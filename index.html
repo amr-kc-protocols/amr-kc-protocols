@@ -1,0 +1,4709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AMR KC Protocols">
+<meta name="theme-color" content="#0a0e1a">
+<meta name="description" content="AMR Kansas City Medical Protocols 2026 — Dr. Ameet Deshmukh MD">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>AMR KC Protocols 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --navy:#0f1e3d;--navy2:#162447;--teal:#0d9488;--teal2:#14b8a6;
+  --white:#f0f4f8;--gray:#8899aa;--dim:#1e2d45;
+  --emt:#16a34a;--emt-bg:#052e16;--emt-light:#e8f5e9;
+  --aemt:#2563eb;--aemt-bg:#0c1a3a;
+  --pm:#7c3aed;--pm-bg:#1e0a3a;
+  --warn:#f59e0b;--danger:#ef4444;--danger-bg:#2a0a0a;
+  --surface:#111827;--surface2:#1a2540;--border:#1e3a5f;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:var(--sans);background:var(--surface);color:var(--white);position:relative}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:#060d1f;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:9999;transition:opacity 0.4s}
+.load-logo{font-family:var(--mono);font-size:48px;font-weight:600;color:var(--teal);
+  letter-spacing:-0.02em;margin-bottom:4px}
+.load-agency{font-size:11px;color:var(--gray);letter-spacing:0.16em;text-transform:uppercase}
+.load-bar{width:180px;height:2px;background:var(--dim);border-radius:2px;margin-top:28px;overflow:hidden}
+.load-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal2));
+  animation:fill 1.4s cubic-bezier(0.4,0,0.2,1) forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+
+/* HEADER */
+#hdr{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:linear-gradient(180deg,#060d1f 0%,var(--navy) 100%);
+  border-bottom:1px solid var(--teal)}
+.hdr-top{display:flex;align-items:center;gap:10px;padding:10px 14px 6px}
+.hdr-badge{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.hdr-icon{width:30px;height:30px;background:var(--teal);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  color:#000;flex-shrink:0;font-family:var(--mono)}
+.hdr-name{line-height:1.15;min-width:0}
+.hdr-name .l1{font-size:12px;font-weight:700;letter-spacing:0.08em;color:var(--teal2);text-transform:uppercase}
+.hdr-name .l2{font-size:9px;color:var(--gray);letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-status{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--gray);flex-shrink:0}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--emt);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* SEARCH */
+.srch-wrap{padding:5px 14px 8px;position:relative}
+#srch{width:100%;height:38px;background:var(--dim);border:1px solid var(--border);
+  border-radius:7px;color:var(--white);font-family:var(--mono);font-size:13px;
+  padding:0 38px 0 34px;outline:none;transition:border-color 0.15s;-webkit-appearance:none}
+#srch:focus{border-color:var(--teal)}
+#srch::placeholder{color:var(--gray)}
+.srch-icon{position:absolute;left:26px;top:50%;transform:translateY(-50%);
+  color:var(--gray);font-size:15px;pointer-events:none;user-select:none}
+#srch-clr{position:absolute;right:26px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--gray);font-size:15px;cursor:pointer;
+  padding:4px;display:none;line-height:1}
+
+/* SCOPE PILLS */
+.scope-bar{display:flex;gap:5px;padding:0 14px 9px;overflow-x:auto;scrollbar-width:none}
+.scope-bar::-webkit-scrollbar{display:none}
+.pill{flex-shrink:0;padding:4px 11px;border-radius:20px;font-size:10px;font-weight:600;
+  letter-spacing:0.06em;border:1px solid;cursor:pointer;transition:all 0.12s;font-family:var(--mono)}
+.pill[data-s="all"]{border-color:var(--gray);color:var(--gray)}
+.pill[data-s="emt"]{border-color:var(--emt);color:var(--emt)}
+.pill[data-s="aemt"]{border-color:var(--aemt);color:var(--aemt)}
+.pill[data-s="pm"]{border-color:var(--pm);color:var(--pm)}
+.pill.on[data-s="all"]{background:var(--gray);color:#000}
+.pill.on[data-s="emt"]{background:var(--emt);color:#000}
+.pill.on[data-s="aemt"]{background:var(--aemt);color:#fff}
+.pill.on[data-s="pm"]{background:var(--pm);color:#fff}
+
+/* MAIN */
+#main{padding-top:120px;padding-bottom:72px;min-height:100vh}
+
+/* SECTION GROUP */
+.sg{padding:16px 14px 5px;font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:0.14em;color:var(--teal);text-transform:uppercase;
+  border-bottom:1px solid var(--border)}
+.sg-sub{padding:7px 14px 3px;font-size:10px;color:var(--gray);letter-spacing:0.05em}
+
+/* CARDS */
+.card{margin:3px 10px;border-radius:9px;overflow:hidden;cursor:pointer;
+  border:1px solid var(--border);transition:opacity 0.1s}
+.card:active{opacity:0.75}
+.card-inner{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface2)}
+.card-num{font-family:var(--mono);font-size:10px;color:var(--gray);flex-shrink:0;min-width:52px}
+.card-title{flex:1;font-size:13px;font-weight:500;line-height:1.3}
+.sbadge{flex-shrink:0;padding:2px 7px;border-radius:3px;font-family:var(--mono);
+  font-size:9px;font-weight:600;letter-spacing:0.05em}
+.sbadge.all{background:var(--emt-bg);color:var(--emt);border:1px solid var(--emt)}
+.sbadge.aemt{background:var(--aemt-bg);color:var(--aemt);border:1px solid var(--aemt)}
+.sbadge.pm{background:var(--pm-bg);color:var(--pm);border:1px solid var(--pm)}
+.card-arr{color:var(--gray);font-size:12px;flex-shrink:0}
+.fav-btn{background:none;border:none;font-size:16px;cursor:pointer;flex-shrink:0;padding:2px;line-height:1}
+
+/* NO RESULTS */
+.no-res{text-align:center;padding:60px 20px;color:var(--gray);font-size:14px}
+.res-label{padding:10px 14px 3px;font-family:var(--mono);font-size:9px;color:var(--gray);letter-spacing:0.08em}
+
+/* DETAIL VIEW */
+#dv{display:none;position:fixed;inset:0;z-index:200;background:var(--surface);
+  overflow-y:auto;-webkit-overflow-scrolling:touch}
+.dv-hdr{position:sticky;top:0;z-index:10;background:var(--navy);
+  border-bottom:2px solid var(--teal);padding:11px 14px;
+  display:flex;align-items:flex-start;gap:10px}
+.back{background:var(--dim);border:1px solid var(--border);color:var(--teal2);
+  font-size:12px;font-weight:600;padding:6px 11px;border-radius:5px;
+  cursor:pointer;flex-shrink:0;font-family:var(--sans)}
+.dv-meta{flex:1;min-width:0}
+.dv-num{font-family:var(--mono);font-size:9px;color:var(--gray)}
+.dv-title{font-size:15px;font-weight:700;line-height:1.2;margin-top:2px}
+.dv-scope{margin-top:4px;display:inline-block}
+.dv-fav{background:none;border:none;font-size:22px;cursor:pointer;
+  padding:2px;line-height:1;flex-shrink:0;align-self:center}
+.dv-body{padding:14px}
+
+/* CONTENT */
+.cs{margin-bottom:20px}
+.cl{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;
+  color:var(--teal);text-transform:uppercase;padding-bottom:5px;
+  border-bottom:1px solid var(--border);margin-bottom:8px}
+.ct{font-size:13px;line-height:1.6;color:#cbd5e1}
+
+/* VITAL STRIP */
+.vs{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;
+  scrollbar-width:none;margin-bottom:14px}
+.vs::-webkit-scrollbar{display:none}
+.vc{flex-shrink:0;background:var(--dim);border:1px solid var(--border);
+  border-radius:7px;padding:7px 11px;text-align:center;min-width:72px}
+.vl{font-size:9px;color:var(--gray);font-family:var(--mono);margin-bottom:2px}
+.vv{font-size:13px;font-weight:700;color:var(--teal2);font-family:var(--mono)}
+
+/* SCOPE TABLE */
+.sot{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+.sot th{padding:7px 8px;text-align:center;font-family:var(--mono);font-size:9px;
+  font-weight:600;letter-spacing:0.06em;border-bottom:1px solid var(--border)}
+.sot th.ec{color:var(--emt)}.sot th.ac{color:var(--aemt)}.sot th.pc{color:var(--pm)}
+.sot th.lc{text-align:left;color:var(--gray)}
+.sot td{padding:8px 7px;border-bottom:1px solid #152030;vertical-align:top;line-height:1.5}
+.sot td.lc{font-size:10px;color:var(--gray);font-family:var(--mono);width:24px}
+.sot td.ec{background:#050d05}.sot td.ac{background:#050a14}.sot td.pc{background:#0a0514}
+
+/* STEPS */
+.step{display:flex;gap:8px;margin-bottom:8px}
+.sn{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--teal);
+  color:#000;font-weight:700;font-size:10px;display:flex;align-items:center;
+  justify-content:center;margin-top:1px;font-family:var(--mono)}
+.st{font-size:13px;line-height:1.5;color:#cbd5e1}
+
+/* CALLOUTS */
+.co{border-left:3px solid;padding:9px 11px;border-radius:0 7px 7px 0;margin-bottom:8px;font-size:12px;line-height:1.5}
+.co.w{border-color:var(--warn);background:#1a1200;color:#fde68a}
+.co.d{border-color:var(--danger);background:var(--danger-bg);color:#fca5a5}
+.co.i{border-color:var(--teal);background:#001a18;color:#99f6e4}
+
+/* DOSE TABLE */
+.dt{width:100%;font-size:12px}
+.dt td{padding:6px 7px;border-bottom:1px solid #1a2a3a;vertical-align:top}
+.dt td:first-child{color:var(--gray);font-family:var(--mono);width:38%}
+.dt td:last-child{color:var(--white)}
+
+/* MONITORING SECTION */
+.mon-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #152030;font-size:13px;color:#cbd5e1}
+.mon-dot{flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--teal2);margin-top:6px}
+
+/* DIVERSION */
+.div-box{background:#1a0a0a;border:1px solid var(--danger);border-radius:7px;
+  padding:10px 12px;font-size:12px;color:#fca5a5;line-height:1.5;margin-bottom:10px}
+.div-label{font-family:var(--mono);font-size:9px;color:var(--danger);
+  letter-spacing:0.1em;font-weight:600;margin-bottom:4px}
+
+/* DRUG GRID */
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.dc{background:var(--dim);border:1px solid var(--border);border-radius:7px;
+  padding:9px 11px;cursor:pointer;transition:border-color 0.12s}
+.dc:active{border-color:var(--teal)}
+.dn{font-size:12px;font-weight:600;color:var(--teal2);margin-bottom:2px}
+.dd{font-size:10px;color:var(--gray);font-family:var(--mono)}
+
+/* REFERENCE */
+.ref-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.ref-label{font-size:12px;color:var(--gray)}
+.ref-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--teal2)}
+.alarm-row{display:flex;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
+.alarm-code{flex-shrink:0;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--danger);min-width:88px}
+.alarm-det{flex:1}
+.alarm-cause{font-size:11px;color:var(--gray);margin-bottom:3px}
+.alarm-act{font-size:12px;color:var(--white)}
+.ped-item{background:var(--dim);padding:9px 11px;border-radius:6px;margin-bottom:3px}
+.ped-drug{font-size:12px;font-weight:600;color:var(--teal2);margin-bottom:2px}
+.ped-dose{font-family:var(--mono);font-size:11px;color:var(--white)}
+
+/* RECENTLY VIEWED */
+.rv-wrap{padding:12px 14px}
+.rv-label{font-family:var(--mono);font-size:9px;color:var(--gray);letter-spacing:0.1em;margin-bottom:8px}
+.rv-chips{display:flex;gap:6px;flex-wrap:wrap}
+.rv-chip{background:var(--dim);border:1px solid var(--border);border-radius:20px;
+  padding:4px 11px;font-size:11px;cursor:pointer;color:var(--white);
+  font-family:var(--mono);transition:border-color 0.12s}
+.rv-chip:active{border-color:var(--teal)}
+
+/* SEARCH HIGHLIGHT */
+.hl{color:var(--teal2);background:rgba(13,148,136,0.15);border-radius:2px;padding:0 2px}
+
+/* DOSE CALCULATOR */
+.calc-wrap{background:var(--dim);border:1px solid var(--teal);border-radius:10px;padding:14px;margin-bottom:16px}
+.calc-title{font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:0.08em;margin-bottom:10px}
+.calc-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.calc-label{font-size:12px;color:var(--gray);min-width:60px}
+.calc-input{background:var(--surface);border:1px solid var(--border);border-radius:5px;
+  color:var(--white);font-family:var(--mono);font-size:15px;padding:7px 10px;
+  width:80px;outline:none;text-align:center;-webkit-appearance:none}
+.calc-unit{font-family:var(--mono);font-size:11px;color:var(--gray)}
+.calc-result{background:var(--navy);border-radius:7px;padding:10px 12px;margin-top:8px}
+.calc-result-label{font-size:10px;color:var(--gray);font-family:var(--mono);margin-bottom:3px}
+.calc-result-val{font-size:16px;font-weight:700;color:var(--teal2);font-family:var(--mono)}
+
+/* NAV */
+#nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:var(--navy);border-top:1px solid var(--border);
+  display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:7px 4px 5px;cursor:pointer;border:none;background:none;
+  color:var(--gray);font-size:9px;font-family:var(--sans);gap:2px;transition:color 0.12s}
+.nb.on{color:var(--teal2)}
+.nb-icon{font-size:18px;line-height:1}
+
+/* INSTALL BANNER */
+#install-banner{position:fixed;bottom:72px;left:10px;right:10px;z-index:150;
+  background:var(--navy2);border:1px solid var(--teal);border-radius:10px;
+  padding:12px 14px;display:none;align-items:center;gap:10px}
+.ib-text{flex:1;font-size:12px;line-height:1.4;color:var(--white)}
+.ib-btn{background:var(--teal);color:#000;border:none;border-radius:5px;
+  padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+.ib-close{background:none;border:none;color:var(--gray);font-size:16px;cursor:pointer;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-logo">AMR</div>
+  <div class="load-agency">Kansas City · Protocols 2026</div>
+  <div class="load-bar"><div class="load-fill"></div></div>
+</div>
+
+<div id="hdr">
+  <div class="hdr-top">
+    <div class="hdr-badge">
+      <div class="hdr-icon">KC</div>
+      <div class="hdr-name">
+        <div class="l1">AMR Kansas City</div>
+        <div class="l2">Medical Protocols 2026 · Dr. Ameet Deshmukh MD · KBEMS Authorized</div>
+      </div>
+    </div>
+    <div class="hdr-status"><div class="status-dot"></div><span>LIVE</span></div>
+  </div>
+  <div class="srch-wrap">
+    <span class="srch-icon">⌕</span>
+    <input id="srch" type="search" placeholder="Search protocols, drugs, procedures..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <button id="srch-clr">✕</button>
+  </div>
+  <div class="scope-bar">
+    <div class="pill on" data-s="all">ALL LEVELS</div>
+    <div class="pill" data-s="emt">EMT</div>
+    <div class="pill" data-s="aemt">AEMT+</div>
+    <div class="pill" data-s="pm">PM ONLY</div>
+  </div>
+</div>
+
+<div id="main"><div id="lv"></div></div>
+
+<div id="dv">
+  <div class="dv-hdr">
+    <button class="back" id="bk">← Back</button>
+    <div class="dv-meta">
+      <div class="dv-num" id="dv-num"></div>
+      <div class="dv-title" id="dv-title"></div>
+      <div class="dv-scope" id="dv-scope"></div>
+    </div>
+    <button class="dv-fav" id="dv-fav" title="Bookmark">☆</button>
+  </div>
+  <div class="dv-body" id="dv-body"></div>
+</div>
+
+<div id="install-banner">
+  <div class="ib-text">📱 Add to Home Screen for offline access</div>
+  <button class="ib-btn" id="ib-install">Install</button>
+  <button class="ib-close" id="ib-close">✕</button>
+</div>
+
+<div id="nav">
+  <button class="nb on" data-tab="ift" onclick="switchTab('ift')"><span class="nb-icon">🏥</span>IFT</button>
+  <button class="nb" data-tab="viii" onclick="switchTab('viii')"><span class="nb-icon">🚑</span>911</button>
+  <button class="nb" data-tab="formulary" onclick="switchTab('formulary')"><span class="nb-icon">⚗</span>Drugs</button>
+  <button class="nb" data-tab="procedures" onclick="switchTab('procedures')"><span class="nb-icon">✦</span>Procs</button>
+  <button class="nb" data-tab="reference" onclick="switchTab('reference')"><span class="nb-icon">◈</span>Ref</button>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const D = {
+  "viii": [
+    {
+      "num": "VIII-A1",
+      "title": "Abdominal Pain",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A1. ABDOMINAL PAIN",
+      "tags": [
+        "abdominal",
+        "pain",
+        "abdomen",
+        "gi"
+      ],
+      "overview": "Assess for life-threatening causes: aortic aneurysm (>50 years, back or flank pain, pulsatile mass), ectopic pregnancy (women of childbearing age), bowel obstruction, and mesenteric ischemia. Most abdominal pain is not immediately life-threatening but requires hospital evaluation.",
+      "page": 135,
+      "emt_steps": [
+        "Obtain history: onset, location, quality, severity, radiation, associated symptoms.",
+        "Apply cardiac monitor; obtain 12-lead ECG.",
+        "Apply oxygen if SpO2 <94%.",
+        "Establish IV access.",
+        "Assess for peritoneal signs: guarding, rigidity, rebound tenderness."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg.",
+        "Obtain blood glucose."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Fentanyl 25–100 mcg IV for severe pain; titrate to comfort.",
+        "Ondansetron 4 mg IV for nausea.",
+        "Contact DMO for suspected aortic aneurysm, ectopic pregnancy, or peritonitis."
+      ],
+      "notes": [
+        "High-risk presentations: >50 yo with back/flank pain (AAA), female with pelvic pain and hemodynamic instability (ectopic), peritoneal signs (surgical emergency).",
+        "Analgesia does NOT mask peritoneal findings — provide adequate pain control."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A2",
+      "title": "Altered Mental Status",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A2. ALTERED MENTAL",
+      "tags": [
+        "ams",
+        "altered",
+        "mental",
+        "status",
+        "unconscious"
+      ],
+      "overview": "Altered mental status (AMS) has a broad differential: hypoglycemia, hypoxia, stroke, seizure, head trauma, toxicologic, metabolic, and psychiatric causes. Treat reversible causes immediately before assuming a neurologic etiology.",
+      "page": 136,
+      "emt_steps": [
+        "Obtain blood glucose immediately.",
+        "Apply oxygen if SpO2 <94%.",
+        "Apply cardiac monitor.",
+        "Protect airway — position patient laterally if vomiting risk.",
+        "Obtain AVPU and GCS."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "For glucose <70: administer D10% 100–250 mL IV.",
+        "Obtain 12-lead ECG.",
+        "Consider naloxone if opioid ingestion suspected."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Naloxone 0.4–2 mg IV/IO/IN for suspected opioid toxidrome.",
+        "For seizure: midazolam 2–5 mg IV/IO/IN.",
+        "Intubate for GCS ≤8 with inability to protect airway.",
+        "Contact DMO for uncertain etiology or refractory AMS."
+      ],
+      "notes": [
+        "AMS differential: AEIOU-TIPS (Alcohol, Epilepsy, Insulin, Overdose/Opioids, Uremia, Trauma, Infection, Psychiatric, Stroke).",
+        "Treat glucose <70 regardless of other findings — hypoglycemia mimics many conditions.",
+        "Sepsis, stroke, and TBI can all present as isolated AMS."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A3",
+      "title": "Anaphylaxis and Allergic Reaction",
+      "scope": "all",
+      "group": "A. General Medical",
+      "search": "VIII-A3. ANAPHYLAXIS",
+      "tags": [
+        "anaphylaxis",
+        "allergic",
+        "epi",
+        "epinephrine",
+        "hives"
+      ],
+      "overview": "Altered mental status (AMS) has a broad differential: hypoglycemia, hypoxia, stroke, seizure, head trauma, toxicologic, metabolic, and psychiatric causes. Treat reversible causes immediately before assuming a neurologic etiology.",
+      "page": 136,
+      "emt_steps": [
+        "Epinephrine 0.3 mg IM to lateral thigh (1:1,000) immediately for anaphylaxis.",
+        "Apply oxygen; position patient supine.",
+        "Apply cardiac monitor.",
+        "Remove/stop allergen exposure if possible.",
+        "Diphenhydramine 25–50 mg IM (adjunct only — do not delay epi)."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish large-bore peripheral IV.",
+        "Normal saline 500 mL–1 L bolus for hypotension.",
+        "May repeat epinephrine 0.3 mg IM every 5–10 minutes if no improvement."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For refractory hypotension: epinephrine infusion 2–10 mcg/min IV; contact DMO.",
+        "For severe bronchospasm: albuterol 2.5 mg nebulized.",
+        "For airway compromise: intubate early — delay leads to complete obstruction.",
+        "Methylprednisolone per sending orders if available."
+      ],
+      "notes": [
+        "Epinephrine IM to lateral thigh is first-line — NEVER delay for IV.",
+        "Biphasic anaphylaxis: recurrence 1–8 hours after initial response. Transport and monitor all patients.",
+        "Airway swelling progresses rapidly — intubate early if any stridor or voice change."
+      ],
+      "vitals": [
+        {
+          "label": "Epi dose",
+          "val": "0.3 mg IM"
+        },
+        {
+          "label": "NS bolus",
+          "val": "500 mL–1 L"
+        }
+      ]
+    },
+    {
+      "num": "VIII-A4",
+      "title": "Behavioral Emergency",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A4. BEHAVIORAL",
+      "tags": [
+        "behavioral",
+        "psychiatric",
+        "agitation",
+        "restraint"
+      ],
+      "overview": "Behavioral emergencies may result from psychiatric illness, substance use, medical causes (hypoglycemia, hypoxia, head trauma, toxicologic), or a combination. Always rule out medical causes before attributing behavior to psychiatric etiology.",
+      "page": 137,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A5",
+      "title": "Diabetic Emergencies",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A5. DIABETIC",
+      "tags": [
+        "diabetic",
+        "glucose",
+        "hypoglycemia",
+        "dka",
+        "sugar"
+      ],
+      "overview": "Hypoglycemia (glucose <70 mg/dL with symptoms or <50 mg/dL) is the immediate life threat and must be treated",
+      "page": 138,
+      "emt_steps": [
+        "Obtain blood glucose immediately.",
+        "Apply oxygen if SpO2 <94%.",
+        "Apply cardiac monitor.",
+        "For glucose <70 mg/dL: administer oral glucose if patient is conscious and able to swallow.",
+        "Notify Paramedic if glucose <70 or >400."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "For glucose <70 mg/dL: D10% 100–250 mL IV; recheck in 10 minutes.",
+        "For glucose >400 mg/dL: normal saline 500 mL IV bolus; contact Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For glucose <70 and no IV access: glucagon 1 mg IM.",
+        "For glucose >400 with AMS or Kussmaul respirations: treat as DKA; normal saline bolus; contact DMO.",
+        "For seizure secondary to hypoglycemia: midazolam + D10% correction."
+      ],
+      "notes": [
+        "D10% is the only dextrose on AMR KC units — no D50%.",
+        "Recheck glucose 10 minutes after D10% administration and every 30 minutes thereafter.",
+        "Hypoglycemia unawareness: patients on beta-blockers may not develop tachycardia or tremors."
+      ],
+      "vitals": [
+        {
+          "label": "Glucose target",
+          "val": ">80 mg/dL"
+        }
+      ]
+    },
+    {
+      "num": "VIII-A6",
+      "title": "Nausea and Vomiting",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A6. NAUSEA",
+      "tags": [
+        "nausea",
+        "vomiting",
+        "zofran",
+        "ondansetron"
+      ],
+      "overview": "Nausea and vomiting are symptoms, not diagnoses. Assess for underlying life-threatening causes: bowel obstruction, mesenteric ischemia, increased ICP, MI, DKA, and medication toxicity. Manage airway and prevent aspiration.",
+      "page": 139,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A7",
+      "title": "Pain Management",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A7. PAIN MANAGEMENT",
+      "tags": [
+        "pain",
+        "fentanyl",
+        "analgesia"
+      ],
+      "overview": "Nausea and vomiting are symptoms, not diagnoses. Assess for underlying life-threatening causes: bowel obstruction, mesenteric ischemia, increased ICP, MI, DKA, and medication toxicity. Manage airway and prevent aspiration.",
+      "page": 139,
+      "emt_steps": [
+        "Assess pain using numeric scale (0–10).",
+        "Position patient for comfort.",
+        "Apply oxygen if SpO2 <94%.",
+        "Apply cardiac monitor."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Fentanyl 25–100 mcg IV titrated; reassess every 5 minutes.",
+        "For nausea with pain: ondansetron 4 mg IV."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Ketamine 0.1–0.3 mg/kg IV for pain refractory to fentanyl (intubated patients only per AMR KC formulary).",
+        "Contact DMO for pain management questions."
+      ],
+      "notes": [
+        "Document pain score before and after each intervention.",
+        "Fentanyl: titrate to comfort — avoid respiratory depression.",
+        "Ketamine per AMR KC formulary: authorized for intubated patients only without DMO order."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A8",
+      "title": "Seizures",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A8. SEIZURES",
+      "tags": [
+        "seizure",
+        "status",
+        "epilepticus",
+        "midazolam",
+        "versed"
+      ],
+      "overview": "Seizures may be primary epileptic, febrile (pediatric), metabolic (hypoglycemia, hyponatremia), toxic, or from structural pathology. Status epilepticus is defined as continuous seizure ≥5 minutes or recurrent seizures without return to baseline. Most seizures self-terminate within 2–3 minutes.",
+      "page": 140,
+      "emt_steps": [
+        "Protect patient from injury — do not restrain limbs forcefully.",
+        "Time the seizure.",
+        "Apply oxygen; suction if secretions present.",
+        "Position laterally (recovery position) after seizure stops.",
+        "Obtain blood glucose."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish IV or IO access.",
+        "For active seizure: midazolam 5 mg IM or 0.1 mg/kg IV (max 5 mg).",
+        "IN midazolam 5 mg if IV/IO access delayed.",
+        "Treat hypoglycemia: D10% if glucose <70."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For refractory seizure (>10 min despite benzodiazepines): second dose midazolam; contact DMO.",
+        "Intubate for airway compromise or status epilepticus with respiratory failure.",
+        "Contact DMO for all status epilepticus and refractory seizures."
+      ],
+      "notes": [
+        "Status epilepticus: continuous seizure >5 minutes OR two or more without return to baseline.",
+        "Benzodiazepines are first-line — do not delay for IV access (use IM or IN).",
+        "Post-ictal period: protect airway, monitor SpO2, check glucose."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A9",
+      "title": "Stroke / CVA",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A9. STROKE",
+      "tags": [
+        "stroke",
+        "cva",
+        "cincinnati",
+        "lkw",
+        "tpa"
+      ],
+      "overview": "Stroke is a time-critical emergency. “Time is brain” — approximately 1.9 million neurons die every minute during ischemic stroke. Use the Cincinnati Prehospital Stroke Scale (facial droop, arm drift, speech abnormality) for rapid screening. Last known well (LKW) time is the most critical piece of information to obtain.",
+      "page": 141,
+      "emt_steps": [
+        "Perform Cincinnati Prehospital Stroke Scale.",
+        "Document LKW (last known well) time precisely.",
+        "Apply oxygen ONLY if SpO2 <94%.",
+        "Apply cardiac monitor.",
+        "Pre-alert stroke center — time is brain.",
+        "Position HOB at 0–30 degrees."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Check blood glucose; treat <70 with D10%.",
+        "Obtain 12-lead ECG."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Maintain BP — do not lower unless SBP >220 or with explicit physician order.",
+        "For airway compromise: intubate — avoid hypoxia and hypercapnia.",
+        "Contact DMO or receiving stroke team for questions."
+      ],
+      "notes": [
+        "Cincinnati: facial droop, arm drift, speech abnormality — any single positive = stroke screen positive.",
+        "TIME IS BRAIN: 1.9 million neurons per minute. Pre-alert before arrival.",
+        "Do NOT give glucose to hyperglycemic stroke patients — worsens ischemic injury.",
+        "Hemorrhagic stroke may be indistinguishable from ischemic in field — treat the same."
+      ],
+      "vitals": [
+        {
+          "label": "LKW time",
+          "val": "Document exact"
+        },
+        {
+          "label": "BP target",
+          "val": "Do not lower"
+        },
+        {
+          "label": "Glucose",
+          "val": "Check/treat"
+        }
+      ]
+    },
+    {
+      "num": "VIII-A10",
+      "title": "Poisonings and Overdoses",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A10. POISONINGS",
+      "tags": [
+        "overdose",
+        "poison",
+        "tca",
+        "opioid",
+        "toxic"
+      ],
+      "overview": "Identify the toxidrome first — opioid (miosis, respiratory depression, AMS), cholinergic (SLUDGE), sympathomimetic (tachycardia, hypertension, hyperthermia, agitation), anticholinergic (dry skin, tachycardia, delirium), sedative-hypnotic (CNS and respiratory depression), or serotonin syndrome (clonus, hyperthermia, agitation). Treat the toxidrome, not a specific drug. Collect pill bottles and containers to bring to the receiving facility.",
+      "page": 158,
+      "emt_steps": [
+        "Identify toxidrome: opioid, stimulant, anticholinergic, cholinergic, sympathomimetic.",
+        "Apply oxygen; assist ventilation if respiratory depression.",
+        "Apply cardiac monitor.",
+        "Protect airway — recovery position if unconscious."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV or IO.",
+        "Naloxone 4 mg IN or 0.4–2 mg IV for opioid toxidrome.",
+        "Obtain blood glucose; treat hypoglycemia.",
+        "Obtain 12-lead ECG — TCA, digoxin, and other toxins cause arrhythmias."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Sodium bicarbonate 1–2 mEq/kg IV for TCA toxicity with wide QRS >120ms or hypotension.",
+        "Benzodiazepines for stimulant-induced agitation, seizures, or sympathomimetic crisis.",
+        "Intubate for airway compromise — watch for rapid deterioration.",
+        "Contact DMO or Poison Control (1-800-222-1222) for complex toxicology cases."
+      ],
+      "notes": [
+        "Opioid toxidrome: miosis, respiratory depression, decreased LOC — naloxone reverses.",
+        "TCA toxicity: wide QRS, right axis deviation, QTc prolongation — sodium bicarb if QRS >120ms.",
+        "Never give physostigmine without medical direction — risk of life-threatening bradycardia."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A11",
+      "title": "Hypertensive Emergency",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A11. HYPERTENSIVE",
+      "tags": [
+        "hypertension",
+        "blood pressure",
+        "bp",
+        "crisis"
+      ],
+      "overview": "A hypertensive emergency exists when severely elevated blood pressure (typically SBP >180 mmHg or DBP >120 mmHg) is causing acute end-organ damage. Target organs include the brain (hypertensive encephalopathy, hemorrhagic stroke, PRES), heart (ACS, acute heart failure), kidneys (acute kidney injury), and aorta (aortic dissection). Hypertensive urgency (severe BP without end-organ damage) is less time-critical but still requires",
+      "page": 159,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-A12",
+      "title": "Sepsis and Septic Shock",
+      "scope": "aemt",
+      "group": "A. General Medical",
+      "search": "VIII-A12. SEPSIS AND",
+      "tags": [
+        "sepsis",
+        "shock",
+        "infection",
+        "norepinephrine",
+        "qsofa"
+      ],
+      "overview": "Sepsis is life-threatening organ dysfunction from infection. Septic shock is sepsis with hemodynamic compromise requiring vasopressors to maintain MAP ≥65 mmHg despite adequate fluid resuscitation. Prehospital recognition and early fluid resuscitation improve outcomes. Screen using qSOFA: altered mental status, respiratory rate >22/min, and SBP ≤100 mmHg — two of three criteria suggests sepsis.",
+      "page": 160,
+      "emt_steps": [
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Apply cardiac monitor.",
+        "Obtain blood glucose.",
+        "Keep patient warm.",
+        "Pre-alert receiving facility: suspected sepsis, vital signs, mental status."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish two large-bore peripheral IVs.",
+        "Normal saline 500 mL IV bolus; repeat to 30 mL/kg if SBP <90 mmHg and lungs clear.",
+        "Reassess lung sounds after each bolus — stop if pulmonary edema develops."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For septic shock refractory to fluids: norepinephrine infusion; titrate to MAP ≥65 mmHg.",
+        "Have vasopressor running before intubation if airway needed.",
+        "Push-dose epinephrine for post-intubation hemodynamic collapse.",
+        "Contact DMO for septic shock."
+      ],
+      "notes": [
+        "qSOFA: AMS + RR >22 + SBP ≤100 — two of three = sepsis until proven otherwise.",
+        "Fluid resuscitation: 30 mL/kg but reassess after each 500 mL bolus.",
+        "Intubating septic shock: highest-risk airway in EMS — optimize hemodynamics first."
+      ],
+      "vitals": [
+        {
+          "label": "MAP",
+          "val": "≥65"
+        },
+        {
+          "label": "Fluid",
+          "val": "30 mL/kg"
+        },
+        {
+          "label": "SpO2",
+          "val": "≥94%"
+        }
+      ]
+    },
+    {
+      "num": "VIII-B1",
+      "title": "Cardiac Arrest and Resuscitation",
+      "scope": "aemt",
+      "group": "B. Cardiovascular",
+      "search": "VIII-B1. CARDIAC ARREST",
+      "tags": [
+        "cardiac arrest",
+        "cpr",
+        "vf",
+        "pulseless",
+        "defib",
+        "amiodarone"
+      ],
+      "overview": "Cardiac arrest management prioritizes high-quality CPR and early defibrillation above all other interventions. Minimize interruptions to chest compressions. Target compression rate 100–120/min, depth 2–2.4 inches, full chest recoil, compression fraction >80%.",
+      "page": 142,
+      "emt_steps": [
+        "Begin CPR immediately — compress hard and fast with full recoil.",
+        "Apply AED as soon as available; defibrillate for shockable rhythm.",
+        "Ventilate at 10 breaths/min once advanced airway placed.",
+        "Minimize interruptions; switch compressors every 2 minutes.",
+        "Apply mechanical CPR device if available."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish IV or IO access without interrupting CPR.",
+        "Non-shockable (PEA/asystole): epinephrine 1 mg IV/IO as early as possible, then every 3–5 min.",
+        "Shockable (VF/pVT): epinephrine 1 mg IV/IO after initial defibrillation attempts fail.",
+        "Defibrillate at 200 J biphasic; resume CPR immediately after shock.",
+        "Amiodarone 300 mg IV/IO after third shock; repeat 150 mg x1."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Place advanced airway (iGel preferred); confirm with waveform capnography.",
+        "Target ETCO2 ≥10 mmHg during CPR; sustained rise suggests ROSC.",
+        "Identify and treat reversible causes (5 H's and 5 T's).",
+        "Lidocaine 1–1.5 mg/kg IV/IO as alternative to amiodarone for refractory VF.",
+        "Contact DMO for prolonged resuscitation. ETCO2 ≤10 mmHg after 20 min: multimodal TOR consideration."
+      ],
+      "notes": [
+        "5 H's: Hypovolemia, Hypoxia, Hydrogen ion, Hypo/Hyperkalemia, Hypothermia.",
+        "5 T's: Tension PTX, Tamponade, Toxins, Thrombosis (PE), Thrombosis (MI).",
+        "AHA 2025: delay epi in shockable rhythms until after initial defib fails. Give early in non-shockable."
+      ],
+      "vitals": [
+        {
+          "label": "Rate",
+          "val": "100–120/min"
+        },
+        {
+          "label": "Depth",
+          "val": "2–2.4\""
+        },
+        {
+          "label": "Defib",
+          "val": "200 J"
+        },
+        {
+          "label": "CF",
+          "val": ">80%"
+        }
+      ]
+    },
+    {
+      "num": "VIII-B2",
+      "title": "Chest Pain / Acute Coronary Syndrome",
+      "scope": "aemt",
+      "group": "B. Cardiovascular",
+      "search": "VIII-B2. CHEST PAIN",
+      "tags": [
+        "chest pain",
+        "acs",
+        "stemi",
+        "aspirin",
+        "nitroglycerin"
+      ],
+      "overview": "Chest pain with cardiac features requires 12-lead ECG acquisition within 10 minutes of patient contact. STEMI is a time-critical emergency requiring immediate activation of the receiving facility’s catheterization laboratory.",
+      "page": 143,
+      "emt_steps": [
+        "Apply cardiac monitor; obtain 12-lead within 10 minutes.",
+        "Apply oxygen ONLY if SpO2 <94%.",
+        "Aspirin 324 mg PO chewed if no contraindication.",
+        "Keep patient at rest.",
+        "Pre-alert if STEMI identified."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Identify STEMI; notify Paramedic and receiving facility immediately.",
+        "Normal saline 250 mL if hypotension without pulmonary edema."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Nitroglycerin 0.4 mg SL q5 min x3 if SBP ≥100; hold if RV infarct suspected.",
+        "Fentanyl 25–50 mcg IV for pain.",
+        "Activate STEMI alert; transmit 12-lead to receiving facility.",
+        "For cardiogenic shock: norepinephrine; contact DMO."
+      ],
+      "notes": [
+        "Inferior STEMI: get right-sided leads (V4R). RV infarct — hold NTG, give fluids.",
+        "Pre-alert receiving facility for STEMI — door-to-balloon target <90 minutes.",
+        "Posterior STEMI: ST depression V1–V4 only — obtain posterior leads V7–V9."
+      ],
+      "vitals": [
+        {
+          "label": "12-lead",
+          "val": "<10 min"
+        },
+        {
+          "label": "BP for NTG",
+          "val": "≥100 SBP"
+        }
+      ]
+    },
+    {
+      "num": "VIII-B3",
+      "title": "Bradycardia",
+      "scope": "aemt",
+      "group": "B. Cardiovascular",
+      "search": "VIII-B3. BRADYCARDIA",
+      "tags": [
+        "bradycardia",
+        "slow",
+        "atropine",
+        "pacing"
+      ],
+      "overview": "Symptomatic bradycardia is defined by hemodynamic compromise (hypotension, altered mental status, signs of poor perfusion) or ischemic chest pain caused by the slow rate. Asymptomatic bradycardia does not require treatment.",
+      "page": 144,
+      "emt_steps": [
+        "Apply cardiac monitor; obtain 12-lead ECG.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Position patient supine.",
+        "Notify Paramedic immediately of hemodynamic compromise."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL IV bolus if SBP <90 mmHg.",
+        "Obtain 12-lead; identify rhythm; report to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Atropine 1 mg IV every 3–5 min (max 3 mg) for symptomatic bradycardia.",
+        "If atropine fails: transcutaneous pacing.",
+        "For refractory hemodynamic compromise: epinephrine infusion 2–10 mcg/min IV; contact DMO."
+      ],
+      "notes": [
+        "Asymptomatic bradycardia does not require treatment — do not treat the number.",
+        "High-degree AV block often does not respond to atropine — go directly to pacing.",
+        "TCP is painful in conscious patients — administer midazolam for sedation."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-B4",
+      "title": "Tachycardia",
+      "scope": "aemt",
+      "group": "B. Cardiovascular",
+      "search": "VIII-B4. TACHYCARDIA",
+      "tags": [
+        "tachycardia",
+        "svt",
+        "vt",
+        "wide complex",
+        "cardioversion"
+      ],
+      "overview": "Symptomatic bradycardia is defined by hemodynamic compromise (hypotension, altered mental status, signs of poor perfusion) or ischemic chest pain caused by the slow rate. Asymptomatic bradycardia does not require treatment.",
+      "page": 144,
+      "emt_steps": [
+        "Apply cardiac monitor; obtain 12-lead ECG.",
+        "Apply oxygen if SpO2 <94%.",
+        "Assess stability: BP, mental status, chest pain, respiratory status.",
+        "Notify Paramedic immediately of hemodynamic instability."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Obtain 12-lead; identify rhythm; report to Paramedic.",
+        "For pulseless VT/VF: initiate CPR; defibrillate at 200 J."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Unstable tachycardia with pulse: synchronized cardioversion — SVT 50–100 J; A-fib 200 J (AHA 2025); VT 100 J.",
+        "Stable narrow SVT: adenosine 6 mg rapid IV push; repeat 12 mg x1.",
+        "Stable wide complex VT: amiodarone 150 mg IV over 10 min.",
+        "Contact DMO for refractory tachycardia."
+      ],
+      "notes": [
+        "Treat wide complex tachycardia as VT until proven otherwise.",
+        "A-fib cardioversion: 200 J per AHA 2025 — avoid low-energy shocks.",
+        "If unstable: cardiovert first — do not delay for rhythm ID or IV access."
+      ],
+      "vitals": [
+        {
+          "label": "A-fib CVX",
+          "val": "200 J"
+        },
+        {
+          "label": "SVT CVX",
+          "val": "50–100 J"
+        },
+        {
+          "label": "VT CVX",
+          "val": "100 J"
+        }
+      ]
+    },
+    {
+      "num": "VIII-B5",
+      "title": "Post-Cardiac Arrest Care (Post-ROSC)",
+      "scope": "aemt",
+      "group": "B. Cardiovascular",
+      "search": "VIII-B5. POST-CARDIAC",
+      "tags": [
+        "rosc",
+        "post arrest",
+        "cooling",
+        "hypothermia",
+        "stemi"
+      ],
+      "overview": "ROSC after cardiac arrest initiates the post-cardiac arrest syndrome: myocardial stunning, systemic ischemia- reperfusion, and ongoing risk of re-arrest. Management focuses on preventing secondary injury from hypoxia, hypotension, hyperthermia, and hyperglycemia.",
+      "page": 145,
+      "emt_steps": [
+        "Confirm ROSC: palpable pulse, ETCO2 rise, SpO2 improvement.",
+        "Apply oxygen; target SpO2 94–98%.",
+        "Apply cardiac monitor continuously.",
+        "Monitor BP every 3–5 minutes.",
+        "Obtain blood glucose."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Maintain peripheral IV access.",
+        "Normal saline 250–500 mL IV bolus for SBP <90 mmHg.",
+        "Obtain 12-lead ECG."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Target MAP ≥65 mmHg; norepinephrine if hypotension persists after fluid.",
+        "FiO2 titrated to SpO2 94–98%; avoid hyperventilation (ETCO2 35–40 mmHg).",
+        "Passive cooling if temperature >37.5°C; avoid active warming.",
+        "Contact DMO and receiving cardiac center for STEMI post-ROSC."
+      ],
+      "notes": [
+        "Prevent four harms: hyperoxia, hyperventilation, hypotension, hyperthermia.",
+        "STEMI post-ROSC: transport to STEMI center regardless of neuro status.",
+        "AHA 2025: temp 32–37.5°C for ≥36 hours in patients not following commands."
+      ],
+      "vitals": [
+        {
+          "label": "SpO2",
+          "val": "94–98%"
+        },
+        {
+          "label": "ETCO2",
+          "val": "35–40"
+        },
+        {
+          "label": "MAP",
+          "val": "≥65"
+        },
+        {
+          "label": "Temp",
+          "val": "≤37.5°C"
+        }
+      ]
+    },
+    {
+      "num": "VIII-B6",
+      "title": "Termination of Resuscitation",
+      "scope": "pm",
+      "group": "B. Cardiovascular",
+      "search": "VIII-B6. TERMINATION",
+      "tags": [
+        "tor",
+        "termination",
+        "field pronouncement"
+      ],
+      "overview": "",
+      "page": 146,
+      "emt_steps": [
+        "Continue resuscitation until Paramedic or DMO authorizes termination.",
+        "Document all resuscitation events with times.",
+        "Secure scene; notify law enforcement as required."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Continue resuscitation until Paramedic or DMO authorizes termination."
+      ],
+      "pm_steps": [
+        "Contact DMO for TOR authorization when ALL criteria are met:",
+        "— Arrest NOT witnessed by EMS.",
+        "— No bystander CPR prior to EMS arrival.",
+        "— No shockable rhythm at any time.",
+        "— ROSC not achieved after minimum 20 minutes of ACLS.",
+        "— No special circumstances: hypothermia, pregnancy, pediatric, drowning, suspected toxic ingestion."
+      ],
+      "notes": [
+        "Special circumstances ALWAYS require transport.",
+        "AHA 2025 Universal TOR: unwitnessed + no bystander CPR + no shockable rhythm.",
+        "Document time resuscitation efforts ceased and DMO contact information."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-C1",
+      "title": "Airway Management",
+      "scope": "aemt",
+      "group": "C. Respiratory",
+      "search": "VIII-C1. AIRWAY MANAGEMENT",
+      "tags": [
+        "airway",
+        "intubation",
+        "igel",
+        "sga",
+        "bvm"
+      ],
+      "overview": "Airway management is the highest priority in any emergency response. The goal is to establish and maintain a patent airway with adequate oxygenation and ventilation. Use the least invasive effective airway adjunct. No RSI",
+      "page": 147,
+      "emt_steps": [
+        "Open airway: head-tilt chin-lift or jaw-thrust.",
+        "Position lateral if vomiting risk.",
+        "Suction airway as needed (Yankauer).",
+        "BVM with 100% O2 if inadequate ventilation.",
+        "Apply OPA/NPA if tolerated.",
+        "Notify Paramedic immediately."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV or IO.",
+        "CPAP via Flow-Safe II for respiratory failure if no contraindications.",
+        "Consider iGel if BVM ventilation inadequate and Paramedic not immediately available."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Endotracheal intubation: maximum 2 laryngoscopy attempts, then iGel.",
+        "Confirm ETT with waveform capnography — gold standard.",
+        "Post-intubation: target SpO2 94–98%, ETCO2 35–40 mmHg.",
+        "Contact DMO for all intubations."
+      ],
+      "notes": [
+        "Two laryngoscopy attempts maximum — do not persist. Move to iGel.",
+        "Waveform capnography required to confirm ETT — colorimetric alone is insufficient.",
+        "Video laryngoscopy preferred when available."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-C2",
+      "title": "Bronchospasm / Respiratory Distress",
+      "scope": "aemt",
+      "group": "C. Respiratory",
+      "search": "VIII-C2. BRONCHOSPASM",
+      "tags": [
+        "bronchospasm",
+        "asthma",
+        "copd",
+        "albuterol",
+        "wheeze"
+      ],
+      "overview": "Bronchospasm from asthma or COPD exacerbation presents with wheezing, prolonged expiration, accessory muscle use, and decreased air movement. Severe exacerbations may have silent chest (no wheeze due to severe obstruction) and are immediately life-threatening.",
+      "page": 148,
+      "emt_steps": [
+        "Apply oxygen; target SpO2 ≥94% (88–92% for COPD).",
+        "Position patient upright.",
+        "Apply cardiac monitor.",
+        "Assist ventilation with BVM if inadequate respiratory effort.",
+        "Notify Paramedic immediately."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Albuterol 2.5 mg nebulized; may repeat x2.",
+        "Ipratropium 0.5 mg nebulized combined with albuterol (first dose only).",
+        "CPAP for COPD exacerbation if patient cooperative."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Magnesium sulfate 2 g IV over 20 min for severe refractory bronchospasm.",
+        "For respiratory failure: intubate — use low rate and prolonged expiratory time.",
+        "Post-intubation obstructive: A/C rate 10–12, I:E ≥1:3, adequate sedation.",
+        "Contact DMO for intubated asthma/COPD patients."
+      ],
+      "notes": [
+        "SpO2 target for COPD: 88–92% — not 94–98%. Hypercapnic drive is real in some patients.",
+        "Auto-PEEP is the primary ventilator risk in obstructive disease — slow rate prevents breath stacking.",
+        "Heliox (70/30 helium/oxygen): reduces turbulent flow if available — contact DMO."
+      ],
+      "vitals": [
+        {
+          "label": "SpO2 COPD",
+          "val": "88–92%"
+        },
+        {
+          "label": "SpO2 Asthma",
+          "val": "≥94%"
+        }
+      ]
+    },
+    {
+      "num": "VIII-D1",
+      "title": "Burns",
+      "scope": "aemt",
+      "group": "D. Traumatic",
+      "search": "VIII-D1. BURNS",
+      "tags": [
+        "burns",
+        "tbsa",
+        "rule of nines",
+        "parkland",
+        "inhalation"
+      ],
+      "overview": "Assess depth and TBSA (Rule of Nines). Assess for inhalation injury: singed nasal hair, carbonaceous sputum, hoarse voice, stridor. Stop the burning process immediately. Airway edema from inhalation injury progresses rapidly — intubate early if anticipated.",
+      "page": 149,
+      "emt_steps": [
+        "Remove burning clothing and jewelry; stop the burning process.",
+        "Cool burns with room temperature water for 10–20 minutes if <20% TBSA and <30 min from injury.",
+        "Apply dry dressings — do NOT use ice, butter, or home remedies.",
+        "Protect airway — singed facial/nasal hair, carbonaceous sputum, hoarse voice = inhalation injury.",
+        "Establish IV access; keep patient warm — burns cause profound hypothermia."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish two large-bore peripheral IVs.",
+        "Parkland formula initiation: 4 mL × kg × % TBSA burned = 24-hour fluid requirement. Give first half in 8 hours.",
+        "Normal saline — titrate to maintain urine output >0.5 mL/kg/hr if Foley present."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Fentanyl for pain management; burns are extremely painful.",
+        "For inhalation injury with impending airway compromise: intubate early — delay leads to complete obstruction.",
+        "Contact DMO for inhalation injury, circumferential burns, burns >20% TBSA."
+      ],
+      "notes": [
+        "Rule of Nines: head 9%, each arm 9%, anterior trunk 18%, posterior trunk 18%, each leg 18%, genitalia 1%.",
+        "Palmar surface of patient's hand (including fingers) ≈ 1% TBSA.",
+        "Inhalation injury signs: singed nasal hair, carbonaceous sputum, hoarse voice, facial burns, stridor."
+      ],
+      "vitals": [
+        {
+          "label": "Parkland",
+          "val": "4 mL×kg×%TBSA"
+        },
+        {
+          "label": "Fluid",
+          "val": "½ in 8 hrs"
+        }
+      ]
+    },
+    {
+      "num": "VIII-D2",
+      "title": "Chest Injuries",
+      "scope": "aemt",
+      "group": "D. Traumatic",
+      "search": "VIII-D2. CHEST INJURIES",
+      "tags": [
+        "chest",
+        "pneumothorax",
+        "tension",
+        "tamponade",
+        "hemothorax"
+      ],
+      "overview": "Life-threatening chest injuries: tension pneumothorax, open pneumothorax, massive hemothorax, flail chest, cardiac tamponade. Mechanism guides suspicion. Apply vented chest seals to all open chest wounds. Chest injuries are load-and-go — scene time goal <10 minutes.",
+      "page": 150,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-D3",
+      "title": "Head Injuries (TBI)",
+      "scope": "aemt",
+      "group": "D. Traumatic",
+      "search": "VIII-D3. HEAD INJURIES",
+      "tags": [
+        "tbi",
+        "head",
+        "brain",
+        "herniation",
+        "icp"
+      ],
+      "overview": "Life-threatening chest injuries: tension pneumothorax, open pneumothorax, massive hemothorax, flail chest, cardiac tamponade. Mechanism guides suspicion. Apply vented chest seals to all open chest wounds. Chest injuries are load-and-go — scene time goal <10 minutes.",
+      "page": 150,
+      "emt_steps": [
+        "Maintain spinal precautions if mechanism warrants.",
+        "Apply oxygen; maintain SpO2 ≥94%.",
+        "Apply cardiac monitor.",
+        "Obtain GCS; document and reassess every 5 minutes.",
+        "Notify Paramedic of any decrease in GCS."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Obtain blood glucose; treat hypoglycemia.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For GCS ≤8 with airway compromise: intubate.",
+        "Maintain SpO2 ≥94% and ETCO2 35–40 mmHg — avoid hypoxia and hypercapnia.",
+        "PEEP: minimum 5 cmH2O — higher PEEP may raise ICP.",
+        "Herniation signs (Cushing's triad, posturing, blown pupil): controlled hyperventilation ETCO2 30–35; contact DMO. Never drop ETCO2 below 30.",
+        "Contact DMO for all intubated TBI patients."
+      ],
+      "notes": [
+        "Cushing's triad: hypertension + bradycardia + irregular respirations = herniation until proven otherwise.",
+        "Avoid hypotension (SBP <90) and hypoxia — each independently doubles mortality.",
+        "Do NOT hyperventilate routinely — reserved for herniation signs only per DMO."
+      ],
+      "vitals": [
+        {
+          "label": "SpO2",
+          "val": "≥94%"
+        },
+        {
+          "label": "ETCO2",
+          "val": "35–40"
+        },
+        {
+          "label": "SBP",
+          "val": "≥90"
+        },
+        {
+          "label": "PEEP",
+          "val": "5 cmH2O"
+        }
+      ]
+    },
+    {
+      "num": "VIII-D4",
+      "title": "Multi-System Trauma",
+      "scope": "aemt",
+      "group": "D. Traumatic",
+      "search": "VIII-D4. MULTI-SYSTEM",
+      "tags": [
+        "trauma",
+        "mst",
+        "multi",
+        "load and go"
+      ],
+      "overview": "Multi-system trauma is load-and-go. Scene time goal is <10 minutes for critical trauma. Life-threatening injuries are identified and managed simultaneously with rapid packaging. The primary survey drives all decision-making.",
+      "page": 151,
+      "emt_steps": [
+        "Control hemorrhage: direct pressure, tourniquet for extremity.",
+        "Maintain airway; apply oxygen.",
+        "Apply cardiac monitor.",
+        "Assess for tension PTX and tamponade.",
+        "Package and move — load-and-go for penetrating trauma and hemodynamic instability."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish two large-bore peripheral IVs en route.",
+        "Normal saline 250–500 mL bolus if SBP <90 mmHg; permissive hypotension if penetrating trauma (target SBP 80–90).",
+        "Apply pelvic binder if pelvic fracture suspected."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Needle decompression for tension PTX.",
+        "For refractory shock: contact DMO for blood product or TXA authorization if available.",
+        "Intubate for GCS ≤8 or airway compromise.",
+        "Contact DMO for all critical trauma patients."
+      ],
+      "notes": [
+        "Permissive hypotension (SBP 80–90) for penetrating trauma — avoid aggressive fluid resuscitation before surgical control.",
+        "Blunt trauma: SBP ≥90 mmHg target.",
+        "Scene time: minimize to <10 minutes for critical trauma — load and go."
+      ],
+      "vitals": [
+        {
+          "label": "SBP blunt",
+          "val": "≥90"
+        },
+        {
+          "label": "SBP penetrating",
+          "val": "80–90"
+        },
+        {
+          "label": "Scene time",
+          "val": "<10 min"
+        }
+      ]
+    },
+    {
+      "num": "VIII-D5",
+      "title": "Orthopedic Injuries",
+      "scope": "aemt",
+      "group": "D. Traumatic",
+      "search": "VIII-D5. ORTHOPEDIC",
+      "tags": [
+        "fracture",
+        "orthopedic",
+        "splint",
+        "traction"
+      ],
+      "overview": "Isolated orthopedic injuries are rarely immediately life-threatening. Exceptions: femur fracture (up to 2 L blood loss), pelvic fracture (massive internal hemorrhage), and vascular injury causing limb ischemia. Assess neurovascular status before and after every intervention.",
+      "page": 152,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-D6",
+      "title": "Shock and Hemorrhage",
+      "scope": "aemt",
+      "group": "D. Traumatic",
+      "search": "VIII-D6. SHOCK AND",
+      "tags": [
+        "shock",
+        "hemorrhage",
+        "bleeding",
+        "tourniquet",
+        "permissive"
+      ],
+      "overview": "Shock is inadequate tissue perfusion. Classify by etiology: hemorrhagic, distributive (septic, neurogenic, anaphylactic), cardiogenic, or obstructive (tension pneumothorax, tamponade). Treatment is etiology-specific but",
+      "page": 153,
+      "emt_steps": [
+        "Apply direct pressure to external hemorrhage.",
+        "Tourniquet for extremity hemorrhage.",
+        "Apply oxygen.",
+        "Apply cardiac monitor.",
+        "Position supine; elevate legs if no spinal/pelvic injury concern."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish two large-bore peripheral IVs.",
+        "Normal saline 250–500 mL bolus for SBP <90 mmHg.",
+        "Hemostatic dressing (QuikClot/Combat Gauze) for junctional wounds."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For tension PTX: needle decompression.",
+        "For refractory shock: contact DMO.",
+        "Intubate for altered mental status with airway compromise."
+      ],
+      "notes": [
+        "Hemorrhagic shock classes: Class I (<15% volume lost), II (15–30%), III (30–40%), IV (>40%).",
+        "Permissive hypotension for penetrating: target SBP 80–90 until surgical control.",
+        "Do NOT remove tourniquets — document time of application."
+      ],
+      "vitals": [
+        {
+          "label": "SBP",
+          "val": "≥90 (blunt)"
+        },
+        {
+          "label": "Permissive",
+          "val": "80–90 (penetrating)"
+        }
+      ]
+    },
+    {
+      "num": "VIII-D7",
+      "title": "Spinal Injuries",
+      "scope": "all",
+      "group": "D. Traumatic",
+      "search": "VIII-D7. SPINAL",
+      "tags": [
+        "spinal",
+        "smr",
+        "c-spine",
+        "immobilization"
+      ],
+      "overview": "Shock is inadequate tissue perfusion. Classify by etiology: hemorrhagic, distributive (septic, neurogenic, anaphylactic), cardiogenic, or obstructive (tension pneumothorax, tamponade). Treatment is etiology-specific but",
+      "page": 153,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-E1",
+      "title": "Drowning",
+      "scope": "aemt",
+      "group": "E. Environmental",
+      "search": "VIII-E1. DROWNING",
+      "tags": [
+        "drowning",
+        "submersion",
+        "water"
+      ],
+      "overview": "Outcome is determined by duration of hypoxia. Cold water may confer neuroprotection. All drowning patients require ED evaluation regardless of apparent recovery. Continue resuscitation in cold water cardiac arrest — do not pronounce until rewarmed.",
+      "page": 154,
+      "emt_steps": [
+        "Ensure scene safety — do not become a victim.",
+        "Begin CPR immediately if pulseless — hypothermic patients may have prolonged VF.",
+        "Apply oxygen; assist ventilation.",
+        "Remove wet clothing; prevent further heat loss.",
+        "Apply cardiac monitor."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline warmed if available for IV.",
+        "D10% if glucose <70."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Defibrillation for VF — may require multiple attempts in hypothermic patients.",
+        "Intubate for airway compromise.",
+        "Contact DMO — cold water drowning with hypothermia may require ECPR at receiving facility."
+      ],
+      "notes": [
+        "\"Not dead until warm and dead\" — continue resuscitation in hypothermic drowning patients.",
+        "Cold water drowning, especially in pediatric patients, has better outcomes — extended resuscitation warranted.",
+        "Aspiration is secondary — airway management and oxygenation are primary."
+      ],
+      "vitals": []
+    },
+    {
+      "num": "VIII-E2",
+      "title": "Environmental Emergencies",
+      "scope": "aemt",
+      "group": "E. Environmental",
+      "search": "VIII-E2. ENVIRONMENTAL",
+      "tags": [
+        "heat",
+        "cold",
+        "hyperthermia",
+        "hypothermia",
+        "frostbite"
+      ],
+      "overview": "Heat stroke (temperature >40°C with altered mental status) and severe hypothermia (<28°C) are immediately life- threatening. Cooling is the treatment for heat stroke. Gentle handling and rewarming is the treatment for severe hypothermia.",
+      "page": 155,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-F1",
+      "title": "Obstetric Emergencies and Field Delivery",
+      "scope": "aemt",
+      "group": "F. Obstetrics",
+      "search": "VIII-F1. OBSTETRIC",
+      "tags": [
+        "obstetric",
+        "delivery",
+        "eclampsia",
+        "magnesium",
+        "ob"
+      ],
+      "overview": "Assess gestational age, contraction frequency, urge to push, crowning, and bleeding. Imminent delivery: crowning, strong urge to push, contractions <2 min apart. Eclampsia: severe hypertension (>160/110 mmHg) with seizure after 20 weeks. Position in left lateral decubitus for all pregnant patients to relieve aortocaval compression.",
+      "page": 156,
+      "emt_steps": [
+        "Position mother: left lateral decubitus to relieve aortocaval compression.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Apply cardiac monitor.",
+        "For imminent delivery: prepare field delivery kit.",
+        "Note gestational age; fetal heart rate if available."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 500 mL IV bolus for hypotension.",
+        "Maintain magnesium infusion continuity if present."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For eclamptic seizure: magnesium sulfate 4–6 g IV over 15–20 minutes.",
+        "For post-partum hemorrhage: uterine fundal massage; oxytocin per sending orders.",
+        "For cardiac arrest in pregnancy: left lateral tilt 15–30 degrees or manual uterine displacement.",
+        "For cardiac arrest at term (≥20 weeks): resuscitative hysterotomy if ROSC not achieved within 4 minutes — contact DMO.",
+        "Contact DMO for all obstetric emergencies."
+      ],
+      "notes": [
+        "Resuscitative hysterotomy (perimortem C-section) goal: delivery within 5 minutes of arrest per AHA 2025.",
+        "Magnesium toxicity: loss of DTRs, respiratory depression — antidote calcium gluconate 1 g IV.",
+        "Left lateral decubitus: prevents uterine compression of IVC and aorta."
+      ],
+      "vitals": [
+        {
+          "label": "SpO2",
+          "val": "≥94%"
+        },
+        {
+          "label": "Mag bolus",
+          "val": "4–6 g over 15–20 min"
+        }
+      ]
+    },
+    {
+      "num": "VIII-G1",
+      "title": "Pediatric Cardiac Arrest (PALS)",
+      "scope": "aemt",
+      "group": "G. Pediatric",
+      "search": "VIII-G1. PEDIATRIC CARDIAC",
+      "tags": [
+        "pals",
+        "pediatric",
+        "arrest",
+        "infant",
+        "child"
+      ],
+      "overview": "Pediatric cardiac arrest most commonly results from respiratory failure or shock leading to hypoxic arrest, rather than primary cardiac arrhythmia. The underlying cause is usually reversible. Aggressive airway management and high-quality CPR are the highest priorities. Use Broselow tape for all weight-based dosing. Shockable rhythms (VF and pulseless VT) are less common in pediatric arrest but must be identified and treated promptly.",
+      "page": 162,
+      "emt_steps": [
+        "Begin CPR immediately — two-thumb encircling technique for infants; heel of one or two hands for children.",
+        "Apply AED for children ≥1 year; use pediatric pads/mode if available.",
+        "BVM ventilation at 10 breaths/min once advanced airway placed.",
+        "Minimize compression interruptions to <10 seconds.",
+        "Use Broselow tape for all weight-based dosing."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish IO access if IV cannot be obtained rapidly.",
+        "Non-shockable (PEA/asystole): epinephrine 0.01 mg/kg IV/IO as early as possible, then every 3–5 min.",
+        "Shockable (VF/pVT): defibrillate at 2 J/kg; escalate to 4 J/kg subsequent shocks.",
+        "Shockable rhythm: epinephrine after initial defibrillation attempts fail."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Place advanced airway (iGel sized to patient); confirm with waveform capnography.",
+        "Amiodarone 5 mg/kg IV/IO for refractory VF/pVT; max 300 mg.",
+        "Identify and treat reversible causes.",
+        "Contact DMO for all pediatric arrests."
+      ],
+      "notes": [
+        "Pediatric arrest is usually respiratory in origin — airway and oxygenation are highest priority.",
+        "Two-thumb encircling technique preferred for infants — no longer two-finger per AHA 2025.",
+        "Broselow tape: if patient exceeds tape length, use adult dosing."
+      ],
+      "vitals": [
+        {
+          "label": "Defib dose",
+          "val": "2 J/kg → 4 J/kg"
+        },
+        {
+          "label": "Epi",
+          "val": "0.01 mg/kg"
+        },
+        {
+          "label": "Amio",
+          "val": "5 mg/kg"
+        }
+      ]
+    },
+    {
+      "num": "VIII-G2",
+      "title": "Pediatric Respiratory Distress",
+      "scope": "aemt",
+      "group": "G. Pediatric",
+      "search": "VIII-G2. PEDIATRIC RESPIRATORY",
+      "tags": [
+        "pediatric",
+        "respiratory",
+        "child",
+        "infant",
+        "breathing"
+      ],
+      "overview": "Respiratory distress is the most common serious pediatric emergency. Causes include upper airway obstruction (croup, foreign body, anaphylaxis), lower airway disease (bronchiolitis, asthma), pneumonia, and cardiac causes. Assessment focuses on work of breathing: retractions, nasal flaring, head bobbing (infants), grunting, stridor, and positioning (tripod, sniffing). A child who is too tired to maintain accessory muscle use is in respiratory failure — not improvement.",
+      "page": 164,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    },
+    {
+      "num": "VIII-G3",
+      "title": "Croup (Laryngotracheobronchitis)",
+      "scope": "pm",
+      "group": "G. Pediatric",
+      "search": "VIII-G3. CROUP",
+      "tags": [
+        "croup",
+        "barky",
+        "stridor",
+        "racemic",
+        "dexamethasone"
+      ],
+      "overview": "Croup is a viral upper respiratory infection causing subglottic edema, typically in children 6 months to 3 years. Classic presentation: barky (seal-like) cough, inspiratory stridor, hoarse voice, low-grade fever, worse at night. Symptoms are exacerbated by agitation. Most cases are mild and self-limiting, but severe croup with stridor at rest requires prehospital treatment.",
+      "page": 165,
+      "emt_steps": [
+        "Position patient upright; do not agitate.",
+        "Apply oxygen gently — avoid frightening child.",
+        "Apply cardiac monitor.",
+        "Notify Paramedic immediately.",
+        "Keep child calm with parent present."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish IV if child is calm; IO for severe distress.",
+        "Racemic epinephrine 0.05 mL/kg nebulized (max 0.5 mL 2.25% solution) or L-epi 5 mg nebulized for moderate-severe croup."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Dexamethasone 0.6 mg/kg PO/IM/IV (max 10 mg) — single dose.",
+        "For severe respiratory failure: prepare for intubation with smaller ETT (croup causes subglottic edema).",
+        "Contact DMO for severe or refractory croup."
+      ],
+      "notes": [
+        "Croup is subglottic edema — ETT will be smaller than expected for age. Have 0.5–1.0 mm smaller tube ready.",
+        "Do not lay child down or agitate — anxiety worsens stridor.",
+        "Racemic epi effect is transient (2–3 hours) — all patients who receive epi should be transported."
+      ],
+      "vitals": [
+        {
+          "label": "Dex dose",
+          "val": "0.6 mg/kg"
+        },
+        {
+          "label": "Max Dex",
+          "val": "10 mg"
+        }
+      ]
+    },
+    {
+      "num": "VIII-G4",
+      "title": "Bronchiolitis",
+      "scope": "aemt",
+      "group": "G. Pediatric",
+      "search": "VIII-G4. BRONCHIOLITIS",
+      "tags": [
+        "bronchiolitis",
+        "rsv",
+        "infant",
+        "albuterol"
+      ],
+      "overview": "Bronchiolitis is a viral lower respiratory tract infection causing bronchiolar inflammation and mucus plugging, most commonly caused by RSV. It primarily affects infants under 2 years, with peak severity in infants under 6 months. Presentation: rhinorrhea progressing to cough, wheeze, increased work of breathing, and feeding difficulty. Hypoxia and apnea can occur, particularly in young infants.",
+      "page": 166,
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL bolus if SBP <90 mmHg."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage per clinical presentation.",
+        "Contact DMO for questions."
+      ],
+      "notes": [],
+      "vitals": []
+    }
+  ],
+  "ift": [
+    {
+      "num": "II-1",
+      "title": "Bradycardia",
+      "scope": "aemt",
+      "group": "A. Cardiac",
+      "search": "II-1. BRADYCARDIA",
+      "tags": [
+        "bradycardia",
+        "slow",
+        "atropine",
+        "pacing",
+        "av block"
+      ],
+      "overview": "Bradycardia defined as heart rate insufficient to maintain adequate cardiac output. IFT patients often transfer after initial stabilization but remain at risk for recurrent hemodynamic compromise.",
+      "emt_steps": [
+        "Apply cardiac monitor; document rhythm strip.",
+        "Obtain 12-lead ECG.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Position patient supine.",
+        "Notify Paramedic of any hemodynamic compromise immediately."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL IV bolus if SBP <90 mmHg.",
+        "Obtain 12-lead; identify rhythm; report to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Atropine 1 mg IV every 3–5 min (max 3 mg) for symptomatic bradycardia.",
+        "If atropine fails: initiate transcutaneous pacing.",
+        "For refractory hemodynamic compromise: epinephrine infusion 2–10 mcg/min IV; contact DMO. (Dopamine is not a carried agent.)"
+      ],
+      "monitoring": [
+        "Continuous rhythm monitoring; document pacing settings and capture confirmation.",
+        "MAP ≥65 mmHg; age-appropriate systolic BP for pediatrics.",
+        "Mental status reassessment every 5 minutes.",
+        "Pacing capture and threshold confirmation every 15 minutes."
+      ],
+      "notes": [
+        "Transcutaneous pacing is painful in conscious patients — administer midazolam for sedation.",
+        "High-degree AV block (Mobitz II, complete) often does not respond to atropine — go directly to pacing.",
+        "Verify capture: pacing spike followed by wide QRS and palpable pulse."
+      ],
+      "diversion": "Loss of pulse, failure of pacing capture with hemodynamic instability unresponsive to intervention.",
+      "vitals": []
+    },
+    {
+      "num": "II-2",
+      "title": "Supraventricular Tachycardia (SVT)",
+      "scope": "pm",
+      "group": "A. Cardiac",
+      "search": "II-2. SUPRAVENTRICULAR",
+      "tags": [
+        "svt",
+        "tachycardia",
+        "adenosine",
+        "narrow",
+        "reentry"
+      ],
+      "overview": "Regular narrow-complex tachycardia. Rate typically 150–250 bpm. Differentiate from sinus tachycardia which has an identifiable cause. Abrupt onset and termination is characteristic.",
+      "emt_steps": [
+        "Apply cardiac monitor; document rhythm.",
+        "Apply oxygen if SpO2 <94%.",
+        "Assess hemodynamic stability.",
+        "Notify Paramedic immediately."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Obtain 12-lead ECG; report to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Vagal maneuvers first (Valsalva, carotid sinus massage) if stable.",
+        "Adenosine 6 mg rapid IV push with 20 mL NS flush; may repeat 12 mg x1 if no conversion.",
+        "If unstable: synchronized cardioversion 50–100 J.",
+        "Contact DMO for refractory SVT or WPW."
+      ],
+      "monitoring": [
+        "Continuous cardiac monitoring with rhythm documentation.",
+        "Blood pressure every 5 minutes.",
+        "Mental status and perfusion assessment."
+      ],
+      "notes": [
+        "Adenosine causes transient asystole — warn patient. Have atropine and pacing ready.",
+        "Administer adenosine as close to heart as possible (AC fossa or central line) with immediate NS flush.",
+        "WPW with pre-excitation: AVOID adenosine and calcium channel blockers — contact DMO."
+      ],
+      "diversion": "Refractory SVT with hemodynamic instability, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-3",
+      "title": "Atrial Fibrillation / Flutter with RVR",
+      "scope": "aemt",
+      "group": "A. Cardiac",
+      "search": "II-3. ATRIAL FIBRILLATION",
+      "tags": [
+        "afib",
+        "aflutter",
+        "rvr",
+        "irregular",
+        "cardioversion",
+        "rate control"
+      ],
+      "overview": "Atrial fibrillation or flutter with rapid ventricular response (RVR) causing hemodynamic compromise. IFT transfer for rate control, rhythm control, or cardioversion capability unavailable at sending facility.",
+      "emt_steps": [
+        "Apply cardiac monitor; document rhythm.",
+        "Apply oxygen if SpO2 <94%.",
+        "Assess hemodynamic stability.",
+        "Notify Paramedic of any hemodynamic compromise."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 250 mL if hypotension.",
+        "Obtain 12-lead; report to Paramedic.",
+        "Maintain heparin infusion continuity if present."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Unstable A-fib/flutter: synchronized cardioversion at 200 J (AHA 2025).",
+        "Stable A-fib with RVR: contact DMO for rate control medication orders.",
+        "Do not give adenosine for irregularly irregular rhythm."
+      ],
+      "monitoring": [
+        "Continuous cardiac monitoring.",
+        "Blood pressure every 5 minutes.",
+        "Rate response to any interventions."
+      ],
+      "notes": [
+        "Cardioversion energy: 200 J per AHA 2025 guidelines for A-fib.",
+        "New-onset A-fib <48 hours may cardiovert safely. Duration unknown or >48 hours: thromboembolic risk.",
+        "Do NOT give adenosine for irregular rhythms — WPW with A-fib can deteriorate to VF."
+      ],
+      "diversion": "Hemodynamic instability refractory to cardioversion, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-4",
+      "title": "Wide Complex Tachycardia / VT",
+      "scope": "pm",
+      "group": "A. Cardiac",
+      "search": "II-4. WIDE COMPLEX",
+      "tags": [
+        "vt",
+        "wide complex",
+        "ventricular tachycardia",
+        "amiodarone"
+      ],
+      "overview": "Wide complex tachycardia treated as VT until proven otherwise. Includes monomorphic VT, polymorphic VT (torsades), and SVT with aberrancy. Unstable patients require immediate cardioversion.",
+      "emt_steps": [
+        "Apply cardiac monitor; document rhythm.",
+        "Apply oxygen if SpO2 <94%.",
+        "Assess stability: BP, mental status, chest pain.",
+        "Notify Paramedic immediately — wide complex tachycardia."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "For pulseless VT: initiate CPR; defibrillate at 200 J; follow cardiac arrest protocol."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Unstable with pulse: synchronized cardioversion at 100 J.",
+        "Stable wide complex VT: amiodarone 150 mg IV over 10 minutes.",
+        "For torsades de pointes: magnesium sulfate 2 g IV over 5 minutes.",
+        "Treat as VT until proven otherwise. Contact DMO."
+      ],
+      "monitoring": [
+        "Continuous cardiac monitoring with rhythm strip.",
+        "Blood pressure every 3–5 minutes.",
+        "SpO2 and mental status continuously."
+      ],
+      "notes": [
+        "Treat wide complex tachycardia as VT until proven otherwise.",
+        "Do not administer verapamil or diltiazem for wide complex tachycardia — risk of VF.",
+        "Torsades: check Mg level, correct electrolytes, magnesium is first-line."
+      ],
+      "diversion": "VF, pulseless VT, hemodynamic instability refractory to cardioversion.",
+      "vitals": []
+    },
+    {
+      "num": "II-5",
+      "title": "Acute Coronary Syndrome (ACS / STEMI)",
+      "scope": "aemt",
+      "group": "A. Cardiac",
+      "search": "II-5. ACUTE CORONARY",
+      "tags": [
+        "stemi",
+        "acs",
+        "chest pain",
+        "mi",
+        "aspirin",
+        "nitroglycerin",
+        "heparin"
+      ],
+      "overview": "STEMI is a time-critical emergency requiring pre-alert to receiving cath lab. NSTEMI and unstable angina require urgent transport. Target door-to-balloon <90 minutes.",
+      "emt_steps": [
+        "Apply cardiac monitor; obtain 12-lead within 10 minutes.",
+        "Apply oxygen ONLY if SpO2 <94%.",
+        "Aspirin 324 mg PO chewed if no contraindication and not already given.",
+        "Keep patient at rest; minimize exertion.",
+        "Pre-alert receiving facility immediately if STEMI identified."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Identify STEMI on 12-lead; notify Paramedic and receiving facility immediately.",
+        "Normal saline 250 mL IV bolus if hypotension without pulmonary edema.",
+        "AEMT 12-lead interpretation authorized for STEMI identification per Dr. Deshmukh."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Nitroglycerin 0.4 mg SL q5 min x3 if SBP ≥100 mmHg; hold if RV infarct suspected.",
+        "Fentanyl 25–50 mcg IV titrated for pain.",
+        "For VT/VF: treat per Cardiac Arrest protocol.",
+        "For cardiogenic shock: norepinephrine infusion; contact DMO.",
+        "Activate STEMI alert and transmit 12-lead to receiving facility."
+      ],
+      "monitoring": [
+        "Continuous ECG with ST-segment awareness; document any ST changes.",
+        "Blood pressure every 5 minutes; MAP ≥65 mmHg target.",
+        "Chest pain reassessment using 0–10 scale every 5–10 minutes.",
+        "Mental status and peripheral perfusion."
+      ],
+      "notes": [
+        "Inferior STEMI (II, III, aVF): obtain right-sided leads (V4R). RV involvement — hold NTG, give fluids.",
+        "Do not administer aspirin if true allergy (anaphylaxis) — aspirin sensitivity with asthma is NOT a contraindication.",
+        "Posterior STEMI may show only ST depression in V1–V4 — obtain posterior leads (V7–V9)."
+      ],
+      "diversion": "Sustained VT/VF, refractory hypotension, acute respiratory failure, cardiac arrest.",
+      "vitals": [
+        {
+          "label": "SpO2",
+          "val": "≥94%"
+        },
+        {
+          "label": "BP for NTG",
+          "val": "≥100 SBP"
+        },
+        {
+          "label": "12-lead",
+          "val": "<10 min"
+        },
+        {
+          "label": "MAP",
+          "val": "≥65"
+        }
+      ]
+    },
+    {
+      "num": "II-6",
+      "title": "Acute Heart Failure / Pulmonary Edema",
+      "scope": "aemt",
+      "group": "A. Cardiac",
+      "search": "II-6. ACUTE PULMONARY",
+      "tags": [
+        "chf",
+        "heart failure",
+        "pulmonary edema",
+        "cpap",
+        "lasix",
+        "furosemide"
+      ],
+      "overview": "Acute decompensated heart failure with pulmonary edema. Transfer for higher-level diuresis, ventilatory support, or hemodynamic monitoring. CPAP and oxygen management are primary interventions.",
+      "emt_steps": [
+        "Position patient upright (high Fowler).",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Apply cardiac monitor.",
+        "Notify Paramedic of respiratory distress severity."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "CPAP via Flow-Safe II if patient alert and cooperative (see V-5).",
+        "Maintain diuretic infusion continuity if present."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For CPAP failure or severe distress: prepare for intubation.",
+        "For hypotension with pulmonary edema (cardiogenic shock): norepinephrine infusion; contact DMO.",
+        "Nitroglycerin 0.4 mg SL if SBP ≥100 and no RV infarct suspected."
+      ],
+      "monitoring": [
+        "SpO2 and respiratory rate continuously.",
+        "Blood pressure every 5 minutes.",
+        "Lung sounds before and after any intervention.",
+        "Urine output if Foley present."
+      ],
+      "notes": [
+        "CPAP contraindicated in hypotension SBP <90, decreased mental status, inability to protect airway, active emesis, pneumothorax.",
+        "Furosemide/lasix is a hospital-supplied drug — manage infusion per sending orders only.",
+        "Worsening despite CPAP: prepare for intubation."
+      ],
+      "diversion": "Acute respiratory failure requiring intubation, hemodynamic collapse.",
+      "vitals": []
+    },
+    {
+      "num": "II-7",
+      "title": "Cardiogenic Shock",
+      "scope": "pm",
+      "group": "A. Cardiac",
+      "search": "II-7. CARDIOGENIC",
+      "tags": [
+        "cardiogenic",
+        "shock",
+        "norepinephrine",
+        "vasopressor",
+        "map"
+      ],
+      "overview": "Cardiogenic shock: cardiac pump failure causing tissue hypoperfusion. MAP <65 mmHg despite adequate preload. High mortality — rapid transport to cardiac-capable facility essential.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Position patient supine with legs elevated if tolerated and no pulmonary edema.",
+        "Notify Paramedic immediately."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish two large-bore peripheral IVs.",
+        "Normal saline 250 mL IV bolus for SBP <90 mmHg if no pulmonary edema.",
+        "Maintain vasopressor infusion continuity."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Target MAP ≥65 mmHg; norepinephrine first-line vasopressor.",
+        "For intubated patients: confirm ventilator settings; avoid high PEEP (reduces cardiac preload).",
+        "Contact DMO for all cardiogenic shock patients — high-risk transport."
+      ],
+      "monitoring": [
+        "Blood pressure every 3–5 minutes; MAP ≥65 mmHg target.",
+        "Urine output if Foley present (target >0.5 mL/kg/hr).",
+        "Vasopressor infusion rate and any changes.",
+        "SpO2 and ETCO2 for intubated patients."
+      ],
+      "notes": [
+        "Positive pressure ventilation reduces venous return and worsens cardiogenic shock — minimize PEEP.",
+        "Dobutamine and milrinone are hospital-supplied — manage per sending orders.",
+        "Intra-aortic balloon pump (IABP): confirm balloon timing and console function before departure."
+      ],
+      "diversion": "Refractory hemodynamic instability, cardiac arrest, IABP failure.",
+      "vitals": []
+    },
+    {
+      "num": "II-8",
+      "title": "Post-Cardiac Arrest Syndrome",
+      "scope": "aemt",
+      "group": "A. Cardiac",
+      "search": "II-8. POST-CARDIAC ARREST SYNDROME",
+      "tags": [
+        "rosc",
+        "post arrest",
+        "ttm",
+        "hypothermia",
+        "stemi",
+        "map"
+      ],
+      "overview": "Post-ROSC management. Prevent four harms: hyperoxia (SpO2 94–98%), hyperventilation (ETCO2 35–40), hypotension (MAP ≥65), hyperthermia (no active warming, temp ≤37.5°C).",
+      "emt_steps": [
+        "Confirm ROSC: palpable pulse, ETCO2 rise, SpO2 improvement.",
+        "Apply oxygen; target SpO2 94–98% — avoid hyperoxia.",
+        "Apply cardiac monitor continuously.",
+        "Monitor BP every 3–5 minutes.",
+        "Obtain blood glucose."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Maintain peripheral IV access.",
+        "Normal saline 250–500 mL IV bolus for SBP <90 mmHg.",
+        "Obtain 12-lead ECG to identify STEMI as arrest cause."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Target MAP ≥65 mmHg; norepinephrine if hypotension persists after fluid.",
+        "FiO2 titrated to SpO2 94–98%; avoid hyperventilation (ETCO2 35–40 mmHg).",
+        "Passive cooling if temperature >37.5°C; avoid active warming.",
+        "Contact DMO and receiving cardiac center for STEMI post-ROSC."
+      ],
+      "monitoring": [
+        "SpO2 94–98% continuously.",
+        "ETCO2 35–40 mmHg continuously.",
+        "MAP ≥65 mmHg; BP every 3–5 minutes.",
+        "Temperature monitoring.",
+        "Glucose every 30 minutes."
+      ],
+      "notes": [
+        "Prevent four harms: hyperoxia, hyperventilation, hypotension, hyperthermia.",
+        "STEMI post-ROSC: transport to STEMI center regardless of neurological status.",
+        "AHA 2025: temperature 32–37.5°C for ≥36 hours in patients not following commands."
+      ],
+      "diversion": "Refractory hemodynamic instability, re-arrest, STEMI identification requiring cath lab.",
+      "vitals": [
+        {
+          "label": "SpO2",
+          "val": "94–98%"
+        },
+        {
+          "label": "ETCO2",
+          "val": "35–40"
+        },
+        {
+          "label": "MAP",
+          "val": "≥65"
+        },
+        {
+          "label": "Temp",
+          "val": "≤37.5°C"
+        }
+      ]
+    },
+    {
+      "num": "II-9",
+      "title": "Acute Ischemic Stroke",
+      "scope": "aemt",
+      "group": "B. Neurologic",
+      "search": "II-9. ACUTE ISCHEMIC",
+      "tags": [
+        "stroke",
+        "tpa",
+        "alteplase",
+        "cva",
+        "lkw",
+        "time is brain"
+      ],
+      "overview": "Time-sensitive transfer for thrombectomy or thrombolytic therapy. 1.9 million neurons die per minute. LKW time is the most critical data point. Do NOT routinely lower BP — permissive hypertension maintains penumbra perfusion.",
+      "emt_steps": [
+        "Apply cardiac monitor; document rhythm.",
+        "Apply oxygen ONLY if SpO2 <94%.",
+        "Maintain IV access and infusion continuity.",
+        "Monitor BP every 5 minutes.",
+        "Notify Paramedic of any neurologic change, vomiting, or airway concern.",
+        "Position HOB at 0–30 degrees."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings.",
+        "Check blood glucose; treat hypoglycemia (glucose <70) with D10%.",
+        "tPA infusion managed by Paramedic — AEMT does not adjust tPA."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Maintain BP per sending physician parameters (typically SBP ≤180/105 if tPA given).",
+        "Monitor tPA infusion per sending orders; do not adjust without explicit order.",
+        "For airway compromise: intubate only when clinically necessary.",
+        "Contact DMO or receiving stroke team for neurologic deterioration."
+      ],
+      "monitoring": [
+        "Neurologic reassessment (GCS, focal deficits) every 5 minutes.",
+        "Blood pressure every 5 minutes — document range.",
+        "tPA infusion rate and any signs of bleeding.",
+        "Airway and level of consciousness continuously."
+      ],
+      "notes": [
+        "Do NOT routinely lower BP — permissive hypertension maintains penumbra perfusion. Only lower with explicit physician order.",
+        "Document LKW time, Cincinnati findings, blood glucose, and all interventions with precise times.",
+        "tPA bleeding complications: stop infusion, contact DMO immediately, maintain airway."
+      ],
+      "diversion": "Acute respiratory failure, herniation signs, airway loss, hemorrhagic transformation.",
+      "vitals": []
+    },
+    {
+      "num": "II-10",
+      "title": "Neurologic Deterioration (ICH / SAH / TBI / Meningitis)",
+      "scope": "aemt",
+      "group": "B. Neurologic",
+      "search": "II-10. NEUROLOGIC",
+      "tags": [
+        "ich",
+        "sah",
+        "tbi",
+        "meningitis",
+        "icp",
+        "brain",
+        "herniation"
+      ],
+      "overview": "Intracranial hemorrhage, subarachnoid hemorrhage, traumatic brain injury, and CNS infection transfers. Airway protection and blood pressure management are critical. Herniation signs require immediate intervention.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-11",
+      "title": "Seizure / Status Epilepticus",
+      "scope": "aemt",
+      "group": "B. Neurologic",
+      "search": "II-11. SEIZURE",
+      "tags": [
+        "seizure",
+        "epilepsy",
+        "status epilepticus",
+        "midazolam",
+        "postictal"
+      ],
+      "overview": "Status epilepticus: continuous seizure >5 minutes or two or more seizures without return to baseline. Time-sensitive — benzodiazepines first-line. Transfer for refractory status requiring propofol or phenobarbital.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-12",
+      "title": "Brain Tumor / Mass Effect Transfer",
+      "scope": "aemt",
+      "group": "B. Neurologic",
+      "search": "II-12. BRAIN TUMOR",
+      "tags": [
+        "brain tumor",
+        "mass",
+        "herniation",
+        "dexamethasone",
+        "icp"
+      ],
+      "overview": "Transfer of patients with intracranial mass effect requiring surgical or radiation oncology capability. Maintain airway, control BP, monitor for herniation signs.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-13",
+      "title": "Acute Respiratory Failure",
+      "scope": "aemt",
+      "group": "C. Respiratory",
+      "search": "II-13. RESPIRATORY FAILURE",
+      "tags": [
+        "respiratory failure",
+        "intubation",
+        "ventilator",
+        "ards",
+        "oxygen"
+      ],
+      "overview": "Respiratory failure requiring advanced airway management or mechanical ventilation. Identify and treat underlying cause. CPAP for pulmonary edema/COPD; intubation for impending failure.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-14",
+      "title": "Ventilator Failure / Transport Ventilator Transition",
+      "scope": "pm",
+      "group": "C. Respiratory",
+      "search": "II-14. VENTILATOR FAILURE",
+      "tags": [
+        "ventilator",
+        "ltv",
+        "vent failure",
+        "transition",
+        "intubated"
+      ],
+      "overview": "Ventilator failure at sending facility or transition to LTV 1200 for transport. Confirm ETT position before any ventilator change. BVM must be immediately accessible. See V-6 for LTV 1200 procedure.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-15",
+      "title": "Pulmonary Embolism",
+      "scope": "aemt",
+      "group": "C. Respiratory",
+      "search": "II-15. PULMONARY EMBOLISM",
+      "tags": [
+        "pe",
+        "pulmonary embolism",
+        "heparin",
+        "rv failure",
+        "hypoxia"
+      ],
+      "overview": "PE with obstruction of pulmonary arterial flow causing increased PVR and potential RV failure. Massive PE carries high risk for cardiovascular collapse. Transfer for thrombolysis, catheter-directed therapy, or ICU monitoring.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-16",
+      "title": "Tracheostomy Complication",
+      "scope": "aemt",
+      "group": "C. Respiratory",
+      "search": "II-16. TRACHEOSTOMY",
+      "tags": [
+        "tracheostomy",
+        "trach",
+        "decannulation",
+        "obstruction",
+        "stoma"
+      ],
+      "overview": "Tracheostomy complications including tube displacement, obstruction, hemorrhage, or infection. Tube management and airway maintenance are priorities. Have replacement tube and BVM immediately accessible.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-17",
+      "title": "Diabetic Ketoacidosis (DKA)",
+      "scope": "aemt",
+      "group": "D. Metabolic",
+      "search": "II-17. DIABETIC KETOACIDOSIS",
+      "tags": [
+        "dka",
+        "diabetic",
+        "ketoacidosis",
+        "insulin",
+        "glucose",
+        "acidosis"
+      ],
+      "overview": "DKA: hyperglycemia + ketosis + metabolic acidosis. Transfer for insulin drip, potassium replacement, and ICU-level monitoring. IV fluid resuscitation and electrolyte management are critical during transport.",
+      "emt_steps": [
+        "Apply cardiac monitor; document rhythm.",
+        "Apply oxygen if SpO2 <94%.",
+        "Maintain IV access and infusion continuity (insulin drip, fluids).",
+        "Obtain blood glucose at departure; monitor every 30 minutes.",
+        "Notify Paramedic of glucose <70, altered mental status, or cardiac dysrhythmia."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV; maintain large-bore access.",
+        "Normal saline bolus per sending orders for SBP <90 mmHg.",
+        "Maintain IV fluid infusion rate per sending orders.",
+        "Recheck blood glucose every 30 minutes; notify Paramedic of glucose <70."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Maintain insulin infusion per sending orders; do not adjust without explicit order.",
+        "For glucose <70 mg/dL: hold insulin infusion; administer D10% 100–250 mL; contact DMO.",
+        "For seizure: midazolam 2–5 mg IV; contact DMO.",
+        "Monitor ECG for hyperkalemia changes (peaked T, wide QRS)."
+      ],
+      "monitoring": [
+        "Blood glucose every 30 minutes.",
+        "IV fluid infusion rate and any changes.",
+        "Insulin infusion rate.",
+        "Cardiac rhythm for hyperkalemia changes.",
+        "Mental status every 5 minutes."
+      ],
+      "notes": [
+        "Do not adjust insulin infusion without explicit physician order.",
+        "DKA potassium: may be elevated initially but total body potassium is depleted — watch for hypokalemia as treatment proceeds.",
+        "Bicarbonate therapy only per sending physician order — do not give routinely."
+      ],
+      "diversion": "Hemodynamic instability, refractory altered mental status, cardiac dysrhythmia.",
+      "vitals": []
+    },
+    {
+      "num": "II-18",
+      "title": "Hyperosmolar Hyperglycemic State (HHS)",
+      "scope": "aemt",
+      "group": "D. Metabolic",
+      "search": "II-18. HYPEROSMOLAR",
+      "tags": [
+        "hhs",
+        "hyperglycemia",
+        "hyperosmolar",
+        "glucose",
+        "dehydration"
+      ],
+      "overview": "HHS: extreme hyperglycemia without significant ketoacidosis. Higher mortality than DKA. Profound dehydration and altered mental status. Gradual fluid resuscitation to avoid cerebral edema.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-19",
+      "title": "Hyperkalemia",
+      "scope": "aemt",
+      "group": "D. Metabolic",
+      "search": "II-19. HYPERKALEMIA",
+      "tags": [
+        "hyperkalemia",
+        "potassium",
+        "calcium",
+        "ecg",
+        "peaked t"
+      ],
+      "overview": "Life-threatening hyperkalemia causing cardiac arrhythmia risk. ECG changes: peaked T waves, wide QRS, sine wave pattern, PEA. Calcium is immediate myocardial membrane stabilizer. Transfer for dialysis or definitive management.",
+      "emt_steps": [
+        "Apply cardiac monitor; obtain and document 12-lead ECG immediately.",
+        "Apply oxygen if SpO2 <94%.",
+        "Note any signs of peaked T waves, wide QRS on monitor.",
+        "Notify Paramedic immediately — hyperkalemia is immediately life-threatening."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV.",
+        "Normal saline 500 mL IV bolus if SBP <90 mmHg.",
+        "Maintain dialysis access patency if applicable (do NOT flush AV fistula)."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Calcium gluconate or calcium chloride per sending orders if ECG changes present.",
+        "Sodium bicarbonate per sending orders.",
+        "Albuterol nebulized 10–20 mg (high dose) if ordered by sending physician.",
+        "For VF/pulseless VT: treat per Cardiac Arrest protocol; calcium and bicarb during arrest.",
+        "Contact DMO for any ECG changes or hemodynamic compromise."
+      ],
+      "monitoring": [
+        "Continuous cardiac monitoring — watch for peaked T waves, PR prolongation, wide QRS, sine wave pattern.",
+        "12-lead ECG every 15 minutes or with any change.",
+        "Blood pressure every 5 minutes.",
+        "Mental status."
+      ],
+      "notes": [
+        "ECG changes in order of severity: peaked T → PR prolongation → wide QRS → sine wave → PEA/VF.",
+        "Calcium is the immediate membrane stabilizer — does not lower potassium level.",
+        "Kayexalate and sodium zirconium (Lokelma) are oral agents — not administered during transport."
+      ],
+      "diversion": "VF, pulseless VT, hemodynamic instability, loss of pacing capture.",
+      "vitals": [
+        {
+          "label": "ECG monitor",
+          "val": "Continuous"
+        },
+        {
+          "label": "12-lead",
+          "val": "q15 min"
+        }
+      ]
+    },
+    {
+      "num": "II-20",
+      "title": "Upper GI Bleed",
+      "scope": "aemt",
+      "group": "E. GI / Surgical",
+      "search": "II-20. UPPER GASTROINTESTINAL",
+      "tags": [
+        "gi bleed",
+        "hemorrhage",
+        "hematemesis",
+        "blood",
+        "melena"
+      ],
+      "overview": "Upper GI hemorrhage with hemodynamic instability. Transfer for endoscopy, intervention, or surgical control. Airway protection is priority in patients with active hematemesis. Large-bore IV access and fluid resuscitation.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-21",
+      "title": "Sepsis / Septic Shock",
+      "scope": "aemt",
+      "group": "F. Infectious",
+      "search": "II-21. SEPSIS",
+      "tags": [
+        "sepsis",
+        "septic shock",
+        "norepinephrine",
+        "fluid",
+        "infection",
+        "qsofa"
+      ],
+      "overview": "Sepsis: dysregulated host response to infection with life-threatening organ dysfunction. Septic shock requires vasopressors to maintain MAP ≥65 mmHg. Surviving Sepsis Campaign 2021 guides management.",
+      "emt_steps": [
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Apply cardiac monitor.",
+        "Obtain blood glucose.",
+        "Keep patient warm — septic patients are often hypothermic.",
+        "Pre-alert receiving facility."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish two large-bore peripheral IVs.",
+        "Normal saline 500 mL IV bolus; repeat to 30 mL/kg total if SBP <90 mmHg and lungs clear — reassess after each bolus.",
+        "Treat hypoglycemia with D10%.",
+        "Stop fluids if pulmonary edema develops."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "For septic shock refractory to 30 mL/kg: norepinephrine infusion; titrate to MAP ≥65 mmHg.",
+        "For airway compromise: intubate — have vasopressor running before intubation.",
+        "Consider push-dose epinephrine 10–20 mcg IV if hemodynamics deteriorate post-intubation.",
+        "Contact DMO for septic shock requiring vasopressors."
+      ],
+      "monitoring": [
+        "Blood pressure every 3–5 minutes; MAP ≥65 mmHg target.",
+        "SpO2 continuously.",
+        "Mental status every 5 minutes.",
+        "Lung sounds after each fluid bolus.",
+        "Temperature if thermometer available."
+      ],
+      "notes": [
+        "qSOFA: AMS + RR >22/min + SBP ≤100 — two of three = suspect sepsis.",
+        "Intubating septic shock patient: loss of sympathetic drive + positive pressure = hemodynamic collapse. Have vasopressor infusing before laryngoscopy.",
+        "Norepinephrine is vasopressor of choice (SSC 2021)."
+      ],
+      "diversion": "Refractory hemodynamic instability, airway loss, cardiac arrest.",
+      "vitals": [
+        {
+          "label": "MAP target",
+          "val": "≥65"
+        },
+        {
+          "label": "Fluid",
+          "val": "30 mL/kg"
+        },
+        {
+          "label": "SpO2",
+          "val": "≥94%"
+        }
+      ]
+    },
+    {
+      "num": "II-22",
+      "title": "Necrotizing Infection / Surgical Gap",
+      "scope": "aemt",
+      "group": "F. Infectious",
+      "search": "II-22. NECROTIZING",
+      "tags": [
+        "necrotizing",
+        "fasciitis",
+        "infection",
+        "surgical",
+        "emergency"
+      ],
+      "overview": "Necrotizing soft tissue infection requiring emergent surgical debridement at capability beyond sending facility. Time-critical transfer — mortality increases significantly with each hour of delay.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-23",
+      "title": "Psychiatric / Behavioral Health Transfer",
+      "scope": "aemt",
+      "group": "G. Psychiatric",
+      "search": "II-23. PSYCHIATRIC",
+      "tags": [
+        "psychiatric",
+        "behavioral",
+        "mental health",
+        "suicidal",
+        "psychosis"
+      ],
+      "overview": "Psychiatric transfer for higher level of behavioral health care. Medical clearance should be confirmed before transfer. Safety of crew and patient are primary concerns throughout transport.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-24",
+      "title": "General Trauma Transport",
+      "scope": "aemt",
+      "group": "H. Trauma",
+      "search": "II-24. GENERAL TRAUMA",
+      "tags": [
+        "trauma",
+        "transfer",
+        "injury",
+        "hemorrhage",
+        "iss"
+      ],
+      "overview": "Trauma patient transfer for surgical capability, ICU level care, or specialty consultation unavailable at sending facility. Maintain hemostasis, airway, and hemodynamic stability. Avoid under-resuscitation.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-25",
+      "title": "Donor Patient Management",
+      "scope": "pm",
+      "group": "H. Trauma",
+      "search": "II-25. DONOR PATIENT",
+      "tags": [
+        "donor",
+        "organ",
+        "brain death",
+        "transplant",
+        "management"
+      ],
+      "overview": "Organ donor patient transport for procurement. Maintain hemodynamic stability, oxygenation, and normothermia to preserve organ viability. Follow sending hospital and organ procurement organization protocols precisely.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-26",
+      "title": "Hypoglycemia — IFT",
+      "scope": "aemt",
+      "group": "D. Metabolic",
+      "search": "II-26. HYPOGLYCEMIA",
+      "tags": [
+        "hypoglycemia",
+        "glucose",
+        "low sugar",
+        "d10",
+        "dextrose"
+      ],
+      "overview": "Hypoglycemia (<70 mg/dL) in IFT setting. Treat promptly — prolonged hypoglycemia causes irreversible brain injury. D10% preferred over D50% for all AMR KC transport units.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-27",
+      "title": "Anaphylaxis — IFT",
+      "scope": "all",
+      "group": "A. Allergic",
+      "search": "II-27. ANAPHYLAXIS",
+      "tags": [
+        "anaphylaxis",
+        "allergic",
+        "epinephrine",
+        "epi",
+        "hives",
+        "airway"
+      ],
+      "overview": "Anaphylaxis: severe systemic allergic reaction with hemodynamic or airway compromise. Epinephrine IM is first-line — do not delay. Diphenhydramine is adjunct only.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    },
+    {
+      "num": "II-28",
+      "title": "Toxicology and Overdose — IFT",
+      "scope": "aemt",
+      "group": "I. Toxicology",
+      "search": "II-28. TOXICOLOGY",
+      "tags": [
+        "overdose",
+        "toxicology",
+        "opioid",
+        "naloxone",
+        "tca",
+        "benzodiazepine"
+      ],
+      "overview": "Toxicology transfer for ICU-level monitoring, antidote therapy, or poison control consultation. Identify substance, dose, and time of exposure. Airway management is priority.",
+      "emt_steps": [
+        "Apply cardiac monitor.",
+        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Maintain IV access and infusion continuity.",
+        "Notify Paramedic of any deterioration."
+      ],
+      "aemt_steps": [
+        "All EMT steps.",
+        "Establish peripheral IV if not present.",
+        "Obtain 12-lead ECG; report findings to Paramedic."
+      ],
+      "pm_steps": [
+        "All EMT and AEMT steps.",
+        "Manage medications per sending orders.",
+        "Contact DMO for clinical questions or deterioration."
+      ],
+      "monitoring": [
+        "Vital signs every 5 minutes.",
+        "Mental status assessment.",
+        "Continuous cardiac monitoring."
+      ],
+      "notes": [],
+      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "vitals": []
+    }
+  ],
+  "formulary": [
+    {
+      "num": "III-1",
+      "name": "Adenosine",
+      "scope": "pm",
+      "tags": [
+        "svt",
+        "narrow",
+        "tachycardia",
+        "reentry"
+      ],
+      "mechanism": "Blocks AV nodal conduction transiently. Causes brief asystole to terminate re-entrant SVT.",
+      "indications": [
+        "Stable narrow-complex SVT unresponsive to vagal maneuvers."
+      ],
+      "contraindications": [
+        "WPW with pre-excitation (relative)",
+        "2nd or 3rd degree AV block",
+        "Sick sinus syndrome",
+        "Severe asthma (relative)"
+      ],
+      "doses": [
+        {
+          "route": "Adult IV",
+          "dose": "6 mg rapid IV push + 20 mL NS flush immediately. Repeat 12 mg x1 if no conversion."
+        },
+        {
+          "route": "Pediatric IV",
+          "dose": "0.1 mg/kg rapid push (max 6 mg); repeat 0.2 mg/kg (max 12 mg) + flush."
+        }
+      ],
+      "notes": [
+        "Administer as close to heart as possible — AC fossa preferred. Flush immediately.",
+        "Warn patient: transient chest tightness, dyspnea, feeling of impending doom are expected.",
+        "Have atropine and pacing ready — brief asystole will occur.",
+        "Methylxanthines (caffeine, theophylline) block adenosine receptors — may need higher dose."
+      ]
+    },
+    {
+      "num": "III-2",
+      "name": "Albuterol",
+      "scope": "all",
+      "tags": [
+        "bronchospasm",
+        "asthma",
+        "copd",
+        "wheeze",
+        "respiratory"
+      ],
+      "mechanism": "Selective beta-2 adrenergic agonist. Bronchodilation via smooth muscle relaxation.",
+      "indications": [
+        "Bronchospasm from asthma, COPD, anaphylaxis.",
+        "Respiratory distress with audible wheeze."
+      ],
+      "contraindications": [
+        "Hypersensitivity to albuterol."
+      ],
+      "doses": [
+        {
+          "route": "Adult nebulized",
+          "dose": "2.5 mg in 3 mL NS; may repeat every 20 minutes x3."
+        },
+        {
+          "route": "Adult MDI",
+          "dose": "4–8 puffs with spacer; may repeat every 20 minutes."
+        },
+        {
+          "route": "Pediatric nebulized",
+          "dose": "2.5 mg for all ages."
+        },
+        {
+          "route": "Pediatric MDI",
+          "dose": "2–4 puffs with spacer."
+        }
+      ],
+      "notes": [
+        "Side effects: tachycardia, tremors, hypokalemia with repeated doses.",
+        "Combine with ipratropium for first nebulized treatment in moderate-severe bronchospasm.",
+        "For high-dose bronchospasm (severe asthma): 10–20 mg continuous nebulization per DMO order."
+      ]
+    },
+    {
+      "num": "III-3",
+      "name": "Amiodarone",
+      "scope": "aemt",
+      "tags": [
+        "vf",
+        "vt",
+        "cardiac arrest",
+        "antiarrhythmic",
+        "refractory"
+      ],
+      "mechanism": "Class III antiarrhythmic. Prolongs action potential duration. Multiple mechanisms: Na, K, Ca channel effects plus alpha/beta blockade.",
+      "indications": [
+        "VF/pVT unresponsive to defibrillation (cardiac arrest).",
+        "Stable VT (Paramedic, with DMO consultation)."
+      ],
+      "contraindications": [
+        "Cardiogenic shock",
+        "Severe bradycardia without pacemaker",
+        "2nd or 3rd degree AV block without pacemaker"
+      ],
+      "doses": [
+        {
+          "route": "Adult cardiac arrest",
+          "dose": "300 mg IV/IO fixed dose (do NOT calculate weight-based for adults). Repeat 150 mg x1 if needed."
+        },
+        {
+          "route": "Adult stable VT",
+          "dose": "150 mg IV over 10 minutes. Contact DMO."
+        },
+        {
+          "route": "Pediatric cardiac arrest",
+          "dose": "5 mg/kg IV/IO push; max 300 mg per dose."
+        }
+      ],
+      "notes": [
+        "Causes hypotension with rapid infusion — slower infusion for stable VT.",
+        "Compatible with D5W — not recommended to mix with NS for infusions.",
+        "Do not adjust hospital-supplied amiodarone infusions without explicit physician order."
+      ]
+    },
+    {
+      "num": "III-4",
+      "name": "Aspirin",
+      "scope": "all",
+      "tags": [
+        "acs",
+        "stemi",
+        "chest pain",
+        "antiplatelet"
+      ],
+      "mechanism": "Irreversible COX-1 inhibitor. Inhibits thromboxane A2-mediated platelet aggregation.",
+      "indications": [
+        "Suspected ACS/STEMI — chest pain with cardiac features."
+      ],
+      "contraindications": [
+        "True aspirin allergy (anaphylaxis, hives)",
+        "Active GI bleeding",
+        "Hemorrhagic stroke (relative)"
+      ],
+      "doses": [
+        {
+          "route": "Adult PO",
+          "dose": "324 mg chewed (not swallowed whole). Give once — additional doses do not add benefit."
+        }
+      ],
+      "notes": [
+        "Aspirin sensitivity with asthma (Samter's triad) is NOT the same as true allergy — give aspirin.",
+        "Must be chewed, not swallowed — faster buccal absorption.",
+        "Do not repeat — one dose is the standard."
+      ]
+    },
+    {
+      "num": "III-5",
+      "name": "Atropine Sulfate",
+      "scope": "aemt",
+      "tags": [
+        "bradycardia",
+        "cholinergic",
+        "organophosphate",
+        "anticholinergic"
+      ],
+      "mechanism": "Competitive muscarinic acetylcholine receptor antagonist. Increases heart rate by blocking vagal tone.",
+      "indications": [
+        "Symptomatic bradycardia.",
+        "Organophosphate/nerve agent toxicity (high doses)."
+      ],
+      "contraindications": [
+        "Narrow-angle glaucoma (relative)",
+        "Obstructive uropathy (relative)"
+      ],
+      "doses": [
+        {
+          "route": "Bradycardia Adult IV",
+          "dose": "1 mg IV every 3–5 minutes; max 3 mg."
+        },
+        {
+          "route": "Bradycardia Pediatric IV/IO",
+          "dose": "0.02 mg/kg; minimum 0.1 mg; maximum 0.5 mg single dose."
+        },
+        {
+          "route": "Organophosphate Adult",
+          "dose": "2–4 mg IV/IM; repeat every 5–10 min until secretions dry. (No maximum in toxicology context.)"
+        }
+      ],
+      "notes": [
+        "Doses <0.5 mg may paradoxically worsen bradycardia (central vagotonic effect) — do not give sub-therapeutic doses to adults.",
+        "High-degree AV block (Mobitz II, complete) often does not respond to atropine — move to pacing.",
+        "Organophosphate antidote: endpoint is drying of secretions, not heart rate."
+      ]
+    },
+    {
+      "num": "III-6",
+      "name": "Diphenhydramine",
+      "scope": "aemt",
+      "tags": [
+        "allergic",
+        "anaphylaxis",
+        "antihistamine",
+        "benadryl"
+      ],
+      "mechanism": "H1 histamine receptor antagonist. Also has anticholinergic and sedative effects.",
+      "indications": [
+        "Allergic reactions and anaphylaxis (ADJUNCT to epinephrine — never first-line alone).",
+        "Dystonic reactions (extrapyramidal side effects from antiemetics)."
+      ],
+      "contraindications": [
+        "Hypersensitivity.",
+        "Neonates."
+      ],
+      "doses": [
+        {
+          "route": "Adult IV/IM",
+          "dose": "25–50 mg IV/IM. IV: give slowly over 2–3 minutes."
+        },
+        {
+          "route": "Pediatric IV/IM",
+          "dose": "1 mg/kg IV/IM; max 50 mg."
+        }
+      ],
+      "notes": [
+        "Do NOT delay epinephrine for diphenhydramine — it is an adjunct only.",
+        "Causes significant sedation — monitor airway.",
+        "For dystonic reactions (torticollis, oculogyric crisis): 50 mg IV provides rapid relief."
+      ]
+    },
+    {
+      "num": "III-7",
+      "name": "Dextrose 10% (D10W)",
+      "scope": "aemt",
+      "tags": [
+        "hypoglycemia",
+        "glucose",
+        "low sugar",
+        "diabetic"
+      ],
+      "mechanism": "Hypertonic glucose solution. Raises blood glucose rapidly.",
+      "indications": [
+        "Symptomatic hypoglycemia (glucose <70 mg/dL).",
+        "Altered mental status with confirmed or suspected hypoglycemia."
+      ],
+      "contraindications": [
+        "Hyperglycemia.",
+        "Do not give to hyperglycemic patients or ischemic stroke with normal glucose."
+      ],
+      "doses": [
+        {
+          "route": "Adult IV",
+          "dose": "100–250 mL IV (10–25 g dextrose). Recheck glucose in 10 minutes."
+        },
+        {
+          "route": "Pediatric IV/IO",
+          "dose": "2–4 mL/kg IV/IO. Recheck glucose 5 minutes after."
+        }
+      ],
+      "notes": [
+        "D10% is the ONLY dextrose concentration carried by AMR KC — no D50%.",
+        "Recheck blood glucose 10 minutes after administration and every 30 minutes thereafter.",
+        "If no IV access and patient cannot swallow: glucagon 1 mg IM (PM scope)."
+      ]
+    },
+    {
+      "num": "III-8",
+      "name": "Epinephrine 1:1,000 (IM)",
+      "scope": "all",
+      "tags": [
+        "anaphylaxis",
+        "allergic",
+        "epipen",
+        "severe allergic"
+      ],
+      "mechanism": "Alpha and beta adrenergic agonist. Reverses vasodilation, bronchospasm, and angioedema in anaphylaxis.",
+      "indications": [
+        "Anaphylaxis — first-line treatment. Do not delay.",
+        "Severe allergic reaction with systemic involvement."
+      ],
+      "contraindications": [
+        "No absolute contraindications in anaphylaxis."
+      ],
+      "doses": [
+        {
+          "route": "Adult IM",
+          "dose": "0.3–0.5 mg IM to lateral thigh (1:1,000). May repeat every 5–10 min."
+        },
+        {
+          "route": "Adult EpiPen",
+          "dose": "EpiPen 0.3 mg auto-injector to lateral thigh through clothing."
+        },
+        {
+          "route": "Pediatric IM",
+          "dose": "0.01 mg/kg IM (1:1,000); max 0.3 mg. EpiPen Jr for <30 kg: 0.15 mg."
+        }
+      ],
+      "notes": [
+        "Lateral thigh preferred — fastest absorption. NOT deltoid.",
+        "Do NOT confuse 1:1,000 (IM) with 1:10,000 (IV/IO) concentration.",
+        "Biphasic anaphylaxis: recurrence in 1–8 hours — transport all patients even if initial response is complete."
+      ]
+    },
+    {
+      "num": "III-9",
+      "name": "Epinephrine 1:10,000 (IV/IO)",
+      "scope": "aemt",
+      "tags": [
+        "cardiac arrest",
+        "pea",
+        "asystole",
+        "vf",
+        "vasopressor",
+        "push dose"
+      ],
+      "mechanism": "Alpha and beta adrenergic agonist. Increases coronary and cerebral perfusion pressure during CPR.",
+      "indications": [
+        "Cardiac arrest (all rhythms).",
+        "Push-dose pressor for peri-intubation hemodynamic collapse (PM only).",
+        "Symptomatic bradycardia refractory to atropine and TCP (PM only — infusion)."
+      ],
+      "contraindications": [
+        "No absolute contraindications in cardiac arrest."
+      ],
+      "doses": [
+        {
+          "route": "Cardiac arrest IV/IO",
+          "dose": "1 mg every 3–5 min. Non-shockable: give as early as possible. Shockable: after initial defib fails."
+        },
+        {
+          "route": "Push-dose pressor (PM)",
+          "dose": "10–20 mcg IV q1–2 min. Prep: 1 mL of 1:10,000 + 9 mL NS = 10 mcg/mL. Give 1–2 mL per dose."
+        },
+        {
+          "route": "Bradycardia infusion (PM)",
+          "dose": "2–10 mcg/min IV; titrate to hemodynamic effect."
+        },
+        {
+          "route": "Pediatric cardiac arrest",
+          "dose": "0.01 mg/kg IV/IO; max 1 mg per dose. Every 3–5 min."
+        }
+      ],
+      "notes": [
+        "AHA 2025: delay in shockable rhythms until after initial defib fails.",
+        "Do NOT confuse concentrations: 1:10,000 (IV) ≠ 1:1,000 (IM).",
+        "Push-dose prep: draw 1 mL of 1:10,000 epi into 10 mL syringe, add 9 mL NS → 10 mcg/mL."
+      ]
+    },
+    {
+      "num": "III-10",
+      "name": "Fentanyl Citrate",
+      "scope": "aemt",
+      "tags": [
+        "pain",
+        "opioid",
+        "analgesia",
+        "procedural"
+      ],
+      "mechanism": "Synthetic mu-opioid agonist. Rapid onset 1–2 min IV, shorter duration than morphine.",
+      "indications": [
+        "Moderate-to-severe pain.",
+        "Procedural analgesia."
+      ],
+      "contraindications": [
+        "Hypersensitivity to fentanyl.",
+        "Use caution in hypotension, respiratory depression, head injury."
+      ],
+      "doses": [
+        {
+          "route": "Adult IV/IO",
+          "dose": "25–100 mcg slow IV push; titrate to effect. Typical start: 25–50 mcg."
+        },
+        {
+          "route": "Adult IN",
+          "dose": "1–2 mcg/kg IN via atomizer; max 100 mcg."
+        },
+        {
+          "route": "Adult IM",
+          "dose": "1–2 mcg/kg IM."
+        },
+        {
+          "route": "Pediatric IV/IO",
+          "dose": "1–2 mcg/kg slow push; max 50 mcg per dose."
+        },
+        {
+          "route": "Pediatric IN",
+          "dose": "1–2 mcg/kg IN via atomizer."
+        }
+      ],
+      "notes": [
+        "Chest wall rigidity with rapid large doses — administer slowly.",
+        "Monitor respirations and SpO2 continuously after each dose.",
+        "Naloxone reverses — have immediately available.",
+        "Preferred over morphine in renal failure and hemodynamically unstable patients."
+      ]
+    },
+    {
+      "num": "III-11",
+      "name": "Midazolam (Versed)",
+      "scope": "aemt",
+      "tags": [
+        "seizure",
+        "sedation",
+        "benzo",
+        "status epilepticus"
+      ],
+      "mechanism": "Benzodiazepine. Enhances GABA-mediated CNS inhibition. Anticonvulsant, amnestic, anxiolytic.",
+      "indications": [
+        "Active seizures / status epilepticus (AEMT: seizure management only).",
+        "Procedural sedation (PM only).",
+        "Behavioral sedation in conjunction with physical restraint (PM only)."
+      ],
+      "contraindications": [
+        "Hypersensitivity.",
+        "Acute narrow-angle glaucoma.",
+        "Severe respiratory depression without airway management capability."
+      ],
+      "doses": [
+        {
+          "route": "Seizure Adult IV/IO",
+          "dose": "2–5 mg IV/IO; may repeat x1 after 5 minutes."
+        },
+        {
+          "route": "Seizure Adult IM",
+          "dose": "5–10 mg IM."
+        },
+        {
+          "route": "Seizure Adult IN",
+          "dose": "5 mg IN (2.5 mg per nostril via atomizer)."
+        },
+        {
+          "route": "Pediatric IV/IO",
+          "dose": "0.1 mg/kg IV/IO; max 5 mg."
+        },
+        {
+          "route": "Pediatric IN",
+          "dose": "0.2 mg/kg IN; max 5 mg."
+        },
+        {
+          "route": "Pediatric IM",
+          "dose": "0.1–0.15 mg/kg IM; max 5 mg."
+        }
+      ],
+      "notes": [
+        "AEMT authorization: midazolam for ACTIVE SEIZURES ONLY per KBEMS and Dr. Deshmukh.",
+        "Respiratory depression risk — BVM immediately accessible at all times.",
+        "IN route effective for seizures when IV/IO delayed — do not wait for access before treating."
+      ]
+    },
+    {
+      "num": "III-12",
+      "name": "Ketamine",
+      "scope": "pm",
+      "tags": [
+        "sedation",
+        "pain",
+        "intubated",
+        "dissociative"
+      ],
+      "mechanism": "NMDA receptor antagonist. Dissociative anesthetic. Analgesic, amnestic, and bronchodilatory properties.",
+      "indications": [
+        "Intubated patients requiring procedural sedation or pain management (AMR KC formulary: intubated patients only without DMO order).",
+        "Behavioral emergency with extreme agitation (PM, with DMO)."
+      ],
+      "contraindications": [
+        "Uncontrolled hypertension (relative).",
+        "Active psychosis (relative).",
+        "Elevated ICP without airway control (relative)."
+      ],
+      "doses": [
+        {
+          "route": "Procedural sedation (intubated) IV",
+          "dose": "0.5–2 mg/kg IV slow push."
+        },
+        {
+          "route": "Analgesia IV",
+          "dose": "0.1–0.3 mg/kg IV (sub-dissociative dose)."
+        },
+        {
+          "route": "Behavioral sedation IM (DMO)",
+          "dose": "4–5 mg/kg IM."
+        }
+      ],
+      "notes": [
+        "AMR KC standing order: ketamine authorized for INTUBATED patients only without DMO order.",
+        "For non-intubated behavioral emergencies: contact DMO for authorization.",
+        "Maintain protective reflexes — laryngospasm rare but possible.",
+        "Increases BP and HR — use with caution in hypertensive emergencies."
+      ]
+    },
+    {
+      "num": "III-13",
+      "name": "Lidocaine",
+      "scope": "aemt",
+      "tags": [
+        "vf",
+        "vt",
+        "antiarrhythmic",
+        "cardiac arrest",
+        "refractory"
+      ],
+      "mechanism": "Class Ib antiarrhythmic. Sodium channel blocker. Suppresses ventricular ectopy.",
+      "indications": [
+        "Refractory VF/pVT as alternative to amiodarone.",
+        "Stable VT (Paramedic, with DMO)."
+      ],
+      "contraindications": [
+        "Hypersensitivity to amide local anesthetics.",
+        "Heart block (without pacemaker).",
+        "Severe sinus bradycardia."
+      ],
+      "doses": [
+        {
+          "route": "Cardiac arrest IV/IO",
+          "dose": "1–1.5 mg/kg IV/IO push; may repeat 0.5–0.75 mg/kg every 5–10 min (max 3 mg/kg total)."
+        },
+        {
+          "route": "Stable VT IV",
+          "dose": "1–1.5 mg/kg IV over 2 minutes; then 0.5–0.75 mg/kg if needed."
+        }
+      ],
+      "notes": [
+        "AHA 2025: amiodarone or lidocaine — both remain 2b recommendations for refractory VF/pVT.",
+        "Lidocaine preferred over amiodarone in some cardiac arrest etiologies (e.g., cocaine-induced).",
+        "Toxicity: perioral numbness, tinnitus, tremors, seizures at high doses."
+      ]
+    },
+    {
+      "num": "III-14",
+      "name": "Magnesium Sulfate",
+      "scope": "pm",
+      "tags": [
+        "eclampsia",
+        "torsades",
+        "asthma",
+        "preeclampsia",
+        "seizure"
+      ],
+      "mechanism": "Electrolyte. Membrane stabilizer. Anticonvulsant (NMDA antagonism). Bronchodilator. Antiarrhythmic.",
+      "indications": [
+        "Eclampsia/preeclampsia seizures.",
+        "Torsades de pointes (polymorphic VT).",
+        "Severe refractory bronchospasm (asthma/status asthmaticus).",
+        "Pediatric severe asthma."
+      ],
+      "contraindications": [
+        "Hypermagnesemia.",
+        "Significant AV block.",
+        "Myasthenia gravis.",
+        "Renal failure (accumulation risk)."
+      ],
+      "doses": [
+        {
+          "route": "Eclampsia IV",
+          "dose": "4–6 g IV over 15–20 minutes; then 1–2 g/hr infusion per sending orders."
+        },
+        {
+          "route": "Torsades IV",
+          "dose": "2 g IV over 2–5 minutes (may give faster in cardiac arrest)."
+        },
+        {
+          "route": "Severe asthma IV",
+          "dose": "2 g IV over 20 minutes."
+        },
+        {
+          "route": "Pediatric severe asthma",
+          "dose": "25–50 mg/kg IV over 20 min; max 2 g."
+        }
+      ],
+      "notes": [
+        "Magnesium toxicity signs (in order): loss of DTRs → respiratory depression → cardiac arrest.",
+        "Antidote: calcium gluconate 1 g IV (or calcium chloride 500 mg IV for faster effect).",
+        "Monitor respiratory rate and patellar reflex during infusion."
+      ]
+    },
+    {
+      "num": "III-15",
+      "name": "Naloxone (Narcan)",
+      "scope": "all",
+      "tags": [
+        "opioid",
+        "overdose",
+        "reversal",
+        "narcan",
+        "respiratory depression"
+      ],
+      "mechanism": "Competitive opioid receptor antagonist. Reverses opioid-induced respiratory depression, sedation, hypotension.",
+      "indications": [
+        "Suspected opioid overdose with respiratory depression or unconsciousness.",
+        "Authorized for all scope levels per KBEMS."
+      ],
+      "contraindications": [
+        "Hypersensitivity (rare)."
+      ],
+      "doses": [
+        {
+          "route": "Adult IV/IO",
+          "dose": "0.4–2 mg; titrate to adequate respiratory effort — do NOT fully reverse in opioid-tolerant patients."
+        },
+        {
+          "route": "Adult IN",
+          "dose": "4 mg per nostril (8 mg total) via atomizer; may repeat."
+        },
+        {
+          "route": "Adult IM",
+          "dose": "0.4–2 mg IM."
+        },
+        {
+          "route": "Pediatric IV/IO",
+          "dose": "0.01–0.1 mg/kg; titrate to respiratory effort."
+        },
+        {
+          "route": "Pediatric IN",
+          "dose": "0.1 mg/kg IN; max 2 mg."
+        }
+      ],
+      "notes": [
+        "Titrate to adequate respiratory effort — NOT to full consciousness. Full reversal = acute withdrawal + combativeness in tolerant patients.",
+        "Naloxone duration (30–90 min) is shorter than most opioids — re-sedation is common. Monitor continuously.",
+        "AHA 2025: naloxone in opioid cardiac arrest must NOT delay CPR or epinephrine.",
+        "High-potency synthetic opioids (fentanyl analogs): may require multiple or higher doses."
+      ]
+    },
+    {
+      "num": "III-16",
+      "name": "Nitroglycerin",
+      "scope": "pm",
+      "tags": [
+        "chest pain",
+        "acs",
+        "stemi",
+        "angina",
+        "pulmonary edema"
+      ],
+      "mechanism": "Organic nitrate. Venodilator → reduces preload. Coronary vasodilator.",
+      "indications": [
+        "Chest pain with suspected ACS (Paramedic scope for field; AEMT may continue sending facility-initiated NTG).",
+        "Pulmonary edema with SBP ≥100 mmHg."
+      ],
+      "contraindications": [
+        "SBP <100 mmHg",
+        "Suspected RV infarct (inferior STEMI)",
+        "PDE-5 inhibitor use within 24–48 hours (sildenafil, tadalafil, vardenafil)",
+        "Severe aortic stenosis"
+      ],
+      "doses": [
+        {
+          "route": "Adult SL",
+          "dose": "0.4 mg SL every 5 minutes x3; hold if SBP <100 mmHg."
+        },
+        {
+          "route": "NTG patch/paste (hospital-initiated)",
+          "dose": "Manage per sending orders — do not apply additional doses without order."
+        }
+      ],
+      "notes": [
+        "PDE-5 inhibitors: sildenafil (Viagra) — 24 hr; tadalafil (Cialis) — 48 hr. Combination causes refractory hypotension.",
+        "Inferior STEMI: hold NTG and give fluids — RV infarction causes preload-dependent hypotension.",
+        "Hypotension after NTG: position supine, fluid bolus, contact DMO."
+      ]
+    },
+    {
+      "num": "III-17",
+      "name": "Norepinephrine (Levophed)",
+      "scope": "pm",
+      "tags": [
+        "shock",
+        "septic shock",
+        "vasopressor",
+        "hypotension",
+        "map"
+      ],
+      "mechanism": "Potent alpha-1 adrenergic agonist with moderate beta-1 activity. Raises MAP via vasoconstriction.",
+      "indications": [
+        "Septic shock.",
+        "Distributive shock (anaphylactic, neurogenic).",
+        "Post-cardiac arrest hypotension.",
+        "Cardiogenic shock (with DMO)."
+      ],
+      "contraindications": [
+        "Hypovolemia without fluid resuscitation (relative)."
+      ],
+      "doses": [
+        {
+          "route": "Adult IV infusion",
+          "dose": "Start 0.1–0.2 mcg/kg/min; titrate to MAP ≥65 mmHg. Range 0.01–3 mcg/kg/min."
+        },
+        {
+          "route": "Mixing (standard)",
+          "dose": "Per hospital-supplied or sending facility concentration — do not mix en route without DMO guidance."
+        }
+      ],
+      "notes": [
+        "Preferred vasopressor for septic shock per Surviving Sepsis Campaign 2021.",
+        "Requires central or large-bore IV — extravasation causes tissue necrosis. Use largest available peripheral IV until central access available.",
+        "Do not adjust hospital-supplied norepinephrine infusions without explicit physician order."
+      ]
+    },
+    {
+      "num": "III-18",
+      "name": "Sodium Bicarbonate",
+      "scope": "pm",
+      "tags": [
+        "acidosis",
+        "tca",
+        "hyperkalemia",
+        "bicarb",
+        "cardiac arrest"
+      ],
+      "mechanism": "Alkalinizing agent. Raises serum pH. Reverses TCA toxicity by alkalinizing plasma.",
+      "indications": [
+        "TCA toxicity with QRS >120ms or hemodynamic instability.",
+        "Hyperkalemia with ECG changes (per sending order).",
+        "Prolonged cardiac arrest with metabolic acidosis (per DMO)."
+      ],
+      "contraindications": [
+        "Hypocalcemia (alkalosis worsens).",
+        "Pulmonary edema (volume/sodium load).",
+        "Do not mix with calcium — precipitates."
+      ],
+      "doses": [
+        {
+          "route": "TCA toxicity IV",
+          "dose": "1–2 mEq/kg IV bolus; repeat to maintain pH 7.45–7.55."
+        },
+        {
+          "route": "Hyperkalemia IV",
+          "dose": "Per sending physician order — typically 50–100 mEq IV."
+        },
+        {
+          "route": "Cardiac arrest",
+          "dose": "1 mEq/kg IV/IO; contact DMO."
+        }
+      ],
+      "notes": [
+        "TCA toxicity: target serum pH 7.45–7.55 — alkalinization reverses sodium channel blockade.",
+        "Do not mix bicarb and calcium in same line — calcium carbonate precipitation.",
+        "AHA 2025: routine bicarb in cardiac arrest not recommended; prehospital use in PEA/asystole has uncertain evidence."
+      ]
+    },
+    {
+      "num": "III-19",
+      "name": "Ondansetron (Zofran)",
+      "scope": "aemt",
+      "tags": [
+        "nausea",
+        "vomiting",
+        "antiemetic",
+        "zofran"
+      ],
+      "mechanism": "Selective 5-HT3 serotonin receptor antagonist. Antiemetic.",
+      "indications": [
+        "Nausea and vomiting from any cause.",
+        "Prevention of vomiting in patients at aspiration risk."
+      ],
+      "contraindications": [
+        "Hypersensitivity.",
+        "QTc prolongation (use with caution).",
+        "Serotonin syndrome risk with other serotonergic drugs."
+      ],
+      "doses": [
+        {
+          "route": "Adult IV/IO",
+          "dose": "4 mg IV over 2–5 minutes. May repeat x1 after 15 minutes."
+        },
+        {
+          "route": "Adult IM",
+          "dose": "4 mg IM."
+        },
+        {
+          "route": "Pediatric IV/IO",
+          "dose": "0.15 mg/kg IV (max 4 mg)."
+        },
+        {
+          "route": "ODT (oral dissolving)",
+          "dose": "4 mg ODT for patients able to take oral medications."
+        }
+      ],
+      "notes": [
+        "Do not give rapid IV push — causes transient headache and dizziness.",
+        "QTc prolongation possible — caution with other QT-prolonging drugs.",
+        "Does not cause sedation — safe for use in patients requiring continued neurologic assessment."
+      ]
+    },
+    {
+      "num": "III-20",
+      "name": "Normal Saline 0.9%",
+      "scope": "all",
+      "tags": [
+        "fluid",
+        "iv",
+        "bolus",
+        "resuscitation",
+        "saline"
+      ],
+      "mechanism": "Isotonic crystalloid solution. Expands intravascular volume without significant fluid shifts.",
+      "indications": [
+        "IV fluid resuscitation for hypovolemia, shock.",
+        "Medication dilution and IV flush.",
+        "KVO (keep vein open) maintenance."
+      ],
+      "contraindications": [
+        "Hypernatremia.",
+        "Hyperchloremic acidosis (large volumes).",
+        "Pulmonary edema — use with extreme caution."
+      ],
+      "doses": [
+        {
+          "route": "Adult IV bolus",
+          "dose": "250–500 mL IV; reassess after each bolus. Sepsis: 30 mL/kg total."
+        },
+        {
+          "route": "Pediatric IV bolus",
+          "dose": "20 mL/kg IV/IO; reassess after each. Max 60 mL/kg without DMO."
+        },
+        {
+          "route": "Maintenance/KVO",
+          "dose": "Per sending orders or 30 mL/hr to maintain access."
+        }
+      ],
+      "notes": [
+        "Reassess lung sounds after EVERY bolus — stop fluids if pulmonary edema develops.",
+        "In septic shock: 30 mL/kg target, but reassess after each 500 mL.",
+        "Permissive hypotension for penetrating trauma: limit fluids until hemorrhage controlled."
+      ]
+    },
+    {
+      "num": "III-21",
+      "name": "Ipratropium Bromide (Atrovent)",
+      "scope": "aemt",
+      "tags": [
+        "bronchospasm",
+        "copd",
+        "asthma",
+        "anticholinergic"
+      ],
+      "mechanism": "Anticholinergic bronchodilator. Inhibits muscarinic receptors in airways — reduces bronchoconstriction and secretions.",
+      "indications": [
+        "COPD exacerbation.",
+        "Bronchospasm (combined with albuterol for first treatment)."
+      ],
+      "contraindications": [
+        "Hypersensitivity to ipratropium or atropine.",
+        "Narrow-angle glaucoma (avoid nebulizer spray in eyes)."
+      ],
+      "doses": [
+        {
+          "route": "Adult nebulized",
+          "dose": "0.5 mg combined with albuterol in single nebulizer — first treatment only."
+        },
+        {
+          "route": "Pediatric nebulized",
+          "dose": "0.25–0.5 mg combined with albuterol — first treatment only."
+        }
+      ],
+      "notes": [
+        "Combine with albuterol for first nebulized treatment — do not repeat ipratropium (repeat albuterol only).",
+        "Slower onset than albuterol (15–30 min) but complementary mechanism.",
+        "Avoid aerosol exposure to eyes — can precipitate acute angle-closure glaucoma."
+      ]
+    }
+  ],
+  "procedures": [
+    {
+      "num": "V-3A",
+      "title": "Upper Airway Suctioning",
+      "scope": "all",
+      "tags": [
+        "suction",
+        "airway",
+        "yankauer",
+        "oral",
+        "nasal"
+      ],
+      "overview": "Oral and nasal suctioning for secretion removal. All levels authorized. Use rigid Yankauer for oral; flexible catheter for nasal.",
+      "steps": [
+        "Position patient: lateral if unconscious; upright if tolerating.",
+        "Turn on suction; confirm adequate suction pressure (80–120 mmHg).",
+        "Oral: insert Yankauer along inside of cheek to back of pharynx; apply suction while withdrawing in sweeping motion.",
+        "Nasal: insert soft catheter gently along floor of nasal passage; apply suction while withdrawing with rotating motion.",
+        "Limit each attempt to 10–15 seconds maximum.",
+        "Allow full re-oxygenation between passes.",
+        "Reassess airway patency and SpO2 after each attempt."
+      ],
+      "notes": [
+        "Monitor for vagal stimulation — bradycardia occurs, especially in pediatric patients. Stop suctioning, ventilate with 100% O2, notify Paramedic.",
+        "Do not suction for more than 15 seconds per pass without re-oxygenating."
+      ]
+    },
+    {
+      "num": "V-3B",
+      "title": "Deep Suctioning — ETT and Tracheostomy",
+      "scope": "aemt",
+      "tags": [
+        "suction",
+        "ett",
+        "tracheostomy",
+        "deep",
+        "intubated",
+        "sterile"
+      ],
+      "overview": "Lower airway suctioning of intubated or tracheostomy patient. AEMT+ authorized per KBEMS Kansas AEMT educational standards and AMR KC Medical Director standing order.",
+      "steps": [
+        "Pre-oxygenate: increase FiO2 to 100% for minimum 30 seconds before suctioning.",
+        "Don sterile gloves; maintain sterile technique throughout procedure.",
+        "Measure catheter depth: for ETT, ETT length plus 1–2 cm; for tracheostomy, just below tube tip.",
+        "Insert catheter WITHOUT applying suction; advance to measured depth.",
+        "Apply suction while withdrawing with rotating motion — do not advance while suctioning.",
+        "Limit each pass to 10–15 seconds maximum.",
+        "Allow full re-oxygenation between passes; do not suction more than twice consecutively without re-oxygenating.",
+        "For tracheostomy: confirm tube position and cuff status after suctioning.",
+        "Reassess SpO2, ETCO2, and work of breathing after each pass."
+      ],
+      "notes": [
+        "Do NOT use saline lavage — current evidence does not support routine saline instillation.",
+        "Persistent bradycardia during suctioning: atropine per protocol (Paramedic scope).",
+        "Upper airway suctioning (oral/nasal) remains All Levels — see V-3A."
+      ]
+    },
+    {
+      "num": "V-4",
+      "title": "Endotracheal Intubation",
+      "scope": "pm",
+      "tags": [
+        "intubation",
+        "ett",
+        "airway",
+        "laryngoscopy",
+        "RSI"
+      ],
+      "overview": "Definitive airway management for respiratory failure or airway protection. Maximum 2 laryngoscopy attempts before iGel. Confirm with waveform capnography.",
+      "steps": [
+        "Pre-oxygenate with BVM at 100% FiO2 for minimum 3 minutes (or 8 vital capacity breaths if cooperative).",
+        "Position patient: sniffing position — ear to sternal notch alignment.",
+        "Select ETT: adult male 8.0–8.5mm, adult female 7.0–7.5mm.",
+        "Insert laryngoscope with left hand; displace tongue leftward; lift blade to expose glottis — do NOT lever on teeth.",
+        "Visualize vocal cords; advance ETT through cords under direct vision.",
+        "Inflate cuff to 20–30 cmH2O; connect to BVM.",
+        "Confirm: bilateral chest rise, condensation in tube, waveform capnography — gold standard.",
+        "Secure ETT; document depth at lip (adult male 21–23 cm, adult female 19–21 cm).",
+        "Connect to ventilator or continue BVM ventilation."
+      ],
+      "notes": [
+        "Maximum 2 laryngoscopy attempts before moving to iGel — do not persist with failed airway.",
+        "Waveform capnography is gold standard — colorimetric alone insufficient in low-perfusion states (cardiac arrest).",
+        "Video laryngoscopy preferred when available.",
+        "No RSI authorized — no paralytics in AMR KC formulary."
+      ]
+    },
+    {
+      "num": "V-5",
+      "title": "CPAP — Flow-Safe II",
+      "scope": "all",
+      "tags": [
+        "cpap",
+        "respiratory",
+        "pulmonary edema",
+        "copd",
+        "non-invasive"
+      ],
+      "overview": "Non-invasive positive pressure for respiratory distress. All levels authorized per Dr. Deshmukh and KBEMS. Flow-Safe II generates CPAP pressure at 15 L/min O2 flow.",
+      "steps": [
+        "Explain procedure to patient — cooperation is essential. Patients who cannot cooperate cannot receive CPAP.",
+        "Select appropriate mask size; ensure no facial hair that may break seal.",
+        "Apply mask over nose and mouth; secure head strap snugly — verify mask seal.",
+        "Connect Flow-Safe II to oxygen at minimum 15 L/min; verify pressure gauge reading (5 cmH2O initial).",
+        "Initiate CPAP at 5 cmH2O; titrate to 10 cmH2O if needed based on patient response.",
+        "Monitor mask seal, respiratory rate, work of breathing, and SpO2 continuously.",
+        "Reassess patient tolerance every 5 minutes throughout transport."
+      ],
+      "notes": [
+        "CONTRAINDICATED: SBP <90 mmHg, decreased mental status, inability to protect airway, active emesis, suspected pneumothorax.",
+        "If patient deteriorates on CPAP: remove immediately and prepare for intubation.",
+        "Minimum 15 L/min O2 required — Flow-Safe II will not generate adequate pressure at lower flows."
+      ]
+    },
+    {
+      "num": "V-6",
+      "title": "LTV 1200 Ventilator Management",
+      "scope": "pm",
+      "tags": [
+        "ventilator",
+        "ltv",
+        "vent",
+        "intubated",
+        "mechanical ventilation"
+      ],
+      "overview": "Mechanical ventilation management during transport. IBW-based tidal volumes. A/C is default mode. Confirm ETT position before connecting. BVM must be immediately accessible.",
+      "steps": [
+        "Confirm ETT position and security: cm marking at lip, bilateral breath sounds, waveform capnography.",
+        "Pre-oxygenate: increase sending vent FiO2 to 100% for 2–3 minutes before transition.",
+        "Connect LTV 1200 circuit: main tube to 22mm outlet port; connect both flow transducer sense lines (non-interchangeable Luer fittings); connect exhalation valve drive line.",
+        "Power on LTV 1200 — press On/Standby. SAME PATIENT: resume previous settings. NEW PATIENT: new setup.",
+        "Set mode: press mode button to cycle Assist/Control → SIMV/CPAP → NPPV. A/C is default for most patients.",
+        "Set Tidal Volume: 6–8 mL/kg IBW (males: IBW = 50 + 2.3 × [ht in inches − 60]; females: 45.5 + 2.3 × [ht in inches − 60]).",
+        "Set Breath Rate, Inspiratory Time, FiO2, Sensitivity (default 3 L/min adults), PEEP.",
+        "Set alarms: High Pressure Limit 40 cmH2O; Low Pressure 10 cmH2O; Low Min Vol 3 L.",
+        "Disconnect from hospital vent; immediately connect ETT to LTV 1200.",
+        "Confirm: bilateral chest rise, SpO2 stable, ETCO2 waveform present, no HIGH PRES or LOW PRES alarms."
+      ],
+      "notes": [
+        "Use IBW for tidal volume — not actual weight. Actual weight in obese patients causes volutrauma.",
+        "A/C preferred over SIMV for transport. SIMV does not prevent breath stacking better than correctly-set A/C (rate 10–12, I:E ≥1:3, adequate sedation).",
+        "BVM always within arm's reach. Any unresolvable alarm: disconnect and BVM ventilate immediately."
+      ]
+    },
+    {
+      "num": "V-7",
+      "title": "Peripheral IV Access",
+      "scope": "aemt",
+      "tags": [
+        "iv",
+        "intravenous",
+        "access",
+        "catheter"
+      ],
+      "overview": "Peripheral intravenous access for medication administration and fluid resuscitation.",
+      "steps": [
+        "Apply tourniquet proximal to intended site; identify appropriate vein.",
+        "Perform antiseptic skin prep (chlorhexidine or alcohol); allow to dry.",
+        "Stabilize vein with non-dominant hand; insert catheter at 10–20 degree angle with bevel up.",
+        "Advance catheter into vein on flash of blood return; remove needle.",
+        "Release tourniquet; confirm blood return with gentle aspiration.",
+        "Flush with 10 mL normal saline; assess for resistance or swelling (infiltration).",
+        "Secure catheter with transparent dressing; label with date and size."
+      ],
+      "notes": [
+        "Avoid sites distal to infiltrated, infected, or injured tissue.",
+        "Avoid antecubital fossa for vasopressor infusions when possible — extravasation risk.",
+        "Label with date and catheter gauge — document number of attempts."
+      ]
+    },
+    {
+      "num": "V-8",
+      "title": "Intraosseous Access (EZ-IO)",
+      "scope": "aemt",
+      "tags": [
+        "io",
+        "intraosseous",
+        "ez-io",
+        "vascular access",
+        "emergent"
+      ],
+      "overview": "Emergency vascular access when peripheral IV cannot be obtained rapidly. For hemodynamically unstable patients and cardiac arrest.",
+      "steps": [
+        "Identify insertion site: proximal tibia (preferred), proximal humerus, or distal tibia (medial malleolus).",
+        "Position extremity; palpate landmarks.",
+        "Perform antiseptic skin prep.",
+        "Select appropriate needle length: 15mm standard adult, 25mm obese/tibial, 45mm humeral.",
+        "Insert EZ-IO needle perpendicular to bone with firm steady pressure until resistance decreases.",
+        "Remove driver; confirm placement — needle should stand without support.",
+        "Attach extension set; flush with 10–20 mL normal saline (WARN: painful in conscious patient — flush slowly).",
+        "Secure with EZ-Stabilizer dressing; connect IV tubing."
+      ],
+      "notes": [
+        "IO placement is painful in conscious patients — lidocaine 40 mg IO before flush helps.",
+        "Contraindicated: fractured bone at site, previous IO attempt at same site within 24 hours, infection or burn overlying site.",
+        "All medications and fluids can be given IO at same doses as IV."
+      ]
+    },
+    {
+      "num": "V-10",
+      "title": "Needle Decompression",
+      "scope": "pm",
+      "tags": [
+        "tension",
+        "pneumothorax",
+        "needle",
+        "decompression",
+        "chest"
+      ],
+      "overview": "Emergency decompression for tension pneumothorax. Life-threatening emergency — do not delay for diagnosis confirmation when clinical picture is consistent.",
+      "steps": [
+        "Identify tension PTX: absent unilateral breath sounds, tracheal deviation (late), JVD, hypotension, worsening SpO2 despite ventilation.",
+        "Primary site: 2nd intercostal space, midclavicular line (2nd ICS MCL).",
+        "Alternate site: 4th–5th ICS, anterior axillary line (AAL) — less soft tissue in obese patients.",
+        "Prep skin with antiseptic.",
+        "Insert 14g (minimum) catheter-over-needle perpendicular to chest wall, OVER the superior rib border.",
+        "Advance until rush of air is felt or resistance releases.",
+        "Remove needle; leave catheter in place; note time of decompression.",
+        "Confirm: improved breath sounds, SpO2, hemodynamics.",
+        "Cover with occlusive dressing; monitor for re-tension."
+      ],
+      "notes": [
+        "Insert over SUPERIOR border of rib — neurovascular bundle runs along inferior border.",
+        "If initial decompression does not improve: attempt alternate site immediately.",
+        "Re-tension can occur — reassess frequently throughout transport.",
+        "Needle decompression is temporizing — definitive treatment is chest tube."
+      ]
+    },
+    {
+      "num": "V-17B",
+      "title": "Chest Tube Monitoring",
+      "scope": "aemt",
+      "tags": [
+        "chest tube",
+        "thoracostomy",
+        "monitoring",
+        "drainage"
+      ],
+      "overview": "Monitoring and maintenance of pre-existing chest tube during interfacility transport. AEMT+ authorized per AMR KC Medical Director standing order.",
+      "steps": [
+        "Confirm chest tube position and security before departure.",
+        "Verify water seal is intact and functional; suction set per sending orders.",
+        "Ensure all connections are secure and tubing is not kinked.",
+        "Mark drainage level at departure time.",
+        "Monitor drainage volume and character every 15 minutes.",
+        "Maintain tubing below level of chest at all times.",
+        "For persistent air leak: verify connections; contact DMO.",
+        "Document drainage volume, character, and any changes throughout transport."
+      ],
+      "notes": [
+        "Never clamp chest tube during transport unless instructed by sending physician and only for specific indications.",
+        "If tube becomes disconnected: cover insertion site with gloved hand or occlusive dressing immediately.",
+        "Sudden increase in drainage or hemorrhagic output: contact DMO immediately."
+      ]
+    },
+    {
+      "num": "V-22",
+      "title": "Tourniquet Application",
+      "scope": "all",
+      "tags": [
+        "tourniquet",
+        "hemorrhage",
+        "cat",
+        "softt",
+        "bleeding control"
+      ],
+      "overview": "Hemorrhage control for life-threatening extremity bleeding. All levels authorized. TIME OF APPLICATION IS CRITICAL — document precisely.",
+      "steps": [
+        "Apply tourniquet 2–3 inches proximal to the wound.",
+        "Pull strap tight; secure with velcro.",
+        "Tighten windlass clockwise until bleeding stops — do not undertighten.",
+        "Lock windlass in holder.",
+        "Write time of application on tourniquet label AND on patient's forehead with marker.",
+        "Do NOT remove in field — only at hospital.",
+        "If bleeding not controlled: apply second tourniquet proximal to first.",
+        "Reassess for bleeding control every 5 minutes."
+      ],
+      "notes": [
+        "Do not remove once applied — leave for hospital surgical team.",
+        "Document exact time of application — ischemia time drives limb salvage decisions.",
+        "Tourniquet pain is expected — administer analgesia per protocol.",
+        "Cover with bandage for transport — maintains warmth and documents not to remove."
+      ]
+    },
+    {
+      "num": "V-29",
+      "title": "Newborn Resuscitation",
+      "scope": "aemt",
+      "tags": [
+        "newborn",
+        "neonatal",
+        "delivery",
+        "apgar",
+        "resuscitation"
+      ],
+      "overview": "Immediate resuscitation of newborn following field delivery. Use two-thumb encircling technique for chest compressions.",
+      "steps": [
+        "Warm, dry, stimulate — place under radiant heat source or warm blanket immediately.",
+        "Position airway: slight neck extension (\"sniffing position\").",
+        "Clear airway with bulb syringe if secretions visible — suction mouth then nose.",
+        "Assess: breathing, heart rate, color. Use APGAR at 1 and 5 minutes.",
+        "If HR <100 or apnea: initiate PPV with BVM at 40–60 breaths/min; FiO2 21% initially (room air).",
+        "If HR <60 after 30 seconds of adequate PPV: begin chest compressions.",
+        "Compressions: two-thumb encircling technique (preferred); compress lower third of sternum; 3:1 ratio (3 compressions:1 breath); rate 120 events/min.",
+        "For HR <60 despite CPR: epinephrine 0.01 mg/kg IV/IO or 0.1 mg/kg ETT.",
+        "Reassess every 30 seconds."
+      ],
+      "notes": [
+        "Two-thumb encircling technique preferred per AHA 2025 — do NOT use two-finger technique.",
+        "Room air (21% FiO2) is preferred initial concentration for term newborns — titrate up based on SpO2.",
+        "APGAR: Appearance, Pulse, Grimace, Activity, Respiration — score at 1 and 5 minutes."
+      ]
+    }
+  ]
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let TAB = 'ift';
+let SCOPE = 'all';
+let QUERY = '';
+let CURRENT = null;
+let FAVS = JSON.parse(localStorage.getItem('amrkc_favs') || '[]');
+let RECENT = JSON.parse(localStorage.getItem('amrkc_recent') || '[]');
+let WEIGHT = '';
+let deferredPrompt = null;
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+const scopeMap = {all:0,emt:0,aemt:1,pm:2};
+const itemScopeMap = {all:0,aemt:1,pm:2};
+
+function scopeLabel(s){return{all:'ALL LEVELS',aemt:'AEMT+',pm:'PM ONLY'}[s]||s.toUpperCase()}
+function scopeBadge(s){return`<span class="sbadge ${s}">${scopeLabel(s)}</span>`}
+
+function matchScope(item){
+  if(SCOPE==='all')return true;
+  return itemScopeMap[item.scope]<=scopeMap[SCOPE];
+}
+
+function matchSearch(item){
+  if(!QUERY)return true;
+  const q=QUERY.toLowerCase();
+  const text=(item.title||item.name||'')+' '+(item.num||'')+' '+(item.tags||[]).join(' ')+' '+(item.overview||'');
+  return text.toLowerCase().includes(q);
+}
+
+function hl(text){
+  if(!QUERY)return text;
+  return text.replace(new RegExp('('+QUERY.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hl">$1</span>');
+}
+
+function isFav(key){return FAVS.includes(key)}
+
+function toggleFav(key){
+  if(isFav(key)){FAVS=FAVS.filter(k=>k!==key)}else{FAVS=[key,...FAVS]}
+  localStorage.setItem('amrkc_favs',JSON.stringify(FAVS));
+}
+
+function addRecent(key){
+  RECENT=[key,...RECENT.filter(k=>k!==key)].slice(0,8);
+  localStorage.setItem('amrkc_recent',JSON.stringify(RECENT));
+}
+
+function itemByKey(key){
+  const [type,idx]=key.split(':');
+  const arr={ift:D.ift,viii:D.viii,formulary:D.formulary,procedures:D.procedures}[type];
+  return arr?arr[parseInt(idx)]:null;
+}
+
+function itemKey(type,idx){return`${type}:${idx}`}
+
+function updateHdrPad(){
+  const h=document.getElementById('hdr').offsetHeight;
+  document.getElementById('main').style.paddingTop=(h+6)+'px';
+}
+
+// ── RENDER LIST ──────────────────────────────────────────────────────────────
+function renderList(){
+  const container=document.getElementById('lv');
+  let html='';
+
+  if(TAB==='reference'){renderReference();return}
+
+  const sources={ift:D.ift,viii:D.viii,formulary:D.formulary,procedures:D.procedures};
+  const items=sources[TAB]||[];
+  const filtered=items.map((item,idx)=>({item,idx})).filter(({item})=>matchScope(item)&&matchSearch(item));
+
+  if(QUERY){
+    html+=`<div class="res-label">${filtered.length} RESULT${filtered.length!==1?'S':''} IN ${TAB.toUpperCase()}</div>`;
+  }
+
+  // Show favorites and recent on home tab with no search
+  if(TAB==='ift'&&!QUERY&&RECENT.length){
+    html+=`<div class="rv-wrap"><div class="rv-label">RECENTLY VIEWED</div><div class="rv-chips">`;
+    RECENT.forEach(key=>{
+      const item=itemByKey(key);
+      if(item)html+=`<div class="rv-chip" onclick="openByKey('${key}')">${item.num||''} ${item.title||item.name||''}</div>`;
+    });
+    html+=`</div></div>`;
+  }
+
+  if(filtered.length===0){
+    html+='<div class="no-res">No protocols found for this filter.</div>';
+    container.innerHTML=html;return;
+  }
+
+  let lastSection='',lastGroup='';
+  filtered.forEach(({item,idx})=>{
+    const sec=item.section||'';
+    const grp=item.group||'';
+    if(sec!==lastSection){
+      html+=`<div class="sg">${sec||TAB.toUpperCase()}</div>`;
+      lastSection=sec;lastGroup='';
+    }
+    if(grp&&grp!==lastGroup){
+      html+=`<div class="sg-sub">${grp}</div>`;
+      lastGroup=grp;
+    }
+    const key=itemKey(TAB,idx);
+    const fav=isFav(key);
+    const title=hl(item.title||item.name||'');
+    html+=`<div class="card" onclick="openDetail('${TAB}',${idx})">
+      <div class="card-inner">
+        <div class="card-num">${item.num}</div>
+        <div class="card-title">${title}</div>
+        ${scopeBadge(item.scope)}
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFavCard('${key}',this)">${fav?'★':'☆'}</button>
+        <div class="card-arr">›</div>
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML=html;
+}
+
+function toggleFavCard(key,btn){
+  toggleFav(key);
+  btn.textContent=isFav(key)?'★':'☆';
+  if(CURRENT&&CURRENT.key===key){
+    document.getElementById('dv-fav').textContent=isFav(key)?'★':'☆';
+  }
+}
+
+// ── RENDER REFERENCE ─────────────────────────────────────────────────────────
+function renderReference(){
+  const container=document.getElementById('lv');
+  let html='';
+
+  // Pediatric weight calculator
+  html+=`<div class="sg">PEDIATRIC DOSE CALCULATOR</div>
+  <div style="padding:12px 14px">
+  <div class="calc-wrap">
+    <div class="calc-title">⚡ WEIGHT-BASED DOSING</div>
+    <div class="calc-row">
+      <div class="calc-label">Weight</div>
+      <input class="calc-input" type="number" id="wt-input" placeholder="kg" min="1" max="150" oninput="calcDoses(this.value)">
+      <span class="calc-unit">kg</span>
+    </div>
+    <div id="calc-results"></div>
+  </div>
+  </div>`;
+
+  // Vital targets
+  html+=`<div class="sg">VITAL SIGN TARGETS</div><div style="padding:4px 14px 12px">`;
+  const vitals=[
+    ['SpO2 (most patients)','≥94%'],['SpO2 post-ROSC','94–98%'],['SpO2 COPD','88–92%'],
+    ['ETCO2 (normal)','35–40 mmHg'],['ETCO2 herniation','30–35 (brief, DMO)'],['ETCO2 during CPR','≥10 mmHg'],
+    ['MAP post-ROSC','≥65 mmHg'],['SBP (blunt trauma)','≥90 mmHg'],['SBP (penetrating)','80–90 permissive'],
+    ['Temp post-ROSC','≤37.5°C (no warming)'],['Glucose ICU target','140–180 mg/dL'],
+    ['Defib energy (A-fib)','200 J (AHA 2025)'],['Defib energy (SVT)','50–100 J'],['Defib energy (VT)','100 J'],
+  ];
+  vitals.forEach(([l,v])=>html+=`<div class="ref-row"><span class="ref-label">${l}</span><span class="ref-val">${v}</span></div>`);
+  html+=`</div>`;
+
+  // Pediatric drug dosing
+  html+=`<div class="sg">PEDIATRIC DRUG DOSING</div><div style="padding:8px 14px 4px">
+    <div class="co w" style="margin-bottom:10px">⚠ USE BROSELOW TAPE FOR ALL WEIGHT-BASED DOSING</div>`;
+  const ped=[
+    ['Epinephrine (cardiac arrest)','0.01 mg/kg IV/IO (1:10,000); max 1 mg; every 3–5 min'],
+    ['Epinephrine (anaphylaxis)','0.01 mg/kg IM (1:1,000); max 0.3 mg'],
+    ['Epinephrine (croup nebulized)','0.05 mL/kg racemic epi (max 0.5 mL); or L-epi 5 mg'],
+    ['Amiodarone (cardiac arrest)','5 mg/kg IV/IO push; max 300 mg per dose'],
+    ['Adenosine','0.1 mg/kg rapid IV push (max 6 mg); repeat 0.2 mg/kg (max 12 mg)'],
+    ['Midazolam (seizure IV/IO)','0.1 mg/kg (max 5 mg); IN: 0.2 mg/kg (max 5 mg)'],
+    ['Naloxone','0.01–0.1 mg/kg IV/IO; 0.1 mg/kg IN (max 2 mg)'],
+    ['Dextrose 10%','2–4 mL/kg IV/IO; recheck glucose 5 min after'],
+    ['Fentanyl','1–2 mcg/kg IV/IO slow push (max 50 mcg); 1–2 mcg/kg IN'],
+    ['Albuterol','2.5 mg nebulized all ages; MDI 2–4 puffs with spacer'],
+    ['Normal saline bolus','20 mL/kg IV/IO; reassess after each; max 60 mL/kg without DMO'],
+    ['Magnesium (severe asthma)','25–50 mg/kg IV over 20 min (max 2 g)'],
+    ['Dexamethasone (croup)','0.6 mg/kg PO/IM/IV (max 10 mg); single dose'],
+    ['Atropine (bradycardia)','0.02 mg/kg IV/IO; min 0.1 mg; max 0.5 mg single dose'],
+  ];
+  ped.forEach(([d,dose])=>html+=`<div class="ped-item"><div class="ped-drug">${d}</div><div class="ped-dose">${dose}</div></div>`);
+  html+=`</div>`;
+
+  // IBW / Tidal Volume
+  html+=`<div class="sg">IBW & TIDAL VOLUME — ADULT VENTILATION</div><div style="padding:8px 14px 14px">`;
+  [['Males (IBW)','50 + 2.3 × (height in inches − 60)'],
+   ['Females (IBW)','45.5 + 2.3 × (height in inches − 60)'],
+   ['Target TV','6–8 mL/kg IBW  |  ARDS: 6 mL/kg strict'],
+   ['Example (70kg IBW)','420–560 mL tidal volume'],
+  ].forEach(([l,v])=>html+=`<div class="ref-row"><span class="ref-label">${l}</span><span class="ref-val" style="font-size:11px;text-align:right;max-width:55%">${v}</span></div>`);
+  html+=`</div>`;
+
+  // LTV Alarms
+  html+=`<div class="sg">LTV 1200 ALARM REFERENCE</div><div style="padding:4px 14px 14px">`;
+  const alarms=[
+    ['HIGH PRES','Secretions, kink, biting, bronchospasm, tension PTX, decreased compliance.','Suction ETT. Check circuit. Auscultate. Tension PTX: needle decomp. Contact DMO if unexplained.'],
+    ['LOW PRES','Circuit disconnection, ETT cuff deflation, major leak.','Check all connections. Verify cuff inflated (20–30 cmH2O). BVM if source unclear.'],
+    ['LOW MIN VOL','Exhaled minute volume below threshold. Leak, patient not triggering.','Check circuit. Assess drive. Consider A/C. Contact DMO.'],
+    ['APNEA XX bpm','No breath within Apnea Interval. Ventilator in Apnea Backup.','Assess patient. Verify circuit. May indicate deterioration.'],
+    ['DISC/SENSE','Flow transducer sense line disconnected or occluded.','Check both Luer sense lines and main circuit. Reconnect.'],
+    ['HIGH PEEP','PEEP exceeds setting. Exhalation valve or circuit occluded.','Check exhalation valve. COPD/asthma: suspect auto-PEEP — disconnect briefly.'],
+    ['BAT LOW/EMPTY','Battery low (10 min) or critical (5 min).','Connect to vehicle DC power immediately.'],
+    ['INOP','Ventilator detected unsafe condition. Device non-functional.','Disconnect. BVM. Remove from service. Contact DMO.'],
+    ['POWER LOST','External power voltage dropped; switched to internal battery.','Reconnect vehicle power. Monitor battery LED.'],
+    ['HIGH f','Total breath rate exceeds alarm threshold. Patient triggering excess breaths.','Assess pain/anxiety. Check for auto-triggering. Address cause.'],
+  ];
+  alarms.forEach(a=>html+=`<div class="alarm-row"><div class="alarm-code">${a[0]}</div><div class="alarm-det"><div class="alarm-cause">${a[1]}</div><div class="alarm-act">${a[2]}</div></div></div>`);
+  html+=`</div>`;
+
+  // GCS
+  html+=`<div class="sg">GLASGOW COMA SCALE</div><div style="padding:8px 14px 14px">`;
+  const gcs=[
+    ['Eye Opening','4=Spontaneous | 3=To Voice | 2=To Pain | 1=None'],
+    ['Verbal','5=Oriented | 4=Confused | 3=Words | 2=Sounds | 1=None'],
+    ['Motor','6=Obeys | 5=Localizes | 4=Withdraws | 3=Flexion | 2=Extension | 1=None'],
+    ['Score 13–15','Mild | Score 9–12: Moderate | Score ≤8: SEVERE — intubation threshold'],
+  ];
+  gcs.forEach(([l,v])=>html+=`<div class="ref-row"><span class="ref-label" style="font-weight:600">${l}</span><span style="font-size:11px;color:var(--white);text-align:right;max-width:60%">${v}</span></div>`);
+  html+=`</div>`;
+
+  // Cincinnati
+  html+=`<div class="sg">CINCINNATI PREHOSPITAL STROKE SCALE</div><div style="padding:8px 14px 14px">
+    <div class="co i">Any single positive finding = POSITIVE stroke screen → pre-alert stroke center immediately. Document LKW time.</div>`;
+  [['Facial Droop','Ask to show teeth or smile. Abnormal: one side does not move equally.'],
+   ['Arm Drift','Eyes closed, arms out 10 sec. Abnormal: one arm drifts down.'],
+   ['Speech','Repeat: "You can\'t teach an old dog new tricks." Abnormal: slurred, wrong words, unable.'],
+  ].forEach(([l,v])=>html+=`<div class="ref-row"><span class="ref-label" style="font-weight:600;color:var(--teal2)">${l}</span><span style="font-size:11px;color:var(--white);text-align:right;max-width:65%">${v}</span></div>`);
+  html+=`</div>`;
+
+  // Broselow color bands
+  html+=`<div class="sg">BROSELOW WEIGHT REFERENCE</div><div style="padding:8px 14px 14px">`;
+  [['Grey','3–5 kg'],['Pink','6–7 kg'],['Red','8–9 kg'],['Purple','10–11 kg'],
+   ['Yellow','12–14 kg'],['White','15–18 kg'],['Blue','19–23 kg'],['Orange','24–29 kg'],['Green','30–36 kg']
+  ].forEach(([c,w])=>html+=`<div class="ref-row"><span class="ref-label">${c} Band</span><span class="ref-val">${w}</span></div>`);
+  html+=`</div>`;
+
+  // Rule of nines
+  html+=`<div class="sg">RULE OF NINES — BURN TBSA</div><div style="padding:8px 14px 14px">`;
+  [['Head & Neck','9%'],['Each Arm','9%'],['Anterior Trunk','18%'],['Posterior Trunk','18%'],
+   ['Each Leg','18%'],['Genitalia','1%'],['Palm of hand (pt)','≈1% TBSA'],
+   ['Parkland formula','4 mL × kg × %TBSA — give ½ in first 8 hours']
+  ].forEach(([l,v])=>html+=`<div class="ref-row"><span class="ref-label">${l}</span><span class="ref-val">${v}</span></div>`);
+  html+=`</div>`;
+
+  // APGAR
+  html+=`<div class="sg">APGAR SCORING</div><div style="padding:8px 14px 14px">`;
+  [['Appearance (Color)','0=Blue/pale | 1=Blue extremities | 2=Pink'],
+   ['Pulse','0=Absent | 1=<100 | 2=≥100 bpm'],
+   ['Grimace','0=None | 1=Grimace | 2=Cry/cough'],
+   ['Activity','0=Limp | 1=Some flexion | 2=Active'],
+   ['Respiration','0=Absent | 1=Weak/irregular | 2=Strong cry'],
+   ['Score 7–10','Normal | 4–6: Moderate concern | 0–3: Resuscitate'],
+  ].forEach(([l,v])=>html+=`<div class="ref-row"><span class="ref-label">${l}</span><span style="font-size:11px;color:var(--white);text-align:right;max-width:60%">${v}</span></div>`);
+  html+=`</div>`;
+
+  container.innerHTML=html;
+}
+
+function calcDoses(wt){
+  const w=parseFloat(wt);
+  const el=document.getElementById('calc-results');
+  if(!w||w<=0||w>150){el.innerHTML='';return}
+  const doses=[
+    ['Epinephrine (arrest)','0.01 mg/kg',(w*0.01).toFixed(2),'mg IV/IO'],
+    ['Epinephrine (anaphylaxis)','0.01 mg/kg',(w*0.01).toFixed(2),'mg IM (max 0.3)'],
+    ['Amiodarone (arrest)','5 mg/kg',Math.min(w*5,300).toFixed(0),'mg IV/IO (max 300mg)'],
+    ['Adenosine (1st)','0.1 mg/kg',Math.min(w*0.1,6).toFixed(1),'mg (max 6mg)'],
+    ['Midazolam (seizure)','0.1 mg/kg',Math.min(w*0.1,5).toFixed(1),'mg (max 5mg)'],
+    ['Fentanyl','1–2 mcg/kg',w.toFixed(0)+'–'+(w*2).toFixed(0),'mcg (max 50mcg/dose)'],
+    ['NS bolus','20 mL/kg',Math.min(w*20,60*w).toFixed(0),'mL'],
+    ['D10% (hypoglycemia)','2–4 mL/kg',(w*2).toFixed(0)+'–'+(w*4).toFixed(0),'mL IV/IO'],
+  ];
+  let html=`<div class="calc-result"><div class="calc-result-label">DOSES FOR ${w} kg PATIENT</div>`;
+  doses.forEach(([n,f,d,u])=>html+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a2a3a">
+    <span style="font-size:11px;color:var(--gray)">${n}</span>
+    <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--teal2)">${d} ${u}</span>
+  </div>`);
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+// ── OPEN DETAIL ──────────────────────────────────────────────────────────────
+function openDetail(type,idx){
+  const arr={ift:D.ift,viii:D.viii,formulary:D.formulary,procedures:D.procedures}[type];
+  const item=arr[idx];
+  const key=itemKey(type,idx);
+  CURRENT={type,idx,item,key};
+  addRecent(key);
+  _renderDetail(item,key);
+}
+
+function openByKey(key){
+  const [type,idx]=key.split(':');
+  openDetail(type,parseInt(idx));
+}
+
+function _renderDetail(item,key){
+  document.getElementById('dv-num').textContent=item.num||'';
+  document.getElementById('dv-title').textContent=item.title||item.name||'';
+  document.getElementById('dv-scope').innerHTML=scopeBadge(item.scope);
+  document.getElementById('dv-fav').textContent=isFav(key)?'★':'☆';
+
+  let html='';
+  const type=CURRENT.type;
+
+  if(type==='formulary'){
+    if(item.mechanism)html+=`<div class="cs"><div class="cl">Mechanism</div><div class="ct">${item.mechanism}</div></div>`;
+    if(item.indications?.length){
+      html+=`<div class="cs"><div class="cl">Indications</div>`;
+      item.indications.forEach(i=>html+=`<div class="step"><div class="sn">•</div><div class="st">${i}</div></div>`);
+      html+=`</div>`;
+    }
+    if(item.contraindications?.length){
+      html+=`<div class="cs"><div class="cl">Contraindications</div>`;
+      item.contraindications.forEach(c=>html+=`<div class="co d">✕ ${c}</div>`);
+      html+=`</div>`;
+    }
+    if(item.doses?.length){
+      html+=`<div class="cs"><div class="cl">Dosing</div><table class="dt">`;
+      item.doses.forEach(d=>html+=`<tr><td>${d.route}</td><td>${d.dose}</td></tr>`);
+      html+=`</table></div>`;
+    }
+    if(item.notes?.length){
+      html+=`<div class="cs"><div class="cl">Clinical Notes</div>`;
+      item.notes.forEach(n=>html+=`<div class="co i">ℹ ${n}</div>`);
+      html+=`</div>`;
+    }
+  } else {
+    // Protocol or procedure
+    if(item.overview)html+=`<div class="cs"><div class="cl">Overview</div><div class="ct">${item.overview}</div></div>`;
+    if(item.vitals?.length){
+      html+=`<div class="vs">`;
+      item.vitals.forEach(v=>html+=`<div class="vc"><div class="vl">${v.label}</div><div class="vv">${v.val}</div></div>`);
+      html+=`</div>`;
+    }
+    // Check if procedure (simple steps array)
+    if(item.steps&&typeof item.steps[0]==='string'){
+      html+=`<div class="cs"><div class="cl">Procedure Steps</div>`;
+      item.steps.forEach((s,i)=>html+=`<div class="step"><div class="sn">${i+1}</div><div class="st">${s}</div></div>`);
+      html+=`</div>`;
+    } else if(item.emt_steps||item.aemt_steps||item.pm_steps){
+      // Scope-tiered standing orders
+      const emt=item.emt_steps||[];
+      const aemt=item.aemt_steps||[];
+      const pm=item.pm_steps||[];
+      const maxR=Math.max(emt.length,aemt.length,pm.length);
+      html+=`<div class="cs"><div class="cl">Standing Orders</div>
+      <table class="sot"><thead><tr><th class="lc">#</th><th class="ec">EMT</th><th class="ac">AEMT</th><th class="pc">PM</th></tr></thead><tbody>`;
+      for(let i=0;i<maxR;i++){
+        html+=`<tr><td class="lc">${i+1}</td><td class="ec">${emt[i]||''}</td><td class="ac">${aemt[i]||''}</td><td class="pc">${pm[i]||''}</td></tr>`;
+      }
+      html+=`</tbody></table></div>`;
+    }
+    if(item.monitoring?.length){
+      html+=`<div class="cs"><div class="cl">Transport Monitoring</div>`;
+      item.monitoring.forEach(m=>html+=`<div class="mon-item"><div class="mon-dot"></div><div>${m}</div></div>`);
+      html+=`</div>`;
+    }
+    if(item.diversion){
+      html+=`<div class="cs"><div class="div-label">⚡ DIVERSION TRIGGERS</div><div class="div-box">${item.diversion}</div></div>`;
+    }
+    if(item.notes?.length){
+      html+=`<div class="cs"><div class="cl">Critical Notes</div>`;
+      item.notes.forEach(n=>html+=`<div class="co w">⚠ ${n}</div>`);
+      html+=`</div>`;
+    }
+  }
+
+  document.getElementById('dv-body').innerHTML=html;
+  document.getElementById('dv').style.display='block';
+  document.getElementById('dv').scrollTop=0;
+  history.pushState({detail:true},'');
+}
+
+function closeDetail(){
+  document.getElementById('dv').style.display='none';
+  CURRENT=null;
+}
+
+// ── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(tab){
+  TAB=tab;
+  closeDetail();
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  renderList();
+}
+
+// ── EVENTS ───────────────────────────────────────────────────────────────────
+document.getElementById('bk').addEventListener('click',()=>{closeDetail();history.back()});
+document.getElementById('dv-fav').addEventListener('click',function(){
+  if(!CURRENT)return;
+  toggleFav(CURRENT.key);
+  this.textContent=isFav(CURRENT.key)?'★':'☆';
+  renderList();
+});
+document.getElementById('srch').addEventListener('input',function(){
+  QUERY=this.value.trim();
+  document.getElementById('srch-clr').style.display=QUERY?'block':'none';
+  renderList();
+});
+document.getElementById('srch-clr').addEventListener('click',function(){
+  document.getElementById('srch').value='';
+  QUERY='';this.style.display='none';renderList();
+});
+document.querySelectorAll('.pill').forEach(p=>p.addEventListener('click',function(){
+  document.querySelectorAll('.pill').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');SCOPE=this.dataset.s;renderList();
+}));
+window.addEventListener('popstate',e=>{
+  if(document.getElementById('dv').style.display==='block')closeDetail();
+});
+
+// PWA install
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  if(!localStorage.getItem('amrkc_install_dismissed')){
+    document.getElementById('install-banner').style.display='flex';
+  }
+});
+document.getElementById('ib-install').addEventListener('click',()=>{
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null}
+  document.getElementById('install-banner').style.display='none';
+});
+document.getElementById('ib-close').addEventListener('click',()=>{
+  document.getElementById('install-banner').style.display='none';
+  localStorage.setItem('amrkc_install_dismissed','1');
+});
+
+// Service worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(()=>{
+    console.log('SW registered');
+  }).catch(e=>console.log('SW failed:',e));
+}
+
+// INIT
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('loading').style.opacity='0';
+    setTimeout(()=>document.getElementById('loading').style.display='none',400);
+    updateHdrPad();
+    renderList();
+  },1200);
+});
+window.addEventListener('resize',updateHdrPad);
+</script>
+</body>
+</html>
