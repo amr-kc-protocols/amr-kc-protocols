@@ -149,6 +149,58 @@ body{font-family:var(--sans);background:var(--surface);color:var(--white)}
 .ib-btn{background:var(--teal);color:#000;border:none;border-radius:5px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
 .ib-close{background:none;border:none;color:var(--gray);font-size:16px;cursor:pointer;flex-shrink:0}
 .hl{color:var(--teal2);background:rgba(13,148,136,0.15);border-radius:2px;padding:0 2px}
+
+/* ── V-6 INTERACTIVE STYLES ────────────────────────────────────────────── */
+.v6-section { margin-bottom: 20px; }
+.v6-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; scrollbar-width: none; }
+.v6-tabs::-webkit-scrollbar { display: none; }
+.v6-tab { flex-shrink: 0; padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--gray); border-bottom: 2px solid transparent; cursor: pointer; font-family: var(--mono); letter-spacing: 0.04em; white-space: nowrap; transition: all 0.15s; }
+.v6-tab.on { color: var(--teal2); border-color: var(--teal2); }
+.v6-pane { display: none; }
+.v6-pane.on { display: block; }
+
+/* IBW Calculator */
+.ibw-wrap { background: var(--dim); border: 1px solid var(--teal); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+.ibw-title { font-family: var(--mono); font-size: 9px; color: var(--teal); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.ibw-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.ibw-label { font-size: 12px; color: var(--gray); min-width: 56px; }
+.ibw-input { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--white); font-family: var(--mono); font-size: 15px; padding: 7px 10px; width: 80px; outline: none; text-align: center; -webkit-appearance: none; }
+.ibw-input:focus { border-color: var(--teal); }
+.ibw-unit { font-family: var(--mono); font-size: 11px; color: var(--gray); }
+.ibw-gender { display: flex; gap: 8px; }
+.gender-btn { flex: 1; padding: 7px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--gray); font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; font-family: var(--sans); }
+.gender-btn.on { background: var(--teal); border-color: var(--teal); color: #000; }
+.ibw-result { background: var(--navy); border-radius: 8px; padding: 12px; margin-top: 10px; }
+.ibw-result-row { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid #1a2a3a; gap: 8px; }
+.ibw-result-row:last-child { border-bottom: none; }
+.ibw-result-label { font-size: 11px; color: var(--gray); }
+.ibw-result-val { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--teal2); }
+.ibw-result-val.warn { color: var(--warn); }
+.ibw-result-val.danger { color: var(--danger); }
+.ibw-result-note { font-size: 10px; color: var(--gray); margin-top: 4px; font-style: italic; }
+
+/* Troubleshooting */
+.ts-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.ts-problem { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; }
+.ts-problem.open { border-color: var(--teal); }
+.ts-problem-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+.ts-problem-icon { font-size: 18px; flex-shrink: 0; }
+.ts-problem-title { flex: 1; font-size: 13px; font-weight: 600; color: var(--white); }
+.ts-chevron { color: var(--gray); font-size: 12px; flex-shrink: 0; transition: transform 0.2s; }
+.ts-problem.open .ts-chevron { transform: rotate(90deg); }
+.ts-problem-body { display: none; padding: 0 14px 14px; }
+.ts-problem.open .ts-problem-body { display: block; }
+.ts-dx { margin-bottom: 10px; }
+.ts-dx-label { font-family: var(--mono); font-size: 9px; color: var(--gray); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.ts-dx-item { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px solid #152030; font-size: 12px; color: #cbd5e1; align-items: flex-start; }
+.ts-dx-bullet { flex-shrink: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--warn); margin-top: 5px; }
+.ts-steps { }
+.ts-steps-label { font-family: var(--mono); font-size: 9px; color: var(--teal); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.ts-step-item { display: flex; gap: 8px; margin-bottom: 7px; align-items: flex-start; }
+.ts-step-num { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--teal); color: #000; font-weight: 700; font-size: 10px; display: flex; align-items: center; justify-content: center; margin-top: 1px; font-family: var(--mono); }
+.ts-step-text { font-size: 12px; line-height: 1.5; color: #cbd5e1; }
+.ts-critical { background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; font-size: 12px; color: #fca5a5; line-height: 1.5; }
+
 </style>
 </head>
 <body>
@@ -3437,12 +3489,13 @@ const D = {
       ],
       "mechanism": "NMDA receptor antagonist. Dissociative anesthetic. Analgesic, amnestic, and bronchodilatory properties.",
       "indications": [
-        "Intubated patients requiring procedural sedation or pain management (AMR KC formulary: intubated patients only without DMO order).",
+        "Intubated patients requiring procedural sedation or pain management (AMR KC formulary: intubated patients only without DMO order)."
       ],
       "contraindications": [
-        "Uncontrolled hypertension (relative).",
-        "Active psychosis (relative).",
-        "Elevated ICP without airway control (relative)."
+        "Known or suspected psychosis or schizophrenia — ketamine worsens psychotic symptoms and is contraindicated.",
+        "Uncontrolled hypertension (relative — monitor closely).",
+        "Elevated ICP without secured airway (relative).",
+        "Hyperthyroidism (relative — causes significant sympathomimetic response)."
       ],
       "doses": [
         {
@@ -3450,15 +3503,14 @@ const D = {
           "dose": "0.5–2 mg/kg IV slow push."
         },
         {
-          "route": "Analgesia IV",
-          "dose": "0.1–0.3 mg/kg IV (sub-dissociative dose)."
-        },
+          "route": "Analgesia (sub-dissociative) IV",
+          "dose": "0.1–0.3 mg/kg IV slow push."
+        }
       ],
       "notes": [
         "AMR KC standing order: ketamine authorized for INTUBATED patients only without DMO order.",
-        "For non-intubated behavioral emergencies: contact DMO for authorization.",
-        "Maintain protective reflexes — laryngospasm rare but possible.",
-        "Increases BP and HR — use with caution in hypertensive emergencies."
+        "Increases BP and HR significantly — use with caution in hypertensive emergencies.",
+        "Laryngospasm rare but possible — have BVM immediately available."
       ]
     },
     {
@@ -4183,12 +4235,13 @@ const D = {
         "Apply physical restraints per V-11 before or simultaneously with medication administration.",
         "Assess airway, vital signs, blood glucose.",
         "Midazolam 5 mg IM (preferred initial agent for most patients) — may repeat once at 5 minutes if inadequate effect and patient hemodynamically stable.",
+        "Ketamine 4–5 mg/kg IM for extreme agitation unresponsive to midazolam — contact DMO.",
         "Monitor airway, SpO2, and respiratory rate continuously after administration.",
         "Position in recovery position (lateral) to reduce aspiration risk if not fully restrained supine."
       ],
       "notes": [
         "Monitor closely for respiratory depression after any sedation — have BVM immediately accessible.",
-        "Higher dose than analgesia use.",
+        "Ketamine: authorized for behavioral sedation with DMO order. Higher dose than analgesia use.",
         "Sedation and restraint decisions are independent — document each separately.",
         "Medical control consultation recommended but not required under standing order — document any attempt to reach DMO."
       ]
@@ -5594,6 +5647,15 @@ function renderDetail(item, key, type) {
 
   let h = '';
 
+  // ── SPECIAL: V-6 LTV 1200 interactive view ──────────────────────────
+  if (type === 'procedures' && item.num === 'V-6') {
+    renderV6Detail();
+    document.getElementById('dv').style.display = 'block';
+    document.getElementById('dv').scrollTop = 0;
+    history.pushState({detail: true}, '');
+    return;
+  }
+
   if (type === 'universal') {
     (item.content || []).forEach(function(sec) {
       h += '<div class="cs"><div class="cl">' + sec.label + '</div>';
@@ -5743,6 +5805,331 @@ window.addEventListener('load', function() {
   }, 1200);
 });
 window.addEventListener('resize', updateHdrPad);
+
+// ── V-6 INTERACTIVE ──────────────────────────────────────────────────────
+function renderV6Detail() {
+  document.getElementById('dv-num').textContent = 'V-6';
+  document.getElementById('dv-title').textContent = 'LTV 1200 Ventilator Management';
+  document.getElementById('dv-scope').innerHTML = '<span class="sbadge pm">PM ONLY</span>';
+  document.getElementById('dv-fav').innerHTML = isFav('procedures:6') ? '&#x2605;' : '&#x2606;';
+
+  var body = document.getElementById('dv-body');
+
+  body.innerHTML = [
+    '<div class="v6-tabs">',
+    '  <div class="v6-tab on" data-pane="ibw">IBW &amp; Tidal Volume</div>',
+    '  <div class="v6-tab" data-pane="trouble">Troubleshooting</div>',
+    '  <div class="v6-tab" data-pane="setup">Setup Steps</div>',
+    '  <div class="v6-tab" data-pane="alarms">Alarms</div>',
+    '  <div class="v6-tab" data-pane="settings">Clinical Settings</div>',
+    '</div>',
+
+    // ── IBW PANE ──────────────────────────────────────────────────────────
+    '<div class="v6-pane on" id="v6-ibw">',
+    '  <div class="ibw-wrap">',
+    '    <div class="ibw-title">&#x26A1; IBW &amp; Tidal Volume Calculator</div>',
+    '    <div class="ibw-row">',
+    '      <div class="ibw-label">Height</div>',
+    '      <input class="ibw-input" type="number" id="v6-ht" placeholder="in" min="48" max="84">',
+    '      <span class="ibw-unit">inches</span>',
+    '      <input class="ibw-input" type="number" id="v6-cm" placeholder="cm" min="120" max="215" style="width:72px">',
+    '      <span class="ibw-unit">cm</span>',
+    '    </div>',
+    '    <div class="ibw-row">',
+    '      <div class="ibw-label">Sex</div>',
+    '      <div class="ibw-gender" style="flex:1">',
+    '        <button class="gender-btn on" id="v6-male">Male</button>',
+    '        <button class="gender-btn" id="v6-female">Female</button>',
+    '      </div>',
+    '    </div>',
+    '    <div id="v6-ibw-result"></div>',
+    '  </div>',
+    '  <div class="co i" style="margin-bottom:12px">&#x2139; Always use IBW for tidal volume &mdash; never actual body weight. Using actual weight in obese patients causes volutrauma.</div>',
+    '  <div class="cs"><div class="cl">Formula Reference</div>',
+    '  <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#cbd5e1">',
+    '    <div><span style="color:var(--gray);font-family:var(--mono)">Male IBW &nbsp;&nbsp;&nbsp;</span> 50 + 2.3 &times; (height in inches &minus; 60)</div>',
+    '    <div><span style="color:var(--gray);font-family:var(--mono)">Female IBW </span> 45.5 + 2.3 &times; (height in inches &minus; 60)</div>',
+    '    <div><span style="color:var(--gray);font-family:var(--mono)">Target TV &nbsp;&nbsp;</span> 6&ndash;8 mL/kg IBW &nbsp;|&nbsp; ARDS/TBI: 6 mL/kg strict</div>',
+    '  </div></div>',
+    '</div>',
+
+    // ── TROUBLESHOOTING PANE ──────────────────────────────────────────────
+    '<div class="v6-pane" id="v6-trouble">',
+    '  <div class="co d" style="margin-bottom:12px">&#x1F6A8; Any alarm you cannot immediately resolve: disconnect and BVM ventilate. Never delay oxygenation to troubleshoot.</div>',
+    '  <div class="ts-list" id="v6-ts-list"></div>',
+    '</div>',
+
+    // ── SETUP STEPS PANE ─────────────────────────────────────────────────
+    '<div class="v6-pane" id="v6-setup">',
+    '  <div class="co i" style="margin-bottom:12px">&#x2139; Get verbal handoff from sending RT/RN: mode, TV, rate, FiO2, PEEP, insp time, last ABG if available.</div>',
+    v6SetupStepsHTML(),
+    '</div>',
+
+    // ── ALARMS PANE ───────────────────────────────────────────────────────
+    '<div class="v6-pane" id="v6-alarms">',
+    v6AlarmsHTML(),
+    '</div>',
+
+    // ── CLINICAL SETTINGS PANE ────────────────────────────────────────────
+    '<div class="v6-pane" id="v6-settings">',
+    v6SettingsHTML(),
+    '</div>',
+
+  ].join('');
+
+  // Wire up tabs
+  body.querySelectorAll('.v6-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      body.querySelectorAll('.v6-tab').forEach(function(t) { t.classList.remove('on'); });
+      body.querySelectorAll('.v6-pane').forEach(function(p) { p.classList.remove('on'); });
+      tab.classList.add('on');
+      var pane = document.getElementById('v6-' + tab.dataset.pane);
+      if (pane) pane.classList.add('on');
+    });
+  });
+
+  // Wire up IBW calculator
+  function calcIBW() {
+    var htIn = parseFloat(document.getElementById('v6-ht').value);
+    var isMale = document.getElementById('v6-male').classList.contains('on');
+    var result = document.getElementById('v6-ibw-result');
+    if (!htIn || htIn < 48 || htIn > 84) { result.innerHTML = ''; return; }
+    var ibw = isMale ? 50 + 2.3 * (htIn - 60) : 45.5 + 2.3 * (htIn - 60);
+    if (ibw < 30) ibw = 30;
+    var tv6 = Math.round(ibw * 6);
+    var tv7 = Math.round(ibw * 7);
+    var tv8 = Math.round(ibw * 8);
+    result.innerHTML = [
+      '<div class="ibw-result">',
+      '  <div class="ibw-result-row"><span class="ibw-result-label">IBW</span><span class="ibw-result-val">' + ibw.toFixed(1) + ' kg</span></div>',
+      '  <div class="ibw-result-row"><span class="ibw-result-label">TV at 6 mL/kg &mdash; ARDS / TBI (strict)</span><span class="ibw-result-val">' + tv6 + ' mL</span></div>',
+      '  <div class="ibw-result-row"><span class="ibw-result-label">TV at 7 mL/kg &mdash; lung protective</span><span class="ibw-result-val">' + tv7 + ' mL</span></div>',
+      '  <div class="ibw-result-row"><span class="ibw-result-label">TV at 8 mL/kg &mdash; normal lungs max</span><span class="ibw-result-val">' + tv8 + ' mL</span></div>',
+      '  <div class="ibw-result-note">Set ventilator to ' + tv6 + '&ndash;' + tv8 + ' mL range. Use 6 mL/kg for ARDS, TBI, or any lung-protective indication.</div>',
+      '</div>',
+    ].join('');
+  }
+
+  // Height in inches updates cm and vice versa
+  document.getElementById('v6-ht').addEventListener('input', function() {
+    var v = parseFloat(this.value);
+    if (v) document.getElementById('v6-cm').value = Math.round(v * 2.54);
+    calcIBW();
+  });
+  document.getElementById('v6-cm').addEventListener('input', function() {
+    var v = parseFloat(this.value);
+    if (v) document.getElementById('v6-ht').value = (v / 2.54).toFixed(1);
+    calcIBW();
+  });
+  document.getElementById('v6-male').addEventListener('click', function() {
+    this.classList.add('on');
+    document.getElementById('v6-female').classList.remove('on');
+    calcIBW();
+  });
+  document.getElementById('v6-female').addEventListener('click', function() {
+    this.classList.add('on');
+    document.getElementById('v6-male').classList.remove('on');
+    calcIBW();
+  });
+
+  // Wire up troubleshooting accordion
+  document.getElementById('v6-ts-list').innerHTML = v6TroubleHTML();
+  document.getElementById('v6-ts-list').addEventListener('click', function(e) {
+    var hdr = e.target.closest('.ts-problem-hdr');
+    if (!hdr) return;
+    var card = hdr.closest('.ts-problem');
+    var wasOpen = card.classList.contains('open');
+    document.querySelectorAll('.ts-problem').forEach(function(p) { p.classList.remove('open'); });
+    if (!wasOpen) card.classList.add('open');
+  });
+}
+
+function v6SetupStepsHTML() {
+  var steps = [
+    'Confirm ETT position and security: cm marking at lip, bilateral breath sounds, waveform capnography.',
+    'Pre-oxygenate: increase sending vent FiO2 to 100% for 2&ndash;3 minutes before transition.',
+    'Connect LTV 1200 circuit: main tube to 22mm outlet port &rarr; both flow transducer sense lines (non-interchangeable Luer fittings) &rarr; exhalation valve drive line.',
+    'Power on: press On/Standby. If SAME PATIENT prompt: select NEW PATIENT for new setup or SAME PATIENT to resume prior settings.',
+    'Set mode: press mode button to cycle Assist/Control &rarr; SIMV/CPAP &rarr; NPPV. A/C is default for most patients.',
+    'Set Tidal Volume: use IBW calculator (tab above). Target 6&ndash;8 mL/kg IBW.',
+    'Set Breath Rate based on clinical need and ETCO2 target.',
+    'Set Inspiratory Time (default 1.0 sec adults).',
+    'Set FiO2 (O2% button). Adjust to match sending vent or clinical target.',
+    'Set Sensitivity: default 3 L/min adults. Reduce if patient triggering poorly; increase if auto-triggering.',
+    'Set PEEP using dedicated PEEP control knob (default 5 cmH2O).',
+    'Set alarms: High Pressure Limit 40 cmH2O; Low Pressure 10 cmH2O; Low Min Vol 3 L.',
+    'Disconnect from hospital vent; immediately connect ETT to LTV 1200.',
+    'Confirm: bilateral chest rise, SpO2 stable, ETCO2 waveform present, no alarms.',
+    'Secure ventilator and circuit before vehicle movement.',
+    'Document all settings at departure with time.',
+  ];
+  var h = '<div class="cs"><div class="cl">16-Step Transition Checklist</div>';
+  steps.forEach(function(s, i) {
+    h += '<div class="step"><div class="sn">' + (i + 1) + '</div><div class="st">' + s + '</div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function v6AlarmsHTML() {
+  var alarms = [
+    ['HIGH PRES', 'Circuit pressure exceeded limit.', 'Secretions/mucus plug, ETT kink, patient biting, coughing, bronchospasm, right mainstem intubation, tension PTX, decreased compliance.', ['Silence alarm.', 'Suction ETT if secretions suspected.', 'Check circuit for kinks; check bite block.', 'Auscultate bilaterally: if asymmetric, check ETT depth.', 'If bilaterally absent: needle decompress (tension PTX).', 'If persistent without explanation: contact DMO.']],
+    ['LOW PRES', 'Peak inspiratory pressure below low pressure alarm.', 'Circuit disconnection, ETT cuff deflation, major circuit leak.', ['Check all circuit connections at ETT, wye, and 22mm port.', 'Verify ETT cuff is inflated (target 20&ndash;30 cmH2O).', 'Check for audible leak around ETT.', 'If source unclear: disconnect and BVM.']],
+    ['LOW MIN VOL', 'Exhaled minute volume below threshold.', 'Circuit leak, patient not triggering in CPAP/SIMV, hypoventilation, cuff leak.', ['Check circuit integrity.', 'Assess patient respiratory drive.', 'Verify settings match clinical need.', 'Consider switching to A/C mode.', 'Contact DMO if persistent.']],
+    ['APNEA XX bpm', 'No breath detected within Apnea Interval. Ventilator enters Apnea Backup mode.', 'Patient apnea (sedation excess, deterioration), circuit disconnect, mode mismatch.', ['Assess patient immediately.', 'Verify circuit is connected and intact.', 'Check sedation level.', 'If in CPAP/PSV: consider switching to A/C.', 'Apnea Backup is running &mdash; do not silence without addressing cause.']],
+    ['DISC/SENSE', 'Flow transducer sense line disconnected or occluded.', 'One or both Luer sense lines disconnected; proximal pressure line kinked.', ['Check both flow transducer sense lines (Luer fittings on side panel).', 'Check for kinks in proximal pressure line.', 'Reconnect firmly; confirm alarm clears.']],
+    ['HIGH PEEP', 'Measured PEEP exceeds High PEEP alarm setting.', 'Exhalation valve occluded, PEEP valve obstruction, auto-PEEP (air trapping in obstructive disease).', ['Check exhalation valve for obstruction.', 'For COPD/asthma: suspect auto-PEEP &mdash; briefly disconnect circuit and listen for prolonged passive exhalation.', 'Reduce rate and prolong expiratory time if auto-PEEP confirmed.', 'Contact DMO before increasing PEEP.']],
+    ['BAT LOW', 'Internal battery low &mdash; approximately 10 minutes remaining.', 'Vehicle power disconnected or insufficient; prolonged battery use.', ['Connect to vehicle DC power immediately.', 'Amber battery LED confirms low state.', 'Do not wait for BAT EMPTY alarm.']],
+    ['BAT EMPTY', 'Internal battery critically low &mdash; approximately 5 minutes remaining. Cannot be silenced.', 'Battery depleted.', ['Connect to vehicle DC power NOW.', 'If power unavailable: begin BVM ventilation.', 'Calculate remaining transport time against battery reserve.']],
+    ['POWER LOST', 'External power dropped below usable voltage; switched to internal battery.', 'Vehicle power connection loose, poor electrical connection, insufficient vehicle voltage.', ['Check DC power connection to ventilator.', 'Reconnect and verify External Power LED turns green.', 'Monitor battery LED for remaining reserve.']],
+    ['INOP', 'Ventilator detected an unsafe condition during operation. Device is non-functional.', 'Hardware fault, internal failure.', ['Disconnect patient immediately.', 'Ventilate with BVM.', 'Remove LTV 1200 from service.', 'Contact DMO.', 'Transport with manual ventilation.']],
+    ['HIGH f', 'Total breath rate exceeds High f alarm threshold.', 'Patient triggering excess breaths (pain, anxiety, hypercapnia, metabolic acidosis), auto-triggering from circuit leak.', ['Assess patient: pain, anxiety, work of breathing.', 'Check ETCO2 for hypercapnia.', 'Check for circuit leak causing auto-triggering.', 'If auto-triggering: increase sensitivity setting (higher number = less sensitive).', 'Address underlying cause.']],
+  ];
+
+  var h = '<div class="ts-list" id="v6-alarm-list">';
+  alarms.forEach(function(a) {
+    var code = a[0], desc = a[1], causes = a[2], steps = a[3];
+    h += '<div class="ts-problem">';
+    h += '<div class="ts-problem-hdr">';
+    h += '<div class="ts-problem-icon" style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--danger);min-width:80px">' + code + '</div>';
+    h += '<div class="ts-problem-title" style="font-size:12px">' + desc + '</div>';
+    h += '<div class="ts-chevron">&#x203A;</div>';
+    h += '</div>';
+    h += '<div class="ts-problem-body">';
+    h += '<div class="ts-dx"><div class="ts-dx-label">Possible causes</div>';
+    causes.split(', ').forEach(function(c) {
+      h += '<div class="ts-dx-item"><div class="ts-dx-bullet"></div><div>' + c + '</div></div>';
+    });
+    h += '</div>';
+    h += '<div class="ts-steps"><div class="ts-steps-label">Immediate response</div>';
+    steps.forEach(function(s, i) {
+      h += '<div class="ts-step-item"><div class="ts-step-num">' + (i + 1) + '</div><div class="ts-step-text">' + s + '</div></div>';
+    });
+    h += '</div></div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function v6SettingsHTML() {
+  var conditions = [
+    {name: 'Normal Lungs', sub: 'Post-arrest, OD, trauma', color: 'var(--emt)',
+     settings: [['Mode','A/C Volume'],['Tidal Volume','6&ndash;8 mL/kg IBW'],['Rate','12&ndash;16/min'],['FiO2','Titrate SpO2 94&ndash;98%'],['PEEP','5 cmH2O'],['Insp Time','1.0 sec'],['High Pres Limit','40 cmH2O']],
+     notes: 'Confirm ETCO2 35&ndash;40 mmHg. Watch for patient-ventilator dyssynchrony &mdash; may need sedation adjustment.'},
+    {name: 'ARDS / Pulmonary Edema', sub: 'Pneumonia, aspiration', color: 'var(--aemt)',
+     settings: [['Mode','A/C Volume'],['Tidal Volume','6 mL/kg IBW (strict)'],['Rate','16&ndash;20/min'],['FiO2','Titrate SpO2 &ge;92%'],['PEEP','8&ndash;12 cmH2O (per orders)'],['Insp Time','1.0&ndash;1.2 sec'],['High Pres Limit','35 cmH2O']],
+     notes: 'Low tidal volume is mandatory. Do NOT increase TV to chase ETCO2 &mdash; permissive hypercapnia is acceptable. PEEP changes require continuous hemodynamic monitoring.'},
+    {name: 'TBI / Elevated ICP', sub: 'Head injury, herniation risk', color: '#e67e22',
+     settings: [['Mode','A/C Volume'],['Tidal Volume','6&ndash;7 mL/kg IBW'],['Rate','16&ndash;18/min'],['FiO2','100% if unstable; titrate to 94&ndash;98%'],['PEEP','5 cmH2O (minimize)'],['Insp Time','1.0 sec'],['ETCO2 target','35&ndash;40 mmHg (strict)']],
+     notes: 'ETCO2 target is critical. Hypercapnia raises ICP; hypocapnia causes cerebral ischemia. Controlled hyperventilation (ETCO2 30&ndash;35) for herniation signs ONLY &mdash; contact DMO. Never drop below 30.'},
+    {name: 'Obstructive Disease', sub: 'COPD, asthma', color: 'var(--warn)',
+     settings: [['Mode','A/C Volume'],['Tidal Volume','6&ndash;8 mL/kg IBW'],['Rate','10&ndash;12/min'],['FiO2','Titrate SpO2 88&ndash;92%'],['PEEP','0&ndash;3 cmH2O'],['Insp Time','0.8&ndash;1.0 sec'],['I:E target','1:3 or greater']],
+     notes: 'Auto-PEEP (breath stacking) is the primary risk. Prevention is rate reduction + prolonged I:E &mdash; NOT mode change. If recurrent HIGH PRES: disconnect briefly and listen for prolonged passive exhalation. Contact DMO before increasing PEEP.'},
+    {name: 'Hemodynamic Instability', sub: 'Shock, sepsis', color: 'var(--danger)',
+     settings: [['Mode','A/C Volume'],['Tidal Volume','6&ndash;8 mL/kg IBW'],['Rate','12&ndash;14/min'],['FiO2','100% initially'],['PEEP','5 cmH2O (reduce if profound hypotension)'],['Insp Time','1.0 sec']],
+     notes: 'Positive pressure reduces venous return and cardiac output &mdash; expect BP drop on initiation. Have vasopressor running before connecting. Monitor MAP continuously after any PEEP change.'},
+  ];
+
+  var h = '';
+  conditions.forEach(function(cond) {
+    h += '<div class="cs">';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
+    h += '<div style="width:4px;height:36px;border-radius:2px;background:' + cond.color + ';flex-shrink:0"></div>';
+    h += '<div><div style="font-size:13px;font-weight:700;color:var(--white)">' + cond.name + '</div>';
+    h += '<div style="font-size:11px;color:var(--gray)">' + cond.sub + '</div></div>';
+    h += '</div>';
+    h += '<table class="dt" style="margin-bottom:8px">';
+    cond.settings.forEach(function(row) {
+      h += '<tr><td>' + row[0] + '</td><td style="font-weight:600;color:var(--white)">' + row[1] + '</td></tr>';
+    });
+    h += '</table>';
+    h += '<div class="co i" style="margin-bottom:0">' + cond.notes + '</div>';
+    h += '</div>';
+  });
+  return h;
+}
+
+function v6TroubleHTML() {
+  var problems = [
+    {icon: '&#x1F4A8;', title: 'Patient fighting the ventilator / dyssynchrony',
+     causes: ['Inadequate sedation or analgesia (most common)','Pain from positioning, procedure, or injury','Hypercapnia &mdash; patient sensing high CO2','Auto-PEEP causing air hunger','Mode mismatch &mdash; SIMV with inadequate support'],
+     critical: null,
+     steps: ['Assess sedation level first &mdash; inadequate sedation is the most common cause.','Check ETCO2: if elevated, increase rate or tidal volume within safe limits.','Assess for pain &mdash; fentanyl per protocol.','Check for auto-PEEP: reduce rate, lengthen expiratory time.','If on SIMV: consider switching to A/C.','Contact DMO if unresolvable or patient deteriorating.']},
+
+    {icon: '&#x1F4C9;', title: 'SpO2 declining on ventilator',
+     causes: ['Secretions / mucus plug (most common)','Circuit disconnect or leak','Right mainstem intubation &mdash; ETT too deep','Tension pneumothorax','Equipment failure &mdash; O2 source issue','Worsening underlying pathology'],
+     critical: null,
+     steps: ['Increase FiO2 to 100% immediately.','Check circuit connections.','Suction ETT &mdash; secretions are most common cause.','Auscultate: if asymmetric &mdash; check ETT depth (pull back if needed).','If bilaterally absent with hypotension: needle decompression.','Verify O2 source is flowing (check flow meter and cylinder pressure).','Contact DMO if not responsive.']},
+
+    {icon: '&#x1F4C8;', title: 'ETCO2 rising (hypercapnia)',
+     causes: ['Inadequate minute ventilation &mdash; rate or TV too low','Circuit leak reducing effective ventilation','Secretions reducing effective alveolar ventilation','Increased CO2 production (fever, shivering, seizure activity)'],
+     critical: null,
+     steps: ['Increase respiratory rate first.','If rate inadequate, increase tidal volume (within IBW limits).','Suction if secretions suspected.','Check for circuit leaks.','Do NOT hyperventilate to overshoot &mdash; target ETCO2 35&ndash;40 mmHg.','Exception: controlled hyperventilation for herniation signs &mdash; contact DMO.']},
+
+    {icon: '&#x1F4C9;', title: 'ETCO2 falling (hypocapnia)',
+     causes: ['Rate or TV too high','Patient triggering excess breaths above set rate (A/C mode)','Anxiety / pain driving tachypnea','Metabolic acidosis with compensatory hyperventilation'],
+     critical: 'Critical in TBI patients &mdash; hypocapnia causes cerebral vasoconstriction and ischemia.',
+     steps: ['Reduce respiratory rate.','In A/C: if patient triggering excess breaths, address pain/anxiety.','Increase sensitivity setting if auto-triggering.','For TBI: target ETCO2 35&ndash;40 strictly &mdash; contact DMO if cannot achieve.']},
+
+    {icon: '&#x26A0;', title: 'Recurrent HIGH PRES alarms',
+     causes: ['Secretions or mucus plug','Patient biting ETT &mdash; no bite block','ETT kink in circuit or oropharynx','Bronchospasm','Auto-PEEP (obstructive disease)','Right mainstem intubation','Tension pneumothorax (late)'],
+     critical: null,
+     steps: ['Suction ETT.','Check for biting &mdash; insert bite block; add sedation.','Check entire circuit for kinks.','Auscultate: asymmetric breath sounds &rarr; check ETT depth.','For COPD/asthma: suspect auto-PEEP &mdash; reduce rate, disconnect briefly.','Bilateral silent with hypotension: needle decompression.','Do not simply increase High Pres Limit without identifying cause.']},
+
+    {icon: '&#x1F300;', title: 'Auto-PEEP / breath stacking (obstructive disease)',
+     causes: ['Respiratory rate too high for adequate exhalation','Inspiratory time too long leaving insufficient expiratory time','Active bronchospasm prolonging expiratory phase'],
+     critical: null,
+     steps: ['Identify: measured PEEP on monitor higher than set PEEP.','Reduce respiratory rate (target 10&ndash;12 for obstructive).','Reduce inspiratory time to increase I:E ratio.','Disconnect circuit briefly: if prolonged exhalation occurs, auto-PEEP confirmed.','Treat bronchospasm: albuterol if not already given.','Adequate sedation to reduce patient&apos;s own respiratory rate.','Contact DMO. Do NOT increase PEEP to counteract auto-PEEP without DMO guidance.']},
+
+    {icon: '&#x1F527;', title: 'Ventilator will not power on / INOP alarm',
+     causes: ['Battery depleted','Vehicle power connection failure','Internal hardware fault'],
+     critical: 'INOP alarm during active ventilation: remove from service immediately.',
+     steps: ['Do not attempt to restart &mdash; switch to BVM immediately.','Check vehicle power connection.','If battery issue: connect to alternate power source.','If INOP during transport: BVM for remainder of transport.','Notify receiving facility.','Document time of failure.']},
+
+    {icon: '&#x2753;', title: 'Unable to confirm ETT placement after transition',
+     causes: ['ETT dislodged during transfer','Esophageal intubation','Right mainstem intubation'],
+     critical: 'Do not connect to LTV 1200 without confirmed ETT placement.',
+     steps: ['Reconnect BVM immediately.','Assess chest rise bilaterally.','Check ETCO2 waveform &mdash; flat waveform suggests esophageal placement.','Auscultate: epigastric sounds suggest esophageal intubation.','If esophageal intubation suspected: extubate and reintubate.','After confirmed placement: reconnect LTV 1200.']},
+  ];
+
+  var h = '';
+  problems.forEach(function(prob, idx) {
+    h += '<div class="ts-problem">';
+    h += '<div class="ts-problem-hdr">';
+    h += '<div class="ts-problem-icon">' + prob.icon + '</div>';
+    h += '<div class="ts-problem-title">' + prob.title + '</div>';
+    h += '<div class="ts-chevron">&#x203A;</div>';
+    h += '</div>';
+    h += '<div class="ts-problem-body">';
+    if (prob.critical) {
+      h += '<div class="ts-critical">&#x1F6A8; ' + prob.critical + '</div>';
+    }
+    h += '<div class="ts-dx"><div class="ts-dx-label">Differential</div>';
+    prob.causes.forEach(function(c) {
+      h += '<div class="ts-dx-item"><div class="ts-dx-bullet"></div><div>' + c + '</div></div>';
+    });
+    h += '</div>';
+    h += '<div class="ts-steps"><div class="ts-steps-label">Response</div>';
+    prob.steps.forEach(function(s, i) {
+      h += '<div class="ts-step-item"><div class="ts-step-num">' + (i + 1) + '</div><div class="ts-step-text">' + s + '</div></div>';
+    });
+    h += '</div></div></div>';
+  });
+  return h;
+}
+
+// Wire up alarm accordion after render
+document.addEventListener('click', function(e) {
+  var list = document.getElementById('v6-alarm-list');
+  if (!list) return;
+  var hdr = e.target.closest('#v6-alarm-list .ts-problem-hdr');
+  if (!hdr) return;
+  var card = hdr.closest('.ts-problem');
+  var wasOpen = card.classList.contains('open');
+  list.querySelectorAll('.ts-problem').forEach(function(p) { p.classList.remove('open'); });
+  if (!wasOpen) card.classList.add('open');
+});
+
 </script>
 </body>
 </html>
