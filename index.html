@@ -201,6 +201,57 @@ body{font-family:var(--sans);background:var(--surface);color:var(--white)}
 .ts-step-text { font-size: 14px; line-height: 1.5; color: #cbd5e1; }
 .ts-critical { background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; font-size: 14px; color: #fca5a5; line-height: 1.5; }
 
+
+/* ── DIAGNOSTIC TREE ──────────────────────────────────────────────────── */
+.dt-wrap { padding: 0; }
+.dt-breadcrumb { display: flex; align-items: center; gap: 6px; padding: 10px 14px 0; flex-wrap: wrap; min-height: 36px; }
+.dt-crumb { font-family: var(--mono); font-size: 10px; color: var(--gray); cursor: pointer; }
+.dt-crumb:hover { color: var(--teal2); }
+.dt-crumb-sep { font-size: 10px; color: var(--border); }
+.dt-crumb.current { color: var(--teal2); cursor: default; }
+.dt-question { padding: 14px 14px 6px; }
+.dt-q-text { font-size: 16px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 4px; }
+.dt-q-sub { font-size: 12px; color: var(--gray); }
+.dt-opts { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.dt-opt { display: flex; align-items: center; gap: 12px; padding: 13px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.12s; }
+.dt-opt:active { border-color: var(--teal); background: var(--dim); transform: scale(0.98); }
+.dt-opt-icon { font-size: 22px; flex-shrink: 0; width: 30px; text-align: center; }
+.dt-opt-label { flex: 1; font-size: 14px; font-weight: 500; color: var(--white); line-height: 1.3; }
+.dt-opt-arr { color: var(--gray); font-size: 14px; flex-shrink: 0; }
+
+/* Results */
+.dt-result { padding: 14px; }
+.dt-result-summary { background: var(--dim); border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; padding: 10px 12px; margin-bottom: 14px; font-size: 14px; color: #cbd5e1; line-height: 1.5; }
+.dt-result-label { font-family: var(--mono); font-size: 9px; color: var(--teal); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.dt-proto-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; margin-bottom: 6px; cursor: pointer; transition: all 0.12s; }
+.dt-proto-card:active { border-color: var(--teal); transform: scale(0.98); }
+.dt-proto-num { font-family: var(--mono); font-size: 10px; color: var(--gray); flex-shrink: 0; min-width: 60px; }
+.dt-proto-title { flex: 1; font-size: 14px; font-weight: 500; color: var(--white); }
+.dt-proto-note { font-size: 11px; color: var(--teal2); margin-top: 2px; }
+.dt-proto-section { flex-shrink: 0; }
+.dt-restart { margin-top: 14px; padding: 12px; background: var(--dim); border: 1px solid var(--border); border-radius: 9px; text-align: center; font-size: 13px; font-weight: 600; color: var(--gray); cursor: pointer; font-family: var(--mono); letter-spacing: 0.04em; }
+.dt-restart:active { border-color: var(--teal); color: var(--teal2); }
+
+
+/* ── SECTION IV INFUSIONS ─────────────────────────────────────────────── */
+.iv-card{margin:4px 10px;border-radius:9px;overflow:hidden;cursor:pointer;border:1px solid var(--border)}
+.iv-card:active{opacity:0.75}
+.iv-card-inner{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2)}
+.iv-card-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.iv-card-text{flex:1}
+.iv-card-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:2px}
+.iv-card-sub{font-size:11px;color:var(--gray)}
+.iv-scope-tag{flex-shrink:0}
+.inf-row{display:flex;gap:0;margin-bottom:6px;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.inf-name{background:var(--navy2);padding:9px 12px;font-size:13px;font-weight:600;color:var(--teal2);min-width:38%;flex-shrink:0}
+.inf-note{background:var(--surface2);padding:9px 12px;font-size:12px;color:#cbd5e1;flex:1;line-height:1.5}
+.iv-critical{background:var(--danger-bg);border:1px solid var(--danger);border-radius:7px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:#fca5a5;line-height:1.5}
+.iv-diversion{background:#1a0a0a;border:1px solid var(--danger);border-radius:7px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#fca5a5;line-height:1.5}
+.iv-diversion-label{font-family:var(--mono);font-size:9px;color:var(--danger);letter-spacing:0.1em;font-weight:600;margin-bottom:4px}
+.tr-step{display:flex;gap:8px;margin-bottom:7px;align-items:flex-start}
+.tr-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;margin-top:1px;font-family:var(--mono)}
+.tr-text{font-size:13px;line-height:1.5;color:#cbd5e1}
+
 </style>
 </head>
 <body>
@@ -248,9 +299,10 @@ body{font-family:var(--sans);background:var(--surface);color:var(--white)}
   <button class="nb on" data-tab="universal"><span class="nb-icon">&#x1F4CB;</span>Universal</button>
   <button class="nb" data-tab="ift"><span class="nb-icon">&#x1F3E5;</span>IFT</button>
   <button class="nb" data-tab="viii"><span class="nb-icon">&#x1F691;</span>911</button>
+  <button class="nb" data-tab="diagnose"><span class="nb-icon">&#x1F50E;</span>Diagnose</button>
   <button class="nb" data-tab="formulary"><span class="nb-icon">&#x2697;</span>Drugs</button>
-  <button class="nb" data-tab="procedures"><span class="nb-icon">&#x2726;</span>Procs</button>
   <button class="nb" data-tab="ventilator"><span class="nb-icon">&#x1F4A8;</span>Vent</button>
+  <button class="nb" data-tab="infusions"><span class="nb-icon">&#x1F4A7;</span>Infusions</button>
   <button class="nb" data-tab="reference"><span class="nb-icon">&#x25C8;</span>Ref</button>
 </div>
 <script>
@@ -5339,6 +5391,357 @@ const D = {
         }
       ]
     }
+  ],
+  "section_iv": [
+    {
+      "id": "iv-overview",
+      "title": "Overview & Crew Authority",
+      "icon": "📋",
+      "content": [
+        {
+          "label": "Purpose",
+          "text": "This section covers medications and infusions initiated at the sending facility and continued during transport. It is distinct from the Ambulance Formulary (Section III). This section focuses on transport verification, monitoring, complication recognition, diversion triggers, and documentation."
+        },
+        {
+          "label": "Crew Authority by Level",
+          "items": [
+            "EMT: IV-A general guideline only. Maintain NS continuity. No medication infusion monitoring beyond NS.",
+            "AEMT: May monitor hospital-supplied infusions that correspond to medications within KBEMS-authorized scope only. See IV-B authorized list. If any running infusion is not on that list: contact dispatch immediately — do not depart.",
+            "Paramedic: All of Section IV applies. May manage, monitor, and titrate hospital-supplied infusions within service protocol and sending physician orders."
+          ]
+        },
+        {
+          "label": "Non-Redundancy Rule",
+          "text": "When a hospital-supplied medication is also carried in the AMR formulary (e.g., midazolam, fentanyl, amiodarone, lidocaine), refer to Section III for indications and pharmacology. This section provides transport-phase monitoring and management only."
+        }
+      ]
+    },
+    {
+      "id": "iv-verification",
+      "title": "Pre-Departure Verification",
+      "icon": "✅",
+      "content": [
+        {
+          "label": "Required Before Every Departure — All Active Infusions",
+          "items": [
+            "Confirm medication name and concentration (mg/mL or mcg/mL).",
+            "Confirm ordered dose or rate (mcg/min, mcg/kg/min, units/hr, mg/hr).",
+            "Confirm current pump rate and compare to the order.",
+            "Trace tubing from bag or syringe to patient (line trace) and label the line.",
+            "Confirm vascular access type (PIV, IO, PICC, central line) and patency.",
+            "Confirm adequate volume remaining for transport time plus safety buffer.",
+            "Confirm backup plan for pump failure.",
+            "Verify sending provider contact and receiving report is complete."
+          ]
+        },
+        {
+          "label": "Infusion Pump & Line Safety",
+          "items": [
+            "Use Sapphire infusion pumps per service standard whenever compatible.",
+            "Maintain dedicated lines for high-risk infusions: vasopressors, insulin, heparin, and sedation should not share a line.",
+            "Do not piggyback incompatible medications without explicit pharmacy guidance.",
+            "Never interrupt vasopressor or sedation infusions during patient movement."
+          ]
+        },
+        {
+          "label": "Transport Default Targets",
+          "items": [
+            "MAP: ≥65 mmHg (adults)",
+            "SBP minimum: ≥90 mmHg (adults)",
+            "SpO2: ≥94% (94–98% post-ROSC; 88–92% COPD)",
+            "ETCO2 (intubated): 35–40 mmHg unless specific order",
+            "Glucose: 140–180 mg/dL for most ICU patients — follow sending orders"
+          ]
+        },
+        {
+          "label": "Documentation — All Hospital-Supplied Infusions",
+          "items": [
+            "Medication name and concentration.",
+            "Ordered dose or rate if provided by sending physician.",
+            "Starting pump rate at departure and any rate changes during transport.",
+            "Vital signs at minimum every 5–15 minutes depending on acuity.",
+            "Vascular access type and line patency checks performed.",
+            "Any alarms, interruptions, or troubleshooting steps taken.",
+            "Any adverse effects and actions taken.",
+            "Receiving facility handoff confirmation."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iv-aemt",
+      "title": "IV-B: AEMT Authorized Infusions",
+      "icon": "🔵",
+      "scope": "aemt",
+      "infusions": [
+        {
+          "name": "Normal Saline (0.9% NaCl)",
+          "notes": "Isotonic crystalloid. KBEMS authorized. AEMT may monitor, maintain rate per standing orders. Most common infusion on AEMT-level calls."
+        },
+        {
+          "name": "Fentanyl infusion",
+          "notes": "Opioid analgesia. KBEMS authorized. Monitor for respiratory depression continuously. Non-intubated, non-sedated patients only. Monitor SpO2 continuously."
+        },
+        {
+          "name": "Ondansetron (IV infusion)",
+          "notes": "Antiemetic. KBEMS authorized. May monitor running infusion and administer per Section III standing orders. Monitor for QT prolongation in high-risk patients."
+        },
+        {
+          "name": "Amiodarone infusion",
+          "notes": "Antiarrhythmic. KBEMS authorized. May monitor running infusion. Do NOT adjust rate without DMO direction. Monitor continuous ECG and blood pressure."
+        },
+        {
+          "name": "Lidocaine infusion",
+          "notes": "Antiarrhythmic. KBEMS authorized. May monitor running infusion. Do NOT adjust rate without DMO direction. Watch for neurotoxicity: tinnitus, perioral numbness, confusion."
+        },
+        {
+          "name": "Dextrose infusion (D5W, D10W)",
+          "notes": "Glucose replacement. KBEMS authorized. May monitor and administer D10 per standing orders for hypoglycemia. Monitor blood glucose every 30 minutes."
+        },
+        {
+          "name": "Isotonic crystalloid with electrolyte additives",
+          "notes": "e.g., NS with KCl. KBEMS authorized. Run via pump at all times. Monitor cardiac rhythm continuously during KCl infusion."
+        },
+        {
+          "name": "Isotonic crystalloid with antibiotic additives",
+          "notes": "e.g., NS with vancomycin, piperacillin-tazobactam. KBEMS authorized. Monitor for infusion reactions throughout transport."
+        },
+        {
+          "name": "Naloxone infusion",
+          "notes": "Opioid antagonist. KBEMS authorized. May monitor hospital-supplied naloxone for opioid reversal maintenance. Monitor for re-sedation and withdrawal symptoms."
+        }
+      ],
+      "responsibilities": [
+        "Verify infusion against authorized list before departure. If any running infusion is not on this list: contact dispatch immediately. Do not depart with an unauthorized infusion running.",
+        "Confirm pump rate matches sending physician order at departure.",
+        "Document infusion rate, access site, and patient response at departure and at regular intervals.",
+        "Do not adjust infusion rates without DMO direction."
+      ]
+    },
+    {
+      "id": "iv-vasopressors",
+      "title": "IV-C1: Vasopressors & Inotropes",
+      "icon": "💉",
+      "scope": "pm",
+      "infusions": [
+        {
+          "name": "Norepinephrine (Levophed)",
+          "notes": "First-line vasopressor. Alpha-1 dominant. Titrate to MAP ≥65 mmHg. Monitor IV/IO access site for extravasation every 15 minutes. Hospital-supplied at variable concentration — confirm with sending RN before departure."
+        },
+        {
+          "name": "Epinephrine infusion",
+          "notes": "Anaphylactic and cardiogenic shock refractory to norepinephrine. Significant beta effects. Monitor for tachyarrhythmia."
+        },
+        {
+          "name": "Dopamine",
+          "notes": "Dose-dependent effects. Less commonly used. Monitor for tachycardia and dysrhythmia."
+        },
+        {
+          "name": "Phenylephrine",
+          "notes": "Pure alpha-1 agonist. No beta effect. May cause reflex bradycardia. Monitor heart rate."
+        },
+        {
+          "name": "Vasopressin",
+          "notes": "Non-catecholamine adjunct vasopressor. Fixed rate — do not titrate without explicit physician order."
+        },
+        {
+          "name": "Dobutamine",
+          "notes": "Inotrope with mild vasodilatory effect. Monitor for hypotension and tachyarrhythmia. Usually requires concurrent vasopressor in shock."
+        },
+        {
+          "name": "Milrinone",
+          "notes": "Phosphodiesterase inhibitor inotrope. Significant vasodilatory effect — almost always requires concurrent vasopressor. Monitor MAP closely."
+        },
+        {
+          "name": "Nicardipine / Clevidipine",
+          "notes": "Calcium channel blocker antihypertensives. Used for BP control in hypertensive emergencies. Monitor for excessive hypotension."
+        }
+      ],
+      "diversion": "Persistent hypotension at maximum infusion rate, sustained life-threatening dysrhythmia, or loss of vascular access in a vasopressor-dependent patient."
+    },
+    {
+      "id": "iv-sedation",
+      "title": "IV-C2: Sedation, Analgesia & NMB",
+      "icon": "💊",
+      "scope": "pm",
+      "critical": "A patient on a neuromuscular blocker infusion cannot breathe independently, signal distress, or protect their airway if the ventilator fails. ETCO2 monitoring is essential. BVM must be immediately accessible. Loss of ventilation in a paralyzed patient is an immediate diversion trigger.",
+      "infusions": [
+        {
+          "name": "Propofol",
+          "notes": "Short-acting sedative. Significant hypotensive potential. Milky white — check line integrity. Monitor blood pressure every 5 minutes."
+        },
+        {
+          "name": "Dexmedetomidine (Precedex)",
+          "notes": "Alpha-2 agonist sedative. Minimal respiratory depression. Monitor for bradycardia and hypotension. Do not stop abruptly."
+        },
+        {
+          "name": "Midazolam infusion",
+          "notes": "Benzodiazepine sedation. AMR formulary agent — see Section III for pharmacology. Monitor respiratory rate and SpO2."
+        },
+        {
+          "name": "Fentanyl infusion",
+          "notes": "Opioid analgesia. AMR formulary agent — see Section III. Monitor for respiratory depression and hemodynamic changes."
+        },
+        {
+          "name": "Ketamine infusion",
+          "notes": "Dissociative sedation. AMR formulary agent — intubated adults only. Monitor BP and HR (increases both). See Section III."
+        },
+        {
+          "name": "Hydromorphone infusion",
+          "notes": "Opioid analgesia. Monitor for respiratory depression, hypotension."
+        },
+        {
+          "name": "Vecuronium",
+          "notes": "Neuromuscular blocker. Patient is FULLY PARALYZED. Cannot signal distress. Absolute airway and ventilator vigilance required. ETCO2 mandatory."
+        },
+        {
+          "name": "Rocuronium",
+          "notes": "Neuromuscular blocker. Same considerations as vecuronium. Sugammadex reversal available at receiving facility — not on AMR unit."
+        },
+        {
+          "name": "Cisatracurium",
+          "notes": "Neuromuscular blocker. Hoffman elimination — does not require renal/hepatic function. ICU-level paralysis. Same transport vigilance as other NMBs."
+        }
+      ],
+      "diversion": "Loss of ventilation in a paralyzed patient. Ventilator failure with NMB infusion running. Refractory hypotension during propofol infusion. Any airway loss."
+    },
+    {
+      "id": "iv-cardiac",
+      "title": "IV-C3: Cardiac & Anticoagulation",
+      "icon": "❤️",
+      "scope": "pm",
+      "infusions": [
+        {
+          "name": "Amiodarone infusion",
+          "notes": "Antiarrhythmic. AMR formulary agent — see Section III. Monitor continuous ECG and blood pressure. Do not adjust rate without explicit order."
+        },
+        {
+          "name": "Lidocaine infusion",
+          "notes": "Antiarrhythmic. AMR formulary agent — see Section III. Monitor ECG. Watch for neurotoxicity: tinnitus, perioral numbness, confusion."
+        },
+        {
+          "name": "Diltiazem infusion",
+          "notes": "Rate control for A-fib with RVR. Monitor for hypotension and excessive bradycardia. Have atropine and pacing ready."
+        },
+        {
+          "name": "Esmolol infusion",
+          "notes": "Ultra-short-acting beta blocker. Rate control and BP management. Monitor for bradycardia and hypotension. Very short half-life — effects wear off quickly if stopped."
+        },
+        {
+          "name": "Heparin infusion",
+          "notes": "Anticoagulation for ACS, PE, DVT, STEMI transfers. Do not adjust rate without explicit order. Monitor IV access site for bleeding. Report any hematoma or unexpected bleeding immediately."
+        },
+        {
+          "name": "Bivalirudin",
+          "notes": "Direct thrombin inhibitor. Used in HIT (heparin-induced thrombocytopenia). Monitor for bleeding. Do not adjust rate without explicit order."
+        }
+      ],
+      "diversion": "Sustained life-threatening dysrhythmia unresponsive to current infusion. Major hemorrhage from anticoagulation."
+    },
+    {
+      "id": "iv-metabolic",
+      "title": "IV-C4: Metabolic & Electrolytes",
+      "icon": "⚗️",
+      "scope": "pm",
+      "critical": "Potassium chloride (KCl) infusion must run via pump at all times. Free-flow or bolus potassium chloride causes fatal cardiac arrest. Confirm pump programming before departure and after any line manipulation.",
+      "infusions": [
+        {
+          "name": "Insulin infusion (Regular)",
+          "notes": "For DKA, HHS, hyperglycemia management. Monitor glucose every 30 minutes. Treat hypoglycemia per D10 standing order immediately. Do not adjust rate without explicit order."
+        },
+        {
+          "name": "Dextrose infusion (D5W, D10W, D50W)",
+          "notes": "Glucose replacement or maintenance. Monitor blood glucose at regular intervals."
+        },
+        {
+          "name": "Potassium chloride (KCl)",
+          "notes": "Electrolyte replacement. MUST run via pump at controlled rate at all times. Monitor cardiac rhythm continuously. FATAL if free-flowed."
+        },
+        {
+          "name": "Magnesium sulfate infusion",
+          "notes": "AMR formulary agent (Paramedic scope) — see Section III. Monitor DTRs and respiratory rate for toxicity. Antidote: calcium gluconate."
+        },
+        {
+          "name": "Sodium bicarbonate infusion",
+          "notes": "AMR formulary agent (Paramedic scope) — see Section III. Monitor for metabolic alkalosis."
+        },
+        {
+          "name": "Hypertonic saline (3%)",
+          "notes": "ICU-ordered for hyponatremia or cerebral edema. Rate must NOT be increased without DMO order. Monitor neurologic status closely. Never bolus."
+        }
+      ],
+      "diversion": "Symptomatic hypoglycemia unresponsive to D10 treatment. Suspected KCl free-flow event. Hemodynamic instability from metabolic derangement."
+    },
+    {
+      "id": "iv-antibiotics",
+      "title": "IV-C5: Antibiotics & Antivirals",
+      "icon": "🧫",
+      "scope": "pm",
+      "infusions": [
+        {
+          "name": "Piperacillin-tazobactam (Zosyn)",
+          "notes": "Broad-spectrum. Common in sepsis and pneumonia. Monitor for infusion reactions (flushing, rash, fever)."
+        },
+        {
+          "name": "Vancomycin",
+          "notes": "Must infuse slowly (≥60 min) to avoid Red Man Syndrome. Monitor for flushing, erythema, and pruritus. If reaction occurs: slow infusion rate or contact DMO."
+        },
+        {
+          "name": "Cefepime",
+          "notes": "Fourth-generation cephalosporin. Monitor for neurotoxicity (confusion, myoclonus) — risk increased in renal impairment."
+        },
+        {
+          "name": "Meropenem",
+          "notes": "Carbapenem for resistant organisms. Monitor for infusion reactions."
+        },
+        {
+          "name": "Antifungals (Fluconazole, Micafungin)",
+          "notes": "Monitor for infusion reactions and QTc prolongation (fluconazole)."
+        },
+        {
+          "name": "Acyclovir",
+          "notes": "Antiviral. Adequate hydration essential — risk of crystalline nephropathy. Obtain urine output report from sending facility before departure."
+        }
+      ],
+      "diversion": "Severe infusion reaction (anaphylaxis, angioedema). Contact DMO for any suspected transfusion or infusion reaction."
+    },
+    {
+      "id": "iv-blood",
+      "title": "IV-C6: Blood Products",
+      "icon": "🩸",
+      "scope": "pm",
+      "critical": "Verify patient identification, unit number, and blood compatibility prior to departure for ALL blood products. Two-provider verification required.",
+      "infusions": [
+        {
+          "name": "Packed Red Blood Cells (pRBC)",
+          "notes": "Facility-directed rate (commonly 1 unit over 1.5–4 hours). Verify compatibility before departure. Monitor for hemolytic reaction, TACO (transfusion-associated circulatory overload), and TRALI."
+        },
+        {
+          "name": "Fresh Frozen Plasma (FFP)",
+          "notes": "Verify prior to departure. Monitor for allergic reaction, anaphylaxis, and volume overload."
+        },
+        {
+          "name": "Platelets",
+          "notes": "Verify prior to departure. Monitor for allergic reaction and febrile response."
+        },
+        {
+          "name": "Tranexamic acid (TXA) infusion",
+          "notes": "Antifibrinolytic. Facility-initiated. Monitor vital signs and for thromboembolism."
+        },
+        {
+          "name": "Factor concentrates",
+          "notes": "Facility-managed hemostatic agents. Monitoring-focused during transport."
+        }
+      ],
+      "transfusion_reaction": [
+        "Stop the transfusion immediately. Maintain IV access with normal saline.",
+        "Assess airway, breathing, and circulation.",
+        "Initiate Anaphylaxis protocol if anaphylaxis is suspected.",
+        "Notify DMO and receiving facility immediately.",
+        "Determine need for diversion based on patient stability."
+      ],
+      "diversion": "Suspected hemolytic reaction (hypotension, back pain, hemoglobinuria), severe respiratory distress or hypoxia, refractory hypotension, or airway compromise during active transfusion."
+    }
   ]
 };
 
@@ -5398,6 +5801,7 @@ function renderList() {
   let h = '';
 
   if (TAB === 'reference') { renderReference(); return; }
+  if (TAB === 'diagnose') { renderDiagTree(); return; }
 
   if (TAB === 'universal') {
     const fil = D.universal.filter(matchSearch);
@@ -5754,12 +6158,17 @@ function switchTab(tab) {
   TAB = tab;
   closeDetail();
   document.querySelectorAll('.nb').forEach(function(b) { b.classList.toggle('on', b.dataset.tab === tab); });
+  if (tab === 'infusions') {
+    TAB = tab;
+    renderInfusions();
+    return;
+  }
   if (tab === 'ventilator') {
-    // Open V-6 directly
     var idx = D.procedures.findIndex(function(p) { return p.num === 'V-6'; });
     if (idx >= 0) openDetail('procedures', idx);
     return;
   }
+  if (tab === 'diagnose') { dtHistory = []; }
   renderList();
 }
 
@@ -6136,6 +6545,264 @@ document.addEventListener('click', function(e) {
   list.querySelectorAll('.ts-problem').forEach(function(p) { p.classList.remove('open'); });
   if (!wasOpen) card.classList.add('open');
 });
+
+
+// ── DIAGNOSTIC TREE ──────────────────────────────────────────────────────
+const TREE = {"root": {"q": "What is the primary presentation?", "sub": "Select the most prominent finding", "opts": [{"label": "Cardiac / Chest Pain", "icon": "❤️", "next": "cardiac"}, {"label": "Respiratory Distress", "icon": "🫁", "next": "resp"}, {"label": "Altered Mental Status", "icon": "🧠", "next": "ams"}, {"label": "Shock / Hypotension", "icon": "📉", "next": "shock"}, {"label": "Neurologic", "icon": "⚡", "next": "neuro"}, {"label": "Trauma", "icon": "🩹", "next": "trauma"}, {"label": "Metabolic / Endocrine", "icon": "🧪", "next": "metabolic"}, {"label": "Airway Emergency", "icon": "🚨", "next": "airway"}, {"label": "Pediatric", "icon": "👶", "next": "peds"}, {"label": "Obstetric", "icon": "🤱", "next": "ob"}, {"label": "Toxic / Overdose", "icon": "⚗️", "next": "tox"}, {"label": "Behavioral / Psychiatric", "icon": "🧩", "next": "psych"}, {"label": "Environmental", "icon": "🌡️", "next": "env"}]}, "cardiac": {"q": "What is the heart rate and rhythm?", "opts": [{"label": "Pulseless / No rhythm", "icon": "💀", "next": "arrest"}, {"label": "Bradycardia (<60)", "icon": "🐌", "next": "brady"}, {"label": "Tachycardia (>100)", "icon": "⚡", "next": "tachy"}, {"label": "Chest pain / STEMI", "icon": "💔", "next": "acs"}, {"label": "Post-ROSC / ROSC achieved", "icon": "💚", "next": "rosc"}, {"label": "Heart failure symptoms", "icon": "💧", "next": "hf"}]}, "arrest": {"q": "Context?", "opts": [{"label": "Field / 911 arrest", "icon": "🚑", "protos": [{"type": "viii", "idx": 12, "title": "Cardiac Arrest and Resuscitation"}, {"type": "viii", "idx": 16, "title": "Post-Cardiac Arrest Care (Post-ROSC)", "note": "If ROSC achieved"}, {"type": "viii", "idx": 17, "title": "Termination of Resuscitation", "note": "If TOR criteria met"}], "summary": "High-quality CPR and early defibrillation. Epinephrine timing based on rhythm."}, {"label": "IFT — post-arrest transfer", "icon": "🏥", "protos": [{"type": "ift", "idx": 7, "title": "Post-Cardiac Arrest Syndrome"}, {"type": "ift", "idx": 4, "title": "Acute Coronary Syndrome (ACS / STEMI)", "note": "If STEMI identified post-ROSC"}], "summary": "Post-cardiac arrest syndrome. Prevent four harms: hyperoxia, hyperventilation, hypotension, hyperthermia."}]}, "brady": {"q": "Is the patient symptomatic (hypotension, AMS, ischemic chest pain)?", "opts": [{"label": "Yes — hemodynamically unstable", "icon": "🔴", "protos": [{"type": "viii", "idx": 14, "title": "Bradycardia"}, {"type": "ift", "idx": 0, "title": "Bradycardia"}], "summary": "Atropine first. If no response: transcutaneous pacing. Epinephrine infusion for refractory cases."}, {"label": "No — asymptomatic", "icon": "🟡", "protos": [{"type": "viii", "idx": 14, "title": "Bradycardia"}, {"type": "ift", "idx": 0, "title": "Bradycardia"}], "summary": "Asymptomatic bradycardia does not require treatment. Monitor continuously. Transport for evaluation."}]}, "tachy": {"q": "Is the patient hemodynamically stable?", "opts": [{"label": "Unstable (hypotension, AMS, chest pain)", "icon": "🔴", "next": "tachy_unstable"}, {"label": "Stable", "icon": "🟢", "next": "tachy_stable"}, {"label": "Pulseless VT / VF", "icon": "💀", "protos": [{"type": "viii", "idx": 12, "title": "Cardiac Arrest and Resuscitation"}], "summary": "Pulseless — treat as cardiac arrest. Defibrillate at 200 J. Follow cardiac arrest algorithm."}]}, "tachy_unstable": {"q": "Rhythm type?", "opts": [{"label": "Narrow complex (SVT / A-fib)", "icon": "📈", "protos": [{"type": "viii", "idx": 15, "title": "Tachycardia"}, {"type": "ift", "idx": 1, "title": "Supraventricular Tachycardia (SVT)"}, {"type": "ift", "idx": 2, "title": "Atrial Fibrillation / Flutter with RVR"}], "summary": "Unstable — synchronized cardioversion immediately. SVT: 50–100 J. A-fib: 200 J (AHA 2025)."}, {"label": "Wide complex", "icon": "📊", "protos": [{"type": "viii", "idx": 15, "title": "Tachycardia"}, {"type": "ift", "idx": 3, "title": "Wide Complex Tachycardia / VT"}], "summary": "Treat as VT until proven otherwise. Unstable — synchronized cardioversion 100 J. Do not give verapamil."}]}, "tachy_stable": {"q": "Rhythm type?", "opts": [{"label": "Narrow — regular (SVT)", "icon": "〰️", "protos": [{"type": "ift", "idx": 1, "title": "Supraventricular Tachycardia (SVT)"}, {"type": "viii", "idx": 15, "title": "Tachycardia"}], "summary": "Vagal maneuvers first. Adenosine 6 mg rapid IV push if no response."}, {"label": "Narrow — irregular (A-fib)", "icon": "〰️", "protos": [{"type": "ift", "idx": 2, "title": "Atrial Fibrillation / Flutter with RVR"}, {"type": "viii", "idx": 15, "title": "Tachycardia"}], "summary": "Rate control per sending orders. Do not give adenosine for irregular rhythm."}, {"label": "Wide complex (VT)", "icon": "📊", "protos": [{"type": "ift", "idx": 3, "title": "Wide Complex Tachycardia / VT"}, {"type": "viii", "idx": 15, "title": "Tachycardia"}], "summary": "Amiodarone 150 mg IV over 10 minutes. Contact DMO."}, {"label": "Sinus tach — underlying cause", "icon": "🔍", "protos": [{"type": "viii", "idx": 11, "title": "Sepsis and Septic Shock"}, {"type": "ift", "idx": 20, "title": "Sepsis / Septic Shock"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}], "summary": "Sinus tachycardia is a symptom — treat the cause. Consider sepsis, hypovolemia, pain, PE."}]}, "acs": {"q": "STEMI identified on 12-lead?", "opts": [{"label": "Yes — STEMI", "icon": "🔴", "protos": [{"type": "ift", "idx": 4, "title": "Acute Coronary Syndrome (ACS / STEMI)"}, {"type": "viii", "idx": 13, "title": "Chest Pain / Acute Coronary Syndrome"}], "summary": "Pre-alert cath lab immediately. Aspirin 324 mg. Highest priority transport to STEMI center."}, {"label": "No — NSTEMI / UA", "icon": "🟡", "protos": [{"type": "ift", "idx": 4, "title": "Acute Coronary Syndrome (ACS / STEMI)"}, {"type": "viii", "idx": 13, "title": "Chest Pain / Acute Coronary Syndrome"}], "summary": "Urgent but not emergent transport. Aspirin, IV access, monitoring. Pre-alert receiving facility."}, {"label": "Post-ROSC — check 12-lead", "icon": "💚", "protos": [{"type": "ift", "idx": 7, "title": "Post-Cardiac Arrest Syndrome"}, {"type": "ift", "idx": 4, "title": "Acute Coronary Syndrome (ACS / STEMI)", "note": "If STEMI identified"}], "summary": "STEMI post-ROSC: transport to STEMI center regardless of neuro status."}]}, "rosc": {"q": "Context?", "opts": [{"label": "Field resuscitation — ROSC achieved", "icon": "🚑", "protos": [{"type": "viii", "idx": 16, "title": "Post-Cardiac Arrest Care (Post-ROSC)"}, {"type": "ift", "idx": 7, "title": "Post-Cardiac Arrest Syndrome"}], "summary": "Post-ROSC: SpO2 94–98%, ETCO2 35–40, MAP ≥65, temp ≤37.5°C. Obtain 12-lead immediately."}, {"label": "IFT — post-arrest transfer", "icon": "🏥", "protos": [{"type": "ift", "idx": 7, "title": "Post-Cardiac Arrest Syndrome"}, {"type": "ift", "idx": 4, "title": "Acute Coronary Syndrome (ACS / STEMI)", "note": "If STEMI identified"}], "summary": "Prevent four harms throughout transport. STEMI post-ROSC requires cath lab activation."}]}, "hf": {"q": "Blood pressure?", "opts": [{"label": "Hypotensive (SBP <90)", "icon": "🔴", "protos": [{"type": "ift", "idx": 6, "title": "Cardiogenic Shock"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}], "summary": "Cardiogenic shock. Norepinephrine infusion. Avoid aggressive diuresis. Contact DMO."}, {"label": "Normotensive / Hypertensive", "icon": "🟢", "protos": [{"type": "ift", "idx": 5, "title": "Acute Heart Failure / Pulmonary Edema"}, {"type": "viii", "idx": 19, "title": "Bronchospasm / Respiratory Distress"}], "summary": "CPAP for pulmonary edema if cooperative. Nitroglycerin if SBP ≥100 mmHg. Upright positioning."}]}, "resp": {"q": "Is the patient intubated / ventilated?", "opts": [{"label": "Yes — intubated and ventilated", "icon": "🫁", "next": "resp_intubated"}, {"label": "No — breathing spontaneously", "icon": "😮‍💨", "next": "resp_spontaneous"}, {"label": "Tracheostomy present", "icon": "🔧", "protos": [{"type": "ift", "idx": 15, "title": "Tracheostomy Complication"}, {"type": "viii", "idx": 18, "title": "Airway Management"}], "summary": "Tracheostomy complication. Confirm tube position and patency. Have replacement tube ready."}]}, "resp_intubated": {"q": "What is the primary problem?", "opts": [{"label": "Ventilator failure / transition needed", "icon": "⚙️", "protos": [{"type": "ift", "idx": 13, "title": "Ventilator Failure / Transport Ventilator Transition"}, {"type": "procedures", "idx": 6, "title": "LTV 1200 Ventilator Management", "note": "LTV 1200 procedure"}], "summary": "Transition to LTV 1200. Confirm ETT position before connecting. Use IBW for tidal volume."}, {"label": "Deteriorating on vent (SpO2, ETCO2)", "icon": "📉", "protos": [{"type": "ift", "idx": 12, "title": "Acute Respiratory Failure"}, {"type": "ift", "idx": 13, "title": "Ventilator Failure / Transport Ventilator Transition"}, {"type": "procedures", "idx": 6, "title": "LTV 1200 Ventilator Management", "note": "Troubleshooting tab"}], "summary": "Suction ETT first. Check circuit. Assess for tension PTX. Use V-6 troubleshooting guide."}, {"label": "ARDS / severe hypoxemia", "icon": "🫁", "protos": [{"type": "ift", "idx": 12, "title": "Acute Respiratory Failure"}, {"type": "procedures", "idx": 6, "title": "LTV 1200 Ventilator Management", "note": "ARDS settings in V-6"}], "summary": "Lung-protective ventilation: 6 mL/kg IBW strict. PEEP per sending orders."}]}, "resp_spontaneous": {"q": "Primary respiratory pattern?", "opts": [{"label": "Wheezing / bronchospasm", "icon": "〰️", "protos": [{"type": "viii", "idx": 19, "title": "Bronchospasm / Respiratory Distress"}, {"type": "ift", "idx": 12, "title": "Acute Respiratory Failure"}], "summary": "Albuterol + ipratropium nebulized. CPAP for severe distress. Magnesium for refractory bronchospasm."}, {"label": "Pulmonary edema / crackles", "icon": "💧", "protos": [{"type": "ift", "idx": 5, "title": "Acute Heart Failure / Pulmonary Edema"}, {"type": "viii", "idx": 19, "title": "Bronchospasm / Respiratory Distress"}], "summary": "CPAP if cooperative and no contraindications. Upright positioning. Nitroglycerin if SBP ≥100."}, {"label": "Hypoxia without wheezing", "icon": "📉", "protos": [{"type": "ift", "idx": 12, "title": "Acute Respiratory Failure"}, {"type": "ift", "idx": 14, "title": "Pulmonary Embolism"}, {"type": "viii", "idx": 18, "title": "Airway Management"}], "summary": "Consider PE, pneumonia, or impending respiratory failure. Prepare for intubation."}, {"label": "Impending failure — silent chest", "icon": "🔴", "protos": [{"type": "viii", "idx": 18, "title": "Airway Management"}, {"type": "ift", "idx": 12, "title": "Acute Respiratory Failure"}, {"type": "procedures", "idx": 4, "title": "Endotracheal Intubation", "note": "ETT procedure"}], "summary": "Prepare for immediate intubation. Pre-oxygenate. Maximum 2 laryngoscopy attempts then iGel."}, {"label": "Suspected pulmonary embolism", "icon": "🩸", "protos": [{"type": "ift", "idx": 14, "title": "Pulmonary Embolism"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}], "summary": "PE with hemodynamic instability: heparin infusion, vasopressors. Urgent transport."}]}, "ams": {"q": "Most likely etiology?", "opts": [{"label": "Glucose abnormality suspected", "icon": "🍬", "next": "ams_glucose"}, {"label": "Stroke signs (facial droop, drift, speech)", "icon": "🧠", "protos": [{"type": "ift", "idx": 8, "title": "Acute Ischemic Stroke"}, {"type": "viii", "idx": 8, "title": "Stroke / CVA"}], "summary": "Positive Cincinnati Stroke Scale. Document LKW time. Pre-alert stroke center immediately."}, {"label": "Seizure / post-ictal", "icon": "⚡", "protos": [{"type": "ift", "idx": 10, "title": "Seizure / Status Epilepticus"}, {"type": "viii", "idx": 7, "title": "Seizures"}], "summary": "Protect airway. Check glucose. Midazolam for active seizure."}, {"label": "Opioid / toxicological", "icon": "⚗️", "protos": [{"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}, {"type": "ift", "idx": 27, "title": "Toxicology and Overdose — IFT"}, {"type": "viii", "idx": 1, "title": "Altered Mental Status"}], "summary": "Naloxone for suspected opioid. Titrate to respiratory effort — not full reversal."}, {"label": "Sepsis / infection suspected", "icon": "🦠", "protos": [{"type": "viii", "idx": 11, "title": "Sepsis and Septic Shock"}, {"type": "ift", "idx": 20, "title": "Sepsis / Septic Shock"}, {"type": "viii", "idx": 1, "title": "Altered Mental Status"}], "summary": "AMS + fever/hypothermia + tachycardia: sepsis until proven otherwise. IV fluids, pre-alert."}, {"label": "Head injury / TBI", "icon": "🪖", "protos": [{"type": "viii", "idx": 22, "title": "Head Injuries (TBI)"}, {"type": "ift", "idx": 9, "title": "Neurologic Deterioration (ICH / SAH / TBI / Meningitis)"}], "summary": "GCS ≤8: prepare for intubation. Avoid hypoxia and hypotension. ETCO2 35–40 strictly."}, {"label": "Unknown / undifferentiated", "icon": "❓", "protos": [{"type": "viii", "idx": 1, "title": "Altered Mental Status"}, {"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}, {"type": "viii", "idx": 8, "title": "Stroke / CVA"}, {"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}], "summary": "Check glucose first. Consider: hypoglycemia, opioid, stroke, sepsis, TBI. Protect airway."}]}, "ams_glucose": {"q": "Blood glucose level?", "opts": [{"label": "Low (<70 mg/dL)", "icon": "📉", "protos": [{"type": "ift", "idx": 25, "title": "Hypoglycemia — IFT"}, {"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}], "summary": "D10% 100–250 mL IV. Recheck in 10 minutes. If no IV access: glucagon 1 mg IM (PM scope)."}, {"label": "High (>400 mg/dL)", "icon": "📈", "next": "ams_hyperglycemia"}, {"label": "Normal — glucose ruled out", "icon": "✅", "protos": [{"type": "viii", "idx": 1, "title": "Altered Mental Status"}, {"type": "viii", "idx": 8, "title": "Stroke / CVA"}, {"type": "viii", "idx": 7, "title": "Seizures"}], "summary": "Glucose normal. Consider stroke, seizure, opioid, sepsis, TBI."}]}, "ams_hyperglycemia": {"q": "Kussmaul respirations or fruity breath?", "opts": [{"label": "Yes — DKA suspected", "icon": "🧪", "protos": [{"type": "ift", "idx": 16, "title": "Diabetic Ketoacidosis (DKA)"}, {"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}], "summary": "DKA: IV fluid resuscitation. Do not adjust insulin without physician order. Monitor ECG for hyperkalemia."}, {"label": "No — HHS suspected", "icon": "💧", "protos": [{"type": "ift", "idx": 17, "title": "Hyperosmolar Hyperglycemic State (HHS)"}, {"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}], "summary": "HHS: gradual fluid resuscitation. Higher mortality than DKA. Profound dehydration."}]}, "shock": {"q": "Most likely shock type?", "opts": [{"label": "Hemorrhagic / traumatic", "icon": "🩸", "next": "shock_hemorrhagic"}, {"label": "Septic (infection source)", "icon": "🦠", "protos": [{"type": "ift", "idx": 20, "title": "Sepsis / Septic Shock"}, {"type": "viii", "idx": 11, "title": "Sepsis and Septic Shock"}], "summary": "Two large-bore IVs. 30 mL/kg NS if lungs clear. Norepinephrine for refractory hypotension. Contact DMO."}, {"label": "Cardiogenic", "icon": "❤️", "protos": [{"type": "ift", "idx": 6, "title": "Cardiogenic Shock"}, {"type": "ift", "idx": 4, "title": "Acute Coronary Syndrome (ACS / STEMI)", "note": "If STEMI identified"}], "summary": "Norepinephrine infusion. Avoid excess fluids. STEMI: cath lab activation. Contact DMO."}, {"label": "Distributive / anaphylactic", "icon": "⚡", "protos": [{"type": "ift", "idx": 26, "title": "Anaphylaxis — IFT"}, {"type": "viii", "idx": 2, "title": "Anaphylaxis and Allergic Reaction"}], "summary": "Epinephrine 0.3 mg IM immediately. Large-bore IV. Fluid bolus. Epinephrine infusion if refractory."}, {"label": "Obstructive (tension PTX / tamponade)", "icon": "🫁", "protos": [{"type": "viii", "idx": 21, "title": "Chest Injuries"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}, {"type": "procedures", "idx": 10, "title": "Needle Decompression", "note": "Needle decompression"}], "summary": "Tension PTX: needle decomp at 2nd ICS MCL. Tamponade: IV fluids, emergent transport. Contact DMO."}, {"label": "Neurogenic (spinal injury)", "icon": "🦴", "protos": [{"type": "viii", "idx": 26, "title": "Spinal Injuries"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}], "summary": "Warm blankets, IV fluids cautiously, vasopressors per DMO. Spinal motion restriction."}]}, "shock_hemorrhagic": {"q": "Source of hemorrhage?", "opts": [{"label": "External — extremity", "icon": "🦵", "protos": [{"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}, {"type": "procedures", "idx": 24, "title": "Tourniquet Application (CAT / SOFTT-W)", "note": "Tourniquet procedure"}], "summary": "Tourniquet 2–3 inches proximal to wound. Document time. Permissive hypotension for penetrating trauma."}, {"label": "External — junctional / truncal", "icon": "🩸", "protos": [{"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}, {"type": "viii", "idx": 23, "title": "Multi-System Trauma"}], "summary": "Hemostatic dressing (QuikClot). Direct pressure. Pelvic binder if pelvic fracture suspected."}, {"label": "Internal (GI, aortic)", "icon": "🫀", "protos": [{"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}, {"type": "ift", "idx": 19, "title": "Upper GI Bleed"}, {"type": "viii", "idx": 0, "title": "Abdominal Pain"}], "summary": "IV access, permissive hypotension, rapid transport. GI bleed: airway protection if hematemesis."}, {"label": "Multi-system trauma", "icon": "🚑", "protos": [{"type": "viii", "idx": 23, "title": "Multi-System Trauma"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}], "summary": "Load and go. Scene time <10 minutes. Hemorrhage control en route. Contact trauma center."}]}, "neuro": {"q": "Neurologic presentation?", "opts": [{"label": "Stroke signs — new onset", "icon": "🧠", "protos": [{"type": "viii", "idx": 8, "title": "Stroke / CVA"}, {"type": "ift", "idx": 8, "title": "Acute Ischemic Stroke"}], "summary": "Cincinnati Stroke Scale positive. Document LKW. Pre-alert stroke center. Do not lower BP."}, {"label": "Active seizure", "icon": "⚡", "protos": [{"type": "viii", "idx": 7, "title": "Seizures"}, {"type": "ift", "idx": 10, "title": "Seizure / Status Epilepticus"}], "summary": "Protect airway. Time the seizure. Midazolam for >5 minutes or recurrent seizure."}, {"label": "TBI / head injury", "icon": "🪖", "protos": [{"type": "viii", "idx": 22, "title": "Head Injuries (TBI)"}, {"type": "ift", "idx": 9, "title": "Neurologic Deterioration (ICH / SAH / TBI / Meningitis)"}], "summary": "GCS trend every 5 min. Avoid hypoxia and hypotension. ETCO2 35–40. Herniation: contact DMO."}, {"label": "ICH / SAH / meningitis (IFT)", "icon": "🏥", "protos": [{"type": "ift", "idx": 9, "title": "Neurologic Deterioration (ICH / SAH / TBI / Meningitis)"}, {"type": "ift", "idx": 8, "title": "Acute Ischemic Stroke"}], "summary": "Neurologic deterioration during transfer. Monitor GCS, pupils, BP. Pre-alert receiving facility."}, {"label": "Herniation signs", "icon": "🔴", "protos": [{"type": "viii", "idx": 22, "title": "Head Injuries (TBI)"}, {"type": "ift", "idx": 9, "title": "Neurologic Deterioration (ICH / SAH / TBI / Meningitis)"}, {"type": "procedures", "idx": 4, "title": "Endotracheal Intubation", "note": "If airway compromise"}], "summary": "Cushing triad: hypertension + bradycardia + irregular respirations. Contact DMO immediately. Controlled hyperventilation ETCO2 30–35 per DMO only."}]}, "trauma": {"q": "Primary injury pattern?", "opts": [{"label": "Head injury", "icon": "🪖", "protos": [{"type": "viii", "idx": 22, "title": "Head Injuries (TBI)"}, {"type": "ift", "idx": 9, "title": "Neurologic Deterioration (ICH / SAH / TBI / Meningitis)"}], "summary": "TBI protocol. GCS every 5 min. SpO2 ≥94%. ETCO2 35–40. SBP ≥90."}, {"label": "Chest injury", "icon": "🫁", "protos": [{"type": "viii", "idx": 21, "title": "Chest Injuries"}, {"type": "procedures", "idx": 10, "title": "Needle Decompression", "note": "Needle decompression if tension PTX"}], "summary": "Assess for tension PTX, hemothorax, flail chest. Needle decomp if tension PTX."}, {"label": "Burns", "icon": "🔥", "protos": [{"type": "viii", "idx": 20, "title": "Burns"}], "summary": "Rule of Nines. Parkland formula. Inhalation injury: early intubation."}, {"label": "Spinal injury", "icon": "🦴", "protos": [{"type": "viii", "idx": 26, "title": "Spinal Injuries"}], "summary": "Spinal motion restriction. Manual inline stabilization. Log roll."}, {"label": "Multi-system / polytrauma", "icon": "🚑", "protos": [{"type": "viii", "idx": 23, "title": "Multi-System Trauma"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}, {"type": "ift", "idx": 23, "title": "General Trauma Transport"}], "summary": "Load and go. Hemorrhage control first. Two IVs en route."}, {"label": "Orthopedic", "icon": "🦵", "protos": [{"type": "viii", "idx": 24, "title": "Orthopedic Injuries"}, {"type": "viii", "idx": 6, "title": "Pain Management"}], "summary": "Splint in position found. Neurovascular check before and after. Analgesia."}, {"label": "Shock / hemorrhage", "icon": "🩸", "protos": [{"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}, {"type": "procedures", "idx": 24, "title": "Tourniquet Application (CAT / SOFTT-W)", "note": "Tourniquet"}, {"type": "ift", "idx": 23, "title": "General Trauma Transport"}], "summary": "Tourniquet for extremity. Permissive hypotension for penetrating. Rapid transport."}]}, "metabolic": {"q": "Primary abnormality?", "opts": [{"label": "Hypoglycemia (<70)", "icon": "📉", "protos": [{"type": "ift", "idx": 25, "title": "Hypoglycemia — IFT"}, {"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}], "summary": "D10% 100–250 mL IV. Recheck glucose 10 minutes after. Glucagon 1 mg IM if no IV access."}, {"label": "DKA (hyperglycemia + acidosis)", "icon": "🧪", "protos": [{"type": "ift", "idx": 16, "title": "Diabetic Ketoacidosis (DKA)"}, {"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}], "summary": "Fluid resuscitation. Do not adjust insulin without order. Monitor ECG for hyperkalemia changes."}, {"label": "HHS (severe hyperglycemia)", "icon": "💧", "protos": [{"type": "ift", "idx": 17, "title": "Hyperosmolar Hyperglycemic State (HHS)"}, {"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}], "summary": "Gradual fluid resuscitation. Higher mortality than DKA. Profound dehydration."}, {"label": "Hyperkalemia", "icon": "⚡", "protos": [{"type": "ift", "idx": 18, "title": "Hyperkalemia"}], "summary": "Monitor ECG continuously. Peaked T → wide QRS → sine wave → PEA. Calcium is immediate membrane stabilizer."}, {"label": "Anaphylaxis / severe allergic", "icon": "🚨", "protos": [{"type": "ift", "idx": 26, "title": "Anaphylaxis — IFT"}, {"type": "viii", "idx": 2, "title": "Anaphylaxis and Allergic Reaction"}], "summary": "Epinephrine 0.3 mg IM immediately. Do not delay. Diphenhydramine is adjunct only."}, {"label": "Sepsis", "icon": "🦠", "protos": [{"type": "ift", "idx": 20, "title": "Sepsis / Septic Shock"}, {"type": "viii", "idx": 11, "title": "Sepsis and Septic Shock"}], "summary": "30 mL/kg NS if lungs clear. Norepinephrine for MAP <65 after fluids. Contact DMO."}]}, "airway": {"q": "Airway status?", "opts": [{"label": "Obstructed — foreign body (FBAO)", "icon": "🚨", "protos": [{"type": "viii", "idx": 18, "title": "Airway Management"}], "summary": "Conscious: 5 back blows + 5 abdominal thrusts. Unconscious: CPR + laryngoscopy to retrieve object."}, {"label": "Stridor / upper airway edema", "icon": "😮‍💨", "protos": [{"type": "viii", "idx": 2, "title": "Anaphylaxis and Allergic Reaction"}, {"type": "viii", "idx": 32, "title": "Croup (Laryngotracheobronchitis)"}, {"type": "viii", "idx": 18, "title": "Airway Management"}], "summary": "Early intubation if anaphylaxis or progressive edema. Croup: racemic epi + dex."}, {"label": "Impending failure — intubate", "icon": "🔴", "protos": [{"type": "viii", "idx": 18, "title": "Airway Management"}, {"type": "procedures", "idx": 4, "title": "Endotracheal Intubation", "note": "ETT procedure"}, {"type": "procedures", "idx": 5, "title": "CPAP — Flow-Safe II", "note": "CPAP if not yet failing"}], "summary": "Pre-oxygenate. Max 2 laryngoscopy attempts then iGel. Confirm with waveform capnography."}, {"label": "Tracheostomy problem", "icon": "🔧", "protos": [{"type": "ift", "idx": 15, "title": "Tracheostomy Complication"}, {"type": "viii", "idx": 18, "title": "Airway Management"}], "summary": "Confirm tube position. Suction. If displaced: cover stoma, BVM via mouth if needed."}]}, "peds": {"q": "Primary pediatric presentation?", "opts": [{"label": "Cardiac arrest", "icon": "💀", "protos": [{"type": "viii", "idx": 30, "title": "Pediatric Cardiac Arrest (PALS)"}], "summary": "PALS. Two-thumb encircling technique. Epinephrine 0.01 mg/kg. Use Broselow tape for all dosing."}, {"label": "Respiratory distress", "icon": "🫁", "protos": [{"type": "viii", "idx": 31, "title": "Pediatric Respiratory Distress"}, {"type": "viii", "idx": 19, "title": "Bronchospasm / Respiratory Distress"}], "summary": "Pediatric respiratory distress usually respiratory in origin. Position of comfort. Albuterol."}, {"label": "Croup (barky cough / stridor)", "icon": "🐶", "protos": [{"type": "viii", "idx": 32, "title": "Croup (Laryngotracheobronchitis)"}], "summary": "Keep child calm. Racemic epi nebulized. Dexamethasone 0.6 mg/kg. Do not agitate."}, {"label": "Bronchiolitis", "icon": "〰️", "protos": [{"type": "viii", "idx": 33, "title": "Bronchiolitis"}], "summary": "RSV typically. Supportive care. Suction, oxygen, positioning. Albuterol trial."}, {"label": "Seizure", "icon": "⚡", "protos": [{"type": "viii", "idx": 7, "title": "Seizures"}], "summary": "Pediatric midazolam doses: 0.1 mg/kg IV/IO (max 5 mg); 0.2 mg/kg IN. Check glucose."}, {"label": "Anaphylaxis", "icon": "🚨", "protos": [{"type": "viii", "idx": 2, "title": "Anaphylaxis and Allergic Reaction"}], "summary": "Epinephrine 0.01 mg/kg IM (max 0.3 mg) to lateral thigh. EpiPen Jr for <30 kg."}, {"label": "Diabetic emergency", "icon": "🍬", "protos": [{"type": "viii", "idx": 4, "title": "Diabetic Emergencies"}], "summary": "D10% 2–4 mL/kg IV/IO. Recheck glucose 5 minutes after. Use Broselow for dosing."}]}, "ob": {"q": "Obstetric presentation?", "opts": [{"label": "Imminent delivery / crowning", "icon": "🤱", "protos": [{"type": "viii", "idx": 29, "title": "Obstetric Emergencies and Field Delivery"}], "summary": "Prepare field delivery kit. Left lateral decubitus. Newborn resuscitation ready."}, {"label": "Seizure / eclampsia", "icon": "⚡", "protos": [{"type": "viii", "idx": 29, "title": "Obstetric Emergencies and Field Delivery"}], "summary": "Magnesium sulfate 4–6 g IV over 15–20 min. Left lateral decubitus. Monitor for Mg toxicity."}, {"label": "Cardiac arrest in pregnancy", "icon": "💀", "protos": [{"type": "viii", "idx": 29, "title": "Obstetric Emergencies and Field Delivery"}, {"type": "viii", "idx": 12, "title": "Cardiac Arrest and Resuscitation"}], "summary": "Left lateral tilt 15–30 degrees. Resuscitative hysterotomy if ROSC not achieved in 4 min. Contact DMO."}, {"label": "Post-partum hemorrhage", "icon": "🩸", "protos": [{"type": "viii", "idx": 29, "title": "Obstetric Emergencies and Field Delivery"}, {"type": "viii", "idx": 25, "title": "Shock and Hemorrhage"}], "summary": "Uterine fundal massage. Oxytocin per sending orders. IV fluid resuscitation."}, {"label": "Hypertension / pre-eclampsia", "icon": "📈", "protos": [{"type": "viii", "idx": 29, "title": "Obstetric Emergencies and Field Delivery"}, {"type": "viii", "idx": 10, "title": "Hypertensive Emergency"}], "summary": "Maintain magnesium infusion. Monitor BP. Seizure precautions."}]}, "tox": {"q": "Suspected substance or toxidrome?", "opts": [{"label": "Opioid (miosis, respiratory depression)", "icon": "💉", "protos": [{"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}, {"type": "ift", "idx": 27, "title": "Toxicology and Overdose — IFT"}, {"type": "viii", "idx": 12, "title": "Cardiac Arrest and Resuscitation", "note": "If cardiac arrest"}], "summary": "Naloxone 4 mg IN or 0.4–2 mg IV. Titrate to respiratory effort. Re-sedation common — monitor closely."}, {"label": "Stimulant (agitation, tachycardia, hyperthermia)", "icon": "⚡", "protos": [{"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}, {"type": "viii", "idx": 3, "title": "Behavioral Emergency"}], "summary": "Benzodiazepines for agitation. Active cooling for hyperthermia. Contact DMO."}, {"label": "TCA / cardiac toxin (wide QRS)", "icon": "❤️", "protos": [{"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}, {"type": "ift", "idx": 27, "title": "Toxicology and Overdose — IFT"}], "summary": "Sodium bicarbonate 1–2 mEq/kg IV if QRS >120ms. Avoid physostigmine."}, {"label": "Organophosphate / cholinergic", "icon": "☣️", "protos": [{"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}, {"type": "ift", "idx": 27, "title": "Toxicology and Overdose — IFT"}], "summary": "SLUDGE signs. Atropine 2–4 mg IV/IM — no maximum in toxicology context. Decontaminate."}, {"label": "Unknown / mixed ingestion", "icon": "❓", "protos": [{"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}, {"type": "viii", "idx": 1, "title": "Altered Mental Status"}, {"type": "ift", "idx": 27, "title": "Toxicology and Overdose — IFT"}], "summary": "Protect airway. Naloxone empirically if respiratory depression. Poison Control 1-800-222-1222."}, {"label": "Carbon monoxide", "icon": "💨", "protos": [{"type": "viii", "idx": 9, "title": "Poisonings and Overdoses"}, {"type": "viii", "idx": 1, "title": "Altered Mental Status"}], "summary": "100% FiO2 via NRB immediately. SpO2 unreliable — do not titrate O2 down based on SpO2 alone."}]}, "psych": {"q": "Presentation?", "opts": [{"label": "Agitation / excited delirium", "icon": "⚡", "protos": [{"type": "viii", "idx": 3, "title": "Behavioral Emergency"}, {"type": "ift", "idx": 22, "title": "Psychiatric / Behavioral Health Transfer"}], "summary": "Rule out medical cause first. Verbal de-escalation. Chemical sedation per DMO. Monitor airway."}, {"label": "Psychiatric transfer (stable)", "icon": "🏥", "protos": [{"type": "ift", "idx": 22, "title": "Psychiatric / Behavioral Health Transfer"}], "summary": "Medical clearance confirmed. Safety of crew and patient throughout transport."}, {"label": "Suicidal / self-harm", "icon": "🆘", "protos": [{"type": "ift", "idx": 22, "title": "Psychiatric / Behavioral Health Transfer"}, {"type": "viii", "idx": 3, "title": "Behavioral Emergency"}], "summary": "Scene safety. Assess for injuries. Transport to appropriate psychiatric facility."}]}, "env": {"q": "Environmental exposure?", "opts": [{"label": "Heat emergency / exertional heat stroke", "icon": "🌡️", "protos": [{"type": "viii", "idx": 28, "title": "Environmental Emergencies"}], "summary": "Rapid cooling immediately — cold water immersion if available. Target temp <39°C. IV fluids."}, {"label": "Hypothermia", "icon": "🧊", "protos": [{"type": "viii", "idx": 28, "title": "Environmental Emergencies"}], "summary": "Remove wet clothing. Warm blankets. Warm IV fluids if available. Not dead until warm and dead."}, {"label": "Drowning / submersion", "icon": "💧", "protos": [{"type": "viii", "idx": 27, "title": "Drowning"}, {"type": "viii", "idx": 12, "title": "Cardiac Arrest and Resuscitation", "note": "If cardiac arrest"}], "summary": "Airway and oxygenation first. Cold water drowning: extended resuscitation warranted."}, {"label": "Lightning / electrocution", "icon": "⚡", "protos": [{"type": "viii", "idx": 12, "title": "Cardiac Arrest and Resuscitation"}, {"type": "viii", "idx": 22, "title": "Head Injuries (TBI)"}], "summary": "Scene safety first. Cardiac arrest likely. TBI possible. Spinal precautions for falls."}]}};
+let dtHistory = []; // stack of {nodeId, label}
+
+function renderDiagTree() {
+  const container = document.getElementById('lv');
+  const nodeId = dtHistory.length > 0 ? dtHistory[dtHistory.length - 1].nodeId : 'root';
+  const node = TREE[nodeId];
+  if (!node) return;
+
+  let h = '<div class="dt-wrap">';
+
+  // Breadcrumb
+  h += '<div class="dt-breadcrumb">';
+  h += '<span class="dt-crumb" data-dt-goto="-1">Start</span>';
+  dtHistory.forEach(function(step, i) {
+    h += '<span class="dt-crumb-sep">›</span>';
+    if (i < dtHistory.length - 1) {
+      h += '<span class="dt-crumb" data-dt-goto="' + i + '">' + step.label + '</span>';
+    } else {
+      h += '<span class="dt-crumb current">' + step.label + '</span>';
+    }
+  });
+  h += '</div>';
+
+  // Question
+  if (node.q) {
+    h += '<div class="dt-question">';
+    h += '<div class="dt-q-text">' + node.q + '</div>';
+    if (node.sub) h += '<div class="dt-q-sub">' + node.sub + '</div>';
+    h += '</div>';
+    h += '<div class="dt-opts">';
+    (node.opts || []).forEach(function(opt, i) {
+      if (opt.next) {
+        h += '<div class="dt-opt" data-dt-next="' + opt.next + '" data-dt-label="' + opt.label + '">';
+      } else {
+        h += '<div class="dt-opt" data-dt-result="' + i + '" data-dt-nodeid="' + nodeId + '">';
+      }
+      h += '<div class="dt-opt-icon">' + (opt.icon || '●') + '</div>';
+      h += '<div class="dt-opt-label">' + opt.label + '</div>';
+      h += '<div class="dt-opt-arr">›</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+
+  h += '</div>';
+  container.innerHTML = h;
+}
+
+function renderDiagResult(nodeId, optIdx) {
+  const node = TREE[nodeId];
+  if (!node) return;
+  const opt = node.opts[optIdx];
+  if (!opt || !opt.protos) return;
+
+  const container = document.getElementById('lv');
+  let h = '<div class="dt-wrap">';
+
+  // Breadcrumb
+  h += '<div class="dt-breadcrumb">';
+  h += '<span class="dt-crumb" data-dt-goto="-1">Start</span>';
+  dtHistory.forEach(function(step, i) {
+    h += '<span class="dt-crumb-sep">›</span>';
+    h += '<span class="dt-crumb" data-dt-goto="' + i + '">' + step.label + '</span>';
+  });
+  h += '<span class="dt-crumb-sep">›</span>';
+  h += '<span class="dt-crumb current">' + opt.label + '</span>';
+  h += '</div>';
+
+  h += '<div class="dt-result">';
+
+  // Summary
+  if (opt.summary) {
+    h += '<div class="dt-result-summary">' + opt.summary + '</div>';
+  }
+
+  // Protocol recommendations
+  h += '<div class="dt-result-label">Recommended Protocols</div>';
+  (opt.protos || []).forEach(function(proto) {
+    if (!proto) return;
+    const sectionColor = proto.section === 'IFT' ? 'var(--aemt)' : proto.section === '911' ? 'var(--emt)' : 'var(--pm)';
+    h += '<div class="dt-proto-card" data-dt-proto-type="' + proto.type + '" data-dt-proto-idx="' + proto.idx + '">';
+    h += '<div class="dt-proto-num">' + (proto.num || '') + '</div>';
+    h += '<div class="dt-proto-title"><div>' + proto.title + '</div>';
+    if (proto.note) h += '<div class="dt-proto-note">→ ' + proto.note + '</div>';
+    h += '</div>';
+    h += '<span class="sbadge" style="background:rgba(0,0,0,0.3);color:' + sectionColor + ';border-color:' + sectionColor + '">' + (proto.section || '') + '</span>';
+    h += '</div>';
+  });
+
+  h += '<div class="dt-restart" data-dt-goto="-1">↺ Start Over</div>';
+  h += '</div></div>';
+  container.innerHTML = h;
+}
+
+// Event delegation for tree
+document.getElementById('lv').addEventListener('click', function(e) {
+  // Already handled by existing card delegation — extend it
+  if (TAB !== 'diagnose') return;
+
+  // Breadcrumb goto
+  const crumb = e.target.closest('.dt-crumb[data-dt-goto]');
+  if (crumb) {
+    const idx = parseInt(crumb.dataset.dtGoto);
+    if (idx === -1) { dtHistory = []; renderDiagTree(); }
+    else { dtHistory = dtHistory.slice(0, idx + 1); renderDiagTree(); }
+    return;
+  }
+
+  // Next node
+  const nextOpt = e.target.closest('.dt-opt[data-dt-next]');
+  if (nextOpt) {
+    dtHistory.push({nodeId: nextOpt.dataset.dtNext, label: nextOpt.querySelector('.dt-opt-label').textContent});
+    renderDiagTree();
+    document.getElementById('main').scrollTop = 0;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Result leaf
+  const resultOpt = e.target.closest('.dt-opt[data-dt-result]');
+  if (resultOpt) {
+    const label = resultOpt.querySelector('.dt-opt-label').textContent;
+    dtHistory.push({nodeId: resultOpt.dataset.dtNodeid + '_result', label: label});
+    renderDiagResult(resultOpt.dataset.dtNodeid, parseInt(resultOpt.dataset.dtResult));
+    document.getElementById('main').scrollTop = 0;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Restart
+  const restart = e.target.closest('.dt-restart');
+  if (restart) {
+    dtHistory = [];
+    renderDiagTree();
+    document.getElementById('main').scrollTop = 0;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Open protocol from result
+  const protoCard = e.target.closest('.dt-proto-card[data-dt-proto-type]');
+  if (protoCard) {
+    openDetail(protoCard.dataset.dtProtoType, parseInt(protoCard.dataset.dtProtoIdx));
+    return;
+  }
+});
+
+
+// ── SECTION IV INFUSIONS ─────────────────────────────────────────────────
+function renderInfusions() {
+  document.querySelectorAll('.nb').forEach(function(b) { b.classList.toggle('on', b.dataset.tab === 'infusions'); });
+  var c = document.getElementById('lv');
+  var h = '<div class="sg">SECTION IV &mdash; HOSPITAL-SUPPLIED INFUSION MONITORING</div>';
+  h += '<div style="padding:10px 14px 4px"><div class="co i" style="margin-bottom:0">&#x2139; Covers infusions initiated at the sending facility and continued during transport. Distinct from Section III formulary.</div></div>';
+
+  D.section_iv.forEach(function(item, idx) {
+    var scopeTag = '';
+    if (item.scope === 'aemt') scopeTag = '<span class="sbadge aemt">AEMT+</span>';
+    else if (item.scope === 'pm') scopeTag = '<span class="sbadge pm">PM ONLY</span>';
+    else scopeTag = '<span class="sbadge all">ALL LEVELS</span>';
+    h += '<div class="iv-card" data-ivtype="' + idx + '">';
+    h += '<div class="iv-card-inner">';
+    h += '<div class="iv-card-icon">' + item.icon + '</div>';
+    h += '<div class="iv-card-text">';
+    h += '<div class="iv-card-title">' + item.title + '</div>';
+    if (item.infusions) h += '<div class="iv-card-sub">' + item.infusions.length + ' medications</div>';
+    h += '</div>';
+    h += scopeTag;
+    h += '<div style="color:var(--gray);font-size:12px;margin-left:6px">&#x203A;</div>';
+    h += '</div></div>';
+  });
+
+  c.innerHTML = h;
+}
+
+function renderInfusionDetail(idx) {
+  var item = D.section_iv[idx];
+  if (!item) return;
+
+  document.getElementById('dv-num').textContent = 'Section IV';
+  document.getElementById('dv-title').textContent = item.title;
+  var scopeTag = item.scope === 'aemt' ? '<span class="sbadge aemt">AEMT+</span>' :
+                 item.scope === 'pm'   ? '<span class="sbadge pm">PM ONLY</span>' :
+                                          '<span class="sbadge all">ALL LEVELS</span>';
+  document.getElementById('dv-scope').innerHTML = scopeTag;
+  document.getElementById('dv-fav').innerHTML = '&#x2606;';
+
+  var h = '';
+
+  // Content sections (overview, verification)
+  if (item.content) {
+    item.content.forEach(function(sec) {
+      h += '<div class="cs"><div class="cl">' + sec.label + '</div>';
+      if (sec.text) h += '<div class="ct">' + sec.text + '</div>';
+      if (sec.items) sec.items.forEach(function(it, i) {
+        h += '<div class="step"><div class="sn">' + (i+1) + '</div><div class="st">' + it + '</div></div>';
+      });
+      h += '</div>';
+    });
+  }
+
+  // Critical warning
+  if (item.critical) {
+    h += '<div class="iv-critical">&#x1F6A8; ' + item.critical + '</div>';
+  }
+
+  // Infusion table
+  if (item.infusions && item.infusions.length) {
+    h += '<div class="cs"><div class="cl">Medications &mdash; Transport Monitoring</div>';
+    item.infusions.forEach(function(inf) {
+      h += '<div class="inf-row">';
+      h += '<div class="inf-name">' + inf.name + '</div>';
+      h += '<div class="inf-note">' + inf.notes + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+
+  // AEMT responsibilities
+  if (item.responsibilities) {
+    h += '<div class="cs"><div class="cl">AEMT Monitoring Responsibilities</div>';
+    item.responsibilities.forEach(function(r, i) {
+      h += '<div class="step"><div class="sn">' + (i+1) + '</div><div class="st">' + r + '</div></div>';
+    });
+    h += '</div>';
+  }
+
+  // Transfusion reaction steps
+  if (item.transfusion_reaction) {
+    h += '<div class="cs"><div class="cl">Transfusion Reaction Response</div>';
+    item.transfusion_reaction.forEach(function(s, i) {
+      h += '<div class="tr-step"><div class="tr-num">' + (i+1) + '</div><div class="tr-text">' + s + '</div></div>';
+    });
+    h += '</div>';
+  }
+
+  // Diversion
+  if (item.diversion) {
+    h += '<div class="cs"><div class="iv-diversion-label">&#x26A1; DIVERSION TRIGGERS</div><div class="iv-diversion">' + item.diversion + '</div></div>';
+  }
+
+  document.getElementById('dv-body').innerHTML = h;
+  document.getElementById('dv').style.display = 'block';
+  document.getElementById('dv').scrollTop = 0;
+  history.pushState({detail: true}, '');
+}
+
+// Event delegation for infusion cards
+document.getElementById('lv').addEventListener('click', function(e) {
+  var ivCard = e.target.closest('.iv-card');
+  if (ivCard) {
+    renderInfusionDetail(parseInt(ivCard.dataset.ivtype));
+  }
+}, true);
 
 </script>
 </body>
