@@ -4,7 +4,7 @@
 **Authorized under:** Kansas Board of Emergency Medical Services
 **Effective:** 2026
 
-Quiz avaiulable at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.html**
+Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.html**
 
 ## Installing on Your Phone
 
