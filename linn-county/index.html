@@ -13,23 +13,36 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --earth: #2C1810;
-  --bark: #4A2C1A;
-  --clay: #C09060;       /* lifted for readability on dark */
-  --wheat: #D4A96A;
-  --straw: #EDD9A0;
-  --parchment: #F8F0DC;
-  --cream: #FBF7EE;
-  --sky: #7AAFC8;
-  --sage: #6E9B6C;
-  --rust: #C04838;
-  --gold: #D4A020;
-  --white: #FDFAF4;
 
-–scope-emt: #4A6E48;
-–scope-aemt: #3A5A78;
-–scope-pm: #6E2E20;
-–scope-all: #5A4A2A;
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.small-text {
+  color: var(--text-secondary);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+a {
+  color: var(--link-color);
+}
+
+
+
+:root {
+  --scope-emt:  #6FAE6B;  /* clear, readable green */
+  --scope-aemt: #5F8FB8;  /* brighter blue, not muddy */
+  --scope-pm:   #C85A45;  /* strong rust/red for highest scope */
+  --scope-all:  #D2B46C;  /* gold-tan that stands out without blending */
 }
 
 - { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
