@@ -252,9 +252,44 @@ body{font-family:var(--sans);background:var(--surface);color:var(--white)}
 .tr-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;margin-top:1px;font-family:var(--mono)}
 .tr-text{font-size:13px;line-height:1.5;color:#cbd5e1}
 
+
+/* DISCLAIMER BANNER */
+.disclaimer-banner{background:#0a1628;border-top:1px solid var(--border);
+  padding:14px 16px;text-align:center}
+.disclaimer-text{font-size:11px;color:var(--gray);line-height:1.6;max-width:500px;margin:0 auto}
+.disclaimer-text strong{color:#94a3b8}
+
+/* DISCLAIMER MODAL */
+#disclaimer-modal{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.85);
+  display:flex;align-items:flex-end;justify-content:center}
+.dm-inner{background:#0f1e3d;border:1px solid var(--teal);border-radius:16px 16px 0 0;
+  padding:24px 20px 36px;max-width:540px;width:100%}
+.dm-icon{font-size:28px;margin-bottom:12px;text-align:center}
+.dm-title{font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;text-align:center}
+.dm-body{font-size:13px;color:#94a3b8;line-height:1.7;margin-bottom:20px}
+.dm-body strong{color:var(--white)}
+.dm-accept{display:block;width:100%;padding:15px;background:var(--teal);color:#000;
+  border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+  font-family:var(--sans)}
+
 </style>
 </head>
 <body>
+
+<div id="disclaimer-modal">
+  <div class="dm-inner">
+    <div class="dm-icon">&#x26A0;&#xFE0F;</div>
+    <div class="dm-title">Educational Use Only</div>
+    <div class="dm-body">
+      This application is an <strong>educational reference tool</strong> for authorized AMR Kansas City EMS personnel. It is not a substitute for clinical judgment, direct medical oversight, or official printed protocols.<br><br>
+      All patient care decisions must be made in accordance with your credentialed scope of practice and the standing orders issued under <strong>Dr. Ameet Deshmukh, MD</strong>, AMR Kansas City Medical Director.<br><br>
+      Content may not reflect the most current protocol amendments. In the event of any discrepancy, the <strong>official printed protocol document supersedes this application</strong>.<br><br>
+      <strong>For authorized AMR Kansas City EMS personnel only.</strong> Unauthorized use is prohibited.
+    </div>
+    <button class="dm-accept" id="dm-accept">I Understand — Continue</button>
+  </div>
+</div>
+
 <div id="loading">
   <div class="load-logo">AMR</div>
   <div class="load-agency">Kansas City &middot; Protocols 2026</div>
@@ -266,7 +301,7 @@ body{font-family:var(--sans);background:var(--surface);color:var(--white)}
       <div class="hdr-icon">KC</div>
       <div class="hdr-name">
         <div class="l1">AMR Kansas City</div>
-        <div class="l2">Medical Protocols 2026 &middot; pending Dr. Ameet Deshmukh MD &middot; pending KBEMS</div>
+        <div class="l2">Medical Protocols 2026 &middot; Dr. Ameet Deshmukh MD &middot; KBEMS Authorized</div>
       </div>
     </div>
     <div class="hdr-status"><div class="status-dot"></div><span>LIVE</span></div>
@@ -3271,6 +3306,7 @@ const D = {
         }
       ],
       "notes": [
+        "AEMT authorization: autoinjector route only in OPG (organophosphate/nerve agent) context. IV/IO administration of atropine is Paramedic scope for bradycardia management.",
         "Doses <0.5 mg may paradoxically worsen bradycardia (central vagotonic effect) — do not give sub-therapeutic doses to adults.",
         "High-degree AV block (Mobitz II, complete) often does not respond to atropine — move to pacing.",
         "Organophosphate antidote: endpoint is drying of secretions, not heart rate."
@@ -3702,7 +3738,7 @@ const D = {
     {
       "num": "III-16",
       "name": "Nitroglycerin",
-      "scope": "all",
+      "scope": "aemt",
       "tags": [
         "chest pain",
         "acs",
@@ -3821,7 +3857,7 @@ const D = {
     {
       "num": "III-19",
       "name": "Ondansetron (Zofran)",
-      "scope": "all",
+      "scope": "aemt",
       "tags": [
         "nausea",
         "vomiting",
@@ -3865,7 +3901,7 @@ const D = {
     {
       "num": "III-20",
       "name": "Normal Saline 0.9%",
-      "scope": "all",
+      "scope": "aemt",
       "tags": [
         "fluid",
         "iv",
@@ -3901,13 +3937,14 @@ const D = {
       "notes": [
         "Reassess lung sounds after EVERY bolus — stop fluids if pulmonary edema develops.",
         "In septic shock: 30 mL/kg target, but reassess after each 500 mL.",
-        "Permissive hypotension for penetrating trauma: limit fluids until hemorrhage controlled."
+        "Permissive hypotension for penetrating trauma: limit fluids until hemorrhage controlled.",
+        "EMT authorization: monitoring of pre-existing IV fluid only. EMT may not initiate IV access or administer IV NS independently."
       ]
     },
     {
       "num": "III-21",
       "name": "Ipratropium Bromide (Atrovent)",
-      "scope": "all",
+      "scope": "aemt",
       "tags": [
         "bronchospasm",
         "copd",
@@ -4975,7 +5012,7 @@ const D = {
               ],
               [
                 "Supraglottic Airway (SGA / iGel)",
-                "—",
+                "✓",
                 "✓",
                 "✓"
               ],
@@ -5001,6 +5038,83 @@ const D = {
                 "Needle Decompression",
                 "—",
                 "—",
+                "✓"
+              ]
+            ]
+          },
+          {
+            "name": "CIRCULATION AND CARDIAC",
+            "rows": [
+              [
+                "CPR",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "Mechanical Compression Device (LUCAS, AutoPulse)",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "AED Operation",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "Manual Defibrillation",
+                "—",
+                "✓",
+                "✓"
+              ],
+              [
+                "Synchronized Cardioversion",
+                "—",
+                "—",
+                "✓"
+              ],
+              [
+                "Transcutaneous Pacing",
+                "—",
+                "—",
+                "✓"
+              ],
+              [
+                "ECG — Limb Lead Acquisition",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "ECG — 12-Lead Acquisition",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "ECG — Limb Lead Interpretation",
+                "—",
+                "✓",
+                "✓"
+              ],
+              [
+                "ECG — 12-Lead Interpretation (STEMI ID)",
+                "—",
+                "✓",
+                "✓"
+              ],
+              [
+                "Arterial Line Monitoring (only)",
+                "—",
+                "—",
+                "✓"
+              ],
+              [
+                "LVAD Monitoring (passive)",
+                "✓",
+                "✓",
                 "✓"
               ]
             ]
@@ -5235,7 +5349,7 @@ const D = {
               ],
               [
                 "Ondansetron IV/IM/ODT",
-                "✓(po only)",
+                "—",
                 "✓",
                 "✓"
               ],
@@ -5249,6 +5363,59 @@ const D = {
                 "Ketamine IV/IM",
                 "—",
                 "—",
+                "✓"
+              ]
+            ]
+          },
+          {
+            "name": "MEDICATION ADMINISTRATION ROUTES",
+            "rows": [
+              [
+                "Oral (PO)",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "Sublingual (SL)",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "Inhalation / Nebulized",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "Intramuscular (IM)",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "Intranasal (IN)",
+                "✓",
+                "✓",
+                "✓"
+              ],
+              [
+                "Intravenous (IV) — Push",
+                "—",
+                "✓",
+                "✓"
+              ],
+              [
+                "Intravenous (IV) — Infusion",
+                "—",
+                "—",
+                "✓"
+              ],
+              [
+                "Intraosseous (IO)",
+                "—",
+                "✓",
                 "✓"
               ]
             ]
@@ -6804,6 +6971,28 @@ document.getElementById('lv').addEventListener('click', function(e) {
   }
 }, true);
 
+
+// ── DISCLAIMER ────────────────────────────────────────────────────────────
+(function() {
+  var KEY = 'amrkc_disc_v1';
+  var modal = document.getElementById('disclaimer-modal');
+  if (localStorage.getItem(KEY)) {
+    modal.style.display = 'none';
+  }
+  document.getElementById('dm-accept').addEventListener('click', function() {
+    localStorage.setItem(KEY, '1');
+    modal.style.display = 'none';
+  });
+})();
 </script>
+
+<div class="disclaimer-banner">
+  <div class="disclaimer-text">
+    <strong>Educational Reference Only</strong> &mdash; Not a substitute for clinical judgment or direct medical oversight.
+    All care must comply with standing orders under Dr. Ameet Deshmukh, MD. Official printed protocols supersede this app.
+    For authorized AMR Kansas City EMS personnel only.
+  </div>
+</div>
+
 </body>
 </html>
