@@ -58,16 +58,28 @@ opacity: 0.4;
 #header {
     position: sticky;
     top: 0;
-    z-index: 1000; /* Increased to ensure it stays above all cards */
-    background-color: var(--earth); /* Fixed the dash to double-hyphen */
-    border-bottom: 2px solid var(--wheat); /* Fixed the dash to double-hyphen */
+    z-index: 1000;
     
-    /* This adds a "buffer" so your title doesn't hide behind the iPhone clock */
+    /* A light, warm brown that makes black text "pop" */
+    background-color: #D2B48C; 
+    
+    /* A slightly darker border to define the edge */
+    border-bottom: 2px solid #8B4513; 
+    
+    /* Adds the "Safe Area" buffer for your translucent status bar */
     padding-top: env(safe-area-inset-top, 20px); 
-    padding-bottom: 10px;
+    padding-bottom: 12px;
+    padding-left: 15px;
+    padding-right: 15px;
     
-    /* Ensures the background spans the full screen width */
+    /* Ensures the background is fully opaque */
     width: 100%;
+    box-sizing: border-box;
+}
+
+/* Forces the text inside the header to be Black */
+#header h1, #header p, #header div {
+    color: #000000 !important;
 }
 
 .header-top {
