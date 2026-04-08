@@ -13,36 +13,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
+  --earth: #2C1810;
+  --bark: #4A2C1A;
+  --clay: #C09060;       /* lifted for readability on dark */
+  --wheat: #D4A96A;
+  --straw: #EDD9A0;
+  --parchment: #F8F0DC;
+  --cream: #FBF7EE;
+  --sky: #7AAFC8;
+  --sage: #6E9B6C;
+  --rust: #C04838;
+  --gold: #D4A020;
+  --white: #FDFAF4;
 
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-.card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-}
-
-.small-text {
-  color: var(--text-secondary);
-}
-
-.muted {
-  color: var(--text-muted);
-}
-
-a {
-  color: var(--link-color);
-}
-
-
-
-:root {
-  --scope-emt:  #6FAE6B;  /* clear, readable green */
-  --scope-aemt: #5F8FB8;  /* brighter blue, not muddy */
-  --scope-pm:   #C85A45;  /* strong rust/red for highest scope */
-  --scope-all:  #D2B46C;  /* gold-tan that stands out without blending */
+–scope-emt: #4A6E48;
+–scope-aemt: #3A5A78;
+–scope-pm: #6E2E20;
+–scope-all: #5A4A2A;
 }
 
 - { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3252,9 +3239,9 @@ function buildQuizHome() {
   var mp = QS.level === 'pm'   && QS.missedIds.length ? '<button class="level-start-btn" id="btn-retry-pm"   style="margin-top:8px;background:var(--bark);border:1px solid var(--rust);color:#D4806A">Retry Missed (' + QS.missedIds.length + ')</button>' : '';
   return '<div class="quiz-home">' +
     '<div class="quiz-intro">Select your credential level. ' + QUIZ_DATA.emt.length + ' EMT, ' + QUIZ_DATA.aemt.length + ' AEMT, ' + QUIZ_DATA.pm.length + ' Paramedic questions. Multiple choice and true/false with instant feedback. Covers scope, medications, protocols, MAI, and clinical decision-making from the 2025/2026 Linn County Medical Protocols under Dr. Deshmukh.</div>' +
-    '<div class="level-card emt"><div class="level-card-inner"><div class="level-icon"></div><div class="level-label">EMT Level</div><div class="level-title">EMT Protocol Quiz</div><div class="level-desc">Scope, airway, hemorrhage control, cardiac emergencies, EMT-authorized medications, pediatrics, stroke, trauma, and transport standards.</div><div class="level-tags"><span class="level-tag">' + QUIZ_DATA.emt.length + ' Questions</span><span class="level-tag">MC & True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-emt">Start EMT Quiz</button>' + me + '</div></div>' +
-    '<div class="level-card aemt"><div class="level-card-inner"><div class="level-icon"></div><div class="level-label">AEMT Level</div><div class="level-title">AEMT Protocol Quiz</div><div class="level-desc">Advanced vascular access, AEMT-scope medications, cardiac emergencies, IO techniques, D10W, ondansetron, midazolam for seizures, and AEMT decision-making.</div><div class="level-tags"><span class="level-tag">' + QUIZ_DATA.aemt.length + ' Questions</span><span class="level-tag">MC & True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-aemt">Start AEMT Quiz</button>' + ma + '</div></div>' +
-    '<div class="level-card pm"><div class="level-card-inner"><div class="level-icon"></div><div class="level-label">Paramedic Level</div><div class="level-title">Paramedic Protocol Quiz</div><div class="level-desc">Advanced pharmacology, MAI procedure, ventilation, vasopressors, ketorolac, IV acetaminophen, pediatric emergencies, and Paramedic-scope decision-making.</div><div class="level-tags"><span class="level-tag">' + QUIZ_DATA.pm.length + ' Questions</span><span class="level-tag">MC & True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-pm">Start Paramedic Quiz</button>' + mp + '</div></div>' +
+    '<div class="level-card emt"><div class="level-card-inner"><div class="level-icon">🟢</div><div class="level-label">EMT Level</div><div class="level-title">EMT Protocol Quiz</div><div class="level-desc">Scope, airway, hemorrhage control, cardiac emergencies, EMT-authorized medications, pediatrics, stroke, trauma, and transport standards.</div><div class="level-tags"><span class="level-tag">' + QUIZ_DATA.emt.length + ' Questions</span><span class="level-tag">MC & True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-emt">Start EMT Quiz</button>' + me + '</div></div>' +
+    '<div class="level-card aemt"><div class="level-card-inner"><div class="level-icon">🔵</div><div class="level-label">AEMT Level</div><div class="level-title">AEMT Protocol Quiz</div><div class="level-desc">Advanced vascular access, AEMT-scope medications, cardiac emergencies, IO techniques, D10W, ondansetron, midazolam for seizures, and AEMT decision-making.</div><div class="level-tags"><span class="level-tag">' + QUIZ_DATA.aemt.length + ' Questions</span><span class="level-tag">MC & True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-aemt">Start AEMT Quiz</button>' + ma + '</div></div>' +
+    '<div class="level-card pm"><div class="level-card-inner"><div class="level-icon">🔴</div><div class="level-label">Paramedic Level</div><div class="level-title">Paramedic Protocol Quiz</div><div class="level-desc">Advanced pharmacology, MAI procedure, ventilation, vasopressors, ketorolac, IV acetaminophen, pediatric emergencies, and Paramedic-scope decision-making.</div><div class="level-tags"><span class="level-tag">' + QUIZ_DATA.pm.length + ' Questions</span><span class="level-tag">MC & True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-pm">Start Paramedic Quiz</button>' + mp + '</div></div>' +
   '</div>';
 }
 
