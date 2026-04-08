@@ -56,12 +56,18 @@ opacity: 0.4;
 
 /* HEADER */
 #header {
-position: sticky;
-top: 0;
-z-index: 100;
-background: var(–earth);
-border-bottom: 2px solid var(–wheat);
-padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* Increased to ensure it stays above all cards */
+    background-color: var(--earth); /* Fixed the dash to double-hyphen */
+    border-bottom: 2px solid var(--wheat); /* Fixed the dash to double-hyphen */
+    
+    /* This adds a "buffer" so your title doesn't hide behind the iPhone clock */
+    padding-top: env(safe-area-inset-top, 20px); 
+    padding-bottom: 10px;
+    
+    /* Ensures the background spans the full screen width */
+    width: 100%;
 }
 
 .header-top {
