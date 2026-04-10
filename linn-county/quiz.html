@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2C1810">
+<title>Linn County EMS &mdash; Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="header">
+  <div class="header-top">
+    <div class="badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C4965A" stroke-width="1.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="title-block">
+      <div class="title-main">Linn County EMS</div>
+      <div class="title-sub">Protocol Quiz &middot; 2026 &middot; Dr. Deshmukh</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <a href="index.html" class="nav-tab" style="text-decoration:none">&#8592; Protocols</a>
+  </div>
+</div>
+<div id="content"></div>
+<script>
+
+var QD={
+emt:[
+{id:1,cat:"Scope",type:"mc",q:"Which skill is authorized at ALL levels (EMT, AEMT, and PM) under Linn County protocols?",opts:["A. Peripheral IV insertion","B. Manual defibrillation","C. CPAP","D. Transcutaneous pacing"],ans:2,exp:"CPAP is authorized at All Levels under Linn County protocols per Dr. Deshmukh. Peripheral IV is AEMT+, manual defibrillation is AEMT+, and transcutaneous pacing is PM only."},
+{id:2,cat:"Scope",type:"tf",q:"True or False: An EMT in Linn County may place a supraglottic airway (King LT).",opts:["True","False"],ans:0,exp:"True. Supraglottic airway (King LT) is authorized at All Levels per the Linn County scope of practice table."},
+{id:3,cat:"Scope",type:"mc",q:"Which medication may an EMT administer for anaphylaxis under Linn County standing orders?",opts:["A. Diphenhydramine 50 mg IV","B. Epinephrine 1:1,000 IM","C. Methylprednisolone 125 mg IM","D. Midazolam 10 mg IM"],ans:1,exp:"Epinephrine 1:1,000 IM is All Levels for anaphylaxis. Diphenhydramine and methylprednisolone are PM scope. Midazolam IM for active seizures is AEMT scope."},
+{id:4,cat:"Scope",type:"mc",q:"Peripheral IV insertion is authorized at which scope level in Linn County?",opts:["A. EMT, AEMT, and PM","B. AEMT and PM only","C. PM only","D. EMT only"],ans:1,exp:"Peripheral IV is AEMT and PM scope. EMTs do not place peripheral IVs under Linn County protocols."},
+{id:5,cat:"Scope",type:"tf",q:"True or False: An EMT in Linn County may operate an AED independently.",opts:["True","False"],ans:0,exp:"True. AED operation is All Levels. Manual defibrillation is AEMT+."},
+{id:6,cat:"Scope",type:"mc",q:"Which of the following is NOT within EMT scope in Linn County?",opts:["A. BVM ventilation","B. Tourniquet application","C. Intraosseous access","D. ETCO2 monitoring"],ans:2,exp:"IO access is AEMT and PM scope. BVM ventilation, tourniquet application, and ETCO2 monitoring are All Levels."},
+{id:7,cat:"Scope",type:"mc",q:"Naloxone administration in Linn County is authorized for which levels?",opts:["A. PM only","B. AEMT and PM only","C. All levels","D. Only with DMO order"],ans:2,exp:"Naloxone is All Levels. EMTs may administer via auto-injector or nasal spray. AEMTs and PMs may use IV/IO/IM/IN routes."},
+{id:8,cat:"Scope",type:"mc",q:"Which medication administration route is authorized at ALL levels in Linn County?",opts:["A. IV push","B. IO","C. Intramuscular (IM)","D. IV infusion"],ans:2,exp:"IM is All Levels. IV push and IO are AEMT+. IV infusion is PM only."},
+{id:9,cat:"Airway",type:"mc",q:"CPAP is contraindicated in which of the following patients?",opts:["A. SpO2 88% with COPD","B. Pulmonary edema with SBP 120","C. SBP 78 mmHg with respiratory distress","D. Anxious but cooperative patient"],ans:2,exp:"Hypotension (SBP < 90 mmHg) contraindicates CPAP. Other contraindications: decreased mental status, inability to protect airway, active emesis, suspected pneumothorax."},
+{id:10,cat:"Airway",type:"tf",q:"True or False: Supplemental oxygen should be applied routinely to all patients regardless of SpO2.",opts:["True","False"],ans:1,exp:"False. Oxygen is titrated to clinical need. Target SpO2 >= 94% for most patients. Hyperoxia causes harm in post-ROSC patients."},
+{id:11,cat:"Cardiac",type:"mc",q:"Per Linn County protocols, what is the aspirin dose for suspected ACS?",opts:["A. 81 mg swallowed","B. 162 mg chewed","C. 324 mg chewed","D. 500 mg chewed"],ans:2,exp:"324 mg aspirin chewed (not swallowed whole). Chewing provides faster buccal absorption for time-sensitive ACS."},
+{id:12,cat:"Cardiac",type:"tf",q:"True or False: Aspirin should be chewed rather than swallowed whole for ACS.",opts:["True","False"],ans:0,exp:"True. Chewing aspirin provides faster buccal absorption. Swallowing whole delays therapeutic effect."},
+{id:13,cat:"Cardiac",type:"mc",q:"What is the target adult CPR compression rate per Linn County protocols?",opts:["A. 60-80/min","B. 80-100/min","C. 100-120/min","D. 120-140/min"],ans:2,exp:"100-120 compressions per minute with full chest recoil between compressions."},
+{id:14,cat:"Stroke",type:"mc",q:"What is the MOST critical piece of information for a suspected stroke patient?",opts:["A. Blood pressure on scene","B. Last known well (LKW) time","C. Blood glucose","D. SpO2"],ans:1,exp:"Last known well time determines tPA and thrombectomy eligibility. Document the exact time from the patient, family, or bystanders."},
+{id:15,cat:"Stroke",type:"mc",q:"The Cincinnati Stroke Screen is positive if:",opts:["A. All three findings are abnormal","B. Any single finding is abnormal","C. Two of three are abnormal","D. Only if facial droop is present"],ans:1,exp:"Any single abnormal finding (facial droop, arm drift, or speech abnormality) is a positive Cincinnati screen."},
+{id:16,cat:"Stroke",type:"tf",q:"True or False: An EMT should routinely lower blood pressure in a suspected stroke patient.",opts:["True","False"],ans:1,exp:"False. Do NOT routinely lower BP in ischemic stroke. Permissive hypertension maintains penumbra perfusion."},
+{id:17,cat:"Anaphylaxis",type:"mc",q:"What is the FIRST treatment for anaphylaxis with hypotension and throat tightness?",opts:["A. Diphenhydramine 50 mg IM","B. Epinephrine 0.3 mg IM to the lateral thigh","C. Normal saline 500 mL bolus","D. Albuterol nebulized"],ans:1,exp:"Epinephrine 1:1,000 IM to the lateral thigh is always first-line. Never delay for antihistamines or IV access."},
+{id:18,cat:"Anaphylaxis",type:"tf",q:"True or False: Diphenhydramine is the first-line treatment for anaphylaxis.",opts:["True","False"],ans:1,exp:"False. Epinephrine IM is always first-line. Diphenhydramine is an adjunct and must never replace or delay epinephrine."},
+{id:19,cat:"Hypoglycemia",type:"mc",q:"A conscious Linn County patient has a glucose of 48 mg/dL. As an EMT, what is your treatment?",opts:["A. Oral glucose if patient can protect airway and swallow","B. D10% IV","C. Contact DMO before treating","D. Oxygen and transport only"],ans:0,exp:"EMTs may administer oral glucose to a conscious patient who can protect their airway and swallow. D10% IV is AEMT+ scope."},
+{id:20,cat:"Trauma",type:"mc",q:"A tourniquet should be placed how far proximal to an extremity wound?",opts:["A. Directly over the wound","B. 1 inch proximal","C. 2-3 inches proximal","D. 6 inches proximal"],ans:2,exp:"2-3 inches proximal to the wound, not over a joint, per Linn County protocols."},
+{id:21,cat:"Trauma",type:"tf",q:"True or False: Tourniquet time should be marked prominently on the patient.",opts:["True","False"],ans:0,exp:"True. Mark time on the tourniquet AND on the patient (forehead). Ischemia time is critical for limb salvage decisions in the OR."},
+{id:22,cat:"Trauma",type:"mc",q:"What is the correct field action for a tourniquet once applied?",opts:["A. Remove once bleeding stops","B. Remove after 30 minutes","C. Remove if patient reports severe pain","D. Do not remove in the field"],ans:3,exp:"Never remove a tourniquet in the field once applied. Leave it for the surgical team."},
+{id:23,cat:"Trauma",type:"mc",q:"Using the Rule of Nines, what percentage of TBSA does one complete leg represent?",opts:["A. 9%","B. 13.5%","C. 18%","D. 4.5%"],ans:2,exp:"Each complete leg = 18% TBSA. Head/neck = 9%, each arm = 9%, anterior trunk = 18%, posterior trunk = 18%, genitalia = 1%. Only 2nd and 3rd degree burns count."},
+{id:24,cat:"Trauma",type:"tf",q:"True or False: First degree burns are included in TBSA calculation.",opts:["True","False"],ans:1,exp:"False. Only partial thickness (2nd degree) and full thickness (3rd degree) burns count. First degree burns are excluded."},
+{id:25,cat:"Spinal",type:"mc",q:"Which is an indication to apply SMR per Linn County protocols?",opts:["A. High-speed MVC mechanism alone","B. Midline neck or spine tenderness on palpation","C. Patient is ambulatory at scene","D. Patient age over 60"],ans:1,exp:"Midline neck or spine pain/tenderness on palpation is an indication for SMR. Mechanism alone does NOT determine need."},
+{id:26,cat:"Spinal",type:"tf",q:"True or False: SMR should NOT be applied for penetrating neck trauma.",opts:["True","False"],ans:0,exp:"True. SMR in penetrating neck trauma is associated with increased mortality. No collar, no board for penetrating neck injury."},
+{id:27,cat:"Pediatric",type:"mc",q:"What tool should be used for weight-based pediatric drug dosing?",opts:["A. Parent estimate of weight","B. Broselow length-based tape","C. Standard adult dosing halved","D. Age-based formula only"],ans:1,exp:"The Broselow tape is the standard for all pediatric weight-based dosing. If patient exceeds tape length, use adult dosing."},
+{id:28,cat:"Cardiac",type:"mc",q:"Minimum EMS resuscitation time for an UNWITNESSED arrest before Linn County field TOR is:",opts:["A. 10 minutes","B. 20 minutes","C. 25 minutes","D. 40 minutes"],ans:2,exp:"Minimum 25 minutes for unwitnessed arrest. Witnessed arrest requires minimum 40 minutes. All other TOR criteria must also be met."},
+{id:29,cat:"Cardiac",type:"tf",q:"True or False: A hypothermic cardiac arrest patient meets TOR criteria if 25 minutes have passed without ROSC.",opts:["True","False"],ans:1,exp:"False. Hypothermia is a special circumstance — resuscitate and transport regardless of TOR time criteria."},
+{id:30,cat:"Operations",type:"mc",q:"Who is the Medical Director for Linn County EMS?",opts:["A. Dr. Bryan Beaver","B. Dr. Jordan Davis","C. Dr. Ameet Deshmukh","D. The KBEMS State Medical Director"],ans:2,exp:"Dr. Ameet Deshmukh, MD is the Medical Director for Linn County EMS. All standing orders are issued under his authority."},
+{id:31,cat:"Operations",type:"tf",q:"True or False: Standing orders may be implemented without contacting DMO first when clinically indicated.",opts:["True","False"],ans:0,exp:"True. Standing orders are pre-authorized and may be implemented when clinically indicated, prior to DMO contact."},
+{id:32,cat:"Nausea",type:"mc",q:"Which antiemetic is authorized at All Levels in Linn County?",opts:["A. Ondansetron IV","B. Isopropyl alcohol inhaled","C. Promethazine IM","D. Metoclopramide IV"],ans:1,exp:"Isopropyl alcohol (prep pad inhaled) is All Levels. Ondansetron is AEMT and PM scope."},
+{id:33,cat:"Airway",type:"mc",q:"A patient rescued from an enclosed fire has SpO2 99% but AMS. What is the problem?",opts:["A. Sensor is on wrong finger","B. SpO2 is unreliable in CO poisoning — reads falsely normal","C. AMS is unrelated to CO at this SpO2","D. SpO2 of 99% rules out CO toxicity"],ans:1,exp:"Pulse oximetry is UNRELIABLE in CO poisoning. Carboxyhemoglobin reads as oxyhemoglobin, giving falsely normal SpO2. Apply high-flow O2 via NRB regardless of SpO2."},
+{id:34,cat:"Obstetrics",type:"mc",q:"After what gestational age should a patient be transported left lateral or with left uterine displacement?",opts:["A. After 12 weeks","B. After 16 weeks","C. After 20 weeks","D. Only during active labor"],ans:2,exp:"After 20 weeks gestation, left lateral decubitus or manual left uterine displacement is required to relieve aortocaval compression."},
+{id:35,cat:"Obstetrics",type:"tf",q:"True or False: Fundal pressure should be applied during shoulder dystocia.",opts:["True","False"],ans:1,exp:"False. NEVER apply fundal pressure during shoulder dystocia — it worsens impaction. Use McRoberts maneuver and suprapubic pressure only."},
+{id:36,cat:"Pediatric",type:"mc",q:"A BRUE patient who appears fully recovered should:",opts:["A. Be discharged if parents are comfortable","B. Be transported to the ED","C. Be monitored on scene 30 minutes then reassessed","D. Only transported if SpO2 is abnormal"],ans:1,exp:"All BRUE patients must be transported. BRUE may signal a cardiac arrhythmia, airway anomaly, or non-accidental trauma."},
+{id:37,cat:"Cardiac",type:"tf",q:"True or False: Drowning and lightning strike patients should receive full resuscitation regardless of standard TOR criteria.",opts:["True","False"],ans:0,exp:"True. Drowning, lightning/electrocution, and hypothermia are special circumstances requiring resuscitation and transport regardless of TOR time criteria."},
+{id:38,cat:"Anaphylaxis",type:"mc",q:"After epinephrine, which fluid is appropriate for persistent anaphylactic hypotension?",opts:["A. No fluids — epi alone is sufficient","B. Normal saline 500 mL IV/IO bolus, repeat as needed","C. D10W 250 mL IV","D. Hypertonic saline 3%"],ans:1,exp:"Normal saline 500 mL IV/IO bolus, repeat as needed for anaphylactic hypotension. Pediatric: 20 mL/kg bolus."},
+{id:39,cat:"Trauma",type:"mc",q:"An amputation patient should be transported to which hospital for replantation in Kansas?",opts:["A. Nearest trauma center","B. St. Luke's Hospital KC","C. KU Medical Center","D. Overland Park Regional"],ans:2,exp:"KU Medical Center is the only Kansas regional center performing peripheral amputation replantation."},
+{id:40,cat:"Scope",type:"mc",q:"Which procedure is authorized at All Levels in Linn County?",opts:["A. Needle chest decompression","B. Wound packing","C. IO access","D. External jugular IV"],ans:1,exp:"Wound packing is All Levels. Needle decompression is PM only. IO access is AEMT+. External jugular IV is PM only."}
+],
+aemt:[
+{id:1,cat:"Scope",type:"mc",q:"Which of the following is within AEMT scope in Linn County under standing orders?",opts:["A. Transcutaneous pacing","B. Synchronized cardioversion","C. Manual defibrillation","D. Endotracheal intubation"],ans:2,exp:"Manual defibrillation is AEMT and PM scope. Transcutaneous pacing and synchronized cardioversion are PM only. ETT intubation is PM only."},
+{id:2,cat:"Scope",type:"tf",q:"True or False: An AEMT in Linn County may access a pre-existing central line for medication administration.",opts:["True","False"],ans:1,exp:"False. Pre-existing central line access is PM only. AEMTs are authorized for peripheral IV and IO access."},
+{id:3,cat:"Medications",type:"mc",q:"What is the correct IV dextrose formulation carried in Linn County?",opts:["A. D5W","B. D10% (Dextrose 10%)","C. D50W","D. D25W"],ans:1,exp:"D10% is the formulary agent for IV hypoglycemia treatment. Max adult: 25 g (250 mL) titrated, up to 50 g total."},
+{id:4,cat:"Medications",type:"mc",q:"An AEMT may administer midazolam in Linn County for which indication?",opts:["A. Sedation for cardioversion","B. Behavioral agitation","C. Active seizures — IM route","D. Post-intubation sedation"],ans:2,exp:"AEMT midazolam scope in Linn County is limited to active seizures, IM route. All other indications are PM only."},
+{id:5,cat:"Medications",type:"mc",q:"Adult midazolam dose for an active seizure when IV is unavailable:",opts:["A. 5 mg IM","B. 10 mg IM","C. 2.5 mg IM","D. 20 mg IM"],ans:1,exp:"10 mg IM for active seizure when IV/IO unavailable. May repeat at 5 mg every 5 min IM or IN (max 20 mg total)."},
+{id:6,cat:"Vascular",type:"tf",q:"True or False: Lidocaine should be administered IO before fluid administration to reduce pain.",opts:["True","False"],ans:0,exp:"True. IO site analgesia with lidocaine: 40 mg IO slow push, 10 mL NS fast push, 20 mg IO slow push (adult). Conscious patients experience significant IO pain without this."},
+{id:7,cat:"Medications",type:"mc",q:"Nitroglycerin in Linn County is authorized for which scope levels?",opts:["A. All levels","B. EMT and AEMT only","C. AEMT and PM","D. PM only"],ans:2,exp:"Nitroglycerin is AEMT and PM scope. Dose: 0.4 mg SL every 5 min. Contraindicated with PDE5 inhibitors within 48 hr, SBP < 100, and post-ROSC."},
+{id:8,cat:"Medications",type:"mc",q:"An AEMT patient with pulmonary edema has SBP 88 mmHg. Should nitroglycerin be given?",opts:["A. Yes — it reduces preload","B. No — SBP <100 is a contraindication","C. Yes — half dose only","D. Yes — if ETCO2 is normal"],ans:1,exp:"SBP < 100 is a contraindication to nitroglycerin. Giving NTG to a hypotensive patient causes severe refractory hypotension."},
+{id:9,cat:"Cardiac",type:"mc",q:"Manual defibrillation energy for adult VF/pVT in Linn County:",opts:["A. 100 J","B. 150 J","C. 200 J biphasic","D. 360 J monophasic"],ans:2,exp:"200 J biphasic for adult VF/pVT. Resume CPR immediately after each shock."},
+{id:10,cat:"Cardiac",type:"mc",q:"Which antiarrhythmics are within AEMT scope for cardiac arrest in Linn County?",opts:["A. Adenosine only","B. Amiodarone and lidocaine for cardiac arrest","C. Amiodarone only","D. No antiarrhythmics — PM only"],ans:1,exp:"Both amiodarone and lidocaine for cardiac arrest are AEMT scope. Use only ONE — do not combine them."},
+{id:11,cat:"Medications",type:"mc",q:"Adult amiodarone dose for cardiac arrest in Linn County:",opts:["A. 150 mg IV/IO","B. 300 mg IV/IO — repeat 150 mg x1","C. 5 mg/kg IV/IO","D. 200 mg IV/IO"],ans:1,exp:"Adult cardiac arrest amiodarone: 300 mg IV/IO fixed dose, repeat 150 mg x1 if needed. Pediatric: 5 mg/kg IV/IO."},
+{id:12,cat:"Cardiac",type:"mc",q:"Post-ROSC SpO2 target in Linn County is:",opts:["A. 88-92%","B. 94-98%","C. 100%","D. >90% any value"],ans:1,exp:"Post-ROSC SpO2: 94-98%. Do NOT target 100% — hyperoxia causes reperfusion injury and worsens neurologic outcomes."},
+{id:13,cat:"Cardiac",type:"tf",q:"True or False: Post-ROSC hyperventilation improves neurological outcomes.",opts:["True","False"],ans:1,exp:"False. Hyperventilation post-ROSC causes cerebral vasoconstriction. Target ETCO2 35-45 mmHg (normocarbia)."},
+{id:14,cat:"Medications",type:"mc",q:"Albuterol for suspected hyperkalemia in Linn County is dosed as:",opts:["A. 2.5 mg/3 mL NS x1","B. 2.5 mg/3 mL NS continuously — max 8 doses adult","C. 5 mg/3 mL NS x1","D. 4 puffs MDI"],ans:1,exp:"Hyperkalemia: 2.5 mg/3 mL NS continuously, max 8 doses (20 mg) adult, 4 doses (10 mg) pediatric. Shifts potassium intracellularly."},
+{id:15,cat:"Vascular",type:"tf",q:"True or False: Any medication approved for IV may also be given IO in Linn County.",opts:["True","False"],ans:0,exp:"True. Any IV-approved medication may also be given via IO per Linn County Medication Administration guidelines."},
+{id:16,cat:"Cardiac",type:"mc",q:"Normal saline fluid resuscitation for adult shock in Linn County is:",opts:["A. 1 L wide open","B. 250-500 mL IV/IO bolus — reassess after each","C. 30 mL/kg in one bolus","D. 100 mL/hr maintenance"],ans:1,exp:"Normal saline 250-500 mL IV/IO bolus, reassess and repeat for clinical response."},
+{id:17,cat:"Medications",type:"mc",q:"Calcium chloride requires DMO in Linn County for which situation?",opts:["A. Cardiac arrest with suspected hyperkalemia","B. All situations","C. Non-arrest use and repeat dosing","D. Pediatric patients only"],ans:2,exp:"First dose in cardiac arrest: no DMO required. DMO required for repeat dosing and all non-arrest use."},
+{id:18,cat:"Vascular",type:"mc",q:"Which vascular access site is NOT within AEMT scope in Linn County?",opts:["A. Peripheral IV","B. IO humeral head","C. External jugular vein","D. Peripheral IV at forearm"],ans:2,exp:"External jugular IV is PM only. AEMTs are authorized for peripheral IV and IO (humeral head, proximal tibia, distal tibia)."},
+{id:19,cat:"Medications",type:"mc",q:"An AEMT responds to opioid overdose. The patient is apneic. After BVM, what is next?",opts:["A. Contact DMO before naloxone","B. Administer naloxone — titrate to adequate respirations","C. Maximum dose naloxone for full reversal","D. Transport only — naloxone is PM scope"],ans:1,exp:"Administer naloxone titrated to adequate respiratory effort — not full consciousness. AEMT scope includes naloxone via IV/IO/IM/IN."},
+{id:20,cat:"Pediatric",type:"mc",q:"A 20 kg child in cardiac arrest. Correct epinephrine dose:",opts:["A. 1 mg IV/IO","B. 0.2 mg IV/IO","C. 0.5 mg IV/IO","D. 0.1 mg IV/IO"],ans:1,exp:"Pediatric arrest epi: 0.01 mg/kg IV/IO. 20 kg x 0.01 = 0.2 mg. Max 1 mg per dose. Repeat every 3-5 min."},
+{id:21,cat:"Cardiac",type:"mc",q:"Minimum EMS resuscitation time for a WITNESSED arrest before Linn County field TOR:",opts:["A. 20 minutes","B. 25 minutes","C. 30 minutes","D. 40 minutes"],ans:3,exp:"Witnessed arrest: minimum 40 minutes. Unwitnessed: minimum 25 minutes. All other criteria must also be met."},
+{id:22,cat:"Medications",type:"mc",q:"Ipratropium is contraindicated in which Linn County pediatric patient?",opts:["A. Any child under 12 years","B. Children under 2 years with bronchiolitis","C. Children with asthma","D. Any patient under 5 years"],ans:1,exp:"Ipratropium should NOT be administered to children under 2 years with bronchiolitis. It is acceptable for bronchospasm in other pediatric patients combined with albuterol."},
+{id:23,cat:"Medications",type:"mc",q:"Ondansetron dosing for an adult Linn County patient is:",opts:["A. 8 mg IV, may repeat x2","B. 4 mg IV/IO/IM or ODT — one dose only","C. 2 mg IV titrated","D. 4 mg IV, repeat every 15 min"],ans:1,exp:"Ondansetron 4 mg IV/IO/IM or ODT — one dose only. Not indicated under age 2."},
+{id:24,cat:"Trauma",type:"mc",q:"For a junctional wound not amenable to tourniquet, the correct Linn County intervention is:",opts:["A. Improvised tourniquet as high as possible","B. Pack tightly with hemostatic gauze and direct pressure","C. Arterial pressure point only","D. Pneumatic antishock garment"],ans:1,exp:"Junctional wounds: pack tightly with hemostatic gauze and maintain direct pressure."},
+{id:25,cat:"Medications",type:"mc",q:"Pre-existing central line access in Linn County requires withdrawal of how much blood before use?",opts:["A. 1 mL","B. 3 mL","C. 5 mL","D. 10 mL"],ans:2,exp:"Withdraw 5 mL from any port PRIOR to use to clear heparin lock before administering medications through a pre-existing central line. PM scope only."}
+],
+pm:[
+{id:1,cat:"Pharmacology",type:"mc",q:"Correct first dose of adenosine for stable SVT in Linn County:",opts:["A. 12 mg slow IV push over 2 minutes","B. 6 mg rapid IV push with immediate flush","C. 6 mg IM to lateral thigh","D. 0.1 mg/kg IV over 5 minutes"],ans:1,exp:"Adenosine 6 mg rapid IV push followed immediately by flush. Must be given as proximal as possible. Half-life approximately 10 seconds. Warn patient of transient asystole."},
+{id:2,cat:"MAI",type:"mc",q:"Correct induction agent and dose for Linn County MAI:",opts:["A. Midazolam 5 mg IV","B. Ketamine 1-1.5 mg/kg IV over 1 minute","C. Fentanyl 100 mcg IV","D. Propofol 1.5 mg/kg IV"],ans:1,exp:"Ketamine 1-1.5 mg/kg IV over 1 minute is the Linn County MAI induction agent. Wait 60 seconds for onset. Signs: nystagmus, jaw relaxation."},
+{id:3,cat:"MAI",type:"mc",q:"Standard paralytic agent for MAI in Linn County:",opts:["A. Succinylcholine 1.5 mg/kg","B. Vecuronium 0.1 mg/kg IV","C. Rocuronium 0.5 mg/kg IV","D. Cisatracurium 0.1 mg/kg"],ans:1,exp:"Vecuronium 0.1 mg/kg IV slow push over 30-60 seconds is the standard Linn County MAI paralytic. Rocuronium is an extended formulary alternative."},
+{id:4,cat:"MAI",type:"tf",q:"True or False: A paralyzed patient is fully awake and aware without sedation.",opts:["True","False"],ans:0,exp:"True. NMBAs cause complete respiratory paralysis with NO analgesic or sedative properties. Sedation/analgesia MUST be given before the paralytic."},
+{id:5,cat:"MAI",type:"mc",q:"Gold standard for confirming ETT placement in Linn County:",opts:["A. Colorimetric CO2 detector","B. Auscultation of bilateral breath sounds","C. Waveform capnography — minimum 6 consecutive waveforms","D. Chest rise symmetry"],ans:2,exp:"Waveform capnography is the gold standard. Must see >= 6 consecutive waveforms. Colorimetric CO2 is unreliable in low-perfusion states."},
+{id:6,cat:"MAI",type:"mc",q:"Post-intubation ventilation targets in Linn County:",opts:["A. Rate 16-20, SpO2 100%, ETCO2 25-30","B. Rate 10-12, SpO2 94-98%, ETCO2 35-45","C. Rate 8-10, SpO2 90-94%, ETCO2 40-50","D. Rate 12-14, SpO2 96-100%, ETCO2 30-35"],ans:1,exp:"Rate 10-12/min adult, SpO2 94-98%, ETCO2 35-45 mmHg. Avoid hyperoxia and hypocarbia — both worsen outcomes."},
+{id:7,cat:"Pharmacology",type:"mc",q:"Ketamine is contraindicated in which patient under Linn County standing orders?",opts:["A. Trauma with hypotension","B. Active psychosis","C. Pediatric pain management","D. Hypertension"],ans:1,exp:"Active psychosis is a hard contraindication to ketamine. Also contraindicated: ACS, CVA."},
+{id:8,cat:"Pharmacology",type:"mc",q:"Standard norepinephrine admixture for post-ROSC hypotension in Linn County:",opts:["A. 4 mg in 250 mL NS = 16 mcg/mL","B. 4 mg in 500 mL NS = 8 mcg/mL","C. 8 mg in 500 mL NS = 16 mcg/mL","D. 2 mg in 250 mL NS = 8 mcg/mL"],ans:1,exp:"Standard admixture: 4 mg in 500 mL NS = 8 mcg/mL. Titrate to MAP > 65 mmHg."},
+{id:9,cat:"Pharmacology",type:"mc",q:"TCA overdose with QRS > 100 ms — Linn County treatment:",opts:["A. Amiodarone 150 mg IV","B. Magnesium sulfate 2 g IV","C. Sodium bicarbonate 1 mEq/kg IV","D. Lidocaine 1.5 mg/kg IV"],ans:2,exp:"Sodium bicarbonate 1 mEq/kg IV for TCA with QRS > 100 ms. Alkalinization reverses sodium channel blockade. DMO required for non-arrest or repeat dosing."},
+{id:10,cat:"Pharmacology",type:"mc",q:"Adult midazolam dose for active seizure with IV access in Linn County:",opts:["A. 2.5 mg IV","B. 5 mg IV — repeat 5 mg every 5 min (max 20 mg)","C. 10 mg IV bolus","D. 0.1 mg/kg IV"],ans:1,exp:"Active seizure with IV: 5 mg IV, repeat at 5 mg every 5 min, max 20 mg. Without IV: 10 mg IM. Also 0.2 mg/kg IN."},
+{id:11,cat:"Pharmacology",type:"mc",q:"Naloxone should be titrated to which endpoint in Linn County?",opts:["A. Full consciousness and alertness","B. Adequate respiratory effort — not full reversal","C. SpO2 >= 98%","D. Patient can verbalize pain score"],ans:1,exp:"Titrate to adequate respiratory effort — NOT full consciousness. Full reversal in opioid-tolerant patients causes acute withdrawal."},
+{id:12,cat:"Pharmacology",type:"mc",q:"Ketorolac (Toradol) NEW 2025 — which patient should NOT receive it?",opts:["A. Musculoskeletal back pain, SBP 130","B. Renal colic, SBP 118","C. Fracture pain, SBP 78 mmHg","D. Hip pain, no NSAID allergy"],ans:2,exp:"Ketorolac is contraindicated in hypotension and hemodynamic instability. Also contraindicated: active GI bleeding, NSAID allergy, coagulopathy, significant renal impairment, 3rd trimester pregnancy."},
+{id:13,cat:"Pharmacology",type:"mc",q:"Adult ketorolac IV dose in Linn County:",opts:["A. 60 mg IV push","B. 15-30 mg IV slow push over 1-2 minutes","C. 30 mg IV infused over 30 minutes","D. 10 mg IV, may repeat x2"],ans:1,exp:"Ketorolac adult IV/IO: 15-30 mg slow push over 1-2 min. Adult IM: 30 mg. Pediatric (>= 2 yr): 0.5 mg/kg (max 15 mg). Single prehospital dose only."},
+{id:14,cat:"Cardiac",type:"mc",q:"Inferior STEMI patient is hypotensive. You are considering nitroglycerin. Correct action:",opts:["A. Give NTG 0.4 mg SL — BP is still measurable","B. Hold NTG, suspect RV infarction, give IV fluids","C. Give NTG and start norepinephrine simultaneously","D. Double the NTG dose"],ans:1,exp:"Inferior STEMI = high suspicion for RV infarction. NTG causes severe hypotension by reducing RV preload. Hold NTG, get right-sided leads, give IV fluids."},
+{id:15,cat:"Cardiac",type:"mc",q:"First-line vasopressor for post-ROSC hypotension in Linn County:",opts:["A. Dopamine","B. Vasopressin","C. Norepinephrine","D. Epinephrine IM"],ans:2,exp:"Norepinephrine is first-line for post-ROSC hypotension and shock. Target MAP > 65 mmHg. Dopamine is not in the Linn County formulary."},
+{id:16,cat:"Cardiac",type:"mc",q:"ETCO2 target for TBI patient during routine transport in Linn County:",opts:["A. 25-30 mmHg","B. 30-35 mmHg","C. 35-45 mmHg","D. 45-50 mmHg"],ans:2,exp:"35-45 mmHg (normocapnia) for routine TBI transport. Controlled hyperventilation to 30-35 is ONLY for active herniation signs."},
+{id:17,cat:"Cardiac",type:"tf",q:"True or False: Nitroglycerin may be administered post-ROSC for hemodynamic support.",opts:["True","False"],ans:1,exp:"False. Nitroglycerin is NEVER administered after ROSC — hard contraindication per Linn County protocols."},
+{id:18,cat:"Pharmacology",type:"mc",q:"Norepinephrine is a vesicant. What precaution is required?",opts:["A. Premedicate with diphenhydramine","B. Extravasation causes severe tissue necrosis — confirm IV patency and monitor continuously","C. Must be filtered before infusion","D. Only safe in central lines"],ans:1,exp:"Vesicant = severe tissue necrosis with extravasation. Use largest most proximal vein. Confirm patency with aspiration and flush. Monitor continuously."},
+{id:19,cat:"Pharmacology",type:"mc",q:"Magnesium sulfate for eclamptic seizures in Linn County:",opts:["A. 2 g IV push","B. 4 g in 50 mL D5W — rapid infusion at 2 gtts/sec","C. 6 g IV over 30 minutes","D. 1 g IM"],ans:1,exp:"Eclampsia: 4 g in 50 mL D5W, macro drip at 2 gtts/sec. May repeat once at 2 g. Calcium chloride must be immediately available as antidote."},
+{id:20,cat:"Pharmacology",type:"mc",q:"Signs of magnesium toxicity include all EXCEPT:",opts:["A. Loss of deep tendon reflexes","B. Respiratory depression","C. Hypertension","D. Circulatory collapse"],ans:2,exp:"Magnesium toxicity causes hypotension (NOT hypertension), flushing, sweating, loss of DTRs, paralysis, hypothermia, cardiovascular depression."},
+{id:21,cat:"Pharmacology",type:"mc",q:"Crush injury with peaked T-waves and widened QRS — FIRST treatment in Linn County:",opts:["A. Sodium bicarbonate 1 mEq/kg","B. Albuterol nebulized","C. Calcium chloride 1 g IV to stabilize myocardium","D. Lidocaine 1.5 mg/kg IV"],ans:2,exp:"Calcium chloride first for hyperkalemia with cardiac membrane instability. Stabilizes the myocardial membrane immediately without lowering potassium."},
+{id:22,cat:"Pharmacology",type:"mc",q:"Vecuronium duration of action at MAI doses in Linn County:",opts:["A. 5-10 minutes","B. 10-20 minutes","C. 30-60 minutes","D. 60-120 minutes"],ans:2,exp:"Vecuronium duration: 30-60 minutes. Ensure ongoing midazolam sedation throughout."},
+{id:23,cat:"Pharmacology",type:"mc",q:"Correct lidocaine IO analgesia sequence in Linn County:",opts:["A. 20 mg IO push only","B. 40 mg IO slow push, 10 mL NS fast, 20 mg IO slow push","C. 1 mg/kg IO over 2 minutes","D. 100 mg IO drip over 10 minutes"],ans:1,exp:"IO site analgesia: 40 mg slow push, 10 mL NS fast, 20 mg slow push. Pediatric: 0.5 mg/kg (max 40 mg), 5 mL NS, 0.25 mg/kg."},
+{id:24,cat:"Medical",type:"mc",q:"Atropine for organophosphate exposure should be titrated to:",opts:["A. Heart rate > 80 bpm","B. Blood pressure > 90 mmHg","C. Drying of secretions — not heart rate","D. Pupil dilation"],ans:2,exp:"Atropine for OP/nerve agent toxicity is titrated to drying of secretions, NOT heart rate. Tachycardia is expected with atropine and is not the target. No maximum dose."},
+{id:25,cat:"Medical",type:"mc",q:"Earliest sign of magnesium toxicity before respiratory arrest:",opts:["A. Hypertension","B. Loss of deep tendon reflexes (patellar reflex)","C. Tachycardia","D. Hyperreflexia"],ans:1,exp:"Loss of deep tendon reflexes (patellar reflex) is the earliest sign of magnesium toxicity. Check DTRs during any magnesium infusion. Antidote: calcium chloride 1 g IV."},
+{id:26,cat:"MAI",type:"mc",q:"ETCO2 waveform disappears suddenly during transport after confirmed intubation. First action:",opts:["A. Increase ventilation rate","B. Reassess ETT position immediately","C. Administer epinephrine","D. Contact DMO before acting"],ans:1,exp:"Sudden ETCO2 loss: immediately reassess ETT position. The tube may have dislodged with patient movement."},
+{id:27,cat:"Pharmacology",type:"mc",q:"Hydroxocobalamin is indicated for which Linn County patient?",opts:["A. Any burn patient","B. Enclosed-space fire patient with AMS, respiratory distress, or shock","C. Any CO exposure patient","D. Metformin toxicity"],ans:1,exp:"Hydroxocobalamin (5 g adult IV over 15 min) for enclosed-space fire patients with AMS, respiratory distress, shock, or seizures — suspected cyanide toxicity."},
+{id:28,cat:"Pharmacology",type:"mc",q:"Preferred analgesic combination for fracture pain in hemodynamically STABLE Linn County patient:",opts:["A. Ketamine 1.5 mg/kg IV","B. Morphine 4 mg IV alone","C. Fentanyl + ketorolac (opioid-sparing approach)","D. Hydromorphone 2 mg IV alone"],ans:2,exp:"Opioid-sparing: fentanyl + ketorolac 15-30 mg IV for musculoskeletal/fracture pain in stable patients. Reduces total opioid dose. Ketorolac is single-dose only prehospital."},
+{id:29,cat:"Pharmacology",type:"mc",q:"Pediatric ketorolac dose (>= 2 years) in Linn County:",opts:["A. 30 mg IV — same as adult","B. 15 mg IV flat dose","C. 0.5 mg/kg IV/IO or IM (max 15 mg)","D. 1 mg/kg IV (max 30 mg)"],ans:2,exp:"Pediatric ketorolac >= 2 yr: 0.5 mg/kg IV/IO or IM, max single dose 15 mg. Under 2: contact DMO. Single prehospital dose only."},
+{id:30,cat:"Medical",type:"mc",q:"Minimum SBP target for adult TBI patients in Linn County:",opts:["A. >= 80 mmHg","B. >= 90 mmHg","C. >= 110 mmHg","D. >= 120 mmHg"],ans:2,exp:"Adult TBI minimum SBP: >= 110 mmHg. Hypotension causes secondary brain injury."}
+]
+};
+
+function shuffleQ(arr){var a=arr.slice(),i,j,t;for(i=a.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function startQuiz(lvl,missedOnly){
+  QS.level=lvl;QS.current=0;QS.score=0;QS.history=[];
+  if(missedOnly&&QS.missedIds.length){QS.questions=shuffleQ(QD[lvl].filter(q=>QS.missedIds.includes(q.id)));}
+  else{QS.questions=shuffleQ(QD[lvl]);}
+  QS.view='active';renderQuiz();
+}
+function renderQuiz(){
+  var c=document.getElementById('content');
+  if(QS.view==='home'){c.innerHTML=buildQuizHome();setTimeout(function(){wireQuizHome();},0);}
+  else if(QS.view==='active'){renderQuizQuestion();}
+  else if(QS.view==='results'){renderQuizResults();}
+}
+function buildQuizHome(){
+  var me=(QS.level==='emt'&&QS.missedIds.length)?'<button class="level-start-btn" id="btn-retry-emt" style="margin-top:8px;background:var(--bark);border:1px solid var(--sage);color:var(--sage)">Retry Missed ('+(QS.missedIds.length)+')</button>':'';
+  var ma=(QS.level==='aemt'&&QS.missedIds.length)?'<button class="level-start-btn" id="btn-retry-aemt" style="margin-top:8px;background:var(--bark);border:1px solid var(--sky);color:var(--sky)">Retry Missed ('+(QS.missedIds.length)+')</button>':'';
+  var mp=(QS.level==='pm'&&QS.missedIds.length)?'<button class="level-start-btn" id="btn-retry-pm" style="margin-top:8px;background:var(--bark);border:1px solid var(--rust);color:#D4806A">Retry Missed ('+(QS.missedIds.length)+')</button>':'';
+  return '<div class="quiz-home"><div class="quiz-intro">Select your credential level. '+(QD.emt.length)+' EMT, '+(QD.aemt.length)+' AEMT, '+(QD.pm.length)+' Paramedic questions. Multiple choice and true/false with instant feedback. Covers scope, medications, protocols, MAI, and clinical decision-making from the 2025/2026 Linn County Medical Protocols under Dr. Deshmukh.</div>\n  <div class="level-card emt"><div class="level-card-inner"><div class="level-icon">🟢</div><div class="level-label">EMT Level</div><div class="level-title">EMT Protocol Quiz</div><div class="level-desc">Scope, airway, hemorrhage control, cardiac emergencies, EMT-authorized medications, pediatrics, stroke, trauma, and transport standards.</div><div class="level-tags"><span class="level-tag">'+(QD.emt.length)+' Questions</span><span class="level-tag">MC &amp; True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-emt">Start EMT Quiz</button>'+(me)+'</div></div>\n  <div class="level-card aemt"><div class="level-card-inner"><div class="level-icon">🔵</div><div class="level-label">AEMT Level</div><div class="level-title">AEMT Protocol Quiz</div><div class="level-desc">Advanced vascular access, AEMT-scope medications, cardiac emergencies, IO techniques, D10W, ondansetron, midazolam for seizures, and AEMT decision-making.</div><div class="level-tags"><span class="level-tag">'+(QD.aemt.length)+' Questions</span><span class="level-tag">MC &amp; True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-aemt">Start AEMT Quiz</button>'+(ma)+'</div></div>\n  <div class="level-card pm"><div class="level-card-inner"><div class="level-icon">🔴</div><div class="level-label">Paramedic Level</div><div class="level-title">Paramedic Protocol Quiz</div><div class="level-desc">Advanced pharmacology, MAI procedure, ventilation, vasopressors, ketorolac, IV acetaminophen, pediatric emergencies, and Paramedic-scope decision-making.</div><div class="level-tags"><span class="level-tag">'+(QD.pm.length)+' Questions</span><span class="level-tag">MC &amp; True/False</span><span class="level-tag">Instant Feedback</span></div><button class="level-start-btn" id="btn-start-pm">Start Paramedic Quiz</button>'+(mp)+'</div></div>\n  </div>';
+}
+function wireQuizHome(){
+  var ge=function(id){return document.getElementById(id);};
+  var se=ge('btn-start-emt'),sa=ge('btn-start-aemt'),sp=ge('btn-start-pm');
+  if(se)se.onclick=function(){startQuiz('emt',false);};
+  if(sa)sa.onclick=function(){startQuiz('aemt',false);};
+  if(sp)sp.onclick=function(){startQuiz('pm',false);};
+  var re=ge('btn-retry-emt'),ra=ge('btn-retry-aemt'),rp=ge('btn-retry-pm');
+  if(re)re.onclick=function(){startQuiz('emt',true);};
+  if(ra)ra.onclick=function(){startQuiz('aemt',true);};
+  if(rp)rp.onclick=function(){startQuiz('pm',true);};
+}
+function renderQuizQuestion(){
+  var q=QS.questions[QS.current],total=QS.questions.length;
+  var pct=Math.round((QS.current/total)*100);
+  var lc={emt:'EMT LEVEL',aemt:'AEMT LEVEL',pm:'PARAMEDIC LEVEL'}[QS.level];
+  var lk={emt:'var(--sage)',aemt:'var(--sky)',pm:'var(--rust)'}[QS.level];
+  var opts='<div class="q-opts">'+q.opts.map((o,i)=>'<button class="q-opt" id="qopt-'+(i)+'">'+(o)+'</button>').join('')+'</div>';
+  document.getElementById('content').innerHTML='\n  <div class="quiz-active-hdr"><div class="quiz-active-top"><button class="quiz-quit-btn" id="quiz-quit-btn">× Quit</button><div class="quiz-level-tag" style="color:'+(lk)+'">'+(lc)+'</div><div class="quiz-score-tag" id="qsc">'+(QS.score)+'/'+(QS.current)+'</div></div>\n  <div style="font-family:\'Courier Prime\',monospace;font-size:11px;color:var(--clay);margin-bottom:6px">Question '+(QS.current+1)+' of '+(total)+'</div>\n  <div class="quiz-prog"><div class="quiz-prog-fill" style="width:'+(pct)+'%"></div></div></div>\n  <div class="q-wrap-lc"><div class="q-cat-lc">'+(q.cat)+'</div>\n  <span class="q-type-badge">'+(q.type==='tf'?'TRUE / FALSE':'MULTIPLE CHOICE')+'</span>\n  <div class="q-text-lc">'+(q.q)+'</div>'+(opts)+'<div id="q-fb"></div></div>';
+  var qqBtn=document.getElementById('quiz-quit-btn');
+  if(qqBtn)qqBtn.onclick=function(){if(confirm('Quit quiz? Progress will be lost.')){QS.view='home';renderQuiz();}};
+  q.opts.forEach(function(_,i){
+    var b=document.getElementById('qopt-'+i);
+    if(b)b.onclick=(function(idx){return function(){handleAnswer(idx);};})(i);
+  });
+}
+function handleAnswer(sel){
+  var q=QS.questions[QS.current];var ok=sel===q.ans;
+  if(ok)QS.score++;
+  QS.history.push({id:q.id,correct:ok,cat:q.cat,q:q.q,correctOpt:q.opts[q.ans],exp:q.exp});
+  var sc=document.getElementById('qsc');if(sc)sc.textContent=QS.score+'/'+(QS.current+1);
+  q.opts.forEach((_,i)=>{var b=document.getElementById('qopt-'+i);if(!b)return;b.style.pointerEvents='none';b.style.cursor='default';if(i===q.ans)b.classList.add('correct');else if(i===sel&&!ok)b.classList.add('wrong');});
+  var isLast=QS.current>=QS.questions.length-1;
+  var fb=document.getElementById('q-fb');
+  fb.innerHTML='<div class="q-feedback '+(ok?'correct':'wrong')+'"><div class="q-fb-hdr">'+(ok?'Correct':'Incorrect')+'</div><div class="q-fb-exp">'+(q.exp)+'</div></div><button class="q-next-btn" id="q-next">'+(isLast?'See Results':'Next Question')+'</button>';
+  document.getElementById('q-next').onclick=function(){
+    QS.current++;
+    if(QS.current>=QS.questions.length){QS.view='results';renderQuizResults();}
+    else{renderQuizQuestion();window.scrollTo(0,0);}
+  };
+  setTimeout(function(){var fb=document.getElementById('q-fb');if(fb)fb.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
+}
+function renderQuizResults(){
+  var total=QS.questions.length,pct=Math.round((QS.score/total)*100);
+  var grade=pct>=90?'Excellent':pct>=80?'Good — review missed items':pct>=70?'Borderline — additional review recommended':'Needs improvement — protocol review required';
+  var ll={emt:'EMT',aemt:'AEMT',pm:'PARAMEDIC'}[QS.level];
+  var cats={};QS.history.forEach(h=>{if(!cats[h.cat])cats[h.cat]={t:0,c:0};cats[h.cat].t++;if(h.correct)cats[h.cat].c++;});
+  var catHtml=Object.keys(cats).sort().map(cat=>{var d=cats[cat],p=Math.round((d.c/d.t)*100),col=p>=80?'var(--sage)':p>=60?'var(--gold)':'var(--rust)';return'<div class="qr-cat-row"><div class="qr-cat-name">'+(cat)+'</div><div class="qr-cat-sc">'+(d.c)+'/'+(d.t)+'</div><div class="qr-bar-wrap"><div class="qr-bar" style="width:'+(p)+'%;background:'+(col)+'"></div></div></div>';}).join('');
+  var missed=QS.history.filter(h=>!h.correct);QS.missedIds=missed.map(h=>h.id);
+  var missedHtml=missed.length===0?'<div style="text-align:center;padding:20px;color:var(--sage);font-family:\'Playfair Display\',serif;font-size:16px">Perfect score — outstanding!</div>':
+    '<div class="qr-sec-label">MISSED QUESTIONS ('+(missed.length)+')</div>'+missed.map(ms=>'<div class="qr-missed-item"><div class="qr-missed-q">'+(ms.q)+'</div><div class="qr-missed-ans">Correct: '+(ms.correctOpt)+'</div><div class="qr-missed-exp">'+(ms.exp)+'</div></div>').join('');
+  document.getElementById('content').innerHTML='\n  <div class="quiz-results-hdr"><div class="qr-level">'+(ll)+' LEVEL</div><div class="qr-title">Quiz Complete</div><div class="qr-score">'+(QS.score)+'<span class="qr-denom">/'+(total)+'</span></div><div class="qr-pct">'+(pct)+'%</div><div class="qr-grade">'+(grade)+'</div></div>\n  <div class="quiz-results-body">\n  <div class="qr-breakdown"><div class="qr-bdi"><div class="qr-bdi-num c">'+(QS.score)+'</div><div class="qr-bdi-label">Correct</div></div><div class="qr-bdi"><div class="qr-bdi-num w">'+(total-QS.score)+'</div><div class="qr-bdi-label">Incorrect</div></div></div>\n  <div style="margin-bottom:20px"><div class="qr-sec-label">BY CATEGORY</div>'+(catHtml)+'</div>\n  <div style="margin-bottom:20px">'+(missedHtml)+'</div>\n  <div class="qr-actions">\n  <button class="qr-btn primary" id="qr-retry">Retry Full Quiz</button>\n  ${missed.length?'<button class="qr-btn ghost" id="qr-missed">Retry Missed (${missed.length})</button>':\'\'}\n  <button class="qr-btn secondary" id="qr-home">Choose Level</button>\n  </div></div>';
+  var qrRetry=document.getElementById('qr-retry');
+  if(qrRetry)qrRetry.onclick=function(){startQuiz(QS.level,false);};
+  var qrHome=document.getElementById('qr-home');
+  if(qrHome)qrHome.onclick=function(){QS.view='home';renderQuiz();};
+  var qrMissed=document.getElementById('qr-missed');
+  if(qrMissed)qrMissed.onclick=function(){startQuiz(QS.level,true);};
+}
+
+// ── BOOT ─────────────────────────────────────────────────────
+var QS={level:null,questions:[],current:0,score:0,history:[],missedIds:[],view:'home'};
+renderQuiz();
+
+</script>
+</body>
+</html>
