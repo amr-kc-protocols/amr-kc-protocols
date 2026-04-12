@@ -453,6 +453,80 @@ function calcDoses(){
     h += '<td class="dv">'+r[1]+'</td></tr>';
   });
   h += '</table></div>';
+
+  // ── WEIGHT-BASED INFUSIONS (adult only) ───────────────────────────────
+  if (!p) {
+    h += '<div style="margin-top:10px;background:var(--bg);border-radius:8px;padding:12px">';
+
+    // Section header
+    h += '<div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px">Weight-Based Infusions &mdash; ' + w + ' kg</div>';
+    h += '<div style="font-family:var(--mono);font-size:9px;color:var(--warn);letter-spacing:0.06em;margin-bottom:10px">&#x2691; Sapphire pump preferred &mdash; see gravity caution below</div>';
+
+    // ── Norepinephrine ─────────────────────────────────────────
+    // Standard: 4 mg NE in 250 mL NS = 16 mcg/mL
+    var neConc = 16; // mcg/mL
+    h += '<div style="margin-bottom:12px">';
+    h += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">';
+    h += '<span style="font-size:14px;font-weight:700;color:var(--white)">Norepinephrine</span>';
+    h += '<span style="font-family:var(--mono);font-size:10px;color:var(--teal2)">4 mg / 250 mL NS &rarr; 16 mcg/mL</span>';
+    h += '<span class="dbadge pm" style="margin-left:auto">PM ONLY</span></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:13px">';
+    h += '<tr style="border-bottom:1px solid var(--border)"><td style="font-family:var(--mono);font-size:10px;color:var(--gray);padding:3px 4px">Dose (mcg/kg/min)</td><td style="font-family:var(--mono);font-size:10px;color:var(--teal2);text-align:right;padding:3px 4px">&#x1F489; Pump (mL/hr)</td><td style="font-family:var(--mono);font-size:10px;color:var(--warn);text-align:right;padding:3px 4px">&#x1F4A7; Gravity 60 gtt/mL*</td></tr>';
+    [0.05, 0.1, 0.2, 0.5, 1.0].forEach(function(d) {
+      var mLhr = (d * w * 60 / neConc);
+      h += '<tr style="border-bottom:1px solid #182030">';
+      h += '<td style="color:var(--gray);padding:6px 4px">' + d + ' mcg/kg/min</td>';
+      h += '<td style="font-family:var(--mono);font-weight:700;color:var(--teal2);text-align:right;padding:6px 4px">' + mLhr.toFixed(1) + ' mL/hr</td>';
+      h += '<td style="font-family:var(--mono);color:var(--warn);text-align:right;padding:6px 4px">' + Math.round(mLhr) + ' gtts/min</td>';
+      h += '</tr>';
+    });
+    h += '</table></div>';
+
+    // ── Ketamine infusion ─────────────────────────────────────────
+    // Standard: 500 mg ketamine in 500 mL NS = 1 mg/mL
+    var ketConc = 1; // mg/mL
+    h += '<div style="margin-bottom:12px">';
+    h += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">';
+    h += '<span style="font-size:14px;font-weight:700;color:var(--white)">Ketamine</span>';
+    h += '<span style="font-family:var(--mono);font-size:10px;color:var(--teal2)">500 mg / 500 mL NS &rarr; 1 mg/mL</span>';
+    h += '<span class="dbadge pm" style="margin-left:auto">PM ONLY</span></div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:13px">';
+    h += '<tr style="border-bottom:1px solid var(--border)"><td style="font-family:var(--mono);font-size:10px;color:var(--gray);padding:3px 4px">Dose (mg/kg/hr)</td><td style="font-family:var(--mono);font-size:10px;color:var(--teal2);text-align:right;padding:3px 4px">&#x1F489; Pump (mL/hr)</td><td style="font-family:var(--mono);font-size:10px;color:var(--warn);text-align:right;padding:3px 4px">&#x1F4A7; Gravity 60 gtt/mL*</td></tr>';
+    // Sub-dissociative analgesia
+    h += '<tr><td colspan="3" style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:0.08em;padding:5px 4px 2px">SUB-DISSOCIATIVE ANALGESIA</td></tr>';
+    [0.1, 0.2, 0.3].forEach(function(d) {
+      var mLhr = (d * w / ketConc);
+      h += '<tr style="border-bottom:1px solid #182030">';
+      h += '<td style="color:var(--gray);padding:6px 4px">' + d + ' mg/kg/hr</td>';
+      h += '<td style="font-family:var(--mono);font-weight:700;color:var(--teal2);text-align:right;padding:6px 4px">' + mLhr.toFixed(1) + ' mL/hr</td>';
+      h += '<td style="font-family:var(--mono);color:var(--warn);text-align:right;padding:6px 4px">' + Math.round(mLhr) + ' gtts/min</td>';
+      h += '</tr>';
+    });
+    // Sedation/intubation maintenance
+    h += '<tr><td colspan="3" style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:0.08em;padding:5px 4px 2px">SEDATION / POST-INTUBATION</td></tr>';
+    [0.5, 1.0, 2.0].forEach(function(d) {
+      var mLhr = (d * w / ketConc);
+      h += '<tr style="border-bottom:1px solid #182030">';
+      h += '<td style="color:var(--gray);padding:6px 4px">' + d + ' mg/kg/hr</td>';
+      h += '<td style="font-family:var(--mono);font-weight:700;color:var(--teal2);text-align:right;padding:6px 4px">' + mLhr.toFixed(1) + ' mL/hr</td>';
+      h += '<td style="font-family:var(--mono);color:var(--warn);text-align:right;padding:6px 4px">' + Math.round(mLhr) + ' gtts/min</td>';
+      h += '</tr>';
+    });
+    h += '</table></div>';
+
+    // Gravity caution box
+    h += '<div style="background:#1a1000;border:1px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:12px;color:#fde68a;line-height:1.6">';
+    h += '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.1em;margin-bottom:5px">&#9888;&#xFE0F; GRAVITY DRIP CAUTION &mdash; 60 gtt/mL MICRO-DRIP SET</div>';
+    h += 'Gravity gtts/min values assume a <strong>60 gtt/mL micro-drip set</strong>. ';
+    h += 'Gravity infusion of vasoactive or dissociative agents <strong>requires a clear clinical reason</strong> why the Sapphire pump cannot be used. ';
+    h += 'Gravity rates are subject to positional flow variation, bag height, and patient movement &mdash; verify flow frequently. ';
+    h += 'Calculate independently and have a second clinician confirm before hanging. ';
+    h += 'Contact medical direction when feasible.';
+    h += '</div>';
+
+    h += '</div>'; // end infusion section
+  }
+
   outEl.innerHTML = h;
   } catch(e) {
     outEl.innerHTML='<div class="calc-empty" style="color:var(--danger)">&#9888; Calculation error &mdash; please check input and reload</div>';
@@ -987,6 +1061,9 @@ function renderV6Detail() {
 
   ].join('');
 
+  // Attach to DOM before wiring listeners so document.getElementById() can find elements
+  lv.appendChild(body);
+
   // Wire up tabs
   body.querySelectorAll('.v6-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
@@ -1067,8 +1144,6 @@ function renderV6Detail() {
     if (!wasOpen) card.classList.add('open');
   });
 
-  // Append built content to #lv (inline tab, not overlay)
-  lv.appendChild(body);
 }
 
 </script>
