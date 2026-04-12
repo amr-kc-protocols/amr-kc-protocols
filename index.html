@@ -145,10 +145,12 @@ background:var(–surface2);cursor:pointer;overflow:hidden}
 .hm-arr{color:var(–gray);font-size:13px;flex-shrink:0;margin-top:3px}
 
 /* DETAIL VIEW */
-#dv{display:none;position:fixed;inset:0;z-index:200;background:var(–bg);
-overflow-y:auto;-webkit-overflow-scrolling:touch}
+#dv{display:none;position:fixed;inset:0;z-index:500;background:var(–bg);
+overflow-y:auto;-webkit-overflow-scrolling:touch;
+padding-top:env(safe-area-inset-top,0px)}
 .dv-hdr{position:sticky;top:0;z-index:10;background:var(–surface);
-border-bottom:2px solid var(–teal);padding:11px 14px;
+border-bottom:2px solid var(–teal);padding:11px 14px 11px;
+padding-top:calc(11px + env(safe-area-inset-top,0px));
 display:flex;align-items:flex-start;gap:10px}
 .bk{background:var(–dim);border:1px solid var(–border);color:var(–teal2);
 font-size:13px;font-weight:600;padding:7px 12px;border-radius:5px;
@@ -380,7 +382,6 @@ function renderCalc(){
   var wtEl = $('wt');
   if(wtEl){
     wtEl.addEventListener('input', calcDoses);
-    wtEl.focus();
   }
   document.querySelectorAll('.age-btn').forEach(function(b){
     b.onclick = function(){
@@ -479,6 +480,7 @@ function renderHosp(){
 function openHospMed(idx){
   var drug = D.hosp_meds[idx];
   if(!drug) return;
+  var sr = $('srch'); if(sr) sr.blur();
   $('dv-num').textContent = drug.cat;
   $('dv-title').textContent = drug.name;
   $('dv-sub').textContent = drug.trade + ' · ' + drug.class;
@@ -519,6 +521,7 @@ function renderFormulary(){
 function openFormulary(idx){
   var d = D.formulary[idx];
   if(!d) return;
+  var sr = $('srch'); if(sr) sr.blur();
   $('dv-num').textContent = d.num;
   $('dv-title').textContent = d.name;
   var scopeLabels = {all:'ALL LEVELS',aemt:'AEMT+',pm:'PM ONLY'};
@@ -551,7 +554,11 @@ function openFormulary(idx){
   history.pushState({detail:true},'');
 }
 
-function closeDetail(){ $('dv').style.display='none'; }
+function closeDetail(){
+  var dv = $('dv');
+  if(dv){ dv.style.display='none'; dv.scrollTop=0; }
+  window.scrollTo(0,0);
+}
 
 // ── EVENT WIRING ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
