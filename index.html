@@ -1781,7 +1781,7 @@ const D = {
       "tags": [
         "croup",
         "barky",
-        "stridor",
+        "stridor"
       ],
       "overview": "Croup is a viral upper respiratory infection causing subglottic edema, typically in children 6 months to 3 years. Classic presentation: barky (seal-like) cough, inspiratory stridor, hoarse voice, low-grade fever, worse at night. Symptoms are exacerbated by agitation. Most cases are mild and self-limiting, but severe croup with stridor at rest requires prehospital treatment.",
       "page": 165,
@@ -1794,7 +1794,7 @@ const D = {
       ],
       "aemt_steps": [
         "All EMT steps.",
-        "Establish IV if child is calm; IO for severe distress.",
+        "Establish IV if child is calm; IO for severe distress."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
@@ -1803,7 +1803,7 @@ const D = {
       ],
       "notes": [
         "Croup is subglottic edema — ETT will be smaller than expected for age. Have 0.5–1.0 mm smaller tube ready.",
-        "Do not lay child down or agitate — anxiety worsens stridor.",
+        "Do not lay child down or agitate — anxiety worsens stridor."
       ],
       "vitals": [
         {
@@ -2330,28 +2330,39 @@ const D = {
       ],
       "overview": "Intracranial hemorrhage, subarachnoid hemorrhage, traumatic brain injury, and CNS infection transfers. Airway protection and blood pressure management are critical. Herniation signs require immediate intervention.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Apply cardiac monitor; document rhythm strip.",
+        "Apply oxygen; target SpO2 ≥94%.",
         "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Monitor blood pressure every 5 minutes.",
+        "Elevate head of stretcher 30 degrees unless contraindicated.",
+        "Notify Paramedic immediately of GCS decline, pupillary change, vomiting, or seizure."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Check blood glucose; treat hypoglycemia <70 mg/dL with dextrose 10%.",
+        "Obtain 12-lead ECG; report findings.",
+        "For seizure activity: notify Paramedic; prepare midazolam for Paramedic administration."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Maintain blood pressure per sending physician parameters; SBP ≥90 mmHg minimum in TBI.",
+        "For active seizure: midazolam 2–5 mg IV; may repeat once at 5 minutes.",
+        "For intubated patients: confirm ventilator settings; avoid hyperventilation unless herniation is imminent.",
+        "Titrate antihypertensive infusion per sending orders; avoid aggressive BP lowering in TBI.",
+        "Contact DMO for herniation signs, refractory seizure, or hemodynamic instability."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Neurologic reassessment every 5 minutes: GCS, pupillary response, focal deficits.",
+        "Blood pressure per sending physician parameters.",
+        "Airway protection vigilance — vomiting and aspiration risk is high.",
+        "Seizure monitoring throughout transport.",
+        "Temperature management if active."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Prevent the secondary injury triad in TBI: avoid hypoxia (SpO2 <94%), avoid hypotension (SBP <90 mmHg), avoid hyperventilation (target ETCO2 35–40 mmHg). Each independently worsens neurologic outcomes."
+      ],
+      "diversion": "Rapid neurologic decline, signs of herniation (Cushing's triad, blown pupil, posturing), uncontrolled seizure, airway compromise, or refractory hemodynamic instability.",
       "vitals": []
     },
     {
@@ -2369,28 +2380,39 @@ const D = {
       ],
       "overview": "Status epilepticus: continuous seizure >5 minutes or two or more seizures without return to baseline. Time-sensitive — benzodiazepines first-line. Transfer for refractory status requiring propofol or phenobarbital.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Apply cardiac monitor; document rhythm strip.",
+        "Apply oxygen; target SpO2 ≥94%.",
         "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Position patient laterally if not intubated to reduce aspiration risk.",
+        "Do not restrain actively seizing extremities; protect patient from injury.",
+        "Notify Paramedic immediately if seizure recurs or airway is compromised."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Check blood glucose; treat hypoglycemia <70 mg/dL with dextrose 10%.",
+        "For active seizure: notify Paramedic immediately; prepare midazolam for Paramedic administration."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "For active seizure: midazolam 2–5 mg IV slow push; may repeat once at 5 minutes.",
+        "For pediatric seizure: midazolam 0.1 mg/kg IV (max 5 mg).",
+        "For refractory seizure: contact DMO for additional benzodiazepine or antiepileptic orders.",
+        "Maintain sedation infusion per sending orders for intubated patients.",
+        "For airway compromise: intubate and initiate ventilator management."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Airway protection and respiratory effort continuously.",
+        "SpO2 trend.",
+        "Recurrence of seizure activity throughout transport.",
+        "Mental status and return to baseline post-ictal.",
+        "Blood glucose level."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Status epilepticus is defined as continuous seizure ≥5 minutes or recurrent seizures without return to baseline.",
+        "Do not restrain actively seizing extremities — protect the patient from the environment."
+      ],
+      "diversion": "Uncontrolled seizure unresponsive to benzodiazepines, airway compromise, or persistent hypoxia.",
       "vitals": []
     },
     {
@@ -2407,28 +2429,36 @@ const D = {
       ],
       "overview": "Transfer of patients with intracranial mass effect requiring surgical or radiation oncology capability. Maintain airway, control BP, monitor for herniation signs.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
+        "Apply cardiac monitor; document rhythm strip.",
+        "Apply oxygen if SpO2 <94%.",
         "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Elevate head of stretcher 30 degrees.",
+        "Monitor blood pressure every 5 minutes.",
+        "Notify Paramedic of any GCS change, vomiting, or seizure."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Check blood glucose.",
+        "For seizure: notify Paramedic immediately; prepare midazolam."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "For active seizure: midazolam 2–5 mg IV; may repeat once.",
+        "Maintain blood pressure within sending physician parameters.",
+        "For airway compromise or GCS ≤8: consider intubation.",
+        "Contact DMO for herniation signs or refractory instability."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Neurologic reassessment every 5–10 minutes: GCS, pupils, focal deficits.",
+        "Blood pressure stability.",
+        "Seizure monitoring.",
+        "Vomiting and aspiration risk."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Elevated ICP may not be obvious — maintain HOB 30 degrees, avoid hypoxia, and avoid hypotension."
+      ],
+      "diversion": "Rapid neurologic deterioration, airway compromise, or refractory hypotension.",
       "vitals": []
     },
     {
@@ -2446,28 +2476,39 @@ const D = {
       ],
       "overview": "Respiratory failure requiring advanced airway management or mechanical ventilation. Identify and treat underlying cause. CPAP for pulmonary edema/COPD; intubation for impending failure.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Apply cardiac monitor; document rhythm strip.",
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Assist with CPAP mask seal and positioning if in use.",
+        "Monitor respiratory rate and work of breathing.",
+        "Monitor blood pressure every 5 minutes.",
+        "Notify Paramedic immediately of SpO2 decline, respiratory fatigue, or agitation."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Initiate CPAP at 5–10 cmH2O if not already applied for alert, cooperative patients with hypoxia.",
+        "Administer albuterol 2.5 mg nebulized if bronchospasm component is present."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Confirm ventilator settings (LTV 1200): tidal volume 6–8 mL/kg IBW, PEEP 5 cmH2O, FiO2 titrated to SpO2 94–98%.",
+        "Maintain sedation infusion per sending orders for intubated patients.",
+        "For ventilator failure: transition to BVM; troubleshoot per V-6 protocol.",
+        "For impending respiratory failure on CPAP: prepare for intubation.",
+        "Contact DMO for persistent hypoxia or ventilator management questions."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "SpO2 continuously; target 94–98%.",
+        "Respiratory rate and work of breathing.",
+        "Ventilator synchrony and alarm status if intubated.",
+        "ETCO2 if intubated.",
+        "Blood pressure every 5 minutes."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "CPAP is contraindicated if SBP <90 mmHg, decreased mental status, or inability to protect airway.",
+        "For intubated patients: use IBW for tidal volume — not actual body weight."
+      ],
+      "diversion": "Refractory hypoxia, inability to ventilate, or hemodynamic instability.",
       "vitals": []
     },
     {
@@ -2485,28 +2526,35 @@ const D = {
       ],
       "overview": "Ventilator failure at sending facility or transition to LTV 1200 for transport. Confirm ETT position before any ventilator change. BVM must be immediately accessible. See V-6 for LTV 1200 procedure.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Immediately notify Paramedic of any ventilator alarm.",
+        "Monitor SpO2 and respiratory effort continuously.",
+        "Prepare BVM with PEEP valve for immediate use.",
+        "Monitor blood pressure every 3–5 minutes."
       ],
       "aemt_steps": [
         "All EMT steps.",
-        "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "If ventilator fails and Paramedic requires assistance: initiate BVM ventilation at 10–12 breaths/min.",
+        "Ensure BVM is connected to oxygen source."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Disconnect patient from ventilator immediately if malfunction is confirmed; ventilate with BVM.",
+        "Troubleshoot: check circuit connections, ETT position, oxygen supply, and power.",
+        "If high-pressure alarm: suction ETT; assess for pneumothorax.",
+        "If low-pressure alarm: check for circuit disconnect or ETT cuff leak.",
+        "If ventilation cannot be restored: divert to nearest appropriate ED.",
+        "Contact DMO immediately."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "SpO2 continuously.",
+        "Ventilator alarms and waveforms.",
+        "Chest rise assessment bilaterally.",
+        "ETCO2 continuously if intubated."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "When in doubt, take the patient off the ventilator and BVM manually. A correctly functioning BVM is always safer than a malfunctioning ventilator."
+      ],
+      "diversion": "Inability to maintain adequate oxygenation or ventilation despite BVM rescue ventilation.",
       "vitals": []
     },
     {
@@ -2524,28 +2572,37 @@ const D = {
       ],
       "overview": "PE with obstruction of pulmonary arterial flow causing increased PVR and potential RV failure. Massive PE carries high risk for cardiovascular collapse. Transfer for thrombolysis, catheter-directed therapy, or ICU monitoring.",
       "emt_steps": [
-        "Apply cardiac monitor.",
+        "Apply cardiac monitor; document rhythm strip.",
         "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Maintain IV access and heparin infusion continuity; do not adjust heparin rate.",
+        "Monitor blood pressure every 5 minutes.",
+        "Notify Paramedic of SpO2 decline, hypotension, or mental status change."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Obtain 12-lead ECG; report findings to Paramedic.",
+        "Heparin is a hospital-supplied infusion; AEMT does not adjust heparin rates."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Maintain heparin infusion per sending orders; verify concentration and rate at departure.",
+        "For hypotension: initiate norepinephrine infusion; titrate to MAP ≥65 mmHg.",
+        "For cardiac arrest from massive PE: initiate ACLS; consider thrombolytics only with DMO order.",
+        "Avoid aggressive fluid resuscitation — volume overload worsens RV failure.",
+        "Contact DMO for any hemodynamic deterioration."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "SpO2 continuously; target ≥94%.",
+        "Heart rate, blood pressure, and mental status every 5 minutes.",
+        "Signs of obstructive shock: tachycardia, hypotension, JVD, clear lung sounds.",
+        "Heparin infusion verification."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Massive PE carries high risk for cardiovascular collapse — have vasopressor ready before departure.",
+        "Do not aggressively fluid resuscitate — RV failure is worsened by excess preload."
+      ],
+      "diversion": "SBP <90 mmHg unresponsive to vasopressors, severe desaturation unresponsive to oxygen, or cardiac arrest.",
       "vitals": []
     },
     {
@@ -2564,27 +2621,36 @@ const D = {
       "overview": "Tracheostomy complications including tube displacement, obstruction, hemorrhage, or infection. Tube management and airway maintenance are priorities. Have replacement tube and BVM immediately accessible.",
       "emt_steps": [
         "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Apply oxygen via tracheostomy mask or connect to ventilator circuit.",
+        "Have suction immediately available throughout transport.",
+        "Monitor SpO2 and work of breathing.",
+        "Notify Paramedic immediately of SpO2 decline or changes in airway patency."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Suction tracheostomy if secretions are audible or SpO2 is declining.",
+        "If tube appears displaced: notify Paramedic immediately; do not attempt tube change."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "For obstruction unresponsive to suctioning: attempt to pass suction catheter; if unsuccessful, deflate cuff and remove tube.",
+        "If stoma is mature (>7 days): insert spare tube of correct size.",
+        "If stoma is immature (<7 days) and tube is removed: cover stoma, ventilate via BVM over mouth and nose.",
+        "For complete airway obstruction with no tube access: attempt oral intubation; if unable, use stoma.",
+        "Contact DMO immediately for any airway emergency."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Airway patency and suction readiness continuously.",
+        "SpO2 trend.",
+        "Ventilator synchrony if applicable.",
+        "Secretion character and volume."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Know the tracheostomy tube type and whether the stoma is mature before transport. A stoma less than 7 days old may close rapidly if the tube is removed.",
+        "Carry the correct spare tube size — confirm with sending nurse before departure."
+      ],
+      "diversion": "Complete airway obstruction or refractory hypoxia unresponsive to intervention.",
       "vitals": []
     },
     {
@@ -2654,27 +2720,35 @@ const D = {
       "overview": "HHS: extreme hyperglycemia without significant ketoacidosis. Higher mortality than DKA. Profound dehydration and altered mental status. Gradual fluid resuscitation to avoid cerebral edema.",
       "emt_steps": [
         "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
         "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Monitor blood pressure every 5 minutes.",
+        "Obtain blood glucose at departure.",
+        "Notify Paramedic of glucose <70 mg/dL, altered mental status, or seizure."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Recheck blood glucose every 30 minutes.",
+        "For glucose <70 mg/dL: administer dextrose 10% 100–250 mL IV and notify Paramedic."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Continue IV fluid resuscitation per sending orders.",
+        "For seizure: midazolam 2–5 mg IV; contact DMO.",
+        "Monitor ECG for dysrhythmia.",
+        "Contact DMO for refractory hypotension or significant neurologic decline."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Blood glucose every 30 minutes.",
+        "Mental status and neurologic exam at intervals.",
+        "IV fluid infusion rate and any changes.",
+        "Blood pressure every 5 minutes."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "HHS carries higher mortality than DKA. Gradual fluid resuscitation is key — rapid correction risks cerebral edema.",
+        "Glucose correction must be gradual; do not overcorrect with aggressive dextrose."
+      ],
+      "diversion": "Refractory hypotension, acute seizure unresponsive to benzodiazepines, or significant neurologic deterioration.",
       "vitals": []
     },
     {
@@ -2750,27 +2824,39 @@ const D = {
       "overview": "Upper GI hemorrhage with hemodynamic instability. Transfer for endoscopy, intervention, or surgical control. Airway protection is priority in patients with active hematemesis. Large-bore IV access and fluid resuscitation.",
       "emt_steps": [
         "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Apply oxygen if SpO2 <94%.",
+        "Maintain IV access and infusion continuity; blood products are Paramedic-managed.",
+        "Have suction immediately available — aspiration risk is high.",
+        "Monitor blood pressure every 5 minutes.",
+        "Notify Paramedic of hematemesis, hypotension, or mental status change."
       ],
       "aemt_steps": [
         "All EMT steps.",
-        "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Establish large-bore peripheral IV if not present.",
+        "Administer normal saline 250–500 mL IV bolus if SBP <90 mmHg and no blood products are running.",
+        "Administer ondansetron 4 mg IV for active nausea to reduce aspiration risk.",
+        "Blood product infusions are Paramedic-managed; AEMT does not adjust blood product rates."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Monitor blood product infusions per sending orders; dual-verify at departure.",
+        "Continue crystalloid resuscitation per sending orders.",
+        "For hemodynamic instability unresponsive to fluids: initiate norepinephrine per shock protocol.",
+        "For airway compromise from active hematemesis: intubate.",
+        "Contact DMO for refractory instability or transfusion reaction."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Heart rate and blood pressure every 5 minutes.",
+        "Mental status as a perfusion marker.",
+        "Ongoing hematemesis or melena.",
+        "Signs of aspiration.",
+        "Blood product infusion verification."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Aspiration is a major risk — position laterally if mental status is reduced, have suction immediately accessible.",
+        "Transfusion reaction: stop blood product immediately, maintain IV with NS, contact DMO."
+      ],
+      "diversion": "Refractory hypotension, massive active bleeding, or loss of consciousness.",
       "vitals": []
     },
     {
@@ -2853,27 +2939,35 @@ const D = {
       "overview": "Necrotizing soft tissue infection requiring emergent surgical debridement at capability beyond sending facility. Time-critical transfer — mortality increases significantly with each hour of delay.",
       "emt_steps": [
         "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Apply oxygen; target SpO2 ≥94%.",
+        "Maintain IV access and all infusion continuity.",
+        "Monitor blood pressure every 3–5 minutes.",
+        "Notify Paramedic of hemodynamic change, mental status decline, or signs of progression."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Administer normal saline 500 mL IV bolus if SBP <90 mmHg and no vasopressor is running.",
+        "Vasopressor infusion is Paramedic-managed."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Titrate norepinephrine to MAP ≥65 mmHg per sending orders.",
+        "Continue antibiotic infusion per sending orders.",
+        "For respiratory compromise: initiate CPAP or prepare for intubation.",
+        "Contact DMO for refractory shock or rapid deterioration."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "MAP ≥65 mmHg target; blood pressure every 3–5 minutes.",
+        "Mental status and pain severity.",
+        "Signs of clinical progression.",
+        "Perfusion assessment."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Necrotizing fasciitis mortality increases significantly with each hour of delay — minimize scene time and pre-alert receiving facility.",
+        "This is a surgical emergency — transport is the intervention."
+      ],
+      "diversion": "Refractory hypotension, acute respiratory failure, or cardiac arrest.",
       "vitals": []
     },
     {
@@ -2891,28 +2985,39 @@ const D = {
       ],
       "overview": "Psychiatric transfer for higher level of behavioral health care. Medical clearance should be confirmed before transfer. Safety of crew and patient are primary concerns throughout transport.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Apply cardiac monitor if patient permits.",
+        "Apply oxygen if clinically indicated.",
+        "Maintain continuous visual observation throughout transport.",
+        "Ensure restraint integrity and perform neurovascular checks on restrained extremities every 15 minutes.",
+        "Notify Paramedic immediately of escalating behavior, elopement attempt, or airway concern."
       ],
       "aemt_steps": [
         "All EMT steps.",
-        "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Establish peripheral IV if indicated and patient permits.",
+        "Monitor SpO2 and respiratory rate if sedation has been administered.",
+        "AEMT does not administer chemical sedation for behavioral indications."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Apply XD four-point restraints if involuntary transport or credible escalation risk; document clinical justification.",
+        "Chemical sedation: midazolam 2–5 mg IV slow push for severe agitation threatening safety. May repeat once at 5 minutes. DMO consultation recommended but not required under standing order.",
+        "Ketamine is NOT authorized for psychiatric sedation.",
+        "Monitor airway and respiratory rate continuously after sedation.",
+        "Contact DMO for airway compromise, respiratory depression, or uncontrolled violent behavior."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Continuous behavioral observation.",
+        "Airway protection if sedated.",
+        "SpO2 and respiratory rate after sedation.",
+        "Restraint integrity and neurovascular checks every 15 minutes if restrained.",
+        "Mental status reassessment at intervals."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Voluntary patients are not restrained unless self-harm, combativeness, or other clear warning signs emerge. All restraint decisions must be documented with clinical justification.",
+        "Ketamine is NOT authorized for psychiatric sedation under any circumstance.",
+        "Anticipated deterioration: sudden agitation, respiratory depression from sedation, emesis with aspiration risk, elopement attempt, or acute medical decompensation."
+      ],
+      "diversion": "Airway compromise, severe respiratory depression, uncontrolled violent behavior threatening crew safety, or acute medical instability.",
       "vitals": []
     },
     {
@@ -2931,27 +3036,38 @@ const D = {
       "overview": "Trauma patient transfer for surgical capability, ICU level care, or specialty consultation unavailable at sending facility. Maintain hemostasis, airway, and hemodynamic stability. Avoid under-resuscitation.",
       "emt_steps": [
         "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Maintain SpO2 ≥94% with supplemental oxygen.",
+        "Maintain IV access and all infusion continuity.",
+        "Monitor blood pressure every 5 minutes.",
+        "Ensure all tubes and devices are secured before and during transport.",
+        "Notify Paramedic of hemodynamic change, SpO2 decline, or device concern."
       ],
       "aemt_steps": [
         "All EMT steps.",
-        "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Establish large-bore peripheral IV if not present.",
+        "Administer normal saline 250–500 mL IV bolus if SBP <90 mmHg and no blood products are running.",
+        "Blood product and vasopressor infusions are Paramedic-managed."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Confirm blood product infusions: dual-verify medication, rate, and access.",
+        "Titrate vasopressor to MAP ≥65 mmHg per sending orders.",
+        "For intubated patients: confirm ventilator settings; avoid hypoxia and hyperventilation.",
+        "For chest tube: confirm tube patency and drainage system function.",
+        "Contact DMO for hemorrhagic shock, airway emergency, or critical equipment failure."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "SpO2 ≥94% continuously.",
+        "MAP ≥65 mmHg; blood pressure every 5 minutes.",
+        "All tubes and device placement and function.",
+        "Mental status as perfusion marker.",
+        "Blood product infusion verification."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Trauma patients at transfer have been initially stabilized — primary transport objectives are maintaining oxygenation and perfusion while preventing secondary injury.",
+        "TBI management: maintain SBP ≥90 mmHg, SpO2 ≥94%, and ETCO2 35–40 mmHg. See II-10 for herniation management."
+      ],
+      "diversion": "Loss of airway, significant uncontrolled hemorrhage, refractory hypotension, cardiac arrest, or critical equipment failure.",
       "vitals": []
     },
     {
@@ -2970,27 +3086,38 @@ const D = {
       "overview": "Organ donor patient transport for procurement. Maintain hemodynamic stability, oxygenation, and normothermia to preserve organ viability. Follow sending hospital and organ procurement organization protocols precisely.",
       "emt_steps": [
         "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Maintain all infusion continuity; do not interrupt vasopressors.",
+        "Maintain ventilator operation; monitor circuit integrity.",
+        "Monitor blood pressure every 5 minutes.",
+        "Notify Paramedic of hemodynamic change, ventilator alarm, or device concern.",
+        "Treat this patient with the same clinical rigor and dignity as any other patient."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Monitor blood glucose; treat hypoglycemia <70 mg/dL with dextrose 10%.",
+        "Vasopressor infusions are Paramedic-managed."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Confirm all vasopressor infusions: verify concentration, rate, and access.",
+        "Confirm ventilator settings per sending orders; maintain oxygenation and normocapnia.",
+        "Titrate vasopressors to maintain MAP ≥65 mmHg and HR <100 per sending orders.",
+        "Monitor urine output catheter patency; report concerns to DMO.",
+        "Contact DMO and transplant coordinator for any significant instability or equipment failure."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Continuous ECG and hemodynamic monitoring.",
+        "Vasopressor infusion rates and access site every 15 minutes.",
+        "Ventilator function and settings.",
+        "Blood glucose.",
+        "Urine output catheter patency."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Transport personnel must maintain respectful and dignified care at all times.",
+        "Brain-death declared patients are maintained on life support for organ viability — clinical standards do not change."
+      ],
+      "diversion": "Refractory hypotension unresponsive to therapy, sustained cardiac arrest, severe hypoxemia not correctable with ventilator adjustment, or any condition precluding organ viability.",
       "vitals": []
     },
     {
@@ -3008,28 +3135,36 @@ const D = {
       ],
       "overview": "Hypoglycemia (<70 mg/dL) in IFT setting. Treat promptly — prolonged hypoglycemia causes irreversible brain injury. D10% preferred over D50% for all AMR KC transport units.",
       "emt_steps": [
+        "Obtain blood glucose immediately at departure.",
         "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Apply oxygen if SpO2 <94%.",
+        "Protect airway — position laterally if decreased mental status.",
+        "Notify Paramedic of glucose <70 mg/dL or altered mental status."
       ],
       "aemt_steps": [
         "All EMT steps.",
         "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "For glucose <70 mg/dL: administer dextrose 10% 100–250 mL IV; recheck glucose in 10 minutes.",
+        "If glucose <50 mg/dL regardless of symptoms: administer dextrose 10% IV immediately.",
+        "Recheck blood glucose every 30 minutes during transport."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "If no IV access and patient cannot swallow: glucagon 1 mg IM.",
+        "For persistent hypoglycemia despite dextrose 10%: contact DMO for additional orders.",
+        "For seizure secondary to hypoglycemia: midazolam 2–5 mg IV plus dextrose correction simultaneously."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Blood glucose at departure, 10 minutes after any D10% administration, then every 30 minutes.",
+        "Mental status and neurologic exam — hypoglycemia causes irreversible brain injury.",
+        "SpO2 and airway continuously."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "D10W is the only dextrose concentration carried on AMR KC units — no D50W.",
+        "Hypoglycemia unawareness: patients on beta-blockers may not develop expected tachycardia or diaphoresis.",
+        "Recheck glucose 10 minutes after D10% — re-hypoglycemia is common, especially with sulfonylurea ingestion."
+      ],
+      "diversion": "Persistent symptomatic hypoglycemia unresponsive to dextrose 10%, active seizure, or loss of consciousness with airway compromise.",
       "vitals": []
     },
     {
@@ -3048,28 +3183,38 @@ const D = {
       ],
       "overview": "Anaphylaxis: severe systemic allergic reaction with hemodynamic or airway compromise. Epinephrine IM is first-line — do not delay. Diphenhydramine is adjunct only.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Assess airway, breathing, and circulation at departure and throughout transport.",
+        "Apply cardiac monitor and pulse oximeter continuously.",
+        "Keep epinephrine autoinjector immediately accessible throughout transport.",
+        "Notify Paramedic immediately of any worsening respiratory symptoms, hives, or hemodynamic change."
       ],
       "aemt_steps": [
         "All EMT steps.",
-        "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Confirm IV access is patent and adequate for medication administration.",
+        "For recurrence or worsening: administer epinephrine 1:1,000 0.3–0.5 mg IM immediately; notify DMO.",
+        "Albuterol 2.5 mg nebulized for bronchospasm component.",
+        "Normal saline 500 mL–1 L IV bolus for hypotension.",
+        "Diphenhydramine 25–50 mg IV/IO as adjunct."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "For refractory anaphylaxis not responding to IM epinephrine: epinephrine infusion 2–10 mcg/min IV titrated to response; contact DMO.",
+        "For refractory bronchospasm: magnesium sulfate 2 g IV over 20 minutes.",
+        "Monitor and manage biphasic reaction risk throughout transport.",
+        "Contact DMO for any patient on an epinephrine infusion at departure."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Airway: stridor, hoarseness, drooling — signs of progressive angioedema.",
+        "SpO2 and respiratory rate continuously.",
+        "Blood pressure every 5 minutes.",
+        "Skin: progression or regression of urticaria and flushing.",
+        "Mental status as perfusion marker."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Biphasic anaphylaxis occurs in up to 20% of cases, typically 1–8 hours after the initial reaction. Reassess every 5 minutes — do not assume a quiet patient is stable.",
+        "If sending facility administered epinephrine infusion: confirm concentration and rate before departure — this is a Paramedic-managed infusion."
+      ],
+      "diversion": "Airway compromise or progressive angioedema, refractory hypotension, or respiratory failure.",
       "vitals": []
     },
     {
@@ -3088,28 +3233,41 @@ const D = {
       ],
       "overview": "Toxicology transfer for ICU-level monitoring, antidote therapy, or poison control consultation. Identify substance, dose, and time of exposure. Airway management is priority.",
       "emt_steps": [
-        "Apply cardiac monitor.",
-        "Apply oxygen; titrate to SpO2 ≥94%.",
-        "Maintain IV access and infusion continuity.",
-        "Notify Paramedic of any deterioration."
+        "Obtain and document: substance ingested, estimated amount, time of ingestion, and treatment already administered.",
+        "Assess level of consciousness, airway protective reflexes, and respiratory rate.",
+        "Apply cardiac monitor; look for QRS widening (TCA), QT prolongation (antipsychotics, CCB), and bradyarrhythmia (beta blockers, CCB, digoxin).",
+        "Apply pulse oximeter continuously.",
+        "Position laterally if mental status is reduced; have suction immediately available."
       ],
       "aemt_steps": [
         "All EMT steps.",
-        "Establish peripheral IV if not present.",
-        "Obtain 12-lead ECG; report findings to Paramedic."
+        "Confirm IV access is patent.",
+        "Monitor naloxone infusion if running; assess for re-sedation or opioid withdrawal throughout transport.",
+        "For re-sedation (RR <10, SpO2 declining): administer naloxone 0.4–2 mg IV/IO/IN; titrate to respiratory effort.",
+        "Obtain blood glucose; treat hypoglycemia with dextrose 10%."
       ],
       "pm_steps": [
         "All EMT and AEMT steps.",
-        "Manage medications per sending orders.",
-        "Contact DMO for clinical questions or deterioration."
+        "Manage NAC, sodium bicarbonate, or insulin infusions per sending physician parameters.",
+        "For TCA toxicity with QRS widening >120 ms or dysrhythmia: sodium bicarbonate 1–2 mEq/kg IV.",
+        "For CCB or beta blocker toxicity with hemodynamic compromise: calcium gluconate 1–2 g IV; glucagon 3–5 mg IV/IM; norepinephrine for refractory hypotension.",
+        "For active seizure from toxic etiology: midazolam 2–5 mg IV/IO/IM.",
+        "For airway compromise (GCS ≤8 with loss of protective reflexes): intubate; note succinylcholine is contraindicated in hyperkalemia — consider rocuronium (hospital-supplied).",
+        "Contact DMO and Poison Control (1-800-222-1222) for complex or deteriorating toxicology."
       ],
       "monitoring": [
-        "Vital signs every 5 minutes.",
-        "Mental status assessment.",
-        "Continuous cardiac monitoring."
+        "Respiratory rate and SpO2 continuously — re-sedation after naloxone is predictable.",
+        "Cardiac rhythm: QRS width and QTc trend.",
+        "Mental status at regular intervals.",
+        "Blood glucose every 30 minutes if on insulin or dextrose infusion.",
+        "Active infusion rates and clinical response."
       ],
-      "notes": [],
-      "diversion": "Hemodynamic instability, airway compromise, cardiac arrest.",
+      "notes": [
+        "Re-sedation after naloxone is predictable — naloxone has a shorter half-life than most opioids. A patient alert at departure may become apneic 20–30 minutes into transport.",
+        "Succinylcholine is contraindicated in hyperkalemia (digoxin toxicity, renal failure patients) — use rocuronium (hospital-supplied) for RSI if needed.",
+        "Poison Control: 1-800-222-1222 — available 24/7 for complex toxicology consultation."
+      ],
+      "diversion": "Airway compromise unresponsive to naloxone, refractory hemodynamic instability, or active seizure unresponsive to benzodiazepines.",
       "vitals": []
     }
   ],
@@ -3582,12 +3740,12 @@ const D = {
       ],
       "doses": [
         {
-          "route": "Procedural sedation (intubated) IV",
-          "dose": "0.5–2 mg/kg IV slow push."
+          "route": "Bolus — intubated adult IV",
+          "dose": "0.5–1 mg/kg IV slow push."
         },
         {
-          "route": "Analgesia (sub-dissociative) IV",
-          "dose": "0.1–0.3 mg/kg IV slow push."
+          "route": "Infusion — intubated adult IV",
+          "dose": "1 mg/kg/hr IV; titrate up to maximum 8 mg/kg/hr. Preferred concentration: 1:1 (250 mg/250 mL or 500 mg/500 mL)."
         }
       ],
       "notes": [
@@ -3851,7 +4009,7 @@ const D = {
     {
       "num": "III-19",
       "name": "Ondansetron (Zofran)",
-      "scope": "all",
+      "scope": "aemt",
       "tags": [
         "nausea",
         "vomiting",
@@ -3887,6 +4045,7 @@ const D = {
         }
       ],
       "notes": [
+        "EMT authorization: PO and ODT routes only. IV/IO, IM, and IN administration is AEMT+ scope.",
         "Do not give rapid IV push — causes transient headache and dizziness.",
         "QTc prolongation possible — caution with other QT-prolonging drugs.",
         "Does not cause sedation — safe for use in patients requiring continued neurologic assessment."
