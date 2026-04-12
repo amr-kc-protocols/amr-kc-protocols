@@ -203,16 +203,16 @@ font-weight:700;cursor:pointer;font-family:var(–sans)}
 <div id="screen-quiz" class="hidden">
   <div class="quiz-hdr">
     <div class="quiz-hdr-top">
-      <button class="quit-btn" id="btn-quit">&#x2715; Quit</button>
+      <button class="quit-btn" id="btn-quit" aria-label="Quit quiz">&#x2715; Quit</button>
       <div class="quiz-hdr-info">
         <div class="qlevel" id="qlevel">EMT LEVEL</div>
         <div class="qcount" id="qcount">Question 1 of 50</div>
       </div>
-      <div class="qscore" id="qscore">0/0</div>
+      <div class="qscore" id="qscore" aria-live="polite" aria-label="Score">0/0</div>
     </div>
-    <div class="prog"><div class="prog-fill emt" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"><div class="prog-fill emt" id="prog-fill" style="width:0%"></div></div>
   </div>
-  <div class="q-wrap" id="q-wrap"></div>
+  <div class="q-wrap" id="q-wrap" aria-live="polite" aria-atomic="true"></div>
 </div>
 
 <div id="screen-results" class="hidden">
@@ -314,7 +314,9 @@ function renderQuestion() {
   var total = S.questions.length;
   var pct = Math.round((S.current / total) * 100);
 
-  document.getElementById('prog-fill').style.width = pct + '%';
+  var progFill = document.getElementById('prog-fill');
+  progFill.style.width = pct + '%';
+  progFill.parentElement.setAttribute('aria-valuenow', pct);
   document.getElementById('qcount').textContent = 'Question ' + (S.current + 1) + ' of ' + total;
   document.getElementById('qscore').textContent = S.score + '/' + S.current;
 
