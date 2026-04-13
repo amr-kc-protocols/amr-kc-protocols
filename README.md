@@ -1,4 +1,4 @@
-# AMR Kansas City Medical Protocols 2026
+# AMR Kansas City Field Guide 2026
 
 **Medical Director:** Dr. Ameet Deshmukh, MD
 **Authorized under:** Kansas Board of Emergency Medical Services
