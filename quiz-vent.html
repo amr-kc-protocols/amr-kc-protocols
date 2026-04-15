@@ -63,9 +63,9 @@ background:var(--vent-bg);color:var(--vent2);border:1px solid var(--vent-border)
 font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;font-family:var(--sans);
 background:var(--vent);color:#fff}
 
-.back-link{display:block;text-align:center;margin-top:20px;
-font-family:var(--mono);font-size:11px;color:var(--gray);text-decoration:none;
-letter-spacing:0.06em}
+.home-links{display:flex;justify-content:center;gap:12px;margin-top:20px}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--gray);text-decoration:none;
+letter-spacing:0.06em;display:inline-flex;align-items:center;gap:4px}
 .back-link:hover{color:var(--teal2)}
 
 /* QUIZ */
@@ -181,7 +181,11 @@ font-weight:700;cursor:pointer;font-family:var(--sans)}
         <button class="start-btn" id="btn-start">Start Ventilator Quiz &rarr;</button>
       </div>
     </div>
-    <a class="back-link" href="index.html">&#x2190; Back to AMR KC Field Guide</a>
+    <div class="home-links">
+      <a class="back-link" href="index.html">&#x2190; Field Guide</a>
+      <span style="color:var(--border)">|</span>
+      <a class="back-link" href="protocols-2026.pdf" target="_blank">&#x1F4C4; Protocol PDF</a>
+    </div>
   </div>
 </div>
 
