@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AMR KC Flash">
+<meta name="theme-color" content="#060d1f">
+<title>AMR KC Flashcards 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#060d1f;--surface:#0d1526;--surface2:#131f35;--border:#1e3a5f;
+  --teal:#0d9488;--teal2:#14b8a6;--white:#f0f4f8;--gray:#8899aa;--dim:#1a2a40;
+  --emt:#16a34a;--emt-bg:#052e16;--aemt:#2563eb;--aemt-bg:#0c1a3a;
+  --pm:#7c3aed;--pm-bg:#1e0a3a;
+  --danger:#ef4444;--warn:#f59e0b;
+  --knew:#16a34a;--knew-bg:#052e16;
+  --missed:#ef4444;--missed-bg:#1a0505;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);overscroll-behavior:none}
+body{font-family:var(--sans);color:var(--white);min-height:100vh;
+  display:flex;flex-direction:column}
+
+/* ── LOADING ─────────────────────────────────────────────────────── */
+#loading{position:fixed;inset:0;background:var(–bg);display:flex;flex-direction:column;
+align-items:center;justify-content:center;z-index:9999;transition:opacity 0.4s}
+.ll{font-family:var(–mono);font-size:48px;font-weight:600;color:var(–teal);letter-spacing:-0.02em}
+.ls{font-size:11px;color:var(–gray);letter-spacing:0.18em;text-transform:uppercase;margin-top:4px}
+.lb{width:160px;height:2px;background:var(–dim);border-radius:2px;margin-top:28px;overflow:hidden}
+.lf{height:100%;background:linear-gradient(90deg,var(–teal),var(–teal2));
+animation:lf 1.2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes lf{from{width:0}to{width:100%}}
+
+/* ── SCREENS ─────────────────────────────────────────────────────── */
+.screen{display:none;flex-direction:column;flex:1}
+.screen.active{display:flex}
+
+/* ── HOME ────────────────────────────────────────────────────────── */
+#home{padding:0 0 40px}
+.home-hdr{background:linear-gradient(180deg,#060d1f,var(–surface));
+border-bottom:1px solid var(–teal);padding:20px 16px 18px}
+.home-badge{font-family:var(–mono);font-size:10px;color:var(–teal);
+letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px}
+.home-title{font-size:24px;font-weight:700;margin-bottom:2px}
+.home-sub{font-size:12px;color:var(–gray)}
+.home-body{padding:20px 16px}
+.home-intro{font-size:13px;color:#94a3b8;line-height:1.7;margin-bottom:24px;
+background:var(–surface2);border:1px solid var(–border);border-radius:10px;padding:14px}
+.stack-card{margin-bottom:14px;border-radius:14px;overflow:hidden;cursor:pointer;
+border:2px solid var(–border);background:var(–surface2);transition:all 0.15s}
+.stack-card:active{opacity:0.7;transform:scale(0.98)}
+.stack-card.amb{border-color:var(–teal)}
+.stack-card.hosp{border-color:var(–aemt)}
+.sci{padding:20px}
+.sc-icon{font-size:28px;margin-bottom:10px}
+.sc-label{font-family:var(–mono);font-size:10px;font-weight:600;
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
+.stack-card.amb .sc-label{color:var(–teal2)}
+.stack-card.hosp .sc-label{color:#60a5fa}
+.sc-title{font-size:19px;font-weight:700;margin-bottom:6px}
+.sc-desc{font-size:13px;color:var(–gray);line-height:1.5;margin-bottom:12px}
+.sc-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.sc-tag{font-family:var(–mono);font-size:10px;padding:3px 9px;border-radius:20px}
+.stack-card.amb .sc-tag{background:var(–emt-bg);color:var(–teal2);border:1px solid var(–teal)}
+.stack-card.hosp .sc-tag{background:var(–aemt-bg);color:#60a5fa;border:1px solid var(–aemt)}
+
+/* Scope filter */
+.scope-filter{display:flex;gap:6px;margin-bottom:6px}
+.sf-btn{flex:1;padding:7px;border-radius:20px;border:1.5px solid var(–border);
+background:var(–dim);color:var(–gray);font-size:11px;font-weight:600;
+cursor:pointer;font-family:var(–sans);text-align:center;transition:all 0.12s}
+.sf-btn.on{border-color:var(–teal);color:var(–teal2);background:#001a18}
+.sf-hint{font-size:11px;color:var(–gray);margin-bottom:16px}
+
+.start-btn{display:block;width:100%;padding:14px;border-radius:8px;border:none;
+font-size:15px;font-weight:700;cursor:pointer;font-family:var(–sans)}
+.stack-card.amb .start-btn{background:var(–teal);color:#000}
+.stack-card.hosp .start-btn{background:var(–aemt);color:#fff}
+
+.back-link{display:flex;align-items:center;gap:6px;padding:16px;
+color:var(–gray);font-size:13px;text-decoration:none;font-family:var(–sans)}
+.back-link:active{color:var(–teal2)}
+
+/* ── QUIZ HEADER ─────────────────────────────────────────────────── */
+.quiz-hdr{position:sticky;top:0;z-index:50;background:var(–surface);
+border-bottom:1px solid var(–border);padding:11px 16px}
+.qh-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.quit-btn{background:var(–dim);border:1px solid var(–border);color:var(–gray);
+font-size:12px;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:var(–sans)}
+.qh-info{flex:1}
+.qh-label{font-family:var(–mono);font-size:9px;font-weight:600;
+letter-spacing:0.1em;text-transform:uppercase;color:var(–teal2)}
+.qh-count{font-size:13px;color:var(–gray);margin-top:2px}
+.qh-score{font-family:var(–mono);font-size:13px;font-weight:600;color:var(–teal2)}
+.prog{height:4px;background:var(–dim);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;background:var(–teal);transition:width 0.3s}
+
+/* ── CARD AREA ───────────────────────────────────────────────────── */
+#card-area{flex:1;display:flex;flex-direction:column;align-items:center;
+justify-content:center;padding:20px 16px;min-height:0}
+
+.card-scene{width:100%;max-width:420px;perspective:1200px;margin:0 auto}
+.card-wrap{width:100%;position:relative;transform-style:preserve-3d;
+transition:transform 0.5s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.card-wrap.flipped{transform:rotateY(180deg)}
+
+.card-face{width:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+border-radius:16px;min-height:280px;display:flex;flex-direction:column}
+.card-front{background:var(–surface2);border:2px solid var(–border);
+padding:28px 22px;align-items:center;justify-content:center;text-align:center}
+.card-back{background:var(–surface);border:2px solid var(–teal);
+padding:22px;transform:rotateY(180deg);position:absolute;inset:0;
+overflow-y:auto;justify-content:flex-start}
+
+.card-front.amb-front{border-color:var(–teal)}
+.card-front.hosp-front{border-color:var(–aemt)}
+.card-back.amb-back{border-color:var(–teal)}
+.card-back.hosp-back{border-color:var(–aemt)}
+
+/* Front content */
+.cf-tag{font-family:var(–mono);font-size:9px;font-weight:600;
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;
+padding:3px 10px;border-radius:20px}
+.cf-tag.amb{background:var(–emt-bg);color:var(–teal2);border:1px solid var(–teal)}
+.cf-tag.hosp{background:var(–aemt-bg);color:#60a5fa;border:1px solid var(–aemt)}
+.cf-name{font-size:26px;font-weight:700;line-height:1.2;margin-bottom:10px}
+.cf-trade{font-family:var(–mono);font-size:13px;color:var(–teal2);margin-bottom:8px}
+.cf-class{font-size:13px;color:var(–gray);margin-bottom:16px}
+.cf-scope{display:inline-block;padding:4px 12px;border-radius:20px;
+font-family:var(–mono);font-size:11px;font-weight:600;margin-bottom:20px}
+.cf-scope.all{background:var(–emt-bg);color:var(–emt);border:1px solid var(–emt)}
+.cf-scope.aemt{background:var(–aemt-bg);color:#60a5fa;border:1px solid var(–aemt)}
+.cf-scope.pm{background:var(–pm-bg);color:#a78bfa;border:1px solid var(–pm)}
+.cf-hint{font-size:11px;color:var(–gray);display:flex;align-items:center;gap:4px}
+
+/* Back content */
+.cb-section{margin-bottom:14px}
+.cb-label{font-family:var(–mono);font-size:9px;font-weight:600;
+letter-spacing:0.1em;text-transform:uppercase;color:var(–teal2);
+border-bottom:1px solid var(–border);padding-bottom:5px;margin-bottom:8px}
+.cb-text{font-size:14px;line-height:1.6;color:#d4e4f0}
+.cb-dose-row{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #182030;
+font-size:13px;align-items:flex-start}
+.cb-dose-route{color:var(–gray);font-family:var(–mono);font-size:11px;
+min-width:110px;flex-shrink:0;padding-top:2px}
+.cb-dose-val{color:var(–white);font-weight:500;line-height:1.4}
+.cb-note{background:#1a1200;border-left:3px solid var(–warn);
+border-radius:0 6px 6px 0;padding:8px 10px;font-size:12px;
+color:#fde68a;line-height:1.5;margin-bottom:6px}
+.cb-critical{background:#1a0505;border-left:3px solid var(–danger);
+border-radius:0 6px 6px 0;padding:8px 10px;font-size:12px;
+color:#fca5a5;line-height:1.5;margin-bottom:6px}
+.cb-watch{background:#1a0505;border-left:3px solid var(–warn);
+border-radius:0 6px 6px 0;padding:8px 10px;font-size:12px;
+color:#fde68a;line-height:1.5;margin-bottom:6px}
+
+/* ── SWIPE BUTTONS ───────────────────────────────────────────────── */
+.swipe-btns{display:flex;gap:12px;padding:16px;max-width:420px;width:100%;margin:0 auto}
+.swipe-btn{flex:1;padding:16px;border-radius:12px;border:none;
+font-size:15px;font-weight:700;cursor:pointer;font-family:var(–sans);
+display:flex;align-items:center;justify-content:center;gap:8px;
+transition:all 0.12s}
+.swipe-btn:active{transform:scale(0.96)}
+.btn-missed{background:var(–missed-bg);color:var(–missed);border:2px solid var(–missed)}
+.btn-knew{background:var(–knew-bg);color:var(–knew);border:2px solid var(–knew)}
+
+.flip-prompt{text-align:center;font-size:12px;color:var(–gray);
+padding:4px 0 12px;font-family:var(–mono)}
+
+/* ── RESULTS ─────────────────────────────────────────────────────── */
+#results{padding:0 0 40px}
+.res-hdr{background:linear-gradient(180deg,#060d1f,var(–surface));
+border-bottom:1px solid var(–border);padding:28px 20px;text-align:center}
+.res-label{font-family:var(–mono);font-size:10px;color:var(–gray);
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
+.res-title{font-size:20px;font-weight:700;margin-bottom:16px}
+.res-score{font-family:var(–mono);font-size:56px;font-weight:600;line-height:1;color:var(–teal2)}
+.res-denom{font-size:20px;color:var(–gray)}
+.res-pct{font-size:16px;font-weight:600;margin-top:6px}
+.res-grade{font-size:13px;color:var(–gray);margin-top:4px}
+.res-body{padding:20px 16px 40px}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.bdi{background:var(–surface2);border:1px solid var(–border);
+border-radius:10px;padding:14px;text-align:center}
+.bdi-num{font-family:var(–mono);font-size:26px;font-weight:700;margin-bottom:4px}
+.bdi-num.k{color:var(–knew)}.bdi-num.m{color:var(–missed)}
+.bdi-label{font-size:11px;color:var(–gray)}
+.sec-label{font-family:var(–mono);font-size:10px;color:var(–gray);
+letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;
+padding-bottom:6px;border-bottom:1px solid var(–border)}
+.missed-item{background:var(–surface2);border:1px solid var(–border);
+border-radius:8px;padding:13px;margin-bottom:8px}
+.missed-name{font-size:14px;font-weight:700;color:var(–missed);margin-bottom:4px}
+.missed-key{font-size:12px;color:var(–gray);line-height:1.5}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.act-btn{padding:14px;border-radius:10px;border:none;font-size:15px;
+font-weight:700;cursor:pointer;font-family:var(–sans);text-align:center}
+.act-btn.primary{background:var(–teal);color:#000}
+.act-btn.secondary{background:var(–surface2);color:var(–white);
+border:1px solid var(–border)}
+.act-btn.ghost{background:var(–surface);color:var(–white);
+border:1px solid var(–border)}
+
+/* Swipe animation hints */
+.card-wrap.swipe-left{animation:swipeL 0.3s ease-out forwards}
+.card-wrap.swipe-right{animation:swipeR 0.3s ease-out forwards}
+@keyframes swipeL{to{transform:translateX(-120%) rotate(-15deg);opacity:0}}
+@keyframes swipeR{to{transform:translateX(120%) rotate(15deg);opacity:0}}
+</style>
+
+</head>
+<body>
+
+<div id="loading">
+  <div class="ll">AMR</div>
+  <div class="ls">Kansas City &middot; Flashcards 2026</div>
+  <div class="lb"><div class="lf"></div></div>
+</div>
+
+<!-- HOME SCREEN -->
+
+<div class="screen" id="home">
+  <a class="back-link" href="quiz.html">&#x2190; Back to Quiz</a>
+  <div class="home-hdr">
+    <div class="home-badge">AMR Kansas City &middot; 2026</div>
+    <div class="home-title">Drug Flashcards</div>
+    <div class="home-sub">Dr. Ameet Deshmukh, MD &middot; Medical Director</div>
+  </div>
+  <div class="home-body">
+    <div class="home-intro">
+      Flip through drug cards and mark what you know. At the end, retry the ones you missed. Two stacks &mdash; ambulance formulary and hospital medications.
+    </div>
+
+```
+<!-- Ambulance Formulary Stack -->
+<div class="stack-card amb">
+  <div class="sci">
+    <div class="sc-icon">&#x1F48A;</div>
+    <div class="sc-label">Ambulance Formulary</div>
+    <div class="sc-title">AMR KC Carried Medications</div>
+    <div class="sc-desc">The 21 medications stocked on AMR Kansas City ambulances. Mechanism, dosing, contraindications, and clinical notes by scope level.</div>
+    <div class="sc-meta">
+      <span class="sc-tag">21 Cards</span>
+      <span class="sc-tag">Scope Tiered</span>
+      <span class="sc-tag">Tap to Flip</span>
+    </div>
+    <div class="scope-filter" id="scope-filter">
+      <div class="sf-btn on" data-scope="all">All</div>
+      <div class="sf-btn" data-scope="emt-only">EMT Level</div>
+      <div class="sf-btn" data-scope="aemt">AEMT+</div>
+      <div class="sf-btn" data-scope="pm">PM Only</div>
+    </div>
+    <div class="sf-hint" id="scope-hint">Showing all 21 cards</div>
+    <button class="start-btn" id="start-amb">Start Ambulance Stack &rarr;</button>
+  </div>
+</div>
+
+<!-- Hospital Meds Stack -->
+<div class="stack-card hosp">
+  <div class="sci">
+    <div class="sc-icon">&#x1F4A7;</div>
+    <div class="sc-label">Hospital Medications</div>
+    <div class="sc-title">Hospital-Supplied Infusions</div>
+    <div class="sc-desc">Vasopressors, sedation, anticoagulation, electrolytes, antibiotics, blood products, and more. Transport monitoring and critical warnings.</div>
+    <div class="sc-meta">
+      <span class="sc-tag">40 Cards</span>
+      <span class="sc-tag">By Category</span>
+      <span class="sc-tag">Tap to Flip</span>
+    </div>
+    <button class="start-btn" id="start-hosp">Start Hospital Stack &rarr;</button>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+
+<div class="screen" id="quiz-screen">
+  <div class="quiz-hdr">
+    <div class="qh-top">
+      <button class="quit-btn" id="quit-btn">&#x2715; Quit</button>
+      <div class="qh-info">
+        <div class="qh-label" id="qh-label">AMBULANCE FORMULARY</div>
+        <div class="qh-count" id="qh-count">Card 1 of 21</div>
+      </div>
+      <div class="qh-score" id="qh-score">&#x2713; 0</div>
+    </div>
+    <div class="prog"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div id="card-area">
+    <div class="card-scene">
+      <div class="card-wrap" id="card-wrap">
+        <div class="card-face card-front" id="card-front"></div>
+        <div class="card-face card-back" id="card-back"></div>
+      </div>
+    </div>
+    <div class="flip-prompt" id="flip-prompt">Tap card to reveal</div>
+    <div class="swipe-btns" id="swipe-btns" style="display:none">
+      <button class="swipe-btn btn-missed" id="btn-missed">&#x2715; Missed</button>
+      <button class="swipe-btn btn-knew" id="btn-knew">&#x2713; Knew It</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+
+<div class="screen" id="results">
+  <div class="res-hdr">
+    <div class="res-label" id="res-label">AMBULANCE FORMULARY</div>
+    <div class="res-title">Stack Complete</div>
+    <div class="res-score" id="res-score">0<span class="res-denom">/21</span></div>
+    <div class="res-pct" id="res-pct">0%</div>
+    <div class="res-grade" id="res-grade"></div>
+  </div>
+  <div class="res-body">
+    <div class="breakdown">
+      <div class="bdi"><div class="bdi-num k" id="r-knew">0</div><div class="bdi-label">Knew It</div></div>
+      <div class="bdi"><div class="bdi-num m" id="r-missed">0</div><div class="bdi-label">Missed</div></div>
+    </div>
+    <div id="missed-section"></div>
+    <div class="actions">
+      <button class="act-btn primary" id="btn-retry-all">Retry Full Stack</button>
+      <button class="act-btn ghost" id="btn-retry-missed">Retry Missed Only</button>
+      <button class="act-btn secondary" id="btn-home">&#x2190; Choose Stack</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+var AMB = [
+  {num:'III-1',name:'Adenosine',scope:'pm',mechanism:'Blocks AV nodal conduction transiently. Terminates re-entrant SVT.',
+   doses:[{route:'Adult IV',dose:'6 mg rapid IV push + 20 mL NS flush. Repeat 12 mg x1.'},{route:'Pediatric IV',dose:'0.1 mg/kg rapid push (max 6 mg); repeat 0.2 mg/kg (max 12 mg).'}],
+   notes:['Administer as close to heart as possible — AC fossa preferred. Flush immediately.','Warn patient: transient chest tightness and sense of impending doom are expected.','Methylxanthines (caffeine, theophylline) block receptors — may need higher dose.'],
+   contra:['WPW with pre-excitation (relative)','2nd or 3rd degree AV block','Sick sinus syndrome']},
+
+  {num:'III-2',name:'Albuterol',scope:'all',mechanism:'Selective beta-2 agonist. Bronchodilation via smooth muscle relaxation.',
+   doses:[{route:'Adult nebulized',dose:'2.5 mg in 3 mL NS; repeat every 20 min x3.'},{route:'Adult MDI',dose:'4–8 puffs with spacer; repeat every 20 min.'},{route:'Pediatric nebulized',dose:'2.5 mg for all ages.'}],
+   notes:['Combine with ipratropium for first treatment in moderate-severe bronchospasm.','Side effects: tachycardia, tremors, hypokalemia with repeated doses.'],
+   contra:['Hypersensitivity to albuterol']},
+
+  {num:'III-3',name:'Amiodarone',scope:'aemt',mechanism:'Class III antiarrhythmic. Prolongs action potential duration. Na/K/Ca channel effects plus alpha/beta blockade.',
+   doses:[{route:'Adult cardiac arrest',dose:'300 mg IV/IO fixed dose. Repeat 150 mg x1.'},{route:'Adult stable VT',dose:'150 mg IV over 10 minutes. Contact DMO.'},{route:'Pediatric arrest',dose:'5 mg/kg IV/IO push; max 300 mg.'}],
+   notes:['Do NOT calculate weight-based dose for adult cardiac arrest — 300 mg fixed.','Causes hypotension with rapid infusion — slower for stable VT.'],
+   contra:['Cardiogenic shock','Severe bradycardia without pacemaker','2nd or 3rd degree AV block without pacemaker']},
+
+  {num:'III-4',name:'Aspirin',scope:'all',mechanism:'Irreversible COX-1 inhibitor. Inhibits thromboxane A2-mediated platelet aggregation.',
+   doses:[{route:'Adult PO',dose:'324 mg chewed (not swallowed whole). Give once.'}],
+   notes:['Must be chewed — faster buccal absorption.','Aspirin sensitivity with asthma (Samter\'s triad) is NOT a true allergy — give aspirin.'],
+   contra:['True aspirin allergy (anaphylaxis, hives)','Active GI bleeding','Hemorrhagic stroke (relative)']},
+
+  {num:'III-5',name:'Atropine Sulfate',scope:'aemt',mechanism:'Competitive muscarinic ACh receptor antagonist. Increases HR by blocking vagal tone.',
+   doses:[{route:'Bradycardia Adult IV',dose:'1 mg IV every 3–5 min; max 3 mg.'},{route:'Bradycardia Pediatric IV/IO',dose:'0.02 mg/kg; min 0.1 mg; max 0.5 mg single dose.'},{route:'Organophosphate Adult',dose:'2–4 mg IV/IM; repeat q5–10 min until secretions dry. No maximum in toxicology context.'}],
+   notes:['AEMT scope: autoinjector route only in OPG context. IV/IO for bradycardia is Paramedic scope.','Doses <0.5 mg may paradoxically worsen bradycardia in adults.','High-degree AV block often does not respond — move to pacing.'],
+   contra:['Narrow-angle glaucoma (relative)']},
+
+  {num:'III-6',name:'Diphenhydramine',scope:'aemt',mechanism:'H1 histamine receptor antagonist. Also anticholinergic and sedative.',
+   doses:[{route:'Adult IV/IM',dose:'25–50 mg IV/IM. IV: give slowly over 2–3 min.'},{route:'Pediatric IV/IM',dose:'1 mg/kg IV/IM; max 50 mg.'}],
+   notes:['Do NOT delay epinephrine for diphenhydramine — adjunct only.','For dystonic reactions: 50 mg IV provides rapid relief.'],
+   contra:['Hypersensitivity','Neonates']},
+
+  {num:'III-7',name:'Dextrose 10% (D10W)',scope:'aemt',mechanism:'Hypertonic glucose solution. Raises blood glucose rapidly.',
+   doses:[{route:'Adult IV',dose:'100–250 mL IV. Recheck glucose in 10 minutes.'},{route:'Pediatric IV/IO',dose:'2–4 mL/kg IV/IO. Recheck BG 5 min after.'}],
+   notes:['D10% is the ONLY dextrose concentration carried by AMR KC — no D50%.','If no IV access and patient cannot swallow: glucagon 1 mg IM (PM scope).'],
+   contra:['Hyperglycemia','Do not give in ischemic stroke with normal glucose']},
+
+  {num:'III-8',name:'Epinephrine 1:1,000 (IM)',scope:'all',mechanism:'Alpha and beta adrenergic agonist. Reverses vasodilation, bronchospasm, and angioedema in anaphylaxis.',
+   doses:[{route:'Adult IM',dose:'0.3–0.5 mg IM to lateral thigh. May repeat every 5–10 min.'},{route:'EpiPen',dose:'0.3 mg auto-injector to lateral thigh through clothing.'},{route:'Pediatric IM',dose:'0.01 mg/kg IM; max 0.3 mg. EpiPen Jr for <30 kg: 0.15 mg.'}],
+   notes:['Lateral thigh preferred — fastest absorption. NOT deltoid.','Do NOT confuse 1:1,000 (IM) with 1:10,000 (IV/IO).'],
+   contra:['No absolute contraindications in anaphylaxis']},
+
+  {num:'III-9',name:'Epinephrine 1:10,000 (IV/IO)',scope:'aemt',mechanism:'Alpha and beta adrenergic agonist. Increases coronary and cerebral perfusion pressure during CPR.',
+   doses:[{route:'Cardiac arrest IV/IO',dose:'1 mg every 3–5 min. Non-shockable: give ASAP. Shockable: after initial defib fails.'},{route:'Push-dose pressor (PM)',dose:'10–20 mcg IV q1–2 min. Prep: 1 mL 1:10,000 + 9 mL NS = 10 mcg/mL.'},{route:'Pediatric arrest',dose:'0.01 mg/kg IV/IO; max 1 mg. Every 3–5 min.'}],
+   notes:['AHA 2025: delay epi in shockable rhythms until after initial defib fails.','Push-dose pressor prep: 1 mL of 1:10,000 into 10 mL syringe + 9 mL NS = 10 mcg/mL.'],
+   contra:['No absolute contraindications in cardiac arrest']},
+
+  {num:'III-10',name:'Fentanyl Citrate',scope:'aemt',mechanism:'Synthetic mu-opioid agonist. Rapid onset 1–2 min IV, shorter duration than morphine.',
+   doses:[{route:'Adult IV/IO',dose:'25–100 mcg slow IV push; titrate to effect.'},{route:'Adult IN',dose:'1–2 mcg/kg IN via atomizer; max 100 mcg.'},{route:'Pediatric IV/IO',dose:'1–2 mcg/kg slow push; max 50 mcg per dose.'}],
+   notes:['Chest wall rigidity with rapid large doses — administer slowly.','Naloxone reverses — have immediately available.','Preferred over morphine in renal failure and hemodynamically unstable patients.'],
+   contra:['Hypersensitivity to fentanyl','Caution: hypotension, respiratory depression, head injury']},
+
+  {num:'III-11',name:'Midazolam (Versed)',scope:'aemt',mechanism:'Benzodiazepine. Enhances GABA-mediated CNS inhibition. Anticonvulsant, amnestic, anxiolytic.',
+   doses:[{route:'Seizure Adult IV/IO',dose:'2–5 mg IV/IO; may repeat x1 after 5 minutes.'},{route:'Seizure Adult IM',dose:'5–10 mg IM.'},{route:'Seizure Adult IN',dose:'5 mg IN (2.5 mg per nostril via atomizer).'},{route:'Pediatric IV/IO',dose:'0.1 mg/kg IV/IO; max 5 mg.'},{route:'Pediatric IN',dose:'0.2 mg/kg IN; max 5 mg.'}],
+   notes:['AEMT authorization: ACTIVE SEIZURES ONLY per KBEMS and Dr. Deshmukh.','Respiratory depression risk — BVM immediately accessible at all times.','IN route effective for seizures when IV/IO delayed.'],
+   contra:['Hypersensitivity','Acute narrow-angle glaucoma']},
+
+  {num:'III-12',name:'Ketamine',scope:'pm',mechanism:'NMDA receptor antagonist. Dissociative anesthetic. Analgesic, amnestic, bronchodilatory properties.',
+   doses:[{route:'Bolus — intubated adult IV',dose:'0.5–1 mg/kg IV slow push.'},{route:'Infusion — intubated adult',dose:'1 mg/kg/hr; titrate up to 8 mg/kg/hr. Preferred: 1:1 concentration.'}],
+   notes:['AMR KC: INTUBATED PATIENTS ONLY without DMO order.','Increases BP and HR significantly.','Known or suspected psychosis is a HARD contraindication.'],
+   contra:['Known or suspected psychosis/schizophrenia','Uncontrolled hypertension (relative)','Elevated ICP without secured airway (relative)']},
+
+  {num:'III-13',name:'Lidocaine',scope:'aemt',mechanism:'Class Ib antiarrhythmic. Sodium channel blocker. Suppresses ventricular ectopy.',
+   doses:[{route:'Cardiac arrest IV/IO',dose:'1–1.5 mg/kg IV/IO push; repeat 0.5–0.75 mg/kg q5–10 min (max 3 mg/kg total).'},{route:'Stable VT IV',dose:'1–1.5 mg/kg IV over 2 min; then 0.5–0.75 mg/kg if needed.'}],
+   notes:['AHA 2025: amiodarone or lidocaine — both 2b for refractory VF/pVT.','Lidocaine preferred in cocaine-induced arrest.','Toxicity: perioral numbness, tinnitus, tremors, seizures at high doses.'],
+   contra:['Heart block without pacemaker','Severe sinus bradycardia']},
+
+  {num:'III-14',name:'Magnesium Sulfate',scope:'pm',mechanism:'Electrolyte. Membrane stabilizer. Anticonvulsant. Bronchodilator. Antiarrhythmic.',
+   doses:[{route:'Eclampsia IV',dose:'4–6 g IV over 15–20 min; then 1–2 g/hr infusion.'},{route:'Torsades IV',dose:'2 g IV over 2–5 min (faster in arrest).'},{route:'Severe asthma IV',dose:'2 g IV over 20 min.'},{route:'Pediatric severe asthma',dose:'25–50 mg/kg IV over 20 min; max 2 g.'}],
+   notes:['Toxicity signs in order: loss of DTRs → respiratory depression → cardiac arrest.','Antidote: calcium gluconate 1 g IV.'],
+   contra:['Hypermagnesemia','Significant AV block','Myasthenia gravis']},
+
+  {num:'III-15',name:'Naloxone (Narcan)',scope:'all',mechanism:'Competitive opioid receptor antagonist. Reverses respiratory depression, sedation, hypotension.',
+   doses:[{route:'Adult IV/IO',dose:'0.4–2 mg; titrate to adequate respiratory effort.'},{route:'Adult IN',dose:'2 mg total IM or IN. Repeat if no response.'},{route:'Pediatric IV/IO',dose:'0.01–0.1 mg/kg; titrate to respiratory effort.'},{route:'Pediatric IN',dose:'0.1 mg/kg IN; max 2 mg.'}],
+   notes:['Titrate to adequate RESPIRATORY EFFORT — not full consciousness. Full reversal = acute withdrawal.','Duration 30–90 min — shorter than most opioids. Re-sedation is common.','AHA 2025: naloxone must NOT delay CPR or epinephrine in opioid arrest.'],
+   contra:['Hypersensitivity (rare)']},
+
+  {num:'III-16',name:'Nitroglycerin',scope:'all',mechanism:'Organic nitrate. Venodilator — reduces preload. Coronary vasodilator.',
+   doses:[{route:'Adult SL',dose:'0.4 mg SL every 5 min x3; hold if SBP <100 mmHg.'},{route:'Hospital-initiated',dose:'Manage per sending orders.'}],
+   notes:['PDE-5 inhibitors: sildenafil (24 hr), tadalafil (48 hr) — combination causes refractory hypotension.','Inferior STEMI: HOLD NTG — RV infarction is preload-dependent.'],
+   contra:['SBP <100 mmHg','Suspected RV infarct (inferior STEMI)','PDE-5 inhibitor use within 24–48 hours','Severe aortic stenosis']},
+
+  {num:'III-17',name:'Norepinephrine (Levophed)',scope:'pm',mechanism:'Potent alpha-1 agonist with moderate beta-1 activity. Raises MAP via vasoconstriction.',
+   doses:[{route:'Adult IV/IO infusion',dose:'0.01–0.1 mcg/kg/min; titrate to MAP ≥65 mmHg. Confirm concentration with sending facility.'},{route:'Pediatric IV/IO',dose:'0.05–1 mcg/kg/min; titrate per PALS targets.'}],
+   notes:['Hospital-supplied at variable concentrations — ALWAYS confirm concentration before departure.','First-line vasopressor for septic shock per SSC 2021.','Extravasation causes tissue necrosis — check site every 15 min.'],
+   contra:['Hypovolemia without fluid resuscitation (relative)']},
+
+  {num:'III-18',name:'Sodium Bicarbonate',scope:'pm',mechanism:'Alkalinizing agent. Raises serum pH. Reverses TCA sodium channel blockade.',
+   doses:[{route:'TCA toxicity IV',dose:'1–2 mEq/kg IV bolus; repeat to maintain pH 7.45–7.55.'},{route:'Hyperkalemia IV',dose:'Per sending order — typically 50–100 mEq IV.'},{route:'Cardiac arrest',dose:'1 mEq/kg IV/IO; contact DMO.'}],
+   notes:['TCA toxicity: target pH 7.45–7.55 — alkalinization reverses sodium channel blockade.','Do NOT mix bicarb and calcium in same line — precipitation.'],
+   contra:['Hypocalcemia (alkalosis worsens)','Pulmonary edema']},
+
+  {num:'III-19',name:'Ondansetron (Zofran)',scope:'aemt',mechanism:'Selective 5-HT3 serotonin receptor antagonist. Antiemetic.',
+   doses:[{route:'Adult IV/IO',dose:'4 mg IV over 2–5 min. May repeat x1 after 15 min.'},{route:'Adult IM',dose:'4 mg IM.'},{route:'Pediatric IV/IO',dose:'0.15 mg/kg IV (max 4 mg).'},{route:'ODT',dose:'4 mg ODT for patients able to take oral medications.'}],
+   notes:['EMT authorization: PO and ODT only. IV/IO, IM, IN administration is AEMT+ scope.','Does not cause sedation — safe for continued neurologic assessment.'],
+   contra:['Hypersensitivity','QTc prolongation (caution)']},
+
+  {num:'III-20',name:'Normal Saline 0.9%',scope:'all',mechanism:'Isotonic crystalloid solution. Expands intravascular volume without significant fluid shifts.',
+   doses:[{route:'Adult IV bolus',dose:'250–500 mL IV; reassess after each. Sepsis: 30 mL/kg total.'},{route:'Pediatric IV bolus',dose:'20 mL/kg IV/IO; reassess. Max 60 mL/kg without DMO.'},{route:'Maintenance/KVO',dose:'Per sending orders or 30 mL/hr.'}],
+   notes:['Reassess lung sounds after EVERY bolus — stop if pulmonary edema develops.','EMT authorization: monitoring of pre-existing IV fluid only. EMT may not initiate independently.'],
+   contra:['Hypernatremia','Pulmonary edema — use with extreme caution']},
+
+  {num:'III-21',name:'Ipratropium Bromide (Atrovent)',scope:'all',mechanism:'Anticholinergic bronchodilator. Inhibits muscarinic receptors — reduces bronchoconstriction and secretions.',
+   doses:[{route:'Adult nebulized',dose:'0.5 mg combined with albuterol — first treatment only.'},{route:'Pediatric nebulized',dose:'0.25–0.5 mg combined with albuterol — first treatment only.'}],
+   notes:['Combine with albuterol for first nebulized treatment only — do NOT repeat ipratropium.','Avoid aerosol exposure to eyes — can precipitate acute angle-closure glaucoma.'],
+   contra:['Hypersensitivity to ipratropium or atropine','Narrow-angle glaucoma']},
+];
+
+var HOSP = [
+  {cat:'Vasopressors',name:'Norepinephrine',trade:'Levophed',klass:'Alpha/beta agonist vasopressor',why:'Septic shock, distributive shock, post-ROSC hypotension',dose:'0.01–0.5 mcg/kg/min IV; titrate to MAP ≥65',watch:'Extravasation → tissue necrosis — check IV site q15 min. Reflex bradycardia.',critical:'Pump must run at all times. Do not bolus. Paramedic scope.'},
+  {cat:'Vasopressors',name:'Epinephrine infusion',trade:'Adrenalin',klass:'Alpha/beta agonist',why:'Refractory shock, anaphylaxis infusion, post-arrest',dose:'0.01–1 mcg/kg/min; anaphylaxis: 2–10 mcg/min',watch:'Tachycardia, hypertension, arrhythmias',critical:'Confirm concentration before transport — variable mixing at sending facilities.'},
+  {cat:'Vasopressors',name:'Vasopressin',trade:'Pitressin',klass:'ADH analog vasopressor',why:'Adjunct in septic shock alongside norepinephrine',dose:'Fixed: 0.03–0.04 units/min — not titrated',watch:'Peripheral ischemia, decreased urine output',critical:'Fixed rate only. Do not adjust.'},
+  {cat:'Vasopressors',name:'Dopamine',trade:'Intropin',klass:'Catecholamine — dose-dependent',why:'Bradycardia refractory to atropine, cardiogenic shock',dose:'2–20 mcg/kg/min; low=renal, high=vasopressor',watch:'Tachyarrhythmias, extravasation necrosis',critical:'Not on AMR KC units. Confirm pump and concentration at sending facility.'},
+  {cat:'Vasopressors',name:'Dobutamine',trade:'Dobutrex',klass:'Beta-1 inotrope',why:'Cardiogenic shock, decompensated CHF',dose:'2–20 mcg/kg/min IV',watch:'Tachycardia, hypotension from vasodilation, arrhythmias',critical:'Increases CO but can worsen hypotension — monitor BP closely.'},
+  {cat:'Vasopressors',name:'Phenylephrine',trade:'Neo-Synephrine',klass:'Pure alpha agonist',why:'Hypotension without tachycardia',dose:'Bolus: 100–200 mcg IV; infusion: 0.5–6 mcg/kg/min',watch:'Reflex bradycardia, hypertension',critical:'Pure vasoconstriction — no cardiac output benefit. May worsen CHF.'},
+  {cat:'Vasopressors',name:'Milrinone',trade:'Primacor',klass:'PDE inhibitor / inotrope',why:'Advanced heart failure, cardiogenic shock',dose:'0.125–0.75 mcg/kg/min IV',watch:'Hypotension and arrhythmias',critical:'Significant hypotension risk. Have vasopressor ready. Paramedic scope.'},
+  {cat:'Sedation',name:'Propofol',trade:'Diprivan',klass:'IV anesthetic / sedative',why:'ICU sedation of intubated patients',dose:'5–50 mcg/kg/min infusion',watch:'Hypotension, bradycardia, respiratory depression',critical:'Paramedic scope only. White emulsion — discard if separated or discolored. PRIS risk at prolonged high doses.'},
+  {cat:'Sedation',name:'Dexmedetomidine',trade:'Precedex',klass:'Alpha-2 agonist sedative',why:'ICU sedation — arousable, minimal respiratory depression',dose:'0.2–1.5 mcg/kg/hr IV',watch:'Bradycardia and hypotension — especially on loading',critical:'Bradycardia can be severe. Have atropine accessible. Paramedic scope.'},
+  {cat:'Sedation',name:'Cisatracurium',trade:'Nimbex',klass:'Non-depolarizing NMB',why:'Paralysis for ventilator synchrony (ARDS, elevated ICP)',dose:'1–3 mcg/kg/min infusion',watch:'Patient CANNOT breathe independently',critical:'PARALYZED PATIENT — vent failure is immediately fatal. BVM immediately if vent fails. Paramedic scope.'},
+  {cat:'Sedation',name:'Rocuronium',trade:'Zemuron',klass:'Non-depolarizing NMB',why:'RSI, ongoing paralysis for ventilator management',dose:'RSI: 1.2 mg/kg IV; maintenance: 0.1–0.2 mg/kg q20–30 min',watch:'Patient CANNOT breathe independently',critical:'PARALYZED PATIENT. Reversal: sugammadex (Bridion) — hospital-supplied only.'},
+  {cat:'Cardiac',name:'Heparin',trade:'Heparin sodium',klass:'Anticoagulant',why:'ACS, STEMI transfer, PE, DVT, mechanical valves',dose:'Weight-based per sending orders; typical 12–18 units/kg/hr',watch:'Active bleeding, HIT',critical:'Do NOT adjust rate without explicit order. EMT: maintain only. PM: titrate per orders.'},
+  {cat:'Cardiac',name:'Alteplase',trade:'tPA / Activase',klass:'Thrombolytic',why:'Acute ischemic stroke, massive PE',dose:'Stroke: 0.9 mg/kg IV over 60 min (max 90 mg)',watch:'Any bleeding — ICH is the catastrophic complication',critical:'STOP and call DMO: new neuro change, new headache, hypotension, any bleeding.'},
+  {cat:'Cardiac',name:'Diltiazem',trade:'Cardizem',klass:'Calcium channel blocker',why:'A-fib/flutter rate control, SVT',dose:'Bolus: 0.25 mg/kg IV; infusion: 5–15 mg/hr',watch:'Hypotension, bradycardia, worsening CHF',critical:'Contraindicated in WPW, wide-complex tachycardia, decompensated CHF, hypotension.'},
+  {cat:'Cardiac',name:'Labetalol',trade:'Trandate',klass:'Alpha/beta blocker',why:'Hypertensive emergency, aortic dissection, eclampsia',dose:'Bolus: 10–20 mg IV; infusion: 1–2 mg/min',watch:'Bradycardia, bronchospasm, hypotension',critical:'Contraindicated in reactive airway disease, decompensated CHF, bradycardia, heart block.'},
+  {cat:'Cardiac',name:'Nicardipine',trade:'Cardene',klass:'Dihydropyridine CCB',why:'Hypertensive emergency, post-stroke/SAH BP control',dose:'5–15 mg/hr IV; titrate q5–15 min',watch:'Hypotension, reflex tachycardia, headache',critical:'Dedicated IV line required. Monitor BP every 5 min during titration.'},
+  {cat:'Cardiac',name:'Nitroglycerin infusion',trade:'Nitro-Bid IV',klass:'Nitrate vasodilator',why:'Acute CHF, unstable angina, hypertensive emergency',dose:'5–200 mcg/min IV; titrate to effect',watch:'Hypotension — rapid onset',critical:'Hold if SBP <100. Contraindicated in RV infarction and within 48h of PDE-5 inhibitors.'},
+  {cat:'Electrolytes',name:'Potassium Chloride',trade:'KCl',klass:'Electrolyte replacement',why:'Hypokalemia, cardiac arrhythmia prevention',dose:'10–20 mEq/hr IV via pump',watch:'Burning at IV site, peaked T waves, QRS widening',critical:'PUMP AT ALL TIMES. Free-flow KCl bolus causes fatal cardiac arrest.'},
+  {cat:'Electrolytes',name:'Magnesium Sulfate infusion',trade:'Mag sulfate',klass:'Electrolyte / anticonvulsant',why:'Eclampsia, torsades, severe asthma, hypomagnesemia',dose:'Loading: 4–6 g over 15–20 min; maintenance: 1–2 g/hr',watch:'Loss of patellar reflex = first toxicity sign → respiratory depression → cardiac arrest',critical:'DTR loss: stop or slow infusion, call DMO. Antidote: calcium gluconate 1 g IV.'},
+  {cat:'Electrolytes',name:'Insulin (Regular)',trade:'Humulin R / Novolin R',klass:'Hormone / antidiabetic',why:'DKA, HHS, hyperkalemia, TPN',dose:'DKA: 0.1–0.14 units/kg/hr; hyperkalemia bolus: 10 units IV',watch:'Hypoglycemia — check glucose q30 min',critical:'Check glucose before departure and q30 min. Glucose <70: hold insulin, D10%, call DMO.'},
+  {cat:'Electrolytes',name:'Calcium Gluconate',trade:'Calcium gluconate',klass:'Electrolyte',why:'Hyperkalemia, mag toxicity antidote, hypocalcemia, CCB/BB toxicity',dose:'1–2 g IV over 10–20 min; may repeat',watch:'Bradycardia with rapid push, extravasation necrosis',critical:'Do NOT mix with sodium bicarb — precipitates. Antidote for mag toxicity.'},
+  {cat:'Electrolytes',name:'Hypertonic Saline 3%',trade:'3% NaCl',klass:'Osmotic agent',why:'Elevated ICP, TBI herniation, severe hyponatremia',dose:'ICP bolus: 1–2 mL/kg IV; hyponatremia: 1–2 mL/kg/hr',watch:'Hypernatremia, central pontine myelinolysis (rapid Na correction)',critical:'Central line strongly preferred. Paramedic scope.'},
+  {cat:'Antibiotics',name:'Vancomycin',trade:'Vancocin',klass:'Glycopeptide antibiotic',why:'MRSA, severe gram-positive infections, sepsis',dose:'15–20 mg/kg IV q8–12h over 60–90 min',watch:'Red Man Syndrome (flushing from rapid infusion — not allergy), nephrotoxicity',critical:'Red Man Syndrome: slow infusion rate. True allergy rare.'},
+  {cat:'Antibiotics',name:'Piperacillin-Tazobactam',trade:'Zosyn',klass:'Beta-lactam / beta-lactamase inhibitor',why:'Broad-spectrum sepsis, pneumonia, intra-abdominal infection',dose:'3.375–4.5 g IV q6–8h over 30 min',watch:'Penicillin cross-reactivity (~1%), electrolyte disturbances',critical:'Contains significant sodium — watch in fluid-restricted patients.'},
+  {cat:'Antibiotics',name:'Meropenem',trade:'Merrem',klass:'Carbapenem antibiotic',why:'Severe/resistant gram-negative infections, meningitis',dose:'1–2 g IV q8h over 15–30 min',watch:'Seizure threshold lowering in renal failure',critical:'Broad-spectrum — indicates serious or resistant infection.'},
+  {cat:'Antibiotics',name:'Acyclovir',trade:'Zovirax',klass:'Antiviral',why:'Herpes encephalitis, severe HSV/VZV infection',dose:'5–10 mg/kg IV q8h over 60 min minimum',watch:'Nephrotoxicity, neurotoxicity at high doses',critical:'Must infuse over 60 min. Adequate hydration required.'},
+  {cat:'Blood Products',name:'Packed Red Blood Cells',trade:'pRBCs',klass:'Blood product',why:'Acute hemorrhage, symptomatic anemia',dose:'1–2 units IV; each unit ~250–350 mL',watch:'Transfusion reaction: hypotension, back pain, fever, dark urine, bronchospasm',critical:'Reaction: stop immediately, NS to maintain IV, call DMO.'},
+  {cat:'Blood Products',name:'Fresh Frozen Plasma',trade:'FFP',klass:'Blood product — clotting factors',why:'Coagulopathy, massive transfusion, warfarin reversal',dose:'10–15 mL/kg IV; typical 2–4 units',watch:'Same transfusion reaction signs as pRBC. Volume overload risk.',critical:'Same reaction protocol as pRBC. Cannot refreeze once thawed.'},
+  {cat:'Blood Products',name:'Platelets',trade:'PLT',klass:'Blood product',why:'Thrombocytopenia with bleeding, massive transfusion protocol',dose:'1 apheresis unit or pool of 4–6 units IV',watch:'Febrile non-hemolytic reaction most common',critical:'Room temperature only — do NOT refrigerate. Short shelf life.'},
+  {cat:'Neuro',name:'Levetiracetam',trade:'Keppra',klass:'Antiepileptic',why:'Seizure prophylaxis post-TBI/stroke, status epilepticus (2nd line)',dose:'Loading: 20–60 mg/kg IV over 15 min (max 4.5 g)',watch:'Sedation, behavioral agitation, dizziness',critical:'Too-rapid infusion causes hypotension.'},
+  {cat:'Neuro',name:'Mannitol',trade:'Osmitrol',klass:'Osmotic diuretic',why:'Elevated ICP, cerebral edema, TBI herniation',dose:'0.25–1 g/kg IV bolus over 15–20 min',watch:'Hypotension, electrolyte imbalances, renal failure with repeat doses',critical:'In-line filter required — crystallizes. Avoid in severe renal failure.'},
+  {cat:'GI',name:'N-Acetylcysteine',trade:'Acetadote / NAC',klass:'Antidote — hepatoprotectant',why:'Acetaminophen overdose — prevents liver failure',dose:'3-bag protocol: 150 mg/kg/hr ×1h → 50 mg/kg over 4h → 100 mg/kg over 16h',watch:'Anaphylactoid reaction (flushing, urticaria, bronchospasm) during first bag',critical:'Slow/stop first bag if reaction, give diphenhydramine, call DMO. NOT true allergy — can restart slower.'},
+  {cat:'GI',name:'Octreotide',trade:'Sandostatin',klass:'Somatostatin analog',why:'Variceal bleeding, GI hemorrhage, carcinoid syndrome',dose:'50–100 mcg IV bolus, then 25–50 mcg/hr',watch:'Bradycardia, hypoglycemia, nausea',critical:'Critical for active variceal bleeding — do not interrupt infusion.'},
+  {cat:'GI',name:'Furosemide',trade:'Lasix',klass:'Loop diuretic',why:'Acute pulmonary edema, volume overload, CHF',dose:'20–200 mg IV bolus; infusion: 5–20 mg/hr',watch:'Hypotension, hypokalemia, hypomagnesemia',critical:'Monitor BP. Hypokalemia potentiates digoxin toxicity.'},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+var S = {
+  mode: null,       // 'amb' | 'hosp'
+  deck: [],         // cards for this session
+  current: 0,
+  knew: 0,
+  missedCards: [],
+  flipped: false,
+  scopeFilter: 'all',
+  missedOnly: false,
+};
+
+// ── SCOPE FILTER ──────────────────────────────────────────────────────────
+var SCOPE_FILTER = 'all';
+
+function filterAmb(){
+  if(SCOPE_FILTER === 'all') return AMB;
+  if(SCOPE_FILTER === 'emt-only') return AMB.filter(function(d){ return d.scope === 'all'; });
+  if(SCOPE_FILTER === 'aemt') return AMB.filter(function(d){ return d.scope === 'all' || d.scope === 'aemt'; });
+  if(SCOPE_FILTER === 'pm') return AMB.filter(function(d){ return d.scope === 'pm'; });
+  return AMB;
+}
+
+function shuffle(arr){
+  var a = arr.slice(), i, j, t;
+  for(i = a.length-1; i > 0; i--){
+    j = Math.floor(Math.random()*(i+1));
+    t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// ── SCREEN MANAGEMENT ─────────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── START DECK ────────────────────────────────────────────────────────────
+function startDeck(mode, cards, missedOnly){
+  S.mode = mode;
+  S.deck = shuffle(cards);
+  S.current = 0;
+  S.knew = 0;
+  S.missedCards = [];
+  S.flipped = false;
+  S.missedOnly = !!missedOnly;
+
+  document.getElementById('qh-label').textContent =
+    mode === 'amb' ? 'AMBULANCE FORMULARY' : 'HOSPITAL MEDICATIONS';
+
+  showScreen('quiz-screen');
+  renderCard();
+}
+
+// ── RENDER CARD ───────────────────────────────────────────────────────────
+function renderCard(){
+  var card = S.deck[S.current];
+  var total = S.deck.length;
+  var pct = Math.round((S.current / total) * 100);
+
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('qh-count').textContent = 'Card ' + (S.current+1) + ' of ' + total;
+  document.getElementById('qh-score').textContent = '\u2713 ' + S.knew;
+
+  var wrap = document.getElementById('card-wrap');
+  wrap.className = 'card-wrap';
+  S.flipped = false;
+
+  var front = document.getElementById('card-front');
+  var back = document.getElementById('card-back');
+
+  document.getElementById('flip-prompt').style.display = 'block';
+  document.getElementById('swipe-btns').style.display = 'none';
+
+  if(S.mode === 'amb'){
+    front.className = 'card-face card-front amb-front';
+    back.className = 'card-face card-back amb-back';
+
+    var scopeLabel = {all:'ALL LEVELS', aemt:'AEMT+', pm:'PM ONLY'}[card.scope];
+    var scopeClass = card.scope;
+
+    front.innerHTML =
+      '<div class="cf-tag amb">Ambulance Formulary</div>' +
+      '<div class="cf-name">' + card.name + '</div>' +
+      '<div class="cf-scope ' + scopeClass + '">' + scopeLabel + '</div>' +
+      '<div class="cf-hint">&#x1F4F2; Tap to reveal</div>';
+
+    var backHtml = '<div class="cb-section"><div class="cb-label">Mechanism</div>' +
+      '<div class="cb-text">' + card.mechanism + '</div></div>';
+
+    if(card.doses && card.doses.length){
+      backHtml += '<div class="cb-section"><div class="cb-label">Dosing</div>';
+      card.doses.forEach(function(d){
+        backHtml += '<div class="cb-dose-row"><div class="cb-dose-route">' + d.route + '</div>' +
+          '<div class="cb-dose-val">' + d.dose + '</div></div>';
+      });
+      backHtml += '</div>';
+    }
+
+    if(card.contra && card.contra.length){
+      backHtml += '<div class="cb-section"><div class="cb-label">Contraindications</div>';
+      card.contra.forEach(function(c){
+        backHtml += '<div class="cb-note">\u2715 ' + c + '</div>';
+      });
+      backHtml += '</div>';
+    }
+
+    if(card.notes && card.notes.length){
+      backHtml += '<div class="cb-section"><div class="cb-label">Clinical Notes</div>';
+      card.notes.forEach(function(n){
+        backHtml += '<div class="cb-note">\u2139 ' + n + '</div>';
+      });
+      backHtml += '</div>';
+    }
+
+    back.innerHTML = backHtml;
+
+  } else {
+    // Hospital med
+    front.className = 'card-face card-front hosp-front';
+    back.className = 'card-face card-back hosp-back';
+
+    front.innerHTML =
+      '<div class="cf-tag hosp">' + card.cat + '</div>' +
+      '<div class="cf-name">' + card.name + '</div>' +
+      '<div class="cf-trade">' + card.trade + '</div>' +
+      '<div class="cf-class">' + card.klass + '</div>' +
+      '<div class="cf-hint">&#x1F4F2; Tap to reveal</div>';
+
+    var backHtml =
+      '<div class="cb-section"><div class="cb-label">Why the patient has this</div>' +
+      '<div class="cb-text">' + card.why + '</div></div>' +
+      '<div class="cb-section"><div class="cb-label">Typical dose / rate</div>' +
+      '<div class="cb-text" style="font-family:var(--mono);font-size:13px;color:var(--teal2)">' + card.dose + '</div></div>' +
+      '<div class="cb-section"><div class="cb-label">Watch for</div>' +
+      '<div class="cb-watch">\u26A0 ' + card.watch + '</div></div>';
+    if(card.critical){
+      backHtml += '<div class="cb-section"><div class="cb-label">Critical</div>' +
+        '<div class="cb-critical">\uD83D\uDEA8 ' + card.critical + '</div></div>';
+    }
+    back.innerHTML = backHtml;
+  }
+}
+
+// ── FLIP CARD ─────────────────────────────────────────────────────────────
+function flipCard(){
+  if(S.flipped) return;
+  S.flipped = true;
+  document.getElementById('card-wrap').classList.add('flipped');
+  document.getElementById('flip-prompt').style.display = 'none';
+  document.getElementById('swipe-btns').style.display = 'flex';
+}
+
+// ── MARK ANSWER ───────────────────────────────────────────────────────────
+function markAnswer(knew){
+  if(!S.flipped) return;
+
+  var card = S.deck[S.current];
+  if(knew){
+    S.knew++;
+  } else {
+    S.missedCards.push(card);
+  }
+
+  var wrap = document.getElementById('card-wrap');
+  wrap.classList.add(knew ? 'swipe-right' : 'swipe-left');
+
+  setTimeout(function(){
+    S.current++;
+    if(S.current >= S.deck.length){
+      showResults();
+    } else {
+      renderCard();
+    }
+  }, 280);
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────
+function showResults(){
+  var total = S.deck.length;
+  var pct = Math.round((S.knew / total) * 100);
+
+  document.getElementById('res-label').textContent =
+    S.mode === 'amb' ? 'AMBULANCE FORMULARY' : 'HOSPITAL MEDICATIONS';
+  document.getElementById('res-score').innerHTML =
+    S.knew + '<span class="res-denom">/' + total + '</span>';
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-grade').textContent =
+    pct >= 90 ? '\uD83C\uDFC6 Excellent' :
+    pct >= 75 ? '\uD83D\uDC4D Good — review missed cards' :
+    '\u26A0\uFE0F Needs review — retry missed stack';
+  document.getElementById('r-knew').textContent = S.knew;
+  document.getElementById('r-missed').textContent = S.missedCards.length;
+
+  var ms = document.getElementById('missed-section');
+  if(S.missedCards.length === 0){
+    ms.innerHTML = '<div style="text-align:center;padding:20px;color:var(--knew);font-weight:600">\uD83C\uDF89 Perfect stack!</div>';
+  } else {
+    var h = '<div class="sec-label">MISSED (' + S.missedCards.length + ')</div>';
+    S.missedCards.forEach(function(c){
+      if(S.mode === 'amb'){
+        h += '<div class="missed-item">';
+        h += '<div class="missed-name">' + c.name + '</div>';
+        h += '<div class="missed-key">' + c.mechanism + '</div>';
+        h += '</div>';
+      } else {
+        h += '<div class="missed-item">';
+        h += '<div class="missed-name">' + c.name + ' <span style="font-size:11px;color:var(--gray)">' + c.trade + '</span></div>';
+        h += '<div class="missed-key">' + c.why + '</div>';
+        h += '</div>';
+      }
+    });
+    ms.innerHTML = h;
+  }
+
+  document.getElementById('btn-retry-missed').style.display =
+    S.missedCards.length ? 'block' : 'none';
+
+  showScreen('results');
+}
+
+// ── EVENT WIRING ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+
+  // Scope filter buttons
+  document.getElementById('scope-filter').addEventListener('click', function(e){
+    var btn = e.target.closest('.sf-btn');
+    if(!btn) return;
+    SCOPE_FILTER = btn.dataset.scope;
+    document.querySelectorAll('.sf-btn').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+    var filtered = filterAmb();
+    var hints = {
+      'all': 'Showing all 21 cards',
+      'emt-only': 'Showing ' + filtered.length + ' EMT-authorized cards',
+      'aemt': 'Showing ' + filtered.length + ' AEMT+ cards (includes EMT)',
+      'pm': 'Showing ' + filtered.length + ' PM Only cards'
+    };
+    document.getElementById('scope-hint').textContent = hints[SCOPE_FILTER];
+  });
+
+  // Start ambulance
+  document.getElementById('start-amb').addEventListener('click', function(){
+    startDeck('amb', filterAmb(), false);
+  });
+
+  // Start hospital
+  document.getElementById('start-hosp').addEventListener('click', function(){
+    startDeck('hosp', HOSP, false);
+  });
+
+  // Flip on card tap
+  document.getElementById('card-wrap').addEventListener('click', function(){
+    flipCard();
+  });
+
+  // Answer buttons
+  document.getElementById('btn-missed').addEventListener('click', function(){
+    markAnswer(false);
+  });
+  document.getElementById('btn-knew').addEventListener('click', function(){
+    markAnswer(true);
+  });
+
+  // Quit
+  document.getElementById('quit-btn').addEventListener('click', function(){
+    if(confirm('Quit? Your progress will be lost.')) showScreen('home');
+  });
+
+  // Results buttons
+  document.getElementById('btn-retry-all').addEventListener('click', function(){
+    startDeck(S.mode, S.mode === 'amb' ? filterAmb() : HOSP, false);
+  });
+  document.getElementById('btn-retry-missed').addEventListener('click', function(){
+    if(S.missedCards.length) startDeck(S.mode, S.missedCards, true);
+  });
+  document.getElementById('btn-home').addEventListener('click', function(){
+    showScreen('home');
+  });
+
+  // Touch swipe support
+  var touchStartX = 0;
+  document.getElementById('card-wrap').addEventListener('touchstart', function(e){
+    touchStartX = e.touches[0].clientX;
+  }, {passive:true});
+  document.getElementById('card-wrap').addEventListener('touchend', function(e){
+    if(!S.flipped) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if(Math.abs(dx) > 60){
+      markAnswer(dx > 0);
+    }
+  }, {passive:true});
+
+  // Loading
+  setTimeout(function(){
+    var l = document.getElementById('loading');
+    l.style.opacity = '0';
+    setTimeout(function(){ l.style.display='none'; showScreen('home'); }, 400);
+  }, 1000);
+});
+</script>
+
+</body>
+</html>
