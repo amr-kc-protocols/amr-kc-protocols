@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACLS 2025 — Flash Cards</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+:root {
+–bg:       #0d1117;
+–surface:  #161b22;
+–border:   #30363d;
+–text:     #e6edf3;
+–muted:    #7d8590;
+–accent:   #58a6ff;
+–green:    #3fb950;
+–amber:    #d29922;
+–red:      #f85149;
+–purple:   #bc8cff;
+–card-front: #161b22;
+–card-back:  #1c2128;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘IBM Plex Sans’, sans-serif;
+font-weight: 300;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 24px 16px 40px;
+}
+
+/* ── Header ── */
+header {
+width: 100%;
+max-width: 640px;
+margin-bottom: 28px;
+}
+
+.header-top {
+display: flex;
+align-items: baseline;
+gap: 12px;
+margin-bottom: 6px;
+}
+
+h1 {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: var(–accent);
+}
+
+.version-tag {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+color: var(–muted);
+border: 1px solid var(–border);
+padding: 1px 7px;
+border-radius: 20px;
+}
+
+/* ── Deck selector ── */
+.deck-bar {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+margin-bottom: 20px;
+}
+
+.deck-btn {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.06em;
+padding: 5px 12px;
+border-radius: 4px;
+border: 1px solid var(–border);
+background: transparent;
+color: var(–muted);
+cursor: pointer;
+transition: all 0.15s;
+}
+
+.deck-btn:hover { color: var(–text); border-color: var(–muted); }
+.deck-btn.active { background: var(–accent); border-color: var(–accent); color: #0d1117; font-weight: 600; }
+
+/* ── Progress bar ── */
+.progress-row {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 20px;
+}
+
+.progress-track {
+flex: 1;
+height: 3px;
+background: var(–border);
+border-radius: 2px;
+overflow: hidden;
+}
+
+.progress-fill {
+height: 100%;
+background: var(–accent);
+border-radius: 2px;
+transition: width 0.3s ease;
+}
+
+.progress-label {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+color: var(–muted);
+white-space: nowrap;
+}
+
+/* ── Card ── */
+.card-wrap {
+width: 100%;
+max-width: 640px;
+perspective: 1200px;
+margin-bottom: 24px;
+}
+
+.card {
+position: relative;
+width: 100%;
+min-height: 220px;
+transform-style: preserve-3d;
+transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+cursor: pointer;
+}
+
+.card.flipped { transform: rotateY(180deg); }
+
+.card-face {
+position: absolute;
+inset: 0;
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 32px 36px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+}
+
+.card-front { background: var(–card-front); }
+.card-back  { background: var(–card-back); transform: rotateY(180deg); border-color: var(–accent); }
+
+.card-tag {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+margin-bottom: 16px;
+opacity: 0.5;
+}
+
+.card-question {
+font-size: 18px;
+font-weight: 400;
+line-height: 1.5;
+color: var(–text);
+}
+
+.card-answer {
+font-size: 17px;
+font-weight: 400;
+line-height: 1.6;
+color: var(–text);
+}
+
+.card-answer strong {
+color: var(–accent);
+font-weight: 600;
+}
+
+.card-answer .highlight-green { color: var(–green); font-weight: 600; }
+.card-answer .highlight-red   { color: var(–red);   font-weight: 600; }
+.card-answer .highlight-amber { color: var(–amber); font-weight: 600; }
+
+.flip-hint {
+margin-top: 20px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 10px;
+color: var(–muted);
+letter-spacing: 0.08em;
+}
+
+/* ── Controls ── */
+.controls {
+display: flex;
+gap: 12px;
+width: 100%;
+max-width: 640px;
+}
+
+.btn {
+flex: 1;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 0.06em;
+padding: 12px;
+border-radius: 6px;
+border: 1px solid var(–border);
+background: var(–surface);
+color: var(–text);
+cursor: pointer;
+transition: all 0.15s;
+}
+
+.btn:hover { border-color: var(–accent); color: var(–accent); }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.3; cursor: default; }
+.btn:disabled:hover { border-color: var(–border); color: var(–text); }
+
+.btn-shuffle {
+flex: 0 0 auto;
+padding: 12px 18px;
+color: var(–muted);
+font-size: 14px;
+}
+
+/* ── Score row ── */
+.score-row {
+display: flex;
+gap: 20px;
+margin-top: 20px;
+width: 100%;
+max-width: 640px;
+}
+
+.score-item {
+display: flex;
+align-items: center;
+gap: 7px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+color: var(–muted);
+cursor: pointer;
+transition: color 0.15s;
+}
+
+.score-item:hover { color: var(–text); }
+
+.score-dot {
+width: 8px; height: 8px;
+border-radius: 50%;
+border: 1.5px solid var(–border);
+transition: all 0.15s;
+}
+
+.score-item.marked-got .score-dot   { background: var(–green);  border-color: var(–green); }
+.score-item.marked-miss .score-dot  { background: var(–red);    border-color: var(–red); }
+
+.score-count { font-size: 13px; font-weight: 600; }
+.score-got  .score-count { color: var(–green); }
+.score-miss .score-count { color: var(–red); }
+
+/* ── Done state ── */
+.done-screen {
+display: none;
+flex-direction: column;
+align-items: center;
+text-align: center;
+gap: 14px;
+width: 100%;
+max-width: 640px;
+padding: 48px 24px;
+border: 1px solid var(–border);
+border-radius: 10px;
+background: var(–surface);
+}
+
+.done-screen.visible { display: flex; }
+
+.done-title {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 13px;
+letter-spacing: 0.1em;
+color: var(–accent);
+text-transform: uppercase;
+}
+
+.done-stats {
+font-size: 40px;
+font-weight: 600;
+color: var(–green);
+}
+
+.done-sub { font-size: 14px; color: var(–muted); }
+
+.btn-restart {
+margin-top: 8px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 0.08em;
+padding: 12px 28px;
+border-radius: 6px;
+border: 1px solid var(–accent);
+background: transparent;
+color: var(–accent);
+cursor: pointer;
+transition: all 0.15s;
+}
+
+.btn-restart:hover { background: var(–accent); color: #0d1117; }
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>ACLS 2025</h1>
+    <span class="version-tag">AHA Guidelines · Oct 2025</span>
+  </div>
+</header>
+
+<div class="deck-bar" id="deckBar"></div>
+
+<div class="progress-row" style="width:100%;max-width:640px;">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="progress-label" id="progressLabel"></span>
+</div>
+
+<div class="card-wrap" id="cardWrap">
+  <div class="card" id="card" onclick="flipCard()">
+    <div class="card-face card-front">
+      <div class="card-tag" id="cardTag"></div>
+      <div class="card-question" id="cardQuestion"></div>
+      <div class="flip-hint">tap to reveal →</div>
+    </div>
+    <div class="card-face card-back">
+      <div class="card-tag" id="cardTagBack"></div>
+      <div class="card-answer" id="cardAnswer"></div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn" id="btnPrev" onclick="prev()">← prev</button>
+  <button class="btn btn-shuffle" onclick="shuffle()" title="Shuffle deck">⇄</button>
+  <button class="btn" id="btnNext" onclick="next()">next →</button>
+</div>
+
+<div class="score-row">
+  <div class="score-item score-got" id="scoreGot" onclick="markGot()">
+    <div class="score-dot"></div>
+    <span>got it</span>
+    <span class="score-count" id="gotCount">0</span>
+  </div>
+  <div class="score-item score-miss" id="scoreMiss" onclick="markMiss()">
+    <div class="score-dot"></div>
+    <span>missed</span>
+    <span class="score-count" id="missCount">0</span>
+  </div>
+</div>
+
+<div class="done-screen" id="doneScreen">
+  <div class="done-title">Deck complete</div>
+  <div class="done-stats" id="doneStats"></div>
+  <div class="done-sub" id="doneSub"></div>
+  <button class="btn-restart" onclick="restart()">Restart deck</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CARDS DATA
+// ─────────────────────────────────────────────
+const ALL_CARDS = [
+
+  // ── CARDIAC ARREST: CPR ──────────────────────
+  { deck:"Cardiac Arrest", q:"What is the target chest compression rate?", a:"<strong>100–120 per minute</strong>" },
+  { deck:"Cardiac Arrest", q:"What is the target compression depth for adults?", a:"<strong>At least 2 inches</strong>, but no more than 2.4 inches" },
+  { deck:"Cardiac Arrest", q:"What must happen after every compression?", a:"<strong>Full chest recoil</strong> — do not lean on the chest" },
+  { deck:"Cardiac Arrest", q:"How often are rhythm checks performed during CPR?", a:"Every <strong>2 minutes</strong> — keep them brief" },
+  { deck:"Cardiac Arrest", q:"How many shocks before resuming CPR?", a:"<strong>1 shock</strong>, then immediately resume CPR — no stacked shocks" },
+  { deck:"Cardiac Arrest", q:"When do you resume compressions after a shock?", a:"<strong>Immediately</strong> — do not pause to check rhythm or pulse" },
+  { deck:"Cardiac Arrest", q:"What is the purpose of EtCO2 monitoring during CPR?", a:"Assess <strong>CPR quality</strong> and detect <strong>ROSC</strong>" },
+  { deck:"Cardiac Arrest", q:"What does a sustained rise in EtCO2 indicate during CPR?", a:"Likely <strong>ROSC</strong>" },
+  { deck:"Cardiac Arrest", q:"Which defibrillator type is preferred?", a:"<strong>Biphasic</strong> — monophasic still acceptable where in use" },
+
+  // ── CARDIAC ARREST: DRUGS ────────────────────
+  { deck:"Cardiac Arrest", q:"Which vasopressor is used in cardiac arrest?", a:"<strong>Epinephrine only</strong> — no vasopressin, no norepinephrine" },
+  { deck:"Cardiac Arrest", q:"Which antiarrhythmic is preferred for refractory VF/pVT?", a:"<strong>No preference</strong> — amiodarone and lidocaine are equal alternatives" },
+  { deck:"Cardiac Arrest", q:"Should you use IV or IO access first?", a:"<strong>IV first</strong> — IO only when IV can't be established quickly without delaying key interventions" },
+  { deck:"Cardiac Arrest", q:"When is sodium bicarbonate appropriate in arrest?", a:"Only with specific indication: <span class='highlight-amber'>hyperkalemia, TCA OD, or toxicologic arrest</span>" },
+  { deck:"Cardiac Arrest", q:"When is calcium appropriate in arrest?", a:"Only for <span class='highlight-amber'>hypocalcemia, hyperkalemia, or CCB/magnesium toxicity</span> — not routine" },
+  { deck:"Cardiac Arrest", q:"When is magnesium appropriate in arrest?", a:"<span class='highlight-amber'>Torsades de pointes</span> or known hypomagnesemia only — not routine" },
+  { deck:"Cardiac Arrest", q:"Are steroids recommended in undifferentiated cardiac arrest?", a:"<span class='highlight-red'>No</span> — not recommended" },
+
+  // ── CARDIAC ARREST: ADVANCED ─────────────────
+  { deck:"Cardiac Arrest", q:"When are mechanical CPR devices recommended?", a:"<span class='highlight-red'>Not routine</span> — consider only when manual CPR is not feasible (e.g., prolonged transport)" },
+  { deck:"Cardiac Arrest", q:"Is electrical pacing useful in established cardiac arrest?", a:"<span class='highlight-red'>No</span> — explicitly not recommended as a resuscitation strategy" },
+  { deck:"Cardiac Arrest", q:"Is dual-sequence defibrillation standard ACLS?", a:"<span class='highlight-red'>No</span> — research/select-system context only; not routine ACLS" },
+  { deck:"Cardiac Arrest", q:"Name the 5 H's of reversible causes", a:"Hypovolemia · Hypoxia · Hydrogen ion (acidosis) · Hypo/Hyperkalemia · Hypothermia" },
+  { deck:"Cardiac Arrest", q:"Name the 5 T's of reversible causes", a:"Tension pneumo · Tamponade · Toxins · Thrombosis (PE) · Thrombosis (coronary)" },
+
+  // ── POST-ARREST CARE ─────────────────────────
+  { deck:"Post-Arrest", q:"What SpO2 range should you target after ROSC?", a:"<strong>94–99%</strong> — avoid both hypoxia and hyperoxia" },
+  { deck:"Post-Arrest", q:"What EtCO2 range should you target after ROSC?", a:"<strong>35–40 mmHg</strong> — do not hyperventilate" },
+  { deck:"Post-Arrest", q:"What MAP should you target after ROSC?", a:"<strong>≥ 65 mmHg</strong> — treat hypotension aggressively" },
+  { deck:"Post-Arrest", q:"What temperature should you avoid after ROSC?", a:"Fever: <span class='highlight-red'>do not allow temp > 37.7 °C</span>" },
+  { deck:"Post-Arrest", q:"What is the 2025 framing of post-arrest care?", a:"A <strong>continuation of resuscitation</strong> — not a separate phase that begins at hospital arrival" },
+  { deck:"Post-Arrest", q:"What ECG should you obtain immediately after ROSC?", a:"<strong>12-lead ECG</strong> — identify STEMI or STEMI-equivalent for cath lab activation" },
+  { deck:"Post-Arrest", q:"What is the paramedic's neurologic role post-ROSC?", a:"Document neurologic status at ROSC and during transport — <strong>formal neuroprognostication is in-hospital</strong>" },
+  { deck:"Post-Arrest", q:"Should you run 100% FiO2 after ROSC?", a:"<span class='highlight-red'>No</span> — titrate to SpO2 94–99%; hyperoxia is harmful" },
+
+  // ── BRADYCARDIA ───────────────────────────────
+  { deck:"Bradycardia", q:"What defines symptomatic bradycardia?", a:"HR typically <strong>< 50 bpm</strong> with hemodynamic compromise <em>attributable to the rate</em>" },
+  { deck:"Bradycardia", q:"What is first-line treatment for symptomatic bradycardia?", a:"<strong>Atropine 1 mg IV</strong>" },
+  { deck:"Bradycardia", q:"What is the maximum total atropine dose?", a:"<strong>3 mg</strong> (1 mg q3–5 min)" },
+  { deck:"Bradycardia", q:"What does 2025 emphasize if atropine fails?", a:"<strong>Escalate promptly</strong> — do not delay TCP; prepare early in Mobitz II or 3rd-degree block" },
+  { deck:"Bradycardia", q:"What is the dopamine infusion dose for bradycardia?", a:"<strong>2–20 mcg/kg/min</strong>" },
+  { deck:"Bradycardia", q:"What is the epinephrine infusion dose for bradycardia?", a:"<strong>2–10 mcg/min</strong>" },
+  { deck:"Bradycardia", q:"What is definitive treatment for refractory bradycardia?", a:"<strong>Transvenous pacing</strong> — an in-hospital procedure" },
+
+  // ── TACHYCARDIA ───────────────────────────────
+  { deck:"Tachycardia", q:"What defines unstable tachycardia?", a:"Hypotension, AMS, ischemic chest pain, or acute HF <strong>attributable to the tachycardia</strong>" },
+  { deck:"Tachycardia", q:"Treatment for ANY unstable tachycardia?", a:"<strong>Immediate synchronized cardioversion</strong> — regardless of QRS width" },
+  { deck:"Tachycardia", q:"Starting energy for cardioversion of narrow regular tachycardia?", a:"<strong>50–100 J biphasic</strong>" },
+  { deck:"Tachycardia", q:"Starting energy for cardioversion of wide/irregular tachycardia?", a:"<strong>200 J biphasic</strong> (or maximum available)" },
+  { deck:"Tachycardia", q:"First step for stable narrow regular tachycardia (SVT)?", a:"<strong>Vagal maneuvers</strong> first, then adenosine" },
+  { deck:"Tachycardia", q:"Adenosine dose for SVT?", a:"<strong>6 mg IV</strong> rapid push with immediate flush — may repeat 12 mg × 2" },
+  { deck:"Tachycardia", q:"Treatment for stable wide regular tachycardia (presumed VT)?", a:"<strong>Amiodarone 150 mg IV over 10 min</strong>" },
+  { deck:"Tachycardia", q:"Should you give adenosine for a wide complex tachycardia?", a:"<span class='highlight-red'>Avoid</span> unless SVT with aberrancy is clearly established" },
+  { deck:"Tachycardia", q:"What should you avoid in pre-excited A-fib (WPW)?", a:"<span class='highlight-red'>AV nodal blocking agents</span> (adenosine, beta-blockers, CCBs, digoxin)" },
+
+  // ── CHAIN OF SURVIVAL ─────────────────────────
+  { deck:"Systems & Chain", q:"How many chains of survival exist in 2025?", a:"<strong>One unified chain</strong> — covers all ages, OHCA and IHCA" },
+  { deck:"Systems & Chain", q:"What is the new 6th link in the 2025 Chain of Survival?", a:"<strong>Recovery</strong> — rehab, cognitive support, psychological care after discharge" },
+  { deck:"Systems & Chain", q:"Name the 6 links of the 2025 Chain of Survival", a:"Prevention · Activation · High-Quality CPR · Defibrillation · Advanced Resuscitation · Recovery" },
+  { deck:"Systems & Chain", q:"What was added to the 2025 Stroke Algorithm?", a:"A formal <strong>thrombolytic (tPA) consideration pathway</strong>" },
+  { deck:"Systems & Chain", q:"What is the prehospital team's most critical stroke documentation?", a:"<strong>Last known well time</strong> — determines tPA eligibility" },
+  { deck:"Systems & Chain", q:"Where is naloxone placed in the 2025 BLS algorithm?", a:"<strong>Explicitly in the algorithm flow</strong> for suspected opioid respiratory/cardiac arrest — not a footnote" },
+  { deck:"Systems & Chain", q:"CPR vs. naloxone priority in full cardiac arrest?", a:"<strong>CPR takes priority</strong> — do not delay compressions to give naloxone" },
+  { deck:"Systems & Chain", q:"Why monitor for re-sedation after naloxone and ROSC?", a:"Naloxone half-life is <strong>shorter than most opioids</strong> — patient can re-sedate" },
+
+  // ── TEAM PERFORMANCE ──────────────────────────
+  { deck:"Team Performance", q:"What communication standard does 2025 reinforce?", a:"<strong>Closed-loop communication</strong> — confirm every order before acting, acknowledge after" },
+  { deck:"Team Performance", q:"Give the closed-loop sequence for a drug order", a:"Order → <strong>Confirm before</strong> → Give → <strong>Confirm after</strong> → Leader acknowledges" },
+  { deck:"Team Performance", q:"When should roles be assigned during a code?", a:"<strong>Before or at the start</strong> of resuscitation — ambiguity costs time and causes errors" },
+  { deck:"Team Performance", q:"What should the team leader NOT do during a code?", a:"Become <strong>task-fixated</strong> — maintain global situational awareness" },
+  { deck:"Team Performance", q:"What is the 2025 guideline recommendation post-resuscitation?", a:"<strong>Structured debriefing</strong> using compression metric data" },
+  { deck:"Team Performance", q:"What do CPR feedback devices measure in real time?", a:"Compression <strong>rate, depth, and chest recoil</strong>" },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const DECKS = ["All", ...new Set(ALL_CARDS.map(c => c.deck))];
+let activeDeck = "All";
+let deck = [];
+let idx = 0;
+let flipped = false;
+let got = 0;
+let miss = 0;
+let marks = {}; // idx -> 'got'|'miss'
+
+function getFilteredDeck() {
+  let cards = activeDeck === "All" ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.deck === activeDeck);
+  return cards;
+}
+
+function shuffle() {
+  deck = getFilteredDeck();
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  idx = 0; got = 0; miss = 0; marks = {};
+  flipped = false;
+  document.getElementById('doneScreen').classList.remove('visible');
+  document.getElementById('cardWrap').style.display = '';
+  document.getElementById('controls') && null;
+  render();
+}
+
+function restart() {
+  document.getElementById('doneScreen').classList.remove('visible');
+  document.getElementById('cardWrap').style.display = '';
+  idx = 0; got = 0; miss = 0; marks = {};
+  flipped = false;
+  render();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function render() {
+  if (idx >= deck.length) { showDone(); return; }
+
+  const card = deck[idx];
+  document.getElementById('card').classList.toggle('flipped', flipped);
+  document.getElementById('cardTag').textContent     = card.deck;
+  document.getElementById('cardTagBack').textContent = card.deck;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML    = card.a;
+
+  // progress
+  const pct = Math.round((idx / deck.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${idx + 1} / ${deck.length}`;
+
+  document.getElementById('btnPrev').disabled = idx === 0;
+
+  // score display
+  document.getElementById('gotCount').textContent  = got;
+  document.getElementById('missCount').textContent = miss;
+
+  // mark state
+  const m = marks[idx];
+  document.getElementById('scoreGot').classList.toggle('marked-got',  m === 'got');
+  document.getElementById('scoreMiss').classList.toggle('marked-miss', m === 'miss');
+}
+
+function flipCard() {
+  flipped = !flipped;
+  document.getElementById('card').classList.toggle('flipped', flipped);
+}
+
+function next() {
+  if (idx >= deck.length - 1) { idx = deck.length; render(); return; }
+  idx++;
+  flipped = false;
+  render();
+}
+
+function prev() {
+  if (idx > 0) { idx--; flipped = false; render(); }
+}
+
+function markGot() {
+  if (!flipped) return;
+  const prev = marks[idx];
+  if (prev === 'got') { delete marks[idx]; got--; }
+  else {
+    if (prev === 'miss') miss--;
+    marks[idx] = 'got'; got++;
+  }
+  render();
+}
+
+function markMiss() {
+  if (!flipped) return;
+  const prev = marks[idx];
+  if (prev === 'miss') { delete marks[idx]; miss--; }
+  else {
+    if (prev === 'got') got--;
+    marks[idx] = 'miss'; miss++;
+  }
+  render();
+}
+
+function showDone() {
+  document.getElementById('cardWrap').style.display = 'none';
+  const total = got + miss;
+  const pct   = total > 0 ? Math.round((got / total) * 100) : 0;
+  document.getElementById('doneStats').textContent = `${pct}%`;
+  document.getElementById('doneSub').textContent   = `${got} got it · ${miss} missed · ${deck.length - total} unscored`;
+  document.getElementById('doneScreen').classList.add('visible');
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = `${deck.length} / ${deck.length}`;
+}
+
+// ─────────────────────────────────────────────
+// DECK BAR
+// ─────────────────────────────────────────────
+function buildDeckBar() {
+  const bar = document.getElementById('deckBar');
+  DECKS.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'deck-btn' + (d === activeDeck ? ' active' : '');
+    const count = d === 'All' ? ALL_CARDS.length : ALL_CARDS.filter(c => c.deck === d).length;
+    btn.textContent = `${d} (${count})`;
+    btn.onclick = () => {
+      activeDeck = d;
+      document.querySelectorAll('.deck-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('doneScreen').classList.remove('visible');
+      document.getElementById('cardWrap').style.display = '';
+      shuffle();
+    };
+    bar.appendChild(btn);
+  });
+}
+
+// ─────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'l') next();
+  if (e.key === 'ArrowLeft'  || e.key === 'h') prev();
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  if (e.key === 'g') markGot();
+  if (e.key === 'm') markMiss();
+});
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+buildDeckBar();
+shuffle();
+</script>
+
+</body>
+</html>
