@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AMR KC Vent Quiz">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<title>AMR KC Ventilator Management Quiz 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --navy:#0f1e3d;--navy2:#162447;--teal:#0d9488;--teal2:#14b8a6;
+  --white:#f0f4f8;--gray:#8899aa;--dim:#1e2d45;
+  --vent:#0284c7;--vent2:#38bdf8;--vent-bg:#001a2e;--vent-border:#0c4a6e;
+  --correct:#16a34a;--correct-bg:#052e16;
+  --wrong:#ef4444;--wrong-bg:#2a0a0a;
+  --warn:#f59e0b;
+  --surface:#111827;--surface2:#1a2540;--border:#1e3a5f;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:var(--sans);background:var(--surface);color:var(--white);min-height:100vh}
+.hidden{display:none!important}
+
+#loading{position:fixed;inset:0;background:#060d1f;display:flex;flex-direction:column;
+align-items:center;justify-content:center;z-index:9999;transition:opacity 0.4s}
+.load-logo{font-family:var(--mono);font-size:38px;font-weight:600;color:var(--vent2);
+letter-spacing:-0.02em;margin-bottom:4px}
+.load-sub{font-size:11px;color:var(--gray);letter-spacing:0.16em;text-transform:uppercase}
+.load-bar{width:180px;height:2px;background:var(--dim);border-radius:2px;margin-top:28px;overflow:hidden}
+.load-fill{height:100%;background:linear-gradient(90deg,var(--vent),var(--vent2));
+animation:fill 1.2s ease-out forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+
+/* HOME */
+.home-hdr{background:linear-gradient(180deg,#060d1f,var(--navy));
+border-bottom:2px solid var(--vent);padding:28px 20px;text-align:center}
+.home-badge{font-family:var(--mono);font-size:10px;color:var(--vent2);
+letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px}
+.home-title{font-size:26px;font-weight:700;margin-bottom:4px}
+.home-sub{font-size:13px;color:var(--gray)}
+.home-body{padding:24px 16px 40px}
+.home-intro{font-size:14px;color:#cbd5e1;line-height:1.6;margin-bottom:24px;
+background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.home-intro strong{color:var(--vent2)}
+
+.quiz-card{margin-bottom:16px;border-radius:14px;overflow:hidden;border:2px solid var(--vent-border)}
+.qci{padding:24px;background:linear-gradient(135deg,#001220,#001e38)}
+.qc-icon{font-size:34px;margin-bottom:10px}
+.qc-level{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--vent2);
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
+.qc-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.qc-desc{font-size:13px;color:var(--gray);line-height:1.5}
+.qc-meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.meta-tag{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:20px;
+background:var(--vent-bg);color:var(--vent2);border:1px solid var(--vent-border)}
+.start-btn{display:block;width:100%;padding:15px;border-radius:8px;border:none;
+font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;font-family:var(--sans);
+background:var(--vent);color:#fff}
+
+.back-link{display:block;text-align:center;margin-top:20px;
+font-family:var(--mono);font-size:11px;color:var(--gray);text-decoration:none;
+letter-spacing:0.06em}
+.back-link:hover{color:var(--teal2)}
+
+/* QUIZ */
+.quiz-hdr{position:sticky;top:0;z-index:50;background:var(--navy);
+border-bottom:1px solid var(--border);padding:12px 16px}
+.quiz-hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.quit-btn{background:var(--dim);border:1px solid var(--border);color:var(--gray);
+font-size:12px;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans)}
+.quiz-hdr-info{flex:1}
+.qlevel{font-family:var(--mono);font-size:9px;font-weight:600;
+letter-spacing:0.1em;text-transform:uppercase;color:var(--vent2)}
+.qcount{font-size:13px;color:var(--gray);margin-top:2px}
+.qscore{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--vent2)}
+.prog{height:4px;background:var(--dim);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width 0.3s;
+background:linear-gradient(90deg,var(--vent),var(--vent2))}
+.q-wrap{padding:20px 16px 32px}
+.q-cat{font-family:var(--mono);font-size:10px;color:var(--vent2);
+letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.q-type{display:inline-block;padding:2px 9px;border-radius:10px;
+font-family:var(--mono);font-size:9px;font-weight:600;margin-bottom:14px;
+background:#001a2e;color:var(--vent2);border:1px solid var(--vent-border)}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;margin-bottom:22px;color:var(--white)}
+.opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.opt{padding:15px 16px;border-radius:10px;border:2px solid var(--border);
+background:var(--surface2);font-size:14px;line-height:1.4;
+color:var(--white);text-align:left;font-family:var(--sans);width:100%;cursor:pointer}
+.opt:active{opacity:0.85}
+.opt.correct{border-color:var(--correct)!important;background:var(--correct-bg)!important;color:#86efac!important}
+.opt.wrong{border-color:var(--wrong)!important;background:var(--wrong-bg)!important;color:#fca5a5!important}
+.feedback{border-radius:10px;padding:15px 16px;margin-bottom:20px;border-left:4px solid;line-height:1.6}
+.feedback.correct{background:var(--correct-bg);border-color:var(--correct)}
+.feedback.wrong{background:var(--wrong-bg);border-color:var(--wrong)}
+.fb-hdr{font-size:15px;font-weight:700;margin-bottom:6px}
+.feedback.correct .fb-hdr{color:#86efac}
+.feedback.wrong .fb-hdr{color:#fca5a5}
+.fb-exp{font-size:13px;color:#cbd5e1;line-height:1.6}
+.fb-ref{font-family:var(--mono);font-size:10px;color:var(--vent2);margin-top:8px;letter-spacing:0.04em}
+.next-btn{display:block;width:100%;padding:15px;border-radius:10px;border:none;
+font-size:16px;font-weight:700;cursor:pointer;font-family:var(--sans);
+background:var(--vent);color:#fff;margin-top:8px}
+
+/* RESULTS */
+.res-hdr{background:linear-gradient(180deg,#060d1f,var(--navy));
+border-bottom:2px solid var(--vent);padding:28px 20px;text-align:center}
+.res-level{font-family:var(--mono);font-size:10px;color:var(--vent2);
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
+.res-title{font-size:20px;font-weight:700;margin-bottom:16px}
+.res-score{font-family:var(--mono);font-size:58px;font-weight:600;line-height:1;color:var(--vent2)}
+.res-denom{font-size:20px;color:var(--gray)}
+.res-pct{font-size:17px;font-weight:600;margin-top:6px;color:var(--vent2)}
+.res-grade{font-size:13px;color:var(--gray);margin-top:4px}
+.res-body{padding:20px 16px 40px}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.bdi{background:var(--surface2);border:1px solid var(--border);
+border-radius:10px;padding:14px;text-align:center}
+.bdi-num{font-family:var(--mono);font-size:26px;font-weight:700;margin-bottom:4px}
+.bdi-num.c{color:var(--correct)}.bdi-num.w{color:var(--wrong)}
+.bdi-label{font-size:11px;color:var(--gray)}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--gray);
+letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;
+padding-bottom:6px;border-bottom:1px solid var(--border)}
+.cat-row{display:flex;align-items:center;gap:10px;padding:8px 0;
+border-bottom:1px solid var(--border)}
+.cat-name{flex:1;font-size:13px;color:var(--white)}
+.cat-sc{font-family:var(--mono);font-size:12px;color:var(--gray);min-width:36px;text-align:right}
+.cat-bar-wrap{width:72px;height:5px;background:var(--dim);border-radius:3px;overflow:hidden}
+.cat-bar{height:100%;border-radius:3px}
+.missed-item{background:var(--surface2);border:1px solid var(--border);
+border-radius:8px;padding:13px;margin-bottom:8px}
+.missed-q{font-size:13px;font-weight:600;margin-bottom:6px;color:#fca5a5}
+.missed-ans{font-size:12px;color:#86efac;margin-bottom:4px}
+.missed-exp{font-size:12px;color:var(--gray);line-height:1.5}
+.actions{display:flex;flex-direction:column;gap:10px}
+.act-btn{padding:14px;border-radius:10px;border:none;font-size:15px;
+font-weight:700;cursor:pointer;font-family:var(--sans)}
+.act-btn.primary{background:var(--vent);color:#fff}
+.act-btn.secondary{background:var(--surface2);color:var(--white);border:1px solid var(--border)}
+.act-btn.ghost{background:var(--navy2);color:var(--white);border:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-logo">VENT</div>
+  <div class="load-sub">Ventilator Management Quiz &middot; AMR KC 2026</div>
+  <div class="load-bar"><div class="load-fill"></div></div>
+</div>
+
+<!-- HOME -->
+<div id="screen-home">
+  <div class="home-hdr">
+    <div class="home-badge">AMR Kansas City &middot; LTV 1200 &middot; Protocol V-6 &middot; 2026</div>
+    <div class="home-title">Ventilator Management</div>
+    <div class="home-sub">Dr. Ameet Deshmukh, MD &middot; Medical Director</div>
+  </div>
+  <div class="home-body">
+    <div class="home-intro">
+      <strong>20 scenario-based questions</strong> covering LTV 1200 operation, alarm troubleshooting, disease-specific ventilation targets, and advanced respiratory physiology. All scenarios reference <strong>KC Metro interfacility transports</strong> and are grounded in the 2026 AMR KC Medical Protocols.
+    </div>
+    <div class="quiz-card">
+      <div class="qci">
+        <div class="qc-icon">&#x1F4A8;</div>
+        <div class="qc-level">Paramedic Scope &mdash; LTV 1200 &middot; Protocol V-6</div>
+        <div class="qc-title">Ventilator Management Quiz</div>
+        <div class="qc-desc">Settings &amp; calculations, alarm management, ventilator failure, disease-specific targets (ARDS, COPD, TBI, post-ROSC, stroke), and advanced respiratory physiology.</div>
+        <div class="qc-meta">
+          <span class="meta-tag">20 Questions</span>
+          <span class="meta-tag">Scenario-Based</span>
+          <span class="meta-tag">CCP-C / FP-C Style</span>
+          <span class="meta-tag">Instant Feedback</span>
+        </div>
+        <button class="start-btn" id="btn-start">Start Ventilator Quiz &rarr;</button>
+      </div>
+    </div>
+    <a class="back-link" href="index.html">&#x2190; Back to AMR KC Field Guide</a>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="hidden">
+  <div class="quiz-hdr">
+    <div class="quiz-hdr-top">
+      <button class="quit-btn" id="btn-quit" aria-label="Quit quiz">&#x2715; Quit</button>
+      <div class="quiz-hdr-info">
+        <div class="qlevel" id="qlevel">VENTILATOR MANAGEMENT</div>
+        <div class="qcount" id="qcount">Question 1 of 20</div>
+      </div>
+      <div class="qscore" id="qscore" aria-live="polite">0/0</div>
+    </div>
+    <div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="prog">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="q-wrap" class="q-wrap"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="hidden">
+  <div class="res-hdr">
+    <div class="res-level" id="res-level">VENTILATOR MANAGEMENT</div>
+    <div class="res-title">Quiz Complete</div>
+    <div class="res-score" id="res-score">0<span class="res-denom">/20</span></div>
+    <div class="res-pct" id="res-pct"></div>
+    <div class="res-grade" id="res-grade"></div>
+  </div>
+  <div class="res-body">
+    <div class="breakdown">
+      <div class="bdi"><div class="bdi-num c" id="r-correct">0</div><div class="bdi-label">Correct</div></div>
+      <div class="bdi"><div class="bdi-num w" id="r-wrong">0</div><div class="bdi-label">Incorrect</div></div>
+    </div>
+    <div class="sec-label">PERFORMANCE BY CATEGORY</div>
+    <div id="r-cats" style="margin-bottom:24px"></div>
+    <div id="r-missed-section" style="margin-bottom:28px"></div>
+    <div class="actions">
+      <button class="act-btn primary" id="btn-retry">Retake Quiz &rarr;</button>
+      <button class="act-btn secondary" id="btn-retry-missed" style="display:none">Retry Missed Only</button>
+      <button class="act-btn ghost" id="btn-home">&#x2190; Home</button>
+      <a class="act-btn ghost" href="index.html" style="text-align:center;text-decoration:none;display:block;padding:14px">&#x1F3E0; Back to Field Guide</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var QUIZ = [
+
+  // ── SETTINGS & CALCULATIONS ──────────────────────────────────────────────
+
+  {id:1, cat:"Settings & Calculations", type:"mc",
+   q:"You are transporting a 70 kg (IBW) ARDS patient from Research Medical Center to Saint Luke's Mid America Heart Institute. Current settings: TV 650 mL, RR 16, PEEP 5, FiO2 55%. Peak inspiratory pressure is 42 cmH2O and has been climbing for 10 minutes. SpO2 is 93%, ETCO2 44 mmHg. Which adjustment BEST reflects AMR KC lung-protective targets and is most likely to reduce ongoing barotrauma?",
+   opts:["A. Increase FiO2 to 100% and add 5 cmH2O PEEP to address the SpO2","B. Reduce tidal volume to 420–560 mL (6–8 mL/kg IBW) — accept a mild ETCO2 rise if needed","C. Increase RR to 22 breaths/min to compensate for any CO2 rise from lower TV","D. Hold current settings — SpO2 93% is marginal but intervention risks further destabilizing the patient"],
+   ans:1,
+   exp:"Per AMR KC Protocol V-6, lung-protective ventilation targets TV 6–8 mL/kg IBW. For a 70 kg patient, 650 mL (9.3 mL/kg) exceeds this and is generating dangerous airway pressures. Reducing TV to 420–560 mL is the priority. Permissive hypercapnia (a mild ETCO2 rise) is acceptable during lung-protective ventilation. Increasing FiO2 does not reduce mechanical lung injury. Increasing RR compensates for CO2 but does not stop volutrauma.",
+   ref:"Protocol V-6 / II-8"},
+
+  {id:2, cat:"Settings & Calculations", type:"mc",
+   q:"You are transporting a 5'4\" female patient (actual weight 92 kg) from Lee's Summit Medical Center to Saint Luke's Hospital. She was intubated for respiratory failure secondary to CHF exacerbation. The sending facility has the LTV 1200 set to TV 700 mL. Per AMR KC Protocol V-6, what is her IBW and the appropriate TV range?",
+   opts:["A. TV 552–736 mL — base tidal volume on actual body weight of 92 kg","B. TV 330–440 mL — IBW ~55 kg (45.5 + 2.3 × 4 inches over 5 feet); current TV of 700 mL significantly exceeds lung-protective target","C. TV 440–550 mL — IBW is calculated as the average of actual and ideal weight in obese patients","D. TV 700 mL is appropriate — the sending physician set it and it should not be changed without a DMO order"],
+   ans:1,
+   exp:"IBW for females: 45.5 kg + 2.3 kg per inch over 5 feet. 5'4\" = 4 inches over 5 feet → 45.5 + (2.3 × 4) = 45.5 + 9.2 = 54.7 kg ≈ 55 kg. TV range: 55 × 6 = 330 mL, 55 × 8 = 440 mL. Setting TV based on actual weight in an obese patient delivers 2–3× the lung-protective volume and causes volutrauma. If the current TV is out of range, reduce to IBW-based target and notify DMO.",
+   ref:"Protocol V-6"},
+
+  {id:3, cat:"Settings & Calculations", type:"mc",
+   q:"Your post-cardiac arrest patient from Belton Regional to Saint Luke's is on NE 0.07 mcg/kg/min, MAP 67. You have successfully titrated FiO2 from 100% down to 50% — SpO2 remains 99%. You reduce FiO2 again to 40%, and 3 minutes later MAP drops to 56 mmHg. SpO2 is still 100%. What is the PRIORITY next action?",
+   opts:["A. Continue reducing FiO2 — correcting hyperoxia takes priority over a borderline MAP drop","B. Titrate norepinephrine upward to restore MAP &ge;65 — hemodynamic instability is the immediate threat","C. Return FiO2 to 100% — the MAP drop indicates the patient cannot tolerate FiO2 reduction","D. Administer 250 mL NS bolus to support MAP before making any further changes"],
+   ans:1,
+   exp:"Both hyperoxia correction (SpO2 target 94–98%) and MAP ≥65 are post-ROSC protocol targets (II-8). When both are simultaneously threatened, hemodynamic instability is the immediate priority — MAP 56 risks end-organ ischemia. Titrate NE to restore MAP ≥65 first, then resume FiO2 weaning once stable. FiO2 reduction does not pharmacologically cause hypotension — this is disease progression. Fluid bolus post-arrest risks worsening myocardial edema.",
+   ref:"Protocol II-8 / III-17"},
+
+  {id:4, cat:"Settings & Calculations", type:"mc",
+   q:"You are transporting a 45-year-old intubated TBI patient from Liberty Hospital to KU Health System. GCS was 7 prior to intubation. Your ETCO2 waveform reads 28 mmHg. SpO2 is 98%, BP 112/74. What is the correct response?",
+   opts:["A. ETCO2 of 28 mmHg is acceptable — values this low prevent herniation in TBI","B. Decrease the respiratory rate to bring ETCO2 to the target range of 35–40 mmHg","C. Increase the respiratory rate — lower ETCO2 prevents cerebral edema in TBI","D. Contact DMO before making any ventilator changes — TBI settings require real-time authorization"],
+   ans:1,
+   exp:"Per AMR KC Protocol II-10, hyperventilation must be avoided in TBI. The target ETCO2 is 35–40 mmHg. An ETCO2 of 28 mmHg indicates significant hyperventilation — cerebral vasoconstriction from hypocapnia reduces CBF and worsens ischemia. Reduce the respiratory rate to correct this. Therapeutic hyperventilation (ETCO2 25–30) is only a temporizing measure for signs of imminent herniation — it is not a maintenance target.",
+   ref:"Protocol II-10"},
+
+  // ── DISEASE-SPECIFIC VENTILATION ─────────────────────────────────────────
+
+  {id:5, cat:"Disease-Specific Ventilation", type:"mc",
+   q:"You are transporting an intubated COPD exacerbation patient from Overland Park Regional to KU Health System. Settings: TV 480 mL (80 kg IBW, 6 mL/kg), RR 16, PEEP 5, FiO2 45%, I:E 1:2. Over 12 minutes: PIP climbs 32 → 48 cmH2O, plateau rises 26 → 41 cmH2O, MAP drops 78 → 62, equal breath sounds bilaterally. No circuit issue or ETT obstruction found. Which ventilator adjustment is MOST likely to reverse this trend?",
+   opts:["A. Increase PEEP to 10 cmH2O to recruit collapsed alveoli and improve compliance","B. Increase tidal volume to 560 mL to overcome the elevated airway pressure","C. Decrease RR to 10–12 breaths/min and extend expiratory time — adjust to I:E 1:3 or longer","D. Increase FiO2 to 100% to compensate for reduced alveolar ventilation"],
+   ans:2,
+   exp:"Auto-PEEP (breath stacking) occurs when obstructed expiratory flow prevents complete exhalation before the next breath. Trapped air progressively raises intrathoracic pressure, reducing venous return and causing hypotension. Both PIP and plateau rise as intrinsic PEEP accumulates. Management: reduce RR and extend expiratory time (longer I:E ratio such as 1:3 or 1:4) to allow passive emptying. In extremis, briefly disconnect from the ventilator to allow passive exhalation of trapped air, then reconnect. Increasing PEEP worsens air trapping in this scenario.",
+   ref:"Protocol II-13 / V-6"},
+
+  {id:6, cat:"Disease-Specific Ventilation", type:"mc",
+   q:"You are transporting an intubated 72-year-old with acute ischemic stroke (no hemorrhagic transformation per CT) from Research Medical Center to KU Health System. Current ETCO2 is 38 mmHg, SpO2 96% on FiO2 40%. The sending nurse tells your partner that 'we hyperventilate stroke patients to reduce cerebral edema.' What is the correct ventilation strategy per AMR KC Protocol II-9?",
+   opts:["A. Reduce ETCO2 to 28–32 mmHg prophylactically to minimize cerebral edema","B. Maintain ETCO2 35–40 mmHg — prophylactic hyperventilation is not indicated and causes cerebral vasoconstriction that worsens ischemia","C. ETCO2 targets apply only to TBI and hemorrhagic stroke — ischemic stroke follows no specific ventilation protocol","D. Target ETCO2 45–50 mmHg — permissive hypercapnia promotes vasodilation and improves penumbra perfusion"],
+   ans:1,
+   exp:"Prophylactic hyperventilation is contraindicated in ischemic stroke. Reducing ETCO2 causes cerebral vasoconstriction, reducing blood flow to the already ischemic penumbra and worsening infarct size. Per AMR KC Protocol II-9, maintain normal ETCO2 (35–40 mmHg). Hyperventilation to ETCO2 25–30 is a temporizing measure for imminent herniation only — not a maintenance strategy. The sending nurse's practice may reflect outdated guidelines.",
+   ref:"Protocol II-9 / II-10"},
+
+  {id:7, cat:"Disease-Specific Ventilation", type:"mc",
+   q:"You have reduced TV on your ARDS patient (70 kg IBW) from Research Medical to 490 mL (7 mL/kg IBW). ETCO2 has risen from 42 to 58 mmHg. The patient has no TBI, no intracranial pathology, and is in sinus tachycardia at 108. BP 104/68, SpO2 93% on FiO2 50%. Your AEMT partner wants to increase RR to bring ETCO2 down. What is correct?",
+   opts:["A. Increase RR to 20 — ETCO2 above 50 is unacceptable and overrides lung-protection priorities in any patient","B. Accept the elevated ETCO2 — permissive hypercapnia is an expected and well-tolerated trade-off of lung-protective ventilation when TBI and severe arrhythmia are absent","C. Increase TV back to 600 mL — the ETCO2 rise means minute ventilation is inadequate and must be corrected","D. Add PEEP to 10 cmH2O — higher PEEP improves alveolar recruitment and CO2 clearance"],
+   ans:1,
+   exp:"Permissive hypercapnia is the intentional trade-off of reducing TV to protect against volutrauma and barotrauma in ARDS. ETCO2 of 58 mmHg is elevated but well-tolerated in patients without TBI, severe metabolic acidosis, or refractory cardiac arrhythmia. The physiologic risks of a TV of 490 mL are far lower than the risks of allowing 600+ mL volutrauma to continue. Contact DMO if the ETCO2 continues to rise or the patient's hemodynamics change.",
+   ref:"Protocol V-6 / II-8"},
+
+  // ── ALARM TROUBLESHOOTING ────────────────────────────────────────────────
+
+  {id:8, cat:"Alarm Troubleshooting", type:"mc",
+   q:"En route from North Kansas City Hospital to Saint Luke's, your intubated patient develops sudden high-pressure alarms. SpO2 drops from 97% to 84% in under 30 seconds. What is the FIRST action per AMR KC Protocol II-14?",
+   opts:["A. Increase FiO2 to 100% and continue monitoring while troubleshooting the alarm","B. Contact DMO before taking any corrective action","C. Disconnect from the ventilator immediately and manually ventilate with BVM","D. Suction the ETT — secretion accumulation is the most common cause of high-pressure alarm"],
+   ans:2,
+   exp:"Per AMR KC Protocol II-14, when malfunction is confirmed or ventilation is inadequate, immediately disconnect the patient and ventilate with BVM. The protocol states: 'When in doubt, take the patient off the ventilator and BVM manually. A correctly functioning BVM is always safer than a malfunctioning ventilator.' Acute desaturation to 84% demands immediate action — troubleshooting is secondary to restoring ventilation. Contact DMO after securing the airway.",
+   ref:"Protocol II-14"},
+
+  {id:9, cat:"Alarm Troubleshooting", type:"mc",
+   q:"During transport from Lee's Summit Medical Center to Saint Luke's Hospital, your patient's LTV 1200 alarms with rising PIP. You perform an inspiratory hold: PIP has risen from 28 to 45 cmH2O, plateau pressure has risen from 22 to 38 cmH2O. Breath sounds equal bilaterally, ETT is secured at 23 cm, circuit intact. SpO2 has dropped from 96% to 89%. Which pathophysiology BEST explains the simultaneous rise in both PIP and plateau?",
+   opts:["A. ETT cuff leak — air escaping during positive-pressure inspiration","B. Bronchospasm or secretion accumulation — increased resistance in the airway or ETT","C. Decreased lung compliance — from worsening pulmonary edema, auto-PEEP, or pleural accumulation","D. Right main-stem ETT migration — right lung receiving full tidal volume"],
+   ans:2,
+   exp:"PIP reflects total work against both airway resistance AND lung compliance. Plateau pressure (measured at zero flow during an inspiratory hold) reflects lung compliance alone. Simultaneous rise of BOTH PIP and plateau means the lungs are stiffer — a compliance problem, not just resistance. Causes: worsening pulmonary edema, pleural effusion, auto-PEEP with breath stacking, or tension pneumothorax. Bronchospasm or secretions raise PIP but typically leave plateau normal. A cuff leak causes a low-pressure alarm. Equal breath sounds reduce but do not exclude pneumothorax — contact DMO and assess.",
+   ref:"Protocol II-13–14 / V-6"},
+
+  {id:10, cat:"Alarm Troubleshooting", type:"mc",
+   q:"You accept an intubated 68-year-old male from North Kansas City Hospital to Saint Luke's. ETT is documented at 25 cm at the lip. On auscultation: breath sounds are clear on the right, diminished on the left. SpO2 93% on FiO2 50%, PIP 38 cmH2O. Trachea is midline. No chest wall asymmetry or hemodynamic instability. What is the MOST likely diagnosis and correct initial action?",
+   opts:["A. Left tension pneumothorax — prepare for immediate needle decompression at 2nd ICS left MCL","B. Right main-stem intubation — withdraw the ETT to 21–23 cm, reassess breath sounds, and reconfirm position","C. Left pneumonia consolidation — increase FiO2 and notify the receiving facility","D. Normal variation — unilateral diminished sounds are common during transport and do not require intervention"],
+   ans:1,
+   exp:"Unilateral diminished breath sounds without tracheal deviation, asymmetric chest wall rise, or hemodynamic collapse points to ETT migration into the right main-stem rather than tension pneumothorax. At 25 cm lip marking, the ETT tip is likely just below the carina. Withdraw to 21–23 cm, reassess breath sounds bilaterally, and re-auscultate. If sounds equalize, confirm new lip marking and document. Tension pneumothorax would be accompanied by tracheal deviation, hemodynamic compromise, and high-pressure alarms.",
+   ref:"Protocol II-14 / V-6"},
+
+  {id:11, cat:"Alarm Troubleshooting", type:"mc",
+   q:"You are 15 minutes into transporting a sedated intubated patient from Belton Regional to Saint Luke's. ETCO2 waveform was present at 36 mmHg at departure. The waveform suddenly drops to zero with a flat line. The LTV 1200 shows no high-pressure or low-pressure alarm. SpO2 drops from 97% to 88% over 90 seconds. What is the MOST likely cause and first action?",
+   opts:["A. ETCO2 sensor disconnection only — reconnect the capnography sampling line; the SpO2 drop is an unrelated coincidence","B. Possible ETT displacement, complete ETT obstruction, or circuit disconnect — immediately assess airway, circuit patency, and ETT position; prepare to BVM","C. The patient has recovered spontaneous ventilation and self-extubated — confirm with direct visualization","D. Capnography is unreliable during transport — rely on SpO2 alone and wait 5 minutes before acting"],
+   ans:1,
+   exp:"Sudden loss of ETCO2 waveform combined with acute SpO2 decline is an airway emergency until proven otherwise. The most dangerous causes are ETT displacement (unintentional extubation or esophageal migration), complete ETT obstruction, or circuit disconnect — all of which would explain absent CO2 and desaturation. Immediately check circuit connections, auscultate for breath sounds, look for chest rise, and prepare to BVM. Do not attribute concurrent SpO2 decline to coincidence. The absence of vent alarms means the circuit is intact — displacement or obstruction is more likely.",
+   ref:"Protocol II-14"},
+
+  {id:12, cat:"Alarm Troubleshooting", type:"mc",
+   q:"En route from Lee's Summit Medical Center to Saint Luke's, sustained high-pressure alarms occur. You suction the ETT — the alarm clears briefly but returns within 90 seconds. PIP is now 46 cmH2O (was 28). Breath sounds are absent on the left, present on the right. SpO2 declining: 97% → 89% → 81%. Tracheal deviation noted to the right. What is the correct diagnosis and action?",
+   opts:["A. Persistent secretions — repeat ETT suction with a larger-bore catheter","B. Left tension pneumothorax — perform needle decompression at 2nd ICS left MCL per Procedure V-10","C. Esophageal intubation — remove the ETT immediately and BVM","D. Bilateral bronchospasm — administer albuterol via ETT adapter and continue transport"],
+   ans:1,
+   exp:"Absent breath sounds on the left + tracheal deviation to the RIGHT + recurrent high-pressure alarms + progressive desaturation = left tension pneumothorax. Trachea deviates AWAY from the side of tension. Secretions would not cause tracheal deviation or unilateral absent sounds. Per AMR KC Procedure V-10, perform needle decompression at the 2nd intercostal space, left midclavicular line, over the upper border of the 3rd rib. Contact DMO immediately and document findings.",
+   ref:"Protocol II-14 / V-10"},
+
+  {id:13, cat:"Alarm Troubleshooting", type:"mc",
+   q:"Mid-transport from Belton Regional Medical Center to Saint Luke's, your LTV 1200 sounds a sustained low-pressure alarm. All circuit connections at the ETT adapter and Y-piece are secure. You can hear audible air escaping around the ETT during each positive-pressure breath. SpO2 is dropping from 95% to 87%. What is the MOST likely cause and next step?",
+   opts:["A. Main-stem migration — withdraw ETT to restore bilateral ventilation","B. ETT cuff failure — attempt cuff re-inflation; if ventilation cannot be restored, disconnect and ventilate with BVM","C. Ventilator power failure — confirm power source and switch to battery backup","D. Sensor malfunction — silence the alarm and rely on SpO2 monitoring"],
+   ans:1,
+   exp:"An audible air leak around the ETT during positive-pressure ventilation with a simultaneous low-pressure alarm indicates ETT cuff failure (deflation or rupture). Per AMR KC Protocol II-14, PM Step 5: 'If low-pressure alarm: check for circuit disconnect or cuff leak.' Attempt re-inflation of the cuff pilot balloon. If ventilation cannot be adequately restored, disconnect and BVM per the protocol's rescue ventilation standard. Document cuff failure with time and corrective actions taken.",
+   ref:"Protocol II-14"},
+
+  // ── VENTILATOR FAILURE ───────────────────────────────────────────────────
+
+  {id:14, cat:"Ventilator Failure", type:"mc",
+   q:"Your LTV 1200 fails completely mid-transport from Liberty Hospital to KU Health System. The screen goes dark and the vent stops cycling. You disconnect the patient and initiate BVM ventilation per Protocol II-14. The patient has no TBI, no cardiac arrest, SpO2 recovering toward 94%. Per AMR KC Protocol II-14, what is the correct BVM ventilation rate for this non-TBI intubated adult?",
+   opts:["A. 8–10 breaths/min — standard rate for all ventilated patients transferred to BVM","B. 10–12 breaths/min — per AMR KC standing orders for intubated adult rescue ventilation","C. 16–20 breaths/min — match the patient's previous set minute ventilation","D. Ventilate only when SpO2 drops below 90% — demand ventilation minimizes auto-PEEP risk"],
+   ans:1,
+   exp:"Per AMR KC Protocol II-14, AEMT standing orders step 2 states: 'If ventilator fails and Paramedic requires assistance: initiate BVM ventilation at 10–12 breaths/min.' This rate provides adequate minute ventilation for most adult patients without risk of breath stacking. Rates above 12/min in a patient with any obstructive component risk auto-PEEP. Demand ventilation (only when SpO2 drops) creates unacceptable hypercapnia in apneic sedated patients.",
+   ref:"Protocol II-14"},
+
+  {id:15, cat:"Ventilator Failure", type:"mc",
+   q:"You are preparing to depart North Kansas City Hospital with a newly transferred intubated patient. Your AEMT partner says 'SpO2 is 96% and there are no alarms — we're good to go.' Per AMR KC Protocol V-6, which elements must be confirmed before transport departure regardless of a normal SpO2?",
+   opts:["A. SpO2 &ge;94% and absence of vent alarms — these confirm adequate ventilation for departure","B. Tidal volume per IBW confirmed, PEEP 5 cmH2O, FiO2 titrated to target SpO2, ETCO2 waveform present, bilateral breath sounds confirmed, circuit secured, BVM with PEEP valve at bedside","C. Ventilator is powered, set rate matches sending facility orders, and patient is sedated","D. ETT confirmed by chest rise alone — auscultation is unreliable in ambulance environments"],
+   ans:1,
+   exp:"Per AMR KC Protocol V-6, the pre-departure ventilator checklist requires: tidal volume confirmed per IBW, PEEP 5 cmH2O, FiO2 titrated to SpO2 target, ETCO2 waveform confirmed, bilateral breath sounds, circuit integrity and security, and backup BVM with PEEP valve at the cot. A normal SpO2 on departure does not confirm correct TV, PEEP, ETCO2 monitoring, circuit security, or backup readiness. Equipment failure during transport is a transport emergency — all checks must occur before leaving the facility.",
+   ref:"Protocol V-6 / II-14"},
+
+  // ── ADVANCED CONCEPTS ────────────────────────────────────────────────────
+
+  {id:16, cat:"Advanced Concepts", type:"mc",
+   q:"During transport of an intubated ARDS patient from Centerpoint Medical Center to KU Health System, you increase PEEP from 5 to 10 cmH2O per sending orders. Two minutes later: HR is unchanged at 98, but MAP drops from 74 to 56 mmHg, and SpO2 improves from 90% to 96%. The patient is not on vasopressors. What is the MOST likely mechanism of the MAP drop?",
+   opts:["A. PEEP 10 causes reflex arterial vasodilation through a pulmonary stretch receptor pathway, reducing SVR","B. Increased mean intrathoracic pressure from higher PEEP impedes venous return, reducing right heart preload and cardiac output","C. PEEP 10 exceeds the LTV 1200 maximum safe setting — equipment toxicity is causing cardiovascular depression","D. Improved SpO2 reduced sympathetic tone, causing vasodilation and a drop in MAP"],
+   ans:1,
+   exp:"Elevated PEEP increases mean intrathoracic pressure, which compresses the great veins and impedes venous return to the right atrium. Reduced preload decreases right heart output, which reduces left heart filling and ultimately drops cardiac output and MAP. This effect is amplified in hypovolemic patients. While SpO2 improved (reflecting better alveolar recruitment), the hemodynamic cost is real. Notify DMO, titrate vasopressor if MAP does not recover, and document the hemodynamic response to the PEEP change.",
+   ref:"Protocol V-6 / II-7"},
+
+  {id:17, cat:"Advanced Concepts", type:"mc",
+   q:"Your intubated patient from Overland Park Regional is on the LTV 1200 in volume-controlled AC mode, set rate 14. The vent display shows total RR of 22. You observe: visible sternocleidomastoid use between vent breaths, and the patient is making inspiratory efforts that don't match the vent cycle — some breaths are triggered, some are not. SpO2 94%, ETCO2 44 mmHg. What is occurring and what is the first assessment step?",
+   opts:["A. The vent is malfunctioning — the rate discrepancy confirms a cycle error; disconnect and BVM","B. Patient-ventilator dyssynchrony — the patient is generating 8 additional triggered or failed breaths above the set rate; assess sedation adequacy, check trigger sensitivity, and contact DMO","C. AC mode always displays more breaths than the set rate — this is normal sensor behavior, not a clinical finding","D. The extra breaths indicate the patient has recovered drive and should be assessed for extubation at the receiving facility"],
+   ans:1,
+   exp:"In AC (assist-control) mode, the ventilator delivers at least the set rate but will also deliver a full breath for each patient-triggered effort above that rate. A total RR of 22 vs set rate of 14 means the patient is generating 8 additional triggered breaths — this is dyssynchrony, not a malfunction or artifact. Causes include under-sedation, inappropriate trigger sensitivity setting, or inadequate flow rate. Assess sedation level, review trigger sensitivity on the LTV 1200, and contact DMO before increasing sedation or vent rate. Dyssynchrony causes patient discomfort, increases work of breathing, and can worsen air trapping.",
+   ref:"Protocol V-6 / III-12"},
+
+  {id:18, cat:"Advanced Concepts", type:"mc",
+   q:"You are 25 minutes into transporting an intubated ARDS patient from Overland Park Regional to KU Health System. Departure vitals: TV 490 mL (70 kg IBW), RR 14, PEEP 5, FiO2 50%, PIP 30 cmH2O, plateau 24 cmH2O, SpO2 95%, MAP 72. Current vitals: PIP 46 cmH2O, plateau 40 cmH2O, SpO2 87%, MAP 68, HR 126. ETT secure, circuit intact, breath sounds equal bilaterally. Which finding is MOST clinically significant and what does it indicate?",
+   opts:["A. HR rise to 126 — tachycardia indicates pain or under-sedation; assess and address before the vent","B. Simultaneous PIP and plateau pressure rise with SpO2 decline — progressive loss of lung compliance requiring immediate clinical assessment","C. MAP 68 is above goal — hemodynamics are acceptable; focus entirely on the airway","D. SpO2 87% — increase FiO2 to 100% and reassess before making any ventilator adjustments"],
+   ans:1,
+   exp:"The key finding is the simultaneous rise of both PIP (30→46) and plateau pressure (24→40 cmH2O). Since plateau reflects compliance alone at zero flow, rising plateau means the lungs are stiffer — a compliance problem. With equal breath sounds and an intact circuit, causes include worsening pulmonary edema, new pleural effusion, or progressive auto-PEEP. Assess for unilateral findings and pneumothorax, contact DMO, and consider temporizing FiO2 increase. Tachycardia is nonspecific. Increasing FiO2 only treats the number — not the mechanical cause of deterioration.",
+   ref:"Protocols II-13–14 / V-6"},
+
+  {id:19, cat:"Advanced Concepts", type:"mc",
+   q:"Per AMR KC Procedure V-10, you are preparing to needle decompress a right tension pneumothorax in a ventilated patient. Absent breath sounds on the right, tracheal deviation to the left, SpO2 78%, PIP alarm sustained. What is the correct landmark for needle decompression?",
+   opts:["A. 5th intercostal space, right posterior axillary line, over the top of the 6th rib","B. 2nd intercostal space, right midclavicular line, over the upper border of the 3rd rib","C. 4th intercostal space, right anterior chest at the midclavicular line, midway between ribs","D. 3rd intercostal space, right midaxillary line, at the inferior rib border"],
+   ans:1,
+   exp:"Per AMR KC Procedure V-10, needle decompression is performed at the 2nd intercostal space, midclavicular line, over the UPPER border of the 3rd rib. Placing the needle over the upper border avoids the intercostal neurovascular bundle (nerve, artery, vein) that runs along the inferior border of each rib. In a ventilated patient with positive-pressure ventilation, a tension pneumothorax develops rapidly and progresses faster than in a spontaneously breathing patient — do not delay. Contact DMO after the procedure.",
+   ref:"Procedure V-10"},
+
+  {id:20, cat:"Advanced Concepts", type:"mc",
+   q:"You are transporting an intubated TBI patient from Centerpoint Medical Center to KU Health System on a ketamine sedation infusion. At departure: GCS 3T, pupils 3 mm equal and reactive, SBP 98, ETCO2 36. Fifteen minutes in: the patient begins purposefully moving both arms, opens eyes to voice, and begins resisting the ventilator. Pupils remain 3 mm equal and reactive, SBP 104, ETCO2 38. What is the CORRECT next action?",
+   opts:["A. Increase ketamine infusion rate immediately — ventilator dyssynchrony raises ICP and cannot be tolerated","B. Decrease ketamine infusion to allow full neurologic assessment — purposeful movement suggests the patient no longer needs sedation","C. Perform GCS reassessment, check pupils and focal deficits, then contact DMO before adjusting sedation in either direction","D. Administer a one-time ketamine bolus of 0.5 mg/kg IV to rapidly restore sedation and vent synchrony"],
+   ans:2,
+   exp:"Per AMR KC Protocol II-10, neurologic reassessment every 5 minutes (GCS, pupils, focal deficits) is a mandatory monitoring priority in TBI. Purposeful movement and eye opening could represent neurologic recovery OR could precede herniation with rising ICP — the exam determines which. Complete the neurologic assessment first, then contact DMO before adjusting sedation in either direction. Increasing sedation blindly obliterates the neurologic exam you need to guide decisions. Decreasing sedation without DMO guidance is equally inappropriate. A bolus without DMO direction is outside standing orders.",
+   ref:"Protocol II-10 / III-12"}
+
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+var S = { current:0, score:0, questions:[], history:[], missedIds:[] };
+
+function showScreen(name) {
+  ['home','quiz','results'].forEach(function(s) {
+    var el = document.getElementById('screen-' + s);
+    if (el) el.classList[s === name ? 'remove' : 'add']('hidden');
+  });
+  window.scrollTo(0, 0);
+}
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function startQuiz(missedOnly) {
+  S.current = 0; S.score = 0; S.history = [];
+  if (missedOnly && S.missedIds.length) {
+    var pool = [];
+    for (var k = 0; k < QUIZ.length; k++) {
+      if (S.missedIds.indexOf(QUIZ[k].id) >= 0) pool.push(QUIZ[k]);
+    }
+    S.questions = shuffle(pool);
+    document.getElementById('qlevel').textContent = 'VENTILATOR — MISSED ONLY';
+  } else {
+    S.questions = shuffle(QUIZ);
+    document.getElementById('qlevel').textContent = 'VENTILATOR MANAGEMENT';
+  }
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  var q = S.questions[S.current];
+  var total = S.questions.length;
+  var pct = Math.round((S.current / total) * 100);
+  var pf = document.getElementById('prog-fill');
+  pf.style.width = pct + '%';
+  document.getElementById('prog').setAttribute('aria-valuenow', pct);
+  document.getElementById('qcount').textContent = 'Question ' + (S.current + 1) + ' of ' + total;
+  document.getElementById('qscore').textContent = S.score + '/' + S.current;
+  var typeBadge = '<span class="q-type">SCENARIO &mdash; MULTIPLE CHOICE</span>';
+  var optsHtml = '<div class="opts" id="opts-container">';
+  for (var i = 0; i < q.opts.length; i++) {
+    optsHtml += '<button class="opt" id="opt-' + i + '" data-idx="' + i + '">' + q.opts[i] + '</button>';
+  }
+  optsHtml += '</div>';
+  document.getElementById('q-wrap').innerHTML =
+    '<div class="q-cat">' + q.cat + '</div>' +
+    typeBadge +
+    '<div class="q-text">' + q.q + '</div>' +
+    optsHtml +
+    '<div id="feedback-area"></div>';
+  for (var j = 0; j < q.opts.length; j++) {
+    (function(idx) {
+      var btn = document.getElementById('opt-' + idx);
+      if (btn) btn.onclick = function() { handleAnswer(idx); };
+    })(j);
+  }
+}
+
+function handleAnswer(selectedIdx) {
+  var q = S.questions[S.current];
+  var correct = selectedIdx === q.ans;
+  if (correct) S.score++;
+  S.history.push({ id:q.id, correct:correct, cat:q.cat, q:q.q, correctOpt:q.opts[q.ans], exp:q.exp });
+  document.getElementById('qscore').textContent = S.score + '/' + (S.current + 1);
+  for (var i = 0; i < q.opts.length; i++) {
+    var btn = document.getElementById('opt-' + i);
+    if (!btn) continue;
+    btn.onclick = null; btn.style.cursor = 'default';
+    if (i === q.ans) btn.classList.add('correct');
+    else if (i === selectedIdx && !correct) btn.classList.add('wrong');
+  }
+  var fbArea = document.getElementById('feedback-area');
+  var fbClass = correct ? 'correct' : 'wrong';
+  var fbHeader = correct ? '&#x2705; Correct!' : '&#x274C; Incorrect';
+  var isLast = S.current >= S.questions.length - 1;
+  fbArea.innerHTML =
+    '<div class="feedback ' + fbClass + '">' +
+    '<div class="fb-hdr">' + fbHeader + '</div>' +
+    '<div class="fb-exp">' + q.exp + '</div>' +
+    '<div class="fb-ref">&#x1F4D6; Ref: ' + q.ref + '</div>' +
+    '</div>' +
+    '<button class="next-btn" id="btn-next">' + (isLast ? 'See Results' : 'Next Question &#x2192;') + '</button>';
+  document.getElementById('btn-next').onclick = function() {
+    S.current++;
+    if (S.current >= S.questions.length) showResults();
+    else { renderQuestion(); window.scrollTo(0,0); }
+  };
+  setTimeout(function() {
+    var fb = document.getElementById('feedback-area');
+    if (fb) fb.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 100);
+}
+
+function showResults() {
+  var total = S.questions.length;
+  var pct = Math.round((S.score / total) * 100);
+  var grade = pct >= 90 ? '&#x1F3C6; Excellent — strong ventilator management readiness' :
+              pct >= 80 ? '&#x1F44D; Good — review missed items before your next transport' :
+              pct >= 70 ? '&#x26A0;&#xFE0F; Borderline — Protocol V-6 review recommended' :
+                          '&#x274C; Needs improvement — review ventilator protocols and disease-specific targets';
+  document.getElementById('res-level').textContent = 'VENTILATOR MANAGEMENT' + (S.missedIds.length && S.questions.length < QUIZ.length ? ' — MISSED ONLY' : '');
+  document.getElementById('res-score').innerHTML = S.score + '<span class="res-denom">/' + total + '</span>';
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-grade').innerHTML = grade;
+  document.getElementById('r-correct').textContent = S.score;
+  document.getElementById('r-wrong').textContent = total - S.score;
+  var cats = {};
+  for (var i = 0; i < S.history.length; i++) {
+    var h = S.history[i];
+    if (!cats[h.cat]) cats[h.cat] = { t:0, c:0 };
+    cats[h.cat].t++;
+    if (h.correct) cats[h.cat].c++;
+  }
+  var catKeys = Object.keys(cats).sort();
+  var catHtml = '';
+  for (var k = 0; k < catKeys.length; k++) {
+    var cat = catKeys[k];
+    var d = cats[cat];
+    var p = Math.round((d.c / d.t) * 100);
+    var color = p >= 80 ? 'var(--correct)' : p >= 60 ? 'var(--warn)' : 'var(--wrong)';
+    catHtml += '<div class="cat-row"><div class="cat-name">' + cat + '</div>' +
+      '<div class="cat-sc">' + d.c + '/' + d.t + '</div>' +
+      '<div class="cat-bar-wrap"><div class="cat-bar" style="width:' + p + '%;background:' + color + '"></div></div></div>';
+  }
+  document.getElementById('r-cats').innerHTML = catHtml;
+  var missed = [];
+  for (var m = 0; m < S.history.length; m++) {
+    if (!S.history[m].correct) missed.push(S.history[m]);
+  }
+  S.missedIds = [];
+  for (var n = 0; n < missed.length; n++) S.missedIds.push(missed[n].id);
+  document.getElementById('btn-retry-missed').style.display = missed.length ? 'block' : 'none';
+  if (missed.length === 0) {
+    document.getElementById('r-missed-section').innerHTML =
+      '<div style="text-align:center;padding:20px;color:var(--correct);font-weight:600">&#x1F389; Perfect score — excellent protocol knowledge!</div>';
+  } else {
+    var mHtml = '<div class="sec-label">MISSED QUESTIONS (' + missed.length + ')</div>';
+    for (var x = 0; x < missed.length; x++) {
+      var ms = missed[x];
+      mHtml += '<div class="missed-item">' +
+        '<div class="missed-q">' + ms.q.substring(0,120) + (ms.q.length > 120 ? '…' : '') + '</div>' +
+        '<div class="missed-ans">&#x2705; ' + ms.correctOpt + '</div>' +
+        '<div class="missed-exp">' + ms.exp.substring(0,200) + (ms.exp.length > 200 ? '…' : '') + '</div>' +
+        '</div>';
+    }
+    document.getElementById('r-missed-section').innerHTML = mHtml;
+  }
+  showScreen('results');
+}
+
+document.getElementById('btn-start').onclick = function() { startQuiz(false); };
+document.getElementById('btn-quit').onclick = function() {
+  if (confirm('Quit quiz? Your progress will be lost.')) showScreen('home');
+};
+document.getElementById('btn-retry').onclick = function() { startQuiz(false); };
+document.getElementById('btn-retry-missed').onclick = function() { startQuiz(true); };
+document.getElementById('btn-home').onclick = function() { showScreen('home'); };
+
+window.onload = function() {
+  setTimeout(function() {
+    var l = document.getElementById('loading');
+    l.style.opacity = '0';
+    setTimeout(function() { l.style.display = 'none'; showScreen('home'); }, 400);
+  }, 900);
+};
+</script>
+</body>
+</html>
