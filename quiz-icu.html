@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AMR KC ICU Quiz">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<title>AMR KC ICU Patient Management Quiz 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --navy:#0f1e3d;--navy2:#162447;--teal:#0d9488;--teal2:#14b8a6;
+  --white:#f0f4f8;--gray:#8899aa;--dim:#1e2d45;
+  --icu:#d97706;--icu2:#f59e0b;--icu-bg:#1c0d00;--icu-border:#92400e;
+  --correct:#16a34a;--correct-bg:#052e16;
+  --wrong:#ef4444;--wrong-bg:#2a0a0a;
+  --warn:#f59e0b;
+  --surface:#111827;--surface2:#1a2540;--border:#1e3a5f;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:var(--sans);background:var(--surface);color:var(--white);min-height:100vh}
+.hidden{display:none!important}
+
+#loading{position:fixed;inset:0;background:#060d1f;display:flex;flex-direction:column;
+align-items:center;justify-content:center;z-index:9999;transition:opacity 0.4s}
+.load-logo{font-family:var(--mono);font-size:38px;font-weight:600;color:var(--icu2);
+letter-spacing:-0.02em;margin-bottom:4px}
+.load-sub{font-size:11px;color:var(--gray);letter-spacing:0.16em;text-transform:uppercase}
+.load-bar{width:180px;height:2px;background:var(--dim);border-radius:2px;margin-top:28px;overflow:hidden}
+.load-fill{height:100%;background:linear-gradient(90deg,var(--icu),var(--icu2));
+animation:fill 1.2s ease-out forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+
+/* HOME */
+.home-hdr{background:linear-gradient(180deg,#060d1f,var(--navy));
+border-bottom:2px solid var(--icu);padding:28px 20px;text-align:center}
+.home-badge{font-family:var(--mono);font-size:10px;color:var(--icu2);
+letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px}
+.home-title{font-size:26px;font-weight:700;margin-bottom:4px}
+.home-sub{font-size:13px;color:var(--gray)}
+.home-body{padding:24px 16px 40px}
+.home-intro{font-size:14px;color:#cbd5e1;line-height:1.6;margin-bottom:24px;
+background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.home-intro strong{color:var(--icu2)}
+
+.quiz-card{margin-bottom:16px;border-radius:14px;overflow:hidden;border:2px solid var(--icu-border)}
+.qci{padding:24px;background:linear-gradient(135deg,#150800,#241200)}
+.qc-icon{font-size:34px;margin-bottom:10px}
+.qc-level{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--icu2);
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
+.qc-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.qc-desc{font-size:13px;color:var(--gray);line-height:1.5}
+.qc-meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.meta-tag{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:20px;
+background:var(--icu-bg);color:var(--icu2);border:1px solid var(--icu-border)}
+.start-btn{display:block;width:100%;padding:15px;border-radius:8px;border:none;
+font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;font-family:var(--sans);
+background:var(--icu);color:#000}
+
+.back-link{display:block;text-align:center;margin-top:20px;
+font-family:var(--mono);font-size:11px;color:var(--gray);text-decoration:none;
+letter-spacing:0.06em}
+.back-link:hover{color:var(--teal2)}
+
+/* QUIZ */
+.quiz-hdr{position:sticky;top:0;z-index:50;background:var(--navy);
+border-bottom:1px solid var(--border);padding:12px 16px}
+.quiz-hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.quit-btn{background:var(--dim);border:1px solid var(--border);color:var(--gray);
+font-size:12px;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans)}
+.quiz-hdr-info{flex:1}
+.qlevel{font-family:var(--mono);font-size:9px;font-weight:600;
+letter-spacing:0.1em;text-transform:uppercase;color:var(--icu2)}
+.qcount{font-size:13px;color:var(--gray);margin-top:2px}
+.qscore{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--icu2)}
+.prog{height:4px;background:var(--dim);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width 0.3s;
+background:linear-gradient(90deg,var(--icu),var(--icu2))}
+.q-wrap{padding:20px 16px 32px}
+.q-cat{font-family:var(--mono);font-size:10px;color:var(--icu2);
+letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.q-type{display:inline-block;padding:2px 9px;border-radius:10px;
+font-family:var(--mono);font-size:9px;font-weight:600;margin-bottom:14px}
+.q-type.mc{background:#1a2540;color:#60a5fa;border:1px solid #1e40af}
+.q-type.tf{background:#1a1500;color:#fbbf24;border:1px solid #92400e}
+.q-type.sc{background:#1a0d00;color:var(--icu2);border:1px solid var(--icu-border)}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;margin-bottom:22px;color:var(--white)}
+.q-scenario{background:#0d1a2e;border-left:3px solid var(--icu);border-radius:0 8px 8px 0;
+padding:12px 14px;margin-bottom:18px;font-size:13px;color:#cbd5e1;line-height:1.6}
+.q-scenario strong{color:var(--icu2)}
+.opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.opt{padding:15px 16px;border-radius:10px;border:2px solid var(--border);
+background:var(--surface2);font-size:14px;line-height:1.4;
+color:var(--white);text-align:left;font-family:var(--sans);width:100%;cursor:pointer}
+.opt:active{opacity:0.85}
+.opt.correct{border-color:var(--correct)!important;background:var(--correct-bg)!important;color:#86efac!important}
+.opt.wrong{border-color:var(--wrong)!important;background:var(--wrong-bg)!important;color:#fca5a5!important}
+.feedback{border-radius:10px;padding:15px 16px;margin-bottom:20px;border-left:4px solid;line-height:1.6}
+.feedback.correct{background:var(--correct-bg);border-color:var(--correct)}
+.feedback.wrong{background:var(--wrong-bg);border-color:var(--wrong)}
+.fb-hdr{font-size:15px;font-weight:700;margin-bottom:6px}
+.feedback.correct .fb-hdr{color:#86efac}
+.feedback.wrong .fb-hdr{color:#fca5a5}
+.fb-exp{font-size:13px;color:#cbd5e1;line-height:1.6}
+.fb-ref{font-family:var(--mono);font-size:10px;color:var(--icu2);margin-top:8px;
+letter-spacing:0.04em}
+.next-btn{display:block;width:100%;padding:15px;border-radius:10px;border:none;
+font-size:16px;font-weight:700;cursor:pointer;font-family:var(--sans);
+background:var(--icu);color:#000;margin-top:8px}
+
+/* RESULTS */
+.res-hdr{background:linear-gradient(180deg,#060d1f,var(--navy));
+border-bottom:2px solid var(--icu);padding:28px 20px;text-align:center}
+.res-level{font-family:var(--mono);font-size:10px;color:var(--icu2);
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
+.res-title{font-size:20px;font-weight:700;margin-bottom:16px}
+.res-score{font-family:var(--mono);font-size:58px;font-weight:600;line-height:1;color:var(--icu2)}
+.res-denom{font-size:20px;color:var(--gray)}
+.res-pct{font-size:17px;font-weight:600;margin-top:6px;color:var(--icu2)}
+.res-grade{font-size:13px;color:var(--gray);margin-top:4px}
+.res-body{padding:20px 16px 40px}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.bdi{background:var(--surface2);border:1px solid var(--border);
+border-radius:10px;padding:14px;text-align:center}
+.bdi-num{font-family:var(--mono);font-size:26px;font-weight:700;margin-bottom:4px}
+.bdi-num.c{color:var(--correct)}.bdi-num.w{color:var(--wrong)}
+.bdi-label{font-size:11px;color:var(--gray)}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--gray);
+letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;
+padding-bottom:6px;border-bottom:1px solid var(--border)}
+.cat-row{display:flex;align-items:center;gap:10px;padding:8px 0;
+border-bottom:1px solid var(--border)}
+.cat-name{flex:1;font-size:13px;color:var(--white)}
+.cat-sc{font-family:var(--mono);font-size:12px;color:var(--gray);min-width:36px;text-align:right}
+.cat-bar-wrap{width:72px;height:5px;background:var(--dim);border-radius:3px;overflow:hidden}
+.cat-bar{height:100%;border-radius:3px}
+.missed-item{background:var(--surface2);border:1px solid var(--border);
+border-radius:8px;padding:13px;margin-bottom:8px}
+.missed-q{font-size:13px;font-weight:600;margin-bottom:6px;color:#fca5a5}
+.missed-ans{font-size:12px;color:#86efac;margin-bottom:4px}
+.missed-exp{font-size:12px;color:var(--gray);line-height:1.5}
+.actions{display:flex;flex-direction:column;gap:10px}
+.act-btn{padding:14px;border-radius:10px;border:none;font-size:15px;
+font-weight:700;cursor:pointer;font-family:var(--sans)}
+.act-btn.primary{background:var(--icu);color:#000}
+.act-btn.secondary{background:var(--surface2);color:var(--white);border:1px solid var(--border)}
+.act-btn.ghost{background:var(--navy2);color:var(--white);border:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-logo">ICU</div>
+  <div class="load-sub">Patient Management Quiz &middot; AMR KC 2026</div>
+  <div class="load-bar"><div class="load-fill"></div></div>
+</div>
+
+<!-- HOME -->
+<div id="screen-home">
+  <div class="home-hdr">
+    <div class="home-badge">AMR Kansas City &middot; Critical Care Transport 2026</div>
+    <div class="home-title">ICU Patient Management</div>
+    <div class="home-sub">Dr. Ameet Deshmukh, MD &middot; Medical Director</div>
+  </div>
+  <div class="home-body">
+    <div class="home-intro">
+      <strong>Scenario-based questions</strong> covering ventilator management, vasopressor titration, and sedation in critically ill patients. All scenarios reference <strong>KC Metro interfacility transports</strong> and are grounded in the 2026 AMR KC Medical Protocols.
+    </div>
+    <div class="quiz-card">
+      <div class="qci">
+        <div class="qc-icon">&#x1F6D1;</div>
+        <div class="qc-level">Critical Care Transport &mdash; Paramedic Scope</div>
+        <div class="qc-title">ICU Patient Management Quiz</div>
+        <div class="qc-desc">Ventilator troubleshooting, vent settings and targets, vasopressor titration and monitoring, sedation protocols, and interfacility decision-making across KC Metro hospitals.</div>
+        <div class="qc-meta">
+          <span class="meta-tag">20 Questions</span>
+          <span class="meta-tag">Scenario-Based</span>
+          <span class="meta-tag">Instant Feedback</span>
+          <span class="meta-tag">KC Hospital Context</span>
+        </div>
+        <button class="start-btn" id="btn-start">Start ICU Quiz &rarr;</button>
+      </div>
+    </div>
+    <a class="back-link" href="index.html">&#x2190; Back to AMR KC Field Guide</a>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="hidden">
+  <div class="quiz-hdr">
+    <div class="quiz-hdr-top">
+      <button class="quit-btn" id="btn-quit" aria-label="Quit quiz">&#x2715; Quit</button>
+      <div class="quiz-hdr-info">
+        <div class="qlevel" id="qlevel">ICU PATIENT MANAGEMENT</div>
+        <div class="qcount" id="qcount">Question 1 of 20</div>
+      </div>
+      <div class="qscore" id="qscore">0/0</div>
+    </div>
+    <div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="prog">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="q-wrap" class="q-wrap"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="hidden">
+  <div class="res-hdr">
+    <div class="res-level" id="res-level">ICU PATIENT MANAGEMENT</div>
+    <div class="res-title">Quiz Complete</div>
+    <div class="res-score" id="res-score">0<span class="res-denom">/20</span></div>
+    <div class="res-pct" id="res-pct"></div>
+    <div class="res-grade" id="res-grade"></div>
+  </div>
+  <div class="res-body">
+    <div class="breakdown">
+      <div class="bdi"><div class="bdi-num c" id="r-correct">0</div><div class="bdi-label">Correct</div></div>
+      <div class="bdi"><div class="bdi-num w" id="r-wrong">0</div><div class="bdi-label">Incorrect</div></div>
+    </div>
+    <div class="sec-label">PERFORMANCE BY CATEGORY</div>
+    <div id="r-cats" style="margin-bottom:24px"></div>
+    <div id="r-missed-section" style="margin-bottom:28px"></div>
+    <div class="actions">
+      <button class="act-btn primary" id="btn-retry">Retake Quiz &rarr;</button>
+      <button class="act-btn secondary" id="btn-retry-missed" style="display:none">Retry Missed Only</button>
+      <button class="act-btn ghost" id="btn-home">&#x2190; Home</button>
+      <a class="act-btn ghost" href="index.html" style="text-align:center;text-decoration:none;display:block;padding:14px">&#x1F3E0; Back to Field Guide</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── QUIZ DATA ─────────────────────────────────────────────────────────────
+var QUIZ = [
+
+  // ── VENTILATOR MANAGEMENT ──────────────────────────────────────────────
+
+  {id:1, cat:"Ventilator Management", type:"mc",
+   q:"You are transporting a 70 kg (IBW) ARDS patient from Research Medical Center to Saint Luke's Mid America Heart Institute. Current vent settings: TV 650 mL, RR 16, PEEP 5, FiO2 55%. Peak inspiratory pressure is 42 cmH2O and has been climbing for 10 minutes. SpO2 is 93%, ETCO2 44 mmHg. Which adjustment BEST reflects AMR KC lung-protective targets and is most likely to reduce ongoing barotrauma?",
+   opts:["A. Increase FiO2 to 100% and add 5 cmH2O PEEP to address the SpO2","B. Reduce tidal volume to 420–560 mL (6–8 mL/kg IBW) — accept a mild ETCO2 rise if needed","C. Increase RR to 22 breaths/min to compensate for any CO2 rise from lower TV","D. Hold current settings — SpO2 93% is marginal but intervention risks further destabilizing the patient"],
+   ans:1,
+   exp:"Per AMR KC Protocol V-6, lung-protective ventilation targets TV 6–8 mL/kg IBW. For a 70 kg patient, 650 mL (9.3 mL/kg) exceeds this and is generating dangerous airway pressures. Reducing TV to 420–560 mL is the priority. Permissive hypercapnia (a mild ETCO2 rise) is acceptable during lung-protective ventilation — it is far safer than ongoing volutrauma. Increasing FiO2 does not address the mechanical cause of rising PIP. Increasing RR compensates for CO2 but does not protect against volume injury.",
+   ref:"Protocol V-6 / II-8"},
+
+  {id:2, cat:"Ventilator Management", type:"mc",
+   q:"En route from North Kansas City Hospital to KU Health System, your intubated septic patient triggers a sustained high-pressure ventilator alarm. SpO2 drops from 97% to 84% in under 30 seconds. What is the FIRST action?",
+   opts:["A. Increase FiO2 to 100% and continue monitoring","B. Contact DMO before taking any action","C. Disconnect from the ventilator and manually ventilate with BVM","D. Suction the ETT before anything else"],
+   ans:2,
+   exp:"Per AMR KC protocol II-14 (Ventilator Failure), when malfunction is confirmed, immediately disconnect the patient and ventilate with BVM. The protocol states: 'A correctly functioning BVM is always safer than a malfunctioning ventilator.' Acute desaturation demands immediate action — do not delay for DMO contact.",
+   ref:"Protocol II-14"},
+
+  {id:3, cat:"Ventilator Management", type:"mc",
+   q:"Transporting an ARDS patient from Centerpoint Medical Center to KU Health System, you notice sudden high-pressure ventilator alarms, SpO2 declining to 82%, absent breath sounds on the left, and tracheal deviation to the right. What is the most likely cause?",
+   opts:["A. ETT cuff leak","B. Right mainstem intubation","C. Right tension pneumothorax","D. Left tension pneumothorax"],
+   ans:3,
+   exp:"Absent breath sounds on one side, tracheal deviation away from that side, high-pressure alarms, and acute desaturation during transport are classic signs of tension pneumothorax. Trachea deviates AWAY from the tension side. Needle decompression is within Paramedic scope per AMR KC procedure V-10. Do not delay treatment awaiting imaging.",
+   ref:"Protocol II-14 / Procedure V-10"},
+
+  {id:4, cat:"Ventilator Management", type:"mc",
+   q:"You are transporting a 45-year-old intubated TBI patient from Liberty Hospital to KU Health System. The patient was intubated for GCS of 7. Your ETCO2 waveform reads 28 mmHg. What is the correct response?",
+   opts:["A. ETCO2 of 28 mmHg is acceptable — continue current settings","B. Decrease the respiratory rate to bring ETCO2 to target 35–40 mmHg","C. Increase the respiratory rate — lower ETCO2 prevents herniation","D. Contact DMO before making any ventilator changes"],
+   ans:1,
+   exp:"Per AMR KC protocol II-10, hyperventilation must be avoided in TBI. Target ETCO2 is 35–40 mmHg. An ETCO2 of 28 mmHg indicates significant hyperventilation, causing cerebral vasoconstriction and worsening ischemia. Reduce the respiratory rate to correct this. Therapeutic hyperventilation is only a temporizing measure for imminent herniation.",
+   ref:"Protocol II-10"},
+
+  {id:5, cat:"Ventilator Management", type:"mc",
+   q:"Your post-cardiac arrest patient from Belton Regional to Saint Luke's is on NE 0.07 mcg/kg/min, MAP 67. You have successfully titrated FiO2 from 100% down to 50% — SpO2 remains 99%. You reduce FiO2 again to 40%, and 3 minutes later MAP drops to 56 mmHg. SpO2 is still 100%. What is the PRIORITY next action?",
+   opts:["A. Continue reducing FiO2 — correcting hyperoxia takes priority over a borderline MAP drop","B. Titrate norepinephrine upward to restore MAP &ge;65 — hemodynamic instability is the immediate threat","C. Return FiO2 to 100% — the MAP drop indicates the patient cannot tolerate FiO2 reduction","D. Administer 250 mL NS bolus to support MAP before making any further FiO2 or vasopressor changes"],
+   ans:1,
+   exp:"Both hyperoxia correction (SpO2 target 94–98%) and MAP ≥65 are post-ROSC protocol targets (II-8). When both are simultaneously threatened, hemodynamic instability is the immediate priority — MAP 56 risks organ ischemia. Titrate NE to restore MAP ≥65 first, then resume FiO2 weaning once hemodynamics are stable. FiO2 reduction does not pharmacologically cause hypotension; this is disease progression. Fluid bolus post-arrest risks worsening myocardial edema in an already impaired heart.",
+   ref:"Protocol II-8 / III-17"},
+
+  {id:6, cat:"Ventilator Management", type:"mc",
+   q:"During transport from Lee's Summit Medical Center to Saint Luke's Hospital, your intubated patient's PIP rises from 28 to 45 cmH2O over 15 minutes. You perform an inspiratory hold and note the plateau pressure has also risen from 22 to 38 cmH2O. Breath sounds are equal bilaterally, ETT is secured at 23 cm, circuit is intact. SpO2 has dropped from 96% to 89%. Which pathophysiology BEST explains the simultaneous rise in both PIP and plateau pressure?",
+   opts:["A. ETT cuff leak — air escaping during positive-pressure inspiration","B. Bronchospasm or secretion accumulation — increased airway resistance in the ETT","C. Decreased lung compliance — from worsening pulmonary edema, auto-PEEP, or pleural accumulation","D. Right main-stem migration — right lung now receiving full tidal volume"],
+   ans:2,
+   exp:"PIP reflects total work against both airway resistance AND lung/chest wall compliance. Plateau pressure (measured at zero flow during an inspiratory hold) reflects lung compliance alone. A simultaneous rise in BOTH PIP and plateau means the lungs are becoming stiffer — a compliance problem. Causes: worsening pulmonary edema, pleural effusion, auto-PEEP with breath stacking, or pneumothorax. Bronchospasm/secretions increase PIP but typically leave plateau pressure unchanged. A cuff leak causes a low-pressure alarm, not high. Equal breath sounds make pneumothorax less likely but do not exclude it — contact DMO and assess for treatable cause.",
+   ref:"Protocol II-13–14 / V-6"},
+
+  {id:7, cat:"Ventilator Management", type:"mc",
+   q:"You are transporting an intubated COPD exacerbation patient from Overland Park Regional Medical Center to KU Health System. Over the past 10 minutes, peak inspiratory pressures have steadily climbed and the patient has developed new hypotension. Breath sounds are equally diminished bilaterally. What is the most likely cause?",
+   opts:["A. Bilateral tension pneumothorax","B. Pulmonary embolism","C. Auto-PEEP from breath stacking","D. ETT obstruction from secretions"],
+   ans:2,
+   exp:"Auto-PEEP (breath stacking) occurs when obstructive disease prevents complete exhalation. Trapped air progressively increases intrathoracic pressure, reducing venous return and causing hypotension. Bilateral equal findings make pneumothorax less likely. Management: reduce respiratory rate and extend expiratory time. In extremis, briefly disconnect from the ventilator to allow passive exhalation of trapped air.",
+   ref:"Protocol II-13 / V-6"},
+
+  // ── PRESSOR MANAGEMENT ────────────────────────────────────────────────
+
+  {id:8, cat:"Pressor Management", type:"mc",
+   q:"Your septic shock patient from Research Medical Center to University Health/Truman is intubated on NE 0.06 mcg/kg/min (4 mg/250 mL NS). Trending MAPs over 20 minutes: 71 → 68 → 64. Current: HR 118, BP 88/52, MAP 64, SpO2 96%, ETCO2 38 mmHg, vent settings unchanged. Your AEMT partner says: 'MAP is only 1 below goal — do we really need to adjust?' What is the correct response and next action?",
+   opts:["A. Agree — a 1 mmHg difference is clinically insignificant; unnecessary titration introduces risk","B. MAP 64 is below the &ge;65 target; make an incremental upward NE titration per sending orders and document","C. MAP 64 is below goal but borderline — give 250 mL NS fluid challenge before touching the vasopressor","D. Hold NE adjustment and contact DMO before any titration on a patient trending this direction"],
+   ans:1,
+   exp:"MAP ≥65 mmHg is the protocol-specified titration target (III-17, II-21). In septic shock, organ perfusion is already compromised — there is no clinically safe threshold below goal. The trend (71→68→64) indicates ongoing deterioration, not stability. Make an incremental upward NE titration per sending orders, document time, new rate, and hemodynamic response. Fluid challenge is not indicated without evidence of hypovolemia. A single incremental titration within scope does not require DMO contact — escalating requirements or MAP unresponsive to titration does.",
+   ref:"Protocol II-21 / III-17"},
+
+  {id:9, cat:"Pressor Management", type:"mc",
+   q:"You accept a septic patient from Centerpoint Medical Center on norepinephrine labeled '4 mg / 250 mL NS' running at 18 mL/hr. The patient weighs 80 kg. What is the current infusion rate in mcg/kg/min, and how does it compare to the AMR KC starting range?",
+   opts:["A. 0.006 mcg/kg/min — below starting range; consider titrating up immediately","B. 0.06 mcg/kg/min — within the AMR KC starting range of 0.01–0.1 mcg/kg/min","C. 0.6 mcg/kg/min — above starting range; notify DMO before continuing","D. 6 mcg/kg/min — critically elevated; stop infusion and contact DMO immediately"],
+   ans:1,
+   exp:"Step 1 — Concentration: 4 mg ÷ 250 mL = 16 mcg/mL. Step 2 — Rate: 18 mL/hr ÷ 60 = 0.3 mL/min. Step 3 — Dose: 0.3 mL/min × 16 mcg/mL = 4.8 mcg/min. Step 4 — Weight-based: 4.8 ÷ 80 kg = 0.06 mcg/kg/min. Per AMR KC Protocol III-17, the typical starting range is 0.01–0.1 mcg/kg/min — this infusion is appropriately dosed. Always verify concentration before programming your transport pump; a non-standard hospital bag requires full rate recalculation before departure.",
+   ref:"Protocol III-17"},
+
+  {id:10, cat:"Pressor Management", type:"mc",
+   q:"You are 20 minutes into a transport from North Kansas City Hospital to Saint Luke's on NE via peripheral 18g right antecubital IV, MAP 68. During your routine site check, you find: blanching and swelling at the IV site, and the patient grimaces on palpation. The Sapphire pump reads no occlusion alarm and the infusion appears to be running. What is the correct IMMEDIATE action?",
+   opts:["A. Reduce NE rate by 50% and monitor the site — the pump shows no occlusion so extravasation is unlikely","B. Stop the NE infusion immediately, establish new IV access at a different site, and notify DMO","C. Flush the site with 10 mL NS to test patency — if resistance is felt, then discontinue","D. Complete the remaining 10-minute transport before making changes — stopping NE risks dangerous MAP drop"],
+   ans:1,
+   exp:"Blanching, swelling, and pain at a peripheral NE site are classic signs of extravasation. NE is a potent vasoconstrictor — tissue extravasation causes severe local ischemia and necrosis within minutes, even before a pump occlusion alarm triggers. Per AMR KC Protocol III-17, stop the infusion immediately and establish new access. If unable to establish new access rapidly, contact DMO. The proximity to destination does not justify continuing an extravasating NE infusion. Document site findings, time of identification, and all corrective actions.",
+   ref:"Protocol III-17"},
+
+  {id:11, cat:"Pressor Management", type:"mc",
+   q:"You are transporting a cardiogenic shock patient from Lee's Summit Medical Center to Saint Luke's Mid America Heart Institute. MAP is 60 mmHg on norepinephrine at 0.15 mcg/kg/min. SpO2 is 92% and crackles are present bilaterally. What is the correct next step?",
+   opts:["A. Administer a 500 mL NS bolus to increase preload and raise MAP","B. Titrate norepinephrine upward per sending orders to achieve MAP ≥65 — avoid fluid bolus","C. Administer 250 mL NS bolus, then reassess","D. Hold norepinephrine — the hypotension is caused by the vasopressor itself"],
+   ans:1,
+   exp:"Per AMR KC protocol II-7 (Cardiogenic Shock) and the NS formulary (III-20), fluid bolus is a contraindication in decompensated heart failure and cardiogenic shock without Paramedic or DMO direction. Bilateral crackles with hypoxia indicate pulmonary edema — adding volume worsens this by increasing preload on a failing ventricle. The correct action is titrating norepinephrine toward MAP ≥65 per sending orders.",
+   ref:"Protocol II-7 / III-20"},
+
+  {id:12, cat:"Pressor Management", type:"mc",
+   q:"You accept a septic patient from Liberty Hospital on norepinephrine via peripheral 18g right antecubital IV. MAP is 66 mmHg and the patient is hemodynamically stable. What should you communicate to the receiving team at KU Health System?",
+   opts:["A. Peripheral IV is fully acceptable for NE — no special communication needed","B. Peripheral IV is preferred over central for NE during short transports","C. Patient is on NE via peripheral IV; central access should be prioritized on arrival","D. Stop NE and switch to NS until central access is available at the receiving facility"],
+   ans:2,
+   exp:"Per AMR KC protocol, central access is preferred for ongoing norepinephrine therapy due to extravasation risk. While peripheral NE is acceptable during transport when central access is unavailable, the receiving team should be notified to prioritize central line placement. Peripheral NE requires site assessment every 15 minutes and documentation throughout transport.",
+   ref:"Protocol III-17"},
+
+  {id:13, cat:"Pressor Management", type:"mc",
+   q:"Transporting a septic shock patient from Belton Regional Medical Center to University Health, you began with NE at 0.2 mcg/kg/min and MAP 68. Twenty minutes later, after two upward titrations, MAP has fallen to 55 mmHg. Per AMR KC protocol, what is indicated?",
+   opts:["A. Continue titrating NE upward — no escalation needed until MAP falls below 50","B. Contact DMO and consider immediate diversion — escalating vasopressor requirement is a diversion trigger","C. Administer a 500 mL NS bolus, then reassess NE requirement","D. Add epinephrine from the formulary as a second-line vasopressor"],
+   ans:1,
+   exp:"Per AMR KC protocol II-21 (Sepsis/Septic Shock), persistent hypotension despite vasopressor titration is an immediate diversion trigger. Escalating vasopressor requirement indicates clinical deterioration requiring higher-level care. Contact DMO immediately, document clinical trend, and divert to the nearest appropriate facility capable of managing refractory septic shock.",
+   ref:"Protocol II-21"},
+
+  {id:14, cat:"Pressor Management", type:"mc",
+   q:"You are transporting an intubated TBI patient (GCS 3T, pupils 4mm equal and reactive) from Liberty Hospital to KU Health System on norepinephrine at 0.08 mcg/kg/min. SpO2 is 98% on current vent settings, ETCO2 is 37 mmHg. BP was 96/62 at departure — now 10 minutes in, it reads 82/50. What is your next action?",
+   opts:["A. Increase respiratory rate to offload CO2 and reduce cerebral edema","B. Titrate norepinephrine upward to restore SBP &ge;90 mmHg and notify DMO","C. Administer a 500 mL NS bolus — hypotension in TBI requires volume first","D. Hold current settings and recheck BP in 5 minutes before intervening"],
+   ans:1,
+   exp:"SBP of 82 mmHg is below the TBI minimum of ≥90 mmHg (Protocol II-10). Hypotension is a secondary brain injury trigger — every minute below goal worsens ischemic injury. With ventilation and oxygenation already at target (ETCO2 37, SpO2 98%), the correct action is titrating norepinephrine upward per sending orders and immediately notifying DMO. Increasing RR (option A) would cause hyperventilation and cerebral vasoconstriction. A fluid bolus in an intubated TBI patient risks worsening cerebral edema. Waiting 5 minutes is unacceptable — act now.",
+   ref:"Protocol II-10 / III-17"},
+
+  // ── SEDATION MANAGEMENT ───────────────────────────────────────────────
+
+  {id:15, cat:"Sedation Management", type:"mc",
+   q:"You are a Paramedic transporting an intubated septic patient from Centerpoint Medical Center to KU Health System with an AEMT partner. The patient is on ketamine infusion 2 mg/kg/hr and NE 0.12 mcg/kg/min via Sapphire pumps. Midway through the transport you need to step to the cab briefly. Your AEMT says: 'I'm certified for hospital-supplied infusion monitoring — I can adjust these if the MAP or vitals change while you're up front.' What is correct?",
+   opts:["A. Approved — hospital-supplied infusion monitoring includes titration authority for AEMTs","B. Denied — both ketamine (III-12, PM only) and NE (III-17, PM only) require Paramedic management; the Paramedic cannot leave the patient unsupervised","C. Approved for NE only — vasopressors are AEMT scope under hospital-supply authorization, but not ketamine","D. Approved if vitals are stable — low-acuity scenarios allow AEMT independent titration"],
+   ans:1,
+   exp:"Both ketamine (Protocol III-12, PM Only) and norepinephrine (Protocol III-17, PM Only) are explicitly Paramedic scope due to titration complexity and patient safety risk. The AEMT may monitor vital signs and alert the Paramedic, but cannot independently adjust either infusion regardless of stability. Critically, a Paramedic cannot leave an intubated patient on vasoactive and sedation infusions without remaining immediately available. If crew configuration cannot maintain Paramedic presence at the patient, contact DMO.",
+   ref:"Protocol III-12 / III-17"},
+
+  {id:16, cat:"Sedation Management", type:"mc",
+   q:"You are transferring a 29-year-old male with known schizophrenia from North Kansas City Hospital to KU Health System for inpatient psychiatric admission. En route he becomes severely agitated — pulling restraints, kicking the cot, incoherent verbal output. HR 152, BP 178/106, SpO2 97%, RR 22, BGL 98 mg/dL, skin warm/dry. The sending physician's discharge note recommends ketamine if agitation escalates during transport. What is the correct intervention?",
+   opts:["A. Administer ketamine 1–2 mg/kg IM — dissociative dose provides fastest onset for combative control","B. Administer midazolam 2–5 mg IV or IM slow push — the authorized behavioral sedation agent; ketamine is an absolute contraindication for psychiatric agitation","C. Administer ketamine 0.3 mg/kg IM — sub-dissociative dose is safe for non-intubated psychiatric patients","D. Contact DMO for real-time ketamine authorization — the sending physician's recommendation permits deviation with DMO approval"],
+   ans:1,
+   exp:"Per AMR KC Protocol II-23 (Psychiatric/Behavioral Health) and III-12 (Ketamine), ketamine is an ABSOLUTE contraindication for psychiatric agitation — listed explicitly in both protocols. Sending physician recommendations and real-time DMO authorization cannot override an absolute contraindication in the formulary; III-12 states this applies 'under any circumstance.' The authorized behavioral sedation agent is midazolam 2–5 mg IV or IM slow push (Paramedic scope only). The hemodynamic picture here (tachycardia, hypertension) is consistent with agitation-related sympathetic surge, not a contraindication to midazolam at this dose.",
+   ref:"Protocol II-23 / III-12"},
+
+  {id:17, cat:"Sedation Management", type:"mc",
+   q:"You are transporting a post-cardiac arrest patient from Research Medical Center to Saint Luke's Hospital. The patient is intubated, MAP is 58 mmHg on norepinephrine, and the patient is showing motor activity. You need to initiate sedation. Which agent is both authorized in the AMR KC formulary and specifically advantageous for a hypotensive intubated patient?",
+   opts:["A. Midazolam infusion — reliably reduces blood pressure and is BZD first-line","B. Ketamine infusion — maintains hemodynamic stability and is the authorized agent for intubated adults","C. Propofol infusion — ICU standard of care, carries hypotension risk","D. Fentanyl infusion — analgesia-first strategy, not a primary sedation agent"],
+   ans:1,
+   exp:"Per AMR KC formulary III-12, ketamine is the only authorized infusion sedation agent for intubated adult patients and is explicitly preferred in hypotensive intubated patients. Its NMDA receptor mechanism maintains sympathetic tone and hemodynamic stability — a significant advantage over midazolam or propofol (both cause hypotension) in a post-arrest patient with MAP of 58. Propofol and fentanyl infusions are not in the AMR KC ambulance formulary.",
+   ref:"Protocol II-8 / III-12"},
+
+  {id:18, cat:"Sedation Management", type:"mc",
+   q:"You are 25 minutes into transporting an intubated ARDS patient from Overland Park Regional to KU Health System on ketamine infusion 2 mg/kg/hr. Departure vitals: TV 490 mL (70 kg IBW), RR 14, PEEP 5, FiO2 50%, PIP 30 cmH2O, plateau 24 cmH2O, SpO2 95%, MAP 72. Current vitals: PIP 46 cmH2O, plateau 40 cmH2O, SpO2 87%, MAP 68, HR 126. ETT secure, circuit intact, breath sounds equal bilaterally. Which finding is MOST clinically significant and what does it indicate?",
+   opts:["A. HR rise to 126 — ketamine infusion is causing sympathetic stimulation; reduce the dose","B. Simultaneous PIP and plateau pressure rise with SpO2 decline — progressive loss of lung compliance requiring immediate assessment","C. MAP 68 is above goal — focus entirely on the airway, hemodynamics are acceptable","D. SpO2 87% — increase FiO2 to 100% and reassess before making any ventilator changes"],
+   ans:1,
+   exp:"The key finding is simultaneous rise of both PIP (30→46) and plateau pressure (24→40 cmH2O). Plateau pressure at zero flow reflects lung compliance alone — when it rises alongside PIP, the lungs are getting stiffer. This is a compliance problem, not just airway resistance. With equal breath sounds and an intact circuit, causes include worsening pulmonary edema, new pleural effusion, or progressive auto-PEEP. Assess for pneumothorax, contact DMO, and consider whether FiO2 increase is a temporizing measure. Ketamine has bronchodilatory properties and is not the cause. Simply increasing FiO2 treats the number, not the mechanism.",
+   ref:"Protocols II-13–14 / V-6"},
+
+  {id:19, cat:"Sedation Management", type:"mc",
+   q:"En route from Lee's Summit Medical Center to Saint Luke's Hospital, your intubated patient is on both norepinephrine and ketamine infusions via Sapphire pumps. The ketamine pump displays a 'LOW BATTERY' warning. What is the correct action?",
+   opts:["A. Stop the ketamine infusion until a replacement battery is available","B. Switch ketamine to gravity infusion until the battery issue is resolved","C. Maintain infusion continuity — address the battery without interrupting the ketamine infusion","D. Stop the ketamine and contact DMO before proceeding"],
+   ans:2,
+   exp:"Per AMR KC protocol, sedation and vasopressor infusions must not be interrupted during transport. Abrupt ketamine cessation in an intubated patient risks patient awareness, ventilator dyssynchrony, sympathetic surge, and hemodynamic instability. Address the equipment issue (swap battery, transfer to backup pump) while maintaining continuous infusion. Pre-transport equipment checks prevent this scenario.",
+   ref:"Protocol II-8 / Procedure V-13"},
+
+  {id:20, cat:"Sedation Management", type:"mc",
+   q:"You are transporting an intubated TBI patient from Centerpoint Medical Center to KU Health System on ketamine infusion 1 mg/kg/hr. At departure: GCS 3T, pupils 3 mm equal and reactive, SBP 98, ETCO2 36. Fifteen minutes in: the patient begins purposefully moving both arms, opens eyes to voice, and is beginning to resist the ventilator. Pupils remain 3 mm equal and reactive, SBP 104, ETCO2 38. What is the CORRECT next action?",
+   opts:["A. Increase ketamine infusion rate immediately — ventilator dyssynchrony raises ICP and cannot be tolerated in TBI","B. Decrease ketamine infusion to allow full neurologic assessment — purposeful movement suggests the patient no longer needs sedation","C. Perform GCS reassessment, check pupils and focal deficits, then contact DMO before adjusting sedation in either direction","D. Administer a one-time ketamine bolus of 0.5 mg/kg IV to rapidly re-establish sedation and vent synchrony"],
+   ans:2,
+   exp:"Per AMR KC Protocol II-10, neurologic reassessment every 5 minutes (GCS, pupils, focal deficits) is a mandatory monitoring priority in TBI. Purposeful movement and eye opening could represent neurologic recovery — or could precede deterioration with rising ICP. The critical step before any sedation adjustment is completing the neurologic exam and contacting DMO. Increasing sedation blindly obliterates the only exam you have access to during transport. Decreasing sedation without DMO guidance is equally inappropriate if the cause is unknown. A bolus without DMO direction is outside the standing orders for sedation management.",
+   ref:"Protocol II-10 / III-12"}
+
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+var S = { current:0, score:0, questions:[], history:[], missedIds:[] };
+
+// ── SCREEN MANAGEMENT ─────────────────────────────────────────────────────
+function showScreen(name) {
+  ['home','quiz','results'].forEach(function(s) {
+    var el = document.getElementById('screen-' + s);
+    if (el) el.classList[s === name ? 'remove' : 'add']('hidden');
+  });
+  window.scrollTo(0, 0);
+}
+
+// ── SHUFFLE ───────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// ── START QUIZ ────────────────────────────────────────────────────────────
+function startQuiz(missedOnly) {
+  S.current = 0;
+  S.score = 0;
+  S.history = [];
+
+  if (missedOnly && S.missedIds.length) {
+    var pool = [];
+    for (var k = 0; k < QUIZ.length; k++) {
+      if (S.missedIds.indexOf(QUIZ[k].id) >= 0) pool.push(QUIZ[k]);
+    }
+    S.questions = shuffle(pool);
+    document.getElementById('qlevel').textContent = 'ICU — MISSED ONLY';
+  } else {
+    S.questions = shuffle(QUIZ);
+    document.getElementById('qlevel').textContent = 'ICU PATIENT MANAGEMENT';
+  }
+
+  showScreen('quiz');
+  renderQuestion();
+}
+
+// ── RENDER QUESTION ───────────────────────────────────────────────────────
+function renderQuestion() {
+  var q = S.questions[S.current];
+  var total = S.questions.length;
+  var pct = Math.round((S.current / total) * 100);
+
+  var progFill = document.getElementById('prog-fill');
+  progFill.style.width = pct + '%';
+  document.getElementById('prog').setAttribute('aria-valuenow', pct);
+  document.getElementById('qcount').textContent = 'Question ' + (S.current + 1) + ' of ' + total;
+  document.getElementById('qscore').textContent = S.score + '/' + S.current;
+
+  var typeBadge = '<span class="q-type sc">SCENARIO &mdash; ' +
+    (q.type === 'tf' ? 'TRUE / FALSE' : 'MULTIPLE CHOICE') + '</span>';
+
+  var optsHtml = '<div class="opts" id="opts-container">';
+  for (var i = 0; i < q.opts.length; i++) {
+    optsHtml += '<button class="opt" id="opt-' + i + '" data-idx="' + i + '">' + q.opts[i] + '</button>';
+  }
+  optsHtml += '</div>';
+
+  document.getElementById('q-wrap').innerHTML =
+    '<div class="q-cat">' + q.cat + '</div>' +
+    typeBadge +
+    '<div class="q-text">' + q.q + '</div>' +
+    optsHtml +
+    '<div id="feedback-area"></div>';
+
+  for (var j = 0; j < q.opts.length; j++) {
+    (function(optIndex) {
+      var optBtn = document.getElementById('opt-' + optIndex);
+      if (optBtn) {
+        optBtn.onclick = function() { handleAnswer(optIndex); };
+      }
+    })(j);
+  }
+}
+
+// ── HANDLE ANSWER ─────────────────────────────────────────────────────────
+function handleAnswer(selectedIdx) {
+  var q = S.questions[S.current];
+  var correct = selectedIdx === q.ans;
+
+  if (correct) S.score++;
+  S.history.push({
+    id: q.id,
+    correct: correct,
+    cat: q.cat,
+    q: q.q,
+    correctOpt: q.opts[q.ans],
+    exp: q.exp
+  });
+
+  document.getElementById('qscore').textContent = S.score + '/' + (S.current + 1);
+
+  for (var i = 0; i < q.opts.length; i++) {
+    var btn = document.getElementById('opt-' + i);
+    if (!btn) continue;
+    btn.onclick = null;
+    btn.style.cursor = 'default';
+    if (i === q.ans) {
+      btn.classList.add('correct');
+    } else if (i === selectedIdx && !correct) {
+      btn.classList.add('wrong');
+    }
+  }
+
+  var fbArea = document.getElementById('feedback-area');
+  var fbClass = correct ? 'correct' : 'wrong';
+  var fbHeader = correct ? '&#x2705; Correct!' : '&#x274C; Incorrect';
+  var isLast = S.current >= S.questions.length - 1;
+  var nextLabel = isLast ? 'See Results' : 'Next Question &#x2192;';
+
+  fbArea.innerHTML =
+    '<div class="feedback ' + fbClass + '">' +
+    '<div class="fb-hdr">' + fbHeader + '</div>' +
+    '<div class="fb-exp">' + q.exp + '</div>' +
+    '<div class="fb-ref">&#x1F4D6; Ref: ' + q.ref + '</div>' +
+    '</div>' +
+    '<button class="next-btn" id="btn-next">' + nextLabel + '</button>';
+
+  document.getElementById('btn-next').onclick = function() {
+    S.current++;
+    if (S.current >= S.questions.length) {
+      showResults();
+    } else {
+      renderQuestion();
+      window.scrollTo(0, 0);
+    }
+  };
+
+  setTimeout(function() {
+    var fb = document.getElementById('feedback-area');
+    if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+// ── SHOW RESULTS ──────────────────────────────────────────────────────────
+function showResults() {
+  var total = S.questions.length;
+  var pct = Math.round((S.score / total) * 100);
+  var grade = pct >= 90 ? '&#x1F3C6; Excellent — strong ICU transport readiness' :
+              pct >= 80 ? '&#x1F44D; Good — review missed items before your next transport' :
+              pct >= 70 ? '&#x26A0;&#xFE0F; Borderline — protocol review recommended' :
+                          '&#x274C; Needs improvement — review ventilator, pressor, and sedation protocols';
+
+  document.getElementById('res-level').textContent = 'ICU PATIENT MANAGEMENT' + (S.missedIds.length && S.questions.length < QUIZ.length ? ' — MISSED ONLY' : '');
+  document.getElementById('res-score').innerHTML = S.score + '<span class="res-denom">/' + total + '</span>';
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-grade').innerHTML = grade;
+  document.getElementById('r-correct').textContent = S.score;
+  document.getElementById('r-wrong').textContent = total - S.score;
+
+  // Category breakdown
+  var cats = {};
+  for (var i = 0; i < S.history.length; i++) {
+    var h = S.history[i];
+    if (!cats[h.cat]) cats[h.cat] = { t:0, c:0 };
+    cats[h.cat].t++;
+    if (h.correct) cats[h.cat].c++;
+  }
+  var catKeys = Object.keys(cats).sort();
+  var catHtml = '';
+  for (var k = 0; k < catKeys.length; k++) {
+    var cat = catKeys[k];
+    var d = cats[cat];
+    var p = Math.round((d.c / d.t) * 100);
+    var color = p >= 80 ? 'var(--correct)' : p >= 60 ? 'var(--warn)' : 'var(--wrong)';
+    catHtml += '<div class="cat-row">' +
+      '<div class="cat-name">' + cat + '</div>' +
+      '<div class="cat-sc">' + d.c + '/' + d.t + '</div>' +
+      '<div class="cat-bar-wrap"><div class="cat-bar" style="width:' + p + '%;background:' + color + '"></div></div>' +
+      '</div>';
+  }
+  document.getElementById('r-cats').innerHTML = catHtml;
+
+  // Missed questions
+  var missed = [];
+  for (var m = 0; m < S.history.length; m++) {
+    if (!S.history[m].correct) missed.push(S.history[m]);
+  }
+  S.missedIds = [];
+  for (var n = 0; n < missed.length; n++) S.missedIds.push(missed[n].id);
+
+  document.getElementById('btn-retry-missed').style.display = missed.length ? 'block' : 'none';
+
+  if (missed.length === 0) {
+    document.getElementById('r-missed-section').innerHTML =
+      '<div style="text-align:center;padding:20px;color:var(--correct);font-weight:600">&#x1F389; Perfect score — excellent protocol knowledge!</div>';
+  } else {
+    var mHtml = '<div class="sec-label">MISSED QUESTIONS (' + missed.length + ')</div>';
+    for (var x = 0; x < missed.length; x++) {
+      var ms = missed[x];
+      mHtml += '<div class="missed-item">' +
+        '<div class="missed-q">' + ms.q + '</div>' +
+        '<div class="missed-ans">&#x2705; ' + ms.correctOpt + '</div>' +
+        '<div class="missed-exp">' + ms.exp + '</div>' +
+        '</div>';
+    }
+    document.getElementById('r-missed-section').innerHTML = mHtml;
+  }
+
+  showScreen('results');
+}
+
+// ── BUTTON WIRING ─────────────────────────────────────────────────────────
+document.getElementById('btn-start').onclick = function() { startQuiz(false); };
+document.getElementById('btn-quit').onclick = function() {
+  if (confirm('Quit quiz? Your progress will be lost.')) showScreen('home');
+};
+document.getElementById('btn-retry').onclick = function() { startQuiz(false); };
+document.getElementById('btn-retry-missed').onclick = function() { startQuiz(true); };
+document.getElementById('btn-home').onclick = function() { showScreen('home'); };
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+window.onload = function() {
+  setTimeout(function() {
+    var l = document.getElementById('loading');
+    l.style.opacity = '0';
+    setTimeout(function() {
+      l.style.display = 'none';
+      showScreen('home');
+    }, 400);
+  }, 900);
+};
+</script>
+</body>
+</html>
