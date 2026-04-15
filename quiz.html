@@ -70,6 +70,11 @@ letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
 font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;font-family:var(–sans)}
 .quiz-card.emt .start-btn{background:var(–emt);color:#000}
 .quiz-card.pm .start-btn{background:var(–pm);color:#fff}
+.quiz-card.icu{border-color:#0c4a6e}
+.quiz-card.icu .qci{background:linear-gradient(135deg,#001a2e,#002d4a)}
+.quiz-card.icu .qc-level{color:#38bdf8}
+.quiz-card.icu .meta-tag{background:#001a2e;color:#7dd3fc;border:1px solid #0c4a6e}
+.quiz-card.icu .start-btn{background:#0284c7;color:#fff}
 
 /* QUIZ */
 .quiz-hdr{position:sticky;top:0;z-index:50;background:var(–navy);
@@ -171,6 +176,7 @@ padding:4px 12px;border-radius:20px;
 
 <div id="screen-home">
   <div class="home-hdr">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--teal);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;opacity:0.85">&#x2190; Field Guide</a>
     <div class="home-badge">AMR Kansas City &middot; Medical Protocols 2026</div>
     <div class="home-title">Protocol Quiz</div>
     <div class="home-sub">Dr. Ameet Deshmukh, MD &middot; Medical Director</div>
@@ -205,6 +211,20 @@ padding:4px 12px;border-radius:20px;
           <span class="meta-tag">Instant Feedback</span>
         </div>
         <button class="start-btn" id="btn-start-pm">Start Paramedic Quiz &rarr;</button>
+      </div>
+    </div>
+    <div class="quiz-card icu">
+      <div class="qci">
+        <div class="qc-icon">&#x1F4A8;</div>
+        <div class="qc-level">LTV 1200 · Paramedic Scope</div>
+        <div class="qc-title">Ventilator Management</div>
+        <div class="qc-desc">CCP-C / FP-C style scenarios covering settings &amp; calculations, disease-specific targets, alarm troubleshooting, and advanced ventilator concepts. Protocol V-6.</div>
+        <div class="qc-meta">
+          <span class="meta-tag">20 Questions</span>
+          <span class="meta-tag">CCP-C / FP-C Style</span>
+          <span class="meta-tag">Instant Feedback</span>
+        </div>
+        <a class="start-btn" href="quiz-vent.html" style="display:block;text-align:center;text-decoration:none;">Start Ventilator Quiz &rarr;</a>
       </div>
     </div>
   </div>
