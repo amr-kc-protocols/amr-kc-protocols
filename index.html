@@ -262,6 +262,35 @@ font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:c
 color:#000;font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;
 margin-top:1px;font-family:var(--mono)}
 .st{font-size:14px;line-height:1.5;color:#cbd5e1}
+  /* ASK THE EDUCATOR */
+.ask-wrap{padding:20px 16px 40px}
+.ask-hero{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:24px 18px;margin-bottom:20px;text-align:center}
+.ask-icon{font-size:40px;margin-bottom:12px}
+.ask-hero-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.ask-hero-sub{font-size:13px;color:var(--gray);line-height:1.65}
+.ask-anon-badge{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:5px 12px;background:var(--emt-bg);border:1px solid var(--emt);border-radius:20px;font-family:var(--mono);font-size:10px;color:var(--emt);letter-spacing:0.06em}
+.ask-field-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal2);margin-bottom:8px;display:block}
+.ask-textarea{width:100%;min-height:160px;background:var(--dim);border:1.5px solid var(--border);border-radius:10px;color:var(--white);font-family:var(--sans);font-size:15px;padding:14px;outline:none;resize:none;line-height:1.6;-webkit-appearance:none}
+.ask-textarea:focus{border-color:var(--teal)}
+.ask-textarea::placeholder{color:var(--gray)}
+.ask-char{font-family:var(--mono);font-size:11px;color:var(--gray);text-align:right;margin-top:5px;margin-bottom:16px}
+.ask-char.warn{color:var(--warn)}
+.ask-submit{display:block;width:100%;padding:15px;background:var(--teal);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:opacity 0.15s}
+.ask-submit:disabled{opacity:0.35;cursor:default}
+.ask-status{font-family:var(--mono);font-size:11px;text-align:center;margin-top:12px;min-height:16px;letter-spacing:0.06em}
+.ask-status.ok{color:var(--emt)}
+.ask-status.err{color:var(--danger)}
+.ask-status.pending{color:var(--gray)}
+.ask-confirm{display:none;background:var(--emt-bg);border:1px solid var(--emt);border-radius:12px;padding:24px 18px;text-align:center;margin-top:16px}
+.ask-confirm-icon{font-size:36px;margin-bottom:10px}
+.ask-confirm-title{font-size:17px;font-weight:700;color:var(--emt);margin-bottom:6px}
+.ask-confirm-sub{font-size:13px;color:#86efac;line-height:1.6;margin-bottom:16px}
+.ask-again{background:var(--dim);border:1px solid var(--border);color:var(--white);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.ask-info-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:16px}
+.ask-info-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:8px}
+.ask-info-item{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--dim);font-size:13px;color:#94a3b8;line-height:1.5;align-items:flex-start}
+.ask-info-item:last-child{border-bottom:none}
+.ask-info-dot{flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--teal);margin-top:6px}
 </style>
 
 </head>
@@ -331,6 +360,7 @@ margin-top:1px;font-family:var(--mono)}
   <button class="nb" data-tab="formulary" aria-label="Drug formulary" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F48A;</span>Formulary</button>
   <button class="nb" data-tab="vent" aria-label="Ventilator management" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F4A8;</span>Ventilator</button>
   <button class="nb" data-tab="pcs" aria-label="PCS and door codes" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F511;</span>PCS/Doors</button>
+  <button class="nb" data-tab="ask" aria-label="Ask the educator" aria-pressed="false"><span class="nb-ic" aria-hidden="true">✉️</span>Ask</button>
 </nav>
 
 <script>
@@ -365,6 +395,7 @@ function render(){
   if(TAB==='formulary') { renderFormulary(); return; }
   if(TAB==='vent')      { renderV6Detail(); return; }
   if(TAB==='pcs')       { renderPCS(); return; }
+  if(TAB==='ask')       { renderAsk(); return; }
 }
 
 // ── DOSE CALCULATOR ───────────────────────────────────────────────────
@@ -1354,5 +1385,186 @@ function buildPCSList(items){
 <div class="disc-footer">
   <strong>Educational Reference Only</strong> &mdash; Not a substitute for clinical judgment. Standing orders under Dr. Ameet Deshmukh, MD. Official printed protocol supersedes this app.
 </div>
+  // ── ASK THE EDUCATOR ──────────────────────────────────────────────────────
+
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAUtgOCaEXbh-Uq42FLWzbFZi_5fXYtVIK0q8sJpvZmd2360_ujeO52zVjSlE0VXIuyw/exec';
+
+var MAX_CHARS = 1000;
+
+function renderAsk(){
+
+  var c = $('lv');
+
+  c.innerHTML = [
+
+    '<div class="ask-wrap">',
+
+    '<div class="ask-hero">',
+
+    '  <div class="ask-icon">&#x1F4AC;</div>',
+
+    '  <div class="ask-hero-title">Ask the Educator</div>',
+
+    '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. No name required &mdash; submissions are completely anonymous.</div>',
+
+    '  <div class="ask-anon-badge">&#x1F512; 100% Anonymous</div>',
+
+    '</div>',
+
+    '<div id="ask-form">',
+
+    '  <label class="ask-field-label" for="ask-msg">Your message</label>',
+
+    '  <textarea class="ask-textarea" id="ask-msg" maxlength="1000" placeholder="Type your question or feedback here..."></textarea>',
+
+    '  <div class="ask-char" id="ask-char">0 / 1000</div>',
+
+    '  <button class="ask-submit" id="ask-submit" disabled>Send Anonymously &#x2192;</button>',
+
+    '  <div class="ask-status" id="ask-status"></div>',
+
+    '</div>',
+
+    '<div class="ask-confirm" id="ask-confirm">',
+
+    '  <div class="ask-confirm-icon">&#x2705;</div>',
+
+    '  <div class="ask-confirm-title">Message Sent</div>',
+
+    '  <div class="ask-confirm-sub">Your message was submitted anonymously. Hunter reviews submissions regularly and will follow up through normal education channels if a response is needed.</div>',
+
+    '  <button class="ask-again" id="ask-again">Send Another Message</button>',
+
+    '</div>',
+
+    '<div class="ask-info-box">',
+
+    '  <div class="ask-info-title">What this is for</div>',
+
+    '  <div class="ask-info-item"><div class="ask-info-dot"></div><div>Protocol questions you did not want to ask out loud</div></div>',
+
+    '  <div class="ask-info-item"><div class="ask-info-dot"></div><div>Feedback on training, education sessions, or materials</div></div>',
+
+    '  <div class="ask-info-item"><div class="ask-info-dot"></div><div>Scope or documentation clarifications</div></div>',
+
+    '  <div class="ask-info-item"><div class="ask-info-dot"></div><div>Anything you would want the Clinical Educator to know</div></div>',
+
+    '</div>',
+
+    '</div>',
+
+  ].join('\n');
+
+  var msg = document.getElementById('ask-msg');
+
+  var charEl = document.getElementById('ask-char');
+
+  var submitBtn = document.getElementById('ask-submit');
+
+  var statusEl = document.getElementById('ask-status');
+
+  var confirmEl = document.getElementById('ask-confirm');
+
+  var formEl = document.getElementById('ask-form');
+
+  var againBtn = document.getElementById('ask-again');
+
+  if(msg){
+
+    msg.addEventListener('input', function(){
+
+      var len = this.value.trim().length;
+
+      charEl.textContent = len + ' / ' + MAX_CHARS;
+
+      charEl.className = 'ask-char' + (len > 900 ? ' warn' : '');
+
+      submitBtn.disabled = len < 10;
+
+    });
+
+  }
+
+  if(submitBtn){
+
+    submitBtn.addEventListener('click', function(){
+
+      var text = msg.value.trim();
+
+      if(text.length < 10) return;
+
+      submitBtn.disabled = true;
+
+      statusEl.textContent = '\u23F3 Sending\u2026';
+
+      statusEl.className = 'ask-status pending';
+
+      var now = new Date();
+
+      fetch(SCRIPT_URL, {
+
+        method: 'POST',
+
+        mode: 'no-cors',
+
+        headers: {'Content-Type': 'application/json'},
+
+        body: JSON.stringify({
+
+          type: 'ask_educator',
+
+          date: (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear(),
+
+          time: now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+
+          message: text
+
+        })
+
+      }).then(function(){
+
+        formEl.style.display = 'none';
+
+        confirmEl.style.display = 'block';
+
+        statusEl.textContent = '';
+
+      }).catch(function(){
+
+        statusEl.textContent = '\u26A0 Submission failed \u2014 check your connection and try again.';
+
+        statusEl.className = 'ask-status err';
+
+        submitBtn.disabled = false;
+
+      });
+
+    });
+
+  }
+
+  if(againBtn){
+
+    againBtn.addEventListener('click', function(){
+
+      msg.value = '';
+
+      charEl.textContent = '0 / ' + MAX_CHARS;
+
+      charEl.className = 'ask-char';
+
+      submitBtn.disabled = true;
+
+      statusEl.textContent = '';
+
+      confirmEl.style.display = 'none';
+
+      formEl.style.display = 'block';
+
+    });
+
+  }
+
+}
 </body>
 </html>
