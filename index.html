@@ -1377,13 +1377,15 @@ function renderAsk(){
     '  <label class="ask-field-label" for="ask-msg">Your message</label>',
     '  <textarea class="ask-textarea" id="ask-msg" maxlength="1000" placeholder="Type your question or feedback here..."></textarea>',
     '  <div class="ask-char" id="ask-char">0 / 1000</div>',
-    '  <button class="ask-submit" id="ask-submit" disabled>Send Anonymously &#x2192;</button>',
+    '  <label class="ask-field-label" for="ask-email" style="margin-top:4px">Email for reply <span style="color:var(--gray);font-weight:400;text-transform:none;letter-spacing:0">&mdash; optional, leave blank to stay anonymous</span></label>',
+    '  <input type="email" id="ask-email" style="width:100%;background:var(--dim);border:1.5px solid var(--border);border-radius:10px;color:var(--white);font-family:var(--sans);font-size:15px;padding:12px 14px;outline:none;-webkit-appearance:none;margin-bottom:16px" placeholder="your@email.com (optional)">',
+    '  <button class="ask-submit" id="ask-submit" disabled>Send &#x2192;</button>',
     '  <div class="ask-status" id="ask-status"></div>',
     '</div>',
     '<div class="ask-confirm" id="ask-confirm">',
     '  <div class="ask-confirm-icon">&#x2705;</div>',
     '  <div class="ask-confirm-title">Message Sent</div>',
-    '  <div class="ask-confirm-sub">Your message was submitted anonymously. Hunter reviews submissions regularly and will follow up through normal education channels if a response is needed.</div>',
+    '  <div class="ask-confirm-sub" id="ask-confirm-sub">Your message was submitted. Hunter reviews submissions regularly.</div>',
     '  <button class="ask-again" id="ask-again">Send Another Message</button>',
     '</div>',
     '<div class="ask-info-box">',
@@ -1414,6 +1416,8 @@ function renderAsk(){
     submitBtn.addEventListener('click', function(){
       var text = msg.value.trim();
       if(text.length < 10) return;
+      var emailEl = document.getElementById('ask-email');
+      var email = emailEl ? emailEl.value.trim() : '';
       submitBtn.disabled = true;
       statusEl.textContent = '\u23F3 Sending\u2026';
       statusEl.className = 'ask-status pending';
@@ -1426,9 +1430,16 @@ function renderAsk(){
           type: 'ask_educator',
           date: (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear(),
           time: now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-          message: text
+          message: text,
+          email: email
         })
       }).then(function(){
+        var subEl = document.getElementById('ask-confirm-sub');
+        if(subEl){
+          subEl.textContent = email
+            ? 'Message sent. Hunter will reply to ' + email + ' if a response is needed.'
+            : 'Message submitted anonymously. Hunter reviews submissions regularly.';
+        }
         formEl.style.display = 'none';
         confirmEl.style.display = 'block';
         statusEl.textContent = '';
@@ -1442,6 +1453,8 @@ function renderAsk(){
   if(againBtn){
     againBtn.addEventListener('click', function(){
       msg.value = '';
+      var emailEl = document.getElementById('ask-email');
+      if(emailEl) emailEl.value = '';
       charEl.textContent = '0 / ' + MAX_CHARS;
       charEl.className = 'ask-char';
       submitBtn.disabled = true;
