@@ -223,6 +223,37 @@ padding:12px 16px;text-align:center;font-size:10px;color:var(--gray);line-height
 .ask-info-item{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--dim);font-size:13px;color:#94a3b8;line-height:1.5;align-items:flex-start}
 .ask-info-item:last-child{border-bottom:none}
 .ask-info-dot{flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--teal);margin-top:6px}
+/* FORMS TAB */
+.cgf-wrap{padding:16px 14px 48px}
+.cgf-hdr{text-align:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.cgf-title{font-size:17px;font-weight:700;margin-bottom:3px}
+.cgf-sub{font-family:var(--mono);font-size:10px;color:var(--gray);letter-spacing:0.08em}
+.cgf-meta{display:flex;gap:10px;margin-bottom:16px}
+.cgf-meta-field{flex:1}
+.cgf-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal2);margin-bottom:6px;display:block}
+.cgf-input{width:100%;background:var(--dim);border:1.5px solid var(--border);border-radius:8px;color:var(--white);font-family:var(--mono);font-size:15px;padding:10px 12px;outline:none;-webkit-appearance:none}
+.cgf-input:focus{border-color:var(--teal)}
+.cgf-select{width:100%;background:var(--dim);border:1.5px solid var(--border);border-radius:8px;color:var(--white);font-family:var(--sans);font-size:14px;padding:10px 12px;outline:none;-webkit-appearance:none;cursor:pointer}
+.cgf-select:focus{border-color:var(--teal)}
+.crew-section{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+.crew-hdr{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.12em;color:var(--teal);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:14px}
+.crew-fields{display:flex;flex-direction:column;gap:12px}
+.cgf-opt{font-size:11px;color:var(--gray);text-align:right;margin-bottom:4px}
+.sig-canvas{width:100%;height:120px;background:#f8f9fa;border-radius:8px;border:2px dashed var(--border);touch-action:none;display:block;cursor:crosshair}
+.sig-canvas.has-sig{border:2px solid var(--teal);background:#fff}
+.sig-footer{display:flex;justify-content:space-between;align-items:center;margin-top:5px}
+.sig-hint{font-size:11px;color:var(--gray);font-family:var(--mono)}
+.sig-clear{background:none;border:1px solid var(--border);color:var(--gray);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans)}
+.cgf-submit{display:block;width:100%;padding:15px;background:var(--teal);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-top:6px;transition:opacity 0.15s}
+.cgf-submit:disabled{opacity:0.35;cursor:default}
+.cgf-status{font-family:var(--mono);font-size:11px;text-align:center;margin-top:10px;min-height:16px;letter-spacing:0.06em}
+.cgf-status.err{color:var(--danger)}
+.cgf-status.pending{color:var(--gray)}
+.cgf-confirm{display:none;background:#052e16;border:1px solid var(--emt);border-radius:12px;padding:24px 18px;text-align:center;margin-top:16px}
+.cgf-confirm-icon{font-size:36px;margin-bottom:10px}
+.cgf-confirm-title{font-size:17px;font-weight:700;color:var(--emt);margin-bottom:6px}
+.cgf-confirm-sub{font-size:13px;color:#86efac;line-height:1.6;margin-bottom:16px}
+.cgf-again{background:var(--dim);border:1px solid var(--border);color:var(--white);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 
 /* V6 styles */
 .v6-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
@@ -361,6 +392,7 @@ margin-top:1px;font-family:var(--mono)}
   <button class="nb" data-tab="vent" aria-label="Ventilator management" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F4A8;</span>Ventilator</button>
   <button class="nb" data-tab="pcs" aria-label="PCS and door codes" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F511;</span>PCS/Doors</button>
   <button class="nb" data-tab="ask" aria-label="Ask the educator" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x2709;&#xFE0F;</span>Ask</button>
+  <button class="nb" data-tab="forms" aria-label="Forms" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F4CB;</span>Forms</button>
 </nav>
 
 <script>
@@ -396,6 +428,7 @@ function render(){
   if(TAB==='vent')      { renderV6Detail(); return; }
   if(TAB==='pcs')       { renderPCS(); return; }
   if(TAB==='ask')       { renderAsk(); return; }
+  if(TAB==='forms')     { renderForms(); return; }
 }
 
 // ── DOSE CALCULATOR ───────────────────────────────────────────────────
@@ -1359,6 +1392,194 @@ function buildPCSList(items){
     h += '</div>';
   });
   return h;
+}
+// ── FORMS ──────────────────────────────────────────────────────────────────
+var CGF_HAS_SIG = [false, false, false];
+function renderForms(){
+  var c = $('lv');
+  CGF_HAS_SIG = [false, false, false];
+  function crewSection(n, label, req){
+    return [
+      '<div class="crew-section">',
+      '<div class="crew-hdr">' + label + (req ? '' : ' <span style="color:var(--gray);font-weight:400;font-family:var(--sans);text-transform:none;letter-spacing:0;font-size:10px">&mdash; if applicable</span>') + '</div>',
+      '<div class="crew-fields">',
+      '<div><label class="cgf-label" for="cgf-name-'+n+'">Full Name</label>',
+      '<input class="cgf-input" type="text" id="cgf-name-'+n+'" placeholder="Last, First" autocomplete="off"></div>',
+      '<div><label class="cgf-label" for="cgf-cert-'+n+'">Certification</label>',
+      '<select class="cgf-select" id="cgf-cert-'+n+'">',
+      '<option value="">Select level&hellip;</option>',
+      '<option value="EMT">EMT</option>',
+      '<option value="AEMT">AEMT</option>',
+      '<option value="Paramedic">Paramedic</option>',
+      '<option value="First Responder">First Responder</option>',
+      '<option value="RN">RN</option>',
+      '</select></div>',
+      '<div><label class="cgf-label">Signature</label>',
+      '<canvas class="sig-canvas" id="sig-canvas-'+n+'"></canvas>',
+      '<div class="sig-footer">',
+      '<span class="sig-hint">Draw signature above</span>',
+      '<button class="sig-clear" id="sig-clear-'+n+'" type="button">Clear</button>',
+      '</div></div>',
+      '</div></div>',
+    ].join('');
+  }
+  c.innerHTML = [
+    '<div class="cgf-wrap">',
+    '<div id="cgf-form">',
+    '<div class="cgf-hdr">',
+    '<div class="cgf-title">&#x1F4CB; AMR Caregiver Signature Form</div>',
+    '<div class="cgf-sub">AMR Kansas City &middot; Complete all applicable crew fields</div>',
+    '</div>',
+    '<div class="cgf-meta">',
+    '<div class="cgf-meta-field"><label class="cgf-label" for="cgf-date">Date of Service</label>',
+    '<input class="cgf-input" type="date" id="cgf-date"></div>',
+    '<div class="cgf-meta-field"><label class="cgf-label" for="cgf-case">Case Number</label>',
+    '<input class="cgf-input" type="text" id="cgf-case" placeholder="e.g. 12345678" autocomplete="off"></div>',
+    '</div>',
+    crewSection('1','CREW 1 &mdash; Primary Caregiver', true),
+    crewSection('2','CREW 2 &mdash; Secondary Caregiver', false),
+    crewSection('3','CREW 3 &mdash; Third Caregiver', false),
+    '<button class="cgf-submit" id="cgf-submit">Submit Form &rarr;</button>',
+    '<div class="cgf-status" id="cgf-status"></div>',
+    '</div>',
+    '<div class="cgf-confirm" id="cgf-confirm">',
+    '<div class="cgf-confirm-icon">&#x2705;</div>',
+    '<div class="cgf-confirm-title">Form Submitted</div>',
+    '<div class="cgf-confirm-sub">The signed form has been sent to the Clinical Educator. No further action needed.</div>',
+    '<button class="cgf-again" id="cgf-again">Submit Another Form</button>',
+    '</div>',
+    '</div>',
+  ].join('');
+  // Setup signature pads after DOM settles
+  setTimeout(function(){
+    [1,2,3].forEach(function(n){ setupSigPad(n); });
+    var submitBtn = document.getElementById('cgf-submit');
+    var statusEl  = document.getElementById('cgf-status');
+    var formEl    = document.getElementById('cgf-form');
+    var confirmEl = document.getElementById('cgf-confirm');
+    var againBtn  = document.getElementById('cgf-again');
+    if(submitBtn) submitBtn.addEventListener('click', function(){
+      var date     = (document.getElementById('cgf-date')||{}).value||'';
+      var caseNum  = (document.getElementById('cgf-case')||{}).value.trim()||'';
+      var name1    = (document.getElementById('cgf-name-1')||{}).value.trim()||'';
+      var cert1    = (document.getElementById('cgf-cert-1')||{}).value||'';
+      if(!date){ statusEl.textContent='⚠ Date of service is required.'; statusEl.className='cgf-status err'; return; }
+      if(!caseNum){ statusEl.textContent='⚠ Case number is required.'; statusEl.className='cgf-status err'; return; }
+      if(!name1||!cert1||!CGF_HAS_SIG[0]){ statusEl.textContent='⚠ Crew 1 name, certification, and signature are required.'; statusEl.className='cgf-status err'; return; }
+      // Validate: if any crew 2/3 field is partial, flag it
+      for(var i=2;i<=3;i++){
+        var nm = (document.getElementById('cgf-name-'+i)||{}).value.trim()||'';
+        var ct = (document.getElementById('cgf-cert-'+i)||{}).value||'';
+        var sg = CGF_HAS_SIG[i-1];
+        if((nm||ct||sg) && !(nm&&ct&&sg)){
+          statusEl.textContent='⚠ Crew '+i+': fill name, certification, and signature — or leave all blank.';
+          statusEl.className='cgf-status err'; return;
+        }
+      }
+      submitBtn.disabled = true;
+      statusEl.textContent = '⏳ Submitting…';
+      statusEl.className = 'cgf-status pending';
+      function getSig(n){
+        var canvas = document.getElementById('sig-canvas-'+n);
+        return CGF_HAS_SIG[n-1] && canvas ? canvas.toDataURL('image/png') : '';
+      }
+      function getField(id){ return (document.getElementById(id)||{}).value||''; }
+      var now = new Date();
+      var payload = {
+        type:'caregiver_form',
+        date: date,
+        caseNumber: caseNum,
+        submittedAt: (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear()+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+        crew1Name: getField('cgf-name-1'), crew1Cert: getField('cgf-cert-1'), crew1Sig: getSig(1),
+        crew2Name: getField('cgf-name-2'), crew2Cert: getField('cgf-cert-2'), crew2Sig: getSig(2),
+        crew3Name: getField('cgf-name-3'), crew3Cert: getField('cgf-cert-3'), crew3Sig: getSig(3),
+      };
+      fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(){
+        formEl.style.display='none';
+        confirmEl.style.display='block';
+        statusEl.textContent='';
+      }).catch(function(){
+        statusEl.textContent='⚠ Submission failed — check connection and try again.';
+        statusEl.className='cgf-status err';
+        submitBtn.disabled=false;
+      });
+    });
+    if(againBtn) againBtn.addEventListener('click', function(){
+      CGF_HAS_SIG=[false,false,false];
+      confirmEl.style.display='none';
+      formEl.style.display='block';
+      ['cgf-date','cgf-case','cgf-name-1','cgf-name-2','cgf-name-3'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.value='';
+      });
+      ['cgf-cert-1','cgf-cert-2','cgf-cert-3'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.selectedIndex=0;
+      });
+      [1,2,3].forEach(function(n){
+        var canvas=document.getElementById('sig-canvas-'+n);
+        if(canvas){ var ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); canvas.classList.remove('has-sig'); }
+      });
+      statusEl.textContent='';
+      (document.getElementById('cgf-submit')||{}).disabled=false;
+      setTimeout(function(){ [1,2,3].forEach(function(n){ setupSigPad(n); }); },50);
+    });
+  },50);
+}
+function setupSigPad(n){
+  var canvas = document.getElementById('sig-canvas-'+n);
+  if(!canvas) return;
+  var dpr = window.devicePixelRatio||1;
+  var w = canvas.offsetWidth, h = canvas.offsetHeight;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.strokeStyle='#0d1526'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  var drawing=false;
+  function pos(e){
+    var r=canvas.getBoundingClientRect();
+    var src=e.touches?e.touches[0]:e;
+    return {x:src.clientX-r.left, y:src.clientY-r.top};
+  }
+  function start(e){ e.preventDefault(); drawing=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+  function move(e){ e.preventDefault(); if(!drawing) return; var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); CGF_HAS_SIG[n-1]=true; canvas.classList.add('has-sig'); }
+  function end(e){ e.preventDefault(); drawing=false; }
+  // Remove old listeners by cloning
+  var fresh = canvas.cloneNode(true);
+  canvas.parentNode.replaceChild(fresh, canvas);
+  fresh.addEventListener('mousedown',start);
+  fresh.addEventListener('mousemove',move);
+  fresh.addEventListener('mouseup',end);
+  fresh.addEventListener('mouseleave',end);
+  fresh.addEventListener('touchstart',start,{passive:false});
+  fresh.addEventListener('touchmove',move,{passive:false});
+  fresh.addEventListener('touchend',end,{passive:false});
+  // Re-setup context on fresh canvas (clone loses ctx state)
+  var ctx2=fresh.getContext('2d');
+  ctx2.scale(dpr,dpr);
+  ctx2.strokeStyle='#0d1526'; ctx2.lineWidth=2.5; ctx2.lineCap='round'; ctx2.lineJoin='round';
+  var drawing2=false;
+  function start2(e){ e.preventDefault(); drawing2=true; var p=pos2(e); ctx2.beginPath(); ctx2.moveTo(p.x,p.y); }
+  function move2(e){ e.preventDefault(); if(!drawing2) return; var p=pos2(e); ctx2.lineTo(p.x,p.y); ctx2.stroke(); CGF_HAS_SIG[n-1]=true; fresh.classList.add('has-sig'); }
+  function end2(e){ e.preventDefault(); drawing2=false; }
+  function pos2(e){ var r=fresh.getBoundingClientRect(); var src=e.touches?e.touches[0]:e; return {x:src.clientX-r.left,y:src.clientY-r.top}; }
+  fresh.addEventListener('mousedown',start2);
+  fresh.addEventListener('mousemove',move2);
+  fresh.addEventListener('mouseup',end2);
+  fresh.addEventListener('mouseleave',end2);
+  fresh.addEventListener('touchstart',start2,{passive:false});
+  fresh.addEventListener('touchmove',move2,{passive:false});
+  fresh.addEventListener('touchend',end2,{passive:false});
+  var clearBtn=document.getElementById('sig-clear-'+n);
+  if(clearBtn){
+    var freshClear=clearBtn.cloneNode(true);
+    clearBtn.parentNode.replaceChild(freshClear,clearBtn);
+    freshClear.addEventListener('click',function(){
+      var ctx3=fresh.getContext('2d');
+      ctx3.clearRect(0,0,fresh.width,fresh.height);
+      CGF_HAS_SIG[n-1]=false;
+      fresh.classList.remove('has-sig');
+    });
+  }
 }
 // ── ASK THE EDUCATOR ──────────────────────────────────────────────────────
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAUtgOCaEXbh-Uq42FLWzbFZi_5fXYtVIK0q8sJpvZmd2360_ujeO52zVjSlE0VXIuyw/exec';
