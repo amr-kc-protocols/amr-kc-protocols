@@ -290,19 +290,42 @@ function makeVT(cycles){
 }
 
 function makeTdP(cycles){
+  // Torsades de Pointes: the QRS axis rotates sinusoidally, producing the
+  // characteristic "twisting around the baseline" spindle.
+  //
+  // Key visual features from real strips:
+  //  - Complexes are smooth, rounded, nearly sinusoidal — not sharp spikes
+  //  - Complexes run together at the peaks (minimal isoelectric gap)
+  //  - Amplitude envelope is a slow cosine: +max → 0 → -max → 0 → +max
+  //  - Near the 0-crossing the complexes flatten almost to baseline
+  //  - Rate ~200-240 bpm, slightly irregular RR
   var samples=[];
   var t=0;
-  var bpm=200;
-  var cycleMs=60000/bpm;
+  var bpm=225;
+  var cycleMs=60000/bpm;  // ~267 ms/beat
+  var twistFreq=1.5;      // ~1.5 full spindles across the strip
+
   for(var c=0;c<cycles;c++){
-    var polarity=(c<cycles/2)?1:-1;
-    samples.push({t:t,v:0});
-    samples.push({t:t+20,v:-polarity*0.35});
-    samples.push({t:t+40,v:polarity*0.9});
-    samples.push({t:t+70,v:-polarity*0.25});
-    samples.push({t:t+100,v:polarity*0.2});
-    samples.push({t:t+cycleMs,v:0});
-    t+=cycleMs;
+    var axisAngle=(c/cycles)*twistFreq*2*Math.PI;
+    var env=Math.cos(axisAngle);               // ±1 amplitude envelope (the "twist")
+    var amp=env*(0.9+0.1*Math.sin(c*1.9));    // subtle beat variation
+    var rr=cycleMs*(0.93+0.07*Math.sin(c*2.7)); // mild RR irregularity
+
+    // Model each complex as one sinusoidal arch filling most of the RR interval.
+    // This matches real TdP where complexes merge without a flat gap.
+    var qrsEnd=rr*0.85;
+    var steps=18;
+    for(var i=0;i<=steps;i++){
+      var frac=i/steps;
+      // sin arch: 0 → peak → 0, centered in the complex window
+      var v=amp*Math.sin(frac*Math.PI);
+      // Add slight asymmetry: rise slightly faster than fall (like real TdP)
+      if(frac<0.45) v*=(1+0.18*Math.sin(frac*Math.PI/0.45));
+      samples.push({t:t+frac*qrsEnd, v:v});
+    }
+    // Brief near-baseline gap before next complex
+    samples.push({t:t+rr, v:amp*0.04*(Math.random()-0.5)});
+    t+=rr;
   }
   return samples;
 }
