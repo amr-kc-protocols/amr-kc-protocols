@@ -70,9 +70,9 @@ color:var(--gray);font-size:16px;cursor:pointer;display:none;line-height:1;paddi
 #nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);
 border-top:1px solid var(--border);display:flex;
 padding-bottom:env(safe-area-inset-bottom,0px)}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
-padding:10px 4px 7px;cursor:pointer;border:none;background:none;
-color:var(--gray);font-size:11px;font-family:var(--sans);transition:color 0.12s;
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+padding:9px 3px 6px;cursor:pointer;border:none;background:none;
+color:var(--gray);font-size:10px;font-family:var(--sans);transition:color 0.12s;
 border-top:2px solid transparent;letter-spacing:0.01em}
 .nb.on{color:var(--teal2);border-top-color:var(--teal2)}
 .nb-ic{font-size:22px;line-height:1}
@@ -256,6 +256,23 @@ padding:12px 16px;text-align:center;font-size:10px;color:var(--gray);line-height
 .cgf-confirm-sub{font-size:13px;color:#86efac;line-height:1.6;margin-bottom:16px}
 .cgf-again{background:var(--dim);border:1px solid var(--border);color:var(--white);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 
+/* MORE HUB */
+.more-hub{padding:8px 0 48px}
+.more-card{display:flex;align-items:center;gap:14px;margin:4px 12px;padding:15px 14px;
+background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-color:transparent;
+transition:border-color 0.12s}
+.more-card:active,.more-card:hover{border-color:var(--teal)}
+.more-card-ico{font-size:26px;flex-shrink:0;width:36px;text-align:center}
+.more-card-info{flex:1;min-width:0}
+.more-card-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:3px}
+.more-card-sub{font-size:12px;color:var(--gray);line-height:1.45}
+.more-card-arr{color:var(--gray);font-size:20px;flex-shrink:0}
+.sub-back{display:inline-flex;align-items:center;gap:5px;margin:12px 14px 4px;
+padding:7px 12px;background:var(--dim);border:1px solid var(--border);border-radius:7px;
+font-size:13px;font-weight:600;color:var(--teal2);cursor:pointer;font-family:var(--sans)}
+.sub-back:active{opacity:0.7}
+
 /* V6 styles */
 .v6-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
 .v6-tabs::-webkit-scrollbar{display:none}
@@ -354,14 +371,8 @@ margin-top:1px;font-family:var(--mono)}
       </div>
     </div>
     <div class="hlinks">
-      <a class="hlink" href="protocols-2026.pdf" target="_blank" aria-label="Open protocol PDF"><span class="hlink-ic">&#x1F4C4;</span>Full Protocols</a>
+      <a class="hlink" href="protocols-2026.pdf" target="_blank" aria-label="Open protocol PDF"><span class="hlink-ic">&#x1F4C4;</span>PDF</a>
       <a class="hlink" href="quiz.html" aria-label="Protocol quiz"><span class="hlink-ic">&#x1F393;</span>Quiz</a>
-      <a class="hlink" href="flashcards.html" aria-label="Drug flashcards">
-<span class="hlink-ic">&#x1F4A0;</span>Flashcards
-</a>
-      <a class="hlink" href="acls-2025-flashcards.html" aria-label="ACLS flashcards">
-<span class="hlink-ic">&#x1F4A0;</span>ACLS Flashcards
-</a>
     </div>
     <div class="hdot"></div>
   </div>
@@ -392,8 +403,7 @@ margin-top:1px;font-family:var(--mono)}
   <button class="nb" data-tab="formulary" aria-label="Drug formulary" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F48A;</span>Formulary</button>
   <button class="nb" data-tab="vent" aria-label="Ventilator management" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F4A8;</span>Ventilator</button>
   <button class="nb" data-tab="pcs" aria-label="PCS and door codes" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F511;</span>PCS/Doors</button>
-  <button class="nb" data-tab="ask" aria-label="Ask the educator" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x2709;&#xFE0F;</span>Ask</button>
-  <button class="nb" data-tab="forms" aria-label="Forms" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x1F4CB;</span>Forms</button>
+  <button class="nb" data-tab="more" aria-label="More tools and resources" aria-pressed="false"><span class="nb-ic" aria-hidden="true">&#x22EF;</span>More</button>
 </nav>
 
 <script>
@@ -423,11 +433,19 @@ function match(item){
 
 // ── RENDER MAIN LIST ──────────────────────────────────────────────────
 function render(){
+  // Keep More button highlighted when inside Ask or Forms sub-pages
+  var navTab = (TAB==='ask'||TAB==='forms') ? 'more' : TAB;
+  document.querySelectorAll('.nb').forEach(function(b){
+    var active = b.dataset.tab === navTab;
+    b.classList.toggle('on', active);
+    b.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
   if(TAB==='calc')      { renderCalc(); return; }
   if(TAB==='hosp')      { renderHosp(); return; }
   if(TAB==='formulary') { renderFormulary(); return; }
   if(TAB==='vent')      { renderV6Detail(); return; }
   if(TAB==='pcs')       { renderPCS(); return; }
+  if(TAB==='more')      { renderMore(); return; }
   if(TAB==='ask')       { renderAsk(); return; }
   if(TAB==='forms')     { renderForms(); return; }
 }
@@ -777,6 +795,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // List delegation — handles all dynamic content clicks in one place
   $('lv').addEventListener('click', function(e){
+    // More hub → sub-tab navigation
+    var mc = e.target.closest('[data-goto]');
+    if(mc){ TAB = mc.dataset.goto; render(); return; }
     var hm = e.target.closest('.hm-card');
     if(hm){ openHospMed(parseInt(hm.dataset.hidx)); return; }
     var fc = e.target.closest('.drug-card');
@@ -1426,6 +1447,7 @@ function renderForms(){
   }
   c.innerHTML = [
     '<div class="cgf-wrap">',
+    '<div class="sub-back" data-goto="more">&#x2190; More</div>',
     '<div id="cgf-form">',
     '<div class="cgf-hdr">',
     '<div class="cgf-title">&#x1F4CB; AMR Caregiver Signature Form</div>',
@@ -1683,6 +1705,65 @@ function setupSigPad(n){
     });
   }
 }
+// ── MORE HUB ──────────────────────────────────────────────────────────────
+function renderMore(){
+  var c = $('lv');
+  c.innerHTML = [
+    '<div class="more-hub">',
+    '<div class="sec">TOOLS</div>',
+    '<div class="more-card" data-goto="forms">',
+    '  <div class="more-card-ico">&#x1F4CB;</div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Caregiver Signature Form</div>',
+    '    <div class="more-card-sub">Complete and download a signed PDF for missing PCR signatures</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</div>',
+    '<div class="more-card" data-goto="ask">',
+    '  <div class="more-card-ico">&#x2709;&#xFE0F;</div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Ask the Educator</div>',
+    '    <div class="more-card-sub">Submit an anonymous question or feedback to Dr. Deshmukh</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</div>',
+    '<div class="sec">RESOURCES</div>',
+    '<a class="more-card" href="protocols-2026.pdf" target="_blank">',
+    '  <div class="more-card-ico">&#x1F4C4;</div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Full Protocols PDF</div>',
+    '    <div class="more-card-sub">AMR Kansas City 2026 Protocol Reference</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x2197;</div>',
+    '</a>',
+    '<a class="more-card" href="quiz.html">',
+    '  <div class="more-card-ico">&#x1F393;</div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Protocol Quiz</div>',
+    '    <div class="more-card-sub">EMT, AEMT, and Ventilator knowledge checks</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</a>',
+    '<a class="more-card" href="flashcards.html">',
+    '  <div class="more-card-ico">&#x1F4A0;</div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Drug Flashcards</div>',
+    '    <div class="more-card-sub">Formulary quick-review cards</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</a>',
+    '<a class="more-card" href="acls-2025-flashcards.html">',
+    '  <div class="more-card-ico">&#x1FAB5;</div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">ACLS Flashcards</div>',
+    '    <div class="more-card-sub">Algorithm and rhythm review</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</a>',
+    '</div>',
+  ].join('');
+}
+
 // ── ASK THE EDUCATOR ──────────────────────────────────────────────────────
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAUtgOCaEXbh-Uq42FLWzbFZi_5fXYtVIK0q8sJpvZmd2360_ujeO52zVjSlE0VXIuyw/exec';
 var MAX_CHARS = 1000;
@@ -1690,6 +1771,7 @@ function renderAsk(){
   var c = $('lv');
   c.innerHTML = [
     '<div class="ask-wrap">',
+    '<div class="sub-back" data-goto="more">&#x2190; More</div>',
     '<div class="ask-hero">',
     '  <div class="ask-icon">&#x1F4AC;</div>',
     '  <div class="ask-hero-title">Ask the Educator</div>',
