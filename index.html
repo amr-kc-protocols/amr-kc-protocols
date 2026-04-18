@@ -11,6 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>AMR KC Field Guide 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 :root{
@@ -1439,13 +1440,13 @@ function renderForms(){
     crewSection('1','CREW 1 &mdash; Primary Caregiver', true),
     crewSection('2','CREW 2 &mdash; Secondary Caregiver', false),
     crewSection('3','CREW 3 &mdash; Third Caregiver', false),
-    '<button class="cgf-submit" id="cgf-submit">Submit Form &rarr;</button>',
+    '<button class="cgf-submit" id="cgf-submit">&#x1F4BE; Save as PDF &rarr;</button>',
     '<div class="cgf-status" id="cgf-status"></div>',
     '</div>',
     '<div class="cgf-confirm" id="cgf-confirm">',
-    '<div class="cgf-confirm-icon">&#x2705;</div>',
-    '<div class="cgf-confirm-title">Form Submitted</div>',
-    '<div class="cgf-confirm-sub">The signed form has been sent to the Clinical Educator. No further action needed.</div>',
+    '<div class="cgf-confirm-icon">&#x1F4E5;</div>',
+    '<div class="cgf-confirm-title">PDF Downloaded</div>',
+    '<div class="cgf-confirm-sub">The completed form with signatures has been saved as a PDF to your device. Share or email it as needed.</div>',
     '<button class="cgf-again" id="cgf-again">Submit Another Form</button>',
     '</div>',
     '</div>',
@@ -1477,7 +1478,7 @@ function renderForms(){
         }
       }
       submitBtn.disabled = true;
-      statusEl.textContent = '⏳ Submitting…';
+      statusEl.textContent = '⏳ Generating PDF…';
       statusEl.className = 'cgf-status pending';
       function getSig(n){
         var canvas = document.getElementById('sig-canvas-'+n);
@@ -1492,25 +1493,119 @@ function renderForms(){
       }
       function getField(id){ return (document.getElementById(id)||{}).value||''; }
       var now = new Date();
-      var payload = {
-        type:'caregiver_form',
-        date: date,
-        caseNumber: caseNum,
-        submittedAt: (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear()+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-        crew1Name: getField('cgf-name-1'), crew1Cert: getField('cgf-cert-1'), crew1Sig: getSig(1),
-        crew2Name: getField('cgf-name-2'), crew2Cert: getField('cgf-cert-2'), crew2Sig: getSig(2),
-        crew3Name: getField('cgf-name-3'), crew3Cert: getField('cgf-cert-3'), crew3Sig: getSig(3),
-      };
-      fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(function(){
+      var submittedAt = (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear()+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+      var crew = [
+        {name: getField('cgf-name-1'), cert: getField('cgf-cert-1'), sig: getSig(1), label: 'Primary Crew Member'},
+        {name: getField('cgf-name-2'), cert: getField('cgf-cert-2'), sig: getSig(2), label: 'Secondary Crew Member'},
+        {name: getField('cgf-name-3'), cert: getField('cgf-cert-3'), sig: getSig(3), label: 'Third Crew Member'},
+      ];
+      try {
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({orientation:'portrait', unit:'pt', format:'letter'});
+        var W = doc.internal.pageSize.getWidth();
+        var margin = 48;
+        var y = margin;
+        // Header bar
+        doc.setFillColor(6,13,31);
+        doc.rect(0, 0, W, 56, 'F');
+        doc.setTextColor(255,255,255);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(15);
+        doc.text('AMR Kansas City', margin, 24);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(11);
+        doc.text('Caregiver Signature Form', margin, 42);
+        y = 80;
+        // Meta row
+        doc.setTextColor(30,30,30);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(10);
+        doc.text('Date of Service:', margin, y);
+        doc.setFont('helvetica','normal');
+        doc.text(date, margin+110, y);
+        doc.setFont('helvetica','bold');
+        doc.text('Case / PCR #:', margin+260, y);
+        doc.setFont('helvetica','normal');
+        doc.text(caseNum, margin+370, y);
+        y += 14;
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(8);
+        doc.setTextColor(120,120,120);
+        doc.text('Generated: '+submittedAt, margin, y);
+        y += 22;
+        // Divider
+        doc.setDrawColor(200,200,200);
+        doc.line(margin, y, W-margin, y);
+        y += 18;
+        // Crew sections
+        crew.forEach(function(c, i){
+          if(!c.name && !c.sig) return;
+          // Section header
+          doc.setFillColor(240,243,247);
+          doc.rect(margin-8, y-12, W-2*margin+16, 20, 'F');
+          doc.setFont('helvetica','bold');
+          doc.setFontSize(10);
+          doc.setTextColor(6,13,31);
+          doc.text(c.label, margin, y);
+          y += 16;
+          // Name + Cert
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(10);
+          doc.setTextColor(30,30,30);
+          doc.text('Name: '+c.name, margin, y);
+          doc.text('Certification: '+c.cert, margin+240, y);
+          y += 16;
+          // Signature
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(9);
+          doc.setTextColor(100,100,100);
+          doc.text('Signature:', margin, y);
+          y += 4;
+          if(c.sig){
+            var sigW = 220, sigH = 70;
+            doc.addImage(c.sig, 'PNG', margin, y, sigW, sigH);
+            y += sigH + 8;
+          } else {
+            doc.setDrawColor(200,200,200);
+            doc.rect(margin, y, 220, 60);
+            doc.setFontSize(8);
+            doc.setTextColor(160,160,160);
+            doc.text('No signature provided', margin+60, y+34);
+            y += 68;
+          }
+          // Divider between crew
+          if(i < crew.length-1){
+            doc.setDrawColor(220,220,220);
+            doc.line(margin, y, W-margin, y);
+            y += 14;
+          }
+        });
+        // Footer note
+        y += 10;
+        doc.setFont('helvetica','italic');
+        doc.setFontSize(8);
+        doc.setTextColor(140,140,140);
+        doc.text('This document was generated via the AMR KC Field Guide app and serves as a supplemental signature record.', margin, y, {maxWidth: W-2*margin});
+        // Save
+        var filename = 'CGF_Case'+caseNum+'_'+date.replace(/\//g,'-')+'.pdf';
+        doc.save(filename);
         formEl.style.display='none';
         confirmEl.style.display='block';
         statusEl.textContent='';
-      }).catch(function(){
-        statusEl.textContent='⚠ Submission failed — check connection and try again.';
+        // Also log to sheet (no signatures — just text data)
+        var payload = {
+          type:'caregiver_form',
+          date: date, caseNumber: caseNum, submittedAt: submittedAt,
+          crew1Name: crew[0].name, crew1Cert: crew[0].cert, crew1Sig:'',
+          crew2Name: crew[1].name, crew2Cert: crew[1].cert, crew2Sig:'',
+          crew3Name: crew[2].name, crew3Cert: crew[2].cert, crew3Sig:''
+        };
+        fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){});
+      } catch(err){
+        statusEl.textContent='⚠ PDF generation failed: '+err.message;
         statusEl.className='cgf-status err';
         submitBtn.disabled=false;
-      });
+      }
     });
     if(againBtn) againBtn.addEventListener('click', function(){
       CGF_HAS_SIG=[false,false,false];
