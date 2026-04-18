@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060d1f">
+<title>Rhythm ID &#x2014; AMR KC</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{--bg:#060d1f;--surface:#0d1526;--surface2:#131f35;--border:#1e3a5f;--teal:#0d9488;--teal2:#14b8a6;--white:#f0f4f8;--gray:#8899aa;--dim:#1a2a40;--emt:#16a34a;--danger:#ef4444;--warn:#f59e0b;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);font-family:var(--sans);color:var(--white)}
+.hdr{background:var(--bg);border-bottom:1px solid var(--teal);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.back-btn{background:var(--dim);border:1px solid var(--border);color:var(--teal2);font-size:13px;font-weight:600;padding:7px 12px;border-radius:6px;text-decoration:none;font-family:var(--sans)}
+.hdr-info{flex:1}
+.hdr-title{font-size:14px;font-weight:700;color:var(--teal2);font-family:var(--mono);letter-spacing:0.06em}
+.hdr-sub{font-size:11px;color:var(--gray);margin-top:1px}
+/* MENU */
+.menu-wrap{max-width:520px;margin:0 auto;padding:20px 14px 48px}
+.menu-hero{text-align:center;padding:24px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;margin-bottom:20px}
+.hero-icon{font-size:44px;margin-bottom:10px}
+.hero-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:16px}
+.start-all-btn{display:inline-block;padding:13px 28px;background:var(--teal);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.menu-sec{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.12em;color:var(--teal2);text-transform:uppercase;margin-bottom:10px}
+.rhythm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.r-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center;transition:border-color 0.15s}
+.r-card:active{border-color:var(--teal)}
+.r-card-name{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.3}
+.r-card-rate{font-family:var(--mono);font-size:10px;color:var(--gray)}
+/* QUIZ */
+.quiz-wrap{max-width:520px;margin:0 auto;padding:12px 14px 48px;display:none}
+.q-progress{margin-bottom:14px}
+.q-progress-bar{height:4px;background:var(--dim);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.q-progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal2));border-radius:2px;transition:width 0.3s}
+.q-progress-txt{font-family:var(--mono);font-size:11px;color:var(--gray);display:flex;justify-content:space-between}
+.strip-box{background:#0a1a0a;border:1px solid #1a3a1a;border-radius:10px;padding:8px;margin-bottom:14px;position:relative}
+.strip-label{font-family:var(--mono);font-size:9px;color:#3a6a3a;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.ecg-canvas{width:100%;height:120px;display:block;border-radius:6px}
+.strip-rate{font-family:var(--mono);font-size:9px;color:#3a6a3a;text-align:right;margin-top:4px}
+.q-prompt{font-size:13px;color:var(--gray);font-family:var(--mono);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:12px}
+.q-options{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.q-opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px;cursor:pointer;font-size:15px;line-height:1.4;text-align:left;color:var(--white);font-family:var(--sans);width:100%}
+.q-opt.correct{border-color:var(--emt);background:rgba(22,163,74,0.12);color:#86efac}
+.q-opt.wrong{border-color:var(--danger);background:rgba(239,68,68,0.1);color:#fca5a5}
+.q-opt:disabled{cursor:default}
+.feedback-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;display:none}
+.fb-result{font-size:15px;font-weight:700;margin-bottom:8px}
+.fb-result.ok{color:var(--emt)}
+.fb-result.no{color:var(--danger)}
+.fb-features{margin-bottom:10px}
+.fb-features-lbl{font-family:var(--mono);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.fb-feature{display:flex;gap:8px;font-size:13px;color:#94a3b8;padding:4px 0;border-bottom:1px solid var(--dim);align-items:flex-start}
+.fb-feature:last-child{border-bottom:none}
+.fb-feature-dot{flex-shrink:0;width:4px;height:4px;border-radius:50%;background:var(--teal2);margin-top:5px}
+.fb-tx{background:rgba(13,148,136,0.08);border:1px solid var(--teal);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--teal2);line-height:1.55}
+.fb-tx-lbl{font-family:var(--mono);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;font-weight:600}
+.q-next-btn{width:100%;padding:13px;background:var(--teal);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);display:none}
+/* RESULT */
+.result-wrap{max-width:520px;margin:0 auto;padding:20px 14px 48px;display:none}
+.result-hero{text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:24px 16px;margin-bottom:20px}
+.result-icon{font-size:44px;margin-bottom:10px}
+.result-score{font-family:var(--mono);font-size:42px;font-weight:700;color:var(--teal2);line-height:1;margin-bottom:6px}
+.result-score-lbl{font-size:14px;color:var(--gray)}
+.result-sec{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.12em;color:var(--teal2);text-transform:uppercase;margin-bottom:10px;margin-top:20px}
+.missed-r{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.missed-r-name{font-size:14px;font-weight:600;color:var(--emt);margin-bottom:4px}
+.missed-r-key{font-size:12px;color:#94a3b8;line-height:1.55}
+.again-btn{display:block;width:100%;padding:14px;background:var(--teal);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-top:6px}
+.menu-btn{display:block;width:100%;padding:14px;background:var(--dim);border:1px solid var(--border);color:var(--white);border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <a class="back-btn" href="index.html">&#x2190; Field Guide</a>
+  <div class="hdr-info">
+    <div class="hdr-title">&#x1FAB5; RHYTHM ID</div>
+    <div class="hdr-sub" id="hdr-sub">Identify the rhythm from the strip</div>
+  </div>
+</div>
+
+<!-- MENU -->
+<div class="menu-wrap" id="menu-screen">
+  <div class="menu-hero">
+    <div class="hero-icon">&#x1FAB5;</div>
+    <div class="hero-title">Rhythm Strip ID</div>
+    <div class="hero-sub">Identify rhythms from Canvas-generated ECG strips. Covers the rhythms most relevant to ALS and BLS prehospital care.</div>
+    <button class="start-all-btn" id="start-all-btn">Start Random Quiz &#x2192;</button>
+  </div>
+  <div class="menu-sec">All Rhythms</div>
+  <div class="rhythm-grid" id="rhythm-grid"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-wrap" id="quiz-screen">
+  <div class="q-progress">
+    <div class="q-progress-bar"><div class="q-progress-fill" id="q-fill" style="width:0%"></div></div>
+    <div class="q-progress-txt"><span id="q-num">1 / 12</span><span id="q-score-live">0 correct</span></div>
+  </div>
+  <div class="strip-box">
+    <div class="strip-label">Lead II &#x2014; 25 mm/s &middot; 10 mm/mV</div>
+    <canvas class="ecg-canvas" id="ecg-canvas"></canvas>
+    <div class="strip-rate" id="strip-rate-lbl"></div>
+  </div>
+  <div class="q-prompt">Identify this rhythm:</div>
+  <div class="q-options" id="q-options"></div>
+  <div class="feedback-box" id="feedback-box">
+    <div class="fb-result" id="fb-result"></div>
+    <div class="fb-features">
+      <div class="fb-features-lbl">Key Features</div>
+      <div id="fb-features-list"></div>
+    </div>
+    <div class="fb-tx">
+      <div class="fb-tx-lbl">EMS Treatment</div>
+      <div id="fb-tx-text"></div>
+    </div>
+  </div>
+  <button class="q-next-btn" id="q-next">Next &#x2192;</button>
+</div>
+
+<!-- RESULT -->
+<div class="result-wrap" id="result-screen">
+  <div class="result-hero">
+    <div class="result-icon" id="r-icon">&#x1F3C6;</div>
+    <div class="result-score" id="r-score">12/12</div>
+    <div class="result-score-lbl">rhythms identified correctly</div>
+  </div>
+  <div id="r-missed-section" style="display:none">
+    <div class="result-sec">Review Missed</div>
+    <div id="r-missed-list"></div>
+  </div>
+  <button class="again-btn" id="again-btn">Try Again &#x2192;</button>
+  <button class="menu-btn" id="menu-btn">&#x1F3E0; Back to Field Guide</button>
+</div>
+
+<script>
+// ── ECG WAVEFORM GENERATOR ─────────────────────────────────────────────
+// Each rhythm is described as a list of segments.
+// Segments are rendered left to right on the canvas.
+// drawSegments(ctx, segments, W, H, lineColor) renders the strip.
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function gauss(x,mu,sigma){return Math.exp(-0.5*Math.pow((x-mu)/sigma,2));}
+
+// Returns array of {x,y} canvas points for one or more PQRST cycles
+function makePQRST(opts){
+  // opts: bpm, noP, wideQRS, longPR, stElev, rAmp, pAmp, tAmp, invT, irregularRR
+  var bpm = opts.bpm||75;
+  var cycleMs = 60000/bpm;
+  var samples = [];
+  var totalCycles = opts.cycles||3;
+  for(var c=0;c<totalCycles;c++){
+    var offset = c * cycleMs;
+    if(opts.irregularRR) offset += (Math.random()-0.5)*cycleMs*0.3;
+    var pDur = opts.noP ? 0 : 80;
+    var prInt = opts.longPR ? 280 : (opts.noP ? 0 : 160);
+    var qrsDur = opts.wideQRS ? 160 : 80;
+    var stDur = 80;
+    var tDur = 160;
+    var rest = cycleMs - pDur - prInt - qrsDur - stDur - tDur;
+    if(rest<0) rest=0;
+
+    var rAmp = opts.rAmp !== undefined ? opts.rAmp : 1.0;
+    var pAmp = opts.noP ? 0 : (opts.pAmp !== undefined ? opts.pAmp : 0.18);
+    var tAmp = opts.invT ? -(opts.tAmp||0.25) : (opts.tAmp||0.25);
+    var stElev = opts.stElev||0;
+
+    var t = offset;
+    // P wave
+    for(var i=0;i<20;i++){
+      var ti=i/20;
+      var pt = t + ti*pDur;
+      var v = pAmp * gauss(ti,0.5,0.2);
+      samples.push({t:pt,v:v});
+    }
+    t += pDur;
+    // PR segment
+    samples.push({t:t,v:0});
+    t += prInt - pDur;
+    samples.push({t:t,v:0});
+    // Q dip
+    samples.push({t:t+qrsDur*0.1,v:-rAmp*0.15});
+    // R spike
+    samples.push({t:t+qrsDur*0.3,v:rAmp});
+    // S dip
+    samples.push({t:t+qrsDur*0.55,v:-rAmp*0.2});
+    samples.push({t:t+qrsDur*0.8,v:stElev});
+    t += qrsDur;
+    // ST segment
+    samples.push({t:t,v:stElev});
+    t += stDur;
+    samples.push({t:t,v:stElev});
+    // T wave
+    for(var i=0;i<20;i++){
+      var ti=i/20;
+      var pt = t + ti*tDur;
+      var v = stElev + tAmp * gauss(ti,0.5,0.22);
+      samples.push({t:pt,v:v});
+    }
+    t += tDur;
+    // TP baseline
+    samples.push({t:t,v:0});
+    samples.push({t:t+rest,v:0});
+  }
+  return samples;
+}
+
+function makeAFib(bpm,cycles){
+  var samples=[];
+  var avgCycle=60000/bpm;
+  var t=0;
+  // Fibrillatory baseline + irregular QRS
+  for(var c=0;c<cycles;c++){
+    var interval = avgCycle*(0.7+Math.random()*0.6);
+    // fibrillatory baseline
+    var fbSteps = Math.floor(interval*0.7/10);
+    for(var i=0;i<fbSteps;i++){
+      var v = (Math.random()-0.5)*0.1;
+      samples.push({t:t+i*10,v:v});
+    }
+    t += interval*0.7;
+    // narrow QRS
+    samples.push({t:t,v:0});
+    samples.push({t:t+10,v:-0.15});
+    samples.push({t:t+25,v:0.9});
+    samples.push({t:t+40,v:-0.18});
+    samples.push({t:t+55,v:0});
+    t += interval*0.3;
+  }
+  return samples;
+}
+
+function makeFlutter(cycles){
+  var samples=[];
+  var t=0;
+  var sawtooth_period = 200; // 300 bpm atrial
+  var ventricular_block = 4; // 4:1 block = 75 bpm ventricular
+  var totalSaw = cycles * ventricular_block;
+  for(var s=0;s<totalSaw;s++){
+    var isVentricular = (s % ventricular_block === 0);
+    // sawtooth (flutter wave)
+    var mid = t + sawtooth_period*0.7;
+    samples.push({t:t,v:0});
+    samples.push({t:mid,v:-0.25});
+    samples.push({t:t+sawtooth_period*0.85,v:0.1});
+    samples.push({t:t+sawtooth_period,v:0});
+    if(isVentricular){
+      // QRS superimposed
+      var qt = t+sawtooth_period*0.5;
+      samples.push({t:qt,v:-0.1});
+      samples.push({t:qt+15,v:0.85});
+      samples.push({t:qt+30,v:-0.15});
+      samples.push({t:qt+55,v:0});
+    }
+    t += sawtooth_period;
+  }
+  return samples;
+}
+
+function makeVF(){
+  var samples=[];
+  for(var i=0;i<120;i++){
+    var t=i*10;
+    var v=(Math.sin(t*0.08+Math.random()*1.5)+Math.sin(t*0.13+0.5))*0.5*(0.5+Math.random()*0.5);
+    samples.push({t:t,v:v});
+  }
+  return samples;
+}
+
+function makeVT(cycles){
+  var samples=[];
+  var t=0;
+  var cycleMs=60000/150;
+  for(var c=0;c<cycles;c++){
+    var offset=t+c*cycleMs;
+    // Wide bizarre QRS, no P wave
+    samples.push({t:offset,v:0});
+    samples.push({t:offset+20,v:-0.4});
+    samples.push({t:offset+50,v:0.95});
+    samples.push({t:offset+90,v:-0.3});
+    samples.push({t:offset+130,v:0.15});
+    samples.push({t:offset+cycleMs*0.55,v:0.18});
+    samples.push({t:offset+cycleMs*0.7,v:0.1});
+    samples.push({t:offset+cycleMs,v:0});
+  }
+  return samples;
+}
+
+function makeTdP(cycles){
+  var samples=[];
+  var t=0;
+  var bpm=200;
+  var cycleMs=60000/bpm;
+  for(var c=0;c<cycles;c++){
+    var polarity=(c<cycles/2)?1:-1;
+    samples.push({t:t,v:0});
+    samples.push({t:t+20,v:-polarity*0.35});
+    samples.push({t:t+40,v:polarity*0.9});
+    samples.push({t:t+70,v:-polarity*0.25});
+    samples.push({t:t+100,v:polarity*0.2});
+    samples.push({t:t+cycleMs,v:0});
+    t+=cycleMs;
+  }
+  return samples;
+}
+
+function makeAsystole(totalMs){
+  var samples=[];
+  for(var t=0;t<=totalMs;t+=20){
+    var v=(Math.random()-0.5)*0.02;
+    samples.push({t:t,v:v});
+  }
+  return samples;
+}
+
+function makeCompleteBlock(){
+  // P waves at 70 bpm, QRS escape at 35 bpm, no relationship
+  var samples=[];
+  var pCycle=60000/70; // ~857ms
+  var vCycle=60000/35; // ~1714ms
+  var total=vCycle*2.5;
+  // P waves
+  for(var t=0;t<total;t+=pCycle){
+    samples.push({t:t,v:0});
+    for(var i=0;i<10;i++){var ti=i/10;samples.push({t:t+ti*80,v:0.15*gauss(ti,0.5,0.22)});}
+    samples.push({t:t+80,v:0});
+  }
+  // Escape QRS (wide)
+  for(var t=400;t<total;t+=vCycle){
+    samples.push({t:t,v:0});
+    samples.push({t:t+25,v:-0.3});
+    samples.push({t:t+55,v:0.75});
+    samples.push({t:t+90,v:-0.25});
+    samples.push({t:t+150,v:0.2});
+    samples.push({t:t+250,v:0});
+  }
+  samples.sort(function(a,b){return a.t-b.t;});
+  return samples;
+}
+
+function drawSamples(canvas, samples, color){
+  var dpr=window.devicePixelRatio||1;
+  var W=canvas.offsetWidth, H=canvas.offsetHeight;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  var ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  // Background
+  ctx.fillStyle='#0a1a0a';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid
+  var smallBox=W/30;
+  ctx.lineWidth=0.5;
+  ctx.strokeStyle='rgba(0,80,0,0.4)';
+  for(var x=0;x<=W;x+=smallBox){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(var y=0;y<=H;y+=smallBox){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(0,100,0,0.6)';
+  for(var x=0;x<=W;x+=smallBox*5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(var y=0;y<=H;y+=smallBox*5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  if(!samples||samples.length===0) return;
+
+  var minT=samples[0].t, maxT=samples[samples.length-1].t;
+  var tRange=maxT-minT||1;
+  var midY=H/2;
+  var ampScale=H*0.38;
+
+  // Sort by time
+  var sorted=samples.slice().sort(function(a,b){return a.t-b.t;});
+
+  ctx.beginPath();
+  ctx.strokeStyle=color||'#00e64d';
+  ctx.lineWidth=2;
+  ctx.shadowBlur=5;
+  ctx.shadowColor=color||'#00e64d';
+  ctx.lineJoin='round';
+  ctx.lineCap='round';
+
+  sorted.forEach(function(p,i){
+    var x=(p.t-minT)/tRange*W;
+    var y=midY - p.v*ampScale;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+// ── RHYTHM BANK ───────────────────────────────────────────────────────
+var RHYTHMS = [
+  {
+    id:'nsr', name:'Normal Sinus Rhythm', rate:'60\u201399 bpm',
+    generate:function(){return makePQRST({bpm:75,cycles:3});},
+    features:['Regular P waves before every QRS','PR interval 120\u2013200 ms','Narrow QRS < 120 ms','Rate 60\u201399 bpm'],
+    tx:'No treatment needed. Maintain monitoring and transport.',
+    distractors:['Sinus Tachycardia','Sinus Bradycardia','1st Degree AV Block']
+  },
+  {
+    id:'stach', name:'Sinus Tachycardia', rate:'>100 bpm',
+    generate:function(){return makePQRST({bpm:140,cycles:5});},
+    features:['P wave precedes every QRS','Rate >100 bpm','Narrow QRS','Shortened PR and TP intervals','Reactive \u2014 treat the cause (pain, hypovolemia, fever)'],
+    tx:'Treat the underlying cause: IV fluids, pain management, O2. Cardioversion NOT indicated \u2014 this is compensatory.',
+    distractors:['SVT (AVNRT)','Atrial Flutter','Normal Sinus Rhythm']
+  },
+  {
+    id:'sbrad', name:'Sinus Bradycardia', rate:'<60 bpm',
+    generate:function(){return makePQRST({bpm:40,cycles:2});},
+    features:['Regular P waves before every QRS','Rate < 60 bpm','Narrow QRS','Long TP segment (slow rate)'],
+    tx:'If symptomatic (hypotension, AMS, chest pain, syncope): Atropine 1 mg IV; TCP if refractory. Asymptomatic: monitor only.',
+    distractors:['Normal Sinus Rhythm','3rd Degree AV Block','Junctional Rhythm']
+  },
+  {
+    id:'afib', name:'Atrial Fibrillation', rate:'Irregularly irregular',
+    generate:function(){return makeAFib(90,5);},
+    features:['No discernible P waves','Irregularly irregular RR intervals','Fibrillatory baseline (fine or coarse)','Narrow QRS (usually)'],
+    tx:'Rate control per sending orders. If unstable with rapid ventricular response: synchronized cardioversion. Anticoagulation considerations \u2014 contact DMO.',
+    distractors:['Atrial Flutter','Normal Sinus Rhythm','SVT (AVNRT)']
+  },
+  {
+    id:'aflut', name:'Atrial Flutter', rate:'Atrial 300 / Vent 75 bpm (4:1)',
+    generate:function(){return makeFlutter(3);},
+    features:['Classic sawtooth flutter waves at 300 bpm','Regular ventricular rate (often 75, 100, or 150 bpm)','No true P waves between QRS','Regular RR intervals'],
+    tx:'If unstable: synchronized cardioversion. Rate control per DMO. Do not adenosine \u2014 it temporarily unmasks flutter waves but does not convert.',
+    distractors:['Sinus Tachycardia','Atrial Fibrillation','SVT (AVNRT)']
+  },
+  {
+    id:'svt', name:'SVT (AVNRT)', rate:'150\u2013250 bpm',
+    generate:function(){return makePQRST({bpm:200,cycles:6,noP:true});},
+    features:['Regular narrow complex tachycardia','Rate 150\u2013250 bpm','P waves absent or hidden in QRS/T','Sudden onset and termination'],
+    tx:'Vagal maneuvers first. Adenosine 6 mg rapid IV push + flush \u2014 repeat 12 mg x1. If unstable: synchronized cardioversion.',
+    distractors:['Atrial Flutter','Sinus Tachycardia','Ventricular Tachycardia']
+  },
+  {
+    id:'vf', name:'Ventricular Fibrillation', rate:'None \u2014 no cardiac output',
+    generate:function(){return makeVF();},
+    features:['Chaotic, disorganized waveforms','No identifiable P waves or QRS complexes','No cardiac output \u2014 pulseless','Coarse or fine amplitude'],
+    tx:'CPR immediately. Defibrillate as soon as available \u2014 do NOT delay. Epinephrine 1 mg IV/IO q3\u20135 min. Amiodarone 300 mg or Lidocaine 1\u20131.5 mg/kg after first failed shock.',
+    distractors:['Torsades de Pointes','Artifact / Movement','Ventricular Tachycardia']
+  },
+  {
+    id:'vt', name:'Ventricular Tachycardia', rate:'100\u2013250 bpm',
+    generate:function(){return makeVT(5);},
+    features:['Wide bizarre QRS > 120 ms','Rate 100\u2013250 bpm','AV dissociation (P waves independent if visible)','No P waves or dissociated P waves'],
+    tx:'Pulseless VT: CPR + defibrillation (treat as VF). Stable VT with pulse: Amiodarone 150 mg IV over 10 min, DMO contact. Unstable with pulse: synchronized cardioversion.',
+    distractors:['SVT with aberrancy','Atrial Flutter','Ventricular Fibrillation']
+  },
+  {
+    id:'tdp', name:'Torsades de Pointes', rate:'200\u2013250 bpm',
+    generate:function(){return makeTdP(10);},
+    features:['Polymorphic VT \u2014 QRS axis rotates around baseline','Rate 200\u2013250 bpm','Associated with prolonged QTc','Can degenerate to VF'],
+    tx:'Magnesium Sulfate 2 g IV over 2 min (Paramedic). Correct electrolyte causes. If pulseless: defibrillate + CPR. Avoid antiarrhythmics that prolong QT (amiodarone, procainamide).',
+    distractors:['Ventricular Fibrillation','Ventricular Tachycardia','Atrial Flutter']
+  },
+  {
+    id:'deg1', name:'1st Degree AV Block', rate:'Normal rate, long PR',
+    generate:function(){return makePQRST({bpm:70,cycles:3,longPR:true});},
+    features:['P wave before every QRS (1:1 conduction)','PR interval > 200 ms (prolonged, constant)','Regular rhythm','Narrow QRS'],
+    tx:'Usually no treatment required prehospital. Document and monitor. Identify and treat reversible causes (medications, hyperkalemia, ischemia).',
+    distractors:['Normal Sinus Rhythm','2nd Degree AV Block (Wenckebach)','Sinus Bradycardia']
+  },
+  {
+    id:'chb', name:'3rd Degree AV Block', rate:'Atrial 70 / Ventricular 30\u201340 bpm',
+    generate:function(){return makeCompleteBlock();},
+    features:['Complete AV dissociation \u2014 P waves and QRS march independently','Ventricular escape rate 20\u201340 bpm','Wide QRS escape rhythm (usually)','P waves present but unrelated to QRS'],
+    tx:'Atropine 1 mg IV (often ineffective). TCP immediately if symptomatic. Epinephrine or dopamine infusion as bridge. Prepare for emergent pacing. High-degree block does NOT reliably respond to atropine.',
+    distractors:['Sinus Bradycardia','2nd Degree AV Block','Junctional Rhythm']
+  },
+  {
+    id:'asys', name:'Asystole', rate:'None \u2014 no electrical activity',
+    generate:function(){return makeAsystole(1200);},
+    features:['Flat or near-flat line \u2014 no identifiable complexes','Confirm in 2 leads (rule out lead disconnect)','No cardiac output','Most common initial rhythm in prolonged arrest'],
+    tx:'CPR immediately. Epinephrine 1 mg IV/IO every 3\u20135 min (AHA 2025: as early as possible in non-shockable rhythms). Identify and treat H\'s and T\'s. Do NOT defibrillate asystole.',
+    distractors:['PEA (Fine)','Ventricular Fibrillation (fine)','Lead Disconnect']
+  }
+];
+
+// Build distractor index
+var RHYTHM_MAP={};
+RHYTHMS.forEach(function(r){RHYTHM_MAP[r.id]=r;});
+
+// ── STATE ──────────────────────────────────────────────────────────────
+var SESSION={questions:[],current:0,score:0,missed:[]};
+
+// ── MENU BUILD ────────────────────────────────────────────────────────
+(function buildMenu(){
+  var grid=document.getElementById('rhythm-grid');
+  RHYTHMS.forEach(function(r){
+    var d=document.createElement('div');
+    d.className='r-card';
+    d.innerHTML='<div class="r-card-name">'+r.name+'</div><div class="r-card-rate">'+r.rate+'</div>';
+    d.addEventListener('click',function(){startSingle(r.id);});
+    grid.appendChild(d);
+  });
+})();
+
+document.getElementById('start-all-btn').addEventListener('click',function(){startQuiz(null);});
+
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function buildQuestionsFrom(ids){
+  return ids.map(function(id){
+    var r=RHYTHM_MAP[id];
+    // Build 4 options: correct + 3 distractors
+    var opts=shuffle([r.name].concat(r.distractors.slice(0,3)));
+    var ans=opts.indexOf(r.name);
+    return{rhythmId:id, opts:opts, ans:ans};
+  });
+}
+
+function startQuiz(singleId){
+  var ids=singleId?[singleId]:shuffle(RHYTHMS.map(function(r){return r.id;}));
+  SESSION={questions:buildQuestionsFrom(ids),current:0,score:0,missed:[]};
+  document.getElementById('menu-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  document.getElementById('result-screen').style.display='none';
+  showQ();
+}
+function startSingle(id){startQuiz(id);}
+
+function showQ(){
+  var item=SESSION.questions[SESSION.current];
+  var r=RHYTHM_MAP[item.rhythmId];
+  var total=SESSION.questions.length;
+  var n=SESSION.current+1;
+  document.getElementById('q-fill').style.width=((n-1)/total*100)+'%';
+  document.getElementById('q-num').textContent=n+' / '+total;
+  document.getElementById('q-score-live').textContent=SESSION.score+' correct';
+  document.getElementById('strip-rate-lbl').textContent='Typical rate: '+r.rate;
+  document.getElementById('feedback-box').style.display='none';
+  document.getElementById('q-next').style.display='none';
+
+  // Draw strip
+  var canvas=document.getElementById('ecg-canvas');
+  var samples=r.generate();
+  drawSamples(canvas,samples);
+
+  // Options
+  var optsEl=document.getElementById('q-options');
+  optsEl.innerHTML='';
+  item.opts.forEach(function(opt,i){
+    var b=document.createElement('button');
+    b.className='q-opt'; b.textContent=opt;
+    b.addEventListener('click',function(){answerQ(i,b,item,r);});
+    optsEl.appendChild(b);
+  });
+}
+
+function answerQ(chosen,btn,item,r){
+  document.querySelectorAll('.q-opt').forEach(function(b){b.disabled=true;});
+  var correct=(chosen===item.ans);
+  btn.classList.add(correct?'correct':'wrong');
+  if(!correct){
+    document.querySelectorAll('.q-opt')[item.ans].classList.add('correct');
+    SESSION.missed.push(r);
+  } else { SESSION.score++; }
+
+  // Feedback
+  var fb=document.getElementById('feedback-box');
+  var fbRes=document.getElementById('fb-result');
+  fbRes.className='fb-result '+(correct?'ok':'no');
+  fbRes.textContent=correct?'\u2713 Correct \u2014 '+r.name:'\u2717 Incorrect \u2014 This is '+r.name;
+  var featList=document.getElementById('fb-features-list');
+  featList.innerHTML='';
+  r.features.forEach(function(f){
+    var d=document.createElement('div');
+    d.className='fb-feature';
+    d.innerHTML='<div class="fb-feature-dot"></div><div>'+f+'</div>';
+    featList.appendChild(d);
+  });
+  document.getElementById('fb-tx-text').textContent=r.tx;
+  fb.style.display='block';
+
+  var nb=document.getElementById('q-next');
+  nb.style.display='block';
+  nb.textContent=SESSION.current<SESSION.questions.length-1?'Next \u2192':'See Results \u2192';
+}
+
+document.getElementById('q-next').addEventListener('click',function(){
+  SESSION.current++;
+  if(SESSION.current>=SESSION.questions.length) showResult(); else showQ();
+});
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  document.getElementById('result-screen').style.display='block';
+  var s=SESSION.score, tot=SESSION.questions.length;
+  var pct=Math.round(s/tot*100);
+  var icons=['\uD83D\uDE14','\uD83E\uDD14','\uD83D\uDC4D','\uD83D\uDC4F','\u2B50','\uD83C\uDFC6'];
+  document.getElementById('r-icon').textContent=pct>=80?'\uD83C\uDFC6':(pct>=60?'\u2B50':'\uD83E\uDD14');
+  document.getElementById('r-score').textContent=s+'/'+tot;
+  if(SESSION.missed.length){
+    document.getElementById('r-missed-section').style.display='block';
+    var list=document.getElementById('r-missed-list'); list.innerHTML='';
+    SESSION.missed.forEach(function(r){
+      var d=document.createElement('div');d.className='missed-r';
+      d.innerHTML='<div class="missed-r-name">'+r.name+'</div>'
+        +'<div class="missed-r-key">'+r.features.slice(0,2).join(' \u00b7 ')+'</div>';
+      list.appendChild(d);
+    });
+  } else {
+    document.getElementById('r-missed-section').style.display='none';
+  }
+}
+document.getElementById('again-btn').addEventListener('click',function(){
+  startQuiz(null);
+});
+document.getElementById('menu-btn').addEventListener('click',function(){
+  window.location.href='index.html';
+});
+</script>
+</body>
+</html>
