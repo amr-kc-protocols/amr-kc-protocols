@@ -13,8 +13,8 @@
 //        var SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_ID/exec';
 // ============================================================
 
-var SHEET_ID  = 'YOUR_GOOGLE_SHEET_ID_HERE';
-var SHEET_TAB = 'Sheet1';
+var SHEET_ID  = '1EI3TpQrIH-VwPqf6Pj_okYRneOYpTUt7rZAip2Cjwq4';
+var SHEET_TAB = 'New hire exit survey';
 
 // Optional: get an email notification on each submission
 var NOTIFY_EMAIL = 'jordan.jones@gmr.net';  // set to '' to disable
