@@ -328,6 +328,20 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
   letter-spacing:0.06em;cursor:pointer;text-transform:uppercase;border:1px solid}
 .lc-btn-next{background:#041520;border-color:var(--blue);color:var(--blue)}
 .lc-btn-sel{background:#0d0f12;border-color:#333;color:#555}
+/* TOUCH UX */
+.adj-btn{touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+@media (pointer:coarse){.knob-adj,.alarm-adj{display:none;}}
+.drawer-val-row{display:flex;align-items:center;justify-content:space-between;background:#080f08;border:1.5px solid #1a3a1a;border-radius:12px;padding:10px 12px;margin-bottom:14px;gap:10px}
+.dv-btn{width:54px;height:54px;border-radius:10px;border:2px solid #1a4a1a;background:#0a1a0a;color:#39ff5a;font-size:30px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;flex-shrink:0}
+.dv-btn:active{background:#1a3a1a}
+.dv-btn.alarm-clr{border-color:#4a1a1a;background:#0d0404;color:#e63946}
+.dv-btn.alarm-clr:active{background:#2a0808}
+.dv-val{text-align:center;flex:1}
+.dv-val-num{font-family:monospace;font-size:34px;font-weight:700;color:#39ff5a;line-height:1}
+.dv-val.alarm-clr .dv-val-num{color:#e63946}
+.dv-val-unit{font-size:11px;color:#2a6a2a;margin-top:3px}
+.dv-val-lbl{font-size:9px;color:#555;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px}
+@media (pointer:coarse){.knob-lbl::after{content:"\21D5";font-size:6px;color:#333;margin-left:3px}}
 </style>
 </head>
 <body>
@@ -1273,6 +1287,24 @@ function openDrawer(key){
     }
   }
   html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>'+c.pearl+'</div>';
+    if(vals[key]){
+    var isAlm=["hipres","lowpres","lowmv","apnea"].indexOf(key)>=0;
+    var dispV=(key==="it")?vals[key].v.toFixed(1):String(vals[key].v);
+    var unt=KNOB_UNITS[key]||"";
+    var bc=isAlm?"dv-btn alarm-clr":"dv-btn";
+    var vc=isAlm?"dv-val alarm-clr":"dv-val";
+    var stp=vals[key].step;
+    var adjRow='<div class="drawer-val-row">'
+      +'<button class="'+bc+'" onclick="adjAndUpdate(\''+(key)+'\',-('+(stp)+'))">&#x2212;</button>'
+      +'<div class="'+vc+'">'
+      +'<div class="dv-val-num" id="dv-num-'+(key)+'">'+(dispV)+'</div>'
+      +'<div class="dv-val-unit">'+(unt)+'</div>'
+      +'<div class="dv-val-lbl">'+(c.title)+'</div>'
+      +'</div>'
+      +'<button class="'+bc+'" onclick="adjAndUpdate(\''+(key)+'\','+(stp)+')">+</button>'
+      +'</div>';
+    html=adjRow+html;
+  }
   document.getElementById('drawer-content').innerHTML=html;
   document.getElementById('drawer').classList.add('open');
   document.getElementById('overlay').classList.add('open');
@@ -1992,6 +2024,25 @@ function toggleMute(){
   var btn=document.getElementById('mute-btn');
   if(btn) btn.textContent=audioMuted?'🔇':'🔊';
 }
+
+var KNOB_UNITS={rate:"bpm",vt:"mL",pc:"cmH₂O",it:"sec",ps:"cmH₂O",fio2:"%",sens:"lpm",peep:"cmH₂O",hipres:"cmH₂O",lowpres:"cmH₂O",lowmv:"L/min",apnea:"sec"};
+function adjAndUpdate(key,delta){adj(key,delta);var el=document.getElementById("dv-num-"+key);if(el)el.textContent=(key==="it")?vals[key].v.toFixed(1):vals[key].v;}
+var _SWIPE_PX=14;
+function setupSwipe(el,key){var sy=0,swiped=false,accum=0;
+  el.addEventListener("touchstart",function(e){sy=e.touches[0].clientY;swiped=false;accum=0;},{passive:true});
+  el.addEventListener("touchmove",function(e){var dy=sy-e.touches[0].clientY;
+    if(Math.abs(dy)>6){swiped=true;accum+=dy;
+      var step=vals[key]?vals[key].step:1;
+      while(accum>=_SWIPE_PX){adj(key,step);accum-=_SWIPE_PX;}
+      while(accum<=-_SWIPE_PX){adj(key,-step);accum+=_SWIPE_PX;}
+      sy=e.touches[0].clientY;e.preventDefault();
+    }},{passive:false});
+  el.addEventListener("touchend",function(e){
+    if(!swiped){openDrawer(key);}e.stopPropagation();e.preventDefault();
+  },{passive:false});}
+(function(){document.querySelectorAll(".ctrl-wrap").forEach(function(w){var m=(w.getAttribute("onclick")||"").match(/openDrawer\('(\w+)'\)/);if(m){w.removeAttribute("onclick");setupSwipe(w,m[1]);}});
+var pr=document.querySelector(".peep-row");if(pr){pr.removeAttribute("onclick");setupSwipe(pr,"peep");}
+document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribute("onclick")||"").match(/openDrawer\('(\w+)'\)/);if(m){w.removeAttribute("onclick");setupSwipe(w,m[1]);}});})();
 </script>
 <!-- LEVEL SELECT OVERLAY -->
 <div class="lvlsel-overlay" id="lvlsel-overlay">
