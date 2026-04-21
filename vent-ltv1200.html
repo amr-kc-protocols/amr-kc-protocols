@@ -215,7 +215,7 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
 .prog-line.done{background:var(--lcd-green)}
 .mission-stage{font-size:8px;font-weight:700;letter-spacing:0.12em;color:var(--blue);
   text-transform:uppercase;margin-bottom:3px}
-.mission-hint{font-size:11px;color:#666;line-height:1.45;margin-bottom:8px}
+.mission-hint{font-size:11px;color:#9a9890;line-height:1.45;margin-bottom:8px}
 .mission-targets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .mtgt{display:flex;align-items:center;gap:6px;background:#080d1a;
   border:1.5px solid #2a3a5a;border-radius:7px;padding:6px 10px;transition:all 0.25s}
@@ -276,18 +276,72 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
 .quiz-continue{display:none;margin:0 20px;padding:13px;background:#0d1a2a;
   border:1.5px solid #2a4a7a;border-radius:10px;color:var(--blue);font-size:14px;
   font-weight:700;cursor:pointer;width:calc(100% - 40px);text-align:center}
+
+/* ── LEVEL SELECT OVERLAY ── */
+.lvlsel-overlay{position:fixed;inset:0;z-index:300;background:rgba(10,12,18,0.97);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  transition:opacity 0.25s}
+.lvlsel-overlay.hidden{opacity:0;pointer-events:none}
+.lvlsel-inner{width:100%;max-width:500px}
+.lvlsel-title{text-align:center;font-size:12px;font-weight:700;letter-spacing:0.18em;
+  color:var(--blue);text-transform:uppercase;margin-bottom:4px}
+.lvlsel-sub{text-align:center;font-size:12px;color:#444;margin-bottom:18px}
+.lvl-card{background:#0d1017;border:1.5px solid #1e2535;border-radius:12px;
+  padding:14px 44px 14px 16px;margin-bottom:10px;cursor:pointer;
+  transition:border-color 0.18s,background 0.18s;position:relative;
+  -webkit-tap-highlight-color:transparent}
+.lvl-card:hover,.lvl-card:active{border-color:var(--blue);background:#0a1020}
+.lvl-card-top{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.lvl-name{font-size:13px;font-weight:700;color:var(--text)}
+.lvl-badge{font-size:8px;font-weight:700;letter-spacing:0.10em;padding:2px 7px;
+  border-radius:10px;text-transform:uppercase;white-space:nowrap}
+.lvl-badge-1{background:#041408;color:var(--lcd-green);border:1px solid #1a4020}
+.lvl-badge-2{background:#160f00;color:var(--orange);border:1px solid #3a2800}
+.lvl-badge-3{background:#160404;color:var(--alarm);border:1px solid #3a1010}
+.lvl-desc{font-size:11px;color:#9a9890;line-height:1.5}
+.lvl-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:#2a3040;font-size:20px;transition:color 0.18s;line-height:1}
+.lvl-card:hover .lvl-arrow{color:var(--blue)}
+
+/* Scenario mission card elements */
+.scen-back-btn{font-size:9px;color:#333;background:none;border:none;cursor:pointer;
+  padding:0 0 6px 0;letter-spacing:0.05em;display:block}
+.scen-back-btn:hover{color:#666}
+.scen-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.scen-badge{font-size:8px;font-weight:700;letter-spacing:0.10em;padding:2px 7px;
+  border-radius:10px;text-transform:uppercase}
+.scen-badge-2{color:var(--orange);background:#160f00;border:1px solid #3a2800}
+.scen-badge-3{color:var(--alarm);background:#160404;border:1px solid #3a1010}
+.scen-vitals{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.scen-vital{background:#080c12;border:1px solid #1a2030;border-radius:6px;padding:4px 8px}
+.scen-vital-k{font-size:7px;color:#3a4a5a;text-transform:uppercase;letter-spacing:0.08em}
+.scen-vital-v{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--orange);margin-top:1px}
+.scen-text{font-size:11px;color:#9a9890;line-height:1.5;margin-bottom:8px}
+
+/* Level-complete card */
+.lc-wrap{text-align:center;padding:10px 0 4px}
+.lc-icon{font-size:26px;margin-bottom:6px}
+.lc-title{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:3px}
+.lc-sub{font-size:11px;color:#555;margin-bottom:10px}
+.lc-btns{display:flex;gap:8px;justify-content:center}
+.lc-btn{padding:7px 14px;border-radius:8px;font-size:11px;font-weight:700;
+  letter-spacing:0.06em;cursor:pointer;text-transform:uppercase;border:1px solid}
+.lc-btn-next{background:#041520;border-color:var(--blue);color:var(--blue)}
+.lc-btn-sel{background:#0d0f12;border-color:#333;color:#555}
 </style>
 </head>
 <body>
 
 <div class="hdr">
   <div class="hdr-left">
-    <a class="back-btn" href="javascript:history.back()">← Back</a>
+    <a class="back-btn" href="index.html">← Back</a>
     <div>
       <div class="hdr-title">Ventilator Simulator</div>
       <div class="hdr-sub">Interactive Reference — EDU ONLY</div>
     </div>
   </div>
+  <button onclick="openLevelSelect()" style="background:none;border:1px solid #2a3a5a;color:#4a6a9a;padding:4px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;letter-spacing:0.06em">LEVELS</button>
+  <button id="mute-btn" onclick="toggleMute()" title="Toggle sound" style="background:none;border:1px solid #333;color:#888;padding:4px 9px;border-radius:6px;font-size:14px;cursor:pointer;margin-right:6px;line-height:1">🔊</button>
   <span class="sim-badge">EDU ONLY</span>
 </div>
 
@@ -1238,18 +1292,18 @@ document.getElementById('drawer').addEventListener('touchend',function(e){if(e.c
 var STAGE_DEFS=[
   {
     name:'Stage 1 — Volume Basics',
-    hint:'Rate and Tidal Volume are your only tools right now. Dial them in.',
+    hint:'Rate and Tidal Volume are your only tools right now. Adjust Rate to 16 and leave Tidal Volume at 500.',
     available:['rate','vt'],
     availModes:['ac'], availBT:['volume'],
     targets:[
-      {key:'rate',val:12,label:'Rate',unit:'bpm'},
+      {key:'rate',val:16,label:'Rate',unit:'bpm'},
       {key:'vt',  val:500,label:'Tidal Vol',unit:'mL'}
     ],
     quiz:{
-      q:'At Rate 12 bpm and Tidal Volume 500 mL, what is the Minute Ventilation?',
-      choices:['3 L/min','6 L/min','9 L/min','12 L/min'],
-      correct:1,
-      exp:'<strong>MV = Rate × Vt = 12 × 0.5 L = 6 L/min.</strong> Normal resting MV is 5–8 L/min. CO₂ clearance is proportional to MV — doubling the rate or Vt doubles CO₂ removal.'
+      q:'At Rate 16 bpm and Tidal Volume 500 mL, what is the Minute Ventilation?',
+      choices:['4 L/min','6 L/min','8 L/min','12 L/min'],
+      correct:2,
+      exp:'<strong>MV = Rate × Vt = 16 × 0.5 L = 8 L/min.</strong> Normal resting MV is 5–8 L/min. CO₂ clearance is directly proportional to MV — double the rate or Vt and you double CO₂ removal.'
     },
     unlock:'🔓 <strong>Inspiratory Time</strong> unlocked — control the duration of each breath.'
   },
@@ -1365,65 +1419,192 @@ var STAGE_DEFS=[
   }
 ];
 
+// ── LEVEL SYSTEM ──────────────────────────────────────────────
+var gameLevel=0;     // 0=selecting, 1=tutorial, 2=clinical, 3=advanced
+var scenarioIdx=0;   // which scenario within L2 or L3
+var _autoTimer=null; // auto-progress countdown handle
+
+var SCENARIO_LEVELS={
+  2:[
+    // ─── L2 S1 ────────────────────────────────────────────────
+    { name:'Hypercapnia — Increase Minute Ventilation',
+      badge:'L2 · Scenario 1 of 4', badgeCls:'scen-badge-2',
+      scenario:'45-year-old post-op patient, not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. Oxygenation adequate. Increase minute ventilation to correct the respiratory acidosis.',
+      vitals:[{k:'SpO₂',v:'93%'},{k:'EtCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'HR',v:'102'}],
+      setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'rate',val:16,label:'Rate',unit:'bpm'}],
+      quiz:{
+        q:'After changing Rate to 16 with Vt 450 mL, what is the Minute Ventilation?',
+        choices:['4.5 L/min','6.0 L/min','7.2 L/min','9.0 L/min'],
+        correct:2,
+        exp:'<strong>MV = Rate × Vt = 16 × 0.45 = 7.2 L/min.</strong> Previously 10 × 0.45 = 4.5 L/min — nearly doubled. Higher MV blows off more CO₂, correcting the respiratory acidosis.'
+      },
+      unlock:'✓ Good call. Higher rate increases MV and CO₂ clearance. Next scenario loading.'
+    },
+    // ─── L2 S2 ────────────────────────────────────────────────
+    { name:'Hypoxemia — Recruit with PEEP',
+      badge:'L2 · Scenario 2 of 4', badgeCls:'scen-badge-2',
+      scenario:'62-year-old ARDS patient. Despite FiO₂ 60%, SpO₂ remains 85%. CXR shows bilateral infiltrates. Increase PEEP to recruit collapsed alveoli.',
+      vitals:[{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'HR',v:'118'}],
+      setup:{mode:'ac',bt:'volume',rate:16,vt:400,it:1.0,peep:3,pc:15,ps:10,fio2:60,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'peep',val:10,label:'PEEP',unit:'cmH₂O'}],
+      quiz:{
+        q:'In ARDS, how does PEEP primarily improve oxygenation?',
+        choices:['Increases rate of CO₂ elimination','Recruits collapsed alveoli, increasing FRC','Reduces tidal volume delivered per breath','Decreases peak inspiratory pressure'],
+        correct:1,
+        exp:'<strong>PEEP holds alveoli open at end-expiration</strong>, recruiting collapsed lung units and increasing functional residual capacity (FRC). This reduces intrapulmonary shunt and improves V/Q matching — directly raising PaO₂ without increasing FiO₂.'
+      },
+      unlock:'✓ Correct — PEEP recruits, FRC rises, shunt falls. Next scenario.'
+    },
+    // ─── L2 S3 ────────────────────────────────────────────────
+    { name:'Hi-Pressure Alarm — Fix the Limit',
+      badge:'L2 · Scenario 3 of 4', badgeCls:'scen-badge-2',
+      scenario:'Post-intubation. Hi-Pressure alarm fires on every single breath at the same pressure (30 cmH₂O). Breath sounds equal bilaterally, no secretions. The alarm limit is simply set too low — correct it.',
+      vitals:[{k:'SpO₂',v:'98%'},{k:'PIP',v:'30 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'88'}],
+      setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:25,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'hipres',val:40,label:'Hi Pres Limit',unit:'cmH₂O'}],
+      quiz:{
+        q:'The Hi-Pressure alarm fires at the exact same pressure every breath. This most likely means:',
+        choices:['A tension pneumothorax is developing','A mucus plug is obstructing the airway','The alarm limit is set at or below the patient\'s normal PIP','Auto-PEEP is elevating circuit pressure'],
+        correct:2,
+        exp:'When the alarm fires at the <strong>exact same pressure every breath</strong>, the limit is at or below normal PIP. Secretions, bronchospasm, or pneumothorax cause <em>escalating or variable</em> pressures. Rule: set Hi Pres 5–10 cmH₂O above the patient\'s normal PIP.'
+      },
+      unlock:'✓ Hi Pres alarm corrected. Set this on every intubation. Next scenario.'
+    },
+    // ─── L2 S4 ────────────────────────────────────────────────
+    { name:'COPD — Allow Adequate Exhalation',
+      badge:'L2 · Scenario 4 of 4', badgeCls:'scen-badge-2',
+      scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. Flow-time curve shows expiratory flow hasn\'t returned to zero before the next breath — breath stacking (auto-PEEP). Decrease rate to allow full exhalation.',
+      vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'I:E',v:'1 : 2.3'},{k:'HR',v:'112'}],
+      setup:{mode:'ac',bt:'volume',rate:18,vt:500,it:1.0,peep:0,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'rate',val:10,label:'Rate',unit:'bpm'}],
+      quiz:{
+        q:'In a patient with COPD on AC mode, which waveform finding confirms breath stacking (auto-PEEP)?',
+        choices:['A spike at the start of the inspiratory pressure waveform','Expiratory flow fails to return to zero before the next breath begins','Irregular tidal volumes breath to breath','Elevated plateau pressure above 30 cmH₂O'],
+        correct:1,
+        exp:'<strong>Expiratory flow failing to return to baseline</strong> means the lungs haven\'t fully emptied — trapped gas raises intrinsic PEEP (auto-PEEP). In COPD, target I:E ≥ 1:4 to 1:5. Reducing rate lengthens the expiratory window without changing Vt.'
+      },
+      unlock:'✓ Lower rate → longer expiratory time → no more breath stacking. Level 2 complete!'
+    }
+  ],
+
+  3:[
+    // ─── L3 S1 ────────────────────────────────────────────────
+    { name:'ARDSnet Lung-Protective Ventilation',
+      badge:'L3 · Scenario 1 of 4', badgeCls:'scen-badge-3',
+      scenario:'32-year-old ARDS patient, IBW 70 kg. Current Vt 700 mL (10 mL/kg), Pplat 34 cmH₂O — above the ARDSnet 30 limit. Implement lung-protective settings: Vt 6 mL/kg IBW (400 mL), increase Rate to maintain MV, PEEP to 10.',
+      vitals:[{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'pH',v:'7.32'},{k:'FiO₂',v:'60%'}],
+      setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'vt',val:400,label:'Tidal Vol',unit:'mL'},{key:'rate',val:20,label:'Rate',unit:'bpm'},{key:'peep',val:10,label:'PEEP',unit:'cmH₂O'}],
+      quiz:{
+        q:'The ARMA trial (ARDSnet 2000) demonstrated mortality benefit with Vt of:',
+        choices:['4 mL/kg IBW — smaller is always safer','6 mL/kg IBW — proven 22% relative mortality reduction','8 mL/kg IBW — current standard for all ICU patients','10 mL/kg IBW — approximates normal tidal breathing'],
+        correct:1,
+        exp:'The landmark ARMA trial showed <strong>6 mL/kg IBW reduces 28-day mortality by ~22%</strong> vs 12 mL/kg. IBW (not actual weight) is used because lung size correlates with height, not obesity. Target Pplat ≤ 30 cmH₂O.'
+      },
+      unlock:'✓ ARDSnet protocol applied. 3 parameters, one framework. Next scenario.'
+    },
+    // ─── L3 S2 ────────────────────────────────────────────────
+    { name:'Weaning — Transition to SIMV',
+      badge:'L3 · Scenario 2 of 4', badgeCls:'scen-badge-3',
+      scenario:'Day 4 post-op respiratory failure. Patient awake, initiating spontaneous breaths, meeting weaning criteria. Physician orders: transition from AC to SIMV Rate 10 with Pressure Support 8 to begin liberation.',
+      vitals:[{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
+      setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'mode',val:'simv',label:'Mode',unit:''},{key:'rate',val:10,label:'Rate',unit:'bpm'},{key:'ps',val:8,label:'Press Supp',unit:'cmH₂O'}],
+      quiz:{
+        q:'In SIMV at Rate 10, the patient breathes 22 total times/min. What are the extra 12 breaths?',
+        choices:['Mandatory breaths triggered early by the patient\'s effort','Patient-initiated breaths augmented by pressure support only','Completely unsupported spontaneous breaths — patient does all the work','Additional pressure-controlled breaths at the set PC level'],
+        correct:1,
+        exp:'SIMV delivers <strong>10 mandatory breaths</strong> (volume-targeted). The extra 12 are spontaneous breaths between mandatory windows — each augmented by <strong>PS 8 cmH₂O</strong> above PEEP. This reduces patient work of breathing during the weaning transition.'
+      },
+      unlock:'✓ SIMV + PS is the classic weaning bridge. Next scenario.'
+    },
+    // ─── L3 S3 ────────────────────────────────────────────────
+    { name:'Pressure Control — Limit Barotrauma Risk',
+      badge:'L3 · Scenario 3 of 4', badgeCls:'scen-badge-3',
+      scenario:'Asthmatic patient post-intubation. Dynamic obstruction causing fluctuating PIP 32–54 cmH₂O on volume control. Physician orders: switch to Pressure Control at PC 22 cmH₂O, IT 1.0s to cap peak airway pressure.',
+      vitals:[{k:'SpO₂',v:'96%'},{k:'PIP range',v:'32–54 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'104'}],
+      setup:{mode:'ac',bt:'volume',rate:14,vt:550,it:0.8,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'breathtype',val:'pressure',label:'Breath Type',unit:''},{key:'pc',val:22,label:'Pres Ctrl',unit:'cmH₂O'},{key:'it',val:1.0,label:'Insp Time',unit:'s'}],
+      quiz:{
+        q:'Switched to PC 22 cmH₂O. Compliance then drops acutely. What happens to delivered Vt?',
+        choices:['Stays the same — the vent compensates automatically','Decreases — same ΔP now moves less volume through stiffer lungs','Increases — stiffer lungs store more energy per breath','The vent alarms and switches to volume control automatically'],
+        correct:1,
+        exp:'Pressure control delivers a <strong>set pressure, not a set volume</strong>. When compliance drops, the same ΔP (PC − PEEP) moves less volume — Vt falls. This is the critical difference from volume control. Always monitor delivered Vt when using pressure-targeted modes.'
+      },
+      unlock:'✓ Pressure control caps PIP — trade-off is variable Vt. Next scenario.'
+    },
+    // ─── L3 S4 ────────────────────────────────────────────────
+    { name:'ARDS Day 2 — Refractory Hypoxemia',
+      badge:'L3 · Scenario 4 of 4', badgeCls:'scen-badge-3',
+      scenario:'ARDS day 2. Already on lung-protective settings. Despite PEEP 8 and FiO₂ 70%, SpO₂ is 82% (P/F ≈ 59 — severe ARDS). Per ARDSnet FiO₂/PEEP table, escalate to FiO₂ 90%, PEEP 14.',
+      vitals:[{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
+      setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'fio2',val:90,label:'FiO₂',unit:'%'},{key:'peep',val:14,label:'PEEP',unit:'cmH₂O'}],
+      quiz:{
+        q:'The Berlin definition classifies severe ARDS as P/F ratio:',
+        choices:['< 300 mmHg on PEEP ≥ 5 — mild ARDS','< 200 mmHg on PEEP ≥ 5 — moderate ARDS','< 100 mmHg on PEEP ≥ 5 — severe ARDS','< 50 mmHg on any PEEP level'],
+        correct:2,
+        exp:'<strong>Berlin criteria:</strong> Mild ARDS = P/F 200–300; Moderate = P/F 100–200; Severe = P/F < 100 — all with PEEP/CPAP ≥ 5 cmH₂O. This patient\'s P/F ≈ 59 places them in severe ARDS. High PEEP + high FiO₂ strategies, prone positioning, and ECMO referral are considerations.'
+      },
+      unlock:'🎓 Level 3 complete. Severe ARDS management — one of the hardest scenarios in critical care.'
+    }
+  ]
+};
+
 var gameStage=0;
 var quizAnsweredCorrect=false;
 
 // ── GAME HELPERS ──────────────────────────────────────────────
 function curStage(){ return STAGE_DEFS[gameStage]||null; }
-function gameDone(){ return gameStage>=STAGE_DEFS.length; }
+function curScenario(){
+  var sc=SCENARIO_LEVELS[gameLevel]; return sc?sc[scenarioIdx]||null:null;
+}
+// Unified task getter: returns current stage (L1) or scenario (L2/L3)
+function curTask(){ return gameLevel<=1 ? curStage() : curScenario(); }
+
+function gameDone(){
+  if(gameLevel===1) return gameStage>=STAGE_DEFS.length;
+  if(gameLevel>=2){
+    var sc=SCENARIO_LEVELS[gameLevel]; return scenarioIdx>=(sc?sc.length:0);
+  }
+  return false;
+}
 
 function isControlUnlocked(key){
-  if(gameDone()) return true;
+  if(gameLevel>=2) return true;       // L2/L3: all controls free
+  if(gameDone())   return true;
   return curStage().available.indexOf(key)>=0;
 }
 function isModeUnlocked(m){
-  if(gameDone()) return true;
+  if(gameLevel>=2) return true;
+  if(gameDone())   return true;
   return curStage().availModes.indexOf(m)>=0;
 }
 function isBTUnlocked(bt){
-  if(gameDone()) return true;
+  if(gameLevel>=2) return true;
+  if(gameDone())   return true;
   return curStage().availBT.indexOf(bt)>=0;
 }
 
 function checkTarget(t){
-  if(t.key==='mode')      return ventMode===t.val;
-  if(t.key==='breathtype')return breathType===t.val;
+  if(t.key==='mode')       return ventMode===t.val;
+  if(t.key==='breathtype') return breathType===t.val;
   var c=vals[t.key]; if(!c) return false;
+  if(t.op==='>=') return c.v>=t.val-0.01;
+  if(t.op==='<=') return c.v<=t.val+0.01;
   return Math.abs(c.v-t.val)<0.051;
 }
 function allTargetsMet(){
   if(gameDone()) return false;
-  return curStage().targets.every(function(t){return checkTarget(t);});
+  var task=curTask(); if(!task) return false;
+  return task.targets.every(function(t){return checkTarget(t);});
 }
 
-// ── MISSION CARD RENDER ───────────────────────────────────────
-function renderMissionCard(){
-  var bar=document.getElementById('mission-bar');
-  if(!bar) return;
-
-  if(gameDone()){
-    bar.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
-      +'<span style="font-size:20px">🎓</span>'
-      +'<div><div style="font-size:10px;color:var(--blue);font-weight:700;letter-spacing:0.1em">CURRICULUM COMPLETE</div>'
-      +'<div style="font-size:11px;color:#555;margin-top:2px">All features unlocked. Explore freely.</div></div></div>';
-    return;
-  }
-
-  var s=curStage();
-  var total=STAGE_DEFS.length;
-
-  // Progress bar
-  var prog='<div class="mission-progress">';
-  for(var i=0;i<total;i++){
-    var dc=i<gameStage?'done':(i===gameStage?'active':'');
-    prog+='<div class="prog-dot '+dc+'"></div>';
-    if(i<total-1) prog+='<div class="prog-line '+(i<gameStage?'done':'')+'"></div>';
-  }
-  prog+='</div>';
-
-  // Targets
+// ── SHARED TARGET BADGES HTML ─────────────────────────────────
+function renderTargetBadges(targets){
   var tgts='<div class="mission-targets">';
-  s.targets.forEach(function(t){
+  targets.forEach(function(t){
     var met=checkTarget(t);
     var dv=t.key==='mode'?t.val.toUpperCase():(t.key==='breathtype'?t.val.toUpperCase():(t.val+(t.unit?' '+t.unit:'')));
     tgts+='<div class="mtgt'+(met?' hit':'')+'"><div>'
@@ -1431,22 +1612,96 @@ function renderMissionCard(){
       +'<div class="mtgt-val">'+(met?'<span class="mtgt-check">✓</span> ':'')+dv+'</div>'
       +'</div></div>';
   });
-  tgts+='</div>';
+  return tgts+'</div>';
+}
 
-  var ready=allTargetsMet();
-  var cta='<button class="mission-cta visible '+(ready?'ready':'wait')+'" onclick="'+(ready?'openQuiz()':'')+'">'
-    +(ready?'✓ ALL SET — ANSWER THE QUESTION':'Match targets above to unlock question')+'</button>';
+// ── MISSION CARD RENDER ───────────────────────────────────────
+function renderMissionCard(){
+  var bar=document.getElementById('mission-bar');
+  if(!bar) return;
 
-  bar.innerHTML=prog
-    +'<div class="mission-stage">'+s.name+'</div>'
-    +'<div class="mission-hint">'+s.hint+'</div>'
-    +tgts+cta;
+  // ── LEVEL 0: no level selected yet ───────────────────────
+  if(gameLevel===0){
+    bar.innerHTML='';
+    return;
+  }
+
+  // ── LEVEL COMPLETE STATE ──────────────────────────────────
+  if(gameDone()){
+    if(gameLevel===1){
+      bar.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
+        +'<span style="font-size:20px">🎓</span>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:10px;color:var(--blue);font-weight:700;letter-spacing:0.1em">LEVEL 1 COMPLETE</div>'
+        +'<div style="font-size:11px;color:#555;margin-top:2px" id="auto-progress-msg">All controls unlocked. Starting Level 2…</div>'
+        +'</div>'
+        +'<button onclick="cancelAuto()" style="background:none;border:1px solid #2a2a2a;color:#333;padding:4px 9px;border-radius:6px;font-size:10px;cursor:pointer;white-space:nowrap">Stay here</button>'
+        +'</div>';
+    } else {
+      var nextLvl=gameLevel<3?gameLevel+1:0;
+      var nextTxt=gameLevel<3?'Try Level '+(gameLevel+1):'Level Select';
+      bar.innerHTML='<div class="lc-wrap">'
+        +'<div class="lc-icon">'+(gameLevel===2?'⭐':'🏆')+'</div>'
+        +'<div class="lc-title" style="color:'+(gameLevel===2?'var(--orange)':'var(--alarm)')+'">Level '+gameLevel+' Complete</div>'
+        +'<div class="lc-sub">'+(gameLevel===2?'All 4 clinical scenarios solved.':'Advanced management mastered — all 4 cases.')+'</div>'
+        +'<div class="lc-btns">'
+        +(gameLevel<3?'<button class="lc-btn lc-btn-next" onclick="startLevel('+nextLvl+')">'+nextTxt+' →</button>':'')
+        +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
+        +'</div></div>';
+    }
+    return;
+  }
+
+  // ── LEVEL 1: Tutorial ─────────────────────────────────────
+  if(gameLevel===1){
+    var s=curStage();
+    var total=STAGE_DEFS.length;
+    var prog='<div class="mission-progress">';
+    for(var i=0;i<total;i++){
+      var dc=i<gameStage?'done':(i===gameStage?'active':'');
+      prog+='<div class="prog-dot '+dc+'"></div>';
+      if(i<total-1) prog+='<div class="prog-line '+(i<gameStage?'done':'')+'"></div>';
+    }
+    prog+='</div>';
+    var ready=allTargetsMet();
+    var cta='<button class="mission-cta visible '+(ready?'ready':'wait')+'" onclick="'+(ready?'openQuiz()':'')+'">'
+      +(ready?'✓ ALL SET — ANSWER THE QUESTION':'Match targets above to unlock question')+'</button>';
+    bar.innerHTML=prog
+      +'<div class="mission-stage">'+s.name+'</div>'
+      +'<div class="mission-hint">'+s.hint+'</div>'
+      +renderTargetBadges(s.targets)+cta;
+    return;
+  }
+
+  // ── LEVELS 2 & 3: Clinical Scenarios ─────────────────────
+  var sc=curScenario();
+  if(!sc) return;
+  var ready2=allTargetsMet();
+
+  var vitalsHtml='<div class="scen-vitals">';
+  sc.vitals.forEach(function(v){
+    vitalsHtml+='<div class="scen-vital"><div class="scen-vital-k">'+v.k+'</div><div class="scen-vital-v">'+v.v+'</div></div>';
+  });
+  vitalsHtml+='</div>';
+
+  var cta2='<button class="mission-cta visible '+(ready2?'ready':'wait')+'" onclick="'+(ready2?'openQuiz()':'')+'">'
+    +(ready2?'✓ SETTINGS CORRECT — ANSWER THE QUESTION':'Adjust settings to match targets above')+'</button>';
+
+  bar.innerHTML='<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
+    +'<div class="scen-header">'
+    +'<div class="mission-stage">'+sc.name+'</div>'
+    +'<span class="scen-badge '+sc.badgeCls+'">'+sc.badge+'</span>'
+    +'</div>'
+    +'<div class="scen-text">'+sc.scenario+'</div>'
+    +vitalsHtml
+    +renderTargetBadges(sc.targets)+cta2;
 }
 
 // ── QUIZ ──────────────────────────────────────────────────────
 function openQuiz(){
   if(!allTargetsMet()) return;
-  var s=curStage();
+  var s=curTask();
+  if(!s) return;
   var q=s.quiz;
   quizAnsweredCorrect=false;
 
@@ -1468,7 +1723,7 @@ function openQuiz(){
 function submitAnswer(idx){
   var btns=document.querySelectorAll('.quiz-btn');
   if(!btns.length||btns[0].classList.contains('disabled')) return;
-  var correct=curStage().quiz.correct;
+  var correct=curTask().quiz.correct;
   quizAnsweredCorrect=(idx===correct);
   btns.forEach(function(b,i){
     b.classList.add('disabled');
@@ -1477,7 +1732,12 @@ function submitAnswer(idx){
     else                 b.classList.add('reveal');
   });
   document.getElementById('qexp').style.display='block';
-  if(quizAnsweredCorrect) document.getElementById('qunlock').style.display='block';
+  if(quizAnsweredCorrect){
+    document.getElementById('qunlock').style.display='block';
+    sfxCorrect();
+  } else {
+    sfxWrong();
+  }
   var cb=document.getElementById('quiz-continue');
   cb.style.display='block';
   cb.textContent=quizAnsweredCorrect?'Unlock next stage →':'Got it — continue →';
@@ -1489,9 +1749,44 @@ function closeQuiz(){
 
 function advanceStage(){
   closeQuiz();
-  if(gameStage<STAGE_DEFS.length) gameStage++;
+  if(gameLevel===1){
+    if(gameStage<STAGE_DEFS.length) gameStage++;
+  } else if(gameLevel>=2){
+    var sc=SCENARIO_LEVELS[gameLevel];
+    if(scenarioIdx<sc.length) scenarioIdx++;
+    if(!gameDone()) loadScenario(sc[scenarioIdx]);
+  }
+  if(gameDone()){
+    sfxComplete();
+    // Auto-progress L1 → L2 after countdown
+    if(gameLevel===1) startAutoProgress();
+  } else {
+    sfxUnlock();
+  }
   renderMissionCard();
   updateUI();
+}
+
+function startAutoProgress(){
+  if(_autoTimer) clearTimeout(_autoTimer);
+  var secs=4;
+  function tick(){
+    var msg=document.getElementById('auto-progress-msg');
+    if(!msg){ _autoTimer=null; return; }
+    if(secs<=0){ startLevel(2); return; }
+    msg.textContent='All controls unlocked. Starting Level 2 in '+secs+'…';
+    secs--;
+    _autoTimer=setTimeout(tick,1000);
+  }
+  tick();
+}
+
+function cancelAuto(){
+  if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; }
+  var msg=document.getElementById('auto-progress-msg');
+  if(msg) msg.textContent='All features unlocked. Explore freely, or tap LEVELS to continue.';
+  var btn=document.querySelector('[onclick="cancelAuto()"]');
+  if(btn) btn.style.display='none';
 }
 
 // ── HOOK GAME LOCKS INTO updateUI ────────────────────────────
@@ -1522,9 +1817,9 @@ updateUI=function(){
   if(bv) bv.classList.toggle('game-locked',!isBTUnlocked('volume'));
   if(bp) bp.classList.toggle('game-locked',!isBTUnlocked('pressure'));
 
-  // FiO2 knob (unlocked only on game completion)
+  // FiO2 knob: locked in L1 until completion; always free in L2/L3
   var fw=document.getElementById('cw-fio2');
-  if(fw) fw.classList.toggle('game-locked',!gameDone());
+  if(fw) fw.classList.toggle('game-locked', gameLevel===1 && !gameDone());
 
   // Refresh mission card
   renderMissionCard();
@@ -1534,11 +1829,13 @@ updateUI=function(){
 var _origSetMode=setMode;
 setMode=function(m){
   if(!isModeUnlocked(m)) return;
+  sfxModeBtn();
   _origSetMode(m);
 };
 var _origSetBT=setBreathType;
 setBreathType=function(bt){
   if(!isBTUnlocked(bt)) return;
+  sfxModeBtn();
   _origSetBT(bt);
 };
 
@@ -1546,12 +1843,188 @@ setBreathType=function(bt){
 var _origAdj=adj;
 adj=function(key,delta){
   if(!isControlUnlocked(key)) return;
+  if(delta>0) sfxKnobUp(); else sfxKnobDown();
   _origAdj(key,delta);
 };
 
+// ── SCENARIO LOADING ──────────────────────────────────────────
+function loadScenario(s){
+  var su=s.setup;
+  ventMode=su.mode;
+  breathType=su.bt;
+  var keys=['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'];
+  keys.forEach(function(k){ if(su[k]!==undefined) vals[k].v=su[k]; });
+  enforceITLimit();
+  simTime=0; pressureHistory=[];
+  keys.forEach(function(k){ updateKnob(k); });
+  updateUI();
+}
+
+// ── LEVEL MANAGEMENT ──────────────────────────────────────────
+function startLevel(n){
+  gameLevel=n;
+  var ov=document.getElementById('lvlsel-overlay');
+  if(ov) ov.classList.add('hidden');
+
+  if(n===1){
+    // Reset Tutorial to defaults
+    gameStage=0;
+    ventMode='ac'; breathType='volume';
+    vals.rate.v=12; vals.vt.v=500; vals.it.v=1.0; vals.peep.v=0;
+    vals.fio2.v=40; vals.pc.v=15; vals.ps.v=10; vals.sens.v=3;
+    vals.hipres.v=40; vals.lowpres.v=10; vals.lowmv.v=3; vals.apnea.v=20;
+    enforceITLimit();
+    ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(function(k){ updateKnob(k); });
+    simTime=0; pressureHistory=[];
+    updateUI();
+  } else {
+    scenarioIdx=0;
+    loadScenario(SCENARIO_LEVELS[n][0]);
+  }
+}
+
+function openLevelSelect(){
+  var ov=document.getElementById('lvlsel-overlay');
+  if(ov) ov.classList.remove('hidden');
+  gameLevel=0;
+  renderMissionCard();
+}
+
 // ── INIT GAME ─────────────────────────────────────────────────
-renderMissionCard();
+// Show level select on first load
+openLevelSelect();
+
+// ════════════════════════════════════════════════════════════════
+// AUDIO ENGINE — button sounds + event SFX
+// ════════════════════════════════════════════════════════════════
+var _ac=null, audioMuted=false;
+
+function getAC(){
+  if(!_ac) _ac=new (window.AudioContext||window.webkitAudioContext)();
+  if(_ac.state==='suspended') _ac.resume();
+  return _ac;
+}
+
+// ── SINGLE NOTE ──────────────────────────────────────────────
+function playNote(freq,durS,startT,vol,type){
+  if(audioMuted||!freq) return;
+  var ac=getAC();
+  var osc=ac.createOscillator();
+  var gain=ac.createGain();
+  osc.type=type||'square';
+  osc.frequency.setValueAtTime(freq,startT);
+  gain.gain.setValueAtTime(0,startT);
+  gain.gain.linearRampToValueAtTime(vol||0.15,startT+0.004);
+  gain.gain.setValueAtTime(vol||0.15,startT+durS*0.7);
+  gain.gain.linearRampToValueAtTime(0,startT+durS);
+  osc.connect(gain);
+  gain.connect(ac.destination);
+  osc.start(startT);
+  osc.stop(startT+durS+0.01);
+}
+
+// ── BUTTON SOUNDS ─────────────────────────────────────────────
+// Knob increment (+) — crisp high tick
+function sfxKnobUp(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime;
+  playNote(1200,0.045,t,0.10,'square');
+}
+
+// Knob decrement (−) — slightly lower tick
+function sfxKnobDown(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime;
+  playNote(900,0.045,t,0.09,'square');
+}
+
+// Mode / breath-type button press — soft blip
+function sfxModeBtn(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime;
+  playNote(660,0.07,t,  0.11,'square');
+  playNote(880,0.05,t+0.04,0.07,'square');
+}
+
+// ── EVENT SFX ─────────────────────────────────────────────────
+// Correct answer — rising C4-E4-G4-C5 arpeggio
+function sfxCorrect(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime+0.02;
+  [[262,0],[330,0.08],[392,0.16],[523,0.24]].forEach(function(n){
+    playNote(n[0],0.18,t+n[1],0.18,'square');
+  });
+}
+
+// Wrong answer — descending bwomp
+function sfxWrong(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime+0.02;
+  playNote(233,0.22,t,      0.18,'sawtooth');
+  playNote(175,0.30,t+0.18, 0.18,'sawtooth');
+}
+
+// Stage unlock — 5-note ascending fanfare
+function sfxUnlock(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime+0.02;
+  [[262,0],[330,0.10],[392,0.20],[523,0.30],[659,0.42]].forEach(function(n){
+    playNote(n[0],0.12,t+n[1],0.20,'square');
+  });
+}
+
+// Game complete — full victory fanfare
+function sfxComplete(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime+0.05;
+  [[262,0],[330,0.1],[392,0.2],[523,0.3],[659,0.4],[784,0.5]].forEach(function(n){
+    playNote(n[0],0.14,t+n[1],0.20,'square');
+  });
+  var c1=t+0.75;
+  [523,659,784].forEach(function(f){ playNote(f,0.35,c1,0.18,'square'); });
+  var c2=c1+0.45;
+  [523,659,784,1047].forEach(function(f){ playNote(f,0.55,c2,0.20,'square'); });
+}
+
+// ── MUTE TOGGLE ───────────────────────────────────────────────
+function toggleMute(){
+  audioMuted=!audioMuted;
+  var btn=document.getElementById('mute-btn');
+  if(btn) btn.textContent=audioMuted?'🔇':'🔊';
+}
 </script>
+<!-- LEVEL SELECT OVERLAY -->
+<div class="lvlsel-overlay" id="lvlsel-overlay">
+  <div class="lvlsel-inner">
+    <div class="lvlsel-title">Ventilator Simulator</div>
+    <div class="lvlsel-sub">Choose a difficulty level</div>
+    <div class="lvl-card" onclick="startLevel(1)">
+      <div class="lvl-card-top">
+        <div class="lvl-name">Level 1 — Tutorial</div>
+        <span class="lvl-badge lvl-badge-1">Beginner</span>
+      </div>
+      <div class="lvl-desc">Learn the controls step by step. Settings unlock progressively as you demonstrate each concept and answer a question.</div>
+      <span class="lvl-arrow">›</span>
+    </div>
+    <div class="lvl-card" onclick="startLevel(2)">
+      <div class="lvl-card-top">
+        <div class="lvl-name">Level 2 — Clinical Scenarios</div>
+        <span class="lvl-badge lvl-badge-2">Intermediate</span>
+      </div>
+      <div class="lvl-desc">4 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
+      <span class="lvl-arrow">›</span>
+    </div>
+    <div class="lvl-card" onclick="startLevel(3)">
+      <div class="lvl-card-top">
+        <div class="lvl-name">Level 3 — Advanced Management</div>
+        <span class="lvl-badge lvl-badge-3">Advanced</span>
+      </div>
+      <div class="lvl-desc">4 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
+      <span class="lvl-arrow">›</span>
+    </div>
+  </div>
+</div>
+
 <!-- QUIZ OVERLAY -->
 <div class="quiz-overlay" id="quiz-overlay">
   <div class="quiz-backdrop" onclick="closeQuiz()"></div>
