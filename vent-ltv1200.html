@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Ventilator Simulator — AMR KC</title>
+<style>
+:root{
+  --panel:#2b2f35;--case:#3a3f47;--lcd-bg:#0d1a0d;--lcd-green:#39ff5a;
+  --lcd-dim:#1a4a1a;--knob:#45494f;--knob-hi:#5a5f67;--knob-ind:#e8e0c8;
+  --alarm:#e63946;--blue:#4a9eff;--orange:#f4a261;--purple:#c4b5fd;
+  --text:#e8e4d8;--sub:#8a8880;--border:#3f4450;
+  --mono:'Courier New',Courier,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:#1a1c20;font-family:var(--sans);color:var(--text);overscroll-behavior:none}
+
+.hdr{background:#0d0f12;border-bottom:2px solid var(--alarm);padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.back-btn{background:none;border:1px solid #444;color:#aaa;padding:5px 10px;
+  border-radius:6px;font-size:12px;cursor:pointer;text-decoration:none;display:inline-block}
+.hdr-title{font-size:15px;font-weight:700;letter-spacing:0.04em}
+.hdr-sub{font-size:10px;color:#666;margin-top:1px}
+.sim-badge{background:var(--alarm);color:#fff;font-size:9px;font-weight:700;
+  padding:2px 7px;border-radius:10px;letter-spacing:0.06em}
+
+.case-wrap{max-width:580px;margin:14px auto;padding:0 10px 80px}
+.case{background:var(--case);border-radius:14px;padding:10px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.06)}
+.panel{background:var(--panel);border-radius:10px;padding:12px;border:1px solid #1a1e24}
+
+/* ── LIVE WAVEFORM CANVAS ── */
+.waveform-wrap{margin-bottom:12px;background:#080f08;border-radius:8px;
+  border:2px solid #0a120a;overflow:hidden;position:relative}
+.waveform-header{display:flex;align-items:center;justify-content:space-between;
+  padding:5px 10px 0;background:#080f08}
+.waveform-title{font-family:var(--mono);font-size:8px;color:#1a5a1a;letter-spacing:0.12em;text-transform:uppercase}
+.waveform-pip{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--lcd-green)}
+.waveform-pip-lbl{font-family:var(--mono);font-size:7px;color:#1a5a1a;margin-left:4px}
+.waveform-alarms{display:flex;gap:12px}
+.waveform-alarm-item{font-family:var(--mono);font-size:8px}
+.wa-hi{color:var(--alarm)}
+.wa-lo{color:var(--orange)}
+canvas#pip-canvas{display:block;width:100%;height:70px}
+
+/* ── LCD ── */
+.lcd{background:var(--lcd-bg);border-radius:8px;padding:10px 12px;margin-bottom:12px;
+  border:2px solid #0a120a;box-shadow:inset 0 2px 8px rgba(0,0,0,0.8)}
+.lcd-mode-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
+  padding-bottom:8px;border-bottom:1px solid #0f1f0f}
+.lcd-mode-main{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--lcd-green);letter-spacing:0.05em}
+.lcd-mode-sub{font-family:var(--mono);font-size:9px;color:#2a7a2a;margin-top:2px}
+.lcd-ie{font-family:var(--mono);font-size:12px;color:#2a6a2a;text-align:right}
+.lcd-ie-lbl{font-size:8px;color:var(--lcd-dim);letter-spacing:0.1em}
+.lcd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.lcd-cell{background:#080f08;border-radius:4px;padding:5px 7px;border:1px solid #0f1f0f;transition:opacity 0.2s}
+.lcd-lbl{font-family:var(--mono);font-size:7px;color:var(--lcd-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px}
+.lcd-val{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--lcd-green);line-height:1}
+.lcd-unit{font-size:8px;color:#2a6a2a}
+.lcd-cell.na{opacity:0.25}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{font-size:8px;font-weight:700;letter-spacing:0.12em;color:#555;
+  text-transform:uppercase;margin:12px 0 6px;padding-left:1px}
+.sec-lbl.red{color:#7a3535}
+
+/* ── MODE PANEL ── */
+.mode-panel{background:#1a1e24;border-radius:8px;padding:10px;margin-bottom:12px;border:1px solid #2a2e38}
+.mode-row{display:flex;gap:6px;margin-bottom:8px}
+.mode-row:last-child{margin-bottom:0}
+.mode-row-lbl{font-size:8px;color:#555;letter-spacing:0.1em;text-transform:uppercase;
+  width:54px;flex-shrink:0;display:flex;align-items:center}
+.mode-btn{flex:1;padding:8px 4px;border-radius:7px;border:1.5px solid #333;background:#252830;
+  color:#666;font-size:10px;font-weight:700;letter-spacing:0.04em;cursor:pointer;text-align:center;
+  transition:all 0.15s;line-height:1.3}
+.mode-btn:active{transform:scale(0.97)}
+.mode-btn.active-vol{border-color:var(--blue);background:#0d1a2e;color:var(--blue)}
+.mode-btn.active-pres{border-color:var(--orange);background:#1a100a;color:var(--orange)}
+.mode-btn.active-ac{border-color:var(--lcd-green);background:#0a1a0a;color:var(--lcd-green)}
+.mode-btn.active-simv{border-color:var(--purple);background:#150d2a;color:var(--purple)}
+.mode-btn.active-cpap{border-color:#fb923c;background:#1a0e05;color:#fb923c}
+.mode-btn.active-nppv{border-color:#38bdf8;background:#041520;color:#38bdf8}
+.mode-btn.disabled-bt{opacity:0.3;pointer-events:none}
+
+/* ── CONTROL GRID ── */
+.ctrl-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:4px}
+.ctrl-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:opacity 0.2s}
+.ctrl-wrap.dim{opacity:0.2;cursor:pointer}
+.knob-outer{width:46px;height:46px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,var(--knob-hi),var(--knob) 60%,#222);
+  border:2px solid #1a1d22;position:relative;
+  box-shadow:0 3px 8px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.08);transition:all 0.2s}
+.ctrl-wrap.dim .knob-outer{background:radial-gradient(circle at 35% 35%,#2a2d32,#1a1c20 60%,#0d0e10)}
+.knob-outer:active{transform:scale(0.95)}
+.knob-ind{width:3px;height:11px;background:var(--knob-ind);border-radius:2px;
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);transform-origin:bottom center;transition:transform 0.15s}
+.ctrl-wrap.dim .knob-ind{background:#333}
+.knob-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.knob-val-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--lcd-green);line-height:1}
+.knob-val-unit{font-family:var(--mono);font-size:6px;color:#2a6a2a;margin-top:1px}
+.ctrl-wrap.dim .knob-val{display:none}
+.dim-lock{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:14px;color:#333}
+.ctrl-wrap.dim .dim-lock{display:flex}
+.knob-lbl{font-size:7px;font-weight:600;color:#aaa;letter-spacing:0.04em;text-align:center;line-height:1.25}
+.ctrl-wrap.dim .knob-lbl{color:#444}
+.knob-adj{display:flex;gap:3px}
+.adj-btn{background:#2a2d33;border:1px solid #3a3d43;color:#888;width:20px;height:16px;
+  border-radius:3px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.adj-btn:active{background:#3a3d43}
+.ctrl-wrap.dim .adj-btn{opacity:0;pointer-events:none}
+
+/* ── PEEP ── */
+.peep-row{display:flex;align-items:center;gap:10px;background:#1a1e24;border-radius:8px;
+  padding:10px 14px;margin-bottom:4px;cursor:pointer;border:1px solid #2a2e38}
+.peep-knob{width:48px;height:48px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 35% 35%,#2a5a3a,#1a3a25 60%,#0a1a0f);
+  border:2px solid #1a3a25;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
+.peep-ind{width:3px;height:12px;background:var(--lcd-green);border-radius:2px;
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);transform-origin:bottom center}
+.peep-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.peep-val-num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--lcd-green)}
+.peep-val-unit{font-family:var(--mono);font-size:7px;color:#2a6a2a;margin-top:1px}
+.peep-info{flex:1}
+.peep-lbl{font-size:11px;font-weight:700;color:#aaa;letter-spacing:0.04em;margin-bottom:3px}
+.peep-sub{font-size:10px;color:#555;line-height:1.4}
+.peep-adj{display:flex;flex-direction:column;gap:4px;margin-left:auto}
+.peep-adj .adj-btn{width:28px;height:22px;font-size:13px}
+
+/* ── ALARMS ── */
+.alarm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.alarm-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.alarm-knob{width:40px;height:40px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#5a2525,#3a1515 60%,#1a0808);
+  border:2px solid #2a1010;position:relative;box-shadow:0 2px 6px rgba(0,0,0,0.5)}
+.alarm-knob:active{transform:scale(0.95)}
+.alarm-ind{width:3px;height:10px;background:var(--alarm);border-radius:2px;
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);transform-origin:bottom center}
+.alarm-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.alarm-val-num{font-family:var(--mono);font-size:10px;font-weight:700;color:#ff6b6b}
+.alarm-val-unit{font-family:var(--mono);font-size:6px;color:#8a3030;margin-top:1px}
+.alarm-lbl{font-size:7px;font-weight:600;color:#c05050;letter-spacing:0.03em;text-align:center;line-height:1.3}
+.alarm-adj .adj-btn{color:var(--alarm);background:#1a0808;border-color:#3a1010}
+
+/* ── FUNCTION BUTTONS ── */
+.fn-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:12px}
+.fn-btn{padding:9px 4px;border-radius:7px;border:2px solid #333;background:#1e2127;
+  color:#666;font-size:8px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;
+  cursor:pointer;text-align:center;line-height:1.4}
+.fn-btn:active{background:#2a2d35}
+.fn-btn.blue{border-color:#1a3a6a;color:var(--blue);background:#080d1a}
+.fn-btn.red{border-color:#4a1010;color:var(--alarm);background:#0d0404}
+.fn-btn.orange{border-color:#4a2a08;color:var(--orange);background:#0d0804}
+.fn-btn.green{border-color:#1a3a1a;color:var(--lcd-green);background:#040d04}
+
+/* ── STATUS ── */
+.status-row{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.led{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.led-green{background:var(--lcd-green);box-shadow:0 0 5px var(--lcd-green)}
+.led-blue{background:var(--blue);box-shadow:0 0 5px var(--blue)}
+.led-amber{background:var(--orange);box-shadow:0 0 5px var(--orange)}
+.led-lbl{font-size:8px;color:#555;letter-spacing:0.08em}
+
+/* ── DRAWER ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:100;
+  opacity:0;pointer-events:none;transition:opacity 0.2s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;bottom:0;left:0;right:0;max-width:580px;margin:0 auto;
+  background:#1e2127;border-radius:18px 18px 0 0;padding:0 0 32px;z-index:101;
+  transform:translateY(100%);transition:transform 0.28s cubic-bezier(0.25,0.8,0.25,1);
+  max-height:80vh;overflow-y:auto}
+.drawer.open{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;background:#444;border-radius:2px;margin:12px auto 0}
+.drawer-inner{padding:16px 20px 0}
+.drawer-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.1em;
+  text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-bottom:8px}
+.tag-control{background:#1a2a1a;color:var(--lcd-green);border:1px solid #1e4a1e}
+.tag-alarm{background:#2a1010;color:var(--alarm);border:1px solid #4a1a1a}
+.tag-button{background:#1a1e2a;color:var(--blue);border:1px solid #1a2a4a}
+.tag-inactive{background:#1a1a1a;color:#666;border:1px solid #333}
+.drawer-title{font-size:19px;font-weight:700;margin-bottom:3px}
+.drawer-range{font-family:var(--mono);font-size:11px;color:#555;margin-bottom:12px}
+.drawer-desc{font-size:14px;color:#ccc;line-height:1.6;margin-bottom:12px}
+.inactive-banner{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:12px 14px;
+  margin-bottom:12px;font-size:13px;color:#666;line-height:1.5}
+.inactive-banner strong{color:#888}
+.avail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.avail-cell{border-radius:7px;padding:8px 10px;border:1px solid #2a2a2a}
+.avail-cell.yes{background:#0a1a0a;border-color:#1a3a1a}
+.avail-cell.no{background:#111;border-color:#222}
+.avail-mode{font-size:9px;font-weight:700;letter-spacing:0.08em;color:#555;margin-bottom:2px}
+.avail-status{font-size:12px;font-weight:700}
+.avail-cell.yes .avail-status{color:var(--lcd-green)}
+.avail-cell.no .avail-status{color:#333}
+.avail-note{font-size:11px;color:#666;margin-top:4px;line-height:1.45}
+.detail-block{background:#15181d;border-radius:8px;padding:10px 12px;margin-bottom:8px;border-left:3px solid #333}
+.detail-lbl{font-size:9px;font-weight:700;letter-spacing:0.08em;color:#666;margin-bottom:3px}
+.detail-text{font-size:13px;color:#bbb;line-height:1.55}
+.pearl{background:#1a1e10;border:1px solid #2a3a10;border-radius:8px;padding:10px 12px;
+  font-size:12px;color:#a8c060;line-height:1.6;margin-bottom:4px}
+.pearl-lbl{font-size:8px;font-weight:700;letter-spacing:0.1em;color:#6a8a30;margin-bottom:3px}
+.drawer-close{display:block;margin:16px 20px 0;padding:12px;background:#252830;
+  border:none;border-radius:10px;color:#aaa;font-size:14px;font-weight:600;
+  cursor:pointer;width:calc(100% - 40px);text-align:center}
+
+/* ── GAMIFICATION ─────────────────────────────────────────── */
+.mission-bar{background:linear-gradient(135deg,#0a0e18,#12182a);border:1px solid #2a3a5a;
+  border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.mission-progress{display:flex;align-items:center;gap:0;margin-bottom:8px}
+.prog-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  background:#1a2a3a;border:1.5px solid #2a3a5a;transition:all 0.4s}
+.prog-dot.done{background:var(--lcd-green);border-color:var(--lcd-green);box-shadow:0 0 5px var(--lcd-green)}
+.prog-dot.active{background:var(--blue);border-color:var(--blue);box-shadow:0 0 7px var(--blue)}
+.prog-line{flex:1;height:2px;background:#1a2a3a;transition:background 0.4s}
+.prog-line.done{background:var(--lcd-green)}
+.mission-stage{font-size:8px;font-weight:700;letter-spacing:0.12em;color:var(--blue);
+  text-transform:uppercase;margin-bottom:3px}
+.mission-hint{font-size:11px;color:#666;line-height:1.45;margin-bottom:8px}
+.mission-targets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.mtgt{display:flex;align-items:center;gap:6px;background:#080d1a;
+  border:1.5px solid #2a3a5a;border-radius:7px;padding:6px 10px;transition:all 0.25s}
+.mtgt.hit{border-color:#1a5a1a;background:#040c04}
+.mtgt-lbl{font-size:8px;color:#4a5a7a;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1px}
+.mtgt-val{font-family:var(--mono);color:var(--blue);font-weight:700;font-size:13px}
+.mtgt-check{color:var(--lcd-green);font-size:16px;line-height:1;margin-right:2px}
+.mission-cta{width:100%;padding:9px;border-radius:8px;font-size:12px;font-weight:700;
+  letter-spacing:0.05em;cursor:pointer;text-align:center;border:none;display:none}
+.mission-cta.visible{display:block}
+.mission-cta.ready{background:#041520;border:1px solid var(--blue);color:var(--blue);
+  animation:pulse-blue 1.8s ease-in-out infinite}
+.mission-cta.wait{background:#0d0f12;border:1px solid #2a2a3a;color:#333;pointer-events:none}
+@keyframes pulse-blue{0%,100%{box-shadow:0 0 0 0 rgba(74,158,255,0.35)}
+  50%{box-shadow:0 0 0 7px rgba(74,158,255,0)}}
+
+/* Game-locked controls */
+.ctrl-wrap.game-locked{opacity:0.18;pointer-events:none!important}
+.ctrl-wrap.game-locked .knob-val{display:none!important}
+.ctrl-wrap.game-locked .dim-lock{display:flex!important;color:#2a2a2a;font-size:18px}
+.ctrl-wrap.game-locked .knob-adj{opacity:0;pointer-events:none}
+.ctrl-wrap.game-locked .knob-lbl{color:#222}
+.peep-row.game-locked,.alarm-grid.game-locked{opacity:0.18;pointer-events:none!important}
+.mode-btn.game-locked{opacity:0.15!important;pointer-events:none!important;cursor:default!important}
+
+/* Quiz overlay */
+.quiz-overlay{position:fixed;inset:0;z-index:200;pointer-events:none;
+  display:flex;align-items:flex-end}
+.quiz-overlay.open{pointer-events:all}
+.quiz-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.8);
+  opacity:0;transition:opacity 0.25s}
+.quiz-overlay.open .quiz-backdrop{opacity:1}
+.quiz-sheet{position:relative;z-index:1;background:#1a1e26;border-radius:18px 18px 0 0;
+  width:100%;max-width:580px;margin:0 auto;
+  transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.25,0.8,0.25,1);
+  max-height:88vh;overflow-y:auto;padding-bottom:36px}
+.quiz-overlay.open .quiz-sheet{transform:translateY(0)}
+.quiz-handle{width:36px;height:4px;background:#444;border-radius:2px;margin:12px auto 0}
+.quiz-inner{padding:16px 20px 0}
+.quiz-badge{font-size:8px;font-weight:700;letter-spacing:0.12em;color:var(--blue);
+  text-transform:uppercase;margin-bottom:6px}
+.quiz-q{font-size:15px;font-weight:700;color:#e8e4d8;line-height:1.45;margin-bottom:14px}
+.quiz-choices{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.quiz-btn{background:#252830;border:2px solid #333;border-radius:10px;padding:12px 14px;
+  font-size:13px;color:#aaa;cursor:pointer;text-align:left;line-height:1.4;
+  transition:border-color 0.15s,background 0.15s;width:100%}
+.quiz-btn:active{transform:scale(0.98)}
+.quiz-btn.correct{border-color:var(--lcd-green);background:#040c04;color:var(--lcd-green)}
+.quiz-btn.wrong{border-color:var(--alarm);background:#0d0404;color:#ff6b6b}
+.quiz-btn.reveal{border-color:#1a4a1a;background:#040c04;color:#1a5a1a;opacity:0.6}
+.quiz-btn.disabled{pointer-events:none}
+.quiz-exp{background:#0d1015;border-left:3px solid var(--lcd-green);
+  border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;color:#bbb;
+  line-height:1.6;margin-bottom:10px;display:none}
+.quiz-unlock{background:linear-gradient(135deg,#040c04,#080f08);border:1px solid #1a4a1a;
+  border-radius:8px;padding:10px 12px;font-size:13px;color:var(--lcd-green);
+  line-height:1.5;margin-bottom:10px;display:none}
+.quiz-continue{display:none;margin:0 20px;padding:13px;background:#0d1a2a;
+  border:1.5px solid #2a4a7a;border-radius:10px;color:var(--blue);font-size:14px;
+  font-weight:700;cursor:pointer;width:calc(100% - 40px);text-align:center}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <a class="back-btn" href="javascript:history.back()">← Back</a>
+    <div>
+      <div class="hdr-title">Ventilator Simulator</div>
+      <div class="hdr-sub">Interactive Reference — EDU ONLY</div>
+    </div>
+  </div>
+  <span class="sim-badge">EDU ONLY</span>
+</div>
+
+<div class="case-wrap">
+<div class="case">
+<div class="panel">
+
+  <!-- MISSION BAR -->
+  <div class="mission-bar" id="mission-bar"></div>
+
+  <!-- Status LEDs -->
+  <div class="status-row">
+    <div class="led led-green"></div><span class="led-lbl">POWER</span>
+    <div class="led led-blue" style="margin-left:6px"></div><span class="led-lbl">EXT POWER</span>
+    <div class="led led-amber" style="margin-left:6px"></div><span class="led-lbl">BATTERY OK</span>
+  </div>
+
+  <!-- Live Waveform Canvas -->
+  <div class="waveform-wrap">
+    <div class="waveform-header">
+      <div>
+        <div class="waveform-title">AIRWAY PRESSURE (cmH₂O)</div>
+      </div>
+      <div class="waveform-alarms">
+        <span class="waveform-alarm-item wa-lo">▸ LO <span id="wa-lo-val">10</span></span>
+        <span class="waveform-alarm-item" style="color:#2a6a2a">▸ PEEP <span id="wa-peep-val">0</span></span>
+        <span class="waveform-alarm-item wa-hi">▸ HI <span id="wa-hi-val">40</span></span>
+        <span class="waveform-alarm-item" style="color:var(--lcd-green);font-family:monospace;font-size:10px;font-weight:700">PIP <span id="wa-pip-live">—</span></span>
+      </div>
+    </div>
+    <canvas id="pip-canvas"></canvas>
+  </div>
+
+  <!-- LCD -->
+  <div class="lcd">
+    <div class="lcd-mode-row">
+      <div>
+        <div class="lcd-mode-main" id="disp-mode-main">AC-VC</div>
+        <div class="lcd-mode-sub" id="disp-mode-sub">Assist Control · Volume</div>
+      </div>
+      <div style="text-align:right">
+        <div class="lcd-ie-lbl" id="lcd-ie-lbl">I:E RATIO</div>
+        <div class="lcd-ie" id="disp-ie">1 : 2.6</div>
+      </div>
+    </div>
+    <div class="lcd-grid">
+      <div class="lcd-cell" id="lcd-rate">
+        <div class="lcd-lbl">RATE SET</div>
+        <div class="lcd-val"><span id="disp-rate">12</span><span class="lcd-unit"> bpm</span></div>
+      </div>
+      <div class="lcd-cell" id="lcd-vt">
+        <div class="lcd-lbl" id="lcd-lbl-vt">TIDAL VOL</div>
+        <div class="lcd-val"><span id="disp-vt">500</span><span class="lcd-unit" id="lcd-unit-vt"> mL</span></div>
+      </div>
+      <div class="lcd-cell" id="lcd-pc">
+        <div class="lcd-lbl" id="lcd-lbl-pc">PRES CTRL</div>
+        <div class="lcd-val"><span id="disp-pc">15</span><span class="lcd-unit"> cmH₂O</span></div>
+      </div>
+      <div class="lcd-cell" id="lcd-it">
+        <div class="lcd-lbl">INSP TIME</div>
+        <div class="lcd-val"><span id="disp-it">1.0</span><span class="lcd-unit"> s</span></div>
+      </div>
+      <div class="lcd-cell" id="lcd-ps">
+        <div class="lcd-lbl" id="lcd-lbl-ps">PRESS SUPP</div>
+        <div class="lcd-val"><span id="disp-ps">10</span><span class="lcd-unit"> cmH₂O</span></div>
+      </div>
+      <div class="lcd-cell" id="lcd-fio2">
+        <div class="lcd-lbl">FiO₂</div>
+        <div class="lcd-val"><span id="disp-fio2">40</span><span class="lcd-unit"> %</span></div>
+      </div>
+      <div class="lcd-cell" id="lcd-peep">
+        <div class="lcd-lbl" id="lcd-lbl-peep">PEEP</div>
+        <div class="lcd-val"><span id="disp-peep">0</span><span class="lcd-unit"> cmH₂O</span></div>
+      </div>
+      <div class="lcd-cell" id="lcd-sens">
+        <div class="lcd-lbl">SENSITIV</div>
+        <div class="lcd-val"><span id="disp-sens">3</span><span class="lcd-unit"> lpm</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE SELECTOR -->
+  <div class="mode-panel">
+    <div class="mode-row">
+      <div class="mode-row-lbl">BREATH<br>TYPE</div>
+      <button class="mode-btn active-vol" id="btn-vol" onclick="setBreathType('volume')">VOLUME</button>
+      <button class="mode-btn" id="btn-pres" onclick="setBreathType('pressure')">PRESSURE</button>
+    </div>
+    <div class="mode-row">
+      <div class="mode-row-lbl">MODE</div>
+      <button class="mode-btn active-ac"  id="btn-ac"   onclick="setMode('ac')">A/C</button>
+      <button class="mode-btn"            id="btn-simv" onclick="setMode('simv')">SIMV</button>
+      <button class="mode-btn"            id="btn-cpap" onclick="setMode('cpap')">CPAP/<br>PSV</button>
+      <button class="mode-btn"            id="btn-nppv" onclick="setMode('nppv')">NPPV/<br>BiPAP</button>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="sec-lbl">CONTROLS</div>
+  <div class="ctrl-grid">
+
+    <div class="ctrl-wrap" id="cw-rate" onclick="openDrawer('rate')">
+      <div class="knob-outer">
+        <div class="knob-ind" id="ind-rate"></div>
+        <div class="knob-val"><div class="knob-val-num" id="kv-rate">12</div><div class="knob-val-unit">bpm</div></div>
+        <div class="dim-lock">🔒</div>
+      </div>
+      <div class="knob-lbl">BREATH<br>RATE</div>
+      <div class="knob-adj">
+        <button class="adj-btn" onclick="adj('rate',-1);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('rate',1);event.stopPropagation()">+</button>
+      </div>
+    </div>
+
+    <div class="ctrl-wrap" id="cw-vt" onclick="openDrawer('vt')">
+      <div class="knob-outer">
+        <div class="knob-ind" id="ind-vt"></div>
+        <div class="knob-val"><div class="knob-val-num" id="kv-vt">500</div><div class="knob-val-unit">mL</div></div>
+        <div class="dim-lock">🔒</div>
+      </div>
+      <div class="knob-lbl" id="lbl-vt">TIDAL<br>VOL</div>
+      <div class="knob-adj">
+        <button class="adj-btn" onclick="adj('vt',-25);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('vt',25);event.stopPropagation()">+</button>
+      </div>
+    </div>
+
+    <div class="ctrl-wrap" id="cw-pc" onclick="openDrawer('pc')">
+      <div class="knob-outer" style="background:radial-gradient(circle at 35% 35%,#3d5a2a,#253a18 60%,#111808)">
+        <div class="knob-ind" id="ind-pc" style="background:#a8e060"></div>
+        <div class="knob-val"><div class="knob-val-num" id="kv-pc" style="color:#a8e060">15</div><div class="knob-val-unit" style="color:#4a6a20">cmH₂O</div></div>
+        <div class="dim-lock">🔒</div>
+      </div>
+      <div class="knob-lbl" id="lbl-pc">PRES<br>CTRL</div>
+      <div class="knob-adj">
+        <button class="adj-btn" onclick="adj('pc',-1);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('pc',1);event.stopPropagation()">+</button>
+      </div>
+    </div>
+
+    <div class="ctrl-wrap" id="cw-it" onclick="openDrawer('it')">
+      <div class="knob-outer" style="background:radial-gradient(circle at 35% 35%,#3d5a2a,#253a18 60%,#111808)">
+        <div class="knob-ind" id="ind-it" style="background:#a8e060"></div>
+        <div class="knob-val"><div class="knob-val-num" id="kv-it" style="color:#a8e060;font-size:10px">1.0</div><div class="knob-val-unit" style="color:#4a6a20">sec</div></div>
+        <div class="dim-lock">🔒</div>
+      </div>
+      <div class="knob-lbl">INSP<br>TIME</div>
+      <div class="knob-adj">
+        <button class="adj-btn" onclick="adjStep('it',-0.1);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adjStep('it',0.1);event.stopPropagation()">+</button>
+      </div>
+    </div>
+
+    <div class="ctrl-wrap" id="cw-ps" onclick="openDrawer('ps')">
+      <div class="knob-outer">
+        <div class="knob-ind" id="ind-ps"></div>
+        <div class="knob-val"><div class="knob-val-num" id="kv-ps">10</div><div class="knob-val-unit" id="kv-ps-unit">cmH₂O</div></div>
+        <div class="dim-lock">🔒</div>
+      </div>
+      <div class="knob-lbl" id="lbl-ps">PRESS<br>SUPP</div>
+      <div class="knob-adj">
+        <button class="adj-btn" onclick="adj('ps',-1);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('ps',1);event.stopPropagation()">+</button>
+      </div>
+    </div>
+
+    <div class="ctrl-wrap" id="cw-fio2" onclick="openDrawer('fio2')">
+      <div class="knob-outer">
+        <div class="knob-ind" id="ind-fio2"></div>
+        <div class="knob-val"><div class="knob-val-num" id="kv-fio2">40</div><div class="knob-val-unit">% O₂</div></div>
+        <div class="dim-lock">🔒</div>
+      </div>
+      <div class="knob-lbl">FiO₂ /<br>O₂ FLUSH</div>
+      <div class="knob-adj">
+        <button class="adj-btn" onclick="adj('fio2',-5);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('fio2',5);event.stopPropagation()">+</button>
+      </div>
+    </div>
+
+    <div class="ctrl-wrap" id="cw-sens" onclick="openDrawer('sens')">
+      <div class="knob-outer">
+        <div class="knob-ind" id="ind-sens"></div>
+        <div class="knob-val"><div class="knob-val-num" id="kv-sens">3</div><div class="knob-val-unit">lpm</div></div>
+        <div class="dim-lock">🔒</div>
+      </div>
+      <div class="knob-lbl">SENSI-<br>TIVITY</div>
+      <div class="knob-adj">
+        <button class="adj-btn" onclick="adj('sens',-1);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('sens',1);event.stopPropagation()">+</button>
+      </div>
+    </div>
+
+  </div><!-- /ctrl-grid -->
+
+  <!-- PEEP -->
+  <div class="sec-lbl" id="peep-sec-lbl">PEEP / CPAP</div>
+  <div class="peep-row" onclick="openDrawer('peep')">
+    <div class="peep-knob">
+      <div class="peep-ind" id="ind-peep"></div>
+      <div class="peep-val">
+        <div class="peep-val-num" id="kv-peep">0</div>
+        <div class="peep-val-unit" id="peep-unit-lbl">cmH₂O</div>
+      </div>
+    </div>
+    <div class="peep-info">
+      <div class="peep-lbl" id="peep-main-lbl">PEEP / CPAP</div>
+      <div class="peep-sub" id="peep-sub-lbl">Active in ALL modes. In CPAP/PSV, sets baseline pressure. In NPPV, this is EPAP.</div>
+    </div>
+    <div class="peep-adj" onclick="event.stopPropagation()">
+      <button class="adj-btn" onclick="adj('peep',1)">+</button>
+      <button class="adj-btn" onclick="adj('peep',-1)">−</button>
+    </div>
+  </div>
+
+  <!-- NPPV IPAP DISPLAY (shows when NPPV active) -->
+  <div id="ipap-display" style="display:none;background:#041520;border:1px solid #1a4a6a;border-radius:8px;padding:10px 14px;margin-top:8px;font-family:var(--mono)">
+    <div style="font-size:8px;color:#38bdf8;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px">NPPV CALCULATED VALUES</div>
+    <div style="display:flex;gap:20px">
+      <div><div style="font-size:8px;color:#1a5a7a">EPAP (PEEP)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-epap">5</span> <span style="font-size:10px">cmH₂O</span></div></div>
+      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">IPAP (EPAP + PS)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ipap">13</span> <span style="font-size:10px">cmH₂O</span></div></div>
+      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">PRESSURE SUPPORT</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ps">8</span> <span style="font-size:10px">cmH₂O above EPAP</span></div></div>
+    </div>
+  </div>
+
+  <!-- ALARM LIMITS -->
+  <div class="sec-lbl red">ALARM LIMITS</div>
+  <div class="alarm-grid">
+    <div class="alarm-wrap" onclick="openDrawer('hipres')">
+      <div class="alarm-knob"><div class="alarm-ind" id="ind-hipres"></div>
+        <div class="alarm-val"><div class="alarm-val-num" id="kv-hipres">40</div><div class="alarm-val-unit">cmH₂O</div></div></div>
+      <div class="alarm-lbl">HIGH PRES<br>LIMIT</div>
+      <div class="knob-adj alarm-adj">
+        <button class="adj-btn" onclick="adj('hipres',-5);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('hipres',5);event.stopPropagation()">+</button>
+      </div>
+    </div>
+    <div class="alarm-wrap" onclick="openDrawer('lowpres')">
+      <div class="alarm-knob"><div class="alarm-ind" id="ind-lowpres"></div>
+        <div class="alarm-val"><div class="alarm-val-num" id="kv-lowpres">10</div><div class="alarm-val-unit">cmH₂O</div></div></div>
+      <div class="alarm-lbl">LOW<br>PRESSURE</div>
+      <div class="knob-adj alarm-adj">
+        <button class="adj-btn" onclick="adj('lowpres',-1);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('lowpres',1);event.stopPropagation()">+</button>
+      </div>
+    </div>
+    <div class="alarm-wrap" onclick="openDrawer('lowmv')">
+      <div class="alarm-knob"><div class="alarm-ind" id="ind-lowmv"></div>
+        <div class="alarm-val"><div class="alarm-val-num" id="kv-lowmv">3</div><div class="alarm-val-unit">L/min</div></div></div>
+      <div class="alarm-lbl">LOW MIN<br>VOLUME</div>
+      <div class="knob-adj alarm-adj">
+        <button class="adj-btn" onclick="adj('lowmv',-1);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('lowmv',1);event.stopPropagation()">+</button>
+      </div>
+    </div>
+    <div class="alarm-wrap" onclick="openDrawer('apnea')">
+      <div class="alarm-knob"><div class="alarm-ind" id="ind-apnea"></div>
+        <div class="alarm-val"><div class="alarm-val-num" id="kv-apnea">20</div><div class="alarm-val-unit">sec</div></div></div>
+      <div class="alarm-lbl">VENT<br>INOP</div>
+      <div class="knob-adj alarm-adj">
+        <button class="adj-btn" onclick="adj('apnea',-5);event.stopPropagation()">−</button>
+        <button class="adj-btn" onclick="adj('apnea',5);event.stopPropagation()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUNCTION BUTTONS -->
+  <div class="sec-lbl">FUNCTION</div>
+  <div class="fn-grid">
+    <div class="fn-btn green" onclick="openDrawer('manual')">MANUAL<br>BREATH</div>
+    <div class="fn-btn blue"  onclick="triggerInspHold()">INSP<br>HOLD</div>
+    <div class="fn-btn blue"  onclick="openDrawer('exphold')">EXP<br>HOLD</div>
+    <div class="fn-btn orange" onclick="openDrawer('o2flush')">100%<br>O₂</div>
+    <div class="fn-btn red"   onclick="openDrawer('silence')">ALARM<br>SILENCE</div>
+  </div>
+
+</div></div></div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-inner" id="drawer-content"></div>
+  <button class="drawer-close" onclick="closeDrawer()">Close</button>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────
+var breathType = 'volume';
+var ventMode   = 'ac';  // ac | simv | cpap | nppv
+
+var vals = {
+  rate:   {v:12,  min:1,   max:80,  step:1},
+  vt:     {v:500, min:50,  max:2000,step:25},
+  pc:     {v:15,  min:5,   max:55,  step:1},
+  it:     {v:1.0, min:0.3, max:3.0, step:0.1},
+  ps:     {v:10,  min:0,   max:40,  step:1},
+  fio2:   {v:40,  min:21,  max:100, step:5},
+  sens:   {v:3,   min:1,   max:9,   step:1},
+  peep:   {v:0,   min:0,   max:20,  step:1},
+  hipres: {v:40,  min:20,  max:80,  step:5},
+  lowpres:{v:10,  min:0,   max:20,  step:1},
+  lowmv:  {v:3,   min:0,   max:20,  step:1},
+  apnea:  {v:20,  min:10,  max:60,  step:5},
+};
+
+// ── ACTIVE CONTROL LOGIC ──────────────────────────────────────
+function isActive(key){
+  var bt=breathType, vm=ventMode;
+  if(key==='rate')   return vm!=='cpap' && vm!=='nppv';
+  if(key==='vt')     return bt==='volume' && vm!=='cpap' && vm!=='nppv';
+  if(key==='pc')     return bt==='pressure' && vm!=='cpap' && vm!=='nppv';
+  if(key==='it')     return vm!=='cpap';
+  if(key==='ps')     return vm==='simv' || vm==='cpap' || vm==='nppv';
+  return true;
+}
+
+// ── MODE LABELS ───────────────────────────────────────────────
+function getModeLabel(){
+  if(ventMode==='cpap') return {main:'CPAP / PSV', sub:'Pressure Support Ventilation · Spontaneous'};
+  if(ventMode==='nppv') return {main:'NPPV / BiPAP', sub:'Non-Invasive · IPAP / EPAP'};
+  var bt=breathType==='volume'?'Volume':'Pressure';
+  var m=ventMode==='ac'?'Assist Control':'Synchronized IMV';
+  var code=ventMode==='ac'?(breathType==='volume'?'AC-VC':'AC-PC'):(breathType==='volume'?'SIMV-VC':'SIMV-PC');
+  return {main:code, sub:m+' · '+bt};
+}
+
+function calcIE(){
+  if(ventMode==='cpap'||ventMode==='nppv') return 'SPONT';
+  var cycleMs=60000/vals.rate.v;
+  var inspMs=vals.it.v*1000;
+  var expMs=cycleMs-inspMs;
+  if(expMs<=0) return 'INV!';
+  return '1 : '+(expMs/inspMs).toFixed(1);
+}
+
+// ── KNOB UPDATES ──────────────────────────────────────────────
+function valToAngle(key){
+  var c=vals[key], pct=(c.v-c.min)/(c.max-c.min);
+  return -135+pct*270;
+}
+function updateKnob(key){
+  var ind=document.getElementById('ind-'+key);
+  var kv =document.getElementById('kv-'+key);
+  if(ind) ind.style.transform='translateX(-50%) rotate('+valToAngle(key)+'deg)';
+  var disp=key==='it'?vals[key].v.toFixed(1):vals[key].v;
+  if(kv)  kv.textContent=disp;
+  var d=document.getElementById('disp-'+key);
+  if(d)   d.textContent=disp;
+}
+// ── RATE ↔ INSP TIME CONSTRAINT ──────────────────────────────
+// Min exp time = 0.5 s  →  max IT = (60/rate) − 0.5
+// Floor at it.min (0.3 s) — at very high rates both constraints can't be met simultaneously
+function enforceITLimit(){
+  var cycleS  = 60 / vals.rate.v;
+  var rawMax  = cycleS - 0.5;
+  var maxIT   = Math.round(Math.max(vals.it.min, rawMax) * 10) / 10;
+  vals.it.max = maxIT;
+  if(vals.it.v > maxIT){
+    vals.it.v = maxIT;
+    updateKnob('it');
+  }
+}
+
+function adj(key,delta){
+  var c=vals[key];
+  // For IT, enforce limit before clamping so we always use the live max
+  if(key==='rate'){
+    c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
+    updateKnob(key);
+    enforceITLimit();
+    // Snap simTime to start of next new cycle to prevent phase-jump glitch
+    var newCycleMs=60000/vals.rate.v;
+    simTime=Math.ceil(simTime/newCycleMs)*newCycleMs;
+    pressureHistory=[];
+  } else if(key==='it'){
+    enforceITLimit(); // update max first
+    c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
+    updateKnob(key);
+  } else {
+    c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
+    updateKnob(key);
+  }
+  updateUI();
+}
+function adjStep(key,delta){ adj(key,delta); }
+
+// ── MODE SETTERS ──────────────────────────────────────────────
+function setBreathType(bt){
+  if(ventMode==='cpap'||ventMode==='nppv') return;
+  breathType=bt;
+  updateUI();
+}
+function setMode(m){
+  ventMode=m;
+  if(m==='cpap'||m==='nppv') breathType='pressure';
+  updateUI();
+}
+
+// ── FULL UI UPDATE ────────────────────────────────────────────
+function updateUI(){
+  // Breath type buttons
+  var bv=document.getElementById('btn-vol'),bp=document.getElementById('btn-pres');
+  var isLocked=(ventMode==='cpap'||ventMode==='nppv');
+  bv.className='mode-btn'+(breathType==='volume'&&!isLocked?' active-vol':'')+(isLocked?' disabled-bt':'');
+  bp.className='mode-btn'+(breathType==='pressure'||isLocked?' active-pres':'')+(isLocked?' disabled-bt':'');
+
+  // Mode buttons
+  document.getElementById('btn-ac').className  ='mode-btn'+(ventMode==='ac'  ?' active-ac':'');
+  document.getElementById('btn-simv').className ='mode-btn'+(ventMode==='simv'?' active-simv':'');
+  document.getElementById('btn-cpap').className ='mode-btn'+(ventMode==='cpap'?' active-cpap':'');
+  document.getElementById('btn-nppv').className ='mode-btn'+(ventMode==='nppv'?' active-nppv':'');
+
+  // Mode label
+  var lbl=getModeLabel();
+  document.getElementById('disp-mode-main').textContent=lbl.main;
+  document.getElementById('disp-mode-sub').textContent=lbl.sub;
+  document.getElementById('disp-ie').textContent=calcIE();
+
+  // NPPV relabeling
+  var isNPPV=(ventMode==='nppv');
+  document.getElementById('lcd-lbl-ps').textContent       = isNPPV?'IPAP ABOVE EPAP':'PRESS SUPP';
+  document.getElementById('lcd-lbl-peep').textContent     = isNPPV?'EPAP':'PEEP';
+  document.getElementById('lbl-ps').innerHTML             = isNPPV?'IPAP<br>(PS)':'PRESS<br>SUPP';
+  document.getElementById('kv-ps-unit').textContent       = isNPPV?'above EPAP':'cmH₂O';
+  document.getElementById('peep-main-lbl').textContent    = isNPPV?'EPAP':'PEEP / CPAP';
+  document.getElementById('peep-sub-lbl').textContent     = isNPPV?'Expiratory Positive Airway Pressure — the baseline the patient exhales against. Equivalent to PEEP.':'Active in ALL modes. In CPAP/PSV, sets baseline pressure. In NPPV, this is EPAP.';
+  document.getElementById('peep-sec-lbl').textContent     = isNPPV?'EPAP (PEEP)':'PEEP / CPAP';
+  document.getElementById('ipap-display').style.display   = isNPPV?'block':'none';
+  if(isNPPV){
+    document.getElementById('nppv-epap').textContent=vals.peep.v;
+    document.getElementById('nppv-ipap').textContent=vals.peep.v+vals.ps.v;
+    document.getElementById('nppv-ps').textContent=vals.ps.v;
+  }
+
+  // Dim/undim controls
+  ['rate','vt','pc','it','ps','fio2','sens'].forEach(function(k){
+    var w=document.getElementById('cw-'+k);
+    var l=document.getElementById('lcd-'+k);
+    if(w) w.classList.toggle('dim',!isActive(k));
+    if(l) l.classList.toggle('na',!isActive(k));
+  });
+
+  // Update alarm header labels
+  document.getElementById('wa-hi-val').textContent=vals.hipres.v;
+  document.getElementById('wa-lo-val').textContent=vals.lowpres.v;
+  document.getElementById('wa-peep-val').textContent=vals.peep.v;
+}
+
+// ── PRESSURE SIMULATION ───────────────────────────────────────
+var simTime=0;
+var pressureHistory=[];
+var CANVAS_SECS=8; // seconds of history shown
+
+// ── INSP HOLD / PLATEAU ───────────────────────────────────────
+var inspHoldActive=false;
+var inspHoldStartTs=0;    // wall-clock timestamp (from rAF)
+var inspHoldDuration=4200; // ms total hold animation
+var inspHoldPIP=0;
+var inspHoldPplat=0;
+var RAW_CMHZO_PER_LPS=12; // simulated airway resistance cmH₂O/(L/s)
+
+function calcPplat(){
+  // Only meaningful in Volume mandatory modes
+  if(breathType!=='volume'||ventMode==='cpap'||ventMode==='nppv') return null;
+  var compliance=20; // mL/cmH₂O (matches calcPressure)
+  var peep=vals.peep.v;
+  var pip=peep+vals.vt.v/compliance;
+  var peakFlow_LPS=(vals.vt.v/1000)/vals.it.v; // L/s constant flow
+  var resPressure=peakFlow_LPS*RAW_CMHZO_PER_LPS;
+  var pplat=Math.max(peep, pip-resPressure);
+  var drive=pplat-peep;
+  var comp=drive>0?Math.round(vals.vt.v/drive):0;
+  return {pip:Math.round(pip*10)/10, pplat:Math.round(pplat*10)/10,
+          drive:Math.round(drive*10)/10, comp:comp, raw:Math.round(resPressure*10)/10};
+}
+
+function triggerInspHold(){
+  if(ventMode==='cpap'||ventMode==='nppv'){openDrawer('insphold');return;}
+  var d=calcPplat();
+  if(!d){openDrawer('insphold');return;} // Pressure mode — just show info
+  inspHoldPIP=d.pip; inspHoldPplat=d.pplat;
+  inspHoldActive=true; inspHoldStartTs=null; // set on next rAF frame
+  openDrawer('insphold');
+}
+
+function calcPressure(tMs){
+  var peep=vals.peep.v;
+  var hi=vals.hipres.v;
+
+  // ── INSP HOLD animation ───────────────────────────────────────
+  if(inspHoldActive){
+    var elapsed=inspHoldStartTs!==null?(performance.now()-inspHoldStartTs):0;
+    if(elapsed>inspHoldDuration){
+      inspHoldActive=false;
+    } else {
+      // 0–300ms: stay at PIP; 300–600ms: step down to Pplat; 600–3800ms: plateau; 3800–4200ms: decay
+      if(elapsed<300)        return inspHoldPIP;
+      if(elapsed<600)        return inspHoldPIP+(inspHoldPplat-inspHoldPIP)*((elapsed-300)/300);
+      if(elapsed<3800)       return inspHoldPplat;
+      // fade back to PEEP
+      var fade=(elapsed-3800)/400;
+      return inspHoldPplat+(peep-inspHoldPplat)*fade;
+    }
+  }
+
+  // Spontaneous modes (CPAP / NPPV)
+  if(ventMode==='cpap'||ventMode==='nppv'){
+    var supPres=(ventMode==='nppv')?(peep+vals.ps.v):(peep+vals.ps.v);
+    // CPAP: pressure dips slightly below baseline during effort then rises to peep+PS
+    // NPPV: rises to IPAP during insp, falls to EPAP during exp
+    var spontBpm=15+2*Math.sin(tMs/9000)+1.5*Math.sin(tMs/3700); // natural variability
+    var cyclMs=60000/spontBpm;
+    var ph=(tMs%cyclMs)/cyclMs;
+    var ri=0.38; // insp fraction (slightly longer than normal to show BiPAP shape)
+    var p;
+    if(ph<0.06){
+      // Slight pre-inspiratory dip (patient effort)
+      p=peep-0.8*Math.sin(ph/0.06*Math.PI);
+    } else if(ph<ri){
+      var x=(ph-0.06)/(ri-0.06);
+      p=peep+(supPres-peep)*Math.sin(x*Math.PI*0.5); // smooth rise to IPAP
+    } else if(ph<ri+0.05){
+      p=supPres; // brief plateau at IPAP
+    } else {
+      // Expiratory decay back to PEEP (flow cycling)
+      var ex=(ph-ri-0.05)/(1-ri-0.05);
+      p=peep+(supPres-peep)*Math.exp(-ex*5);
+    }
+    return Math.min(hi,Math.max(peep-1.5,p));
+  }
+
+  var cycleMs=60000/vals.rate.v;
+  var ph=(tMs%cycleMs)/cycleMs;
+
+  // Pressure control mode
+  if(breathType==='pressure'){
+    var pip=peep+vals.pc.v;
+    var insFrac=Math.min((vals.it.v*1000)/cycleMs,0.80);
+    var ramp=0.06; // fast rise (pressure-limited target)
+    var p;
+    var expStart=insFrac+0.04; // brief over-pressure bleed
+    if(ph<ramp){
+      p=peep+(pip-peep)*(ph/ramp); // rapid rise
+    } else if(ph<insFrac){
+      // plateau with tiny ventilator oscillation
+      p=pip+vals.pc.v*0.01*Math.sin(ph*40);
+    } else if(ph<expStart){
+      p=pip*(1-(ph-insFrac)/0.04); // sharp fall
+    } else {
+      // passive expiratory decay back to PEEP + small cardiac oscillation
+      var expPh=(ph-expStart)/(1-expStart);
+      p=peep+(pip-peep)*0.04*Math.exp(-expPh*6)+0.6*Math.sin(expPh*12);
+      p=Math.max(peep,p);
+    }
+    return Math.min(hi,Math.max(0,p));
+  }
+
+  // Volume control mode — IT now directly controlled (per LTV manual)
+  // Compliance ~20 mL/cmH₂O = typical ventilated/sick patient (normal: 60-80)
+  var compliance=20;
+  var pip_v=peep+vals.vt.v/compliance;
+  var insFrac_v=Math.min((vals.it.v*1000)/cycleMs,0.85);
+  var p;
+  if(ph<insFrac_v){
+    // Linear pressure ramp (constant flow = linearly rising volume = linearly rising pressure)
+    var frac=ph/insFrac_v;
+    p=peep+(pip_v-peep)*frac;
+    // Add small end-inspiratory plateau "notch" in the last 10% of insp
+    if(frac>0.9) p+=( pip_v-peep)*0.04*Math.sin((frac-0.9)/0.1*Math.PI);
+  } else if(ph<insFrac_v+0.04){
+    // Sharp fall on valve close
+    p=pip_v*(1-(ph-insFrac_v)/0.04);
+    p=Math.max(peep,p);
+  } else {
+    // Passive expiratory decay to PEEP + cardiac oscillations
+    var expPh=(ph-insFrac_v-0.04)/(1-insFrac_v-0.04);
+    p=peep+(pip_v-peep)*0.05*Math.exp(-expPh*7)+0.5*Math.sin(expPh*14);
+    p=Math.max(peep,p);
+  }
+  return Math.min(hi,Math.max(0,p));
+}
+
+// ── CANVAS ANIMATION ──────────────────────────────────────────
+var canvas=document.getElementById('pip-canvas');
+var ctx=canvas.getContext('2d');
+var dpr=window.devicePixelRatio||1;
+var lastTs=null;
+var _canvasW=0,_canvasH=0;
+
+function resizeCanvas(){
+  var w=canvas.offsetWidth;
+  var h=canvas.offsetHeight;
+  if(w===_canvasW && h===_canvasH) return; // skip if unchanged
+  _canvasW=w; _canvasH=h;
+  canvas.width=w*dpr;
+  canvas.height=h*dpr;
+}
+window.addEventListener('resize',function(){ _canvasW=0; }); // force resize on next frame
+
+function drawWaveform(){
+  resizeCanvas();
+  var W=canvas.width, H=canvas.height;
+  if(W===0||H===0) return;
+  // Y-axis: scale to hipres alarm + small headroom, never below 30
+  var yMax=Math.max(vals.hipres.v+5, 30);
+  var yMin=0;
+  function mapY(p){ return H - ((p-yMin)/(yMax-yMin))*H*0.88 - H*0.06; }
+  function mapX(i){ return (i/pressureHistory.length)*W; }
+
+  ctx.clearRect(0,0,W,H);
+
+  // Background
+  ctx.fillStyle='#050d05';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid lines (horizontal, every 10 cmH2O)
+  ctx.strokeStyle='#0f1f0f';
+  ctx.lineWidth=1;
+  ctx.setLineDash([]);
+  for(var g=0;g<=yMax;g+=10){
+    var gy=mapY(g);
+    ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
+    // Label
+    if(g%20===0){
+      ctx.fillStyle='#1a3a1a';
+      ctx.font=(8*dpr)+'px monospace';
+      ctx.fillText(g,2,gy-2);
+    }
+  }
+
+  // PEEP line
+  ctx.strokeStyle='rgba(57,255,90,0.2)';
+  ctx.lineWidth=1*dpr;
+  ctx.setLineDash([3*dpr,4*dpr]);
+  var peepY=mapY(vals.peep.v);
+  ctx.beginPath(); ctx.moveTo(0,peepY); ctx.lineTo(W,peepY); ctx.stroke();
+
+  // LOW PRESSURE alarm line (orange)
+  ctx.strokeStyle='rgba(244,162,97,0.7)';
+  ctx.lineWidth=1.5*dpr;
+  ctx.setLineDash([4*dpr,4*dpr]);
+  var loY=mapY(vals.lowpres.v);
+  ctx.beginPath(); ctx.moveTo(0,loY); ctx.lineTo(W,loY); ctx.stroke();
+  ctx.fillStyle='rgba(244,162,97,0.8)';
+  ctx.font=(7*dpr)+'px monospace';
+  ctx.fillText('LO',W-18*dpr,loY-2);
+
+  // HIGH PRESSURE alarm line (red)
+  ctx.strokeStyle='rgba(230,57,70,0.7)';
+  ctx.lineWidth=1.5*dpr;
+  ctx.setLineDash([4*dpr,4*dpr]);
+  var hiY=mapY(vals.hipres.v);
+  ctx.beginPath(); ctx.moveTo(0,hiY); ctx.lineTo(W,hiY); ctx.stroke();
+  ctx.fillStyle='rgba(230,57,70,0.8)';
+  ctx.fillText('HI',W-14*dpr,hiY+8*dpr);
+
+  // Waveform
+  if(pressureHistory.length>1){
+    ctx.setLineDash([]);
+    ctx.lineWidth=1.8*dpr;
+    ctx.lineJoin='round';
+    ctx.strokeStyle='#39ff5a';
+    ctx.shadowColor='#39ff5a';
+    ctx.shadowBlur=3*dpr;
+    ctx.beginPath();
+    pressureHistory.forEach(function(p,i){
+      var x=mapX(i), y=mapY(p);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Current PIP dot
+    var lastP=pressureHistory[pressureHistory.length-1];
+    var dotX=W, dotY=mapY(lastP);
+    ctx.fillStyle='#39ff5a';
+    ctx.beginPath(); ctx.arc(dotX,dotY,3*dpr,0,Math.PI*2); ctx.fill();
+
+    // Live PIP readout
+    document.getElementById('wa-pip-live').textContent=lastP.toFixed(1);
+
+    // INSP HOLD plateau annotation overlay
+    if(inspHoldActive && inspHoldStartTs!==null){
+      var elapsed=performance.now()-inspHoldStartTs;
+      if(elapsed>300 && elapsed<3900){
+        var pplatY=mapY(inspHoldPplat);
+        var pipY=mapY(inspHoldPIP);
+        // Pplat dashed line
+        ctx.setLineDash([6*dpr,3*dpr]);
+        ctx.strokeStyle='rgba(74,158,255,0.9)';
+        ctx.lineWidth=1.5*dpr;
+        ctx.beginPath(); ctx.moveTo(0,pplatY); ctx.lineTo(W,pplatY); ctx.stroke();
+        // PIP dashed line
+        ctx.strokeStyle='rgba(74,158,255,0.5)';
+        ctx.beginPath(); ctx.moveTo(0,pipY); ctx.lineTo(W,pipY); ctx.stroke();
+        ctx.setLineDash([]);
+        // Labels
+        ctx.font='bold '+(9*dpr)+'px monospace';
+        ctx.fillStyle='rgba(74,158,255,1)';
+        ctx.fillText('Pplat '+inspHoldPplat.toFixed(1),4*dpr,pplatY-3*dpr);
+        ctx.fillStyle='rgba(74,158,255,0.7)';
+        ctx.fillText('PIP '+inspHoldPIP.toFixed(1),4*dpr,pipY-3*dpr);
+        // HOLD badge
+        ctx.fillStyle='rgba(74,158,255,0.15)';
+        ctx.fillRect(W*0.5-30*dpr, H*0.02, 60*dpr, 14*dpr);
+        ctx.fillStyle='rgba(74,158,255,0.9)';
+        ctx.font='bold '+(8*dpr)+'px monospace';
+        ctx.textAlign='center';
+        ctx.fillText('INSP HOLD',W*0.5,H*0.02+10*dpr);
+        ctx.textAlign='left';
+      }
+    }
+  }
+}
+
+function animLoop(ts){
+  if(lastTs!==null){
+    var dt=Math.min(ts-lastTs,50); // cap at 50ms to handle tab visibility
+    if(inspHoldActive && inspHoldStartTs===null) inspHoldStartTs=ts;
+    simTime+=dt;
+    var p=calcPressure(simTime);
+    pressureHistory.push(p);
+    // Keep only CANVAS_SECS worth of history at ~60fps
+    var maxLen=Math.ceil(CANVAS_SECS*60);
+    if(pressureHistory.length>maxLen) pressureHistory.shift();
+    drawWaveform();
+  }
+  lastTs=ts;
+  requestAnimationFrame(animLoop);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+enforceITLimit(); // set correct max IT based on initial rate
+Object.keys(vals).forEach(function(k){ updateKnob(k); });
+updateUI();
+requestAnimationFrame(animLoop);
+
+// ── CONTROL INFO ──────────────────────────────────────────────
+var CONTROLS={
+  rate:{tag:'control',tagCls:'tag-control',title:'Breath Rate',range:'1–80 bpm  |  Typical: 12–16  |  Higher rate → shorter max IT',
+    desc:'Minimum mandatory breaths per minute. <strong>Inactive in CPAP and NPPV</strong> — patient determines own rate in those modes.',
+    avail:[
+      {mode:'AC-VC / AC-PC',yes:true,note:'Delivers at least this many full breaths/min. Patient triggers additional breaths above this.'},
+      {mode:'SIMV-VC / SIMV-PC',yes:true,note:'Exactly this many mandatory breaths/min. Patient breathes spontaneously between them.'},
+      {mode:'CPAP / PSV',yes:false,note:'No mandatory rate. Patient must breathe spontaneously for every breath.'},
+      {mode:'NPPV / BiPAP',yes:false,note:'No mandatory rate. Patient-triggered only. Backup rate may be set in extended settings.'},
+    ],
+    pearl:'Lower rate in COPD/asthma (10–12) to allow full exhalation and prevent auto-PEEP. Titrate to ETCO₂.'
+  },
+  vt:{tag:'control',tagCls:'tag-control',title:'Tidal Volume',range:'50–2000 mL  |  Target 6–8 mL/kg IBW',
+    desc:'Volume per mandatory breath. <strong>Volume mode only.</strong> In pressure modes, delivered Vt depends on set pressure and lung compliance.',
+    avail:[
+      {mode:'AC-VC / SIMV-VC',yes:true,note:'Guaranteed volume per breath. Vent generates whatever pressure is needed to reach this volume.'},
+      {mode:'AC-PC / SIMV-PC',yes:false,note:'Not set directly. Vt depends on Pressure Control level and patient compliance.'},
+      {mode:'CPAP / NPPV',yes:false,note:'Patient determines their own Vt. PS augments effort but does not guarantee a set volume.'},
+    ],
+    pearl:'Male IBW = 50 + 2.3 × (height in inches − 60). Female = 45.5 + 2.3 × (height in inches − 60). Start at 6 mL/kg, not actual body weight.'
+  },
+  pc:{tag:'control',tagCls:'tag-control',title:'Pressure Control',range:'5–55 cmH₂O above PEEP',
+    desc:'Inspiratory pressure target for mandatory breaths. <strong>Pressure mode only.</strong> Vent delivers this pressure above PEEP for the set Inspiratory Time.',
+    avail:[
+      {mode:'AC-PC / SIMV-PC',yes:true,note:'Vent pressurizes circuit to PEEP+PC for the Insp Time. Vt delivered varies with compliance.'},
+      {mode:'AC-VC / SIMV-VC',yes:false,note:'Volume is controlled directly. Resulting pressure varies — monitored via peak pressure.'},
+      {mode:'CPAP / NPPV',yes:false,note:'Not active. NPPV uses Pressure Support (IPAP above EPAP) instead.'},
+    ],
+    pearl:'Monitor delivered Vt closely in pressure mode. If compliance worsens (pneumothorax, secretions), same PC delivers less volume.'
+  },
+  it:{tag:'control',tagCls:'tag-control',title:'Inspiratory Time',range:'0.3 s – (60÷Rate − 0.5 s)  |  Typical: 0.8–1.2 s',
+    desc:'Duration of each inspiratory phase. <strong>Active in all mandatory breath modes</strong> — both Volume and Pressure A/C and SIMV. In Volume mode, IT directly controls insp duration and determines calculated peak flow (Vcalc). In Pressure mode, IT sets how long the pressure plateau is held. <strong>Maximum IT is mathematically limited</strong> to (60÷Rate − 0.5 s) to guarantee at least 0.5 s of expiratory time.',
+    avail:[
+      {mode:'AC-VC / SIMV-VC',yes:true,note:'Sets insp duration directly. Vent displays calculated Vcalc (peak flow). I:E = IT ÷ (cycle time − IT).'},
+      {mode:'AC-PC / SIMV-PC',yes:true,note:'Sets how long each mandatory breath holds at the pressure target. Watch I:E ratio — avoid inverse ratios.'},
+      {mode:'NPPV / BiPAP',yes:true,note:'Sets maximum inspiratory time before the vent cycles back to EPAP. Acts as a backup Ti limit.'},
+      {mode:'CPAP / PSV',yes:false,note:'Spontaneous only — breath duration determined by patient effort and flow cycling. No mandatory IT.'},
+    ],
+    pearl:'Max IT = (60÷Rate) − 0.5 s. Example: Rate 12 → cycle = 5.0 s → max IT = 4.5 s. At Rate 20 → cycle = 3.0 s → max IT = 2.5 s. Insufficient exp time → auto-PEEP and hemodynamic compromise.'
+  },
+  ps:{tag:'control',tagCls:'tag-control',title:'Pressure Support / IPAP',range:'0–40 cmH₂O  |  Typical: 5–10',
+    desc:'In invasive modes: pressure boost for spontaneous breaths. <strong>In NPPV: this is the IPAP above EPAP</strong> — the total inspiratory pressure = EPAP + this value.',
+    avail:[
+      {mode:'AC-VC / AC-PC',yes:false,note:'All breaths are mandatory in A/C. No spontaneous breaths to support.'},
+      {mode:'SIMV-VC / SIMV-PC',yes:true,note:'Supports spontaneous breaths between mandatory breaths. Reduces work of breathing.'},
+      {mode:'CPAP / PSV',yes:true,note:'Primary ventilation. Every breath is PS-augmented. Wean by reducing PS.'},
+      {mode:'NPPV / BiPAP',yes:true,note:'Sets IPAP above EPAP. Total inspiratory pressure = EPAP + this value. Typical NPPV: EPAP 5, IPAP 10–15 (so PS = 5–10).'},
+    ],
+    pearl:'NPPV example: EPAP 5 + PS 10 = IPAP 15 cmH₂O. IPAP drives CO₂ removal; EPAP improves oxygenation. Minimum PS of ~5 overcomes mask/circuit resistance.'
+  },
+  fio2:{tag:'control',tagCls:'tag-control',title:'FiO₂ / O₂ Flush',range:'21–100%  |  Hold 3 sec for 100% flush',
+    desc:'Fraction of inspired oxygen. Active in all modes. In NPPV, oxygen is entrained into the circuit at this concentration.',
+    avail:[{mode:'All modes',yes:true,note:'Always active. Titrate to SpO₂ 94–98% (88–92% in chronic hypercapnic COPD). Hold knob 3 sec to flush to 100% for ~2 min.'}],
+    pearl:'Start 100% FiO₂ for all critically ill patients, then titrate down. Hyperoxia is harmful — target 94–98%, not 100%.'
+  },
+  sens:{tag:'control',tagCls:'tag-control',title:'Sensitivity (Flow Trigger)',range:'1–9 L/min  |  Typical: 1–3  |  Lower = easier to trigger',
+    desc:'Flow trigger threshold. Patient must generate this inspiratory flow to trigger a breath. Active in all modes — critical in CPAP and NPPV where every breath must be triggered.',
+    avail:[{mode:'All modes',yes:true,note:'In NPPV, sensitivity is especially important — an apneic patient on NPPV with poor sensitivity cannot trigger the machine.'}],
+    pearl:'Auto-triggering (vent fires without patient effort): sensitivity too low — increase it. Patient straining to trigger: sensitivity too high — decrease it.'
+  },
+  peep:{tag:'control',tagCls:'tag-control',title:'PEEP / CPAP / EPAP',range:'0–20 cmH₂O  |  Standard: 5 cmH₂O',
+    desc:'Maintains positive pressure at end-expiration. Active in ALL modes. In NPPV this knob sets the <strong>EPAP</strong> — the pressure the patient exhales against and the baseline for oxygenation.',
+    avail:[
+      {mode:'AC / SIMV modes',yes:true,note:'Physiologic PEEP. Prevents alveolar collapse. Start 5 cmH₂O for all intubated patients.'},
+      {mode:'CPAP / PSV',yes:true,note:'This IS the CPAP level. The baseline pressure throughout the breathing cycle.'},
+      {mode:'NPPV / BiPAP',yes:true,note:'This is EPAP. Improves oxygenation by maintaining alveolar recruitment. Typical 4–8 cmH₂O. Total IPAP = EPAP + PS knob.'},
+    ],
+    pearl:'NPPV: EPAP primarily helps oxygenation (like PEEP). IPAP (EPAP + PS) primarily helps ventilation and CO₂ removal.'
+  },
+  hipres:{tag:'alarm',tagCls:'tag-alarm',title:'High Pressure Limit',range:'20–80 cmH₂O  |  Red line on waveform',
+    desc:'If circuit pressure reaches this level, inspiration terminates immediately and the alarm sounds. The red line on the waveform shows this limit — the waveform is clamped here.',
+    avail:[{mode:'All modes',yes:true,note:'Always active. In pressure modes this acts as a secondary safety limit above the PC setting.'}],
+    pearl:'Frequent high-pressure alarms = investigate the patient. Causes: coughing, bronchospasm, secretions, right mainstem intubation, tension pneumothorax, biting tube, kinked circuit.'
+  },
+  lowpres:{tag:'alarm',tagCls:'tag-alarm',title:'Low Pressure Alarm',range:'0–20 cmH₂O  |  Orange line on waveform',
+    desc:'Alarms if circuit pressure does not reach this threshold during a breath. Indicates circuit disconnect, large leak, or cuff failure. The orange line on the waveform marks this threshold.',
+    avail:[{mode:'All modes',yes:true,note:'If peak pressure stays below this level, alarm fires. In NPPV with a mask, small leaks are expected — set this conservatively.'}],
+    pearl:'In NPPV, intentional mask leak is normal — do not set this too high or it will alarm constantly. Start low (2–3 cmH₂O) and titrate.'
+  },
+  lowmv:{tag:'alarm',tagCls:'tag-alarm',title:'Low Minute Volume',range:'0–20 L/min',
+    desc:'Alarms if total minute ventilation falls below threshold. Critical in CPAP and NPPV where no mandatory backup rate is delivered.',
+    avail:[{mode:'All modes',yes:true,note:'Set ~20% below expected MV. In spontaneous modes (CPAP, NPPV) this is the primary protection against apnea.'}],
+    pearl:'In NPPV: if patient becomes apneic or the mask dislodges completely, this alarm should fire. Do not silence without investigating.'
+  },
+  apnea:{tag:'alarm',tagCls:'tag-alarm',title:'Vent Inoperative / Apnea',range:'10–60 sec  |  Typical 20 sec',
+    desc:'Time without a detected breath before backup ventilation activates and alarm sounds.',
+    avail:[{mode:'All modes',yes:true,note:'After apnea interval, LTV switches to backup A/C settings. In NPPV, this is the safety net if the patient stops breathing.'}],
+    pearl:'Assess the patient after any apnea alarm — not just the machine. Causes: over-sedation, neuro event, tube/mask obstruction, complete circuit disconnect.'
+  },
+  manual:{tag:'button',tagCls:'tag-button',title:'Manual Breath',range:'Momentary — one breath on press',
+    desc:'Delivers one mandatory breath immediately at current settings.',
+    avail:[{mode:'All modes',yes:true,note:'In NPPV, delivers one full IPAP breath. Useful for pre-oxygenation before suctioning or mask removal.'}],
+    pearl:'Press 3–5 times before suctioning. Breath delivered mid-cycle — avoid rapid stacking in obstructive patients.'
+  },
+  insphold:{tag:'button',tagCls:'tag-button',title:'Inspiratory Hold',range:'Hold during inspiration',
+    desc:'Holds end-inspiration to measure plateau pressure and static compliance.',
+    avail:[{mode:'Volume modes',yes:true,note:'Plateau pressure target <30 cmH₂O. Pplat − PEEP = driving pressure (target <15).'}],
+    pearl:'High Ppeak + normal Pplat = airway resistance problem. High Ppeak + high Pplat = compliance problem (ARDS, pneumothorax).'
+  },
+  exphold:{tag:'button',tagCls:'tag-button',title:'Expiratory Hold',range:'Hold during expiration',
+    desc:'Holds end-expiration to measure total PEEP including auto-PEEP (air trapping).',
+    avail:[{mode:'All modes',yes:true,note:'Total PEEP − Set PEEP = Auto-PEEP. Auto-PEEP >5 cmH₂O is clinically significant.'}],
+    pearl:'Auto-PEEP causes missed triggers, hemodynamic compromise, and worsens dyssynchrony. Fix: reduce rate, reduce Vt, extend exp time.'
+  },
+  o2flush:{tag:'button',tagCls:'tag-button',title:'100% O₂ / O₂ Flush',range:'Hold 3 sec — auto-reverts ~2 min',
+    desc:'Overrides FiO₂ to 100% temporarily. Use before all suction events.',
+    avail:[{mode:'All modes',yes:true,note:'Auto-reverts after ~2 min. Verify FiO₂ display returns to set value afterward.'}],
+    pearl:'Standard pre-suction protocol. Suction events cause significant desaturation — never skip this step.'
+  },
+  silence:{tag:'button',tagCls:'tag-button',title:'Alarm Silence / Reset',range:'Silences ~2 minutes',
+    desc:'Mutes audible alarm while you assess the cause. Visual alarms remain active.',
+    avail:[{mode:'All modes',yes:true,note:'2-minute countdown. Alarm re-sounds if not corrected. Silence → Assess → Correct → Confirm.'}],
+    pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
+  },
+};
+
+// ── DRAWER ────────────────────────────────────────────────────
+function openDrawer(key){
+  // ── INSP HOLD: dynamic plateau pressure readout ──
+  if(key==='insphold'){
+    var d=calcPplat();
+    var html='<span class="drawer-tag tag-button">BUTTON</span>';
+    html+='<div class="drawer-title">Inspiratory Hold — Plateau Pressure</div>';
+    if(!d){
+      // Pressure control or spontaneous mode
+      html+='<div class="drawer-range">Volume mode only for Pplat measurement</div>';
+      html+='<div class="drawer-desc">Plateau pressure measurement requires <strong>Volume Control</strong> mode. In Pressure Control, the vent directly sets circuit pressure — PIP and Pplat are essentially the same value and no resistance component can be isolated.<br><br>Switch to Volume A/C or Volume SIMV and tap again.</div>';
+    } else {
+      html+='<div class="drawer-range">Hold at end-inspiration — flow stops — resistance pressure disappears</div>';
+      // Live value cards
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0">';
+      html+='<div style="background:#080f08;border:1px solid #1a3a1a;border-radius:8px;padding:10px 12px">';
+      html+='<div style="font-size:9px;color:#2a6a2a;letter-spacing:0.1em;margin-bottom:4px">PEAK (PIP)</div>';
+      html+='<div style="font-family:monospace;font-size:22px;font-weight:700;color:#39ff5a">'+d.pip+'<span style="font-size:11px;color:#2a6a2a"> cmH₂O</span></div></div>';
+      html+='<div style="background:#041520;border:1px solid #1a3a4a;border-radius:8px;padding:10px 12px">';
+      html+='<div style="font-size:9px;color:#1a5a7a;letter-spacing:0.1em;margin-bottom:4px">PLATEAU (Pplat)</div>';
+      html+='<div style="font-family:monospace;font-size:22px;font-weight:700;color:#4a9eff">'+d.pplat+'<span style="font-size:11px;color:#1a5a7a"> cmH₂O</span></div></div>';
+      html+='<div style="background:#0d0804;border:1px solid #3a2a08;border-radius:8px;padding:10px 12px">';
+      html+='<div style="font-size:9px;color:#6a5010;letter-spacing:0.1em;margin-bottom:4px">DRIVING PRESSURE</div>';
+      var driveColor=d.drive>15?'#e63946':d.drive>12?'#f4a261':'#f4a261';
+      html+='<div style="font-family:monospace;font-size:22px;font-weight:700;color:'+driveColor+'">'+d.drive+'<span style="font-size:11px;color:#6a5010"> cmH₂O</span></div>';
+      html+='<div style="font-size:10px;color:#555;margin-top:3px">Pplat − PEEP | target &lt;15</div></div>';
+      html+='<div style="background:#100a0a;border:1px solid #2a1a1a;border-radius:8px;padding:10px 12px">';
+      html+='<div style="font-size:9px;color:#6a2a2a;letter-spacing:0.1em;margin-bottom:4px">STATIC COMPLIANCE</div>';
+      html+='<div style="font-family:monospace;font-size:22px;font-weight:700;color:#ff6b6b">'+d.comp+'<span style="font-size:11px;color:#6a2a2a"> mL/cmH₂O</span></div>';
+      html+='<div style="font-size:10px;color:#555;margin-top:3px">Vt ÷ (Pplat−PEEP) | normal 60–80</div></div>';
+      html+='</div>';
+      html+='<div style="background:#0a0d15;border:1px solid #2a2a4a;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#888;line-height:1.5">';
+      html+='<strong style="color:#aaa">Resistance component (PIP−Pplat):</strong> '+d.raw+' cmH₂O ';
+      html+='| Simulated R<sub>aw</sub> = '+RAW_CMHZO_PER_LPS+' cmH₂O/(L/s) | Peak flow = '+(Math.round(vals.vt.v/vals.it.v)/1000).toFixed(2)+' L/s</div>';
+      var driveMsg=d.drive>15?'⚠ Driving pressure &gt;15 — ARDS risk elevated. Consider reducing Vt toward 6 mL/kg IBW.':d.drive>12?'Driving pressure borderline — monitor closely.':'Driving pressure within target range.';
+      html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>';
+      html+=driveMsg+'<br><br>High PIP + normal Pplat → airway resistance problem (secretions, bronchospasm, biting tube). High PIP + high Pplat → compliance problem (ARDS, pneumothorax, auto-PEEP). Pplat &gt;30 cmH₂O = lung injury risk — reduce Vt or rate.</div>';
+    }
+    document.getElementById('drawer-content').innerHTML=html;
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+    return;
+  }
+
+  var c=CONTROLS[key]; if(!c) return;
+  var inactive=(['rate','vt','pc','it','ps'].indexOf(key)>=0)&&!isActive(key);
+  var html='';
+  html+='<span class="drawer-tag '+(inactive?'tag-inactive':c.tagCls)+'">'+c.tag.toUpperCase()+(inactive?' · INACTIVE':'')+'</span>';
+  html+='<div class="drawer-title">'+c.title+'</div>';
+  // For IT: show live computed max
+  var rangeStr=c.range;
+  if(key==='it'){
+    var cycleS=Math.round(60/vals.rate.v*10)/10;
+    var maxIT=Math.round(Math.max(0.3,cycleS-0.5)*10)/10;
+    rangeStr='0.3 – <strong>'+maxIT+' s</strong> (at '+vals.rate.v+' bpm, cycle='+cycleS+'s, min exp=0.5s)  |  Typical: 0.8–1.2 s';
+  }
+  html+='<div class="drawer-range">'+rangeStr+'</div>';
+  if(inactive){
+    html+='<div class="inactive-banner">⚠ <strong>'+c.title+'</strong> is not active in <strong>'+getModeLabel().main+'</strong>. Tap to see how it works in the modes where it is available.</div>';
+  }
+  html+='<div class="drawer-desc">'+c.desc+'</div>';
+  if(c.avail){
+    if(c.avail.length>1){
+      html+='<div class="avail-grid">';
+      c.avail.forEach(function(a){
+        html+='<div class="avail-cell '+(a.yes?'yes':'no')+'">';
+        html+='<div class="avail-mode">'+a.mode+'</div>';
+        html+='<div class="avail-status">'+(a.yes?'✓ ACTIVE':'— INACTIVE')+'</div>';
+        html+='<div class="avail-note">'+a.note+'</div></div>';
+      });
+      html+='</div>';
+    } else {
+      html+='<div class="detail-block" style="border-left-color:#2a5a2a">';
+      html+='<div class="detail-lbl">'+c.avail[0].mode+'</div>';
+      html+='<div class="detail-text">'+c.avail[0].note+'</div></div>';
+    }
+  }
+  html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>'+c.pearl+'</div>';
+  document.getElementById('drawer-content').innerHTML=html;
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+var ty0=0;
+document.getElementById('drawer').addEventListener('touchstart',function(e){ty0=e.touches[0].clientY;},{passive:true});
+document.getElementById('drawer').addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-ty0>60)closeDrawer();},{passive:true});
+
+// ══════════════════════════════════════════════════════════════
+// GAME / TUTORIAL LAYER
+// ══════════════════════════════════════════════════════════════
+
+var STAGE_DEFS=[
+  {
+    name:'Stage 1 — Volume Basics',
+    hint:'Rate and Tidal Volume are your only tools right now. Dial them in.',
+    available:['rate','vt'],
+    availModes:['ac'], availBT:['volume'],
+    targets:[
+      {key:'rate',val:12,label:'Rate',unit:'bpm'},
+      {key:'vt',  val:500,label:'Tidal Vol',unit:'mL'}
+    ],
+    quiz:{
+      q:'At Rate 12 bpm and Tidal Volume 500 mL, what is the Minute Ventilation?',
+      choices:['3 L/min','6 L/min','9 L/min','12 L/min'],
+      correct:1,
+      exp:'<strong>MV = Rate × Vt = 12 × 0.5 L = 6 L/min.</strong> Normal resting MV is 5–8 L/min. CO₂ clearance is proportional to MV — doubling the rate or Vt doubles CO₂ removal.'
+    },
+    unlock:'🔓 <strong>Inspiratory Time</strong> unlocked — control the duration of each breath.'
+  },
+  {
+    name:'Stage 2 — Inspiratory Time',
+    hint:'Set Rate and IT to the targets below, then answer a question about I:E ratio.',
+    available:['rate','vt','it'],
+    availModes:['ac'], availBT:['volume'],
+    targets:[
+      {key:'rate',val:15,label:'Rate',unit:'bpm'},
+      {key:'it',  val:1.5,label:'Insp Time',unit:'s'}
+    ],
+    quiz:{
+      q:'At Rate 15 bpm and IT 1.5 s, the breath cycle is 4 s. What is the I:E ratio — and is expiratory time adequate?',
+      choices:[
+        '1:1.7 — Exp = 2.5 s. Marginal in obstructive disease; may cause auto-PEEP.',
+        '1:2.0 — Always safe. Expiratory time is never a concern.',
+        '1:0.5 — Inverse ratio, immediately dangerous.',
+        '1:4.0 — Perfectly normal, no concerns.'
+      ],
+      correct:0,
+      exp:'Cycle = 60÷15 = 4 s. Exp = 4−1.5 = 2.5 s. I:E ≈ <strong>1:1.7</strong>. Above the 0.5 s minimum, but for COPD/asthma patients who need long exhalation, even 2.5 s can trap air (auto-PEEP). Target I:E ≥ 1:2 in obstructive disease.'
+    },
+    unlock:'🔓 <strong>PEEP</strong> and <strong>Sensitivity</strong> unlocked — the building blocks of safe ventilation.'
+  },
+  {
+    name:'Stage 3 — PEEP & Triggering',
+    hint:'Set standard starting values for PEEP and Sensitivity.',
+    available:['rate','vt','it','peep','sens'],
+    availModes:['ac'], availBT:['volume'],
+    targets:[
+      {key:'peep',val:5,label:'PEEP',unit:'cmH₂O'},
+      {key:'sens',val:2,label:'Sensitivity',unit:'lpm'}
+    ],
+    quiz:{
+      q:'A patient is straining hard to trigger every breath. Sensitivity is set to 8 L/min. What is the correct fix?',
+      choices:[
+        'Increase Sensitivity to 9 — make the threshold even higher.',
+        'Decrease Sensitivity to 1–2 — make it easier to trigger.',
+        'Increase PEEP by 5 cmH₂O to reduce the work of breathing.',
+        'Increase Rate so the vent takes over all the work.'
+      ],
+      correct:1,
+      exp:'<strong>Higher Sensitivity = harder to trigger</strong> (patient must generate more flow). Decrease to 1–3 L/min to make triggering easier. Flip side: if the vent fires on its own (auto-triggering), sensitivity is too low — increase it.'
+    },
+    unlock:'🔓 <strong>Alarm limits</strong> unlocked — set these on every intubation before ventilating.'
+  },
+  {
+    name:'Stage 4 — Alarm Limits',
+    hint:'Set appropriate alarm limits for a freshly intubated adult.',
+    available:['rate','vt','it','peep','sens','hipres','lowpres','lowmv','apnea'],
+    availModes:['ac'], availBT:['volume'],
+    targets:[
+      {key:'hipres', val:40,label:'Hi Pres',unit:'cmH₂O'},
+      {key:'lowpres',val:5, label:'Lo Pres',unit:'cmH₂O'}
+    ],
+    quiz:{
+      q:'The high-pressure alarm fires on every single breath at the exact same peak pressure. What is the most likely cause?',
+      choices:[
+        'A large air leak around the endotracheal cuff.',
+        'The Hi Pressure Limit is set at or below the patient\'s normal PIP.',
+        'Tension pneumothorax — pressure escalates over each breath.',
+        'The low minute volume alarm is set incorrectly.'
+      ],
+      correct:1,
+      exp:'When the alarm fires at the <em>exact same</em> pressure every breath, the limit is at or below normal PIP. Secretions, bronchospasm, or pneumothorax cause <em>escalating</em> pressures. Fix: set Hi Pressure Limit 5–10 cmH₂O above the patient\'s normal PIP.'
+    },
+    unlock:'🔓 <strong>SIMV mode</strong> and <strong>Pressure Support</strong> unlocked — synchronize the vent with the patient\'s own breathing.'
+  },
+  {
+    name:'Stage 5 — SIMV & Pressure Support',
+    hint:'Switch to SIMV mode and dial in a Pressure Support level.',
+    available:['rate','vt','it','peep','sens','hipres','lowpres','lowmv','apnea','ps'],
+    availModes:['ac','simv'], availBT:['volume'],
+    targets:[
+      {key:'mode',val:'simv',label:'Mode',unit:''},
+      {key:'ps',  val:8,    label:'Press Supp',unit:'cmH₂O'}
+    ],
+    quiz:{
+      q:'In SIMV-VC with Rate 8 and PS 8 cmH₂O, the patient breathes at 22 total breaths/min. What are the extra 14 breaths?',
+      choices:[
+        'Pressure-supported — the vent boosts each effort by 8 cmH₂O above PEEP.',
+        'Full mandatory breaths — same volume as the set Vt.',
+        'Completely unsupported — the patient does all the work on those breaths.',
+        'Impossible — SIMV locks the rate to exactly 8.'
+      ],
+      correct:0,
+      exp:'Mandatory breaths (8/min) deliver the set Vt. Spontaneous breaths between them are <strong>pressure-supported</strong> — the vent augments each effort by 8 cmH₂O. This reduces patient work of breathing without controlling volume on those breaths.'
+    },
+    unlock:'🔓 <strong>Pressure Control</strong> mode unlocked — the vent targets pressure; volume follows compliance.'
+  },
+  {
+    name:'Stage 6 — Pressure Control',
+    hint:'Switch to Pressure Control and set a pressure target.',
+    available:['rate','vt','it','peep','sens','hipres','lowpres','lowmv','apnea','ps','pc'],
+    availModes:['ac','simv'], availBT:['volume','pressure'],
+    targets:[
+      {key:'breathtype',val:'pressure',label:'Breath Type',unit:''},
+      {key:'pc',        val:20,        label:'Pres Ctrl',unit:'cmH₂O'}
+    ],
+    quiz:{
+      q:'A patient on AC-PC (PC 20, PEEP 5) develops a tension pneumothorax — compliance drops sharply. What happens to delivered Tidal Volume?',
+      choices:[
+        'Decreases — same pressure now moves less volume through stiffer lungs.',
+        'Stays the same — pressure control guarantees the set volume.',
+        'Increases — stiffer lungs store more energy per breath.',
+        'The vent auto-increases PC to maintain Vt.'
+      ],
+      correct:0,
+      exp:'Pressure control delivers a <strong>set pressure, not a set volume</strong>. When compliance drops, the same pressure gradient moves less volume. This is the critical difference from volume control. Always monitor delivered Vt closely when using pressure-targeted modes.'
+    },
+    unlock:'🎉 <strong>Core curriculum complete!</strong> All advanced features unlocked: Insp Hold, CPAP, NPPV/BiPAP, FiO₂, and function buttons. You are now a certified ventilator operator.'
+  }
+];
+
+var gameStage=0;
+var quizAnsweredCorrect=false;
+
+// ── GAME HELPERS ──────────────────────────────────────────────
+function curStage(){ return STAGE_DEFS[gameStage]||null; }
+function gameDone(){ return gameStage>=STAGE_DEFS.length; }
+
+function isControlUnlocked(key){
+  if(gameDone()) return true;
+  return curStage().available.indexOf(key)>=0;
+}
+function isModeUnlocked(m){
+  if(gameDone()) return true;
+  return curStage().availModes.indexOf(m)>=0;
+}
+function isBTUnlocked(bt){
+  if(gameDone()) return true;
+  return curStage().availBT.indexOf(bt)>=0;
+}
+
+function checkTarget(t){
+  if(t.key==='mode')      return ventMode===t.val;
+  if(t.key==='breathtype')return breathType===t.val;
+  var c=vals[t.key]; if(!c) return false;
+  return Math.abs(c.v-t.val)<0.051;
+}
+function allTargetsMet(){
+  if(gameDone()) return false;
+  return curStage().targets.every(function(t){return checkTarget(t);});
+}
+
+// ── MISSION CARD RENDER ───────────────────────────────────────
+function renderMissionCard(){
+  var bar=document.getElementById('mission-bar');
+  if(!bar) return;
+
+  if(gameDone()){
+    bar.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
+      +'<span style="font-size:20px">🎓</span>'
+      +'<div><div style="font-size:10px;color:var(--blue);font-weight:700;letter-spacing:0.1em">CURRICULUM COMPLETE</div>'
+      +'<div style="font-size:11px;color:#555;margin-top:2px">All features unlocked. Explore freely.</div></div></div>';
+    return;
+  }
+
+  var s=curStage();
+  var total=STAGE_DEFS.length;
+
+  // Progress bar
+  var prog='<div class="mission-progress">';
+  for(var i=0;i<total;i++){
+    var dc=i<gameStage?'done':(i===gameStage?'active':'');
+    prog+='<div class="prog-dot '+dc+'"></div>';
+    if(i<total-1) prog+='<div class="prog-line '+(i<gameStage?'done':'')+'"></div>';
+  }
+  prog+='</div>';
+
+  // Targets
+  var tgts='<div class="mission-targets">';
+  s.targets.forEach(function(t){
+    var met=checkTarget(t);
+    var dv=t.key==='mode'?t.val.toUpperCase():(t.key==='breathtype'?t.val.toUpperCase():(t.val+(t.unit?' '+t.unit:'')));
+    tgts+='<div class="mtgt'+(met?' hit':'')+'"><div>'
+      +'<div class="mtgt-lbl">'+t.label+'</div>'
+      +'<div class="mtgt-val">'+(met?'<span class="mtgt-check">✓</span> ':'')+dv+'</div>'
+      +'</div></div>';
+  });
+  tgts+='</div>';
+
+  var ready=allTargetsMet();
+  var cta='<button class="mission-cta visible '+(ready?'ready':'wait')+'" onclick="'+(ready?'openQuiz()':'')+'">'
+    +(ready?'✓ ALL SET — ANSWER THE QUESTION':'Match targets above to unlock question')+'</button>';
+
+  bar.innerHTML=prog
+    +'<div class="mission-stage">'+s.name+'</div>'
+    +'<div class="mission-hint">'+s.hint+'</div>'
+    +tgts+cta;
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────
+function openQuiz(){
+  if(!allTargetsMet()) return;
+  var s=curStage();
+  var q=s.quiz;
+  quizAnsweredCorrect=false;
+
+  var html='<div class="quiz-badge">'+s.name+' — Knowledge Check</div>';
+  html+='<div class="quiz-q">'+q.q+'</div>';
+  html+='<div class="quiz-choices">';
+  q.choices.forEach(function(c,i){
+    html+='<button class="quiz-btn" onclick="submitAnswer('+i+')">'+c+'</button>';
+  });
+  html+='</div>';
+  html+='<div class="quiz-exp" id="qexp">'+q.exp+'</div>';
+  html+='<div class="quiz-unlock" id="qunlock">'+s.unlock+'</div>';
+
+  document.getElementById('quiz-inner').innerHTML=html;
+  document.getElementById('quiz-continue').style.display='none';
+  document.getElementById('quiz-overlay').classList.add('open');
+}
+
+function submitAnswer(idx){
+  var btns=document.querySelectorAll('.quiz-btn');
+  if(!btns.length||btns[0].classList.contains('disabled')) return;
+  var correct=curStage().quiz.correct;
+  quizAnsweredCorrect=(idx===correct);
+  btns.forEach(function(b,i){
+    b.classList.add('disabled');
+    if(i===correct)      b.classList.add('correct');
+    else if(i===idx)     b.classList.add('wrong');
+    else                 b.classList.add('reveal');
+  });
+  document.getElementById('qexp').style.display='block';
+  if(quizAnsweredCorrect) document.getElementById('qunlock').style.display='block';
+  var cb=document.getElementById('quiz-continue');
+  cb.style.display='block';
+  cb.textContent=quizAnsweredCorrect?'Unlock next stage →':'Got it — continue →';
+}
+
+function closeQuiz(){
+  document.getElementById('quiz-overlay').classList.remove('open');
+}
+
+function advanceStage(){
+  closeQuiz();
+  if(gameStage<STAGE_DEFS.length) gameStage++;
+  renderMissionCard();
+  updateUI();
+}
+
+// ── HOOK GAME LOCKS INTO updateUI ────────────────────────────
+var _origUpdateUI=updateUI;
+updateUI=function(){
+  _origUpdateUI();
+
+  // Lock/unlock knob controls
+  ['rate','vt','it','pc','ps','fio2','sens'].forEach(function(k){
+    var w=document.getElementById('cw-'+k);
+    if(w) w.classList.toggle('game-locked',!isControlUnlocked(k));
+  });
+
+  // PEEP row
+  var pr=document.querySelector('.peep-row');
+  if(pr) pr.classList.toggle('game-locked',!isControlUnlocked('peep'));
+
+  // Alarm grid
+  var ag=document.querySelector('.alarm-grid');
+  if(ag) ag.classList.toggle('game-locked',!isControlUnlocked('hipres'));
+
+  // Mode buttons
+  ['ac','simv','cpap','nppv'].forEach(function(m){
+    var el=document.getElementById('btn-'+m);
+    if(el) el.classList.toggle('game-locked',!isModeUnlocked(m));
+  });
+  var bv=document.getElementById('btn-vol'),bp=document.getElementById('btn-pres');
+  if(bv) bv.classList.toggle('game-locked',!isBTUnlocked('volume'));
+  if(bp) bp.classList.toggle('game-locked',!isBTUnlocked('pressure'));
+
+  // FiO2 knob (unlocked only on game completion)
+  var fw=document.getElementById('cw-fio2');
+  if(fw) fw.classList.toggle('game-locked',!gameDone());
+
+  // Refresh mission card
+  renderMissionCard();
+};
+
+// ── PATCH MODE SETTERS TO RESPECT GAME LOCKS ─────────────────
+var _origSetMode=setMode;
+setMode=function(m){
+  if(!isModeUnlocked(m)) return;
+  _origSetMode(m);
+};
+var _origSetBT=setBreathType;
+setBreathType=function(bt){
+  if(!isBTUnlocked(bt)) return;
+  _origSetBT(bt);
+};
+
+// ── PATCH adj TO RESPECT GAME LOCKS ──────────────────────────
+var _origAdj=adj;
+adj=function(key,delta){
+  if(!isControlUnlocked(key)) return;
+  _origAdj(key,delta);
+};
+
+// ── INIT GAME ─────────────────────────────────────────────────
+renderMissionCard();
+</script>
+<!-- QUIZ OVERLAY -->
+<div class="quiz-overlay" id="quiz-overlay">
+  <div class="quiz-backdrop" onclick="closeQuiz()"></div>
+  <div class="quiz-sheet" id="quiz-sheet">
+    <div class="quiz-handle"></div>
+    <div class="quiz-inner" id="quiz-inner"></div>
+    <button class="quiz-continue" id="quiz-continue" onclick="advanceStage()">Continue →</button>
+  </div>
+</div>
+</body>
+</html>
