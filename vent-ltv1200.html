@@ -342,6 +342,76 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
 .dv-val-unit{font-size:11px;color:#2a6a2a;margin-top:3px}
 .dv-val-lbl{font-size:9px;color:#555;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px}
 @media (pointer:coarse){.knob-lbl::after{content:"\21D5";font-size:6px;color:#333;margin-left:3px}}
+
+/* ── COMPACT PHONE LAYOUT (no-scroll) ── */
+@media (pointer:coarse){
+  /* overall container */
+  .case-wrap{margin:6px auto;padding:0 8px 16px}
+  .case{padding:7px}
+  .panel{padding:8px}
+
+  /* hide status LEDs row entirely */
+  .status-row{display:none}
+
+  /* mission / gamification bar — tighter */
+  .mission-bar{padding:8px 10px;margin-bottom:8px}
+  .mission-hint{font-size:10px;margin-bottom:4px}
+  .mission-targets{gap:3px;margin-bottom:4px}
+  .mtgt{padding:4px 7px;gap:4px}
+  .mtgt-val{font-size:11px}
+  .mission-cta{padding:7px;font-size:11px}
+  .mission-progress{margin-bottom:5px}
+
+  /* waveform — shorter canvas, hide title */
+  .waveform-wrap{margin-bottom:8px}
+  .waveform-title{display:none}
+  canvas#pip-canvas{height:44px}
+
+  /* LCD — hide numeric grid (values visible on knobs), tighten mode row */
+  .lcd{padding:6px 10px;margin-bottom:8px}
+  .lcd-mode-row{margin-bottom:0;padding-bottom:0;border-bottom:none}
+  .lcd-mode-sub{display:none}
+  .lcd-grid{display:none}
+  .lcd-mode-main{font-size:17px}
+  .lcd-ie{font-size:10px}
+
+  /* mode panel */
+  .mode-panel{padding:7px;margin-bottom:8px}
+  .mode-row{margin-bottom:4px;gap:3px}
+  .mode-row-lbl{font-size:7px;width:44px}
+  .mode-btn{padding:5px 3px;font-size:9px}
+
+  /* section labels */
+  .sec-lbl{margin:5px 0 3px}
+
+  /* control knobs — smaller */
+  .ctrl-grid{gap:3px;margin-bottom:2px}
+  .knob-outer{width:40px;height:40px}
+  .knob-ind{height:9px;top:4px}
+  .knob-val-num{font-size:10px}
+  .knob-val-unit{font-size:5px}
+  .knob-lbl{font-size:6px}
+
+  /* PEEP row */
+  .peep-row{padding:7px 10px;margin-bottom:2px}
+  .peep-knob{width:42px;height:42px}
+  .peep-val-num{font-size:11px}
+  .peep-val-unit{font-size:6px}
+  .peep-lbl{font-size:10px;margin-bottom:1px}
+  .peep-sub{font-size:9px}
+
+  /* alarm knobs — smaller */
+  .alarm-grid{gap:3px}
+  .alarm-knob{width:34px;height:34px}
+  .alarm-ind{height:8px;top:4px}
+  .alarm-val-num{font-size:9px}
+  .alarm-val-unit{font-size:5px}
+  .alarm-lbl{font-size:6px}
+
+  /* function buttons */
+  .fn-grid{margin-top:5px;gap:3px}
+  .fn-btn{padding:6px 2px;font-size:7px}
+}
 </style>
 </head>
 <body>
@@ -2027,18 +2097,13 @@ function toggleMute(){
 
 var KNOB_UNITS={rate:"bpm",vt:"mL",pc:"cmH₂O",it:"sec",ps:"cmH₂O",fio2:"%",sens:"lpm",peep:"cmH₂O",hipres:"cmH₂O",lowpres:"cmH₂O",lowmv:"L/min",apnea:"sec"};
 function adjAndUpdate(key,delta){adj(key,delta);var el=document.getElementById("dv-num-"+key);if(el)el.textContent=(key==="it")?vals[key].v.toFixed(1):vals[key].v;}
-var _SWIPE_PX=14;
-function setupSwipe(el,key){var sy=0,swiped=false,accum=0;
-  el.addEventListener("touchstart",function(e){sy=e.touches[0].clientY;swiped=false;accum=0;},{passive:true});
-  el.addEventListener("touchmove",function(e){var dy=sy-e.touches[0].clientY;
-    if(Math.abs(dy)>6){swiped=true;accum+=dy;
-      var step=vals[key]?vals[key].step:1;
-      while(accum>=_SWIPE_PX){adj(key,step);accum-=_SWIPE_PX;}
-      while(accum<=-_SWIPE_PX){adj(key,-step);accum+=_SWIPE_PX;}
-      sy=e.touches[0].clientY;e.preventDefault();
-    }},{passive:false});
+// Tap handler: opens drawer on tap, never blocks page scroll
+function setupSwipe(el,key){
+  var sy=0,moved=false;
+  el.addEventListener("touchstart",function(e){sy=e.touches[0].clientY;moved=false;},{passive:true});
+  el.addEventListener("touchmove",function(e){if(Math.abs(e.touches[0].clientY-sy)>10)moved=true;},{passive:true});
   el.addEventListener("touchend",function(e){
-    if(!swiped){openDrawer(key);}e.stopPropagation();e.preventDefault();
+    if(!moved){openDrawer(key);e.preventDefault();}
   },{passive:false});}
 (function(){document.querySelectorAll(".ctrl-wrap").forEach(function(w){var m=(w.getAttribute("onclick")||"").match(/openDrawer\('(\w+)'\)/);if(m){w.removeAttribute("onclick");setupSwipe(w,m[1]);}});
 var pr=document.querySelector(".peep-row");if(pr){pr.removeAttribute("onclick");setupSwipe(pr,"peep");}
