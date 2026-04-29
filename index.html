@@ -575,7 +575,7 @@ function calcDoses(){
     h += '<span class="dbadge pm" style="margin-left:auto">PM ONLY</span></div>';
     h += '<table style="width:100%;border-collapse:collapse;font-size:13px">';
     h += '<tr style="border-bottom:1px solid var(--border)"><td style="font-family:var(--mono);font-size:10px;color:var(--gray);padding:3px 4px">Dose (mcg/kg/min)</td><td style="font-family:var(--mono);font-size:10px;color:var(--teal2);text-align:right;padding:3px 4px">&#x1F489; Pump (mL/hr)</td><td style="font-family:var(--mono);font-size:10px;color:var(--warn);text-align:right;padding:3px 4px">&#x1F4A7; Gravity 60 gtt/mL*</td></tr>';
-    [0.05, 0.1, 0.2, 0.5, 1.0].forEach(function(d) {
+    [0.01, 0.02, 0.05, 0.07, 0.1].forEach(function(d) {
       var mLhr = (d * w * 60 / neConc);
       h += '<tr style="border-bottom:1px solid #182030">';
       h += '<td style="color:var(--gray);padding:6px 4px">' + d + ' mcg/kg/min</td>';
