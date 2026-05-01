@@ -1518,9 +1518,9 @@ function renderForms(){
       var now = new Date();
       var submittedAt = (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear()+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
       var crew = [
-        {name: getField('cgf-name-1'), cert: getField('cgf-cert-1'), sig: getSig(1), label: 'Primary Crew Member'},
-        {name: getField('cgf-name-2'), cert: getField('cgf-cert-2'), sig: getSig(2), label: 'Secondary Crew Member'},
-        {name: getField('cgf-name-3'), cert: getField('cgf-cert-3'), sig: getSig(3), label: 'Third Crew Member'},
+        {name: getField('cgf-name-1'), cert: getField('cgf-cert-1'), sig: getSig(1), label: 'Crew Member'},
+        {name: getField('cgf-name-2'), cert: getField('cgf-cert-2'), sig: getSig(2), label: 'Crew Member'},
+        {name: getField('cgf-name-3'), cert: getField('cgf-cert-3'), sig: getSig(3), label: 'Crew Member'},
       ];
       try {
         var jsPDF = window.jspdf.jsPDF;
