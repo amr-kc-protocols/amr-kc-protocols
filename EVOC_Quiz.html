@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
 <title>EVOC Knowledge Quiz | AMR</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -22,8 +23,19 @@
 
 - { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Force dark theme regardless of browser/OS color overrides */
+:root { color-scheme: dark; }
+
+@media (forced-colors: active) {
+body, header, main, .question-card, .option, .score-stat,
+.review-item, .tab, .progress-track, .feedback {
+forced-color-adjust: none;
+}
+}
+
 body {
 background: var(–navy);
+background-color: #0a1628;
 color: var(–text);
 font-family: ‘Barlow’, sans-serif;
 font-weight: 300;
@@ -47,7 +59,8 @@ rgba(255,255,255,0.02) 60px
 
 /* ── HEADER ── */
 header {
-background: linear-gradient(135deg, var(–blue) 0%, #0d2244 100%);
+background-color: #1a3a6e;
+background: linear-gradient(135deg, #1a3a6e 0%, #0d2244 100%);
 border-bottom: 3px solid var(–accent);
 padding: 28px 40px 24px;
 position: relative;
@@ -178,6 +191,7 @@ background: var(–border);
 
 .question-card {
 background: var(–card);
+background-color: #111e35;
 border: 1px solid var(–border);
 border-radius: 4px;
 padding: 28px 32px;
