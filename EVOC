@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOC Knowledge Quiz | AMR</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --blue: #1a3a6e;
+    --accent: #f5a623;
+    --red: #c0392b;
+    --green: #1a7a4a;
+    --light: #e8edf5;
+    --text: #d0d8e8;
+    --muted: #7a8aaa;
+    --card: #111e35;
+    --border: #1e3050;
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–navy);
+color: var(–text);
+font-family: ‘Barlow’, sans-serif;
+font-weight: 300;
+min-height: 100vh;
+background-image:
+repeating-linear-gradient(
+0deg,
+transparent,
+transparent 59px,
+rgba(255,255,255,0.02) 59px,
+rgba(255,255,255,0.02) 60px
+),
+repeating-linear-gradient(
+90deg,
+transparent,
+transparent 59px,
+rgba(255,255,255,0.02) 59px,
+rgba(255,255,255,0.02) 60px
+);
+}
+
+/* ── HEADER ── */
+header {
+background: linear-gradient(135deg, var(–blue) 0%, #0d2244 100%);
+border-bottom: 3px solid var(–accent);
+padding: 28px 40px 24px;
+position: relative;
+overflow: hidden;
+}
+header::before {
+content: ‘’;
+position: absolute;
+top: -60px; right: -60px;
+width: 200px; height: 200px;
+border-radius: 50%;
+background: rgba(245,166,35,0.07);
+}
+.header-inner {
+max-width: 860px;
+margin: 0 auto;
+position: relative;
+}
+.badge {
+display: inline-block;
+background: var(–accent);
+color: #000;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 11px;
+letter-spacing: 2px;
+padding: 3px 10px;
+border-radius: 2px;
+margin-bottom: 10px;
+text-transform: uppercase;
+}
+h1 {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 900;
+font-size: clamp(28px, 5vw, 46px);
+line-height: 1;
+letter-spacing: -0.5px;
+color: #fff;
+}
+h1 span { color: var(–accent); }
+.header-meta {
+margin-top: 10px;
+font-size: 13px;
+color: var(–muted);
+letter-spacing: 0.5px;
+}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+max-width: 860px;
+margin: 28px auto 0;
+padding: 0 20px;
+}
+.progress-label {
+display: flex;
+justify-content: space-between;
+font-size: 12px;
+color: var(–muted);
+margin-bottom: 6px;
+font-family: ‘Barlow Condensed’, sans-serif;
+letter-spacing: 1px;
+text-transform: uppercase;
+}
+.progress-track {
+background: var(–border);
+border-radius: 2px;
+height: 4px;
+overflow: hidden;
+}
+.progress-fill {
+background: var(–accent);
+height: 100%;
+border-radius: 2px;
+transition: width 0.5s ease;
+width: 0%;
+}
+
+/* ── MODULE TABS ── */
+.tabs {
+max-width: 860px;
+margin: 24px auto 0;
+padding: 0 20px;
+display: flex;
+gap: 6px;
+}
+.tab {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 600;
+font-size: 12px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+padding: 6px 14px;
+border-radius: 2px;
+border: 1px solid var(–border);
+background: transparent;
+color: var(–muted);
+cursor: default;
+transition: all 0.3s;
+}
+.tab.active { background: var(–accent); color: #000; border-color: var(–accent); }
+.tab.done { border-color: var(–green); color: var(–green); }
+
+/* ── QUIZ AREA ── */
+main {
+max-width: 860px;
+margin: 28px auto 60px;
+padding: 0 20px;
+}
+
+.module-title {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 13px;
+letter-spacing: 2.5px;
+text-transform: uppercase;
+color: var(–accent);
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.module-title::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: var(–border);
+}
+
+.question-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 4px;
+padding: 28px 32px;
+margin-bottom: 16px;
+position: relative;
+transition: border-color 0.3s;
+}
+.question-card.answered { border-color: #1e3a5a; }
+
+.q-number {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 11px;
+letter-spacing: 2px;
+color: var(–muted);
+text-transform: uppercase;
+margin-bottom: 10px;
+}
+
+.q-text {
+font-size: 16px;
+font-weight: 400;
+line-height: 1.55;
+color: #c8d4e8;
+margin-bottom: 20px;
+}
+
+.options {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.option {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+padding: 12px 16px;
+border-radius: 3px;
+border: 1px solid var(–border);
+cursor: pointer;
+transition: all 0.2s;
+background: rgba(255,255,255,0.02);
+position: relative;
+overflow: hidden;
+}
+.option:hover:not(.locked) {
+border-color: #3a5a8a;
+background: rgba(26,58,110,0.3);
+}
+.option.selected:not(.correct):not(.wrong) {
+border-color: var(–accent);
+background: rgba(245,166,35,0.08);
+}
+.option.correct {
+border-color: var(–green);
+background: rgba(26,122,74,0.15);
+}
+.option.wrong {
+border-color: var(–red);
+background: rgba(192,57,43,0.12);
+}
+.option.reveal-correct {
+border-color: var(–green);
+background: rgba(26,122,74,0.08);
+opacity: 0.7;
+}
+.option.locked { cursor: default; }
+
+.opt-letter {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 14px;
+color: var(–muted);
+min-width: 22px;
+padding-top: 1px;
+transition: color 0.2s;
+}
+.option.selected .opt-letter { color: var(–accent); }
+.option.correct .opt-letter { color: #2ecc71; }
+.option.wrong .opt-letter { color: var(–red); }
+
+.opt-text {
+font-size: 14px;
+line-height: 1.45;
+color: var(–text);
+flex: 1;
+}
+
+.opt-icon {
+font-size: 16px;
+min-width: 20px;
+text-align: right;
+opacity: 0;
+transition: opacity 0.2s;
+}
+.option.correct .opt-icon,
+.option.wrong .opt-icon { opacity: 1; }
+
+.feedback {
+margin-top: 14px;
+padding: 12px 16px;
+border-radius: 3px;
+font-size: 13px;
+line-height: 1.5;
+display: none;
+}
+.feedback.show { display: block; }
+.feedback.correct-fb { background: rgba(26,122,74,0.2); border-left: 3px solid var(–green); color: #7adba5; }
+.feedback.wrong-fb { background: rgba(192,57,43,0.15); border-left: 3px solid var(–red); color: #e07070; }
+
+/* ── NAVIGATION ── */
+.nav-buttons {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-top: 28px;
+gap: 12px;
+}
+
+.btn {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 14px;
+letter-spacing: 2px;
+text-transform: uppercase;
+padding: 12px 28px;
+border-radius: 3px;
+border: none;
+cursor: pointer;
+transition: all 0.2s;
+}
+.btn-primary {
+background: var(–accent);
+color: #000;
+}
+.btn-primary:hover { background: #ffc04a; }
+.btn-primary:disabled { background: #4a4020; color: #7a6030; cursor: not-allowed; }
+.btn-ghost {
+background: transparent;
+color: var(–muted);
+border: 1px solid var(–border);
+}
+.btn-ghost:hover { border-color: var(–muted); color: var(–text); }
+.btn-ghost:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.q-counter {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 14px;
+color: var(–muted);
+letter-spacing: 1px;
+}
+
+/* ── SCORE SCREEN ── */
+#score-screen {
+display: none;
+text-align: center;
+padding: 40px 20px 60px;
+}
+.score-ring {
+width: 160px;
+height: 160px;
+border-radius: 50%;
+margin: 0 auto 28px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+border: 6px solid var(–accent);
+position: relative;
+}
+.score-ring::before {
+content: ‘’;
+position: absolute;
+inset: 6px;
+border-radius: 50%;
+background: radial-gradient(circle at 40% 40%, #1a3a6e, var(–navy));
+}
+.score-pct {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 900;
+font-size: 52px;
+color: var(–accent);
+position: relative;
+z-index: 1;
+line-height: 1;
+}
+.score-label {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 12px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: var(–muted);
+position: relative;
+z-index: 1;
+}
+.score-headline {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 900;
+font-size: 32px;
+color: #fff;
+margin-bottom: 8px;
+}
+.score-sub {
+font-size: 14px;
+color: var(–muted);
+margin-bottom: 32px;
+}
+
+.score-breakdown {
+display: flex;
+justify-content: center;
+gap: 24px;
+flex-wrap: wrap;
+margin-bottom: 36px;
+}
+.score-stat {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 4px;
+padding: 16px 24px;
+min-width: 110px;
+}
+.score-stat-num {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 900;
+font-size: 32px;
+line-height: 1;
+}
+.score-stat-num.correct-num { color: #2ecc71; }
+.score-stat-num.wrong-num { color: var(–red); }
+.score-stat-num.total-num { color: var(–accent); }
+.score-stat-lbl {
+font-size: 11px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+color: var(–muted);
+margin-top: 4px;
+font-family: ‘Barlow Condensed’, sans-serif;
+}
+
+#restart-btn { margin-top: 8px; }
+
+/* ── REVIEW ── */
+.review-section { margin-top: 40px; text-align: left; }
+.review-item {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 4px;
+padding: 18px 22px;
+margin-bottom: 10px;
+border-left: 4px solid var(–border);
+}
+.review-item.correct { border-left-color: var(–green); }
+.review-item.wrong { border-left-color: var(–red); }
+.review-q { font-size: 14px; color: #b0bed8; margin-bottom: 8px; }
+.review-answer { font-size: 13px; }
+.review-answer .your { color: var(–red); }
+.review-answer .correct { color: #2ecc71; }
+.review-answer span { display: block; margin-bottom: 2px; }
+
+@media (max-width: 600px) {
+header { padding: 20px; }
+.question-card { padding: 20px; }
+.tabs { flex-wrap: wrap; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="badge">AMR — Global Medical Response</div>
+    <h1>EVOC <span>Knowledge Quiz</span></h1>
+    <p class="header-meta">Following Distance &nbsp;·&nbsp; Distracted Driving &nbsp;·&nbsp; Fatigue</p>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="prog-label">Progress</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" id="tab-0">Following Distance</div>
+  <div class="tab" id="tab-1">Distracted Driving</div>
+  <div class="tab" id="tab-2">Fatigue</div>
+</div>
+
+<main>
+  <div id="quiz-area">
+    <div class="module-title" id="module-label">Module 1 — Following Distance</div>
+    <div id="question-container"></div>
+    <div class="nav-buttons">
+      <button class="btn btn-ghost" id="prev-btn" onclick="navigate(-1)" disabled>← Previous</button>
+      <span class="q-counter" id="q-counter">1 / 20</span>
+      <button class="btn btn-primary" id="next-btn" onclick="navigate(1)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <div id="score-screen">
+    <div class="score-ring">
+      <div class="score-pct" id="score-pct">—</div>
+      <div class="score-label">Score</div>
+    </div>
+    <div class="score-headline" id="score-headline">Quiz Complete</div>
+    <div class="score-sub" id="score-sub"></div>
+    <div class="score-breakdown">
+      <div class="score-stat">
+        <div class="score-stat-num correct-num" id="stat-correct">0</div>
+        <div class="score-stat-lbl">Correct</div>
+      </div>
+      <div class="score-stat">
+        <div class="score-stat-num wrong-num" id="stat-wrong">0</div>
+        <div class="score-stat-lbl">Incorrect</div>
+      </div>
+      <div class="score-stat">
+        <div class="score-stat-num total-num" id="stat-total">0</div>
+        <div class="score-stat-lbl">Total</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="restart-btn" onclick="restart()">Retake Quiz</button>
+
+```
+<div class="review-section" id="review-section"></div>
+```
+
+  </div>
+</main>
+
+<script>
+const questions = [
+  // ── MODULE 0: FOLLOWING DISTANCE ──────────────────────────────────
+  {
+    module: 0,
+    text: "According to the 4|5|12 Rule, what following distance (in seconds) should you maintain when traveling at or below 40 mph?",
+    options: ["2 seconds", "3 seconds", "4 seconds", "5 seconds"],
+    answer: 2,
+    feedback: "The 4|5|12 Rule specifies a 4-second following interval at or below 40 mph, 5 seconds above 40 mph, and 12 seconds for safety visual lead time."
+  },
+  {
+    module: 0,
+    text: "What does the '12' represent in the 4|5|12 Rule?",
+    options: ["12 car lengths minimum spacing", "12 seconds of safety visual lead time", "12 mph over the speed limit maximum", "12 feet of stopping distance"],
+    answer: 1,
+    feedback: "The 12-second component of the rule refers to safety visual lead time — how far ahead you should be actively scanning the roadway."
+  },
+  {
+    module: 0,
+    text: "At 60 mph, using a 1.5-second perception/reaction time, approximately how far does a vehicle travel before the brakes are even applied?",
+    options: ["66 feet", "88 feet", "132 feet", "180 feet"],
+    answer: 2,
+    feedback: "At 60 mph (88 ft/sec × 1.5 sec reaction time), the vehicle travels approximately 132 feet before braking begins. The actual braking distance adds another ~180 feet for a total stopping distance over 312 feet."
+  },
+  {
+    module: 0,
+    text: "What is the approximate total stopping distance at 60 mph (reaction distance + braking distance)?",
+    options: ["180 feet", "220 feet", "265 feet", "312 feet"],
+    answer: 3,
+    feedback: "Total stopping distance at 60 mph = ~132 feet reaction distance + ~180 feet braking distance = ~312 feet — greater than the length of a football field."
+  },
+  {
+    module: 0,
+    text: "Which of the following is NOT listed as a factor affecting stopping distance?",
+    options: ["Vehicle weight and load", "Tire pressure and wear", "Driver's age", "Road surface and grade"],
+    answer: 2,
+    feedback: "Driver age is a factor affecting reaction time, not stopping distance. Stopping distance is affected by vehicle weight/load, road surface/grade, weather, speed, tires, and brakes/suspension."
+  },
+  {
+    module: 0,
+    text: "How do you correctly apply the second-counting method to assess following distance?",
+    options: [
+      "Count seconds from when you pass a fixed point until the car ahead does",
+      "Count seconds from when the vehicle ahead passes a fixed point until you pass that same point",
+      "Count the number of car lengths between you and the vehicle ahead",
+      "Count seconds between brake light activation and when you begin braking"
+    ],
+    answer: 1,
+    feedback: "When the vehicle ahead passes a fixed point, begin counting. If your vehicle reaches that same point in 4+ seconds (dry road), your following distance is adequate."
+  },
+  {
+    module: 0,
+    text: "Spatial awareness while driving involves which of the following?",
+    options: [
+      "Driving in the center lane at all times",
+      "Positioning your vehicle so you always have an escape route and preventing other drivers from boxing you in",
+      "Maintaining exactly one car length per 10 mph of speed",
+      "Keeping your mirrors adjusted to eliminate all blind spots"
+    ],
+    answer: 1,
+    feedback: "Spatial awareness means strategically positioning your vehicle to always have a way out, preventing being boxed in, making sure others can see you, and anticipating other drivers' moves."
+  },
+
+  // ── MODULE 1: DISTRACTED DRIVING ──────────────────────────────────
+  {
+    module: 1,
+    text: "Which of the following best defines distracted driving?",
+    options: [
+      "Any activity that requires cognitive effort while driving",
+      "Any non-driving activity that diverts attention and increases risk of a motor vehicle collision",
+      "Using a cell phone while operating a vehicle",
+      "Driving more than 10 mph over the posted speed limit"
+    ],
+    answer: 1,
+    feedback: "Distracted driving is any non-driving activity engaged in while operating a vehicle that has the potential to divert attention from the primary task of driving and increases MVC risk."
+  },
+  {
+    module: 1,
+    text: "What are the three main types of driving distraction?",
+    options: [
+      "Physical, emotional, and environmental",
+      "Primary, secondary, and tertiary",
+      "Visual, manual, and cognitive",
+      "Auditory, tactile, and visual"
+    ],
+    answer: 2,
+    feedback: "The three types are: Visual (eyes off the road), Manual (hands off the wheel), and Cognitive (mind off the task). Texting is especially dangerous because it involves all three simultaneously."
+  },
+  {
+    module: 1,
+    text: "Sending or reading a text at 55 mph takes your eyes off the road for approximately 5 seconds. How far does the vehicle travel in that time?",
+    options: [
+      "About half a football field",
+      "About the length of a football field",
+      "About 50 feet",
+      "About 200 feet"
+    ],
+    answer: 1,
+    feedback: "At 55 mph, a vehicle travels approximately 80.67 feet per second. Over 5 seconds, that's roughly 403 feet — the full length of a football field — with eyes completely off the road."
+  },
+  {
+    module: 1,
+    text: "According to GMR Vehicle Safety Policy, who should handle radio and cell phone traffic when the ambulance is in motion?",
+    options: [
+      "The EVO (driver), since they are responsible for communications",
+      "The right-seat partner",
+      "Either crew member depending on call volume",
+      "Dispatch should hold all communications until the vehicle stops"
+    ],
+    answer: 1,
+    feedback: "GMR policy states that both cell phone usage and radio traffic shall be handled by the right-seat partner when the vehicle is in motion. The EVO's primary task is driving."
+  },
+  {
+    module: 1,
+    text: "Why is using a cellular phone while driving considered more dangerous than talking to a passenger?",
+    options: [
+      "Cell phones emit radiation that impairs judgment",
+      "Passengers can see the road and modify their conversation during hazards; a phone caller cannot",
+      "Cell phones are louder and cause more auditory distraction",
+      "Passengers typically sit behind the driver, reducing distraction"
+    ],
+    answer: 1,
+    feedback: "A passenger can perceive the driving environment and naturally pause conversation during hazards. A phone caller has no awareness of road conditions and cannot adjust accordingly, making the cognitive load continuous and more dangerous."
+  },
+  {
+    module: 1,
+    text: "Which of the following activities is explicitly prohibited by GMR Vehicle Safety Policy while driving?",
+    options: [
+      "Talking with the right-seat partner about patient care",
+      "Eating, drinking, and grooming",
+      "Listening to dispatch radio traffic",
+      "Using GPS navigation"
+    ],
+    answer: 1,
+    feedback: "The GMR Vehicle Safety Policy explicitly prohibits eating, drinking, and grooming while driving. Cell phone use and radio traffic are also regulated — they must be handled by the right-seat partner."
+  },
+  {
+    module: 1,
+    text: "During emergency operations, GMR policy allows drivers to exceed the posted speed limit by how much, up to a maximum of what speed?",
+    options: [
+      "5 mph over, max 65 mph",
+      "10 mph over, max 75 mph",
+      "15 mph over, max 80 mph",
+      "No limit applies during true emergencies"
+    ],
+    answer: 1,
+    feedback: "GMR policy allows exceeding the posted speed limit by 10 mph during emergency operation, with a maximum vehicle speed of 75 mph. This privilege does NOT apply in school zones, construction zones, or other restricted areas."
+  },
+
+  // ── MODULE 2: FATIGUE ──────────────────────────────────────────────
+  {
+    module: 2,
+    text: "After 17 consecutive hours awake, impairment is estimated to be equivalent to a BAC of approximately:",
+    options: [".02", ".05", ".08", ".10"],
+    answer: 1,
+    feedback: "Per NIOSH data, 17 hours awake produces impairment equivalent to a BAC of .05. After 24 hours awake, impairment reaches the equivalent of a BAC of .10 — legally drunk in all U.S. states."
+  },
+  {
+    module: 2,
+    text: "Which type of fatigue is defined as acute fatigue caused by substantial sleep restriction or prolonged hours awake within one or two days?",
+    options: ["Cumulative fatigue", "Circadian fatigue", "Transient fatigue", "Physical fatigue"],
+    answer: 2,
+    feedback: "Transient fatigue is acute fatigue from severe sleep loss or extended wakefulness over 1–2 days. Cumulative fatigue builds over multiple days of mild restriction; Circadian fatigue relates to the body's 24-hour cycle and reduced nighttime performance."
+  },
+  {
+    module: 2,
+    text: "According to NASEMSO evidence-based guidelines, EMS personnel should work shifts shorter than how many hours in duration?",
+    options: ["12 hours", "16 hours", "20 hours", "24 hours"],
+    answer: 3,
+    feedback: "NASEMSO's evidence-based fatigue risk management guidelines recommend EMS personnel work shifts shorter than 24 hours in duration as one of five key mitigation strategies."
+  },
+  {
+    module: 2,
+    text: "Which of the following is a WARNING SIGN of driver fatigue rather than an effect?",
+    options: [
+      "Drifting from your lane",
+      "Experiencing micro-sleeps",
+      "Excessive blinking and yawning",
+      "Tunnel vision"
+    ],
+    answer: 2,
+    feedback: "Yawning and excessive blinking are warning signs — early indicators that fatigue is setting in. Lane drifting, micro-sleeps, and tunnel vision are effects — things that happen when you are already significantly impaired by fatigue."
+  },
+  {
+    module: 2,
+    text: "According to NIOSH, what percentage of U.S. workers get less than the recommended 7 hours of sleep?",
+    options: ["17%", "25%", "37%", "48%"],
+    answer: 2,
+    feedback: "A NIOSH survey found that 37% of U.S. workers got less than the recommended minimum of 7 hours of sleep per night, demonstrating how widespread sleep deprivation is in the working population."
+  },
+  {
+    module: 2,
+    text: "The GMR training deck states that the only true 'cure' for fatigue is:",
+    options: ["Caffeine", "A cold shower", "Sleep", "High-intensity exercise"],
+    answer: 2,
+    feedback: "The training is explicit: coffee and a short nap are temporary measures. The only real cure for fatigue is sleep. Caffeine, per NASEMSO guidelines, is a recognized countermeasure but not a substitute for adequate rest."
+  },
+];
+
+const MODULE_LABELS = [
+  "Module 1 — Following Distance",
+  "Module 2 — Distracted Driving",
+  "Module 3 — Fatigue"
+];
+
+const MODULE_RANGES = [
+  { start: 0, end: 6 },
+  { start: 7, end: 13 },
+  { start: 14, end: 20 }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+function getModule(idx) {
+  if (idx <= 6) return 0;
+  if (idx <= 13) return 1;
+  return 2;
+}
+
+function render() {
+  const q = questions[current];
+  const answered = answers[current] !== null;
+  const mod = getModule(current);
+
+  // Update module label
+  document.getElementById('module-label').textContent = MODULE_LABELS[mod];
+
+  // Update tabs
+  for (let i = 0; i < 3; i++) {
+    const tab = document.getElementById('tab-' + i);
+    tab.className = 'tab';
+    const range = MODULE_RANGES[i];
+    const allAnswered = answers.slice(range.start, range.end + 1).every(a => a !== null);
+    if (i === mod) tab.classList.add('active');
+    else if (allAnswered) tab.classList.add('done');
+  }
+
+  // Progress
+  const answeredCount = answers.filter(a => a !== null).length;
+  const pct = Math.round((answeredCount / questions.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+
+  // Counter
+  document.getElementById('q-counter').textContent = `${current + 1} / ${questions.length}`;
+
+  // Nav buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  const nextBtn = document.getElementById('next-btn');
+  if (current === questions.length - 1) {
+    nextBtn.textContent = 'Finish →';
+    nextBtn.disabled = !answered;
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = !answered;
+  }
+
+  // Question HTML
+  const letters = ['A', 'B', 'C', 'D'];
+  let optHtml = '';
+  q.options.forEach((opt, i) => {
+    let cls = 'option' + (answered ? ' locked' : '');
+    if (answered) {
+      if (i === q.answer) cls += ' correct';
+      else if (i === answers[current] && i !== q.answer) cls += ' wrong';
+    } else if (answers[current] === i) {
+      cls += ' selected';
+    }
+    const icon = answered
+      ? (i === q.answer ? '✓' : (i === answers[current] ? '✗' : ''))
+      : '';
+    optHtml += `<div class="${cls}" onclick="selectOption(${i})">
+      <span class="opt-letter">${letters[i]}</span>
+      <span class="opt-text">${opt}</span>
+      <span class="opt-icon">${icon}</span>
+    </div>`;
+  });
+
+  const fbClass = answered
+    ? (answers[current] === q.answer ? 'feedback correct-fb show' : 'feedback wrong-fb show')
+    : 'feedback';
+  const fbIcon = answers[current] === q.answer ? '✓ Correct — ' : '✗ Incorrect — ';
+
+  document.getElementById('question-container').innerHTML = `
+    <div class="question-card${answered ? ' answered' : ''}">
+      <div class="q-number">Question ${current + 1} of ${questions.length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options">${optHtml}</div>
+      <div class="${fbClass}"><strong>${answered ? fbIcon : ''}</strong>${q.feedback}</div>
+    </div>`;
+}
+
+function selectOption(i) {
+  if (answers[current] !== null) return;
+  answers[current] = i;
+  render();
+}
+
+function navigate(dir) {
+  if (dir === 1 && current === questions.length - 1) {
+    showScore();
+    return;
+  }
+  current = Math.max(0, Math.min(questions.length - 1, current + dir));
+  render();
+}
+
+function showScore() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const screen = document.getElementById('score-screen');
+  screen.style.display = 'block';
+
+  const correct = answers.filter((a, i) => a === questions[i].answer).length;
+  const wrong = questions.length - correct;
+  const pct = Math.round((correct / questions.length) * 100);
+
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-total').textContent = questions.length;
+
+  let headline = pct >= 90 ? 'Outstanding Performance' :
+                 pct >= 75 ? 'Competency Demonstrated' :
+                 pct >= 60 ? 'Review Recommended' : 'Remediation Required';
+  let sub = pct >= 75
+    ? `You answered ${correct} of ${questions.length} correctly. ${pct >= 90 ? 'Excellent EVOC knowledge.' : 'Review any missed items below.'}`
+    : `You answered ${correct} of ${questions.length} correctly. Please review the training materials and retake.`;
+
+  document.getElementById('score-headline').textContent = headline;
+  document.getElementById('score-sub').textContent = sub;
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+
+  // Review
+  const letters = ['A', 'B', 'C', 'D'];
+  let reviewHtml = '<div class="module-title" style="margin-bottom:16px;">Review All Answers</div>';
+  questions.forEach((q, i) => {
+    const userAns = answers[i];
+    const isCorrect = userAns === q.answer;
+    reviewHtml += `<div class="review-item ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="review-q"><strong>Q${i+1}.</strong> ${q.text}</div>
+      <div class="review-answer">
+        ${!isCorrect ? `<span class="your">Your answer: ${letters[userAns]} — ${q.options[userAns]}</span>` : ''}
+        <span class="correct">${isCorrect ? '✓ ' : 'Correct: '}${letters[q.answer]} — ${q.options[q.answer]}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('review-section').innerHTML = reviewHtml;
+}
+
+function restart() {
+  answers = new Array(questions.length).fill(null);
+  current = 0;
+  document.getElementById('score-screen').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  render();
+}
+
+// init
+render();
+</script>
+
+</body>
+</html>
