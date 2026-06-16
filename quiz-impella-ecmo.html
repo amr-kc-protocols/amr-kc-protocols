@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060d1f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-193.png">
+<title>Impella &amp; ECMO &#x2014; AMR KC</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{--bg:#060d1f;--surface:#0d1526;--surface2:#131f35;--border:#1e3a5f;--teal:#0d9488;--teal2:#14b8a6;--white:#f0f4f8;--gray:#8899aa;--dim:#1a2a40;--emt:#16a34a;--danger:#ef4444;--warn:#f59e0b;--gold:#f6c453;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);font-family:var(--sans);color:var(--white)}
+.hdr{background:var(--bg);border-bottom:1px solid var(--teal);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.back-btn{background:var(--dim);border:1px solid var(--border);color:var(--teal2);font-size:13px;font-weight:600;padding:7px 12px;border-radius:6px;text-decoration:none;font-family:var(--sans)}
+.hdr-info{flex:1}
+.hdr-title{font-size:14px;font-weight:700;color:var(--teal2);font-family:var(--mono);letter-spacing:0.06em}
+.hdr-sub{font-size:11px;color:var(--gray);margin-top:1px}
+/* MENU */
+.menu-wrap{max-width:540px;margin:0 auto;padding:20px 14px 48px}
+.menu-hero{text-align:center;padding:26px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;margin-bottom:18px}
+.hero-icon{font-size:46px;margin-bottom:10px}
+.hero-title{font-size:23px;font-weight:700;margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:18px}
+.name-lbl{display:block;text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal2);margin-bottom:6px}
+.name-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--white);font-size:15px;font-family:var(--sans);margin-bottom:16px}
+.name-input:focus{outline:none;border-color:var(--teal)}
+.start-all-btn{display:inline-block;width:100%;padding:14px 28px;background:var(--teal);color:#001;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.meta-row{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap}
+.meta-chip{font-family:var(--mono);font-size:10px;color:var(--gray);background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:6px 12px}
+.obj-box{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 16px 6px}
+.obj-title{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.12em;color:var(--teal2);text-transform:uppercase;margin-bottom:12px}
+.obj-item{display:flex;gap:10px;font-size:13px;color:#b6c4d2;padding:0 0 12px;line-height:1.5}
+.obj-num{flex-shrink:0;font-family:var(--mono);font-size:11px;color:var(--teal2);border:1px solid var(--border);border-radius:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+/* QUIZ */
+.quiz-wrap{max-width:540px;margin:0 auto;padding:12px 14px 48px;display:none}
+.q-progress{margin-bottom:16px}
+.q-progress-bar{height:4px;background:var(--dim);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.q-progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal2));border-radius:2px;transition:width 0.3s}
+.q-progress-txt{font-family:var(--mono);font-size:11px;color:var(--gray);display:flex;justify-content:space-between}
+.q-topic{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal2);background:rgba(13,148,136,0.12);border:1px solid var(--teal);border-radius:999px;padding:4px 10px;margin-bottom:12px}
+.q-stem{font-size:17px;font-weight:600;line-height:1.45;margin-bottom:16px}
+.q-options{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.q-opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;font-size:15px;line-height:1.4;text-align:left;color:var(--white);font-family:var(--sans);width:100%;display:flex;gap:10px;align-items:flex-start}
+.q-opt .ltr{font-family:var(--mono);font-size:12px;color:var(--teal2);flex-shrink:0;margin-top:2px;font-weight:600}
+.q-opt.correct{border-color:var(--emt);background:rgba(22,163,74,0.12);color:#86efac}
+.q-opt.correct .ltr{color:#86efac}
+.q-opt.wrong{border-color:var(--danger);background:rgba(239,68,68,0.1);color:#fca5a5}
+.q-opt.wrong .ltr{color:#fca5a5}
+.q-opt:disabled{cursor:default}
+.feedback-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;display:none}
+.fb-result{font-size:15px;font-weight:700;margin-bottom:8px}
+.fb-result.ok{color:var(--emt)}
+.fb-result.no{color:var(--danger)}
+.fb-why{background:rgba(13,148,136,0.08);border:1px solid var(--teal);border-radius:8px;padding:11px 13px;font-size:13.5px;color:#cfe8e5;line-height:1.6}
+.fb-why-lbl{font-family:var(--mono);font-size:9px;color:var(--teal2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;font-weight:600}
+.q-next-btn{width:100%;padding:14px;background:var(--teal);color:#001;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);display:none}
+/* RESULT */
+.result-wrap{max-width:540px;margin:0 auto;padding:20px 14px 48px;display:none}
+.result-hero{text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:26px 16px;margin-bottom:18px}
+.result-icon{font-size:46px;margin-bottom:8px}
+.result-score{font-family:var(--mono);font-size:46px;font-weight:700;color:var(--teal2);line-height:1;margin-bottom:4px}
+.result-score-lbl{font-size:14px;color:var(--gray)}
+.result-pct{font-family:var(--mono);font-size:13px;margin-top:8px}
+.pass-pill{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;padding:6px 14px;border-radius:999px}
+.pass-pill.pass{background:rgba(22,163,74,0.15);border:1px solid var(--emt);color:#86efac}
+.pass-pill.fail{background:rgba(245,158,11,0.12);border:1px solid var(--warn);color:#fcd34d}
+.result-sec{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.12em;color:var(--teal2);text-transform:uppercase;margin:18px 0 10px}
+.missed-r{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.missed-r-q{font-size:13.5px;font-weight:600;color:var(--white);margin-bottom:5px;line-height:1.4}
+.missed-r-a{font-size:12.5px;color:#86efac;line-height:1.5}
+.cert-panel{background:linear-gradient(160deg,#102338,#0c1a2c);border:1px solid var(--teal);border-radius:14px;padding:20px 16px;text-align:center;margin-bottom:14px}
+.cert-panel.locked{border-color:var(--border);background:var(--surface2)}
+.cert-emoji{font-size:34px;margin-bottom:8px}
+.cert-h{font-size:16px;font-weight:700;margin-bottom:6px}
+.cert-p{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:14px}
+.cert-btn{display:inline-block;width:100%;padding:14px;background:var(--gold);color:#2a1c00;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.again-btn{display:block;width:100%;padding:14px;background:var(--teal);color:#001;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-top:6px}
+.menu-btn{display:block;width:100%;padding:14px;background:var(--dim);border:1px solid var(--border);color:var(--white);border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);margin-top:8px}
+/* CERTIFICATE OVERLAY */
+.cert-overlay{position:fixed;inset:0;background:rgba(2,6,15,0.94);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:18px 12px;overflow:auto}
+.cert-modal{max-width:560px;width:100%;margin:auto}
+.cert-canvas-wrap{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+#cert-canvas{width:100%;display:block}
+.cert-actions{display:flex;gap:8px;margin-top:14px}
+.cert-dl{flex:1;padding:14px;background:var(--gold);color:#2a1c00;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.cert-close{padding:14px 18px;background:var(--dim);border:1px solid var(--border);color:var(--white);border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.cert-hint{text-align:center;font-size:11.5px;color:var(--gray);margin-top:10px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <a class="back-btn" href="index.html">&#x2190; Field Guide</a>
+  <div class="hdr-info">
+    <div class="hdr-title">&#x1FAC0; IMPELLA &amp; ECMO</div>
+    <div class="hdr-sub">Mechanical circulatory support for transport</div>
+  </div>
+</div>
+
+<!-- MENU -->
+<div class="menu-wrap" id="menu-screen">
+  <div class="menu-hero">
+    <div class="hero-icon">&#x1FAC0;</div>
+    <div class="hero-title">Impella &amp; ECMO CE Quiz</div>
+    <div class="hero-sub">10 questions covering anatomy, the problems these devices treat, and practical transport management. Pass with 80% or higher to earn your certificate of completion.</div>
+    <label class="name-lbl" for="name-input">Name for your certificate</label>
+    <input class="name-input" id="name-input" type="text" placeholder="e.g., Jordan Jones, NRP" autocomplete="name">
+    <button class="start-all-btn" id="start-btn">Start Quiz &#x2192;</button>
+    <div class="meta-row">
+      <span class="meta-chip">10 questions</span>
+      <span class="meta-chip">~1.0 CE hour</span>
+      <span class="meta-chip">80% to pass</span>
+    </div>
+  </div>
+  <div class="obj-box">
+    <div class="obj-title">What this covers</div>
+    <div class="obj-item"><div class="obj-num">1</div><div>Basic anatomy &#x2014; the left ventricle, the lungs, and the one-loop map.</div></div>
+    <div class="obj-item"><div class="obj-num">2</div><div>Why these devices exist &#x2014; cardiogenic shock and respiratory failure.</div></div>
+    <div class="obj-item"><div class="obj-num">3</div><div>Impella &#x2014; what it does, the family, the purge system, and alarms.</div></div>
+    <div class="obj-item"><div class="obj-num">4</div><div>ECMO &#x2014; VA vs VV, complications, and securing the lifeline.</div></div>
+    <div class="obj-item"><div class="obj-num">5</div><div>Your role in transport alongside the perfusionist.</div></div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-wrap" id="quiz-screen">
+  <div class="q-progress">
+    <div class="q-progress-bar"><div class="q-progress-fill" id="q-fill" style="width:0%"></div></div>
+    <div class="q-progress-txt"><span id="q-num">1 / 10</span><span id="q-score-live">0 correct</span></div>
+  </div>
+  <div class="q-topic" id="q-topic">Anatomy</div>
+  <div class="q-stem" id="q-stem"></div>
+  <div class="q-options" id="q-options"></div>
+  <div class="feedback-box" id="feedback-box">
+    <div class="fb-result" id="fb-result"></div>
+    <div class="fb-why">
+      <div class="fb-why-lbl">Why</div>
+      <div id="fb-why-text"></div>
+    </div>
+  </div>
+  <button class="q-next-btn" id="q-next">Next &#x2192;</button>
+</div>
+
+<!-- RESULT -->
+<div class="result-wrap" id="result-screen">
+  <div class="result-hero">
+    <div class="result-icon" id="r-icon">&#x1F3C6;</div>
+    <div class="result-score" id="r-score">10/10</div>
+    <div class="result-score-lbl">questions correct</div>
+    <div class="result-pct" id="r-pct"></div>
+    <div id="r-pill"></div>
+  </div>
+
+  <div class="cert-panel" id="cert-panel">
+    <div class="cert-emoji" id="cert-emoji">&#x1F396;&#xFE0F;</div>
+    <div class="cert-h" id="cert-h">You passed!</div>
+    <div class="cert-p" id="cert-p">Generate your certificate of completion below.</div>
+    <button class="cert-btn" id="cert-btn">Generate Certificate &#x1F396;&#xFE0F;</button>
+  </div>
+
+  <div id="r-missed-section" style="display:none">
+    <div class="result-sec">Review what you missed</div>
+    <div id="r-missed-list"></div>
+  </div>
+
+  <button class="again-btn" id="again-btn">Retake Quiz &#x2192;</button>
+  <button class="menu-btn" id="menu-btn">&#x1F3E0; Back to Field Guide</button>
+</div>
+
+<!-- CERTIFICATE OVERLAY -->
+<div class="cert-overlay" id="cert-overlay">
+  <div class="cert-modal">
+    <div class="cert-canvas-wrap"><canvas id="cert-canvas" width="1400" height="990"></canvas></div>
+    <div class="cert-actions">
+      <button class="cert-dl" id="cert-dl">&#x2B07;&#xFE0F; Download PNG</button>
+      <button class="cert-close" id="cert-close">Close</button>
+    </div>
+    <div class="cert-hint">Tip: On a phone, you can also long-press the certificate to save or share it.</div>
+  </div>
+</div>
+
+<script>
+// ── QUESTION BANK ──────────────────────────────────────────────────────
+// Each: topic, stem, options[], ans (index of correct), why (explanation)
+var QUESTIONS = [
+  {
+    topic:'Anatomy',
+    stem:'Which chamber is the high-pressure "body pump" that pushes oxygen-rich blood out to the entire body — and the one these devices most often support?',
+    options:['Right atrium','Right ventricle','Left ventricle','Left atrium'],
+    ans:2,
+    why:'The left ventricle (LV) pushes oxygenated blood out through the aorta to the whole body, working against systemic pressure every beat. It is the chamber that fails most often and the one the Impella is built to support.'
+  },
+  {
+    topic:'Anatomy',
+    stem:'The lungs perform "gas exchange." What does that mean?',
+    options:[
+      'They pump blood to the body',
+      'Oxygen moves into the blood and carbon dioxide moves out',
+      'They filter clots from the bloodstream',
+      'They regulate blood pressure'
+    ],
+    ans:1,
+    why:'Gas exchange means oxygen (O₂) loads onto the blood and carbon dioxide (CO₂) is offloaded. When this fails (e.g., ARDS) and a ventilator is not enough, VV ECMO can do the lungs’ job from outside the body.'
+  },
+  {
+    topic:'Pathophysiology',
+    stem:'Cardiogenic shock is best described as:',
+    options:[
+      'Low blood volume from bleeding (an empty tank)',
+      'A severe allergic reaction causing vasodilation',
+      'The heart is too weak to pump enough blood, even though the tank is full',
+      'An infection causing widespread vasodilation'
+    ],
+    ans:2,
+    why:'In cardiogenic shock the problem is the pump, not the volume — the heart can’t move enough blood despite adequate filling. The most common cause is a large heart attack damaging LV muscle.'
+  },
+  {
+    topic:'Impella',
+    stem:'In one sentence, what does an Impella do?',
+    options:[
+      'Adds oxygen to the blood like an artificial lung',
+      'Pulls blood out of the left ventricle and pushes it into the aorta, unloading the heart',
+      'Paces the heart electrically to control the rate',
+      'Drains blood from a vein and returns it to a vein'
+    ],
+    ans:1,
+    why:'The Impella is a tiny pump across the aortic valve. It continuously pulls blood from the LV and pushes it into the aorta — "unloading" the ventricle, boosting body perfusion, and improving coronary flow so the heart can rest.'
+  },
+  {
+    topic:'Impella',
+    stem:'Which Impella model are you most likely to see during a transport?',
+    options:['Impella RP','Impella 2.5','Impella CP','Impella 5.5'],
+    ans:2,
+    why:'The Impella CP is the most common. It supports the left ventricle, flows up to roughly 3.5–4 L/min, and is placed percutaneously through the groin. They all work the same way — a bigger number just means more support and a larger catheter.'
+  },
+  {
+    topic:'Impella',
+    stem:'The Impella purge system runs a constant trickle of fluid through the pump. Why does this matter to you in transport?',
+    options:[
+      'It is decorative and can be clamped if it is in the way',
+      'It protects the motor — keep the bag upright, never kink or clamp the line, and report purge alarms',
+      'It delivers the patient’s sedation',
+      'It only matters once the patient reaches the ICU'
+    ],
+    ans:1,
+    why:'The purge fluid keeps blood out of the pump motor. If it stops, the pump can fail. Keep the purge bag upright (air in the line alarms), never kink or clamp it, and call out any purge-pressure alarm to the perfusionist immediately.'
+  },
+  {
+    topic:'Impella',
+    stem:'You get a "Suction" alarm on the Impella controller during transport. What is the best first response?',
+    options:[
+      'Reposition the catheter yourself right away',
+      'Increase the P-level to push past it',
+      'Look at the patient, notify the perfusionist, and consider that the patient may need volume or was just moved',
+      'Silence the alarm and continue'
+    ],
+    ans:2,
+    why:'Suction means the pump is pulling more than the ventricle can give — often from low volume, a bumped/repositioned patient, or right-heart underfilling. Assess the patient, tell the perfusionist (who may lower the P-level), and anticipate fluid. Never reposition the catheter in the field — that is done under imaging.'
+  },
+  {
+    topic:'Transport',
+    stem:'For a patient with a femoral (groin) Impella, how should you position them for the move?',
+    options:[
+      'Sitting fully upright to ease breathing',
+      'Head of bed ≤30° with the access leg kept straight (no hip bending)',
+      'Prone (face down)',
+      'It does not matter as long as they are secured'
+    ],
+    ans:1,
+    why:'Keep the head of bed at 30° or less and the cannulated leg straight. Sitting them up or bending the hip can kink the catheter and migrate the pump, triggering suction or position alarms.'
+  },
+  {
+    topic:'ECMO',
+    stem:'What is the key difference between VA and VV ECMO?',
+    options:[
+      'VA is for children, VV is for adults',
+      'VA supports the heart (blood returns to an artery; pulse may be weak or absent); VV supports the lungs only (returns to a vein; pulse usually normal)',
+      'They are two names for the same configuration',
+      'VV supports the heart and VA supports the lungs'
+    ],
+    ans:1,
+    why:'VA (veno-arterial) returns blood to an artery and takes over the heart’s pumping — these patients may have little or no pulse, which can be normal. VV (veno-venous) returns to a vein and only does gas exchange; the heart still pumps, so the pulse is usually normal.'
+  },
+  {
+    topic:'ECMO',
+    stem:'Your ECMO patient on full VA support suddenly looks "arrested" with no palpable pulse. What should you do?',
+    options:[
+      'Begin chest compressions immediately',
+      'Confirm with the perfusionist first — on full VA support, no pulse can be normal, and CPR risks dislodging a cannula',
+      'Disconnect the circuit to check it',
+      'Defibrillate right away'
+    ],
+    ans:1,
+    why:'On full VA ECMO the machine provides continuous flow, so a weak or absent pulse can be normal — judge perfusion by the MAP, not the pulse. Compressions can dislodge a cannula (a catastrophic bleed/air risk). Confirm true arrest with the perfusionist before acting. And remember: the lines are the lifeline — secure them and never put traction on them.'
+  }
+];
+
+var PASS_THRESHOLD = 0.8; // 80%
+
+// ── STATE ──────────────────────────────────────────────────────────────
+var SESSION = {order:[], current:0, score:0, missed:[], name:''};
+
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+// Build a per-question option order so the correct answer isn't always in the same slot
+function buildOrder(){
+  return QUESTIONS.map(function(q){
+    var idx = q.options.map(function(_,i){return i;});
+    var shuffled = shuffle(idx);
+    return {opts:shuffled, ans:shuffled.indexOf(q.ans)};
+  });
+}
+
+document.getElementById('start-btn').addEventListener('click', function(){
+  var nm = document.getElementById('name-input').value.trim();
+  SESSION = {order:buildOrder(), current:0, score:0, missed:[], name:nm};
+  document.getElementById('menu-screen').style.display='none';
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  showQ();
+});
+
+var LETTERS=['A','B','C','D'];
+
+function showQ(){
+  var i=SESSION.current;
+  var q=QUESTIONS[i];
+  var ord=SESSION.order[i];
+  var total=QUESTIONS.length;
+  document.getElementById('q-fill').style.width=(i/total*100)+'%';
+  document.getElementById('q-num').textContent=(i+1)+' / '+total;
+  document.getElementById('q-score-live').textContent=SESSION.score+' correct';
+  document.getElementById('q-topic').textContent=q.topic;
+  document.getElementById('q-stem').textContent=q.stem;
+  document.getElementById('feedback-box').style.display='none';
+  document.getElementById('q-next').style.display='none';
+
+  var optsEl=document.getElementById('q-options');
+  optsEl.innerHTML='';
+  ord.opts.forEach(function(origIdx, pos){
+    var b=document.createElement('button');
+    b.className='q-opt';
+    b.innerHTML='<span class="ltr">'+LETTERS[pos]+'</span><span>'+q.options[origIdx]+'</span>';
+    b.addEventListener('click', function(){ answerQ(pos); });
+    optsEl.appendChild(b);
+  });
+}
+
+function answerQ(pos){
+  var i=SESSION.current;
+  var q=QUESTIONS[i];
+  var ord=SESSION.order[i];
+  var btns=document.querySelectorAll('.q-opt');
+  btns.forEach(function(b){b.disabled=true;});
+  var correct=(pos===ord.ans);
+  btns[pos].classList.add(correct?'correct':'wrong');
+  if(!correct){
+    btns[ord.ans].classList.add('correct');
+    SESSION.missed.push({stem:q.stem, answer:q.options[q.ans]});
+  } else {
+    SESSION.score++;
+  }
+  var fb=document.getElementById('feedback-box');
+  var fbRes=document.getElementById('fb-result');
+  fbRes.className='fb-result '+(correct?'ok':'no');
+  fbRes.textContent=correct?'✓ Correct':'✗ Not quite — the correct answer is '+LETTERS[ord.opts.indexOf(q.ans)];
+  document.getElementById('fb-why-text').textContent=q.why;
+  fb.style.display='block';
+  document.getElementById('q-score-live').textContent=SESSION.score+' correct';
+
+  var nb=document.getElementById('q-next');
+  nb.style.display='block';
+  nb.textContent=(SESSION.current<QUESTIONS.length-1)?'Next →':'See Results →';
+}
+
+document.getElementById('q-next').addEventListener('click', function(){
+  SESSION.current++;
+  if(SESSION.current>=QUESTIONS.length) showResult(); else showQ();
+});
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  document.getElementById('result-screen').style.display='block';
+  var s=SESSION.score, tot=QUESTIONS.length;
+  var pct=Math.round(s/tot*100);
+  var passed = (s/tot) >= PASS_THRESHOLD;
+
+  document.getElementById('r-icon').innerHTML = passed ? '&#x1F3C6;' : '&#x1F4DA;';
+  document.getElementById('r-score').textContent=s+'/'+tot;
+  document.getElementById('r-pct').textContent=pct+'% · '+(passed?'PASS':'80% needed to pass');
+
+  var pill=document.getElementById('r-pill');
+  pill.innerHTML = passed
+    ? '<span class="pass-pill pass">&#x2713; PASSED</span>'
+    : '<span class="pass-pill fail">RETAKE TO PASS</span>';
+
+  // Certificate panel
+  var panel=document.getElementById('cert-panel');
+  if(passed){
+    panel.className='cert-panel';
+    document.getElementById('cert-emoji').innerHTML='&#x1F396;&#xFE0F;';
+    document.getElementById('cert-h').textContent='You passed — nice work!';
+    document.getElementById('cert-p').textContent='Generate your certificate of completion below. Add your name on the start screen if you left it blank.';
+    document.getElementById('cert-btn').style.display='inline-block';
+    document.getElementById('cert-btn').textContent='Generate Certificate 🎖️';
+  } else {
+    panel.className='cert-panel locked';
+    document.getElementById('cert-emoji').innerHTML='&#x1F512;';
+    document.getElementById('cert-h').textContent='Certificate locked';
+    document.getElementById('cert-p').textContent='You need 80% (8 of 10) to earn the certificate. Review the items below and retake — the questions reshuffle each time.';
+    document.getElementById('cert-btn').style.display='none';
+  }
+
+  // Missed review
+  var sec=document.getElementById('r-missed-section');
+  var list=document.getElementById('r-missed-list');
+  if(SESSION.missed.length){
+    sec.style.display='block';
+    list.innerHTML='';
+    SESSION.missed.forEach(function(m){
+      var d=document.createElement('div');
+      d.className='missed-r';
+      d.innerHTML='<div class="missed-r-q">'+m.stem+'</div><div class="missed-r-a">✓ '+m.answer+'</div>';
+      list.appendChild(d);
+    });
+  } else {
+    sec.style.display='none';
+  }
+}
+
+document.getElementById('again-btn').addEventListener('click', function(){
+  SESSION = {order:buildOrder(), current:0, score:0, missed:[], name:SESSION.name};
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  showQ();
+});
+document.getElementById('menu-btn').addEventListener('click', function(){
+  window.location.href='index.html';
+});
+
+// ── CERTIFICATE ────────────────────────────────────────────────────────
+function makeCredId(){
+  var d=new Date();
+  var stamp=''+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+  var rand=Math.random().toString(36).slice(2,7).toUpperCase();
+  return 'IE-'+stamp+'-'+rand;
+}
+function pad(n){return (n<10?'0':'')+n;}
+function todayStr(){
+  var d=new Date();
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
+}
+
+function drawCertificate(){
+  var c=document.getElementById('cert-canvas');
+  var ctx=c.getContext('2d');
+  var W=c.width, H=c.height;
+  var name=(SESSION.name && SESSION.name.length) ? SESSION.name : 'EMS Provider';
+  var pct=Math.round(SESSION.score/QUESTIONS.length*100);
+  var credId=makeCredId();
+
+  // Background
+  ctx.fillStyle='#ffffff';
+  ctx.fillRect(0,0,W,H);
+  // Subtle top band
+  var grad=ctx.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0,'#0E2A3B'); grad.addColorStop(0.6,'#0d9488'); grad.addColorStop(1,'#14b8a6');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,18);
+  ctx.fillRect(0,H-18,W,18);
+
+  // Outer border
+  ctx.strokeStyle='#0E2A3B'; ctx.lineWidth=6;
+  ctx.strokeRect(40,40,W-80,H-80);
+  ctx.strokeStyle='#14b8a6'; ctx.lineWidth=2;
+  ctx.strokeRect(54,54,W-108,H-108);
+
+  ctx.textAlign='center';
+
+  // Eyebrow
+  ctx.fillStyle='#0d9488';
+  ctx.font='600 26px "IBM Plex Mono", monospace';
+  ctx.fillText('C E R T I F I C A T E   O F   C O M P L E T I O N', W/2, 150);
+
+  // Course title
+  ctx.fillStyle='#0E2A3B';
+  ctx.font='700 58px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText('Impella & ECMO for EMS Transport', W/2, 230);
+  ctx.fillStyle='#5B6B78';
+  ctx.font='400 24px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText('Mechanical Circulatory Support · Continuing Education', W/2, 272);
+
+  // Presented to
+  ctx.fillStyle='#5B6B78';
+  ctx.font='400 24px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText('This certifies that', W/2, 380);
+
+  // Name
+  ctx.fillStyle='#0E2A3B';
+  ctx.font='700 64px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText(name, W/2, 452);
+  // underline under name
+  ctx.strokeStyle='#14b8a6'; ctx.lineWidth=3;
+  var nameW=Math.min(ctx.measureText(name).width+120, W-260);
+  ctx.beginPath(); ctx.moveTo(W/2-nameW/2,478); ctx.lineTo(W/2+nameW/2,478); ctx.stroke();
+
+  // Body
+  ctx.fillStyle='#27343C';
+  ctx.font='400 26px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText('has successfully completed the 1.0-hour continuing education module', W/2, 540);
+  ctx.fillText('covering Impella and ECMO management in the transport setting.', W/2, 578);
+
+  // Score badge
+  ctx.fillStyle='#0d9488';
+  ctx.font='700 44px "IBM Plex Mono", monospace';
+  ctx.fillText('Score: '+SESSION.score+'/'+QUESTIONS.length+'  ('+pct+'%)', W/2, 660);
+
+  // Footer columns: date / credential / signature
+  var baseY=792;
+  ctx.lineWidth=2; ctx.strokeStyle='#9fb3c2';
+  // date
+  ctx.beginPath(); ctx.moveTo(170,baseY); ctx.lineTo(470,baseY); ctx.stroke();
+  // signature
+  ctx.beginPath(); ctx.moveTo(W-470,baseY); ctx.lineTo(W-170,baseY); ctx.stroke();
+
+  ctx.fillStyle='#0E2A3B';
+  ctx.font='600 24px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText(todayStr(), 320, baseY-16);
+  ctx.font='italic 30px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText('Ameet Deshmukh, MD', W-320, baseY-16);
+
+  ctx.fillStyle='#5B6B78';
+  ctx.font='400 18px "IBM Plex Mono", monospace';
+  ctx.fillText('DATE', 320, baseY+30);
+  ctx.fillText('MEDICAL DIRECTOR', W-320, baseY+30);
+
+  // Org + credential id (center)
+  ctx.fillStyle='#0E2A3B';
+  ctx.font='600 22px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText('AMR Kansas City · EMS Education', W/2, baseY-6);
+  ctx.fillStyle='#9fb3c2';
+  ctx.font='400 18px "IBM Plex Mono", monospace';
+  ctx.fillText('Credential ID: '+credId, W/2, baseY+30);
+
+  return {name:name, credId:credId};
+}
+
+document.getElementById('cert-btn').addEventListener('click', function(){
+  // ensure fonts are ready, then draw
+  function go(){ drawCertificate(); document.getElementById('cert-overlay').style.display='flex'; }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,300); }
+  else { go(); }
+});
+
+document.getElementById('cert-dl').addEventListener('click', function(){
+  var c=document.getElementById('cert-canvas');
+  var name=(SESSION.name||'certificate').replace(/[^a-z0-9]+/gi,'_');
+  var link=document.createElement('a');
+  link.download='Impella_ECMO_CE_Certificate_'+name+'.png';
+  link.href=c.toDataURL('image/png');
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+});
+document.getElementById('cert-close').addEventListener('click', function(){
+  document.getElementById('cert-overlay').style.display='none';
+});
+
+// ── PWA: register service worker ───────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
