@@ -1,0 +1,653 @@
+import { useState, useEffect } from “react”;
+
+const questions = [
+{
+number: 1,
+title: “The Sweaty Guy on the Couch”,
+scenario: “You’re called for a 58-year-old male, "not feeling well." He’s diaphoretic, pale, and nauseated. Vitals: BP 88/60, HR 42 and regular, SpO2 96% on room air. He denies chest pain but says his jaw has been aching for an hour.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Inferior STEMI with vagally-mediated bradycardia”,
+differentials: [
+“Complete heart block”,
+“RV infarction”,
+“Beta-blocker or calcium channel blocker overdose”,
+“Vasovagal syncope with delayed recovery”
+],
+teaching: “Jaw pain is an anginal equivalent — especially in inferior MI. Don’t anchor on the absence of chest pain.”
+},
+{
+number: 2,
+title: “The Anxious Mom Call”,
+scenario: “7-year-old male, found unresponsive by mom after school. GCS 10, pupils 4mm and sluggish bilaterally, HR 58, RR 8 and shallow, skin warm and dry. Mom says he’s been "moody lately" and there are medications in the home.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Opioid toxidrome”,
+differentials: [
+“TCA overdose”,
+“Benzodiazepine ingestion”,
+“Hypoglycemia”,
+“Postictal state”,
+“Intracranial hemorrhage”
+],
+teaching: “Miosis + respiratory depression + AMS = opioid until proven otherwise. Identify the toxidrome first — treat the toxidrome, not a specific drug.”
+},
+{
+number: 3,
+title: “The Warehouse Worker”,
+scenario: “35-year-old male, found collapsed at work. Coworkers say he complained of a headache before going down. HR 52, BP 168/94, RR 6 and irregular, SpO2 88%. No trauma. The building houses refrigeration equipment.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Carbon monoxide poisoning”,
+differentials: [
+“Refrigerant or other toxic gas exposure”,
+“Hypoglycemia”,
+“Spontaneous intracranial hemorrhage”,
+“Cardiac event”
+],
+teaching: “That SpO2 of 88% cannot be trusted — CO-hemoglobin reads as oxyhemoglobin on standard pulse oximetry. The true saturation may be far worse.”
+},
+{
+number: 4,
+title: “The Nursing Home Scramble”,
+scenario: “82-year-old female, acute onset altered mental status. Staff says she was fine at breakfast. GCS 12, BP 202/110, facial droop on the right, LEFT gaze deviation, no history of seizures. BGL 104.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Acute ischemic stroke — large vessel occlusion”,
+differentials: [
+“Hemorrhagic stroke”,
+“Hypertensive encephalopathy”,
+“Todd’s paralysis post-unwitnessed seizure”,
+“Hyperosmolar hyperglycemic state (BGL rules this out)”
+],
+teaching: “Left gaze deviation with right-sided deficit = left hemisphere LVO. The normal BGL strengthens the stroke impression. Time is brain.”
+},
+{
+number: 5,
+title: “The Athlete Who Didn’t Make It”,
+scenario: “19-year-old male, collapsed during a basketball game. Bystander CPR in progress on arrival. Rhythm shows coarse ventricular fibrillation. No trauma reported, no chest impact witnessed.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Sudden cardiac death — hypertrophic cardiomyopathy”,
+differentials: [
+“Congenital arrhythmia (long QT, Brugada, WPW)”,
+“Myocarditis”,
+“Anomalous coronary artery”,
+“Stimulant or cocaine use”
+],
+teaching: “Commotio cordis requires a witnessed blunt chest impact during a vulnerable cardiac window — no mechanism, no differential. Don’t guess.”
+},
+{
+number: 6,
+title: “The 3 AM Breathing Call”,
+scenario: “67-year-old female, severe respiratory distress, sitting upright, tripoding. Diffuse bilateral crackles, JVD present, SpO2 82% on room air, BP 188/102, HR 110 and irregular. She takes furosemide and lisinopril.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Acute decompensated heart failure / flash pulmonary edema”,
+differentials: [
+“A-fib with RVR as the precipitant”,
+“COPD exacerbation”,
+“Pneumonia”,
+“Pulmonary embolism”
+],
+teaching: “JVD + bilateral crackles + medication history = cardiac until proven otherwise. That irregular rhythm may be both a finding and the cause.”
+},
+{
+number: 7,
+title: “The Construction Site”,
+scenario: “28-year-old male, fell approximately 15 feet from scaffolding. GCS 14, confused, BP 78/50, HR 128, abdomen rigid and distended. Pelvis unstable on compression. No obvious external hemorrhage.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Hemorrhagic shock — pelvic fracture with internal hemorrhage”,
+differentials: [
+“Intra-abdominal injury (both pelvis and abdomen are suspect)”,
+“Tension pneumothorax”,
+“Traumatic aortic injury”,
+“Spinal shock”
+],
+teaching: “Shock + no external bleeding = cavitary hemorrhage. Pelvis and abdomen are both suspects here. Don’t stop at one.”
+},
+{
+number: 8,
+title: “The Dialysis Patient”,
+scenario: “54-year-old male, dialysis-dependent, missed his last two sessions. Weakness and "just feeling off." HR 52, wide complex rhythm on monitor, BP 104/68, peaked T-waves on 12-lead. No chest pain.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Severe hyperkalemia with cardiac conduction toxicity”,
+differentials: [
+“ACS with conduction abnormality”,
+“Complete heart block”,
+“Digoxin toxicity”
+],
+teaching: “Protocol is explicit: a wide bizarre rhythm with known hyperkalemia = hyperkalemic cardiac toxicity until proven otherwise. Hypomagnesemia produces flat/inverted T-waves and U-waves — it does NOT cause peaked T-waves.”
+},
+{
+number: 9,
+title: “The Postpartum Call”,
+scenario: “26-year-old female, 6 days post-delivery, sudden onset shortness of breath and right-sided chest pain that worsens with breathing. HR 118, BP 96/60, SpO2 90%, RR 28. Right leg swelling noted.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Pulmonary embolism”,
+differentials: [
+“Postpartum cardiomyopathy”,
+“Pneumothorax”,
+“Pneumonia”
+],
+teaching: “The postpartum period is one of the highest-risk windows for VTE. Unilateral leg swelling + pleuritic pain + hemodynamic compromise = PE until proven otherwise. Amniotic fluid embolism is extremely unlikely at 6 days.”
+},
+{
+number: 10,
+title: “The Confused Hiker”,
+scenario: “44-year-old male found by trail runners, confused and stumbling. Hot day, been hiking since morning. Skin hot and dry, HR 136, BP 88/58, temp 41.2°C (106.2°F), GCS 11. No medications reported.”,
+prompt: “What’s your field impression and key differentials?”,
+primary: “Heat stroke”,
+differentials: [
+“Exertional rhabdomyolysis (likely concurrent)”,
+“Serotonin syndrome (if meds were underreported)”,
+“Stimulant toxicity”,
+“Meningitis”
+],
+teaching: “Protocol defines heat stroke as temp >40°C with altered mental status — this patient meets both. Cooling IS the treatment. ‘No medications reported’ in the field is not confirmed — keep serotonin syndrome in mind.”
+}
+];
+
+const EKG_PATH = “M0,50 L20,50 L25,20 L30,80 L35,50 L60,50 L65,10 L70,90 L75,50 L100,50 L105,20 L110,80 L115,50 L140,50 L145,10 L150,90 L155,50 L180,50 L185,20 L190,80 L195,50 L220,50 L225,10 L230,90 L235,50 L260,50 L265,20 L270,80 L275,50 L300,50”;
+
+export default function EMSTrivia() {
+const [screen, setScreen] = useState(“title”); // title | question | answer
+const [current, setCurrent] = useState(0);
+const [revealed, setRevealed] = useState(false);
+const [animate, setAnimate] = useState(false);
+
+useEffect(() => {
+setAnimate(false);
+const t = setTimeout(() => setAnimate(true), 50);
+return () => clearTimeout(t);
+}, [screen, current]);
+
+const q = questions[current];
+
+const goNext = () => {
+if (current < questions.length - 1) {
+setRevealed(false);
+setCurrent(c => c + 1);
+setScreen(“question”);
+} else {
+setScreen(“end”);
+}
+};
+
+const goPrev = () => {
+if (current > 0) {
+setRevealed(false);
+setCurrent(c => c - 1);
+setScreen(“question”);
+}
+};
+
+return (
+<div style={{
+minHeight: “100vh”,
+background: “#0a0e1a”,
+fontFamily: “‘Georgia’, ‘Times New Roman’, serif”,
+color: “#e8f4f8”,
+display: “flex”,
+flexDirection: “column”,
+alignItems: “center”,
+justifyContent: “center”,
+padding: “20px”,
+position: “relative”,
+overflow: “hidden”
+}}>
+{/* Animated EKG background */}
+<svg style={{
+position: “fixed”, top: 0, left: 0, width: “100%”, height: “100%”,
+opacity: 0.04, pointerEvents: “none”
+}}>
+{[0, 1, 2, 3, 4].map(i => (
+<g key={i} transform={`translate(0, ${i * 200 - 50})`}>
+<path d={EKG_PATH} stroke=”#00d4ff” strokeWidth=“2” fill=“none”
+style={{
+strokeDasharray: 600,
+strokeDashoffset: 600,
+animation: `ekgDraw 3s linear ${i * 0.6}s infinite`
+}} />
+<path d={EKG_PATH} stroke=”#00d4ff” strokeWidth=“2” fill=“none”
+transform=“translate(300, 0)”
+style={{
+strokeDasharray: 600,
+strokeDashoffset: 600,
+animation: `ekgDraw 3s linear ${i * 0.6 + 1}s infinite`
+}} />
+<path d={EKG_PATH} stroke=”#00d4ff” strokeWidth=“2” fill=“none”
+transform=“translate(600, 0)”
+style={{
+strokeDasharray: 600,
+strokeDashoffset: 600,
+animation: `ekgDraw 3s linear ${i * 0.6 + 2}s infinite`
+}} />
+<path d={EKG_PATH} stroke=”#00d4ff” strokeWidth=“2” fill=“none”
+transform=“translate(900, 0)”
+style={{
+strokeDasharray: 600,
+strokeDashoffset: 600,
+animation: `ekgDraw 3s linear ${i * 0.6 + 1.5}s infinite`
+}} />
+<path d={EKG_PATH} stroke=”#00d4ff” strokeWidth=“2” fill=“none”
+transform=“translate(1200, 0)”
+style={{
+strokeDasharray: 600,
+strokeDashoffset: 600,
+animation: `ekgDraw 3s linear ${i * 0.6 + 0.8}s infinite`
+}} />
+</g>
+))}
+</svg>
+
+```
+  <style>{`
+    @keyframes ekgDraw {
+      0% { stroke-dashoffset: 600; opacity: 1; }
+      80% { stroke-dashoffset: 0; opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 0; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 2px;
+      backdrop-filter: blur(8px);
+    }
+    .btn-primary {
+      background: #00d4ff;
+      color: #0a0e1a;
+      border: none;
+      padding: 14px 36px;
+      font-family: 'Georgia', serif;
+      font-size: 15px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 1px;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      background: #33ddff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,212,255,0.4);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: rgba(0,212,255,0.7);
+      border: 1px solid rgba(0,212,255,0.3);
+      padding: 10px 24px;
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 1px;
+      transition: all 0.2s;
+    }
+    .btn-ghost:hover {
+      border-color: rgba(0,212,255,0.8);
+      color: #00d4ff;
+    }
+    .btn-ghost:disabled {
+      opacity: 0.2;
+      cursor: default;
+    }
+    .reveal-btn {
+      background: linear-gradient(135deg, #ff4d6d, #c9184a);
+      color: white;
+      border: none;
+      padding: 16px 48px;
+      font-family: 'Georgia', serif;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 1px;
+      transition: all 0.2s;
+      box-shadow: 0 0 30px rgba(255,77,109,0.3);
+    }
+    .reveal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(255,77,109,0.5);
+    }
+  `}</style>
+
+  {/* TITLE SCREEN */}
+  {screen === "title" && (
+    <div style={{
+      textAlign: "center", maxWidth: 700,
+      animation: animate ? "fadeUp 0.8s ease both" : "none"
+    }}>
+      <div style={{
+        fontSize: 11, letterSpacing: 6, color: "#00d4ff",
+        textTransform: "uppercase", marginBottom: 24, opacity: 0.8
+      }}>
+        AMR Kansas City · EMS Week 2025
+      </div>
+      <div style={{
+        fontSize: 13, letterSpacing: 4, color: "rgba(0,212,255,0.5)",
+        textTransform: "uppercase", marginBottom: 16
+      }}>
+        ★ ★ ★
+      </div>
+      <h1 style={{
+        fontSize: "clamp(42px, 8vw, 80px)",
+        fontWeight: "normal",
+        lineHeight: 1.1,
+        marginBottom: 8,
+        letterSpacing: "-1px",
+        color: "#ffffff"
+      }}>
+        Differential
+      </h1>
+      <h1 style={{
+        fontSize: "clamp(42px, 8vw, 80px)",
+        fontWeight: "normal",
+        lineHeight: 1.1,
+        marginBottom: 32,
+        letterSpacing: "-1px",
+        color: "#00d4ff"
+      }}>
+        Diagnosis
+      </h1>
+      <div style={{
+        fontSize: "clamp(16px, 3vw, 22px)",
+        fontStyle: "italic",
+        color: "rgba(232,244,248,0.6)",
+        marginBottom: 60,
+        lineHeight: 1.5
+      }}>
+        10 Prehospital Scenarios.<br />What's your field impression?
+      </div>
+      <button className="btn-primary" onClick={() => setScreen("question")}>
+        Start Game
+      </button>
+      <div style={{
+        marginTop: 40, fontSize: 12, color: "rgba(255,255,255,0.2)",
+        letterSpacing: 2, textTransform: "uppercase"
+      }}>
+        Medical Director: Dr. Ameet Deshmukh, MD
+      </div>
+    </div>
+  )}
+
+  {/* QUESTION SCREEN */}
+  {screen === "question" && (
+    <div style={{
+      maxWidth: 820, width: "100%",
+      animation: animate ? "fadeUp 0.5s ease both" : "none"
+    }}>
+      {/* Header */}
+      <div style={{
+        display: "flex", justifyContent: "space-between",
+        alignItems: "center", marginBottom: 32
+      }}>
+        <div style={{
+          fontSize: 11, letterSpacing: 4, color: "rgba(0,212,255,0.6)",
+          textTransform: "uppercase"
+        }}>
+          AMR KC · EMS Week
+        </div>
+        <div style={{
+          fontSize: 13, letterSpacing: 3, color: "#00d4ff",
+          textTransform: "uppercase"
+        }}>
+          {current + 1} / {questions.length}
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{
+        height: 2, background: "rgba(0,212,255,0.15)",
+        marginBottom: 40, borderRadius: 1
+      }}>
+        <div style={{
+          height: "100%",
+          width: `${((current + 1) / questions.length) * 100}%`,
+          background: "#00d4ff",
+          transition: "width 0.4s ease",
+          borderRadius: 1
+        }} />
+      </div>
+
+      {/* Question number badge */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 16, marginBottom: 20
+      }}>
+        <div style={{
+          width: 48, height: 48,
+          border: "2px solid #ff4d6d",
+          borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "#ff4d6d", fontSize: 18, fontWeight: "bold",
+          flexShrink: 0
+        }}>
+          {q.number}
+        </div>
+        <h2 style={{
+          fontSize: "clamp(20px, 4vw, 32px)",
+          fontWeight: "normal",
+          color: "#ffffff",
+          margin: 0,
+          letterSpacing: "-0.5px"
+        }}>
+          {q.title}
+        </h2>
+      </div>
+
+      {/* Scenario card */}
+      <div className="card" style={{ padding: "28px 32px", marginBottom: 24 }}>
+        <div style={{
+          fontSize: 11, letterSpacing: 3, color: "#00d4ff",
+          textTransform: "uppercase", marginBottom: 16, opacity: 0.7
+        }}>
+          Scenario
+        </div>
+        <p style={{
+          fontSize: "clamp(15px, 2vw, 18px)",
+          lineHeight: 1.75,
+          color: "rgba(232,244,248,0.9)",
+          margin: 0
+        }}>
+          {q.scenario}
+        </p>
+      </div>
+
+      {/* Prompt */}
+      <div style={{
+        padding: "20px 32px",
+        background: "rgba(255,77,109,0.08)",
+        border: "1px solid rgba(255,77,109,0.3)",
+        borderRadius: 2,
+        marginBottom: 36
+      }}>
+        <p style={{
+          fontSize: "clamp(16px, 2.5vw, 20px)",
+          fontStyle: "italic",
+          color: "#ff8fa3",
+          margin: 0,
+          lineHeight: 1.5
+        }}>
+          {q.prompt}
+        </p>
+      </div>
+
+      {/* Answer section */}
+      {!revealed ? (
+        <div style={{ textAlign: "center" }}>
+          <button className="reveal-btn" onClick={() => setRevealed(true)}>
+            Reveal Answer
+          </button>
+        </div>
+      ) : (
+        <div style={{ animation: "slideDown 0.4s ease both" }}>
+          {/* Primary impression */}
+          <div style={{
+            padding: "24px 32px",
+            background: "rgba(0,212,255,0.08)",
+            border: "1px solid rgba(0,212,255,0.4)",
+            borderRadius: 2,
+            marginBottom: 16
+          }}>
+            <div style={{
+              fontSize: 11, letterSpacing: 3, color: "#00d4ff",
+              textTransform: "uppercase", marginBottom: 10
+            }}>
+              Primary Impression
+            </div>
+            <div style={{
+              fontSize: "clamp(18px, 3vw, 26px)",
+              color: "#ffffff",
+              fontWeight: "bold",
+              letterSpacing: "-0.5px"
+            }}>
+              {q.primary}
+            </div>
+          </div>
+
+          {/* Differentials */}
+          <div className="card" style={{ padding: "24px 32px", marginBottom: 16 }}>
+            <div style={{
+              fontSize: 11, letterSpacing: 3, color: "#00d4ff",
+              textTransform: "uppercase", marginBottom: 16
+            }}>
+              Also Consider
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {q.differentials.map((d, i) => (
+                <span key={i} style={{
+                  padding: "8px 16px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  borderRadius: 2,
+                  fontSize: 14,
+                  color: "rgba(232,244,248,0.8)",
+                  animation: `fadeIn 0.3s ease ${i * 0.07}s both`
+                }}>
+                  {d}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Teaching point */}
+          <div style={{
+            padding: "20px 32px",
+            background: "rgba(255,193,7,0.06)",
+            border: "1px solid rgba(255,193,7,0.25)",
+            borderRadius: 2,
+            marginBottom: 36
+          }}>
+            <div style={{
+              fontSize: 11, letterSpacing: 3, color: "#ffc107",
+              textTransform: "uppercase", marginBottom: 10
+            }}>
+              ⚡ Teaching Point
+            </div>
+            <p style={{
+              fontSize: 15, lineHeight: 1.7,
+              color: "rgba(232,244,248,0.8)",
+              margin: 0, fontStyle: "italic"
+            }}>
+              {q.teaching}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center"
+      }}>
+        <button className="btn-ghost" onClick={goPrev} disabled={current === 0}>
+          ← Previous
+        </button>
+        <button
+          className="btn-primary"
+          onClick={goNext}
+          style={{ opacity: revealed ? 1 : 0.4, cursor: revealed ? "pointer" : "default" }}
+          disabled={!revealed}
+        >
+          {current === questions.length - 1 ? "Finish" : "Next Question →"}
+        </button>
+      </div>
+    </div>
+  )}
+
+  {/* END SCREEN */}
+  {screen === "end" && (
+    <div style={{
+      textAlign: "center", maxWidth: 600,
+      animation: animate ? "fadeUp 0.8s ease both" : "none"
+    }}>
+      <div style={{
+        fontSize: 64, marginBottom: 24,
+        animation: "pulse 2s ease infinite"
+      }}>
+        🚑
+      </div>
+      <div style={{
+        fontSize: 11, letterSpacing: 5, color: "#00d4ff",
+        textTransform: "uppercase", marginBottom: 16
+      }}>
+        Game Complete
+      </div>
+      <h2 style={{
+        fontSize: "clamp(32px, 6vw, 56px)",
+        fontWeight: "normal",
+        color: "#ffffff",
+        marginBottom: 16,
+        letterSpacing: "-1px"
+      }}>
+        That's a Wrap.
+      </h2>
+      <p style={{
+        fontSize: 18, lineHeight: 1.7,
+        color: "rgba(232,244,248,0.6)",
+        marginBottom: 48,
+        fontStyle: "italic"
+      }}>
+        10 scenarios. 10 field impressions.<br />
+        The job never gets simpler — but you do get sharper.
+      </p>
+      <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+        <button className="btn-primary" onClick={() => {
+          setCurrent(0);
+          setRevealed(false);
+          setScreen("question");
+        }}>
+          Play Again
+        </button>
+        <button className="btn-ghost" onClick={() => setScreen("title")}>
+          Title Screen
+        </button>
+      </div>
+      <div style={{
+        marginTop: 48, fontSize: 12,
+        color: "rgba(255,255,255,0.2)",
+        letterSpacing: 2, textTransform: "uppercase",
+        lineHeight: 1.8
+      }}>
+        AMR Kansas City · EMS Week<br />
+        Medical Director: Dr. Ameet Deshmukh, MD
+      </div>
+    </div>
+  )}
+</div>
+```
+
+);
+}

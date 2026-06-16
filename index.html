@@ -1460,9 +1460,9 @@ function renderForms(){
     '<div class="cgf-meta-field"><label class="cgf-label" for="cgf-case">Case Number</label>',
     '<input class="cgf-input" type="text" id="cgf-case" placeholder="e.g. 12345678" autocomplete="off"></div>',
     '</div>',
-    crewSection('1','CREW 1 &mdash; Primary Caregiver', true),
-    crewSection('2','CREW 2 &mdash; Secondary Caregiver', false),
-    crewSection('3','CREW 3 &mdash; Third Caregiver', false),
+    crewSection('1','CREW 1 &mdash; Caregiver', false),
+    crewSection('2','CREW 2 &mdash; Caregiver', false),
+    crewSection('3','CREW 3 &mdash; Caregiver', false),
     '<button class="cgf-submit" id="cgf-submit">&#x1F4BE; Save as PDF &rarr;</button>',
     '<div class="cgf-status" id="cgf-status"></div>',
     '</div>',
@@ -1518,9 +1518,9 @@ function renderForms(){
       var now = new Date();
       var submittedAt = (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear()+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
       var crew = [
-        {name: getField('cgf-name-1'), cert: getField('cgf-cert-1'), sig: getSig(1), label: 'Primary Crew Member'},
-        {name: getField('cgf-name-2'), cert: getField('cgf-cert-2'), sig: getSig(2), label: 'Secondary Crew Member'},
-        {name: getField('cgf-name-3'), cert: getField('cgf-cert-3'), sig: getSig(3), label: 'Third Crew Member'},
+        {name: getField('cgf-name-1'), cert: getField('cgf-cert-1'), sig: getSig(1), label: 'Crew Member'},
+        {name: getField('cgf-name-2'), cert: getField('cgf-cert-2'), sig: getSig(2), label: 'Crew Member'},
+        {name: getField('cgf-name-3'), cert: getField('cgf-cert-3'), sig: getSig(3), label: 'Crew Member'},
       ];
       try {
         var jsPDF = window.jspdf.jsPDF;

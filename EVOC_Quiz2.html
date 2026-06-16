@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>EVOC Knowledge Quiz — Part 2 | AMR</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --blue: #1a3a6e;
+    --accent: #f5a623;
+    --red: #c0392b;
+    --green: #1a7a4a;
+    --text: #d0d8e8;
+    --muted: #7a8aaa;
+    --card: #111e35;
+    --border: #1e3050;
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root { color-scheme: dark; }
+
+@media (forced-colors: active) {
+body, header, main, .question-card, .option, .score-stat,
+.review-item, .tab, .progress-track, .feedback {
+forced-color-adjust: none;
+}
+}
+
+body {
+background: var(–navy);
+background-color: #0a1628;
+color: var(–text);
+font-family: ‘Barlow’, sans-serif;
+font-weight: 300;
+min-height: 100vh;
+background-image:
+repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.02) 59px, rgba(255,255,255,0.02) 60px),
+repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.02) 59px, rgba(255,255,255,0.02) 60px);
+}
+
+/* ── HEADER ── */
+header {
+background-color: #1a3a6e;
+background: linear-gradient(135deg, #1a3a6e 0%, #0d2244 100%);
+border-bottom: 3px solid var(–accent);
+padding: 28px 40px 24px;
+position: relative;
+overflow: hidden;
+}
+header::before {
+content: ‘’;
+position: absolute;
+top: -60px; right: -60px;
+width: 200px; height: 200px;
+border-radius: 50%;
+background: rgba(245,166,35,0.07);
+}
+.header-inner { max-width: 860px; margin: 0 auto; position: relative; }
+.badge {
+display: inline-block;
+background: var(–accent);
+color: #000;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 11px;
+letter-spacing: 2px;
+padding: 3px 10px;
+border-radius: 2px;
+margin-bottom: 10px;
+text-transform: uppercase;
+}
+.part-tag {
+display: inline-block;
+background: rgba(245,166,35,0.15);
+color: var(–accent);
+border: 1px solid var(–accent);
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 11px;
+letter-spacing: 2px;
+padding: 3px 10px;
+border-radius: 2px;
+margin-bottom: 10px;
+margin-left: 8px;
+text-transform: uppercase;
+}
+h1 {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 900;
+font-size: clamp(28px, 5vw, 46px);
+line-height: 1;
+letter-spacing: -0.5px;
+color: #fff;
+}
+h1 span { color: var(–accent); }
+.header-meta { margin-top: 10px; font-size: 13px; color: var(–muted); letter-spacing: 0.5px; }
+
+/* ── PROGRESS ── */
+.progress-wrap { max-width: 860px; margin: 28px auto 0; padding: 0 20px; }
+.progress-label {
+display: flex;
+justify-content: space-between;
+font-size: 12px;
+color: var(–muted);
+margin-bottom: 6px;
+font-family: ‘Barlow Condensed’, sans-serif;
+letter-spacing: 1px;
+text-transform: uppercase;
+}
+.progress-track { background: var(–border); border-radius: 2px; height: 4px; overflow: hidden; }
+.progress-fill { background: var(–accent); height: 100%; border-radius: 2px; transition: width 0.5s ease; width: 0%; }
+
+/* ── TABS ── */
+.tabs { max-width: 860px; margin: 24px auto 0; padding: 0 20px; display: flex; gap: 6px; }
+.tab {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 600;
+font-size: 12px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+padding: 6px 14px;
+border-radius: 2px;
+border: 1px solid var(–border);
+background: transparent;
+color: var(–muted);
+cursor: default;
+transition: all 0.3s;
+}
+.tab.active { background: var(–accent); color: #000; border-color: var(–accent); }
+.tab.done { border-color: var(–green); color: var(–green); }
+
+/* ── QUIZ AREA ── */
+main { max-width: 860px; margin: 28px auto 60px; padding: 0 20px; }
+
+.module-title {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 13px;
+letter-spacing: 2.5px;
+text-transform: uppercase;
+color: var(–accent);
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.module-title::after { content: ‘’; flex: 1; height: 1px; background: var(–border); }
+
+.question-card {
+background: var(–card);
+background-color: #111e35;
+border: 1px solid var(–border);
+border-radius: 4px;
+padding: 28px 32px;
+margin-bottom: 16px;
+transition: border-color 0.3s;
+}
+.question-card.answered { border-color: #1e3a5a; }
+
+.q-number { font-family: ‘Barlow Condensed’, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; color: var(–muted); text-transform: uppercase; margin-bottom: 10px; }
+.q-text { font-size: 16px; font-weight: 400; line-height: 1.55; color: #c8d4e8; margin-bottom: 20px; }
+
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+padding: 12px 16px;
+border-radius: 3px;
+border: 1px solid var(–border);
+cursor: pointer;
+transition: all 0.2s;
+background: rgba(255,255,255,0.02);
+}
+.option:hover:not(.locked) { border-color: #3a5a8a; background: rgba(26,58,110,0.3); }
+.option.selected:not(.correct):not(.wrong) { border-color: var(–accent); background: rgba(245,166,35,0.08); }
+.option.correct { border-color: var(–green); background: rgba(26,122,74,0.15); }
+.option.wrong { border-color: var(–red); background: rgba(192,57,43,0.12); }
+.option.locked { cursor: default; }
+
+.opt-letter { font-family: ‘Barlow Condensed’, sans-serif; font-weight: 700; font-size: 14px; color: var(–muted); min-width: 22px; padding-top: 1px; transition: color 0.2s; }
+.option.selected .opt-letter { color: var(–accent); }
+.option.correct .opt-letter { color: #2ecc71; }
+.option.wrong .opt-letter { color: var(–red); }
+
+.opt-text { font-size: 14px; line-height: 1.45; color: var(–text); flex: 1; }
+.opt-icon { font-size: 16px; min-width: 20px; text-align: right; opacity: 0; transition: opacity 0.2s; }
+.option.correct .opt-icon, .option.wrong .opt-icon { opacity: 1; }
+
+.feedback { margin-top: 14px; padding: 12px 16px; border-radius: 3px; font-size: 13px; line-height: 1.5; display: none; }
+.feedback.show { display: block; }
+.feedback.correct-fb { background: rgba(26,122,74,0.2); border-left: 3px solid var(–green); color: #7adba5; }
+.feedback.wrong-fb { background: rgba(192,57,43,0.15); border-left: 3px solid var(–red); color: #e07070; }
+
+/* ── NAV ── */
+.nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+.btn {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 700;
+font-size: 14px;
+letter-spacing: 2px;
+text-transform: uppercase;
+padding: 12px 28px;
+border-radius: 3px;
+border: none;
+cursor: pointer;
+transition: all 0.2s;
+}
+.btn-primary { background: var(–accent); color: #000; }
+.btn-primary:hover { background: #ffc04a; }
+.btn-primary:disabled { background: #4a4020; color: #7a6030; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(–muted); border: 1px solid var(–border); }
+.btn-ghost:hover { border-color: var(–muted); color: var(–text); }
+.btn-ghost:disabled { opacity: 0.3; cursor: not-allowed; }
+.q-counter { font-family: ‘Barlow Condensed’, sans-serif; font-size: 14px; color: var(–muted); letter-spacing: 1px; }
+
+/* ── SCORE ── */
+#score-screen { display: none; text-align: center; padding: 40px 20px 60px; }
+.score-ring {
+width: 160px; height: 160px; border-radius: 50%; margin: 0 auto 28px;
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+border: 6px solid var(–accent); position: relative;
+}
+.score-ring::before {
+content: ‘’; position: absolute; inset: 6px; border-radius: 50%;
+background: radial-gradient(circle at 40% 40%, #1a3a6e, var(–navy));
+}
+.score-pct { font-family: ‘Barlow Condensed’, sans-serif; font-weight: 900; font-size: 52px; color: var(–accent); position: relative; z-index: 1; line-height: 1; }
+.score-label { font-family: ‘Barlow Condensed’, sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(–muted); position: relative; z-index: 1; }
+.score-headline { font-family: ‘Barlow Condensed’, sans-serif; font-weight: 900; font-size: 32px; color: #fff; margin-bottom: 8px; }
+.score-sub { font-size: 14px; color: var(–muted); margin-bottom: 32px; }
+
+.score-breakdown { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 36px; }
+.score-stat { background: var(–card); border: 1px solid var(–border); border-radius: 4px; padding: 16px 24px; min-width: 110px; }
+.score-stat-num { font-family: ‘Barlow Condensed’, sans-serif; font-weight: 900; font-size: 32px; line-height: 1; }
+.score-stat-num.correct-num { color: #2ecc71; }
+.score-stat-num.wrong-num { color: var(–red); }
+.score-stat-num.total-num { color: var(–accent); }
+.score-stat-lbl { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(–muted); margin-top: 4px; font-family: ‘Barlow Condensed’, sans-serif; }
+
+.part-link {
+display: inline-block;
+margin-top: 16px;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-weight: 600;
+font-size: 13px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+color: var(–muted);
+text-decoration: none;
+border: 1px solid var(–border);
+padding: 10px 22px;
+border-radius: 3px;
+transition: all 0.2s;
+margin-left: 12px;
+}
+.part-link:hover { color: var(–text); border-color: var(–muted); }
+
+/* ── REVIEW ── */
+.review-section { margin-top: 40px; text-align: left; }
+.review-item { background: var(–card); border: 1px solid var(–border); border-radius: 4px; padding: 18px 22px; margin-bottom: 10px; border-left: 4px solid var(–border); }
+.review-item.correct { border-left-color: var(–green); }
+.review-item.wrong { border-left-color: var(–red); }
+.review-q { font-size: 14px; color: #b0bed8; margin-bottom: 8px; }
+.review-answer { font-size: 13px; }
+.review-answer .your { color: var(–red); }
+.review-answer .correct { color: #2ecc71; }
+.review-answer span { display: block; margin-bottom: 2px; }
+
+@media (max-width: 600px) {
+header { padding: 20px; }
+.question-card { padding: 20px; }
+.tabs { flex-wrap: wrap; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+      <div class="badge">AMR — Global Medical Response</div>
+      <div class="part-tag">Part 2 of 2</div>
+    </div>
+    <h1>EVOC <span>Knowledge Quiz</span></h1>
+    <p class="header-meta">Backing &nbsp;·&nbsp; Seat Belt Utilization</p>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="prog-label">Progress</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" id="tab-0">Backing</div>
+  <div class="tab" id="tab-1">Seat Belt Utilization</div>
+</div>
+
+<main>
+  <div id="quiz-area">
+    <div class="module-title" id="module-label">Module 1 — Backing</div>
+    <div id="question-container"></div>
+    <div class="nav-buttons">
+      <button class="btn btn-ghost" id="prev-btn" onclick="navigate(-1)" disabled>← Previous</button>
+      <span class="q-counter" id="q-counter">1 / 18</span>
+      <button class="btn btn-primary" id="next-btn" onclick="navigate(1)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <div id="score-screen">
+    <div class="score-ring">
+      <div class="score-pct" id="score-pct">—</div>
+      <div class="score-label">Score</div>
+    </div>
+    <div class="score-headline" id="score-headline">Quiz Complete</div>
+    <div class="score-sub" id="score-sub"></div>
+    <div class="score-breakdown">
+      <div class="score-stat">
+        <div class="score-stat-num correct-num" id="stat-correct">0</div>
+        <div class="score-stat-lbl">Correct</div>
+      </div>
+      <div class="score-stat">
+        <div class="score-stat-num wrong-num" id="stat-wrong">0</div>
+        <div class="score-stat-lbl">Incorrect</div>
+      </div>
+      <div class="score-stat">
+        <div class="score-stat-num total-num" id="stat-total">0</div>
+        <div class="score-stat-lbl">Total</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="restart-btn" onclick="restart()">Retake Quiz</button>
+    <a class="part-link" href="EVOC_Quiz.html">← Part 1</a>
+    <div class="review-section" id="review-section"></div>
+  </div>
+</main>
+
+<script>
+const questions = [
+
+  // ── MODULE 0: BACKING ──────────────────────────────────────────────
+  {
+    module: 0,
+    text: "Backing collisions are described in GMR training as which of the following?",
+    options: [
+      "Rare but catastrophic when they occur",
+      "One of the most common and most avoidable types of collisions",
+      "Primarily a risk during emergency response, not routine operations",
+      "Less dangerous than intersection collisions due to lower speed"
+    ],
+    answer: 1,
+    feedback: "The GMR Backing module states directly: backing collisions are one of the most common types of collisions and the most avoidable. The best strategy is to eliminate the need to back up by positioning the vehicle appropriately from the start."
+  },
+  {
+    module: 0,
+    text: "What is the MOST effective way to prevent a backing collision?",
+    options: [
+      "Always use a backup camera",
+      "Have the partner call out clearance from inside the cab",
+      "Position the vehicle so backing is not necessary in the first place",
+      "Back slowly using only mirrors"
+    ],
+    answer: 2,
+    feedback: "Per GMR policy: the most effective way to avoid a backing collision is to eliminate the need to back up altogether. Thoughtful initial vehicle positioning is the primary prevention strategy."
+  },
+  {
+    module: 0,
+    text: "According to GMR backing policy, where should the spotter position themselves during a backing maneuver?",
+    options: [
+      "Directly behind the vehicle at the centerline",
+      "In a visible safe zone 10–15 feet at the LEFT REAR of the vehicle",
+      "On the tailboard to guide the driver verbally",
+      "At the right rear corner of the vehicle"
+    ],
+    answer: 1,
+    feedback: "The backer should position in a visible safe zone 10–15 feet at the left rear of the vehicle — visible in the driver's left mirror. Riding the tailboard or running boards while the vehicle is moving is never permitted."
+  },
+  {
+    module: 0,
+    text: "What must the driver do if the spotter is no longer visible in the left mirror?",
+    options: [
+      "Continue slowly while checking all other mirrors",
+      "Sound the horn to alert the spotter",
+      "Stop backing the unit immediately",
+      "Reduce speed and proceed with caution"
+    ],
+    answer: 2,
+    feedback: "Policy is clear: if the spotter is not visible in the left mirror, the driver shall stop backing the unit. This protects the spotter from being struck or pinned — which has happened in real incidents. No movement without visual contact."
+  },
+  {
+    module: 0,
+    text: "What is the correct universal hand signal for STOP during backing?",
+    options: [
+      "One hand raised with palm facing out",
+      "Both arms pointing downward with palms facing the ground",
+      "Both arms crossed with hands in fists, reinforced by yelling 'stop'",
+      "Rapid waving of both arms overhead"
+    ],
+    answer: 2,
+    feedback: "The Stop signal is both arms crossed with hands in fists. The spotter must reinforce the signal by yelling the stop order loudly enough for the driver to hear — especially important when windows are down."
+  },
+  {
+    module: 0,
+    text: "What is the correct universal hand signal for STRAIGHT BACK?",
+    options: [
+      "Both hands waving back and forth horizontally",
+      "One hand above the head with palm toward face, waving back; other hand at your side",
+      "Both index fingers pointing straight back at waist level",
+      "Thumbs up with both hands extended"
+    ],
+    answer: 1,
+    feedback: "Straight Back is signaled with one hand raised above the head, palm facing toward the spotter's face, waving back. The other hand stays at the side. Universal hand signals must always be used during backing."
+  },
+  {
+    module: 0,
+    text: "When a patient is in the ambulance and backing is necessary, what should the attendant do?",
+    options: [
+      "Exit the vehicle and serve as spotter regardless of patient condition",
+      "Have dispatch contact a nearby unit for assistance",
+      "Remain buckled and do not assist with backing",
+      "Move close to the rear doors, look out rear windows, and verbally direct the driver"
+    ],
+    answer: 3,
+    feedback: "When a patient is on board, the attendant cannot exit to spot. Instead, they should move as close to the rear doors as patient needs allow, look out the rear windows, and verbally direct the driver. This is one of the rare exceptions that permits unbuckling in the patient compartment."
+  },
+  {
+    module: 0,
+    text: "Under GMR policy, who may serve as a spotter if the driver's partner is unavailable?",
+    options: [
+      "No one — backing must be postponed until the partner returns",
+      "Allied agency personnel such as fire, police, or security",
+      "Any bystander willing to assist",
+      "The driver must perform a walk-around and back alone"
+    ],
+    answer: 1,
+    feedback: "GMR policy permits allied agency personnel (fire, police, security, etc.) to serve as spotters when the driver's partner is not present or available for justifiable reasons. Soliciting their help is preferable to operating independently."
+  },
+  {
+    module: 0,
+    text: "Which of the following is an ESSENTIAL requirement during all backing maneuvers per GMR policy?",
+    options: [
+      "Hazard lights must be activated before reversing",
+      "Windows must be down, regardless of weather",
+      "The driver must tap the horn twice before moving in reverse",
+      "Backing speed may not exceed 5 mph"
+    ],
+    answer: 1,
+    feedback: "Windows must be down when backing, irrespective of the weather. This ensures the driver can hear the spotter's voice commands in addition to hand signals. Vehicle speed while backing must not exceed the walking speed of the backer."
+  },
+  {
+    module: 0,
+    text: "If the driver is alone and no spotter is available, what must they do before backing?",
+    options: [
+      "Use only the backup camera and mirrors",
+      "Sound the horn to clear the area and back slowly",
+      "Perform a walk-around to check for hazards behind, alongside, and above the vehicle",
+      "Call dispatch to confirm the area is clear before reversing"
+    ],
+    answer: 2,
+    feedback: "When alone or when a spotter is unavailable, the driver must perform a 'walk-around' checking behind, alongside, and above the vehicle prior to backing. Even if they parked the vehicle themselves, hazards may have appeared since then. This step may need to be repeated."
+  },
+
+  // ── MODULE 1: SEAT BELT UTILIZATION ───────────────────────────────
+  {
+    module: 1,
+    text: "According to NHTSA data cited in GMR training, approximately what percentage of the 26,325 passenger vehicle occupants killed in 2021 were not buckled?",
+    options: ["About 25%", "About 35%", "About 50%", "About 65%"],
+    answer: 2,
+    feedback: "NHTSA data shows that about 50% of the 26,325 passenger vehicle occupants killed in 2021 were not buckled (based on known seat belt use). Seat belt use is the single most effective life-safety action a vehicle occupant can take."
+  },
+  {
+    module: 1,
+    text: "GMR policy requires that safety belts in the cab be worn by employees and right-seat passengers at ALL times while the vehicle is in operation. What risk does this primarily manage?",
+    options: [
+      "Equipment damage from unsecured items",
+      "Blunt force trauma from collision, sudden braking, acceleration, or abrupt steering",
+      "Driver distraction caused by passenger movement",
+      "Legal liability from patient observation of crew behavior"
+    ],
+    answer: 1,
+    feedback: "The risk being managed is blunt force trauma relating to traffic collision, near collision, sudden or unexpected braking, acceleration, and/or abrupt steering. Failure to wear seat belts is also unlawful and subjects the crew to citation by law enforcement."
+  },
+  {
+    module: 1,
+    text: "Safety belts in the patient compartment must be worn by employees at ALL times EXCEPT:",
+    options: [
+      "During any transport with lights and siren activated",
+      "Momentarily when performing specific treatment or vehicle backing procedures that prevent such use",
+      "Whenever the patient requires direct physical contact",
+      "During the first 5 minutes of any transport"
+    ],
+    answer: 1,
+    feedback: "Policy allows unbuckling only momentarily when performing specific treatment procedures or vehicle backing that physically prevent seat belt use. 'Specific treatment' is defined in the Job Hazard Analysis (JHA) created to clarify this exception — routine monitoring or documentation does not qualify."
+  },
+  {
+    module: 1,
+    text: "What does GMR training identify as 'the most dangerous unsecured object in an ambulance'?",
+    options: [
+      "An oxygen tank",
+      "A cardiac monitor",
+      "A person",
+      "An unsecured drug box"
+    ],
+    answer: 2,
+    feedback: "GMR training states explicitly: the most dangerous unsecured object in an ambulance is a person. An unrestrained crew member or patient becomes a projectile in a collision. Equipment items are also hazardous — they can fall under the brake pedal during sudden stops."
+  },
+  {
+    module: 1,
+    text: "Air bags and seat belts have which relationship according to the training?",
+    options: [
+      "Air bags replace the need for seat belts at highway speeds",
+      "Air bags are designed to work with seat belts, not replace them",
+      "Seat belts are optional when advanced air bag systems are present",
+      "Air bags only deploy when seat belts are buckled"
+    ],
+    answer: 1,
+    feedback: "Air bags are designed to work WITH seat belts, not replace them. An unbelted occupant can be seriously injured or killed by airbag deployment itself. Both systems must be used together as intended."
+  },
+  {
+    module: 1,
+    text: "According to GMR policy, prior to placing the vehicle in gear, what must employees verify regarding children under the age of 12?",
+    options: [
+      "Children under 12 must ride in the rear of the vehicle only",
+      "Children under 12 should not ride in seats where airbags are present",
+      "Children under 12 require a parent or guardian to be present in the cab",
+      "Children under 12 must use a booster seat regardless of their size"
+    ],
+    answer: 1,
+    feedback: "GMR Policy Analysis #4 specifies that children under the age of 12 should not ride in seats where airbags are present. Additionally, infants and children — whether passengers or patients — must be secured in an appropriate restraint device."
+  },
+  {
+    module: 1,
+    text: "An unbelted occupant in the patient compartment poses a risk to whom?",
+    options: [
+      "Only to themselves in the event of a crash",
+      "Only to the patient they are treating",
+      "To themselves AND to others around them — they become a projectile",
+      "Primarily to the driver, since the cab and patient compartment are separated"
+    ],
+    answer: 2,
+    feedback: "GMR training is direct on this point: not only is being unbelted dangerous for you, but you are also dangerous to others. An unrestrained person in the patient compartment becomes a projectile in any collision or sudden stop, threatening the patient, the other crew member, and themselves."
+  },
+  {
+    module: 1,
+    text: "Which statement best reflects GMR's policy expectation regarding seat belt use in the patient compartment?",
+    options: [
+      "Seat belts should be worn when practical, with clinical judgment guiding exceptions",
+      "Seat belts should be used every time; there are only a few rare exceptions — and if a colleague is unbelted, say something",
+      "Seat belt requirements apply only to the cab, not the patient compartment",
+      "Seat belts may be removed any time active patient care is being delivered"
+    ],
+    answer: 1,
+    feedback: "GMR's summary statement is unambiguous: seat belts should be used every time in the back of the ambulance. There are only a few rare exceptions. The training also emphasizes crew accountability — if anyone is not wearing a seat belt, say something. It doesn't take a collision to get injured."
+  },
+];
+
+const MODULE_LABELS = [
+  "Module 1 — Backing",
+  "Module 2 — Seat Belt Utilization"
+];
+
+const MODULE_RANGES = [
+  { start: 0, end: 9 },
+  { start: 10, end: 17 }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+function getModule(idx) {
+  return idx <= 9 ? 0 : 1;
+}
+
+function render() {
+  const q = questions[current];
+  const answered = answers[current] !== null;
+  const mod = getModule(current);
+
+  document.getElementById('module-label').textContent = MODULE_LABELS[mod];
+
+  for (let i = 0; i < 2; i++) {
+    const tab = document.getElementById('tab-' + i);
+    tab.className = 'tab';
+    const range = MODULE_RANGES[i];
+    const allAnswered = answers.slice(range.start, range.end + 1).every(a => a !== null);
+    if (i === mod) tab.classList.add('active');
+    else if (allAnswered) tab.classList.add('done');
+  }
+
+  const answeredCount = answers.filter(a => a !== null).length;
+  const pct = Math.round((answeredCount / questions.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+
+  document.getElementById('q-counter').textContent = `${current + 1} / ${questions.length}`;
+  document.getElementById('prev-btn').disabled = current === 0;
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = current === questions.length - 1 ? 'Finish →' : 'Next →';
+  nextBtn.disabled = !answered;
+
+  const letters = ['A', 'B', 'C', 'D'];
+  let optHtml = '';
+  q.options.forEach((opt, i) => {
+    let cls = 'option' + (answered ? ' locked' : '');
+    if (answered) {
+      if (i === q.answer) cls += ' correct';
+      else if (i === answers[current] && i !== q.answer) cls += ' wrong';
+    } else if (answers[current] === i) {
+      cls += ' selected';
+    }
+    const icon = answered ? (i === q.answer ? '✓' : (i === answers[current] ? '✗' : '')) : '';
+    optHtml += `<div class="${cls}" onclick="selectOption(${i})">
+      <span class="opt-letter">${letters[i]}</span>
+      <span class="opt-text">${opt}</span>
+      <span class="opt-icon">${icon}</span>
+    </div>`;
+  });
+
+  const fbClass = answered
+    ? (answers[current] === q.answer ? 'feedback correct-fb show' : 'feedback wrong-fb show')
+    : 'feedback';
+  const fbIcon = answers[current] === q.answer ? '✓ Correct — ' : '✗ Incorrect — ';
+
+  document.getElementById('question-container').innerHTML = `
+    <div class="question-card${answered ? ' answered' : ''}">
+      <div class="q-number">Question ${current + 1} of ${questions.length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options">${optHtml}</div>
+      <div class="${fbClass}"><strong>${answered ? fbIcon : ''}</strong>${q.feedback}</div>
+    </div>`;
+}
+
+function selectOption(i) {
+  if (answers[current] !== null) return;
+  answers[current] = i;
+  render();
+}
+
+function navigate(dir) {
+  if (dir === 1 && current === questions.length - 1) { showScore(); return; }
+  current = Math.max(0, Math.min(questions.length - 1, current + dir));
+  render();
+}
+
+function showScore() {
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('score-screen').style.display = 'block';
+
+  const correct = answers.filter((a, i) => a === questions[i].answer).length;
+  const wrong = questions.length - correct;
+  const pct = Math.round((correct / questions.length) * 100);
+
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-total').textContent = questions.length;
+
+  const headline = pct >= 90 ? 'Outstanding Performance' :
+                   pct >= 75 ? 'Competency Demonstrated' :
+                   pct >= 60 ? 'Review Recommended' : 'Remediation Required';
+  const sub = pct >= 75
+    ? `You answered ${correct} of ${questions.length} correctly. ${pct >= 90 ? 'Excellent EVOC knowledge.' : 'Review any missed items below.'}`
+    : `You answered ${correct} of ${questions.length} correctly. Please review the training materials and retake.`;
+
+  document.getElementById('score-headline').textContent = headline;
+  document.getElementById('score-sub').textContent = sub;
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+
+  const letters = ['A', 'B', 'C', 'D'];
+  let reviewHtml = '<div class="module-title" style="margin-bottom:16px;">Review All Answers</div>';
+  questions.forEach((q, i) => {
+    const userAns = answers[i];
+    const isCorrect = userAns === q.answer;
+    reviewHtml += `<div class="review-item ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="review-q"><strong>Q${i+1}.</strong> ${q.text}</div>
+      <div class="review-answer">
+        ${!isCorrect ? `<span class="your">Your answer: ${letters[userAns]} — ${q.options[userAns]}</span>` : ''}
+        <span class="correct">${isCorrect ? '✓ ' : 'Correct: '}${letters[q.answer]} — ${q.options[q.answer]}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('review-section').innerHTML = reviewHtml;
+}
+
+function restart() {
+  answers = new Array(questions.length).fill(null);
+  current = 0;
+  document.getElementById('score-screen').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
