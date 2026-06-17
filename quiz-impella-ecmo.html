@@ -74,6 +74,10 @@ html,body{min-height:100%;background:var(--bg);font-family:var(--sans);color:var
 .missed-r-a{font-size:12.5px;color:#86efac;line-height:1.5}
 .cert-panel{background:linear-gradient(160deg,#102338,#0c1a2c);border:1px solid var(--teal);border-radius:14px;padding:20px 16px;text-align:center;margin-bottom:14px}
 .cert-panel.locked{border-color:var(--border);background:var(--surface2)}
+.attest{display:flex;gap:10px;align-items:flex-start;text-align:left;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:12px 13px;margin-bottom:14px}
+.attest input{margin-top:2px;width:20px;height:20px;flex-shrink:0;accent-color:var(--teal2)}
+.attest label{font-size:12.5px;color:#b6c4d2;line-height:1.55}
+.cert-btn:disabled{opacity:0.4;cursor:not-allowed}
 .cert-emoji{font-size:34px;margin-bottom:8px}
 .cert-h{font-size:16px;font-weight:700;margin-bottom:6px}
 .cert-p{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:14px}
@@ -159,7 +163,11 @@ html,body{min-height:100%;background:var(--bg);font-family:var(--sans);color:var
     <div class="cert-emoji" id="cert-emoji">&#x1F396;&#xFE0F;</div>
     <div class="cert-h" id="cert-h">You passed!</div>
     <div class="cert-p" id="cert-p">Generate your certificate of completion below.</div>
-    <button class="cert-btn" id="cert-btn">Generate Certificate &#x1F396;&#xFE0F;</button>
+    <div class="attest" id="attest-row">
+      <input type="checkbox" id="attest-check">
+      <label for="attest-check">I attest that I personally viewed the full training and completed this assessment myself. I understand this completion record may be retained by the sponsoring organization for continuing-education documentation.</label>
+    </div>
+    <button class="cert-btn" id="cert-btn" disabled>Generate Certificate &#x1F396;&#xFE0F;</button>
   </div>
 
   <div id="r-missed-section" style="display:none">
@@ -301,8 +309,26 @@ var QUESTIONS = [
 
 var PASS_THRESHOLD = 0.8; // 80%
 
+// ════════════════════════════════════════════════════════════════════════
+//  CE / SPONSOR CONFIG  —  EDIT THESE before issuing official Kansas CE.
+//  Required certificate fields per K.A.R. 109-5-1(g): provider, learner,
+//  course title, date, location, credit amount, course ID number.
+// ════════════════════════════════════════════════════════════════════════
+var CE_CONFIG = {
+  provider:        'AMR Kansas City',                       // sponsoring org (your LTPP)
+  courseTitle:     'Impella & ECMO for EMS Transport',
+  courseSubtitle:  'Mechanical Circulatory Support · Continuing Education',
+  courseId:        'AMRKC-CE-2026-IE01',                    // <-- assign per your LTPP
+  creditHours:     '1.00',                                  // contact hours
+  location:        'Online (distributive)',                 // 109-5-1(g)(5) "location"
+  medicalDirector: 'Ameet Deshmukh, MD',
+  // Paste your Google Apps Script web-app URL here to log completions to a Sheet.
+  // Leave blank ('') and the certificate still works, but nothing is recorded.
+  logEndpoint:     ''
+};
+
 // ── STATE ──────────────────────────────────────────────────────────────
-var SESSION = {order:[], current:0, score:0, missed:[], name:''};
+var SESSION = {order:[], current:0, score:0, missed:[], name:'', completionId:'', _logged:false};
 
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 
@@ -398,20 +424,28 @@ function showResult(){
     ? '<span class="pass-pill pass">&#x2713; PASSED</span>'
     : '<span class="pass-pill fail">RETAKE TO PASS</span>';
 
+  // New completion identifier for this result (used on the cert + the log)
+  SESSION.completionId = makeCredId();
+  SESSION._logged = false;
+
   // Certificate panel
   var panel=document.getElementById('cert-panel');
   if(passed){
     panel.className='cert-panel';
     document.getElementById('cert-emoji').innerHTML='&#x1F396;&#xFE0F;';
     document.getElementById('cert-h').textContent='You passed — nice work!';
-    document.getElementById('cert-p').textContent='Generate your certificate of completion below. Add your name on the start screen if you left it blank.';
+    document.getElementById('cert-p').textContent='Confirm the attestation below, then generate your certificate. Add your name on the start screen if you left it blank.';
+    document.getElementById('attest-row').style.display='flex';
+    document.getElementById('attest-check').checked=false;
     document.getElementById('cert-btn').style.display='inline-block';
+    document.getElementById('cert-btn').disabled=true;
     document.getElementById('cert-btn').textContent='Generate Certificate 🎖️';
   } else {
     panel.className='cert-panel locked';
     document.getElementById('cert-emoji').innerHTML='&#x1F512;';
     document.getElementById('cert-h').textContent='Certificate locked';
     document.getElementById('cert-p').textContent='You need 80% (8 of 10) to earn the certificate. Review the items below and retake — the questions reshuffle each time.';
+    document.getElementById('attest-row').style.display='none';
     document.getElementById('cert-btn').style.display='none';
   }
 
@@ -455,6 +489,10 @@ function todayStr(){
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   return months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
 }
+function nowStamp(){
+  var d=new Date();
+  return todayStr()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
 
 function drawCertificate(){
   var c=document.getElementById('cert-canvas');
@@ -462,7 +500,7 @@ function drawCertificate(){
   var W=c.width, H=c.height;
   var name=(SESSION.name && SESSION.name.length) ? SESSION.name : 'EMS Provider';
   var pct=Math.round(SESSION.score/QUESTIONS.length*100);
-  var credId=makeCredId();
+  var credId=SESSION.completionId||makeCredId();
 
   // Background
   ctx.fillStyle='#ffffff';
@@ -488,68 +526,113 @@ function drawCertificate(){
 
   // Course title
   ctx.fillStyle='#0E2A3B';
-  ctx.font='700 58px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText('Impella & ECMO for EMS Transport', W/2, 230);
+  ctx.font='700 54px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText(CE_CONFIG.courseTitle, W/2, 226);
   ctx.fillStyle='#5B6B78';
-  ctx.font='400 24px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText('Mechanical Circulatory Support · Continuing Education', W/2, 272);
+  ctx.font='400 23px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText(CE_CONFIG.courseSubtitle, W/2, 266);
 
   // Presented to
   ctx.fillStyle='#5B6B78';
   ctx.font='400 24px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText('This certifies that', W/2, 380);
+  ctx.fillText('This certifies that', W/2, 352);
 
   // Name
   ctx.fillStyle='#0E2A3B';
-  ctx.font='700 64px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText(name, W/2, 452);
-  // underline under name
+  ctx.font='700 60px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText(name, W/2, 422);
   ctx.strokeStyle='#14b8a6'; ctx.lineWidth=3;
   var nameW=Math.min(ctx.measureText(name).width+120, W-260);
-  ctx.beginPath(); ctx.moveTo(W/2-nameW/2,478); ctx.lineTo(W/2+nameW/2,478); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W/2-nameW/2,448); ctx.lineTo(W/2+nameW/2,448); ctx.stroke();
 
   // Body
   ctx.fillStyle='#27343C';
-  ctx.font='400 26px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText('has successfully completed the 1.0-hour continuing education module', W/2, 540);
-  ctx.fillText('covering Impella and ECMO management in the transport setting.', W/2, 578);
+  ctx.font='400 25px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText('has successfully completed the following continuing education activity,', W/2, 506);
+  ctx.fillText('passing the post-course assessment with a score of '+SESSION.score+'/'+QUESTIONS.length+' ('+pct+'%).', W/2, 542);
 
-  // Score badge
-  ctx.fillStyle='#0d9488';
-  ctx.font='700 44px "IBM Plex Mono", monospace';
-  ctx.fillText('Score: '+SESSION.score+'/'+QUESTIONS.length+'  ('+pct+'%)', W/2, 660);
+  // ── Compliance detail strip (K.A.R. 109-5-1(g)) ──
+  var bx=120, bw=W-240, by=586, bh=118;
+  ctx.fillStyle='#F2F7F9';
+  if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,12); ctx.fill(); }
+  else ctx.fillRect(bx,by,bw,bh);
+  ctx.strokeStyle='#cfe0e6'; ctx.lineWidth=1.5; ctx.strokeRect(bx,by,bw,bh);
+  var col=[bx+bw*0.17, bx+bw*0.5, bx+bw*0.83];
+  var fields=[
+    ['COURSE ID', CE_CONFIG.courseId],
+    ['CE CREDIT', CE_CONFIG.creditHours+' contact hour'+(CE_CONFIG.creditHours==='1.00'?'':'s')],
+    ['LOCATION', CE_CONFIG.location]
+  ];
+  fields.forEach(function(f,i){
+    ctx.fillStyle='#0d9488'; ctx.font='600 17px "IBM Plex Mono", monospace';
+    ctx.fillText(f[0], col[i], by+44);
+    ctx.fillStyle='#0E2A3B'; ctx.font='600 23px "IBM Plex Sans", Arial, sans-serif';
+    ctx.fillText(f[1], col[i], by+82);
+  });
+  ctx.strokeStyle='#cfe0e6'; ctx.lineWidth=1;
+  [bx+bw/3, bx+bw*2/3].forEach(function(x){ ctx.beginPath(); ctx.moveTo(x,by+22); ctx.lineTo(x,by+bh-22); ctx.stroke(); });
 
-  // Footer columns: date / credential / signature
-  var baseY=792;
-  ctx.lineWidth=2; ctx.strokeStyle='#9fb3c2';
-  // date
-  ctx.beginPath(); ctx.moveTo(170,baseY); ctx.lineTo(470,baseY); ctx.stroke();
-  // signature
-  ctx.beginPath(); ctx.moveTo(W-470,baseY); ctx.lineTo(W-170,baseY); ctx.stroke();
-
-  ctx.fillStyle='#0E2A3B';
-  ctx.font='600 24px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText(todayStr(), 320, baseY-16);
-  ctx.font='italic 30px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText('Ameet Deshmukh, MD', W-320, baseY-16);
-
-  ctx.fillStyle='#5B6B78';
-  ctx.font='400 18px "IBM Plex Mono", monospace';
-  ctx.fillText('DATE', 320, baseY+30);
-  ctx.fillText('MEDICAL DIRECTOR', W-320, baseY+30);
-
-  // Org + credential id (center)
+  // Provider (sponsoring organization)
   ctx.fillStyle='#0E2A3B';
   ctx.font='600 22px "IBM Plex Sans", Arial, sans-serif';
-  ctx.fillText('AMR Kansas City · EMS Education', W/2, baseY-6);
-  ctx.fillStyle='#9fb3c2';
-  ctx.font='400 18px "IBM Plex Mono", monospace';
-  ctx.fillText('Credential ID: '+credId, W/2, baseY+30);
+  ctx.fillText('Provided by ' + CE_CONFIG.provider, W/2, by+bh+42);
+
+  // Footer signatures
+  var baseY=852;
+  ctx.lineWidth=2; ctx.strokeStyle='#9fb3c2';
+  ctx.beginPath(); ctx.moveTo(190,baseY); ctx.lineTo(520,baseY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W-520,baseY); ctx.lineTo(W-190,baseY); ctx.stroke();
+  ctx.fillStyle='#0E2A3B';
+  ctx.font='600 24px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText(todayStr(), 355, baseY-14);
+  ctx.font='italic 28px "IBM Plex Sans", Arial, sans-serif';
+  ctx.fillText(CE_CONFIG.medicalDirector, W-355, baseY-14);
+  ctx.fillStyle='#5B6B78'; ctx.font='400 17px "IBM Plex Mono", monospace';
+  ctx.fillText('DATE COMPLETED', 355, baseY+28);
+  ctx.fillText('MEDICAL DIRECTOR', W-355, baseY+28);
+
+  // Completion record id (cross-references the retained log)
+  ctx.fillStyle='#9fb3c2'; ctx.font='400 17px "IBM Plex Mono", monospace';
+  ctx.fillText('Completion record ID: '+credId+'   ·   Issued '+nowStamp(), W/2, baseY+68);
 
   return {name:name, credId:credId};
 }
 
+// enable the generate button only once the learner attests
+document.getElementById('attest-check').addEventListener('change', function(){
+  document.getElementById('cert-btn').disabled = !this.checked;
+});
+
+// POST a completion record to the sponsor's Google Sheet (if configured)
+function logCompletion(){
+  if(SESSION._logged) return;
+  SESSION._logged = true;
+  if(!CE_CONFIG.logEndpoint) return; // logging off until URL is set
+  try{
+    var body = new URLSearchParams({
+      submittedAt:  new Date().toISOString(),
+      learnerName:  SESSION.name || '',
+      courseTitle:  CE_CONFIG.courseTitle,
+      courseId:     CE_CONFIG.courseId,
+      creditHours:  CE_CONFIG.creditHours,
+      location:     CE_CONFIG.location,
+      scoreRaw:     SESSION.score + '/' + QUESTIONS.length,
+      scorePercent: Math.round(SESSION.score/QUESTIONS.length*100) + '%',
+      passStatus:   'PASS',
+      attestation:  'Yes',
+      completionId: SESSION.completionId
+    });
+    fetch(CE_CONFIG.logEndpoint, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: body.toString()
+    }).catch(function(){});
+  }catch(e){}
+}
+
 document.getElementById('cert-btn').addEventListener('click', function(){
+  if(this.disabled) return;
+  logCompletion();
   // ensure fonts are ready, then draw
   function go(){ drawCertificate(); document.getElementById('cert-overlay').style.display='flex'; }
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(go); setTimeout(go,300); }
