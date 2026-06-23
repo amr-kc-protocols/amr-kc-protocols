@@ -1082,9 +1082,28 @@ select.cert-input { cursor: pointer; }
 /* ---------- PRINT: isolate the certificate ---------- */
 @media print {
   @page { size: landscape; margin: 0.4in; }
-  .app-header, .app-nav, .app-footer, .no-print { display: none !important; }
+  .app-header, .app-nav, .app-footer, .no-print, .admin-badge { display: none !important; }
   body, .app-main, #app { background: #fff !important; margin: 0 !important; padding: 0 !important; }
   .cert-wrap { max-width: 100%; margin: 0; }
   .certificate { box-shadow: none; border-radius: 0; page-break-inside: avoid; }
   .cert-inner { border-color: var(--navy); }
+}
+
+/* ---------- ADMIN MODE BADGE ---------- */
+.admin-badge {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 4.6rem);
+  transform: translateX(-50%);
+  z-index: 60;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--white);
+  background: var(--terra);
+  border-radius: 999px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
 }
