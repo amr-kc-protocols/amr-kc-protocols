@@ -108,19 +108,19 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "Anatomic dead space in a healthy 70 kg adult is approximately:",
-        choices: ["50 mL", "150 mL", "350 mL", "500 mL"], answer: 1,
+        choices: ["150 mL", "50 mL", "350 mL", "500 mL"], answer: 0,
         rationale: "Anatomic dead space is approximately 2 mL/kg, or about 150 mL in a 70 kg adult." },
       { q: "Which combination of ventilator settings controls VENTILATION (CO₂ elimination)?",
-        choices: ["FiO₂ and PEEP", "Respiratory rate and tidal volume", "PEEP and I:E ratio", "PIP and Pplat"], answer: 1,
+        choices: ["Respiratory rate and tidal volume", "FiO₂ and PEEP", "PEEP and I:E ratio", "PIP and Pplat"], answer: 0,
         rationale: "Minute ventilation = RR × Vt. Oxygenation is the other pair — FiO₂ and PEEP." },
       { q: "A vented patient's PIP rises from 22 to 38 cmH₂O. Pplat (measured on inspiratory hold) reads 24 cmH₂O. The MOST likely cause is:",
-        choices: ["Worsening ARDS", "Mucus plug or bronchospasm", "Tension pneumothorax", "Auto-PEEP from breath stacking"], answer: 1,
+        choices: ["Worsening ARDS", "Tension pneumothorax", "Auto-PEEP from breath stacking", "Mucus plug or bronchospasm"], answer: 3,
         rationale: "PIP up + Pplat normal = airway resistance problem. ARDS and tension PTX would both raise Pplat as well." },
       { q: "A pneumonia patient has SpO₂ 84% on a non-rebreather at 15 L/min and shows little improvement when FiO₂ is increased. The MOST likely physiologic mechanism is:",
         choices: ["Dead-space ventilation", "Intrapulmonary shunt", "Pure diffusion impairment", "Hyperventilation"], answer: 1,
         rationale: "Refractory hypoxia despite high FiO₂ points to shunt physiology — blood traversing non-ventilated alveoli. The bedside fix is PEEP (CPAP in this case), not more oxygen." },
       { q: "Type II pneumocytes are responsible for:",
-        choices: ["Forming the thin alveolar wall", "Producing surfactant", "Lining the trachea", "Filtering inhaled particles"], answer: 1,
+        choices: ["Forming the thin alveolar wall", "Lining the trachea", "Producing surfactant", "Filtering inhaled particles"], answer: 2,
         rationale: "Type II pneumocytes produce surfactant, which lowers surface tension and prevents alveolar collapse. Type I cells form the thin wall." },
       { q: "Right mainstem branches off the trachea at approximately what angle from the vertical?",
         choices: ["10 degrees", "25 degrees", "45 degrees", "60 degrees"], answer: 1,
@@ -129,13 +129,13 @@ const MODULES = [
         choices: ["PIP – Pplat", "Pplat – PEEP", "PIP – PEEP", "Pplat + PEEP"], answer: 1,
         rationale: "Driving pressure = Pplat – PEEP. Amato et al. (NEJM 2015) showed ΔP > 14 cmH₂O strongly predicts ARDS mortality. Each 7 cmH₂O rise increases mortality by ~40%." },
       { q: "PEEP is most useful at the bedside as a treatment for:",
-        choices: ["High CO₂", "Refractory hypoxia from shunt physiology", "Bronchospasm", "Auto-PEEP"], answer: 1,
+        choices: ["High CO₂", "Bronchospasm", "Refractory hypoxia from shunt physiology", "Auto-PEEP"], answer: 2,
         rationale: "PEEP recruits collapsed or fluid-filled alveoli, reducing shunt fraction. It does not directly affect ventilation (CO₂ clearance) and is not a treatment for bronchospasm." },
       { q: "A patient is intubated for COPD exacerbation with hypercapnia. EtCO₂ trends from 60 to 75 mmHg over five minutes despite no setting change. What does this suggest?",
         choices: ["Improving lung function", "Worsening ventilation / patient fatigue", "Excessive sedation", "Auto-PEEP only"], answer: 1,
         rationale: "A rising EtCO₂ trend means the patient is moving less air relative to CO₂ production. In a Type II failure picture, this is a fatigue signal — escalate." },
       { q: "ARDSNet (NEJM 2000) demonstrated that ventilation at 6 mL/kg of ideal body weight compared to 12 mL/kg reduced mortality from approximately:",
-        choices: ["40% to 31%", "60% to 50%", "20% to 15%", "There was no difference"], answer: 0,
+        choices: ["60% to 50%", "20% to 15%", "There was no difference", "40% to 31%"], answer: 3,
         rationale: "The ARMA trial showed mortality 39.8% (12 mL/kg) vs 31.0% (6 mL/kg) — absolute reduction 8.8%, NNT 11 lives saved. One of the most evidence-based interventions in critical care." }
     ]
   },
@@ -308,34 +308,34 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "Acute Type II respiratory failure is defined as:",
-        choices: ["PaO₂ < 60 with PaCO₂ < 40", "PaCO₂ > 50 with pH < 7.35", "PaCO₂ > 50 with pH > 7.45", "PaO₂ < 90 alone"], answer: 1,
+        choices: ["PaO₂ < 60 with PaCO₂ < 40", "PaCO₂ > 50 with pH > 7.45", "PaCO₂ > 50 with pH < 7.35", "PaO₂ < 90 alone"], answer: 2,
         rationale: "Acute Type II failure requires the pH criterion. Chronic retainers tolerate high CO₂ with renal compensation and a normal pH; acute rises in CO₂ crash the pH below 7.35." },
       { q: "An SpO₂ of 90% corresponds approximately to a PaO₂ of:",
-        choices: ["80 mmHg", "60 mmHg", "45 mmHg", "100 mmHg"], answer: 1,
+        choices: ["80 mmHg", "45 mmHg", "100 mmHg", "60 mmHg"], answer: 3,
         rationale: "On the oxyhemoglobin dissociation curve, SpO₂ 90% ≈ PaO₂ 60 mmHg — the threshold for hypoxic failure and the edge of the cliff." },
       { q: "A vented patient's EtCO₂ waveform shows a sloping upstroke without a flat plateau. The MOST likely diagnosis is:",
-        choices: ["Tube dislodgement", "Bronchospasm (asthma, COPD, anaphylaxis)", "Cardiac arrest", "Rebreathing from NIV mask leak"], answer: 1,
+        choices: ["Tube dislodgement", "Cardiac arrest", "Bronchospasm (asthma, COPD, anaphylaxis)", "Rebreathing from NIV mask leak"], answer: 2,
         rationale: "A shark-fin waveform is the classic capnographic sign of bronchospasm. The steeper the slope, the more obstruction." },
       { q: "A previously distressed asthma patient with RR 30 is now RR 8, drowsy, and the chest is silent. This represents:",
-        choices: ["Resolution of bronchospasm", "Pre-arrest from fatigue and air-trapping", "Effective sedation", "Improvement to be observed"], answer: 1,
+        choices: ["Pre-arrest from fatigue and air-trapping", "Resolution of bronchospasm", "Effective sedation", "Improvement to be observed"], answer: 0,
         rationale: "Sudden calm in a previously distressed patient is pre-arrest. Silent chest means they are no longer moving enough air to wheeze. Bag and prepare to intubate immediately." },
       { q: "Which of the following is the LATEST sign of respiratory failure?",
-        choices: ["Tachypnea", "Tripoding", "Bradycardia", "Diaphoresis"], answer: 2,
+        choices: ["Tachypnea", "Bradycardia", "Tripoding", "Diaphoresis"], answer: 1,
         rationale: "Bradycardia in respiratory failure is a late, pre-arrest sign — the patient has exhausted sympathetic compensation. Tachypnea, tripoding, and diaphoresis are all earlier." },
       { q: "Cyanosis becomes clinically visible when the deoxygenated hemoglobin reaches approximately:",
-        choices: ["1 g/dL", "5 g/dL", "10 g/dL", "15 g/dL"], answer: 1,
+        choices: ["1 g/dL", "10 g/dL", "15 g/dL", "5 g/dL"], answer: 3,
         rationale: "Lundsgaard's classic threshold is approximately 5 g/dL of deoxygenated hemoglobin. Anemic patients may never appear cyanotic even at significant hypoxia." },
       { q: "AHA guidance: during CPR, an EtCO₂ persistently below 10 mmHg suggests:",
-        choices: ["Effective compressions and likely ROSC", "Inadequate compressions or low likelihood of ROSC", "Hyperventilation", "Pulmonary embolism specifically"], answer: 1,
+        choices: ["Inadequate compressions or low likelihood of ROSC", "Effective compressions and likely ROSC", "Hyperventilation", "Pulmonary embolism specifically"], answer: 0,
         rationale: "Persistent EtCO₂ < 10 mmHg during compressions is a quality-of-CPR marker. It suggests inadequate compressions or unlikely ROSC. A sudden rise to 40+ is the most specific sign of ROSC." },
       { q: "A 70-year-old COPD patient: RR 8, SpO₂ 88% on non-rebreather, EtCO₂ 72 mmHg, and drowsy. The MOST appropriate next step is:",
-        choices: ["Increase O₂ flow and continue monitoring", "Begin CPAP at 5 cmH₂O", "BiPAP if cooperative; otherwise prepare for intubation", "Order an ABG and wait"], answer: 2,
+        choices: ["Increase O₂ flow and continue monitoring", "BiPAP if cooperative; otherwise prepare for intubation", "Begin CPAP at 5 cmH₂O", "Order an ABG and wait"], answer: 1,
         rationale: "Falling RR + high CO₂ + altered mental status = pre-arrest Type II failure. BiPAP if cooperative, otherwise invasive ventilation. CPAP alone won't fix the ventilation problem." },
       { q: "Type I respiratory failure (hypoxic) is most consistent with which of the following clinical pictures?",
         choices: ["COPD exacerbation with hypercapnia", "Acute pulmonary edema with refractory hypoxia", "Opioid overdose with bradypnea", "Myasthenia gravis exacerbation"], answer: 1,
         rationale: "Acute pulmonary edema is the prototype Type I (hypoxic) failure — shunt physiology from alveolar flooding. The other three are Type II (ventilatory pump failure)." },
       { q: "A rising EtCO₂ trend in a non-intubated patient over five minutes suggests:",
-        choices: ["Improving condition", "Patient fatigue / failing ventilation", "Hyperventilation", "Sensor malfunction only"], answer: 1,
+        choices: ["Improving condition", "Hyperventilation", "Patient fatigue / failing ventilation", "Sensor malfunction only"], answer: 2,
         rationale: "Rising EtCO₂ trend means the patient is moving less air relative to CO₂ production. In a distressed patient, this is a fatigue alarm — escalate." }
     ]
   },
@@ -507,10 +507,10 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "A 65-year-old in acute pulmonary edema is awake, RR 32, SpO₂ 84% on non-rebreather, frothy sputum. The BEST next step within EMS scope is:",
-        choices: ["Immediate intubation", "CPAP at 5–10 cmH₂O with FiO₂ 100%", "BVM with PEEP valve only", "Nasal cannula at 6 L/min"], answer: 1,
+        choices: ["Immediate intubation", "BVM with PEEP valve only", "CPAP at 5–10 cmH₂O with FiO₂ 100%", "Nasal cannula at 6 L/min"], answer: 2,
         rationale: "Acute pulmonary edema in an awake patient with intact airway protection is the textbook CPAP indication. Cochrane evidence: NNT ~5 to prevent intubation. Reassess in 5–10 min." },
       { q: "Which of the following is an ABSOLUTE contraindication to NIV?",
-        choices: ["Mild claustrophobia", "Inability to protect the airway", "Tachypnea > 30", "Mild bronchospasm"], answer: 1,
+        choices: ["Inability to protect the airway", "Mild claustrophobia", "Tachypnea > 30", "Mild bronchospasm"], answer: 0,
         rationale: "Cannot protect the airway (GCS ≤ 8, vomiting, copious secretions) is absolute. NIV in such patients risks aspiration." },
       { q: "BiPAP is first-line for which of the following EMS scenarios?",
         choices: ["Acute pulmonary edema with CHF", "COPD exacerbation with hypercapnia", "Severe traumatic brain injury", "Tension pneumothorax (post-decompression)"], answer: 1,
@@ -519,22 +519,22 @@ const MODULES = [
         choices: ["50% to 25%", "74% to 26%", "20% to 10%", "No significant difference"], answer: 1,
         rationale: "Brochard et al. NEJM 1995: intubation 74% (control) vs 26% (BiPAP); mortality 29% vs 9%. NNT ~2 to prevent one intubation in this trial." },
       { q: "An obese, significantly hypoxic patient is being prepared for RSI. The BEST pre-oxygenation strategy is:",
-        choices: ["3 min of tidal-volume breathing on NRB only", "NIV for 3–5 min prior to paralytic, plus apneic oxygen via nasal cannula during laryngoscopy", "Bag-mask ventilation at room air", "Skip pre-oxygenation to save time"], answer: 1,
+        choices: ["NIV for 3–5 min prior to paralytic, plus apneic oxygen via nasal cannula during laryngoscopy", "3 min of tidal-volume breathing on NRB only", "Bag-mask ventilation at room air", "Skip pre-oxygenation to save time"], answer: 0,
         rationale: "Obese and significantly hypoxic patients benefit from NIV pre-oxygenation (addresses atelectasis and shunt) plus apneic oxygenation during the laryngoscopy itself. Plain NRB may not be sufficient." },
       { q: "Typical starting settings for CPAP in acute pulmonary edema are:",
         choices: ["20 cmH₂O at FiO₂ 21%", "5–10 cmH₂O at FiO₂ 100%, then wean", "1–2 cmH₂O at FiO₂ 50%", "IPAP 20 / EPAP 5"], answer: 1,
         rationale: "Start CPAP at 5–10 cmH₂O with FiO₂ 100%, then titrate as the patient improves. The IPAP/EPAP option is BiPAP, not CPAP." },
       { q: "The 1-hour rule for NIV means:",
-        choices: ["NIV must be attempted for at least 1 hour before escalation", "If no improvement at 60 minutes, escalate to invasive ventilation", "NIV cannot exceed 1 hour total", "Switch from CPAP to BiPAP every hour"], answer: 1,
+        choices: ["If no improvement at 60 minutes, escalate to invasive ventilation", "NIV must be attempted for at least 1 hour before escalation", "NIV cannot exceed 1 hour total", "Switch from CPAP to BiPAP every hour"], answer: 0,
         rationale: "If the patient is not improving at 60 minutes on NIV, escalate. Continuing in a non-improving patient delays intubation under increasingly poor conditions." },
       { q: "NoDESAT (apneic oxygenation during laryngoscopy) involves:",
         choices: ["A nasal cannula at 15 L/min left in place during intubation", "Increasing the NRB flow during the apneic phase", "Bag-mask ventilation during laryngoscopy", "Cricoid pressure for the entire apnea"], answer: 0,
         rationale: "NoDESAT: place a nasal cannula at flush rate (15 L/min) during pre-oxygenation and leave it in place during the laryngoscopy. Extends safe apnea time, particularly in obese and pediatric patients." },
       { q: "Mechanism of benefit of CPAP in acute pulmonary edema includes:",
-        choices: ["Bronchodilation", "Reduced preload AND LV afterload, plus alveolar recruitment", "Increased cardiac contractility", "Direct diuresis"], answer: 1,
+        choices: ["Reduced preload AND LV afterload, plus alveolar recruitment", "Bronchodilation", "Increased cardiac contractility", "Direct diuresis"], answer: 0,
         rationale: "CPAP raises intrathoracic pressure (reducing preload) and reduces LV afterload (reducing transmural cardiac pressure), in addition to pushing alveolar fluid back into capillaries. Triple effect." },
       { q: "A COPD patient on BiPAP for 60 minutes shows no improvement, persistent CO₂ retention, and is becoming drowsy. The MOST appropriate next step is:",
-        choices: ["Continue BiPAP — give it more time", "Escalate to invasive mechanical ventilation", "Switch to CPAP", "Add high-flow nasal cannula on top of BiPAP"], answer: 1,
+        choices: ["Escalate to invasive mechanical ventilation", "Continue BiPAP — give it more time", "Switch to CPAP", "Add high-flow nasal cannula on top of BiPAP"], answer: 0,
         rationale: "1-hour rule. NIV failure with worsening mental status is an indication for invasive ventilation. Continuing now wastes time and risks aspiration as he loses airway protection." }
     ]
   },
@@ -543,21 +543,21 @@ const MODULES = [
     title: "Pick the Right Support",
     intro: "Six clinical pictures. Match each to the appropriate first-line ventilatory support.",
     bins: [
-      { id: "cpap", title: "CPAP", sub: "First-line for oxygenation problems" },
-      { id: "bipap", title: "BiPAP", sub: "First-line for ventilation problems" },
-      { id: "invasive", title: "Invasive Ventilation", sub: "Failed NIV or airway compromise" }
+      { id: "cpap", title: "CPAP", sub: "ONE steady pressure · oxygenation failure (low SpO₂, normal CO₂) — CHF / pulmonary edema" },
+      { id: "bipap", title: "BiPAP", sub: "TWO pressures, IPAP + EPAP · ventilation failure (high EtCO₂, acidotic) — COPD" },
+      { id: "invasive", title: "Invasive Ventilation", sub: "Failed NIV, declining LOC, or unprotected airway" }
     ],
     items: [
-      { id: "chf",     label: "Acute pulmonary edema, awake, RR 32", correctBin: "cpap" },
-      { id: "copd",    label: "COPD exacerbation, awake, EtCO₂ 65, drowsy but cooperative", correctBin: "bipap" },
+      { id: "chf",     label: "Acute pulmonary edema, awake, SpO₂ 84%, EtCO₂ normal", correctBin: "cpap" },
+      { id: "chf-mild", label: "Cardiogenic pulmonary edema, awake, RR 24, SpO₂ 90% on NRB", correctBin: "cpap" },
+      { id: "copd",    label: "COPD exacerbation, awake, EtCO₂ 68 and climbing, drowsy", correctBin: "bipap" },
+      { id: "copd2",   label: "COPD, alert but tiring, EtCO₂ 75, pH 7.26", correctBin: "bipap" },
       { id: "trauma",  label: "Severe TBI, GCS 6", correctBin: "invasive" },
-      { id: "edema-niv-fail", label: "Pulmonary edema on CPAP 60 min, RR rising, mental status declining", correctBin: "invasive" },
-      { id: "asthma",  label: "Asthma exacerbation, awake, alert, RR 28, no fatigue yet", correctBin: "bipap" },
-      { id: "chf-mild", label: "Acute pulmonary edema, awake, on NRB, RR 24, SpO₂ 90%", correctBin: "cpap" }
+      { id: "edema-niv-fail", label: "Pulmonary edema on CPAP 60 min, RR rising, mental status declining", correctBin: "invasive" }
     ],
     feedback: {
-      pass: "Strong work. CPAP for oxygenation problems (CHF, mild pulmonary edema). BiPAP for ventilation problems (COPD with hypercapnia, asthma). Invasive when airway is unprotected or NIV is failing.",
-      fail: "Review the indication lessons. The decision tree: airway protected → mostly oxygenation (CPAP) vs mostly ventilation (BiPAP). If failing NIV or airway compromise → invasive."
+      pass: "Exactly. CPAP = one pressure for an OXYGENATION problem — CHF / pulmonary edema, where SpO₂ is low but CO₂ is normal. BiPAP = two pressures that add inspiratory support for a VENTILATION problem — COPD, where EtCO₂ is high and the patient is acidotic. Go invasive when NIV fails or the airway is unprotected.",
+      fail: "Sort by the failing number. Low SpO₂ with a normal CO₂ (CHF) → CPAP. Rising EtCO₂ / acidosis (COPD) → BiPAP. Declining mental status or a failed NIV trial → invasive."
     }
   },
 
@@ -699,16 +699,16 @@ const MODULES = [
         choices: ["6–8 mL/kg of actual 113 kg → 700–900 mL", "6–8 mL/kg of IBW ~64 kg → 380–510 mL", "Use last documented Vt", "10 mL/kg actual weight"], answer: 1,
         rationale: "Devine IBW for a 5'6\" man = 50 + 2.3 × 6 = 63.8 kg. Vt = 6–8 mL/kg IBW = 380–510 mL. Lungs scale with height, not actual weight." },
       { q: "ARDSNet (ARMA, NEJM 2000) showed mortality at 6 mL/kg vs 12 mL/kg IBW was approximately:",
-        choices: ["No difference", "31% vs 40%", "20% vs 25%", "50% vs 60%"], answer: 1,
+        choices: ["31% vs 40%", "No difference", "20% vs 25%", "50% vs 60%"], answer: 0,
         rationale: "31.0% (6 mL/kg) vs 39.8% (12 mL/kg). Absolute reduction 8.8%. NNT 11 lives saved. Foundational evidence for lung-protective ventilation." },
       { q: "Plateau pressure ceiling in ARDS, per ARDSNet protocol:",
-        choices: ["< 50 cmH₂O", "< 30 cmH₂O", "< 20 cmH₂O", "No specific ceiling"], answer: 1,
+        choices: ["< 30 cmH₂O", "< 50 cmH₂O", "< 20 cmH₂O", "No specific ceiling"], answer: 0,
         rationale: "ARDSNet keeps Pplat < 30 cmH₂O. Above this threshold, mortality rises sharply due to alveolar over-distention." },
       { q: "Driving pressure (ΔP) is defined as:",
-        choices: ["PIP − Pplat", "Pplat − PEEP", "PIP − PEEP", "Pplat + PEEP"], answer: 1,
+        choices: ["PIP − Pplat", "PIP − PEEP", "Pplat + PEEP", "Pplat − PEEP"], answer: 3,
         rationale: "ΔP = Pplat − PEEP. Amato 2015 showed it's the strongest mortality predictor in ARDS. Target < 14 cmH₂O." },
       { q: "Appropriate I:E ratio for a status asthmaticus patient on AC/VC:",
-        choices: ["1:1", "1:2", "1:4 or longer", "Inverse 2:1"], answer: 2,
+        choices: ["1:4 or longer", "1:1", "1:2", "Inverse 2:1"], answer: 0,
         rationale: "Obstructive disease needs prolonged exhalation. 1:4 or 1:5 prevents breath stacking and auto-PEEP. Forcing higher rates risks barotrauma." },
       { q: "Strict normocapnia (EtCO₂ 35–40) is the target in which population?",
         choices: ["ARDS", "TBI / increased ICP", "Asthma", "Post-ROSC"], answer: 1,
@@ -717,13 +717,13 @@ const MODULES = [
         choices: ["Always 100% to maximize oxygen delivery", "Titrate to SpO₂ 92–98% — avoid hyperoxia", "Room air only", "Whatever the prior intubator chose"], answer: 1,
         rationale: "Hyperoxia post-ROSC worsens neurologic outcome (multiple observational studies). AHA recommends titrating FiO₂ to SpO₂ 92–98%." },
       { q: "Adult target minute ventilation:",
-        choices: ["2–4 L/min", "6–8 L/min", "12–14 L/min", "20+ L/min"], answer: 1,
+        choices: ["6–8 L/min", "2–4 L/min", "12–14 L/min", "20+ L/min"], answer: 0,
         rationale: "Adult MV target is 6–8 L/min (RR × Vt). For a 70 kg IBW adult: Vt 480 × RR 14 = 6.7 L/min." },
       { q: "PIP rises from 22 to 40, Pplat stays at 24. The MOST likely cause is:",
-        choices: ["Worsening ARDS", "Mucus plug or bronchospasm", "Pneumothorax", "Auto-PEEP"], answer: 1,
+        choices: ["Worsening ARDS", "Pneumothorax", "Auto-PEEP", "Mucus plug or bronchospasm"], answer: 3,
         rationale: "PIP up + Pplat unchanged = AIRWAY problem (resistance). ARDS or PTX would raise both. Suction, bronchodilator, check the tube." },
       { q: "Safe initial PEEP for an uncomplicated adult intubation:",
-        choices: ["0 cmH₂O", "5 cmH₂O", "10 cmH₂O", "15 cmH₂O"], answer: 1,
+        choices: ["5 cmH₂O", "0 cmH₂O", "10 cmH₂O", "15 cmH₂O"], answer: 0,
         rationale: "Adult default PEEP is 5 cmH₂O (\"physiologic PEEP\"). Higher (10–15) is reserved for ARDS, paired with FiO₂ via the ARDSNet table." }
     ]
   },
@@ -881,13 +881,13 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "First-line mode for an awake adult with acute cardiogenic pulmonary edema:",
-        choices: ["AC/VC", "AC/PC", "CPAP", "SIMV + pressure support"], answer: 2,
+        choices: ["AC/VC", "AC/PC", "SIMV + pressure support", "CPAP"], answer: 3,
         rationale: "CPAP is first-line for acute pulmonary edema in awake patients. Bersten 1991 / Cochrane NNT ~5 to prevent intubation. Reduces preload, afterload, and shunt fraction." },
       { q: "First-line mode for an awake COPD patient with hypercapnia:",
-        choices: ["CPAP", "BiPAP", "AC/VC", "AC/PC"], answer: 1,
+        choices: ["CPAP", "AC/VC", "BiPAP", "AC/PC"], answer: 2,
         rationale: "BiPAP for COPD with hypercapnia. EPAP overcomes auto-PEEP; IPAP unloads the tired diaphragm. Brochard 1995: intubation 74% → 26%, mortality 29% → 9%." },
       { q: "In pure AC mode, when the patient triggers a breath above the set rate, the vent delivers:",
-        choices: ["A small supportive breath", "The full set tidal volume (or pressure)", "Whatever the patient pulls in spontaneously", "No additional breath until the next mandatory cycle"], answer: 1,
+        choices: ["A small supportive breath", "Whatever the patient pulls in spontaneously", "No additional breath until the next mandatory cycle", "The full set tidal volume (or pressure)"], answer: 3,
         rationale: "Pure AC has no \"small\" breaths. Every triggered breath gets the full set Vt or set inspiratory pressure. This is why tachypneic patients can stack and develop auto-PEEP." },
       { q: "The Esteban 1995 NEJM weaning trial demonstrated that:",
         choices: ["SIMV produces the fastest extubation", "T-piece trials and PSV are faster than SIMV", "AC/VC is superior to AC/PC", "BiPAP reduces mortality in COPD"], answer: 1,
@@ -896,13 +896,13 @@ const MODULES = [
         choices: ["Pure pressure-targeted ventilation", "Pure volume-targeted ventilation", "Hybrid — volume target with pressure cap", "An NIV mode"], answer: 2,
         rationale: "PRVC: set a volume target; the vent delivers it using the lowest pressure required, adjusting breath-by-breath. Hybrid. Drager AutoFlow / Servo PRVC are equivalent." },
       { q: "OSCILLATE (NEJM 2013) studied High-Frequency Oscillatory Ventilation in moderate-severe ARDS. The trial was:",
-        choices: ["Stopped early because of harm (increased mortality in HFOV arm)", "Positive — HFOV reduces mortality", "Inconclusive — neither benefit nor harm", "Never completed"], answer: 0,
+        choices: ["Positive — HFOV reduces mortality", "Inconclusive — neither benefit nor harm", "Never completed", "Stopped early because of harm (increased mortality in HFOV arm)"], answer: 3,
         rationale: "OSCILLATE was stopped early because of increased mortality in the HFOV arm (47% vs 35%). OSCAR also showed no benefit. HFOV is no longer a first-line ARDS rescue strategy." },
       { q: "Inspiratory rise time controls:",
         choices: ["The set respiratory rate", "How quickly the pressure ramps at the start of inspiration", "Trigger sensitivity", "I:E ratio"], answer: 1,
         rationale: "Inspiratory rise time = how fast the pressure ramps up at the start of inspiration in pressure-targeted modes. Faster jolts awake patients; slower can feel like flow starvation." },
       { q: "Patient-vent dyssynchrony affects approximately what fraction of vented patients (Blanch, ICM 2015)?",
-        choices: ["~5%", "~25%", "~50%", "~75%"], answer: 1,
+        choices: ["~5%", "~50%", "~25%", "~75%"], answer: 2,
         rationale: "Approximately 25% of all vented patients have significant dyssynchrony episodes (Blanch 2015 prospective observation). Associated with prolonged ventilation and higher mortality." },
       { q: "Pressure Support of approximately 5 cmH₂O is generally considered:",
         choices: ["Aggressive — actively unloads the diaphragm", "Roughly physiologic — compensates for ETT/circuit resistance", "Therapeutic for ARDS", "Equivalent to CPAP"], answer: 1,
@@ -1066,28 +1066,28 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "Before using the LTV 1200 on a patient, the FIRST step is:",
-        choices: ["Set Vt to 1000 mL to be safe", "Perform POST with a complete circuit and test lung", "Disable all alarms", "Set FiO₂ to 21%"], answer: 1,
+        choices: ["Set Vt to 1000 mL to be safe", "Disable all alarms", "Perform POST with a complete circuit and test lung", "Set FiO₂ to 21%"], answer: 2,
         rationale: "POST with a circuit and test lung is required. POST without a circuit is meaningless. Most field failures are caught here." },
       { q: "An EMS provider notes exhaled Vt is consistently 70 mL lower than set Vt. The MOST appropriate first action is:",
-        choices: ["Silence the alarm and continue", "Increase Vt to compensate", "Investigate for a circuit or cuff leak", "Switch from AC/VC to AC/PC"], answer: 2,
+        choices: ["Silence the alarm and continue", "Increase Vt to compensate", "Switch from AC/VC to AC/PC", "Investigate for a circuit or cuff leak"], answer: 3,
         rationale: "Persistent divergence between set and exhaled Vt is a leak. Check ETT cuff with a pilot syringe; walk the circuit for loose connections; check the exhalation valve drive line." },
       { q: "Internal LTV battery runtime at moderate load is approximately:",
-        choices: ["10 min", "60 min", "180 min", "8 hr"], answer: 1,
+        choices: ["10 min", "180 min", "60 min", "8 hr"], answer: 2,
         rationale: "Approximately 60 minutes at moderate load. Less at high FiO₂, high PEEP, or rapid rates. Always verify line power on the truck." },
       { q: "Most commonly missed connection on the LTV circuit:",
-        choices: ["Bacterial filter", "Exhalation valve drive line", "Y-piece", "Inspiratory limb"], answer: 1,
+        choices: ["Exhalation valve drive line", "Bacterial filter", "Y-piece", "Inspiratory limb"], answer: 0,
         rationale: "The exhalation valve drive line is a small skinny tube that's easily missed when packing. Without it, the valve doesn't open and the patient cannot exhale." },
       { q: "The default value for the LOW MINUTE VOLUME alarm is often:",
-        choices: ["Set automatically to 70% of expected MV", "Zero — must be set manually for each patient", "Always 4 L/min", "Linked to the apnea alarm"], answer: 1,
+        choices: ["Set automatically to 70% of expected MV", "Always 4 L/min", "Zero — must be set manually for each patient", "Linked to the apnea alarm"], answer: 2,
         rationale: "Default is often 0 (off). Set it to ~70% of expected MV on every patient. Don't trust apnea alone — by then 20+ seconds have passed." },
       { q: "The LTV display organizes the screen as:",
-        choices: ["Set values on top, monitored values on bottom", "Settings on the LEFT, monitored values on the RIGHT", "All settings on the right", "Alphabetically"], answer: 1,
+        choices: ["Set values on top, monitored values on bottom", "All settings on the right", "Settings on the LEFT, monitored values on the RIGHT", "Alphabetically"], answer: 2,
         rationale: "Settings on the left (what you programmed), monitored values on the right (what the patient receives). Scan top-to-bottom on both halves." },
       { q: "The Alarm Silence button quiets an active alarm for approximately:",
-        choices: ["10 seconds", "60 seconds", "5 minutes", "Indefinitely"], answer: 1,
+        choices: ["10 seconds", "5 minutes", "Indefinitely", "60 seconds"], answer: 3,
         rationale: "60 seconds. Silence is a fix-the-problem window, not a permanent mute. After 60 sec, if the cause persists, the alarm re-fires." },
       { q: "To measure plateau pressure on the LTV, you:",
-        choices: ["Wait for the vent to display it automatically", "Press and hold the inspiratory hold button during inspiration", "Disconnect the patient briefly", "Increase the set rate"], answer: 1,
+        choices: ["Wait for the vent to display it automatically", "Disconnect the patient briefly", "Press and hold the inspiratory hold button during inspiration", "Increase the set rate"], answer: 2,
         rationale: "Press and hold the inspiratory hold button while observing the pressure waveform. Pplat appears as a brief flat segment after the peak. Release to resume." },
       { q: "When changing a setting on the LTV, the correct workflow is:",
         choices: ["Change it quickly so you don't miss anything", "Verbalize the change, navigate, change one parameter, reassess in 30 sec, document", "Make all needed changes at once for efficiency", "Wait for the patient to deteriorate before adjusting"], answer: 1,
@@ -1259,34 +1259,34 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "DOPE stands for:",
-        choices: ["Diagnosis, Oxygen, Pressure, Equipment", "Dislodgement, Obstruction, Pneumothorax, Equipment failure", "Dyspnea, Outcomes, Pulse, EtCO₂", "Drugs, Oxygen, PEEP, Education"], answer: 1,
+        choices: ["Diagnosis, Oxygen, Pressure, Equipment", "Dyspnea, Outcomes, Pulse, EtCO₂", "Drugs, Oxygen, PEEP, Education", "Dislodgement, Obstruction, Pneumothorax, Equipment failure"], answer: 3,
         rationale: "DOPE: Dislodgement, Obstruction, Pneumothorax, Equipment failure. The universal algorithm for every deteriorating ventilated patient. Some texts add S for Stacked breaths (auto-PEEP)." },
       { q: "If you cannot resolve an alarm in approximately 10 seconds, the next step is:",
-        choices: ["Silence the alarm and continue", "Disconnect from the vent and bag with 100% O₂", "Increase FiO₂ on the vent", "Call medical control before doing anything"], answer: 1,
+        choices: ["Silence the alarm and continue", "Increase FiO₂ on the vent", "Call medical control before doing anything", "Disconnect from the vent and bag with 100% O₂"], answer: 3,
         rationale: "The 10-second rule. Bagging is diagnostic (tells you whether patient or machine is the problem) AND therapeutic. Rarely the wrong answer." },
       { q: "A vented patient suddenly develops PIP 52, no EtCO₂ waveform, BS absent right, hypotension, JVD. The MOST urgent action is:",
-        choices: ["Increase FiO₂ to 100%", "Decompress the right chest", "Increase sedation", "Document and continue transport"], answer: 1,
+        choices: ["Increase FiO₂ to 100%", "Increase sedation", "Document and continue transport", "Decompress the right chest"], answer: 3,
         rationale: "Tension pneumothorax until proven otherwise. Decompress at the bedside (needle at 2nd ICS midclavicular OR 4th–5th midaxillary). Bag with 100% during decompression." },
       { q: "Most common cause of OBSTRUCTION in a post-arrest vented patient:",
-        choices: ["Pneumothorax", "Mucus plug", "Bronchospasm", "Auto-PEEP"], answer: 1,
+        choices: ["Pneumothorax", "Bronchospasm", "Mucus plug", "Auto-PEEP"], answer: 2,
         rationale: "Mucus plugging is the most common O cause, especially in post-arrest, post-aspiration, and COPD patients. Pass a suction catheter — diagnostic and therapeutic." },
       { q: "READING the alarm before silencing is:",
         choices: ["Optional — depends on workflow", "A sentinel-level safety habit; silencing without investigating is a recordable safety event", "Only required in certain protocols", "Less important than mechanical troubleshooting"], answer: 1,
         rationale: "Silencing without identifying the cause is documented as a sentinel-level error in transport-service incident reviews. Build the habit: read, silence, fix, document." },
       { q: "Bagging a vented patient with a hard, resistive bag suggests:",
-        choices: ["The ventilator is the problem", "A patient problem — DOPE: D, O, or P", "Battery failure", "Normal physiology"], answer: 1,
+        choices: ["A patient problem — DOPE: D, O, or P", "The ventilator is the problem", "Battery failure", "Normal physiology"], answer: 0,
         rationale: "Hard bag = patient problem. Work through DOPE: dislodgement (depth, EtCO₂), obstruction (suction), pneumothorax (BS, JVD). Easy bag would suggest a machine problem." },
       { q: "Patient-vent dyssynchrony affects approximately what fraction of vented patients (Blanch 2015)?",
-        choices: ["~5%", "~25%", "~50%", "~80%"], answer: 1,
+        choices: ["~5%", "~50%", "~80%", "~25%"], answer: 3,
         rationale: "Approximately 25%. Associated with increased work of breathing, sedation needs, and mortality." },
       { q: "Double triggering — patient effort outlasts the vent's inspiratory phase — is best managed by:",
-        choices: ["Decreasing trigger sensitivity (make it less responsive)", "Lengthening inspiratory time, deepening sedation, treating air hunger", "Switching modes immediately", "Removing the patient from the vent"], answer: 1,
+        choices: ["Lengthening inspiratory time, deepening sedation, treating air hunger", "Decreasing trigger sensitivity (make it less responsive)", "Switching modes immediately", "Removing the patient from the vent"], answer: 0,
         rationale: "Double triggering is usually fixed by lengthening inspiratory time, deepening sedation, and treating air hunger. Pure mode switches without root-cause attention often don't help." },
       { q: "Sudden loss of EtCO₂ waveform in an intubated patient is most concerning for which of the following:",
-        choices: ["Bronchospasm", "Tube dislodgement, complete obstruction, cardiac arrest, or massive PE", "Auto-PEEP", "Sensor needing recalibration"], answer: 1,
+        choices: ["Bronchospasm", "Auto-PEEP", "Sensor needing recalibration", "Tube dislodgement, complete obstruction, cardiac arrest, or massive PE"], answer: 3,
         rationale: "Sudden drop to zero or near-zero in EtCO₂ in a vented patient is dislodgement, obstruction, arrest, or massive PE. All four require immediate action. DOPE." },
       { q: "Sentinel-level safety event in ventilator transport often documented in incident reviews:",
-        choices: ["Reading vital signs more often than every 15 minutes", "Silencing an alarm without identifying the cause", "Using a checklist", "Documenting every change"], answer: 1,
+        choices: ["Reading vital signs more often than every 15 minutes", "Using a checklist", "Silencing an alarm without identifying the cause", "Documenting every change"], answer: 2,
         rationale: "Silencing without investigating is the most commonly cited contributor to adverse vent events in transport-service incident reviews. Read first, silence second." }
     ]
   },
@@ -1440,34 +1440,34 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "Paralyzing a patient with rocuronium WITHOUT adequate sedation is:",
-        choices: ["Acceptable for very short transports", "A sentinel safety event — awareness with paralysis", "Standard practice", "Required to prevent self-extubation"], answer: 1,
+        choices: ["Acceptable for very short transports", "Standard practice", "Required to prevent self-extubation", "A sentinel safety event — awareness with paralysis"], answer: 3,
         rationale: "Awareness with paralysis is documented as a sentinel safety event. Always pair long-acting paralytics with analgesia AND sedation. The patient is awake, terrified, and unable to move." },
       { q: "Push-dose epinephrine is mixed as:",
         choices: ["1 mg into 10 mL NS = 100 mcg/mL", "1 mg into 100 mL NS = 10 mcg/mL", "10 mg into 100 mL NS = 100 mcg/mL", "0.1 mg into 100 mL NS"], answer: 1,
         rationale: "Standard push-dose epi: 1 mg of 1:10,000 epi into 100 mL NS = 10 mcg/mL. Dose 5–20 mcg IV (typically 10 mcg = 1 mL) every 1–5 min." },
       { q: "Push-dose phenylephrine is prepared as:",
-        choices: ["1 mg into 100 mL NS = 10 mcg/mL", "10 mg into 100 mL NS = 100 mcg/mL", "100 mg into 100 mL NS = 1000 mcg/mL", "10 mg into 1000 mL NS = 10 mcg/mL"], answer: 1,
+        choices: ["1 mg into 100 mL NS = 10 mcg/mL", "100 mg into 100 mL NS = 1000 mcg/mL", "10 mg into 1000 mL NS = 10 mcg/mL", "10 mg into 100 mL NS = 100 mcg/mL"], answer: 3,
         rationale: "Push-dose phenylephrine: 10 mg into 100 mL NS = 100 mcg/mL. Dose 50–200 mcg IV every 1–5 min. Pure α-agonist; reflex bradycardia possible." },
       { q: "Post-intubation hypotension incidence in EMS RSI is approximately (Heffner 2012):",
-        choices: ["~5%", "~25%", "~50%", "~75%"], answer: 1,
+        choices: ["~5%", "~50%", "~25%", "~75%"], answer: 2,
         rationale: "Approximately 25% of EMS RSI patients develop post-intubation hypotension. Push-dose pressors should be prepared BEFORE pushing the induction agent." },
       { q: "Which agent is generally preferred for RSI induction in a septic shock patient?",
-        choices: ["Midazolam", "Propofol", "Ketamine", "Etomidate alone"], answer: 2,
+        choices: ["Midazolam", "Ketamine", "Propofol", "Etomidate alone"], answer: 1,
         rationale: "Ketamine preserves or augments sympathetic tone — preferred in shock. KETASED (Jabre 2009) showed ketamine equivalent to etomidate without the adrenal suppression. Etomidate's adrenal suppression is debated in septic shock." },
       { q: "PRIS (propofol-related infusion syndrome) is most associated with:",
         choices: ["Single induction dose of propofol", "Infusion rates > 4 mg/kg/hr or duration > 48 hr", "Patients receiving fentanyl simultaneously", "Patients on ketamine"], answer: 1,
         rationale: "PRIS occurs at high doses or prolonged infusions: > 4 mg/kg/hr or > 48 hr. Metabolic acidosis, rhabdomyolysis, cardiac arrhythmia — potentially fatal." },
       { q: "Transport RASS target for a vented EMS patient is typically:",
-        choices: ["0 — alert and calm", "−1 to −2 — calm but arousable", "−3 to −4 — moderate to deep sedation", "−5 — unarousable"], answer: 1,
+        choices: ["0 — alert and calm", "−3 to −4 — moderate to deep sedation", "−5 — unarousable", "−1 to −2 — calm but arousable"], answer: 3,
         rationale: "RASS −1 to −2 is the transport target: calm but arousable. Allows handoff assessment at the receiving facility. Deeper sedation increases hemodynamic risk and complicates handoff." },
       { q: "Fentanyl chest wall rigidity is most associated with:",
-        choices: ["Low doses", "High doses pushed rapidly (e.g., > 5 mcg/kg fast bolus)", "Long infusions", "Pediatric patients"], answer: 1,
+        choices: ["High doses pushed rapidly (e.g., > 5 mcg/kg fast bolus)", "Low doses", "Long infusions", "Pediatric patients"], answer: 0,
         rationale: "Chest wall rigidity is rare but occurs with high doses pushed rapidly. Push fentanyl slowly. Treatment if it occurs: neuromuscular blockade to bag the patient." },
       { q: "Modern evidence on ketamine in traumatic brain injury (TBI) suggests:",
-        choices: ["Always avoid — raises ICP significantly", "Acceptable in TBI when hemodynamic stability matters", "Only for pediatric TBI", "Equivalent to barbiturates"], answer: 1,
+        choices: ["Always avoid — raises ICP significantly", "Only for pediatric TBI", "Equivalent to barbiturates", "Acceptable in TBI when hemodynamic stability matters"], answer: 3,
         rationale: "Older teaching avoided ketamine in TBI. Modern evidence (multiple RCTs through the 2010s) shows no clinically meaningful ICP rise. Ketamine is acceptable in TBI, particularly when hemodynamic stability matters." },
       { q: "Modern ICU sedation evidence (ABCDE bundle, SAT/SBT trials) supports:",
-        choices: ["Deeper sedation (RASS −5) to prevent agitation", "Lighter sedation with daily wake-ups", "Continuous paralytics for synchrony", "Avoiding sedation entirely"], answer: 1,
+        choices: ["Deeper sedation (RASS −5) to prevent agitation", "Continuous paralytics for synchrony", "Avoiding sedation entirely", "Lighter sedation with daily wake-ups"], answer: 3,
         rationale: "Modern ICU evidence (ABCDE bundle, SAT/SBT) shows LIGHTER sedation with daily wake-ups reduces vent days and mortality. Target lighter sedation (RASS −1 to −2 in EMS transport)." }
     ]
   },
@@ -1623,34 +1623,34 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "First-line strategy for status asthmaticus on the vent:",
-        choices: ["High rate (RR 20+) to normalize CO₂", "Low rate (RR 8–10), long expiratory time (I:E 1:4–1:5), permissive hypercapnia", "High PEEP to splint airways", "Inverse I:E ratio"], answer: 1,
+        choices: ["Low rate (RR 8–10), long expiratory time (I:E 1:4–1:5), permissive hypercapnia", "High rate (RR 20+) to normalize CO₂", "High PEEP to splint airways", "Inverse I:E ratio"], answer: 0,
         rationale: "Asthma is an exhalation problem. Slow rate, long exp time, accept higher CO₂ (pH ≥ 7.20). High rate stacks breaths and drops BP via auto-PEEP." },
       { q: "PROSEVA (Guérin, NEJM 2013) demonstrated that:",
         choices: ["Prone positioning has no effect in ARDS", "Prone positioning reduces mortality in severe ARDS approximately by half", "Prone positioning is harmful", "Prone positioning is only useful in pediatric ARDS"], answer: 1,
         rationale: "PROSEVA: severe ARDS, 16-hr daily prone vs supine. Mortality 33% → 16% (absolute reduction 17%, NNT 6). Standard of care in severe ARDS." },
       { q: "Routine EtCO₂ target in TBI per Brain Trauma Foundation:",
-        choices: ["25–30 mmHg", "30–35 mmHg", "35–40 mmHg", "45–50 mmHg"], answer: 2,
+        choices: ["35–40 mmHg", "25–30 mmHg", "30–35 mmHg", "45–50 mmHg"], answer: 0,
         rationale: "Strict normocapnia at 35–40 mmHg. Avoid prophylactic hyperventilation (BTF Level IIB). Hyperventilation only for transient herniation rescue (to 30–35, never below 30)." },
       { q: "ARDS patient (IBW 57 kg) on Vt 480 mL. Pplat is 32. The MOST appropriate next adjustment:",
-        choices: ["Increase Vt to 600 mL", "Decrease Vt toward 4–6 mL/kg IBW (240–340 mL); accept higher CO₂ if needed", "Increase RR to 30 immediately", "Drop PEEP to 0"], answer: 1,
+        choices: ["Increase Vt to 600 mL", "Increase RR to 30 immediately", "Decrease Vt toward 4–6 mL/kg IBW (240–340 mL); accept higher CO₂ if needed", "Drop PEEP to 0"], answer: 2,
         rationale: "Pplat > 30 in ARDS = drop Vt. ARDSNet 6 mL/kg IBW (~340 mL here), down to 4 mL/kg if Pplat doesn't improve. Permissive hypercapnia OK; pH ≥ 7.20 typical floor." },
       { q: "A previously-stable vented asthmatic suddenly drops BP to 70/40. Flow waveform doesn't return to zero before next breath. The bedside maneuver to try FIRST is:",
-        choices: ["Push fluids and norepinephrine", "Briefly disconnect from the vent for 5–10 seconds to release trapped gas", "Increase PEEP to splint airways", "Increase the rate to normalize CO₂"], answer: 1,
+        choices: ["Briefly disconnect from the vent for 5–10 seconds to release trapped gas", "Push fluids and norepinephrine", "Increase PEEP to splint airways", "Increase the rate to normalize CO₂"], answer: 0,
         rationale: "Auto-PEEP physiology — trapped gas → high intrathoracic pressure → preload drops → BP falls. Brief disconnect releases the trapped gas. BP often recovers in under a minute." },
       { q: "PALS 2020 guidance on ETT cuff type in most pediatric patients:",
-        choices: ["Uncuffed tubes are preferred", "Cuffed tubes are preferred, including in infants", "Always use double-lumen tubes", "Only adolescents tolerate cuffed tubes"], answer: 1,
+        choices: ["Cuffed tubes are preferred, including in infants", "Uncuffed tubes are preferred", "Always use double-lumen tubes", "Only adolescents tolerate cuffed tubes"], answer: 0,
         rationale: "PALS 2020 recommends cuffed ETTs in most pediatric patients, including infants. Pay attention to cuff pressure to prevent tracheal injury." },
       { q: "Cushing's triad consists of:",
         choices: ["Hypertension, tachycardia, regular respirations", "Hypertension, bradycardia, irregular respirations", "Hypotension, tachycardia, tachypnea", "Hypotension, bradycardia, apnea"], answer: 1,
         rationale: "Cushing's triad: hypertension + bradycardia + irregular respirations. Sign of impending herniation. Trigger for transient hyperventilation rescue (EtCO₂ 30–35, never below 30)." },
       { q: "ARDSNet PEEP/FiO₂ lower-PEEP table: at FiO₂ 1.0, suggested PEEP is approximately:",
-        choices: ["5 cmH₂O", "10 cmH₂O", "14 cmH₂O", "18–24 cmH₂O"], answer: 3,
+        choices: ["18–24 cmH₂O", "5 cmH₂O", "10 cmH₂O", "14 cmH₂O"], answer: 0,
         rationale: "ARDSNet lower-PEEP at FiO₂ 1.0 is PEEP 18–24 cmH₂O. PEEP and FiO₂ are paired together via the table — the worse the oxygenation, the higher both go." },
       { q: "Most common pediatric ventilation error:",
         choices: ["Setting RR too low", "Using cuffed ETT", "Using the adult circuit on a pediatric patient (dead space > Vt)", "Using normal saline"], answer: 2,
         rationale: "Adult circuit dead space can exceed a pediatric patient's tidal volume — ventilating the circuit, not the lungs. Always use the pediatric circuit and verify visually." },
       { q: "In TBI, prophylactic hyperventilation:",
-        choices: ["Is recommended by BTF guidelines", "Is contraindicated except as transient herniation rescue", "Is the first-line strategy", "Should be maintained for 24 hours after injury"], answer: 1,
+        choices: ["Is recommended by BTF guidelines", "Is the first-line strategy", "Should be maintained for 24 hours after injury", "Is contraindicated except as transient herniation rescue"], answer: 3,
         rationale: "BTF 4th edition (2017) Level IIB recommendation: avoid prophylactic hyperventilation in TBI. Reserve hyperventilation for transient herniation rescue (EtCO₂ 30–35, never below 30, return to normocapnia after 2–5 min)." }
     ]
   },
@@ -1734,6 +1734,91 @@ const MODULES = [
 
 ]; // END MODULES
 
+// ---------- 1b. FINAL EXAM (capstone) ----------
+// Cumulative exam, unlocked only after every module is complete.
+const FINAL_EXAM = {
+  title: "Final Certification Exam",
+  intro: "Twenty-five cumulative questions drawn from all nine modules. You need 20 correct (80%) to pass and earn your certificate. Rationale appears after each answer.",
+  passScore: 20,
+  questions: [
+    { q: "Minute ventilation — the volume of gas moved per minute — is the product of:",
+      choices: ["Tidal volume × respiratory rate", "FiO₂ × PEEP", "PIP × Pplat", "Driving pressure × compliance"], answer: 0,
+      rationale: "Minute ventilation = Vt × RR and is the primary determinant of CO₂ clearance. Oxygenation is governed by the other pair — FiO₂ and PEEP." },
+    { q: "A vented patient is ventilating adequately (EtCO₂ 38) but remains hypoxic at SpO₂ 86%. Which two settings do you adjust?",
+      choices: ["Respiratory rate and tidal volume", "Inspiratory time and rate", "FiO₂ and PEEP", "PIP and trigger sensitivity"], answer: 2,
+      rationale: "Oxygenation is controlled by FiO₂ and PEEP. Raising RR/Vt would only blow off more CO₂ without fixing oxygenation." },
+    { q: "PIP jumps from 24 to 40 cmH₂O. On an inspiratory hold, Pplat is 26 cmH₂O. The problem is in the:",
+      choices: ["Lung parenchyma (compliance)", "Chest wall", "Ventilator calibration", "Airway (resistance)"], answer: 3,
+      rationale: "High PIP with a near-normal Pplat isolates the problem to airway resistance — kink, secretions, bronchospasm, or biting. A compliance problem would raise Pplat too." },
+    { q: "Driving pressure (ΔP), a key ARDS mortality predictor, is calculated as:",
+      choices: ["PIP − PEEP", "PIP − Pplat", "Pplat + PEEP", "Pplat − PEEP"], answer: 3,
+      rationale: "ΔP = Pplat − PEEP. Amato et al. (NEJM 2015) found ΔP > 14 cmH₂O strongly predicts ARDS mortality." },
+    { q: "Tidal volume on a ventilated patient should be set according to:",
+      choices: ["Actual body weight", "BMI", "Ideal body weight (height and sex)", "Body surface area"], answer: 2,
+      rationale: "Vt tracks lung size, which scales with height — so it is set on ideal body weight. Using actual weight in an obese patient delivers injurious volumes." },
+    { q: "The ARDSNet (ARMA) trial established a lung-protective tidal volume target of:",
+      choices: ["4 mL/kg IBW", "10 mL/kg IBW", "12 mL/kg IBW", "6 mL/kg IBW"], answer: 3,
+      rationale: "6 mL/kg IBW reduced mortality from ~40% to ~31% versus 12 mL/kg, with plateau pressure kept ≤ 30 cmH₂O." },
+    { q: "To minimize ventilator-induced lung injury, plateau pressure should generally be kept at or below:",
+      choices: ["20 cmH₂O", "40 cmH₂O", "30 cmH₂O", "50 cmH₂O"], answer: 2,
+      rationale: "Pplat ≤ 30 cmH₂O is the lung-protective ceiling; Pplat reflects alveolar pressure and correlates with overdistension injury." },
+    { q: "A pneumonia patient stays hypoxic despite FiO₂ 100% (shunt physiology). The most effective bedside correction is:",
+      choices: ["Increase tidal volume", "Increase respiratory rate", "Increase inspiratory time", "Add/increase PEEP"], answer: 3,
+      rationale: "Shunt is blood passing unventilated alveoli, so more FiO₂ can't reach them. PEEP recruits collapsed/flooded alveoli and reduces shunt fraction." },
+    { q: "A COPD patient becomes acutely hypotensive with rising PIP and suspected auto-PEEP. Your FIRST maneuver is to:",
+      choices: ["Increase the set PEEP", "Disconnect the circuit and allow full exhalation", "Increase the respiratory rate", "Give a fluid bolus and continue"], answer: 1,
+      rationale: "Briefly disconnecting lets trapped air escape and relieves the hemodynamic compromise immediately. Then prevent recurrence with a lower rate and longer expiratory time." },
+    { q: "To prevent auto-PEEP in an obstructed (COPD/asthma) patient you should:",
+      choices: ["Lower the rate and prolong expiratory time", "Increase rate and tidal volume", "Increase inspiratory time", "Increase PEEP to match"], answer: 0,
+      rationale: "Air trapping is an expiratory-time problem. Lower the rate, shorten inspiratory time, and target a longer expiratory phase (I:E 1:4 or greater)." },
+    { q: "The appropriate I:E strategy for a severe asthmatic on the ventilator is:",
+      choices: ["1:1", "1:2", "Prolonged expiration, 1:4 or greater", "Prolonged inspiration, 2:1"], answer: 2,
+      rationale: "Obstructed lungs empty slowly. A long expiratory time (1:4+) prevents breath stacking and auto-PEEP." },
+    { q: "A vented patient's capnography develops a 'shark-fin' upslope. This indicates:",
+      choices: ["Hyperventilation", "Esophageal intubation", "Bronchospasm / obstructive airflow", "Cardiac arrest"], answer: 2,
+      rationale: "Loss of the sharp alpha angle reflects uneven, obstructed expiratory flow — bronchospasm. Treat the obstruction; don't chase the number." },
+    { q: "The capnography waveform suddenly drops to zero. After confirming the monitor works, the FIRST concern is:",
+      choices: ["Tube dislodgement, circuit disconnect, or loss of perfusion", "Increased sedation need", "Hyperventilation", "Auto-PEEP"], answer: 0,
+      rationale: "A sudden flatline means no CO₂ is reaching the sensor — dislodged/obstructed tube, disconnect, or arrest. Assess the patient and airway immediately." },
+    { q: "The single most reliable method to confirm and continuously monitor ETT placement is:",
+      choices: ["Auscultation of breath sounds", "Chest rise", "Pulse oximetry", "Waveform capnography"], answer: 3,
+      rationale: "Sustained waveform capnography is the gold standard for confirming and monitoring tracheal placement. SpO₂ lags and breath sounds can mislead." },
+    { q: "An ETT advanced too far usually enters the right mainstem because that bronchus:",
+      choices: ["Is longer and narrower", "Branches at a steeper, more vertical angle (~25°)", "Lies anterior to the left", "Has more cartilage"], answer: 1,
+      rationale: "The right mainstem leaves the trachea at ~25° versus ~45° on the left — the path of least resistance. Suspect it with asymmetric breath sounds and rising PIP." },
+    { q: "Why can SpO₂ sit near 95% and then fall precipitously as a patient deteriorates?",
+      choices: ["The oximeter is usually broken", "SpO₂ tracks PaO₂ linearly", "The oxyhemoglobin curve is flat up high, then drops steeply below ~90% / PaO₂ 60 mmHg", "Saturation is unrelated to PaO₂"], answer: 2,
+      rationale: "On the flat upper curve, big PaO₂ changes barely move SpO₂. Past the steep portion (~90% / 60 mmHg), saturation falls fast — the 'cliff.'" },
+    { q: "After return of spontaneous circulation, FiO₂ should be titrated to an SpO₂ target of:",
+      choices: ["100% at all times", "85–90%", "92–98%", "As high as possible"], answer: 2,
+      rationale: "Hyperoxia after ROSC is linked to worse neurologic outcomes. AHA recommends titrating to SpO₂ 92–98% rather than leaving FiO₂ at 100%." },
+    { q: "For a ventilated TBI patient WITHOUT herniation signs, the EtCO₂ target is:",
+      choices: ["25–30 mmHg", "30–35 mmHg", "35–40 mmHg", "45–50 mmHg"], answer: 2,
+      rationale: "Normocapnia (35–40) is the target. Hypercapnia raises ICP; prophylactic hyperventilation causes cerebral vasoconstriction and ischemia." },
+    { q: "Controlled mild hyperventilation (EtCO₂ ~30–35) in TBI is appropriate ONLY when:",
+      choices: ["The patient is intubated", "EtCO₂ reads above 40", "There are acute herniation signs (blown pupil, posturing, Cushing response)", "On every head injury"], answer: 2,
+      rationale: "Hyperventilation is a temporary rescue for active herniation only and should not drop below 30. Return to normocapnia once the crisis is managed." },
+    { q: "A previously wheezing asthmatic now has a 'silent chest.' This indicates:",
+      choices: ["Resolved bronchospasm", "Critically reduced airflow — a pre-arrest sign", "Improving air movement", "A measurement artifact"], answer: 1,
+      rationale: "Wheeze requires airflow. A silent chest in a severe asthmatic means almost no air is moving — impending respiratory arrest." },
+    { q: "Noninvasive positive-pressure ventilation (CPAP/BiPAP) is best supported first-line in:",
+      choices: ["A patient with a depressed gag who is vomiting", "Cardiac arrest", "Facial trauma with airway bleeding", "Cardiogenic pulmonary edema or COPD in an awake, cooperative patient"], answer: 3,
+      rationale: "NPPV has the strongest evidence in cardiogenic pulmonary edema and COPD when the patient can protect their airway and cooperate. The others are contraindications." },
+    { q: "Increasing PEEP can lower blood pressure primarily because it:",
+      choices: ["Directly dilates arteries", "Causes bradycardia", "Raises intrathoracic pressure and reduces venous return (preload)", "Increases CO₂"], answer: 2,
+      rationale: "Positive intrathoracic pressure impedes venous return, dropping preload and cardiac output — most pronounced when the patient is hypovolemic." },
+    { q: "Which picture best characterizes Type II (hypercapnic) respiratory failure?",
+      choices: ["Elevated PaCO₂ with respiratory acidosis", "Low PaO₂ with low/normal PaCO₂", "Normal gas with anxiety", "Isolated metabolic alkalosis"], answer: 0,
+      rationale: "Type II is a ventilation (pump) failure — CO₂ rises and pH falls. Type I is an oxygenation failure with low PaO₂ and normal/low PaCO₂." },
+    { q: "A high peak-pressure alarm on transport prompts the DOPE mnemonic, which stands for:",
+      choices: ["Displacement, Obstruction, Pneumothorax, Equipment failure", "Disconnect, Oxygen, Pressure, EtCO₂", "Drugs, Output, PEEP, Edema", "Distension, Overfeeding, Perfusion, Embolism"], answer: 0,
+      rationale: "DOPE: tube Displacement, Obstruction (secretions/kink/bite), Pneumothorax, Equipment failure. Work through it; if unresolved, disconnect and bag." },
+    { q: "Plateau pressure is measured by:",
+      choices: ["Reading PIP during a normal breath", "Performing an end-inspiratory hold (no gas flow)", "Performing an end-expiratory hold", "Subtracting PEEP from FiO₂"], answer: 1,
+      rationale: "An end-inspiratory hold stops flow so pressure equilibrates to alveolar pressure — that is Pplat, reflecting compliance. An end-expiratory hold instead measures auto-PEEP." }
+  ]
+};
+
 // ---------- 2. STATE / STORAGE ----------
 
 const STORAGE_KEY = "vta-pwa-state-v2";
@@ -1752,7 +1837,10 @@ const defaultModuleState = () => ({
 const Store = {
   state: {
     currentModule: null,
-    modules: {}
+    modules: {},
+    examResults: null,
+    examInProgress: null,
+    certificate: null
   },
 
   load() {
@@ -1762,6 +1850,9 @@ const Store = {
         const parsed = JSON.parse(raw);
         this.state.currentModule = parsed.currentModule || null;
         this.state.modules = parsed.modules || {};
+        this.state.examResults = parsed.examResults || null;
+        this.state.examInProgress = parsed.examInProgress || null;
+        this.state.certificate = parsed.certificate || null;
       }
     } catch (e) { /* ignore */ }
     // Ensure every defined module has an entry
@@ -1776,7 +1867,7 @@ const Store = {
   },
 
   resetAll() {
-    this.state = { currentModule: null, modules: {} };
+    this.state = { currentModule: null, modules: {}, examResults: null, examInProgress: null, certificate: null };
     MODULES.forEach(m => { this.state.modules[m.id] = defaultModuleState(); });
     this.save();
   },
@@ -1856,7 +1947,19 @@ const Store = {
 
   hasQuizInProgress(modId)    { return !!this.mod(modId).quizInProgress; },
   hasMatchInProgress(modId)   { return !!this.mod(modId).matchInProgress; },
-  hasScenarioInProgress(modId) { return !!this.mod(modId).scenarioInProgress; }
+  hasScenarioInProgress(modId) { return !!this.mod(modId).scenarioInProgress; },
+
+  // ---------- Final exam & certificate ----------
+  allModulesComplete()  { return MODULES.every(m => this.isModuleComplete(m.id)); },
+  isExamUnlocked()      { return this.allModulesComplete(); },
+  isExamDone()          { return !!this.state.examResults; },
+  isExamPassed()        { return !!this.state.examResults && this.state.examResults.passed; },
+  hasCertificate()      { return !!this.state.certificate; },
+  hasExamInProgress()   { return !!this.state.examInProgress; },
+  setExamResults(r)     { this.state.examResults = r; this.state.examInProgress = null; this.save(); },
+  setExamInProgress(p)  { this.state.examInProgress = p; this.save(); },
+  clearExamInProgress() { this.state.examInProgress = null; this.save(); },
+  setCertificate(c)     { this.state.certificate = c; this.save(); }
 };
 
 // ---------- 3. NAVIGATION ----------
@@ -1959,6 +2062,14 @@ function renderNav() {
     return;
   }
 
+  // Final-exam / certificate views: single return-to-hub pill
+  if (Nav.view === "exam" || Nav.view === "certform" || Nav.view === "certificate") {
+    nav.appendChild(el("button", { class: "nav-pill", type: "button", onclick: () => Nav.exitToCourse() }, "← Course Hub"));
+    const label = Nav.view === "certificate" ? "Certificate" : Nav.view === "certform" ? "Claim Certificate" : "Final Exam";
+    nav.appendChild(el("button", { class: "nav-pill active", type: "button", onclick: () => {} }, label));
+    return;
+  }
+
   // Module-level nav
   const modId = Nav.moduleId;
   const items = [
@@ -2034,7 +2145,64 @@ function renderCourseHub() {
     );
   });
 
-  mount(el("div", null, hero, grid));
+  mount(el("div", null, hero, grid, buildCapstoneCard()));
+}
+
+// Capstone card: final exam → certificate, gated behind all modules complete.
+function buildCapstoneCard() {
+  const unlocked = Store.isExamUnlocked();
+  const certified = Store.hasCertificate();
+  const examDone = Store.isExamDone();
+  const examPassed = Store.isExamPassed();
+  const doneCount = MODULES.filter(m => Store.isModuleComplete(m.id)).length;
+
+  let kicker, title, desc, action, onclick, cls = "capstone";
+
+  if (certified) {
+    cls += " certified";
+    kicker = "★ Certified";
+    title = "Ventilator Academy — Certified";
+    desc = "You've earned it. View, print, or save your certificate of completion.";
+    action = "View Certificate →";
+    onclick = () => Nav.go("certificate");
+  } else if (!unlocked) {
+    cls += " locked";
+    kicker = "🔒 Capstone — Locked";
+    title = "Final Certification Exam";
+    desc = `Complete all nine modules to unlock the final exam. ${doneCount} of ${MODULES.length} modules done.`;
+    action = `${doneCount}/${MODULES.length} modules`;
+    onclick = null;
+  } else if (examPassed) {
+    // Passed but hasn't claimed certificate yet
+    kicker = "✓ Exam Passed";
+    title = "Claim Your Certificate";
+    desc = "You passed the final exam. Enter your details to generate your certificate.";
+    action = "Claim Certificate →";
+    onclick = () => Nav.go("certform");
+  } else if (examDone) {
+    kicker = "Capstone — Retake";
+    title = "Final Certification Exam";
+    const r = Store.state.examResults;
+    desc = `Last attempt: ${r.score}/${r.total}. You need ${FINAL_EXAM.passScore}/${r.total} to pass. Review the modules and try again.`;
+    action = "Retake Exam →";
+    onclick = () => { ExamState.reset(); Nav.go("exam"); };
+  } else {
+    const resuming = Store.hasExamInProgress();
+    kicker = "★ Capstone — Unlocked";
+    title = "Final Certification Exam";
+    desc = resuming
+      ? "You have a final exam in progress — pick up where you left off."
+      : `All modules complete. ${FINAL_EXAM.questions.length} cumulative questions, ${FINAL_EXAM.passScore}/${FINAL_EXAM.questions.length} (80%) to pass and earn your certificate.`;
+    action = resuming ? "Resume Exam →" : "Begin Final Exam →";
+    onclick = () => { ExamState.enter(); Nav.go("exam"); };
+  }
+
+  return el("button", { class: cls, type: "button", disabled: onclick == null, onclick: onclick || (() => {}) },
+    el("span", { class: "capstone-kicker" }, kicker),
+    el("h2", { class: "capstone-title" }, title),
+    el("p", { class: "capstone-desc" }, desc),
+    el("span", { class: "capstone-action" }, action)
+  );
 }
 
 // ---------- MODULE HUB ----------
@@ -2670,6 +2838,229 @@ function renderSummary() {
   mount(el("div", null, headerCard, cards, buttons));
 }
 
+// ---------- FINAL EXAM ----------
+const ExamState = {
+  idx: 0, picked: null, answers: [],
+
+  enter() {
+    const s = Store.state.examInProgress;
+    if (s) {
+      this.idx = s.idx || 0;
+      this.picked = (s.picked === undefined) ? null : s.picked;
+      this.answers = s.answers || [];
+    } else {
+      this.idx = 0; this.picked = null; this.answers = [];
+    }
+  },
+  persist() { Store.setExamInProgress({ idx: this.idx, picked: this.picked, answers: this.answers }); },
+  reset()   { Store.clearExamInProgress(); this.idx = 0; this.picked = null; this.answers = []; }
+};
+
+function renderExam() {
+  if (!Store.isExamUnlocked()) { Nav.exitToCourse(); return; }
+  if (ExamState.idx < FINAL_EXAM.questions.length) renderExamQuestion();
+  else renderExamResults();
+}
+
+function renderExamQuestion() {
+  const total = FINAL_EXAM.questions.length;
+  const q = FINAL_EXAM.questions[ExamState.idx];
+  const picked = ExamState.picked;
+  const answered = picked != null;
+
+  const optionsContainer = el("div", { class: "quiz-options" });
+  q.choices.forEach((choice, i) => {
+    const cls = ["quiz-option"];
+    if (answered) {
+      if (i === q.answer) cls.push("correct");
+      else if (i === picked) cls.push("incorrect");
+    } else if (picked === i) cls.push("selected");
+    optionsContainer.appendChild(
+      el("button", {
+        class: cls.join(" "), type: "button", disabled: answered,
+        onclick: answered ? null : () => { ExamState.picked = i; ExamState.persist(); renderExam(); }
+      },
+        el("span", { class: "quiz-letter" }, ["A", "B", "C", "D"][i]),
+        el("span", null, choice)
+      )
+    );
+  });
+
+  const card = el("article", { class: "quiz-question" },
+    el("p", { class: "quiz-question-number" }, `Final Exam · Question ${ExamState.idx + 1} of ${total}`),
+    el("h2", { class: "quiz-question-text" }, q.q),
+    optionsContainer
+  );
+
+  if (answered) {
+    const correct = picked === q.answer;
+    card.appendChild(
+      el("div", { class: "feedback " + (correct ? "feedback-correct" : "feedback-incorrect") },
+        el("span", { class: "feedback-label" }, correct ? "Correct." : `Incorrect (answer: ${["A","B","C","D"][q.answer]}).`),
+        q.rationale
+      )
+    );
+  }
+
+  const buttons = el("div", { class: "button-row" },
+    el("button", { class: "btn btn-ghost", type: "button", onclick: () => Nav.exitToCourse() }, "Exit"),
+    !answered
+      ? el("button", { class: "btn btn-primary", type: "button", disabled: true }, "Select an answer")
+      : el("button", {
+          class: "btn btn-primary", type: "button",
+          onclick: () => {
+            // Record this answer before advancing (indexed so re-renders can't double-count)
+            ExamState.answers[ExamState.idx] = { picked, correct: picked === q.answer };
+            ExamState.idx++;
+            ExamState.picked = null;
+            ExamState.persist();
+            renderExam();
+          }
+        }, ExamState.idx === total - 1 ? "See Results →" : "Next Question →")
+  );
+
+  mount(el("div", null, card, buttons));
+}
+
+function renderExamResults() {
+  const total = FINAL_EXAM.questions.length;
+  const correctCount = ExamState.answers.filter(a => a && a.correct).length;
+  const passed = correctCount >= FINAL_EXAM.passScore;
+  Store.setExamResults({ score: correctCount, total, passed });
+  const pct = Math.round(correctCount / total * 100);
+
+  const message = passed
+    ? `${pct}% — you've cleared the final certification exam. Enter your details to claim your certificate.`
+    : `${pct}%. You need ${FINAL_EXAM.passScore} of ${total} (80%) to pass. Review the modules and retake when ready.`;
+
+  const card = el("div", { class: "results-card" },
+    el("p", { class: "section-kicker" }, "Final Exam Results"),
+    el("p", { class: "results-score" }, String(correctCount), el("small", null, ` / ${total}`)),
+    el("p", { class: "results-message" }, message),
+    el("div", { class: "button-row", style: "justify-content: center;" },
+      passed
+        ? el("button", { class: "btn btn-primary", type: "button",
+            onclick: () => Nav.go("certform") }, "Claim Certificate →")
+        : el("button", { class: "btn btn-primary", type: "button",
+            onclick: () => { ExamState.reset(); Nav.go("exam"); } }, "Retake Exam"),
+      el("button", { class: "btn btn-ghost", type: "button",
+        onclick: () => Nav.exitToCourse() }, "Back to Course Hub")
+    )
+  );
+
+  updateProgressPill();
+  renderNav();
+  mount(card);
+}
+
+// Deterministic, human-readable certificate ID.
+function makeCertId(name, emp, ts) {
+  let h = 0;
+  const s = name + "|" + emp + "|" + ts;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const yr = new Date(ts).getFullYear();
+  return "VTA-" + yr + "-" + h.toString(36).toUpperCase().padStart(6, "0").slice(-6);
+}
+
+// ---------- CERTIFICATE: details form ----------
+function renderCertForm() {
+  if (!Store.isExamPassed()) { Nav.exitToCourse(); return; }
+  const existing = Store.state.certificate;
+
+  const nameInput = el("input", { class: "cert-input", type: "text", id: "cert-name",
+    placeholder: "First Last", autocomplete: "name", value: existing ? existing.name : "" });
+  const credSelect = el("select", { class: "cert-input", id: "cert-cred" },
+    el("option", { value: "" }, "Select credential…"),
+    ...["EMT", "AEMT", "Paramedic", "RN", "RT", "Other"].map(c =>
+      el("option", { value: c, selected: (existing && existing.credential === c) ? true : null }, c))
+  );
+  const empInput = el("input", { class: "cert-input", type: "text", id: "cert-emp",
+    placeholder: "e.g. 100482", autocomplete: "off", value: existing ? existing.employeeNo : "" });
+  const status = el("p", { class: "cert-form-status" }, "");
+
+  function submit() {
+    const name = nameInput.value.trim();
+    const cred = credSelect.value;
+    const emp = empInput.value.trim();
+    status.className = "cert-form-status";
+    if (!name) { status.textContent = "Enter your full name."; status.classList.add("err"); return; }
+    if (!cred) { status.textContent = "Select your credential level."; status.classList.add("err"); return; }
+    if (!emp)  { status.textContent = "Enter your employee number."; status.classList.add("err"); return; }
+    const r = Store.state.examResults || { score: FINAL_EXAM.passScore, total: FINAL_EXAM.questions.length };
+    const issuedAt = Date.now();
+    Store.setCertificate({
+      name, credential: cred, employeeNo: emp,
+      score: r.score, total: r.total, issuedAt,
+      certId: makeCertId(name, emp, issuedAt)
+    });
+    Nav.go("certificate");
+  }
+
+  const card = el("div", { class: "card cert-form" },
+    el("p", { class: "section-kicker" }, "Almost there"),
+    el("h1", { class: "section-title", style: "color: var(--navy); margin-top: 0.2rem;" }, "Claim Your Certificate"),
+    el("p", { style: "color: var(--muted); margin-top: 0;" },
+      "Your name and credential will appear on the certificate exactly as entered — please double-check spelling."),
+    el("label", { class: "cert-label", for: "cert-name" }, "Full name"),
+    nameInput,
+    el("label", { class: "cert-label", for: "cert-cred" }, "Credential level"),
+    credSelect,
+    el("label", { class: "cert-label", for: "cert-emp" }, "Employee number"),
+    empInput,
+    status,
+    el("div", { class: "button-row" },
+      el("button", { class: "btn btn-ghost", type: "button", onclick: () => Nav.exitToCourse() }, "Cancel"),
+      el("button", { class: "btn btn-primary", type: "button", onclick: submit }, "Generate Certificate →")
+    )
+  );
+  mount(card);
+}
+
+// ---------- CERTIFICATE ----------
+function renderCertificate() {
+  const c = Store.state.certificate;
+  if (!c) { Nav.go(Store.isExamPassed() ? "certform" : "course"); return; }
+
+  const issued = new Date(c.issuedAt);
+  const dateStr = issued.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const pct = Math.round(c.score / c.total * 100);
+
+  const cert = el("div", { class: "certificate", id: "certificate" },
+    el("div", { class: "cert-inner" },
+      el("div", { class: "cert-seal" }, el("span", { class: "cert-seal-text" }, "VTA")),
+      el("p", { class: "cert-org" }, "Ventilator Training Academy"),
+      el("p", { class: "cert-org-sub" }, "AEMT & Paramedic Edition"),
+      el("p", { class: "cert-heading" }, "Certificate of Completion"),
+      el("p", { class: "cert-presented" }, "This is to certify that"),
+      el("p", { class: "cert-name" }, c.name),
+      el("p", { class: "cert-cred" }, c.credential + "  ·  Employee #" + c.employeeNo),
+      el("p", { class: "cert-statement" },
+        "has successfully completed all nine modules of the Ventilator Training Academy and passed the Final Certification Exam covering ventilator physiology, recognition of respiratory failure, lung-protective ventilation, and transport management of the mechanically ventilated patient."),
+      el("p", { class: "cert-score" }, `Final Exam Score — ${c.score} / ${c.total} (${pct}%)`),
+      el("div", { class: "cert-foot" },
+        el("div", { class: "cert-sig" },
+          el("span", { class: "cert-sig-line" }),
+          el("span", { class: "cert-sig-name" }, "Ameet Deshmukh, MD"),
+          el("span", { class: "cert-sig-role" }, "Medical Director · AMR Kansas City")
+        ),
+        el("div", { class: "cert-sig" },
+          el("span", { class: "cert-sig-line" }),
+          el("span", { class: "cert-sig-name" }, dateStr),
+          el("span", { class: "cert-sig-role" }, "Date of Issue")
+        )
+      ),
+      el("p", { class: "cert-id" }, "Certificate ID — " + c.certId)
+    )
+  );
+
+  const buttons = el("div", { class: "button-row no-print", style: "justify-content: center;" },
+    el("button", { class: "btn btn-ghost", type: "button", onclick: () => Nav.exitToCourse() }, "← Course Hub"),
+    el("button", { class: "btn btn-primary", type: "button", onclick: () => window.print() }, "🖨 Print / Save as PDF")
+  );
+
+  mount(el("div", { class: "cert-wrap" }, cert, buttons));
+}
+
 // ---------- 5. ROUTER ----------
 function render() {
   updateProgressPill();
@@ -2681,6 +3072,9 @@ function render() {
   else if (Nav.view === "match")    renderMatch();
   else if (Nav.view === "scenario") renderScenario();
   else if (Nav.view === "summary")  renderSummary();
+  else if (Nav.view === "exam")     renderExam();
+  else if (Nav.view === "certform") renderCertForm();
+  else if (Nav.view === "certificate") renderCertificate();
 }
 
 // ---------- 6. BOOT ----------
@@ -2696,11 +3090,12 @@ function boot() {
         Nav.go("module");
       }
     } else {
-      if (confirm("Reset ALL course progress? This clears every module.")) {
+      if (confirm("Reset ALL course progress? This clears every module, your exam, and your certificate.")) {
         Store.resetAll();
         QuizState.reset();
         MatchState.reset();
         ScenarioState.reset();
+        ExamState.reset();
         Nav.go("course");
       }
     }
