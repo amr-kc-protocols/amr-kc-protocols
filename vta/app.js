@@ -2280,6 +2280,9 @@ function renderQuizQuestion(m) {
       : el("button", {
           class: "btn btn-primary", type: "button",
           onclick: () => {
+            // Record this question's answer before advancing. (Indexed by
+            // question so re-renders/resumes can't double-count.)
+            QuizState.answers[QuizState.idx] = { picked, correct: picked === q.answer };
             QuizState.idx++;
             QuizState.picked = null;
             QuizState.persist();
