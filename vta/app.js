@@ -1823,6 +1823,21 @@ const FINAL_EXAM = {
 
 const STORAGE_KEY = "vta-pwa-state-v2";
 
+// ---------- ADMIN MODE ----------
+// Add ?admin=1 (or #admin) to the URL to unlock every module and the final
+// exam for review — lets an educator open any quiz, match, scenario, or the
+// final exam without completing prerequisites. Not persisted: drop the
+// parameter and reload to return to the normal gated experience.
+const ADMIN = (function () {
+  try { return new URLSearchParams(location.search).has("admin") || /(?:^|[#&])admin\b/.test(location.hash); }
+  catch (e) { return false; }
+})();
+
+// ---------- SCORE LOGGING (Google Sheets → exportable to Excel) ----------
+// Paste the Web App /exec URL from vta-certifications-AppsScript.gs here to log
+// each certification to your spreadsheet. Leave "" to disable logging.
+const VTA_LOG_ENDPOINT = "";
+
 const defaultModuleState = () => ({
   lessonsRead: {},
   quizResults: null,
@@ -1941,6 +1956,7 @@ const Store = {
 
   isModuleUnlocked(modId) {
     // Module 1 always open; subsequent modules require previous to be complete
+    if (ADMIN) return true;
     if (modId <= 1) return true;
     return this.isModuleComplete(modId - 1);
   },
@@ -1951,7 +1967,7 @@ const Store = {
 
   // ---------- Final exam & certificate ----------
   allModulesComplete()  { return MODULES.every(m => this.isModuleComplete(m.id)); },
-  isExamUnlocked()      { return this.allModulesComplete(); },
+  isExamUnlocked()      { return ADMIN || this.allModulesComplete(); },
   isExamDone()          { return !!this.state.examResults; },
   isExamPassed()        { return !!this.state.examResults && this.state.examResults.passed; },
   hasCertificate()      { return !!this.state.certificate; },
@@ -2962,6 +2978,27 @@ function makeCertId(name, emp, ts) {
   return "VTA-" + yr + "-" + h.toString(36).toUpperCase().padStart(6, "0").slice(-6);
 }
 
+// Fire-and-forget POST of a certification record to the Google Sheet endpoint.
+// Form-encoded + no-cors so it works from a static page with no preflight.
+function logCertification(cert) {
+  if (!VTA_LOG_ENDPOINT) return; // logging disabled until an endpoint is set
+  try {
+    const now = new Date();
+    const pct = Math.round(cert.score / cert.total * 100);
+    const body = new URLSearchParams({
+      submittedAt: now.toISOString(),
+      name: cert.name,
+      credential: cert.credential,
+      employeeNo: cert.employeeNo,
+      scoreRaw: cert.score + "/" + cert.total,
+      scorePercent: pct + "%",
+      passStatus: cert.score >= FINAL_EXAM.passScore ? "PASS" : "FAIL",
+      certId: cert.certId
+    });
+    fetch(VTA_LOG_ENDPOINT, { method: "POST", mode: "no-cors", body }).catch(() => {});
+  } catch (e) { /* never block the certificate on logging */ }
+}
+
 // ---------- CERTIFICATE: details form ----------
 function renderCertForm() {
   if (!Store.isExamPassed()) { Nav.exitToCourse(); return; }
@@ -2988,11 +3025,13 @@ function renderCertForm() {
     if (!emp)  { status.textContent = "Enter your employee number."; status.classList.add("err"); return; }
     const r = Store.state.examResults || { score: FINAL_EXAM.passScore, total: FINAL_EXAM.questions.length };
     const issuedAt = Date.now();
-    Store.setCertificate({
+    const cert = {
       name, credential: cred, employeeNo: emp,
       score: r.score, total: r.total, issuedAt,
       certId: makeCertId(name, emp, issuedAt)
-    });
+    };
+    Store.setCertificate(cert);
+    logCertification(cert);
     Nav.go("certificate");
   }
 
@@ -3080,6 +3119,13 @@ function render() {
 // ---------- 6. BOOT ----------
 function boot() {
   Store.load();
+  if (ADMIN) {
+    document.body.classList.add("is-admin");
+    const badge = document.createElement("div");
+    badge.className = "admin-badge";
+    badge.textContent = "ADMIN · all modules unlocked";
+    document.body.appendChild(badge);
+  }
   document.getElementById("resetButton").addEventListener("click", () => {
     if (Nav.moduleId != null) {
       if (confirm(`Reset progress for Module ${Nav.moduleId}? This will clear that module's scores and lesson reads. Other modules are unaffected.`)) {
