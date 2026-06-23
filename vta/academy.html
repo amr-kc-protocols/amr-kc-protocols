@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1E2761">
+  <meta name="description" content="Ventilator Training Academy — 9-module interactive course for AEMT and Paramedic providers. Lessons, knowledge checks, drag-and-drop exercises, and branching clinical scenarios on the Pulmonetic LTV 1200.">
+  <title>Ventilator Training Academy</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <div class="brand-text">
+          <span class="brand-title">Ventilator Training Academy</span>
+          <span class="brand-sub">Virtual Academy · Course Hub</span>
+        </div>
+      </div>
+      <div class="progress-pill" id="progressPill">
+        <span class="progress-bar"><span class="progress-fill" id="progressFill" style="width: 0%"></span></span>
+        <span class="progress-label" id="progressLabel">0% complete</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="app-main">
+    <!-- View renders into here -->
+    <div class="view-placeholder">Loading…</div>
+  </main>
+
+  <nav class="app-nav" id="appNav" aria-label="Module navigation"></nav>
+
+  <footer class="app-footer">
+    <span>Ventilator Training Academy · AEMT &amp; Paramedic Edition</span>
+    <button class="link-button" id="resetButton" type="button">Reset progress</button>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
