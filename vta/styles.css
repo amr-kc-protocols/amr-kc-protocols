@@ -221,6 +221,12 @@ body {
 }
 .callout-evidence .callout-label { color: var(--navy); }
 
+.callout-kc {
+  background: #FBEEE9;
+  border-left-color: #B85042;
+}
+.callout-kc .callout-label { color: #B85042; }
+
 .callout-warn {
   background: var(--terra-soft);
   border-left-color: var(--terra);
@@ -1106,4 +1112,39 @@ select.cert-input { cursor: pointer; }
   border-radius: 999px;
   box-shadow: var(--shadow-lg);
   pointer-events: none;
+}
+
+/* ---------- COURSE RESOURCES ---------- */
+.resources { margin-top: 1.5rem; }
+.resources-kicker {
+  margin: 0 0 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+.resource-link {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.2rem;
+  background: var(--white);
+  border: 1.5px solid var(--soft);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+.resource-link:hover { border-color: var(--navy); transform: translateY(-2px); }
+.resource-ico { font-size: 1.6rem; flex-shrink: 0; }
+.resource-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.resource-title { font-weight: 700; color: var(--navy); }
+.resource-sub { font-size: 0.85rem; color: var(--muted); }
+.resource-arr {
+  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--sage);
+  font-size: 1.1rem;
 }
