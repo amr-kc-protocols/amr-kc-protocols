@@ -245,7 +245,7 @@ const MODULES = [
         "SpO₂ 80% → PaO₂ ≈ 45 mmHg. SpO₂ 70% → PaO₂ ≈ 38 mmHg — minutes from arrest in most adults.",
         "Practical implication: aim for SpO₂ 92–96%. High enough to be off the cliff, low enough to detect deterioration. Targeting 100% does the patient no good and wastes oxygen reserves."
       ],
-      evidence: { title: "Hyperoxia after ROSC", body: "Multiple observational studies show worse neurologic outcomes in cardiac arrest survivors maintained at PaO₂ > 300 mmHg post-arrest. AHA recommends titrating FiO₂ to SpO₂ 92–98% post-ROSC." }
+      evidence: { title: "Hyperoxia after ROSC", body: "Multiple observational studies show worse neurologic outcomes in cardiac arrest survivors maintained at PaO₂ > 300 mmHg post-arrest. AHA recommends titrating FiO₂ to SpO₂ 90–98% post-ROSC (2025 AHA update; the prior target was 92–98%)." }
     },
     {
       id: "type1",
@@ -653,7 +653,7 @@ const MODULES = [
       id: "fio2-peep", kicker: "4.3 · Oxygenation Knobs", title: "FiO₂ and PEEP",
       body: [
         "FiO₂ is the fraction of oxygen in the inspired gas. Range 0.21 (room air) to 1.00 (100%). Start at 100% on every fresh intubation; wean.",
-        "Target SpO₂ ≥ 92% (adult), ≥ 88% (COPD per GOLD), ≥ 94% (TBI per BTF). Hyperoxia post-ROSC worsens neurologic outcome — AHA recommends SpO₂ 92–98% after cardiac arrest. Oxygen is a drug, not a vital sign.",
+        "Target SpO₂ ≥ 92% (adult), ≥ 88% (COPD per GOLD), ≥ 94% (TBI per BTF). Hyperoxia post-ROSC worsens neurologic outcome — AHA recommends SpO₂ 90–98% after cardiac arrest (2025 update; previously 92–98%). Oxygen is a drug, not a vital sign.",
         "PEEP is the pressure remaining in airways at end-exhalation. Adult default 5 cmH₂O. ARDS uses 10–15 cmH₂O paired with FiO₂ per the ARDSNet table.",
         "PEEP recruits collapsed alveoli — the fix for shunt physiology. It also reduces preload, which can drop BP in volume-depleted patients. Pair PEEP with FiO₂ together, not separately."
       ],
@@ -714,8 +714,8 @@ const MODULES = [
         choices: ["ARDS", "TBI / increased ICP", "Asthma", "Post-ROSC"], answer: 1,
         rationale: "Brain Trauma Foundation 4th edition: maintain EtCO₂ 35–40 mmHg in TBI. Avoid prophylactic hyperventilation. Hyperventilation only as transient herniation rescue." },
       { q: "Best practice for FiO₂ in a post-ROSC adult per AHA guidance:",
-        choices: ["Always 100% to maximize oxygen delivery", "Titrate to SpO₂ 92–98% — avoid hyperoxia", "Room air only", "Whatever the prior intubator chose"], answer: 1,
-        rationale: "Hyperoxia post-ROSC worsens neurologic outcome (multiple observational studies). AHA recommends titrating FiO₂ to SpO₂ 92–98%." },
+        choices: ["Always 100% to maximize oxygen delivery", "Titrate to SpO₂ 90–98% — avoid hyperoxia", "Room air only", "Whatever the prior intubator chose"], answer: 1,
+        rationale: "Hyperoxia post-ROSC worsens neurologic outcome (multiple observational studies). The 2025 AHA guidelines recommend titrating FiO₂ to SpO₂ 90–98% (prior target 92–98%)." },
       { q: "Adult target minute ventilation:",
         choices: ["6–8 L/min", "2–4 L/min", "12–14 L/min", "20+ L/min"], answer: 0,
         rationale: "Adult MV target is 6–8 L/min (RR × Vt). For a 70 kg IBW adult: Vt 480 × RR 14 = 6.7 L/min." },
@@ -1418,7 +1418,7 @@ const MODULES = [
         "Post-intubation hypotension affects ~25% of EMS RSI (Heffner 2012). The fix is anticipation.",
         "Push-dose epinephrine — first-line for most EMS shock states. Mix 1 mg (1:10,000) into 100 mL NS = 10 mcg/mL. Dose 5–20 mcg IV (typically 10 mcg) every 1–5 min. Onset 1 min, duration 5–10 min. Inotropy + vasoconstriction.",
         "Push-dose phenylephrine — alternative when avoiding tachycardia. Mix 10 mg into 100 mL NS = 100 mcg/mL. Dose 50–200 mcg IV q1–5 min. Pure α-agonist; reflex bradycardia possible.",
-        "Label every syringe clearly. Document every push. Move to a continuous infusion as soon as practical. Push-dose pressors are a bridge."
+        "Label every syringe clearly. Document every push. Move to a continuous infusion as soon as practical — norepinephrine is the first-line infused vasopressor for most shock states (Surviving Sepsis 2021), started at 0.05–0.1 mcg/kg/min and titrated to MAP ≥ 65, and it can run peripherally through a good IV for transport. Push-dose pressors are a bridge to that infusion."
       ],
       evidence: { title: "Post-intubation hypotension", body: "Heffner 2012: incidence ~25% in EMS RSI. Higher in shock states. Always have push-dose pressors prepared before pushing the induction agent." }
     },
@@ -1580,7 +1580,7 @@ const MODULES = [
     {
       id: "ards", kicker: "9.3 · ARDS", title: "Lung-Protective Ventilation",
       body: [
-        "Acute Respiratory Distress Syndrome: diffuse alveolar damage, refractory hypoxia. Berlin definition (2012): bilateral infiltrates, not cardiac, within 1 week. Severity by P/F ratio: mild 200–300, moderate 100–200, severe < 100.",
+        "Acute Respiratory Distress Syndrome: diffuse alveolar damage, refractory hypoxia. Berlin definition (2012): bilateral infiltrates, not cardiac, within 1 week. Severity by P/F ratio: mild 200–300, moderate 100–200, severe < 100. A 2023/2024 Global Definition of ARDS now also allows diagnosis by SpO₂/FiO₂ and includes patients on HFNO ≥ 30 L/min or CPAP/NIV ≥ 5 cmH₂O — but the Berlin P/F severity bands remain in everyday bedside use.",
         "Goal: protect remaining alveoli. Small breaths, modest pressure, generous PEEP.",
         "Settings: AC/VC or AC/PC; Vt 4–6 mL/kg IBW (LOWER than usual); RR 18–22 to maintain MV; PEEP 10–15 per ARDSNet table; Pplat < 30; driving pressure (Pplat − PEEP) < 14 cmH₂O.",
         "ARDSNet ARMA (NEJM 2000): mortality 31% vs 40% comparing 6 vs 12 mL/kg IBW. NNT 11. The most evidence-based ARDS intervention."
@@ -1790,8 +1790,8 @@ const FINAL_EXAM = {
       choices: ["The oximeter is usually broken", "SpO₂ tracks PaO₂ linearly", "The oxyhemoglobin curve is flat up high, then drops steeply below ~90% / PaO₂ 60 mmHg", "Saturation is unrelated to PaO₂"], answer: 2,
       rationale: "On the flat upper curve, big PaO₂ changes barely move SpO₂. Past the steep portion (~90% / 60 mmHg), saturation falls fast — the 'cliff.'" },
     { q: "After return of spontaneous circulation, FiO₂ should be titrated to an SpO₂ target of:",
-      choices: ["100% at all times", "85–90%", "92–98%", "As high as possible"], answer: 2,
-      rationale: "Hyperoxia after ROSC is linked to worse neurologic outcomes. AHA recommends titrating to SpO₂ 92–98% rather than leaving FiO₂ at 100%." },
+      choices: ["100% at all times", "85–90%", "90–98%", "As high as possible"], answer: 2,
+      rationale: "Hyperoxia after ROSC is linked to worse neurologic outcomes. The 2025 AHA guidelines recommend titrating to SpO₂ 90–98% (prior target 92–98%) rather than leaving FiO₂ at 100%." },
     { q: "For a ventilated TBI patient WITHOUT herniation signs, the EtCO₂ target is:",
       choices: ["25–30 mmHg", "30–35 mmHg", "35–40 mmHg", "45–50 mmHg"], answer: 2,
       rationale: "Normocapnia (35–40) is the target. Hypercapnia raises ICP; prophylactic hyperventilation causes cerebral vasoconstriction and ischemia." },
@@ -2453,14 +2453,7 @@ function renderQuizQuestion(m) {
   const buttons = el("div", { class: "button-row" },
     el("button", { class: "btn btn-ghost", type: "button", onclick: () => Nav.go("module") }, "Exit"),
     !answered
-      ? el("button", {
-          class: "btn btn-primary", type: "button", disabled: picked == null,
-          onclick: () => {
-            QuizState.answers.push({ picked, correct: picked === q.answer });
-            QuizState.persist();
-            renderQuiz();
-          }
-        }, "Submit")
+      ? el("button", { class: "btn btn-primary", type: "button", disabled: true }, "Select an answer")
       : el("button", {
           class: "btn btn-primary", type: "button",
           onclick: () => {
