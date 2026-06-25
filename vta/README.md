@@ -19,7 +19,7 @@ Day 1 — Foundations
 Day 2 — Application
 - Module 6 — LTV 1200 Platform Tour (50 min · 6 lessons, 10-question quiz, front-panel matching, pre-shift walkaround scenario)
 - Module 7 — Alarms & Troubleshooting / DOPE (55 min · 7 lessons, 10-question quiz, DOPE-letter sorting, tension PTX scenario)
-- Module 8 — Sedation & Analgesia (40 min · 5 lessons, 10-question quiz, agent-selection matching, septic shock RSI scenario)
+- Module 8 — Sedation & Analgesia (40 min · 7 lessons incl. AMR KC formulary & hospital-infusion scope, 10-question quiz, agent-selection matching, septic shock RSI scenario)
 - Module 9 — Special Populations (60 min · 6 lessons, 10-question quiz, population-strategy matching, TBI herniation scenario)
 
 The Course Hub renders all nine modules with strict sequential locking: Module N is locked until Module N−1 is fully completed.
