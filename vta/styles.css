@@ -1148,3 +1148,27 @@ select.cert-input { cursor: pointer; }
   color: var(--sage);
   font-size: 1.1rem;
 }
+
+/* ---------- Scannable bullet lists (lessons & KC callouts) ---------- */
+.lesson-list {
+  margin: 0.25rem 0 1rem;
+  padding-left: 1.1rem;
+}
+.lesson-list li {
+  margin: 0.3rem 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+/* a short label paragraph immediately before a list hugs it */
+.section-body p:has(+ .lesson-list) { margin-bottom: 0.25rem; font-weight: 700; color: var(--navy); }
+
+.callout-list {
+  margin: 0;
+  padding-left: 1.05rem;
+}
+.callout-list li {
+  margin: 0.3rem 0;
+  line-height: 1.45;
+}
+.callout-list li:first-child { margin-top: 0; }
+.callout-list li:last-child { margin-bottom: 0; }
