@@ -25,7 +25,7 @@ const MODULES = [
       title: "The Path of a Breath",
       body: [
         "A breath begins at the nose or mouth and travels through the pharynx, larynx, and trachea. The adult trachea is approximately 12 centimeters long and ends at the carina, the bifurcation roughly at the level of the fourth thoracic vertebra.",
-        "From the carina, air enters the right and left mainstem bronchi. The two are not symmetric. The right mainstem branches off the trachea at approximately 25 degrees from the vertical; the left at approximately 45 degrees. This asymmetry has practical consequences: an ETT advanced too deep slides into the right mainstem and leaves the left lung unventilated.",
+        "From the carina, air enters the right and left mainstem bronchi — but the fork is lopsided, like a highway splitting into two ramps. The right ramp barely curves (about 25° from vertical), almost a straight continuation of the road; the left banks hard (about 45°). Push an ETT too deep and it takes the path of least resistance straight down the right ramp, leaving the left lung dark and silent. That asymmetry is exactly why an over-deep tube is almost always a right-mainstem tube — and why you listen over the LEFT chest first when breath sounds go one-sided.",
         "Confirm ETT depth at the lip — approximately 21 cm in women, 23 cm in men — and verify with equal bilateral breath sounds and a normal capnography waveform.",
         "Beyond the mainstem bronchi, the airway branches through approximately 23 generations to reach the alveoli. There are approximately 300 million alveoli per adult, with a combined surface area of roughly 70 square meters — about the size of a tennis court."
       ],
@@ -38,8 +38,8 @@ const MODULES = [
       body: [
         "The pulmonary system has two zones. The conducting zone is everything from the mouth to the terminal bronchioles. It moves air. No gas exchange occurs here. The volume that fills it on each breath is anatomic dead space — approximately 2 mL per kilogram of body weight, or about 150 mL in a 70 kg adult.",
         "The respiratory zone is where gas exchange happens. Type I pneumocytes form the thin alveolar wall (0.2–0.5 µm thick — about 1/100 the diameter of a red blood cell). Type II pneumocytes produce surfactant.",
-        "Surfactant lowers surface tension at the air-fluid interface of each alveolus. Without it, by Laplace's law, the smallest alveoli would collapse into the larger ones at every exhalation. ARDS, smoke inhalation, drowning, and gastric aspiration all damage Type II cells or wash out surfactant.",
-        "PEEP is your bedside replacement: it splints alveoli open mechanically until surfactant function returns."
+        "Picture two soap bubbles tied to the ends of a straw, one small and one large. By Laplace's law the small bubble has the higher pressure, so it empties itself into the big one and collapses. Alveoli would do the same to each other on every exhale — except for surfactant, the dish soap Type II cells make to lower that surface tension so the smallest alveoli survive instead of caving into their neighbors. ARDS, smoke inhalation, drowning, and gastric aspiration all damage Type II cells or wash the soap out.",
+        "When the soap is gone, PEEP is your bedside replacement: it is the doorstop you wedge under each alveolus, splinting it open mechanically until surfactant function returns."
       ],
       evidence: { title: "Surfactant and PEEP", body: "Conditions that damage Type II pneumocytes produce a stiff lung with refractory hypoxia. The bedside fix is PEEP — not more FiO₂." }
     },
@@ -48,10 +48,10 @@ const MODULES = [
       kicker: "1.3 · The Mental Model",
       title: "Ventilation vs Oxygenation — Two Knobs Each",
       body: [
-        "This is the single most useful mental model in mechanical ventilation. Memorize it now.",
-        "Ventilation means moving CO₂ out. It is controlled by two knobs: Respiratory Rate (RR) and Tidal Volume (Vt). Their product is Minute Ventilation. When PaCO₂ is too high, you increase one of these. When PaCO₂ is too low, you decrease one.",
-        "Oxygenation means getting O₂ across the alveolar membrane into the blood. It is controlled by two different knobs: FiO₂ (the fraction of oxygen in the inspired gas) and PEEP (the pressure that holds alveoli open at end-expiration). When SpO₂ is too low, you increase FiO₂ first, then PEEP if shunt physiology is suspected.",
-        "Many of the most common ventilator errors come from turning the wrong knob — increasing FiO₂ to address rising CO₂, or increasing rate to fix a low saturation. Pair them in your head: RR + Vt for ventilation, FiO₂ + PEEP for oxygenation."
+        "This is the single most useful mental model in mechanical ventilation — memorize it now. Picture the lung as a house with two completely separate chores, each with its own set of controls. Confusing the two is the most common ventilator mistake there is.",
+        "Ventilation is taking out the trash — clearing CO₂. You run it with two knobs: Respiratory Rate (RR) and Tidal Volume (Vt) — how often the trash goes out and how big each load is. Their product is Minute Ventilation. PaCO₂ too high? Turn one up. Too low? Turn one down.",
+        "Oxygenation is bringing in the groceries — loading O₂ across the alveolar membrane into the blood. It runs on two different knobs: FiO₂ (how oxygen-rich the incoming air is) and PEEP (the pressure that holds alveoli open at end-expiration). SpO₂ too low? Raise FiO₂ first, then PEEP if you suspect shunt physiology. Running the trash out more often will never restock the fridge.",
+        "Most ventilator errors are turning the wrong knob — bumping FiO₂ to fix a rising CO₂, or cranking the rate to fix a low saturation. Pair them in your head: RR + Vt for ventilation, FiO₂ + PEEP for oxygenation. Trash and groceries — two chores, two sets of knobs."
       ],
       pearl: { title: "Two knobs each", body: "Ventilation = RR + Vt. Oxygenation = FiO₂ + PEEP. On the final exam. At every bedside for the rest of your career." }
     },
@@ -60,10 +60,10 @@ const MODULES = [
       kicker: "1.4 · Dead Space",
       title: "Air That Doesn't Help You",
       body: [
-        "Dead space is the part of every breath that does not participate in gas exchange. There are three kinds.",
+        "Every breath is like mailing a package down a long hallway to a room at the far end. The hallway holds air but does no gas exchange — anything that never reaches the room is wasted effort. That wasted volume is dead space: the part of every breath that does not participate in gas exchange. It comes in three kinds.",
         "Anatomic dead space is the volume of the conducting airways: approximately 2 mL per kilogram of body weight. Alveolar dead space is the volume of alveoli that are ventilated but not perfused — for example, downstream of a pulmonary embolism. Equipment dead space is the volume of the vent circuit between the ETT tip and the Y-piece — up to 80 to 90 mL on an adult circuit.",
         "Total physiologic dead space is normally about 30% of tidal volume in a healthy adult. A study by Nuckton and colleagues (NEJM 2002) showed that VD/VT greater than 0.6 in ARDS strongly predicts mortality.",
-        "The practical bedside implication: tidal volume must be large enough to overcome dead space. Setting Vt too low means dead space eats the breath. Aim for 6–8 mL per kg of ideal body weight in most adults; 4–6 mL/kg IBW in ARDS."
+        "The practical bedside implication: tidal volume must be large enough to overcome dead space. Set Vt too low and the whole breath gets stuck in the hallway — dead space eats it before any reaches the room. Aim for 6–8 mL per kg of ideal body weight in most adults; 4–6 mL/kg IBW in ARDS."
       ]
     },
     {
@@ -71,9 +71,9 @@ const MODULES = [
       kicker: "1.5 · V/Q Matching",
       title: "Shunt vs Dead Space",
       body: [
-        "Gas exchange requires both ventilation reaching alveoli and blood perfusing those alveoli. The ratio is called V/Q. Disease produces mismatch in one of two directions.",
-        "Shunt is blood that passes through the lung without being ventilated — V/Q approaches zero. Pneumonia, pulmonary edema, ARDS, and atelectasis all produce shunt. The hallmark is refractory hypoxia: cranking FiO₂ to 100% produces little improvement because the shunted blood never reaches a ventilated alveolus. The bedside fix is PEEP, which recruits collapsed alveoli.",
-        "Dead space is the mirror image: ventilation without perfusion. Pulmonary embolism, low cardiac output, and severe hypovolemia produce dead-space physiology. The hallmark is a widening gap between PaCO₂ and EtCO₂ — ventilated alveoli with no blood contribute air with low CO₂ content. The fix is improving perfusion (fluids, pressors, treating the embolism).",
+        "Picture a bus line where the buses are air and the passengers are blood. Gas exchange only happens where a bus and its passengers actually meet. That match-up is V/Q, and disease breaks it in one of two opposite directions.",
+        "Shunt is passengers crowding a stop the bus skips entirely — perfusion with no ventilation, V/Q approaching zero. Pneumonia, pulmonary edema, ARDS, and atelectasis all produce shunt. The hallmark is refractory hypoxia: you can send more buses (crank FiO₂ to 100%) but they keep driving past the skipped stop, so saturation barely moves. The bedside fix is PEEP, which re-opens the stop — recruiting collapsed alveoli so the bus can finally pick those passengers up.",
+        "Dead space is the mirror image: a bus running its full route past empty stops — ventilation with no perfusion. Pulmonary embolism, low cardiac output, and severe hypovolemia produce dead-space physiology. The hallmark is a widening gap between PaCO₂ and EtCO₂: those empty-stop alveoli exhale air carrying almost no CO₂. The fix is getting passengers back to the stops — improving perfusion with fluids, pressors, or treating the embolism.",
         "Hypoxic Pulmonary Vasoconstriction (HPV) is a partial auto-correction: the lung constricts arterioles in poorly ventilated regions, diverting blood toward better-ventilated alveoli. HPV is incomplete; in significant disease, it is not enough."
       ],
       pearl: { title: "FiO₂ alone won't fix shunt", body: "If a patient on a non-rebreather at flush rate is still hypoxic, suspect shunt. The bedside fix is PEEP, often via CPAP." }
@@ -83,8 +83,8 @@ const MODULES = [
       kicker: "1.6 · Compliance vs Resistance",
       title: "How the Lung Pushes Back",
       body: [
-        "Two physical properties determine how the lung responds to the ventilator's pressure. Compliance is stretchiness — how much volume the lung accepts for a given pressure. Normal adult static compliance is 60–100 mL per cmH₂O. ARDS can drop it to 20–30 mL per cmH₂O — a very stiff lung.",
-        "Resistance is how much the airway pushes back against airflow. Normal airway resistance is 1–2 cmH₂O per liter per second. Severe asthma can push it to 15–20. Kinked tubes, mucus plugs, and bronchospasm all raise resistance.",
+        "Imagine blowing up a balloon through a straw — two completely separate things can make it hard. The first is the balloon's stiffness. That is compliance: how much volume the lung accepts for a given pressure. A brand-new, stiff balloon (the ARDS lung) fights every breath; a worn-in one gives easily. Normal adult static compliance is 60–100 mL per cmH₂O; ARDS can drop it to 20–30 — a very stiff balloon.",
+        "The second is the straw's narrowness. That is resistance: how hard the airway pushes back against airflow. Pinch the straw — bronchospasm, a mucus plug, a kinked tube — and you must push far harder for the same airflow. Normal airway resistance is 1–2 cmH₂O per liter per second; severe asthma can push it to 15–20.",
         "Both can raise PIP on the ventilator — but only reduced compliance raises Pplat. That distinction is the foundation of bedside troubleshooting and the subject of the next lesson."
       ]
     },
@@ -93,8 +93,8 @@ const MODULES = [
       kicker: "1.7 · The Bedside Test",
       title: "PIP vs Pplat",
       body: [
-        "Peak Inspiratory Pressure (PIP) is the highest airway pressure during inspiration. Plateau Pressure (Pplat) is the airway pressure during a brief inspiratory hold (typically 0.5 seconds) when no air is flowing. Pplat reflects alveolar pressure — a measure of compliance.",
-        "The relationship is mechanical: PIP is approximately equal to Pplat plus (Resistance × Flow). When airway resistance rises, PIP rises but Pplat does not. When the lung becomes stiffer, both rise together.",
+        "Picture pushing water through a hose that has a narrow nozzle (the airways) and a balloon on the end (the alveoli). Peak Inspiratory Pressure (PIP) is the pressure while water is still flowing — it includes the squeeze through the nozzle. Hit the inspiratory hold (about 0.5 seconds, no flow) and you feel only the balloon's stretch: that is Plateau Pressure (Pplat), which reflects alveolar pressure — a measure of compliance.",
+        "The relationship is mechanical: PIP is approximately Pplat plus (Resistance × Flow). Clog the nozzle and resistance rises — PIP climbs but Pplat does not. Stiffen the balloon and both rise together.",
         "Bedside interpretation: High PIP + normal Pplat means an AIRWAY problem (resistance) — mucus plug, biting on the tube, bronchospasm, kinked tube. High PIP + high Pplat means a LUNG problem (compliance) — pneumothorax, mainstem migration, worsening ARDS, pulmonary edema.",
         "Driving pressure (Pplat minus PEEP) has emerged as a strong mortality predictor in ARDS (Amato 2015, NEJM). Aim for ΔP less than 14 cmH₂O. You'll use this rule in Module 4 and again in Module 9."
       ],
@@ -239,7 +239,7 @@ const MODULES = [
       kicker: "2.2 · The Oxyhemoglobin Curve",
       title: "Why SpO₂ Lies — Until It Doesn't",
       body: [
-        "Pulse oximetry is not linear. The relationship between SpO₂ and PaO₂ is sigmoidal.",
+        "Pulse oximetry is not linear — the SpO₂/PaO₂ relationship is an S-shaped curve, and that shape is a flat tabletop that ends at a cliff. Stroll along the top and big swings in PaO₂ barely move the saturation; step off the edge near 90% and you drop fast.",
         "SpO₂ 100% → PaO₂ ≥ 100 mmHg (the curve is flat on top — very different PaO₂ values produce the same saturation).",
         "SpO₂ 95% → PaO₂ ≈ 80 mmHg. SpO₂ 90% → PaO₂ ≈ 60 mmHg — the edge of the cliff and the threshold for Type I respiratory failure.",
         "SpO₂ 80% → PaO₂ ≈ 45 mmHg. SpO₂ 70% → PaO₂ ≈ 38 mmHg — minutes from arrest in most adults.",
@@ -262,7 +262,7 @@ const MODULES = [
       kicker: "2.4 · Type II",
       title: "Hypercapnic Failure at the Bedside",
       body: [
-        "Hypercapnic failure is more deceptive. A patient retaining CO₂ may look comfortable while the partial pressure climbs. Their respiratory rate may be normal or even slow. By the time CO₂ is high enough to affect mental status, the patient is in trouble.",
+        "Hypercapnic failure is more deceptive, because a tiring pump goes quiet, not loud. A patient retaining CO₂ may look comfortable while the partial pressure climbs — respiratory rate normal or even slowing. By the time CO₂ is high enough to affect mental status, the patient is already in trouble.",
         "Mental status correlates with the RATE of CO₂ rise rather than the absolute number. A chronic retainer at PaCO₂ 70 may be cognitively intact; an acute climb to the same value produces somnolence. As PaCO₂ rises into the 80s and 90s, the patient becomes increasingly difficult to arouse — CO₂ narcosis.",
         "Common scenarios: the COPD patient who tires after a week of escalating bronchospasm; the severe asthmatic whose minute ventilation drops to the point of quiet chest; the opioid-overdosed patient with bradypnea and miosis; the neuromuscular patient whose respiratory muscles can no longer keep pace."
       ],
@@ -442,8 +442,8 @@ const MODULES = [
       kicker: "3.2 · The Two Flavors",
       title: "CPAP vs BiPAP",
       body: [
-        "Continuous Positive Airway Pressure (CPAP) applies a single, constant pressure throughout the respiratory cycle. The patient does all the work of breathing; the machine maintains a baseline that splints alveoli open. In CHF, this baseline pushes alveolar fluid back into the capillary circulation, reduces preload (by raising intrathoracic pressure), and reduces LV afterload. The combined effect is often dramatic.",
-        "Bilevel Positive Airway Pressure (BiPAP) applies two pressures: IPAP (inspiratory) and EPAP (expiratory). The difference between the two is the pressure support delivered with each inspiration. EPAP behaves like PEEP, holding alveoli open and overcoming auto-PEEP. IPAP actively assists inspiration, unloading the tired diaphragm. In COPD exacerbation with hypercapnia, EPAP overcomes auto-PEEP and IPAP supports the diaphragm long enough for the patient to catch up.",
+        "Continuous Positive Airway Pressure (CPAP) is one steady pressure the whole cycle long — a doorstop wedged under the airway, holding it open the same amount whether the patient breathes in or out. The patient does all the breathing work; the machine just holds the baseline. In CHF, that baseline pushes alveolar fluid back into the capillaries, drops preload (by raising intrathoracic pressure), and reduces LV afterload. The combined effect is often dramatic.",
+        "Bilevel Positive Airway Pressure (BiPAP) adds a second, higher pressure on inspiration — like a spotter at the bench press who shoves the bar up each time you push and eases off as you lower it. The two pressures are IPAP (inspiratory) and EPAP (expiratory); their difference is the pressure support delivered with each breath. EPAP is the doorstop (it behaves like PEEP — holding alveoli open and overcoming auto-PEEP); IPAP is the spotter's shove, unloading the tired diaphragm. In COPD with hypercapnia, EPAP overcomes auto-PEEP while IPAP supports the diaphragm long enough for the patient to catch up.",
         "Typical starting settings: CPAP at 5 to 10 cmH₂O with FiO₂ 100% initially, weaned. BiPAP at IPAP 10 / EPAP 5, FiO₂ titrated. Both require a good mask seal. Sit the patient up. Coach them to breathe with the machine."
       ]
     },
@@ -493,7 +493,7 @@ const MODULES = [
       kicker: "3.6 · Pre-Oxygenation",
       title: "Buying Yourself Eight Minutes",
       body: [
-        "Pre-oxygenation before RSI replaces the nitrogen in the functional residual capacity (FRC) with oxygen. In a healthy adult with good seal and high FiO₂, safe apnea time (the time before SpO₂ falls below 90%) extends to approximately 8 minutes. With moderate disease, 3 to 5 minutes. With severe ARDS or obesity, sometimes less than 60 seconds.",
+        "Pre-oxygenation before RSI is topping off the tank before a free-dive: you flush the nitrogen out of the lung's reservoir — the functional residual capacity (FRC) — and fill it with oxygen, so the patient can hold that breath through the apnea of intubation far longer before desaturating. In a healthy adult with a good seal and high FiO₂, safe apnea time (before SpO₂ falls below 90%) stretches to approximately 8 minutes. With moderate disease, 3 to 5 minutes. With severe ARDS or obesity, sometimes less than 60 seconds.",
         "Standard technique: 3 minutes of tidal-volume breathing on a tight-sealed NRB at flush rate (15 L/min or higher). Alternative: 8 vital-capacity breaths. In a hypoxic patient who cannot achieve adequate pre-oxygenation by these methods, NIV (CPAP or BiPAP) for 3 to 5 minutes prior to the paralytic is the best option.",
         "Apneic oxygenation extends safe apnea further. A nasal cannula at 15 L/min applied during the laryngoscopy itself continues to deliver oxygen during the apneic interval. This technique — NoDESAT — adds several minutes of safe apnea time, particularly in obese and pediatric patients. Position the patient with the head elevated 20 to 30 degrees for both pre-oxygenation and laryngoscopy."
       ],
@@ -820,7 +820,7 @@ const MODULES = [
     {
       id: "v-vs-p", kicker: "5.1 · Targeting", title: "Volume vs Pressure Targeting",
       body: [
-        "Every vent breath has something guaranteed and something that varies.",
+        "Every vent breath guarantees one thing and lets the other float — like inflating a tire: pump to a set volume of air and the pressure lands where it lands, or pump to a set pressure and the volume lands where it lands. You never get to fix both at once.",
         "Volume-targeted (AC/VC): you set Vt — vent delivers it. PRESSURE varies with lung compliance. Most EMS default. Watch PIP / Pplat.",
         "Pressure-targeted (AC/PC): you set inspiratory pressure — vent delivers it. VOLUME varies. Pressure capped, so barotrauma risk lower. Watch delivered Vt.",
         "Trade-off: AC/VC gives predictable minute ventilation but variable pressure. AC/PC caps pressure but volume floats with stiffness."
@@ -867,7 +867,7 @@ const MODULES = [
     {
       id: "synchrony", kicker: "5.6 · Synchrony", title: "Trigger Sensitivity & Inspiratory Rise Time",
       body: [
-        "Patient-vent dyssynchrony affects ~25% of vented patients (Blanch, Intensive Care Med 2015). Increases work of breathing, sedation needs, and mortality.",
+        "Patient-vent dyssynchrony is the patient and the machine fighting over who leads the breath — pushing and pulling at different moments, like two people trying to row out of step. It affects ~25% of vented patients (Blanch, Intensive Care Med 2015) and raises work of breathing, sedation needs, and mortality.",
         "Trigger sensitivity controls how easily the patient initiates a breath. Pressure trigger (−1 to −2 cmH₂O) is the common default. Flow trigger (1–3 L/min) is more responsive. Too sensitive → auto-cycling from circuit motion. Not sensitive enough → patient struggles.",
         "Inspiratory rise time: how fast the pressure ramps up at the start of inspiration (pressure-targeted modes). Faster rise (0.1–0.2 sec) feels powerful but can jolt awake patients. Slower (0.4–0.6 sec) is gentler but can feel like flow starvation in dyspneic patients.",
         "EMS bedside fix for most dyssynchrony: deepen sedation, ensure analgesia, check trigger settings."
@@ -1643,7 +1643,7 @@ const MODULES = [
     {
       id: "auto-peep", kicker: "9.2 · Auto-PEEP", title: "When the Lung Doesn't Empty",
       body: [
-        "Auto-PEEP develops when the lung doesn't fully exhale before the next breath. Air trapped, intrathoracic pressure rises, venous return drops, BP falls.",
+        "Picture pouring into a glass that drains slowly: send the next splash before it empties and the level climbs until it overflows. Auto-PEEP is the same — in an obstructed lung that exhales slowly, the next breath starts before the last one finishes, so air stacks, the chest over-fills, intrathoracic pressure rises, venous return drops, and BP falls.",
         "Clinical signs: rising PIP without rising Pplat; falling BP; patient \"fights\" the vent; expiratory flow waveform doesn't return to zero before next breath.",
         "Management: slow RR (often dramatically — to 8 or even 6). Lengthen exp time (I:E 1:4 or 1:5).",
         "If hemodynamically compromised: BRIEFLY DISCONNECT FROM THE VENT for 5–10 seconds. Trapped gas releases. BP often improves immediately. Reconnect on slower settings. Vented status asthmaticus has ~30% incidence of post-intubation hypotension — anticipate it."
@@ -1654,7 +1654,7 @@ const MODULES = [
       id: "ards", kicker: "9.3 · ARDS", title: "Lung-Protective Ventilation",
       body: [
         "Acute Respiratory Distress Syndrome: diffuse alveolar damage, refractory hypoxia. Berlin definition (2012): bilateral infiltrates, not cardiac, within 1 week. Severity by P/F ratio: mild 200–300, moderate 100–200, severe < 100. A 2023/2024 Global Definition of ARDS now also allows diagnosis by SpO₂/FiO₂ and includes patients on HFNO ≥ 30 L/min or CPAP/NIV ≥ 5 cmH₂O — but the Berlin P/F severity bands remain in everyday bedside use.",
-        "Goal: protect remaining alveoli. Small breaths, modest pressure, generous PEEP.",
+        "Goal: protect the alveoli you have left. The mental model is the 'baby lung' — in ARDS so much lung is flooded or collapsed that only a small, child-sized portion is still open to ventilate. You are not filling an adult lung; you are filling what survives. So: small breaths, modest pressure, generous PEEP — a normal-sized Vt would over-stretch those few survivors and injure them.",
         "Settings: AC/VC or AC/PC; Vt 4–6 mL/kg IBW (LOWER than usual); RR 18–22 to maintain MV; PEEP 10–15 per ARDSNet table; Pplat < 30; driving pressure (Pplat − PEEP) < 14 cmH₂O.",
         "ARDSNet ARMA (NEJM 2000): mortality 31% vs 40% comparing 6 vs 12 mL/kg IBW. NNT 11. The most evidence-based ARDS intervention."
       ],
@@ -1663,10 +1663,11 @@ const MODULES = [
     {
       id: "ards-rescue", kicker: "9.4 · ARDS Rescue", title: "When Lung-Protective Isn't Enough",
       body: [
-        "PROSEVA (Guérin, NEJM 2013): 16-hour daily prone positioning in severe ARDS (P/F < 150). Mortality 33% → 16%. NNT 6. Strongest single rescue intervention.",
-        "NMBA in ARDS: ACURASYS (NEJM 2010) showed mortality benefit with 48-hr cisatracurium. ROSE (NEJM 2019) failed to replicate. Current practice reserves continuous NMBA for severe dyssynchrony despite deep sedation.",
-        "HFOV (OSCILLATE/OSCAR, NEJM 2013): no benefit; OSCILLATE stopped for harm. Not first-line.",
-        "ECMO: ICU-level. Transport teams may move ECMO patients but don't initiate. Notify receiving early when standard care is failing."
+        "When lung-protective settings (6 mL/kg, Pplat < 30, ΔP < 14) aren't enough, these are the rescue options — roughly in order of evidence:",
+        ["Prone positioning — PROSEVA (Guérin, NEJM 2013): 16 hr/day in severe ARDS (P/F < 150). Mortality 33% → 16%, NNT 6. The strongest single rescue.",
+         "Neuromuscular blockade — ACURASYS (NEJM 2010) showed a mortality benefit with 48-hr cisatracurium; ROSE (NEJM 2019) didn't replicate it. Now reserved for severe dyssynchrony despite deep sedation.",
+         "HFOV — OSCILLATE / OSCAR (NEJM 2013): no benefit; OSCILLATE was stopped for harm. Not first-line.",
+         "ECMO — ICU-level. Transport teams may move ECMO patients but don't initiate. Notify the receiving facility early when standard care is failing."]
       ]
     },
     {
