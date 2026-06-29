@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Kansas Class Builder · AMR KC Field Guide</title>
+<!--
+  Kansas Class Builder — AMR KC Field Guide (plain HTML/JS)
+  ---------------------------------------------------------
+  Self-contained tool. An instructor enters course details once; the values
+  fan out across every page and the tool produces one print-ready PDF packet:
+    1. Clinical Education Application Cover Sheet (your template, fields filled)
+    2. Course Information Sheet (generated: objectives / agenda / credentials)
+    3. Post Evaluation Form (your template, header filled)
+    4. Attendance Roster (your template, header filled; student rows left blank)
+
+  DROP-IN
+  -------
+  Put these next to this file in your repo:
+    kansas-class-builder.html   (this file)
+    pdf-lib.min.js              (vendored; loaded locally so it works offline)
+    ce-templates/cover-sheet.pdf
+    ce-templates/roster.pdf
+    ce-templates/post-eval.pdf
+  Then link to kansas-class-builder.html from your Tools section.
+  If your folder layout differs, change TEMPLATE_BASE and the pdf-lib <script> src.
+-->
+<style>
+:root{--amr-red:#E2231A;--amr-navy:#003595;--ink:#15181d;--line:#dfe2e8;--bg:#f6f7f9;--field:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.ce-wrap{max-width:760px;margin:0 auto;padding:16px 16px 40px}
+.ce-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.ce-bar{width:6px;align-self:stretch;border-radius:3px;background:linear-gradient(var(--amr-red),var(--amr-navy))}
+.ce-head h1{font-size:20px;margin:0;letter-spacing:-.01em}
+.ce-head p{margin:2px 0 0;font-size:12px;color:#5b6472}
+.ce-section{background:var(--bg);border:1px solid var(--line);border-radius:14px;margin-top:14px;overflow:hidden}
+.ce-sectionhead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:#fff}
+.ce-sectionhead h2{font-size:13px;margin:0;text-transform:uppercase;letter-spacing:.06em;color:#3a414c}
+.ce-sectionbody{padding:14px;display:flex;flex-direction:column;gap:12px}
+.ce-row{display:flex;gap:10px;flex-wrap:wrap}
+.ce-row>*{flex:1;min-width:120px}
+.ce-field{display:flex;flex-direction:column;gap:5px}
+.ce-field>span{font-size:12px;color:#475063;font-weight:600}
+.ce-field em{color:var(--amr-red);font-style:normal}
+.ce-field input,.ce-agendarow input,.ce-listrow input,.ce-catcell input{
+  width:100%;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px;font-size:15px;color:var(--ink);outline:none;font-family:inherit}
+.ce-field input:focus,.ce-agendarow input:focus,.ce-listrow input:focus,.ce-catcell input:focus{border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.12)}
+.ce-sub{margin:2px 0 -2px;font-size:12px;color:#5b6472;font-weight:600}
+.ce-cat{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.ce-catcell{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 10px}
+.ce-catcell span{font-size:13px;color:#3a414c}
+.ce-catcell input{width:64px;text-align:center;padding:8px}
+.ce-warn{margin:0;font-size:12.5px;color:#8a5a00;background:#fff7e6;border:1px solid #ffe2a8;padding:8px 10px;border-radius:9px}
+.ce-warn.hide{display:none}
+.ce-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ce-chip{font-size:12px;background:#eef1f6;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:#33404f}
+.ce-comp{display:flex;flex-direction:column;gap:14px}
+.ce-comp.hide{display:none}
+.ce-compgroup h4{margin:0 0 6px;font-size:12px;color:var(--amr-navy);text-transform:uppercase;letter-spacing:.04em}
+.ce-compgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px}
+.ce-compitem{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;cursor:pointer}
+.ce-compitem.on{border-color:var(--amr-navy);background:#eef3fb}
+.ce-compitem input{width:16px;height:16px;accent-color:var(--amr-navy)}
+.ce-listrow,.ce-agendarow{display:flex;align-items:center;gap:8px}
+.ce-marker{flex:0 0 22px;text-align:center;font-size:13px;font-weight:700;color:var(--amr-navy)}
+.ce-agendarow .ce-time{flex:0 0 110px}
+.ce-agendarow .ce-topic{flex:1}
+.ce-x{flex:0 0 32px;height:32px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:18px;line-height:1;color:#8a92a0;cursor:pointer}
+.ce-x:hover{color:var(--amr-red);border-color:var(--amr-red)}
+.ce-x-spacer{flex:0 0 32px}
+.ce-ghost{background:transparent;border:1px solid var(--line);color:var(--amr-navy);font-weight:600;font-size:13px;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit}
+.ce-ghost:hover{border-color:var(--amr-navy)}
+.ce-error{margin:14px 2px 0;color:#b00020;font-size:13.5px;font-weight:600}
+.ce-error:empty{display:none}
+.ce-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding:14px 0;background:linear-gradient(transparent,#fff 22%)}
+.ce-primary{flex:1;min-width:160px;text-align:center;text-decoration:none;background:var(--amr-red);color:#fff;font-weight:700;font-size:16px;border:none;border-radius:12px;padding:15px 16px;cursor:pointer;font-family:inherit}
+.ce-primary:disabled{opacity:.6;cursor:wait}
+.ce-secondary{background:var(--amr-navy);color:#fff;font-weight:700;font-size:15px;border:none;border-radius:12px;padding:15px 16px;cursor:pointer;font-family:inherit}
+.ce-done{margin:8px 2px 0;font-size:12.5px;color:#5b6472}
+.ce-done:empty{display:none}
+@media (max-width:560px){.ce-cat{grid-template-columns:1fr 1fr}.ce-head h1{font-size:18px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="ce-wrap" id="kcb-root"></div>
+
+<!-- Vendored locally so the field guide keeps working offline. -->
+<script src="pdf-lib.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  var PDFLib = window.PDFLib;
+
+  /* ---------------- configuration ---------------- */
+  var TEMPLATE_BASE = "ce-templates/";
+  var TPL = { cover: TEMPLATE_BASE + "cover-sheet.pdf", roster: TEMPLATE_BASE + "roster.pdf", eval: TEMPLATE_BASE + "post-eval.pdf" };
+  var PROGRAM = { provider: "PP2400", programManager: 'Jordan "Hunter" Jones' };
+  var AMR_LOGO_JPEG_B64 = "/9j/4AAQSkZJRgABAQEA3ADcAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCACVAbMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD32iiimIKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKQwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACuU8beM4fCdnGEjE97PnyoicAAdWPt/OuqJwM184eM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";
+
+  var COVER_TEXT = {
+    title: "Title of Course", date: "Date of Course", startEnd: "Start and End Time",
+    location: "Course Location and Address", instructor: "Lead Instructor", instructorEmail: "Lead Instructor Email",
+    courseHours: "These are the hours entered into KEMSIS for Kansas continuing education",
+    lectureHours: "Total Lecture Hours", labHours: "Total Lab Hours"
+  };
+  var CATEGORY_FIELD = { Airway: "AirwayRow1", Cardiovascular: "CardiovascularRow1", Trauma: "TraumaRow1", Medical: "MedicalRow1", Operations: "OperationsRow1", Pediatric: "PediatricRow1", LocalFlex: "LocalFlex CompRow1" };
+  var CATEGORY_ORDER = [["Airway","Airway"],["Cardiovascular","Cardiovascular"],["Trauma","Trauma"],["Medical","Medical"],["Operations","Operations"],["Pediatric","Pediatric"],["LocalFlex","Local / Flex Comp."]];
+
+  // visible competency label -> TRUE field name (mapped by position; verified by render).
+  var COMPETENCY_FIELD = {
+    "Ventilation":"Airway Respiration  VentilationRow1","Capnography":"Airway Respiration  VentilationRow2","Oxygenation":"Airway Respiration  VentilationRow3",
+    "Post Resuscitation":"CardiovascularVentilation","Ventricular Assist Devices":"CardiovascularCapnography","Stroke":"CardiovascularOxygenation","Cardiac Arrest":"CardiovascularRow4","Pediatric Cardiac Arrest":"CardiovascularRow5","Congestive Heart Failure":"CardiovascularRow6","Acute Coronary Syndrome":"CardiovascularRow7",
+    "Trauma Triage":"TraumaPost Resuscitation","CNS Injury":"TraumaVentricular Assist Devices","Hemorrhage":"TraumaStroke","Fluid Resuscitation":"TraumaCardiac Arrest",
+    "Special Healthcare Needs":"MedicalRow1_2","OB Emergencies":"MedicalRow2","Infectious Disease":"MedicalRow3","Medication Delivery":"MedicalRow4","Pain Management":"MedicalRow5","Psych/Behavioral":"MedicalRow6","Toxicological":"MedicalRow7","Neurological":"MedicalRow8","Endocrine":"MedicalRow9","Immunological":"MedicalRow10",
+    "At-Risk Populations":"OperationsSpecial Healthcare Needs","Ambulance Safety":"OperationsOB Emergencies","Field Triage":"OperationsInfectious Disease","Provider Hygiene":"OperationsMedication Delivery","Culture of Safety":"OperationsPain Management","Pediatric Transport":"OperationsPsychBehavioral","Crew Resource Mngmt.":"OperationsToxicological","EMS Research":"OperationsNeurological","Evidence Based Guidelines":"OperationsEndocrine"
+  };
+  var COMPETENCY_GROUPS = [
+    ["Airway, Respiration & Ventilation",["Ventilation","Capnography","Oxygenation"]],
+    ["Cardiovascular",["Post Resuscitation","Ventricular Assist Devices","Stroke","Cardiac Arrest","Pediatric Cardiac Arrest","Congestive Heart Failure","Acute Coronary Syndrome"]],
+    ["Trauma",["Trauma Triage","CNS Injury","Hemorrhage","Fluid Resuscitation"]],
+    ["Medical",["Special Healthcare Needs","OB Emergencies","Infectious Disease","Medication Delivery","Pain Management","Psych/Behavioral","Toxicological","Neurological","Endocrine","Immunological"]],
+    ["Operations",["At-Risk Populations","Ambulance Safety","Field Triage","Provider Hygiene","Culture of Safety","Pediatric Transport","Crew Resource Mngmt.","EMS Research","Evidence Based Guidelines"]]
+  ];
+  var ROSTER_FIELD = { title:"Class Title", location:"Location", date:"Date", startEnd:"Time", hours:"Hours", instructor:"Print Name", otherInstructors:"Print Names" };
+  var EVAL_OVERLAY = { title:{x:110,y:676}, date:{x:289,y:676}, instructor:{x:428,y:676} };
+
+  /* ---------------- helpers ---------------- */
+  function b64ToBytes(b64){ var bin=atob(b64), out=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i); return out; }
+  function slug(s){ return ((s||"course").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40))||"course"; }
+  function num(v){ return (v||"").replace(/[^0-9.]/g,""); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  async function fetchPdfBytes(url){ var res=await fetch(url); if(!res.ok) throw new Error("Could not load "+url+" ("+res.status+"). Check that the ce-templates folder is deployed."); return new Uint8Array(await res.arrayBuffer()); }
+  function setText(form,name,value,size){ if(value==null||value==="") return; try{ var f=form.getTextField(name); f.setText(String(value)); if(size) f.setFontSize(size);}catch(e){} }
+  function wrapLines(text,font,size,maxW){ var words=String(text).split(/\s+/),lines=[],cur=""; for(var i=0;i<words.length;i++){var t=cur?cur+" "+words[i]:words[i]; if(font.widthOfTextAtSize(t,size)<=maxW)cur=t; else{ if(cur)lines.push(cur); cur=words[i]; }} if(cur)lines.push(cur); return lines; }
+
+  /* ---------------- PDF builders (validated engine) ---------------- */
+  async function buildCover(D){
+    var PDFDocument=PDFLib.PDFDocument;
+    var doc=await PDFDocument.load(await fetchPdfBytes(TPL.cover));
+    var form=doc.getForm(), k;
+    for(k in COVER_TEXT) setText(form,COVER_TEXT[k],D[k],11);
+    for(k in CATEGORY_FIELD){ if(D.catHours[k]) setText(form,CATEGORY_FIELD[k],D.catHours[k],10); }
+    for(var i=0;i<D.competencies.length;i++){ var fld=COMPETENCY_FIELD[D.competencies[i]]; if(fld) setText(form,fld,"X",10); }
+    if(D.localComp) setText(form,"LocalIndividualAtRisk Populations_2",D.localComp,9);
+    form.flatten();
+    return doc;
+  }
+  async function buildRoster(D){
+    var PDFDocument=PDFLib.PDFDocument;
+    var doc=await PDFDocument.load(await fetchPdfBytes(TPL.roster));
+    var form=doc.getForm();
+    setText(form,ROSTER_FIELD.title,D.title,10);
+    setText(form,ROSTER_FIELD.location,D.location,9);
+    setText(form,ROSTER_FIELD.date,D.date,10);
+    setText(form,ROSTER_FIELD.startEnd,D.startEnd,10);
+    setText(form,ROSTER_FIELD.hours,D.courseHours,10);
+    setText(form,ROSTER_FIELD.instructor,D.instructor,11);
+    setText(form,ROSTER_FIELD.otherInstructors,D.otherInstructors,10);
+    form.flatten(); // student rows left blank for handwritten sign-in
+    return doc;
+  }
+  async function buildEval(D){
+    var PDFDocument=PDFLib.PDFDocument, StandardFonts=PDFLib.StandardFonts;
+    var doc=await PDFDocument.load(await fetchPdfBytes(TPL.eval));
+    var font=await doc.embedFont(StandardFonts.Helvetica), p=doc.getPage(0);
+    function draw(txt,pos){ if(txt) p.drawText(String(txt),{x:pos.x,y:pos.y,size:10,font:font}); }
+    draw(D.title,EVAL_OVERLAY.title); draw(D.date,EVAL_OVERLAY.date); draw(D.instructor,EVAL_OVERLAY.instructor);
+    return doc;
+  }
+  async function buildInfoPage(D){
+    var PDFDocument=PDFLib.PDFDocument, StandardFonts=PDFLib.StandardFonts, rgb=PDFLib.rgb;
+    var doc=await PDFDocument.create(), page=doc.addPage([612,792]);
+    var reg=await doc.embedFont(StandardFonts.Helvetica), bold=await doc.embedFont(StandardFonts.HelveticaBold), ital=await doc.embedFont(StandardFonts.HelveticaOblique);
+    var logo=await doc.embedJpg(b64ToBytes(AMR_LOGO_JPEG_B64));
+    var W=612,M=72,cW=W-2*M,black=rgb(0,0,0),band=rgb(.9,.89,.84),y=792-M;
+    var lw=100,lh=lw*149/435;
+    page.drawImage(logo,{x:M,y:y-lh+6,width:lw,height:lh});
+    page.drawText("Course Information Sheet",{x:W-M-bold.widthOfTextAtSize("Course Information Sheet",15),y:y-6,size:15,font:bold,color:black});
+    var sub="KBEMS Provider "+PROGRAM.provider;
+    page.drawText(sub,{x:W-M-reg.widthOfTextAtSize(sub,9),y:y-22,size:9,font:reg,color:black});
+    y-=lh+12; page.drawLine({start:{x:M,y:y},end:{x:W-M,y:y},thickness:1,color:black}); y-=22;
+    page.drawText(D.title||"Untitled course",{x:M,y:y,size:11,font:bold,color:black}); y-=15;
+    var meta=[[D.date,D.startEnd].filter(Boolean).join("   "),D.location].filter(Boolean).join("   |   ");
+    if(meta){ page.drawText(meta,{x:M,y:y,size:9,font:reg,color:black}); y-=12; }
+    var instr=[D.instructor, D.instructorEmail?("("+D.instructorEmail+")"):""].filter(Boolean).join("   ");
+    if(instr){ page.drawText(instr,{x:M,y:y,size:9,font:reg,color:black}); y-=6; }
+    if(D.otherInstructors){ y-=6; page.drawText("Additional instructors: "+D.otherInstructors,{x:M,y:y,size:9,font:reg,color:black}); y-=6; }
+    y-=14;
+    function banner(label){ page.drawRectangle({x:M,y:y-5,width:cW,height:18,color:band}); page.drawText(label,{x:M+6,y:y,size:11,font:bold,color:black}); y-=26; }
+    function para(text,opt){ opt=opt||{}; var indent=opt.indent||0,gap=opt.gap==null?4:opt.gap,prefix=opt.prefix||"";
+      var lines=wrapLines((prefix||"")+text,reg,10,cW-indent);
+      for(var i=0;i<lines.length;i++){ var x=M+(i===0?indent:indent+(prefix?reg.widthOfTextAtSize(prefix,10):0)); page.drawText(lines[i],{x:x,y:y,size:10,font:reg,color:black}); y-=13; } y-=gap; }
+    var objs=D.objectives.filter(function(o){return o.trim();});
+    if(objs.length){ banner("Course objectives"); objs.forEach(function(o,i){ para(o,{indent:18,prefix:(i+1)+".  "}); }); y-=6; }
+    var ag=D.agenda.filter(function(a){return a.time||a.topic;});
+    if(ag.length){ banner("Agenda"); ag.forEach(function(a){ page.drawText(a.time||"",{x:M,y:y,size:10,font:bold,color:black}); var lines=wrapLines(a.topic||"",reg,10,cW-84); lines.forEach(function(ln,i){ page.drawText(ln,{x:M+84,y:y,size:10,font:reg,color:black}); if(i<lines.length-1)y-=13; }); y-=15; }); y-=6; }
+    var creds=D.credentials.filter(function(c){return c.trim();});
+    if(creds.length){ banner("Instructor credentials"); creds.forEach(function(c){ para(c,{indent:14,prefix:"•  "}); }); }
+    page.drawText("Generated by the AMR KC Field Guide · Kansas Class Builder · Provider "+PROGRAM.provider+" · Program Manager "+PROGRAM.programManager,
+      {x:M,y:40,size:8,font:ital,color:rgb(.3,.3,.3)});
+    return doc;
+  }
+  async function generatePacket(D){
+    var built=await Promise.all([buildCover(D),buildInfoPage(D),buildEval(D),buildRoster(D)]);
+    var out=await PDFLib.PDFDocument.create();
+    for(var i=0;i<built.length;i++){ var src=built[i]; var pages=await out.copyPages(src,src.getPageIndices()); pages.forEach(function(p){out.addPage(p);}); }
+    out.setTitle("CE Packet - "+(D.title||"")); out.setSubject("Kansas CE submission · Provider "+PROGRAM.provider);
+    var bytes=await out.save();
+    return new Blob([bytes],{type:"application/pdf"});
+  }
+
+  /* ---------------- state ---------------- */
+  var D = {
+    title:"", date:"", startEnd:"", location:"", instructor:"", instructorEmail:"", otherInstructors:"",
+    courseHours:"", lectureHours:"", labHours:"",
+    catHours:{Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
+    competencies:[], localComp:"",
+    objectives:[""], agenda:[{time:"",topic:""}], credentials:[""]
+  };
+  var showComp=false, busy=false, result=null;
+  var root=document.getElementById("kcb-root");
+
+  /* ---------------- rendering ---------------- */
+  function field(label,key,opts){ opts=opts||{};
+    return '<label class="ce-field"><span>'+label+(opts.req?' <em>*</em>':'')+'</span>'+
+      '<input data-key="'+key+'" type="'+(opts.type||"text")+'"'+(opts.mode?' inputmode="'+opts.mode+'"':'')+
+      ' placeholder="'+esc(opts.ph||"")+'" value="'+esc(getPath(key))+'" /></label>';
+  }
+  function getPath(key){ return key.indexOf(".")>-1 ? key.split(".").reduce(function(o,k){return o?o[k]:"";},D) : (D[key]||""); }
+
+  function render(){
+    var html="";
+    html+='<header class="ce-head"><div class="ce-bar"></div><div><h1>Kansas Class Builder</h1>'+
+          '<p>Continuing education submission · Provider '+PROGRAM.provider+'</p></div></header>';
+
+    // Course details
+    html+=section("Course details",
+      field("Course title","title",{req:true,ph:"Prehospital Management of Acute Stroke"})+
+      '<div class="ce-row">'+field("Date","date",{req:true,type:"date"})+field("Start / end time","startEnd",{req:true,ph:"0900-1300"})+'</div>'+
+      field("Location & address","location",{req:true,ph:"AMR KC Training Center, 8338 Melrose Dr, Lenexa, KS"})+
+      '<div class="ce-row">'+field("Lead instructor","instructor",{req:true,ph:"Aaron Murray, NRP"})+field("Instructor email","instructorEmail",{type:"email",ph:"name@gmr.net"})+'</div>'+
+      field("Other instructor(s)","otherInstructors",{ph:"Optional"})
+    );
+
+    // Hours
+    var catCells="";
+    CATEGORY_ORDER.forEach(function(p){ catCells+='<label class="ce-catcell"><span>'+p[1]+'</span><input data-cat="'+p[0]+'" inputmode="decimal" value="'+esc(D.catHours[p[0]])+'" placeholder="0" /></label>'; });
+    html+=section("Hours",
+      '<div class="ce-row">'+field("Total course","courseHours",{req:true,mode:"decimal",ph:"4"})+field("Lecture","lectureHours",{mode:"decimal",ph:"3"})+field("Lab","labHours",{mode:"decimal",ph:"1"})+'</div>'+
+      '<p class="ce-sub">KEMSIS category hours (enter hours per category that apply)</p>'+
+      '<div class="ce-cat">'+catCells+'</div>'+
+      '<p class="ce-warn hide" id="ce-hours-warn"></p>'
+    );
+
+    // Competencies
+    var compRight='<button class="ce-ghost" data-action="toggle-comp">'+(showComp?"Hide":(D.competencies.length?D.competencies.length+" selected":"Select"))+'</button>';
+    var compBody="";
+    if(!showComp && D.competencies.length){ compBody+='<div class="ce-chips">'+D.competencies.map(function(c){return '<span class="ce-chip">'+esc(c)+'</span>';}).join("")+'</div>'; }
+    compBody+='<div class="ce-comp'+(showComp?'':' hide')+'">';
+    COMPETENCY_GROUPS.forEach(function(g){
+      compBody+='<div class="ce-compgroup"><h4>'+esc(g[0])+'</h4><div class="ce-compgrid">';
+      g[1].forEach(function(label){ var on=D.competencies.indexOf(label)>-1; compBody+='<label class="ce-compitem'+(on?' on':'')+'"><input type="checkbox" data-comp="'+esc(label)+'"'+(on?' checked':'')+' /><span>'+esc(label)+'</span></label>'; });
+      compBody+='</div></div>';
+    });
+    compBody+=field("Local / individual (write-in)","localComp",{ph:"Optional agency-specific competency"});
+    compBody+='</div>';
+    html+=section("National Registry competencies",compBody,compRight);
+
+    // Objectives
+    html+=section("Objectives",'<div id="ce-objectives"></div>','<button class="ce-ghost" data-action="add-objective">+ Add</button>');
+    // Agenda
+    html+=section("Agenda",'<div id="ce-agenda"></div>','<button class="ce-ghost" data-action="add-agenda">+ Add</button>');
+    // Credentials
+    html+=section("Instructor credentials",'<div id="ce-credentials"></div>','<button class="ce-ghost" data-action="add-credential">+ Add</button>');
+
+    html+='<p class="ce-error" id="ce-error"></p>';
+    html+='<div class="ce-actions" id="ce-actions"></div>';
+    html+='<p class="ce-done" id="ce-done"></p>';
+
+    root.innerHTML=html;
+    renderObjectives(); renderAgenda(); renderCredentials(); renderActions(); updateHoursWarn();
+  }
+  function section(title,body,right){ return '<section class="ce-section"><div class="ce-sectionhead"><h2>'+title+'</h2>'+(right||"")+'</div><div class="ce-sectionbody">'+body+'</div></section>'; }
+
+  function renderObjectives(){
+    document.getElementById("ce-objectives").innerHTML = D.objectives.map(function(o,i){
+      var rm = D.objectives.length>1 ? '<button class="ce-x" data-action="rm-objective" data-i="'+i+'" aria-label="Remove">×</button>' : '<span class="ce-x-spacer"></span>';
+      return '<div class="ce-listrow"><span class="ce-marker">'+(i+1)+'</span><input data-list="objectives" data-i="'+i+'" value="'+esc(o)+'" placeholder="Recognize signs of acute stroke using the Cincinnati scale" />'+rm+'</div>';
+    }).join("");
+  }
+  function renderAgenda(){
+    document.getElementById("ce-agenda").innerHTML = D.agenda.map(function(a,i){
+      var rm = D.agenda.length>1 ? '<button class="ce-x" data-action="rm-agenda" data-i="'+i+'" aria-label="Remove">×</button>' : '<span class="ce-x-spacer"></span>';
+      return '<div class="ce-agendarow"><input class="ce-time" data-list="agenda" data-sub="time" data-i="'+i+'" value="'+esc(a.time)+'" placeholder="0900-0930" /><input class="ce-topic" data-list="agenda" data-sub="topic" data-i="'+i+'" value="'+esc(a.topic)+'" placeholder="Topic" />'+rm+'</div>';
+    }).join("");
+  }
+  function renderCredentials(){
+    document.getElementById("ce-credentials").innerHTML = D.credentials.map(function(c,i){
+      var rm = D.credentials.length>1 ? '<button class="ce-x" data-action="rm-credential" data-i="'+i+'" aria-label="Remove">×</button>' : '<span class="ce-x-spacer"></span>';
+      return '<div class="ce-listrow"><span class="ce-marker">•</span><input data-list="credentials" data-i="'+i+'" value="'+esc(c)+'" placeholder="Aaron Murray, NRP — KBEMS Cert #12345, 8 yrs field, AMR KC FTO" />'+rm+'</div>';
+    }).join("");
+  }
+  function renderActions(){
+    var el=document.getElementById("ce-actions"), done=document.getElementById("ce-done");
+    if(!result){
+      el.innerHTML='<button class="ce-primary" data-action="generate"'+(busy?' disabled':'')+'>'+(busy?"Generating…":"Generate packet")+'</button>';
+      done.textContent="";
+    } else {
+      var share = (navigator.share)? '<button class="ce-secondary" data-action="share">Share / email</button>' : '';
+      el.innerHTML='<a class="ce-primary" href="'+result.url+'" download="'+result.filename+'">Download PDF</a>'+share+'<button class="ce-ghost" data-action="edit">Edit</button>';
+      done.textContent=result.filename+" · 5 pages · cover, info, eval, roster";
+    }
+  }
+  function updateHoursWarn(){
+    var warn=document.getElementById("ce-hours-warn"); if(!warn) return;
+    var sum=0; for(var k in D.catHours){ sum+=parseFloat(D.catHours[k])||0; }
+    var ch=parseFloat(D.courseHours);
+    if(D.courseHours && sum && Math.abs(sum-ch)>0.001){ warn.textContent="Category hours total "+sum+" but course hours are "+D.courseHours+". Double-check before submitting."; warn.classList.remove("hide"); }
+    else warn.classList.add("hide");
+  }
+
+  /* ---------------- events ---------------- */
+  root.addEventListener("input",function(e){
+    var t=e.target, ds=t.dataset;
+    if(ds.key!=null){ setPath(ds.key, ds.key==="courseHours"||ds.key==="lectureHours"||ds.key==="labHours"? num(t.value): t.value); if(ds.key==="courseHours") updateHoursWarn(); }
+    else if(ds.cat!=null){ D.catHours[ds.cat]=num(t.value); if(t.value!==D.catHours[ds.cat]) t.value=D.catHours[ds.cat]; updateHoursWarn(); }
+    else if(ds.list!=null){ var i=+ds.i; if(ds.sub) D[ds.list][i][ds.sub]=t.value; else D[ds.list][i]=t.value; }
+  });
+  root.addEventListener("change",function(e){
+    var t=e.target; if(t.dataset.comp!=null){ toggleComp(t.dataset.comp, t.checked, t); }
+  });
+  root.addEventListener("click",function(e){
+    var b=e.target.closest("[data-action]"); if(!b) return; var a=b.dataset.action;
+    if(a==="toggle-comp"){ showComp=!showComp; render(); }
+    else if(a==="add-objective"){ D.objectives.push(""); renderObjectives(); }
+    else if(a==="rm-objective"){ D.objectives.splice(+b.dataset.i,1); renderObjectives(); }
+    else if(a==="add-agenda"){ D.agenda.push({time:"",topic:""}); renderAgenda(); }
+    else if(a==="rm-agenda"){ D.agenda.splice(+b.dataset.i,1); renderAgenda(); }
+    else if(a==="add-credential"){ D.credentials.push(""); renderCredentials(); }
+    else if(a==="rm-credential"){ D.credentials.splice(+b.dataset.i,1); renderCredentials(); }
+    else if(a==="generate"){ onGenerate(); }
+    else if(a==="share"){ onShare(); }
+    else if(a==="edit"){ if(result){ URL.revokeObjectURL(result.url); result=null; } renderActions(); }
+  });
+
+  function setPath(key,val){ if(key.indexOf(".")>-1){ var ks=key.split("."),o=D; for(var i=0;i<ks.length-1;i++)o=o[ks[i]]; o[ks[ks.length-1]]=val; } else D[key]=val; }
+  function toggleComp(label,on,inputEl){
+    var idx=D.competencies.indexOf(label);
+    if(on && idx<0) D.competencies.push(label);
+    if(!on && idx>-1) D.competencies.splice(idx,1);
+    var item=inputEl.closest(".ce-compitem"); if(item) item.classList.toggle("on",on);
+    var btn=document.querySelector('[data-action="toggle-comp"]'); if(btn) btn.textContent= showComp?"Hide":(D.competencies.length?D.competencies.length+" selected":"Select");
+  }
+
+  function setError(msg){ var el=document.getElementById("ce-error"); if(el) el.textContent=msg||""; }
+  async function onGenerate(){
+    setError(""); 
+    var req=[["title","Course title"],["date","Date"],["startEnd","Start / end time"],["location","Location"],["instructor","Lead instructor"],["courseHours","Total course hours"]];
+    var missing=req.filter(function(r){return !String(D[r[0]]).trim();}).map(function(r){return r[1];});
+    if(missing.length){ setError("Add: "+missing.join(", ")+"."); return; }
+    busy=true; renderActions();
+    try{
+      var blob=await generatePacket(D);
+      var filename="CE_"+(D.date||"packet")+"_"+slug(D.title)+".pdf";
+      result={ blob:blob, url:URL.createObjectURL(blob), filename:filename };
+    }catch(err){ setError(err.message||"Could not generate the packet."); }
+    finally{ busy=false; renderActions(); }
+  }
+  async function onShare(){
+    if(!result) return;
+    var file=new File([result.blob],result.filename,{type:"application/pdf"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:D.title||"CE Packet"});}catch(e){} }
+    else { var a=document.createElement("a"); a.href=result.url; a.download=result.filename; a.click(); }
+  }
+
+  if(!PDFLib){ root.innerHTML='<p style="padding:20px;color:#b00020">pdf-lib.min.js did not load. Make sure it sits next to this file.</p>'; return; }
+  render();
+})();
+</script>
+</body>
+</html>
