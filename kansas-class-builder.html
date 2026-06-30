@@ -26,77 +26,85 @@
   If your folder layout differs, change TEMPLATE_BASE and the pdf-lib <script> src.
 -->
 <style>
-:root{--amr-red:#E2231A;--amr-navy:#003595;--ink:#15181d;--line:#dfe2e8;--bg:#f6f7f9;--field:#fff}
+:root{--amr-red:#E2231A;--amr-navy:#003595;--ink:#171b22;--muted:#5b6472;--line:#e4e8ef;--bg:#eaedf3;--card:#fff;--field:#f4f6fa;
+  --radius:16px;--shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06)}
 *{box-sizing:border-box}
-body{margin:0;background:#fff;color:var(--ink);
+body{margin:0;color:var(--ink);
+  background:linear-gradient(180deg,#eef1f6 0%,#e7ebf2 100%);background-attachment:fixed;min-height:100vh;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
-.ce-wrap{max-width:760px;margin:0 auto;padding:16px 16px 40px}
-.ce-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.ce-bar{width:6px;align-self:stretch;border-radius:3px;background:linear-gradient(var(--amr-red),var(--amr-navy))}
-.ce-head h1{font-size:20px;margin:0;letter-spacing:-.01em}
-.ce-head p{margin:2px 0 0;font-size:12px;color:#5b6472}
-.ce-section{background:var(--bg);border:1px solid var(--line);border-radius:14px;margin-top:14px;overflow:hidden}
-.ce-sectionhead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:#fff}
-.ce-sectionhead h2{font-size:13px;margin:0;text-transform:uppercase;letter-spacing:.06em;color:#3a414c}
-.ce-sectionbody{padding:14px;display:flex;flex-direction:column;gap:12px}
+.ce-wrap{max-width:740px;margin:0 auto;padding:18px 16px 48px}
+.ce-head{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:4px}
+.ce-bar{width:6px;align-self:stretch;min-height:42px;border-radius:3px;background:linear-gradient(var(--amr-red),var(--amr-navy))}
+.ce-head h1{font-size:22px;margin:0;letter-spacing:-.02em;font-weight:800}
+.ce-head p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.ce-section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-top:16px;overflow:hidden;box-shadow:var(--shadow)}
+.ce-sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfcfe,#f6f8fb)}
+.ce-sectionhead h2{font-size:12.5px;margin:0;text-transform:uppercase;letter-spacing:.07em;color:var(--amr-navy);font-weight:800}
+.ce-sectionbody{padding:16px;display:flex;flex-direction:column;gap:13px}
 .ce-row{display:flex;gap:10px;flex-wrap:wrap}
-.ce-row>*{flex:1;min-width:120px}
-.ce-field{display:flex;flex-direction:column;gap:5px}
-.ce-field>span{font-size:12px;color:#475063;font-weight:600}
+.ce-row>*{flex:1 1 140px;min-width:0}
+.ce-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ce-field>span{font-size:12px;color:#3f4754;font-weight:600}
 .ce-field em{color:var(--amr-red);font-style:normal}
 .ce-field input,.ce-agendarow input,.ce-listrow input,.ce-catcell input{
-  width:100%;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px;font-size:15px;color:var(--ink);outline:none;font-family:inherit}
-.ce-field input:focus,.ce-agendarow input:focus,.ce-listrow input:focus,.ce-catcell input:focus{border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.12)}
-.ce-sub{margin:2px 0 -2px;font-size:12px;color:#5b6472;font-weight:600}
+  width:100%;min-width:0;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:12px 13px;font-size:15px;color:var(--ink);outline:none;font-family:inherit;
+  transition:border-color .15s,box-shadow .15s,background .15s}
+.ce-field input:focus,.ce-agendarow input:focus,.ce-listrow input:focus,.ce-catcell input:focus{background:#fff;border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.13)}
+input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
+.ce-sub{margin:2px 0 -1px;font-size:12px;color:var(--muted);font-weight:600;line-height:1.45}
 .ce-cat{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.ce-catcell{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 10px}
-.ce-catcell span{font-size:13px;color:#3a414c}
-.ce-catcell input{width:64px;text-align:center;padding:8px}
-.ce-warn{margin:0;font-size:12.5px;color:#8a5a00;background:#fff7e6;border:1px solid #ffe2a8;padding:8px 10px;border-radius:9px}
+.ce-catcell{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:6px 8px 6px 12px}
+.ce-catcell span{font-size:13px;color:#39414d;font-weight:500}
+.ce-catcell input{width:60px;text-align:center;padding:8px;background:#fff}
+.ce-warn{margin:0;font-size:12.5px;color:#8a5a00;background:#fff8ea;border:1px solid #ffe2a8;padding:9px 11px;border-radius:11px;line-height:1.45}
 .ce-warn.hide{display:none}
 .ce-chips{display:flex;flex-wrap:wrap;gap:6px}
-.ce-chip{font-size:12px;background:#eef1f6;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:#33404f}
+.ce-chip{font-size:12px;background:#eef3fb;border:1px solid #d7e1f2;border-radius:999px;padding:5px 11px;color:var(--amr-navy);font-weight:600}
 .ce-comp{display:flex;flex-direction:column;gap:14px}
 .ce-comp.hide{display:none}
-.ce-compgroup h4{margin:0 0 6px;font-size:12px;color:var(--amr-navy);text-transform:uppercase;letter-spacing:.04em}
-.ce-compgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px}
-.ce-compitem{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;cursor:pointer}
-.ce-compitem.on{border-color:var(--amr-navy);background:#eef3fb}
-.ce-compitem input{width:16px;height:16px;accent-color:var(--amr-navy)}
+.ce-compgroup h4{margin:0 0 7px;font-size:11.5px;color:var(--amr-navy);text-transform:uppercase;letter-spacing:.05em;font-weight:800}
+.ce-compgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:7px}
+.ce-compitem{display:flex;align-items:center;gap:8px;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:9px 11px;font-size:13px;cursor:pointer;transition:border-color .12s,background .12s}
+.ce-compitem:hover{border-color:#c2cee2}
+.ce-compitem.on{border-color:var(--amr-navy);background:#eaf1fc;font-weight:600}
+.ce-compitem input{width:16px;height:16px;accent-color:var(--amr-navy);flex:0 0 auto}
 .ce-listrow,.ce-agendarow{display:flex;align-items:center;gap:8px}
 .ce-marker{flex:0 0 22px;text-align:center;font-size:13px;font-weight:700;color:var(--amr-navy)}
-.ce-agendarow .ce-time{flex:0 0 110px}
-.ce-agendarow .ce-topic{flex:1}
-.ce-x{flex:0 0 32px;height:32px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:18px;line-height:1;color:#8a92a0;cursor:pointer}
+.ce-agendarow .ce-time{flex:0 0 104px}
+.ce-agendarow .ce-topic{flex:1 1 auto}
+.ce-x{flex:0 0 36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:18px;line-height:1;color:#8a92a0;cursor:pointer;transition:color .12s,border-color .12s}
 .ce-x:hover{color:var(--amr-red);border-color:var(--amr-red)}
-.ce-x-spacer{flex:0 0 32px}
-.ce-ghost{background:transparent;border:1px solid var(--line);color:var(--amr-navy);font-weight:600;font-size:13px;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit}
-.ce-ghost:hover{border-color:var(--amr-navy)}
-.ce-error{margin:14px 2px 0;color:#b00020;font-size:13.5px;font-weight:600}
+.ce-x-spacer{flex:0 0 36px}
+.ce-ghost{background:#fff;border:1px solid var(--line);color:var(--amr-navy);font-weight:600;font-size:13px;border-radius:10px;padding:8px 13px;cursor:pointer;font-family:inherit;transition:border-color .12s,background .12s}
+.ce-ghost:hover{border-color:var(--amr-navy);background:#f4f8ff}
+.ce-error{margin:16px 2px 0;color:#b00020;font-size:13.5px;font-weight:600}
 .ce-error:empty{display:none}
-.ce-invalid{border-color:var(--amr-red)!important;box-shadow:0 0 0 3px rgba(226,35,26,.14)!important}
-.ce-reset{margin-left:auto;align-self:center;background:transparent;border:1px solid var(--line);color:#5b6472;font-weight:600;font-size:12px;border-radius:8px;padding:6px 10px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.ce-invalid{border-color:var(--amr-red)!important;box-shadow:0 0 0 3px rgba(226,35,26,.14)!important;background:#fff6f6!important}
+.ce-reset{margin-left:auto;align-self:center;background:#fff;border:1px solid var(--line);color:var(--muted);font-weight:600;font-size:12px;border-radius:10px;padding:7px 12px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .12s,border-color .12s}
 .ce-reset:hover{border-color:var(--amr-red);color:var(--amr-red)}
-.ce-paste{width:100%;min-height:84px;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;resize:vertical}
-.ce-paste:focus{border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.12)}
-.ce-warn .ce-ghost{background:#fff;margin-left:4px}
-.ce-saved{font-size:11px;color:#8a92a0;font-weight:600;align-self:center;white-space:nowrap}
+.ce-paste{width:100%;min-height:88px;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;resize:vertical}
+.ce-paste:focus{background:#fff;border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.13)}
+.ce-warn .ce-ghost{margin-left:4px}
+.ce-saved{font-size:11px;color:#9aa2b1;font-weight:700;align-self:center;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
 .ce-presets{display:flex;flex-wrap:wrap;gap:8px}
-.ce-preset{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
-.ce-presetload{background:transparent;border:none;color:var(--amr-navy);font-weight:600;font-size:13px;padding:8px 11px;cursor:pointer;font-family:inherit;text-align:left}
+.ce-preset{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff;transition:border-color .12s,box-shadow .12s}
+.ce-preset:hover{border-color:#c2cee2;box-shadow:0 2px 8px rgba(16,24,40,.06)}
+.ce-presetload{background:transparent;border:none;color:var(--amr-navy);font-weight:600;font-size:13px;padding:9px 12px;cursor:pointer;font-family:inherit;text-align:left}
 .ce-presetload:hover{background:#eef3fb}
-.ce-preset .ce-x{flex:0 0 30px;height:auto;border:none;border-left:1px solid var(--line);border-radius:0;font-size:16px}
-.ce-compsearch{width:100%;background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;margin-bottom:2px}
-.ce-compsearch:focus{border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.12)}
-.ce-previewhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#3a414c;font-weight:700;margin:16px 2px 6px}
-.ce-preview{width:100%;height:520px;border:1px solid var(--line);border-radius:12px;background:#fff}
-.ce-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding:14px 0;background:linear-gradient(transparent,#fff 22%)}
-.ce-primary{flex:1;min-width:160px;text-align:center;text-decoration:none;background:var(--amr-red);color:#fff;font-weight:700;font-size:16px;border:none;border-radius:12px;padding:15px 16px;cursor:pointer;font-family:inherit}
-.ce-primary:disabled{opacity:.6;cursor:wait}
-.ce-secondary{background:var(--amr-navy);color:#fff;font-weight:700;font-size:15px;border:none;border-radius:12px;padding:15px 16px;cursor:pointer;font-family:inherit}
-.ce-done{margin:8px 2px 0;font-size:12.5px;color:#5b6472}
+.ce-preset .ce-x{flex:0 0 32px;height:auto;border:none;border-left:1px solid var(--line);border-radius:0;font-size:16px;background:#fff}
+.ce-compsearch{width:100%;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:10px 13px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;margin-bottom:2px}
+.ce-compsearch:focus{background:#fff;border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.13)}
+.ce-previewhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--amr-navy);font-weight:800;margin:18px 2px 8px}
+.ce-preview{width:100%;height:540px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
+.ce-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;padding:16px 0 14px;background:linear-gradient(transparent,#e9ecf2 30%)}
+.ce-primary{flex:1;min-width:170px;text-align:center;text-decoration:none;background:linear-gradient(180deg,#ed3127,var(--amr-red));color:#fff;font-weight:800;font-size:16px;border:none;border-radius:13px;padding:16px;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(226,35,26,.30);transition:transform .08s,box-shadow .12s}
+.ce-primary:hover{box-shadow:0 8px 22px rgba(226,35,26,.36)}
+.ce-primary:active{transform:translateY(1px)}
+.ce-primary:disabled{opacity:.6;cursor:wait;box-shadow:none}
+.ce-secondary{background:var(--amr-navy);color:#fff;font-weight:800;font-size:15px;border:none;border-radius:13px;padding:16px;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,53,149,.24)}
+.ce-done{margin:10px 2px 0;font-size:12.5px;color:var(--muted)}
 .ce-done:empty{display:none}
-@media (max-width:560px){.ce-cat{grid-template-columns:1fr 1fr}.ce-head h1{font-size:18px}}
+@media (max-width:560px){.ce-cat{grid-template-columns:1fr 1fr}.ce-head h1{font-size:19px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -327,7 +335,8 @@ body{margin:0;background:#fff;color:var(--ink);
     // Course details
     html+=section("Course details",
       field("Course title","title",{req:true,ph:"Prehospital Management of Acute Stroke"})+
-      '<div class="ce-row">'+field("Date","date",{req:true,type:"date"})+field("Start time","startTime",{req:true,type:"time"})+field("End time","endTime",{req:true,type:"time"})+'</div>'+
+      field("Date","date",{req:true,type:"date"})+
+      '<div class="ce-row">'+field("Start time","startTime",{req:true,type:"time"})+field("End time","endTime",{req:true,type:"time"})+'</div>'+
       field("Location & address","location",{req:true,ph:"AMR KC Training Center, 8338 Melrose Dr, Lenexa, KS"})+
       '<div class="ce-row">'+field("Lead instructor","instructor",{req:true,ph:"Aaron Murray, NRP"})+field("Instructor email","instructorEmail",{type:"email",ph:"name@gmr.net"})+'</div>'+
       field("Other instructor(s)","otherInstructors",{ph:"Optional"})
