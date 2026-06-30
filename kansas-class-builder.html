@@ -81,6 +81,15 @@ body{margin:0;background:#fff;color:var(--ink);
 .ce-paste:focus{border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.12)}
 .ce-warn .ce-ghost{background:#fff;margin-left:4px}
 .ce-saved{font-size:11px;color:#8a92a0;font-weight:600;align-self:center;white-space:nowrap}
+.ce-presets{display:flex;flex-wrap:wrap;gap:8px}
+.ce-preset{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+.ce-presetload{background:transparent;border:none;color:var(--amr-navy);font-weight:600;font-size:13px;padding:8px 11px;cursor:pointer;font-family:inherit;text-align:left}
+.ce-presetload:hover{background:#eef3fb}
+.ce-preset .ce-x{flex:0 0 30px;height:auto;border:none;border-left:1px solid var(--line);border-radius:0;font-size:16px}
+.ce-compsearch{width:100%;background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;margin-bottom:2px}
+.ce-compsearch:focus{border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.12)}
+.ce-previewhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#3a414c;font-weight:700;margin:16px 2px 6px}
+.ce-preview{width:100%;height:520px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .ce-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding:14px 0;background:linear-gradient(transparent,#fff 22%)}
 .ce-primary{flex:1;min-width:160px;text-align:center;text-decoration:none;background:var(--amr-red);color:#fff;font-weight:700;font-size:16px;border:none;border-radius:12px;padding:15px 16px;cursor:pointer;font-family:inherit}
 .ce-primary:disabled{opacity:.6;cursor:wait}
@@ -140,6 +149,13 @@ body{margin:0;background:#fff;color:var(--ink);
   function slug(s){ return ((s||"course").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40))||"course"; }
   function num(v){ return (v||"").replace(/[^0-9.]/g,""); }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  // ISO yyyy-mm-dd -> mm/dd/yyyy for the printed forms (looks official on a state submission).
+  function fmtDate(v){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v||"")); return m? (m[2]+"/"+m[3]+"/"+m[1]) : (v||""); }
+  function milTime(t){ var m=/^(\d{1,2}):(\d{2})/.exec(String(t||"")); return m? (("0"+m[1]).slice(-2)+m[2]) : ""; }
+  function derivedStartEnd(d){ var a=milTime(d.startTime), b=milTime(d.endTime); return (a&&b)? (a+"-"+b) : (d.startEnd||""); }
+  function hoursBetween(d){ var a=milTime(d.startTime), b=milTime(d.endTime); if(!a||!b) return null; var am=parseInt(a.slice(0,2),10)*60+parseInt(a.slice(2),10), bm=parseInt(b.slice(0,2),10)*60+parseInt(b.slice(2),10); var diff=bm-am; if(diff<0) diff+=1440; var h=diff/60; return (h>=0.25&&h<=14)? Math.round(h*100)/100 : null; }
+  // Shallow clone with print-ready date + derived start/end, fed to the PDF builders.
+  function prep(d){ var P={},k; for(k in d) P[k]=d[k]; P.date=fmtDate(d.date); P.startEnd=derivedStartEnd(d); return P; }
   async function fetchPdfBytes(url){ var res=await fetch(url); if(!res.ok) throw new Error("Could not load "+url+" ("+res.status+"). Check that the ce-templates folder is deployed."); return new Uint8Array(await res.arrayBuffer()); }
   function setText(form,name,value,size){ if(value==null||value==="") return; try{ var f=form.getTextField(name); f.setText(String(value)); if(size) f.setFontSize(size);}catch(e){} }
   // Like setText, but shrinks the font (down to 5pt) so the value fits the field width. Caps at maxSize so short values aren't blown up.
@@ -218,7 +234,8 @@ body{margin:0;background:#fff;color:var(--ink);
     return doc;
   }
   async function generatePacket(D){
-    var parts=await Promise.all([buildCover(D),buildInfoPage(D),buildEval(D),buildRoster(D)]);
+    var P=prep(D);
+    var parts=await Promise.all([buildCover(P),buildInfoPage(P),buildEval(P),buildRoster(P)]);
     var cover=parts[0], info=parts[1], evalDoc=parts[2], roster=parts[3];
     var out=await PDFLib.PDFDocument.create();
     async function append(src){ var pages=await out.copyPages(src,src.getPageIndices()); pages.forEach(function(p){out.addPage(p);}); }
@@ -233,7 +250,7 @@ body{margin:0;background:#fff;color:var(--ink);
 
   /* ---------------- state ---------------- */
   var D = {
-    title:"", date:"", startEnd:"", location:"", instructor:"", instructorEmail:"", otherInstructors:"",
+    title:"", date:"", startTime:"", endTime:"", startEnd:"", location:"", instructor:"", instructorEmail:"", otherInstructors:"",
     courseHours:"", lectureHours:"", labHours:"",
     catHours:{Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
     competencies:[], localComp:"",
@@ -242,7 +259,45 @@ body{margin:0;background:#fff;color:var(--ink);
   };
   var showComp=false, showPaste=false, busy=false, result=null;
   var root=document.getElementById("kcb-root");
-  var STORAGE_KEY="kcb_draft_v1";
+  var STORAGE_KEY="kcb_draft_v1", PRESETS_KEY="kcb_presets_v1";
+
+  /* ---------------- course presets ---------------- */
+  // Fields a preset carries (the reusable "what the class is" content); date/time/students/instructor are per-offering and excluded.
+  var PRESET_KEYS=["title","courseHours","lectureHours","labHours","catHours","competencies","localComp","objectives","agenda","credentials"];
+  var PREBUILT=[
+    { name:"Impella & ECMO in Critical Care Transport", builtin:true, data:{
+      title:"Impella & ECMO in Critical Care Transport", courseHours:"2", lectureHours:"2", labHours:"",
+      catHours:{Airway:"",Cardiovascular:"2",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
+      competencies:["Ventricular Assist Devices","Post Resuscitation"], localComp:"",
+      objectives:["Describe the indications and physiology of Impella and VA-ECMO support","Identify alarms, cannula/console troubleshooting, and complications during transport","Manage a patient on mechanical circulatory support en route, including hemodynamic goals"],
+      agenda:[{time:"0900-0930",topic:"Mechanical circulatory support overview"},{time:"0930-1015",topic:"Impella: physiology, console, troubleshooting"},{time:"1015-1100",topic:"VA-ECMO: circuit, cannulation, transport considerations"}],
+      credentials:["Lead instructor — NRP, CCP-C, AMR KC critical care FTO"] } },
+    { name:"Prehospital Acute Stroke Management", builtin:true, data:{
+      title:"Prehospital Acute Stroke Management", courseHours:"2", lectureHours:"2", labHours:"",
+      catHours:{Airway:"",Cardiovascular:"2",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
+      competencies:["Stroke"], localComp:"",
+      objectives:["Recognize acute stroke using a validated prehospital scale","Differentiate stroke mimics and document last-known-well","Apply stroke-alert destination criteria and pre-notification"],
+      agenda:[{time:"0900-0945",topic:"Stroke pathophysiology and recognition"},{time:"0945-1030",topic:"Prehospital scales, LKW, and mimics"},{time:"1030-1100",topic:"Destination selection and stroke alerts"}],
+      credentials:["Lead instructor — NRP, AMR KC field training officer"] } },
+    { name:"Cardiac Arrest & Post-Resuscitation Care", builtin:true, data:{
+      title:"Cardiac Arrest & Post-Resuscitation Care", courseHours:"3", lectureHours:"2", labHours:"1",
+      catHours:{Airway:"",Cardiovascular:"3",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
+      competencies:["Cardiac Arrest","Post Resuscitation","Acute Coronary Syndrome"], localComp:"",
+      objectives:["Deliver high-performance CPR with minimal interruptions","Apply current ACLS algorithms for shockable and non-shockable rhythms","Initiate post-ROSC care including ventilation, hemodynamics, and 12-lead"],
+      agenda:[{time:"0900-1000",topic:"High-performance CPR and team dynamics"},{time:"1000-1100",topic:"ACLS algorithms and rhythm review"},{time:"1100-1200",topic:"Post-ROSC bundle (skills lab)"}],
+      credentials:["Lead instructor — NRP, ACLS instructor, AMR KC"] } }
+  ];
+  function getPresets(){ try{ var s=localStorage.getItem(PRESETS_KEY); var a=s?JSON.parse(s):[]; return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function savePresets(a){ try{ localStorage.setItem(PRESETS_KEY, JSON.stringify(a)); }catch(e){} }
+  function allPresets(){ return PREBUILT.concat(getPresets()); }
+  function applyPreset(p){ if(!p||!p.data) return; PRESET_KEYS.forEach(function(k){ var v=p.data[k]; if(v==null) return; D[k]=(typeof v==="object")? JSON.parse(JSON.stringify(v)) : v; });
+    if(!D.objectives.length) D.objectives=[""]; if(!D.agenda.length) D.agenda=[{time:"",topic:""}]; if(!D.credentials.length) D.credentials=[""];
+    showComp=false; showPaste=false; if(result){ URL.revokeObjectURL(result.url); result=null; } saveDraft(); render(); }
+  function saveCurrentPreset(){ var name=prompt("Save this course as a preset. Name:", D.title||""); if(name==null) return; name=name.trim(); if(!name) return;
+    var data={}; PRESET_KEYS.forEach(function(k){ var v=D[k]; data[k]=(typeof v==="object")? JSON.parse(JSON.stringify(v)) : v; });
+    var list=getPresets(); var idx=list.findIndex(function(x){return x.name===name;}); var entry={name:name,data:data};
+    if(idx>-1) list[idx]=entry; else list.push(entry); savePresets(list); render(); }
+  function deletePreset(name){ if(!confirm('Delete preset "'+name+'"?')) return; savePresets(getPresets().filter(function(x){return x.name!==name;})); render(); }
 
   /* ---------------- rendering ---------------- */
   function field(label,key,opts){ opts=opts||{};
@@ -259,10 +314,20 @@ body{margin:0;background:#fff;color:var(--ink);
           '<span class="ce-saved" id="ce-saved">Auto-saved</span>'+
           '<button class="ce-reset" data-action="reset" title="Clear this course and start a new one">Start new</button></header>';
 
+    // Course presets
+    var presetChips=allPresets().map(function(p){
+      var del=p.builtin?'':'<button class="ce-x" data-action="del-preset" data-name="'+esc(p.name)+'" aria-label="Delete preset" title="Delete">×</button>';
+      return '<span class="ce-preset"><button class="ce-presetload" data-action="load-preset" data-name="'+esc(p.name)+'">'+(p.builtin?'★ ':'')+esc(p.name)+'</button>'+del+'</span>';
+    }).join("");
+    html+=section("Start from a saved course",
+      '<p class="ce-sub">Load a course, fill in the date/time and roster, and generate. ★ are starter examples.</p>'+
+      '<div class="ce-presets">'+presetChips+'</div>',
+      '<button class="ce-ghost" data-action="save-preset">Save current</button>');
+
     // Course details
     html+=section("Course details",
       field("Course title","title",{req:true,ph:"Prehospital Management of Acute Stroke"})+
-      '<div class="ce-row">'+field("Date","date",{req:true,type:"date"})+field("Start / end time","startEnd",{req:true,ph:"0900-1300"})+'</div>'+
+      '<div class="ce-row">'+field("Date","date",{req:true,type:"date"})+field("Start time","startTime",{req:true,type:"time"})+field("End time","endTime",{req:true,type:"time"})+'</div>'+
       field("Location & address","location",{req:true,ph:"AMR KC Training Center, 8338 Melrose Dr, Lenexa, KS"})+
       '<div class="ce-row">'+field("Lead instructor","instructor",{req:true,ph:"Aaron Murray, NRP"})+field("Instructor email","instructorEmail",{type:"email",ph:"name@gmr.net"})+'</div>'+
       field("Other instructor(s)","otherInstructors",{ph:"Optional"})
@@ -283,9 +348,10 @@ body{margin:0;background:#fff;color:var(--ink);
     var compBody="";
     if(!showComp && D.competencies.length){ compBody+='<div class="ce-chips">'+D.competencies.map(function(c){return '<span class="ce-chip">'+esc(c)+'</span>';}).join("")+'</div>'; }
     compBody+='<div class="ce-comp'+(showComp?'':' hide')+'">';
+    compBody+='<input class="ce-compsearch" id="ce-compsearch" data-compsearch="1" type="text" placeholder="Search competencies…" />';
     COMPETENCY_GROUPS.forEach(function(g){
       compBody+='<div class="ce-compgroup"><h4>'+esc(g[0])+'</h4><div class="ce-compgrid">';
-      g[1].forEach(function(label){ var on=D.competencies.indexOf(label)>-1; compBody+='<label class="ce-compitem'+(on?' on':'')+'"><input type="checkbox" data-comp="'+esc(label)+'"'+(on?' checked':'')+' /><span>'+esc(label)+'</span></label>'; });
+      g[1].forEach(function(label){ var on=D.competencies.indexOf(label)>-1; compBody+='<label class="ce-compitem'+(on?' on':'')+'" data-complabel="'+esc(label.toLowerCase())+'"><input type="checkbox" data-comp="'+esc(label)+'"'+(on?' checked':'')+' /><span>'+esc(label)+'</span></label>'; });
       compBody+='</div></div>';
     });
     compBody+=field("Local / individual (write-in)","localComp",{ph:"Optional agency-specific competency"});
@@ -304,6 +370,7 @@ body{margin:0;background:#fff;color:var(--ink);
     var rosterBody='<p class="ce-sub">Optional &mdash; names print on the roster ('+stuCount+' of '+ROSTER_MAX_STUDENTS+'); blank rows stay open for walk-in sign-in.</p>';
     if(showPaste){ rosterBody+='<textarea class="ce-paste" id="ce-paste" placeholder="Paste one name per line, e.g.\nJones, Hunter\nMurray, Aaron"></textarea>'+
       '<div class="ce-row" style="margin:8px 0 2px;gap:8px"><div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-paste">Add these names</button></div><div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-paste">Cancel</button></div></div>'; }
+    if(stuCount>ROSTER_MAX_STUDENTS){ rosterBody+='<p class="ce-warn">Only the first '+ROSTER_MAX_STUDENTS+' names print on the roster (template capacity). The remaining '+(stuCount-ROSTER_MAX_STUDENTS)+' won’t appear &mdash; add a second roster by hand if needed.</p>'; }
     rosterBody+='<div id="ce-students"></div>';
     html+=section("Roster sign-in",rosterBody,rosterRight);
     // Post-evaluation copies
@@ -315,9 +382,15 @@ body{margin:0;background:#fff;color:var(--ink);
     html+='<p class="ce-error" id="ce-error"></p>';
     html+='<div class="ce-actions" id="ce-actions"></div>';
     html+='<p class="ce-done" id="ce-done"></p>';
+    html+='<div id="ce-preview-wrap"></div>';
 
     root.innerHTML=html;
-    renderObjectives(); renderAgenda(); renderCredentials(); renderStudents(); renderActions(); updateHoursWarn();
+    renderObjectives(); renderAgenda(); renderCredentials(); renderStudents(); renderActions(); renderPreview(); updateHoursWarn();
+  }
+  function renderPreview(){
+    var wrap=document.getElementById("ce-preview-wrap"); if(!wrap) return;
+    if(result){ wrap.innerHTML='<div class="ce-previewhead">Preview</div><iframe class="ce-preview" title="Packet preview" src="'+result.url+'#toolbar=1"></iframe><p class="ce-sub">If the preview is blank (some phones can’t show PDFs inline), use Download or Share above.</p>'; }
+    else wrap.innerHTML="";
   }
   function section(title,body,right){ return '<section class="ce-section"><div class="ce-sectionhead"><h2>'+title+'</h2>'+(right||"")+'</div><div class="ce-sectionbody">'+body+'</div></section>'; }
 
@@ -356,6 +429,7 @@ body{margin:0;background:#fff;color:var(--ink);
       el.innerHTML='<a class="ce-primary" href="'+result.url+'" download="'+result.filename+'">Download PDF</a>'+share+'<button class="ce-ghost" data-action="edit">Edit</button>';
       done.textContent=result.filename+" · "+result.pages+" pages";
     }
+    renderPreview();
   }
   function updateHoursWarn(){
     var warn=document.getElementById("ce-hours-warn"); if(!warn) return;
@@ -372,6 +446,7 @@ body{margin:0;background:#fff;color:var(--ink);
   /* ---------------- events ---------------- */
   root.addEventListener("input",function(e){
     var t=e.target, ds=t.dataset;
+    if(ds.compsearch!=null){ filterComp(t.value); return; }
     if(t.classList) t.classList.remove("ce-invalid");
     if(ds.key!=null){
       var v=t.value;
@@ -379,15 +454,29 @@ body{margin:0;background:#fff;color:var(--ink);
       else if(ds.key==="evalCount"){ v=v.replace(/[^0-9]/g,""); if(v!==t.value) t.value=v; }
       setPath(ds.key, v);
       if(ds.key==="courseHours") updateHoursWarn();
-      // Auto-fill total course hours from the start/end time when it's still blank.
-      if(ds.key==="startEnd" && !String(D.courseHours).trim()){
-        var h=hoursFromRange(v);
-        if(h!=null){ D.courseHours=String(h); var ch=root.querySelector('[data-key="courseHours"]'); if(ch){ ch.value=D.courseHours; ch.classList.remove("ce-invalid"); } updateHoursWarn(); }
+      // Start/end pickers: keep the derived range string and auto-fill course hours when still blank.
+      if(ds.key==="startTime"||ds.key==="endTime"){
+        D.startEnd=derivedStartEnd(D);
+        if(!String(D.courseHours).trim()){ var h=hoursBetween(D); if(h!=null){ D.courseHours=String(h); var ch=root.querySelector('[data-key="courseHours"]'); if(ch){ ch.value=D.courseHours; ch.classList.remove("ce-invalid"); } updateHoursWarn(); } }
       }
     }
     else if(ds.cat!=null){ D.catHours[ds.cat]=num(t.value); if(t.value!==D.catHours[ds.cat]) t.value=D.catHours[ds.cat]; updateHoursWarn(); }
     else if(ds.list!=null){ var i=+ds.i; if(ds.sub) D[ds.list][i][ds.sub]=t.value; else D[ds.list][i]=t.value; }
     saveDraft();
+  });
+  // Enter at the end of a list row drops into a fresh row (agenda chains the next start time).
+  root.addEventListener("keydown",function(e){
+    if(e.key!=="Enter" || e.shiftKey) return;
+    var t=e.target, ds=t.dataset; if(!ds||t.tagName!=="INPUT") return;
+    if(ds.list==="objectives"||ds.list==="credentials"||ds.list==="students"){
+      e.preventDefault(); var i=+ds.i; D[ds.list].splice(i+1,0,"");
+      ({objectives:renderObjectives,credentials:renderCredentials,students:renderStudents}[ds.list])(); saveDraft();
+      var el=root.querySelector('[data-list="'+ds.list+'"][data-i="'+(i+1)+'"]'); if(el) el.focus();
+    } else if(ds.list==="agenda"){
+      e.preventDefault(); var j=+ds.i, nt=chainTime(D.agenda[j].time);
+      D.agenda.splice(j+1,0,{time:nt,topic:""}); renderAgenda(); saveDraft();
+      var sub=nt?"topic":"time", el2=root.querySelector('[data-list="agenda"][data-sub="'+sub+'"][data-i="'+(j+1)+'"]'); if(el2) el2.focus();
+    }
   });
   root.addEventListener("change",function(e){
     var t=e.target; if(t.dataset.comp!=null){ toggleComp(t.dataset.comp, t.checked, t); saveDraft(); }
@@ -410,7 +499,7 @@ body{margin:0;background:#fff;color:var(--ink);
     if(a==="toggle-comp"){ showComp=!showComp; render(); }
     else if(a==="add-objective"){ D.objectives.push(""); renderObjectives(); saveDraft(); }
     else if(a==="rm-objective"){ D.objectives.splice(+b.dataset.i,1); renderObjectives(); saveDraft(); }
-    else if(a==="add-agenda"){ D.agenda.push({time:"",topic:""}); renderAgenda(); saveDraft(); }
+    else if(a==="add-agenda"){ var la=D.agenda[D.agenda.length-1]; D.agenda.push({time:la?chainTime(la.time):"",topic:""}); renderAgenda(); saveDraft(); var ae=root.querySelector('[data-list="agenda"][data-sub="topic"][data-i="'+(D.agenda.length-1)+'"]'); if(ae) ae.focus(); }
     else if(a==="rm-agenda"){ D.agenda.splice(+b.dataset.i,1); renderAgenda(); saveDraft(); }
     else if(a==="add-credential"){ D.credentials.push(""); renderCredentials(); saveDraft(); }
     else if(a==="rm-credential"){ D.credentials.splice(+b.dataset.i,1); renderCredentials(); saveDraft(); }
@@ -420,12 +509,22 @@ body{margin:0;background:#fff;color:var(--ink);
     else if(a==="apply-paste"){ applyPaste(); }
     else if(a==="use-cat-total"){ D.courseHours=b.dataset.sum; var ch=root.querySelector('[data-key="courseHours"]'); if(ch) ch.value=D.courseHours; updateHoursWarn(); saveDraft(); }
     else if(a==="reset"){ resetForm(); }
+    else if(a==="save-preset"){ saveCurrentPreset(); }
+    else if(a==="load-preset"){ var lp=allPresets().filter(function(x){return x.name===b.dataset.name;})[0]; if(lp) applyPreset(lp); }
+    else if(a==="del-preset"){ deletePreset(b.dataset.name); }
     else if(a==="generate"){ onGenerate(); }
     else if(a==="share"){ onShare(); }
     else if(a==="edit"){ if(result){ URL.revokeObjectURL(result.url); result=null; } renderActions(); }
   });
 
   function setPath(key,val){ if(key.indexOf(".")>-1){ var ks=key.split("."),o=D; for(var i=0;i<ks.length-1;i++)o=o[ks[i]]; o[ks[ks.length-1]]=val; } else D[key]=val; }
+  function chainTime(prevTime){ if(!prevTime) return ""; var end=String(prevTime).split(/\s*-\s*/)[1]||""; return end?(end+"-"):""; }
+  function filterComp(q){ q=(q||"").trim().toLowerCase();
+    Array.prototype.forEach.call(root.querySelectorAll(".ce-compgroup"),function(g){
+      var shown=0; Array.prototype.forEach.call(g.querySelectorAll(".ce-compitem"),function(it){ var vis=(!q||(it.getAttribute("data-complabel")||"").indexOf(q)>-1); it.style.display=vis?"":"none"; if(vis)shown++; });
+      g.style.display=shown?"":"none";
+    });
+  }
   function toggleComp(label,on,inputEl){
     var idx=D.competencies.indexOf(label);
     if(on && idx<0) D.competencies.push(label);
@@ -450,7 +549,7 @@ body{margin:0;background:#fff;color:var(--ink);
   function resetForm(){
     if(!confirm("Start a new course? This clears the current entries but keeps your name, email, and location.")) return;
     var keep={ instructor:D.instructor, instructorEmail:D.instructorEmail, location:D.location, otherInstructors:D.otherInstructors };
-    D.title="";D.date="";D.startEnd="";D.courseHours="";D.lectureHours="";D.labHours="";
+    D.title="";D.date="";D.startTime="";D.endTime="";D.startEnd="";D.courseHours="";D.lectureHours="";D.labHours="";
     D.catHours={Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""};
     D.competencies=[];D.localComp="";D.objectives=[""];D.agenda=[{time:"",topic:""}];D.credentials=[""];
     D.students=[""];D.evalCount="1";
@@ -496,7 +595,7 @@ body{margin:0;background:#fff;color:var(--ink);
   async function onGenerate(){
     setError("");
     Array.prototype.forEach.call(root.querySelectorAll(".ce-invalid"),function(el){ el.classList.remove("ce-invalid"); });
-    var req=[["title","Course title"],["date","Date"],["startEnd","Start / end time"],["location","Location"],["instructor","Lead instructor"],["courseHours","Total course hours"]];
+    var req=[["title","Course title"],["date","Date"],["startTime","Start time"],["endTime","End time"],["location","Location"],["instructor","Lead instructor"],["courseHours","Total course hours"]];
     var missing=req.filter(function(r){return !String(D[r[0]]).trim();});
     if(missing.length){
       var first=null;
