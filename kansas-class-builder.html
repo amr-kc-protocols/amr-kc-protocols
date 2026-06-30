@@ -229,8 +229,9 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
       setTextFit(form,ROSTER_STU_FIELD.dept+n,s.dept,8.5,helv);
       setTextFit(form,ROSTER_STU_FIELD.amr+n,s.amr,9,helv);
       setTextFit(form,ROSTER_STU_FIELD.ksbems+n,s.ksbems,8.5,helv);
-      // overlay columns (no form field): phone is per-student; time in/out + hours are class-wide.
-      var anchor; try{ anchor=form.getField(ROSTER_STU_FIELD.email+n); }catch(e){ anchor=null; }
+      // overlay columns (no form field): anchor to the name field so they sit on the printed-name
+      // data line (top sub-row), aligned with email/KSBEMS — not the full-row centre.
+      var anchor; try{ anchor=form.getField(ROSTER_STU_FIELD.name+n); }catch(e){ anchor=null; }
       if(anchor){
         drawCol(anchor,ROSTER_OVERLAY.phone,s.phone);
         drawCol(anchor,ROSTER_OVERLAY.timeIn,D.timeIn);
