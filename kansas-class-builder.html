@@ -320,6 +320,18 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
       });
       y-=6;
     }
+    if(sm.tallies && sm.tallies.length){
+      banner("Other ratings");
+      sm.tallies.forEach(function(t){
+        ensure(80);
+        var lines=wrapLines(t.label,reg,9.5,cW-170); page.drawText(lines[0]||"",{x:M,y:y,size:9.5,font:reg,color:black});
+        var parts=Object.keys(t.counts).map(function(k){return k+" "+t.counts[k];}).join("   ");
+        page.drawText(parts,{x:W-M-bold.widthOfTextAtSize(parts,9),y:y,size:9,font:bold,color:navy}); y-=14;
+        for(var i=1;i<lines.length;i++){ page.drawText(lines[i],{x:M,y:y,size:9.5,font:reg,color:black}); y-=12; }
+        y-=3;
+      });
+      y-=6;
+    }
     (sm.comments||[]).forEach(function(c){
       if(!c.answers.length) return;
       banner(c.label);
@@ -703,17 +715,22 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
       .map(function(line){ return line.indexOf("\t")>-1 ? line.split("\t") : [line]; }); }
   var ROSTER_HEADER_MATCH=[
     ["email",/e-?mail/i],["phone",/phone|cell|mobile/i],
-    ["dept",/op.?\/?\s*dept|department|agency|service|station|unit/i],
+    ["dept",/op.?\/?\s*dept|operation|department|agency|service|station|\bunit\b/i],
     ["amr",/\bamr\b|employee/i],
     ["ksbems",/ksbems|kbems|attend[ae]nt|cert(ificate)?\s*#?|registry|nremt|licen[sc]e/i],
     ["name",/(student|print).*name|^name$|full ?name|last.*first|attendee/i]
   ];
-  function looksLikeHeader(cells){ return cells.some(function(c){ return /[a-z]/i.test(c) && /name|e-?mail|phone|dept|agency|amr|ksbems|kbems|attend|cert|registry/i.test(c); }); }
+  // When Forms has both an account column and the typed question, prefer the question column.
+  var ROSTER_PREFER={ name:/(student|print).*name|attendee/i, email:/e-?mail\s*address/i };
+  function looksLikeHeader(cells){ return cells.some(function(c){ return /[a-z]/i.test(c) && /name|e-?mail|phone|dept|operation|agency|amr|ksbems|kbems|attend|cert|registry/i.test(c); }); }
   // Build student objects from pasted text (Excel TSV with headers, or one name per line).
   function parseRoster(text){
     var rows=splitTable(text); if(!rows.length) return [];
     var header=rows[0], hasHeader=looksLikeHeader(header), map={};
-    if(hasHeader){ header.forEach(function(h,idx){ for(var k=0;k<ROSTER_HEADER_MATCH.length;k++){ if(map[ROSTER_HEADER_MATCH[k][0]]==null && ROSTER_HEADER_MATCH[k][1].test(h)){ map[ROSTER_HEADER_MATCH[k][0]]=idx; break; } } }); }
+    if(hasHeader){
+      header.forEach(function(h,idx){ for(var k=0;k<ROSTER_HEADER_MATCH.length;k++){ if(map[ROSTER_HEADER_MATCH[k][0]]==null && ROSTER_HEADER_MATCH[k][1].test(h)){ map[ROSTER_HEADER_MATCH[k][0]]=idx; break; } } });
+      header.forEach(function(h,idx){ for(var f in ROSTER_PREFER){ if(ROSTER_PREFER[f].test(h)) map[f]=idx; } }); // prefer explicit question columns
+    }
     if(map.name==null) map.name=0; // fallback: first column is the name
     var data=hasHeader?rows.slice(1):rows;
     return data.map(function(cells){ var s=emptyStudent();
@@ -729,21 +746,34 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   }
   function applyPaste(){ var ta=document.getElementById("ce-paste"); if(ta) ingestRoster(ta.value); }
 
-  // Parse Microsoft Forms results (Excel TSV) into a ratings/comments summary.
-  var EVAL_META=/^(id|start time|completion time|email|name|total points|points ?-|quiz ?feedback|feedback|last modified|submission)/i;
+  // Parse Microsoft Forms results (Excel TSV) into a ratings/tallies/comments summary.
+  var EVAL_META=/^(id|column\s*\d*|start ?time|completion ?time|e-?mail|name|class.*title|^title$|instructor|date|total ?points|points ?-|quiz ?feedback|feedback|last modified|submission ?(id|time)?)$/i;
+  var EVAL_SCALE={ "poor":1,"very poor":1,"fair":2,"below average":2,"average":3,"satisfactory":3,"neutral":3,"good":4,"very good":4,"above average":4,"excellent":5,"outstanding":5 };
+  var EVAL_YESNO=/^(yes|no|partially|partial|somewhat|maybe|n\/?a|not applicable)$/i;
+  // Long Forms headers are "Group.Subitem" — show just the specific sub-item.
+  function evalLabel(h){ var i=h.lastIndexOf("."); return (i>0 && i<h.length-1)? h.slice(i+1).trim() : h.trim(); }
   function parseEval(text){
     var rows=splitTable(text); if(rows.length<2) return null;
     var header=rows[0], data=rows.slice(1).filter(function(r){return r.join("").trim();}); if(!data.length) return null;
-    var questions=[], comments=[];
+    var questions=[], tallies=[], comments=[];
     for(var c=0;c<header.length;c++){
-      var label=(header[c]||"").trim(); if(!label || EVAL_META.test(label)) continue;
-      var nums=[], texts=[];
-      for(var r=0;r<data.length;r++){ var v=(data[r][c]||"").trim(); if(!v) continue; var m=v.match(/^([1-5])(?:\s|$|\.|-|:)/)||v.match(/^([1-5])$/); if(m) nums.push(parseInt(m[1],10)); else texts.push(v); }
-      if(nums.length && nums.length>=data.length*0.4 && nums.length>=texts.length){ questions.push({label:label, avg:nums.reduce(function(a,b){return a+b;},0)/nums.length, n:nums.length}); }
+      var raw=(header[c]||"").trim(); if(!raw || EVAL_META.test(raw)) continue;
+      var label=evalLabel(raw), scores=[], yn={}, ynN=0, texts=[];
+      for(var r=0;r<data.length;r++){ var v=(data[r][c]||"").trim(); if(!v) continue;
+        var lo=v.toLowerCase();
+        var m=v.match(/^([1-5])(?:\s|$|\.|-|:)/)||v.match(/^([1-5])$/);
+        if(m){ scores.push(parseInt(m[1],10)); }
+        else if(EVAL_SCALE[lo]!=null){ scores.push(EVAL_SCALE[lo]); }
+        else if(EVAL_YESNO.test(lo)){ ynN++; yn[v]=(yn[v]||0)+1; }
+        else { texts.push(v); }
+      }
+      var nonEmpty=scores.length+ynN+texts.length; if(!nonEmpty) continue;
+      if(scores.length>=nonEmpty*0.6){ questions.push({label:label, avg:scores.reduce(function(a,b){return a+b;},0)/scores.length, n:scores.length}); }
+      else if(ynN>=nonEmpty*0.6){ tallies.push({label:label, counts:yn, n:ynN}); }
       else if(texts.length){ comments.push({label:label, answers:texts}); }
     }
-    if(!questions.length && !comments.length) return null;
-    return { count:data.length, questions:questions, comments:comments };
+    if(!questions.length && !tallies.length && !comments.length) return null;
+    return { count:data.length, questions:questions, tallies:tallies, comments:comments };
   }
   function ingestEval(text){ var sm=parseEval(text); if(!sm){ setError("Couldn’t read evaluation results — paste the Excel cells including the header row."); return; }
     D.evalSummary=sm; showEvalPaste=false; setError(""); saveDraft(); render(); }
