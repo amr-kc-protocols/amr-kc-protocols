@@ -74,6 +74,13 @@ body{margin:0;background:#fff;color:var(--ink);
 .ce-ghost:hover{border-color:var(--amr-navy)}
 .ce-error{margin:14px 2px 0;color:#b00020;font-size:13.5px;font-weight:600}
 .ce-error:empty{display:none}
+.ce-invalid{border-color:var(--amr-red)!important;box-shadow:0 0 0 3px rgba(226,35,26,.14)!important}
+.ce-reset{margin-left:auto;align-self:center;background:transparent;border:1px solid var(--line);color:#5b6472;font-weight:600;font-size:12px;border-radius:8px;padding:6px 10px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.ce-reset:hover{border-color:var(--amr-red);color:var(--amr-red)}
+.ce-paste{width:100%;min-height:84px;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;resize:vertical}
+.ce-paste:focus{border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.12)}
+.ce-warn .ce-ghost{background:#fff;margin-left:4px}
+.ce-saved{font-size:11px;color:#8a92a0;font-weight:600;align-self:center;white-space:nowrap}
 .ce-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding:14px 0;background:linear-gradient(transparent,#fff 22%)}
 .ce-primary{flex:1;min-width:160px;text-align:center;text-decoration:none;background:var(--amr-red);color:#fff;font-weight:700;font-size:16px;border:none;border-radius:12px;padding:15px 16px;cursor:pointer;font-family:inherit}
 .ce-primary:disabled{opacity:.6;cursor:wait}
@@ -233,8 +240,9 @@ body{margin:0;background:#fff;color:var(--ink);
     objectives:[""], agenda:[{time:"",topic:""}], credentials:[""],
     students:[""], evalCount:"1"
   };
-  var showComp=false, busy=false, result=null;
+  var showComp=false, showPaste=false, busy=false, result=null;
   var root=document.getElementById("kcb-root");
+  var STORAGE_KEY="kcb_draft_v1";
 
   /* ---------------- rendering ---------------- */
   function field(label,key,opts){ opts=opts||{};
@@ -247,7 +255,9 @@ body{margin:0;background:#fff;color:var(--ink);
   function render(){
     var html="";
     html+='<header class="ce-head"><div class="ce-bar"></div><div><h1>Kansas Class Builder</h1>'+
-          '<p>Continuing education submission · Provider '+PROGRAM.provider+'</p></div></header>';
+          '<p>Continuing education submission · Provider '+PROGRAM.provider+'</p></div>'+
+          '<span class="ce-saved" id="ce-saved">Auto-saved</span>'+
+          '<button class="ce-reset" data-action="reset" title="Clear this course and start a new one">Start new</button></header>';
 
     // Course details
     html+=section("Course details",
@@ -289,7 +299,13 @@ body{margin:0;background:#fff;color:var(--ink);
     // Credentials
     html+=section("Instructor credentials",'<div id="ce-credentials"></div>','<button class="ce-ghost" data-action="add-credential">+ Add</button>');
     // Roster sign-in (student names)
-    html+=section("Roster sign-in",'<p class="ce-sub">Optional &mdash; names print on the roster (up to '+ROSTER_MAX_STUDENTS+'); blank rows stay open for walk-in sign-in.</p><div id="ce-students"></div>','<button class="ce-ghost" data-action="add-student">+ Add</button>');
+    var stuCount=D.students.filter(function(s){return (s||"").trim();}).length;
+    var rosterRight='<button class="ce-ghost" data-action="toggle-paste">'+(showPaste?"Close":"Paste list")+'</button><button class="ce-ghost" data-action="add-student">+ Add</button>';
+    var rosterBody='<p class="ce-sub">Optional &mdash; names print on the roster ('+stuCount+' of '+ROSTER_MAX_STUDENTS+'); blank rows stay open for walk-in sign-in.</p>';
+    if(showPaste){ rosterBody+='<textarea class="ce-paste" id="ce-paste" placeholder="Paste one name per line, e.g.\nJones, Hunter\nMurray, Aaron"></textarea>'+
+      '<div class="ce-row" style="margin:8px 0 2px;gap:8px"><div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-paste">Add these names</button></div><div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-paste">Cancel</button></div></div>'; }
+    rosterBody+='<div id="ce-students"></div>';
+    html+=section("Roster sign-in",rosterBody,rosterRight);
     // Post-evaluation copies
     html+=section("Post-evaluation forms",
       '<p class="ce-sub">How many blank evaluation forms to include in the packet (one per student).</p>'+
@@ -344,38 +360,66 @@ body{margin:0;background:#fff;color:var(--ink);
   function updateHoursWarn(){
     var warn=document.getElementById("ce-hours-warn"); if(!warn) return;
     var sum=0; for(var k in D.catHours){ sum+=parseFloat(D.catHours[k])||0; }
+    sum=Math.round(sum*100)/100;
     var ch=parseFloat(D.courseHours);
-    if(D.courseHours && sum && Math.abs(sum-ch)>0.001){ warn.textContent="Category hours total "+sum+" but course hours are "+D.courseHours+". Double-check before submitting."; warn.classList.remove("hide"); }
-    else warn.classList.add("hide");
+    if(D.courseHours && sum && Math.abs(sum-ch)>0.001){
+      warn.innerHTML="Category hours total "+sum+" but course hours are "+esc(D.courseHours)+". "+
+        '<button class="ce-ghost" data-action="use-cat-total" data-sum="'+sum+'">Set course hours to '+sum+'</button>';
+      warn.classList.remove("hide");
+    } else warn.classList.add("hide");
   }
 
   /* ---------------- events ---------------- */
   root.addEventListener("input",function(e){
     var t=e.target, ds=t.dataset;
+    if(t.classList) t.classList.remove("ce-invalid");
     if(ds.key!=null){
       var v=t.value;
       if(ds.key==="courseHours"||ds.key==="lectureHours"||ds.key==="labHours") v=num(v);
       else if(ds.key==="evalCount"){ v=v.replace(/[^0-9]/g,""); if(v!==t.value) t.value=v; }
       setPath(ds.key, v);
       if(ds.key==="courseHours") updateHoursWarn();
+      // Auto-fill total course hours from the start/end time when it's still blank.
+      if(ds.key==="startEnd" && !String(D.courseHours).trim()){
+        var h=hoursFromRange(v);
+        if(h!=null){ D.courseHours=String(h); var ch=root.querySelector('[data-key="courseHours"]'); if(ch){ ch.value=D.courseHours; ch.classList.remove("ce-invalid"); } updateHoursWarn(); }
+      }
     }
     else if(ds.cat!=null){ D.catHours[ds.cat]=num(t.value); if(t.value!==D.catHours[ds.cat]) t.value=D.catHours[ds.cat]; updateHoursWarn(); }
     else if(ds.list!=null){ var i=+ds.i; if(ds.sub) D[ds.list][i][ds.sub]=t.value; else D[ds.list][i]=t.value; }
+    saveDraft();
   });
   root.addEventListener("change",function(e){
-    var t=e.target; if(t.dataset.comp!=null){ toggleComp(t.dataset.comp, t.checked, t); }
+    var t=e.target; if(t.dataset.comp!=null){ toggleComp(t.dataset.comp, t.checked, t); saveDraft(); }
+  });
+  // Pasting multiple lines into a student row splits them into separate rows.
+  root.addEventListener("paste",function(e){
+    var t=e.target; if(!t.dataset || t.dataset.list!=="students") return;
+    var text=((e.clipboardData||window.clipboardData)||{getData:function(){return "";}}).getData("text");
+    if(!text || !/[\r\n]/.test(text)) return;
+    e.preventDefault();
+    var lines=text.split(/[\r\n]+/).map(function(s){return s.trim();}).filter(Boolean);
+    var i=+t.dataset.i;
+    Array.prototype.splice.apply(D.students,[i,1].concat(lines));
+    D.students=D.students.slice(0,ROSTER_MAX_STUDENTS); if(!D.students.length) D.students=[""];
+    var cnt=D.students.filter(function(s){return (s||"").trim();}).length; if(cnt) D.evalCount=String(Math.min(50,cnt));
+    saveDraft(); render();
   });
   root.addEventListener("click",function(e){
     var b=e.target.closest("[data-action]"); if(!b) return; var a=b.dataset.action;
     if(a==="toggle-comp"){ showComp=!showComp; render(); }
-    else if(a==="add-objective"){ D.objectives.push(""); renderObjectives(); }
-    else if(a==="rm-objective"){ D.objectives.splice(+b.dataset.i,1); renderObjectives(); }
-    else if(a==="add-agenda"){ D.agenda.push({time:"",topic:""}); renderAgenda(); }
-    else if(a==="rm-agenda"){ D.agenda.splice(+b.dataset.i,1); renderAgenda(); }
-    else if(a==="add-credential"){ D.credentials.push(""); renderCredentials(); }
-    else if(a==="rm-credential"){ D.credentials.splice(+b.dataset.i,1); renderCredentials(); }
-    else if(a==="add-student"){ D.students.push(""); renderStudents(); }
-    else if(a==="rm-student"){ D.students.splice(+b.dataset.i,1); renderStudents(); }
+    else if(a==="add-objective"){ D.objectives.push(""); renderObjectives(); saveDraft(); }
+    else if(a==="rm-objective"){ D.objectives.splice(+b.dataset.i,1); renderObjectives(); saveDraft(); }
+    else if(a==="add-agenda"){ D.agenda.push({time:"",topic:""}); renderAgenda(); saveDraft(); }
+    else if(a==="rm-agenda"){ D.agenda.splice(+b.dataset.i,1); renderAgenda(); saveDraft(); }
+    else if(a==="add-credential"){ D.credentials.push(""); renderCredentials(); saveDraft(); }
+    else if(a==="rm-credential"){ D.credentials.splice(+b.dataset.i,1); renderCredentials(); saveDraft(); }
+    else if(a==="add-student"){ D.students.push(""); renderStudents(); saveDraft(); }
+    else if(a==="rm-student"){ D.students.splice(+b.dataset.i,1); renderStudents(); saveDraft(); }
+    else if(a==="toggle-paste"){ showPaste=!showPaste; render(); }
+    else if(a==="apply-paste"){ applyPaste(); }
+    else if(a==="use-cat-total"){ D.courseHours=b.dataset.sum; var ch=root.querySelector('[data-key="courseHours"]'); if(ch) ch.value=D.courseHours; updateHoursWarn(); saveDraft(); }
+    else if(a==="reset"){ resetForm(); }
     else if(a==="generate"){ onGenerate(); }
     else if(a==="share"){ onShare(); }
     else if(a==="edit"){ if(result){ URL.revokeObjectURL(result.url); result=null; } renderActions(); }
@@ -390,12 +434,77 @@ body{margin:0;background:#fff;color:var(--ink);
     var btn=document.querySelector('[data-action="toggle-comp"]'); if(btn) btn.textContent= showComp?"Hide":(D.competencies.length?D.competencies.length+" selected":"Select");
   }
 
+  /* ---------------- persistence ---------------- */
+  function saveDraft(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(D)); var s=document.getElementById("ce-saved"); if(s){ s.textContent="Saved"; clearTimeout(saveDraft._t); saveDraft._t=setTimeout(function(){ if(s) s.textContent="Auto-saved"; },1200); } }catch(e){} }
+  function loadDraft(){ try{ var raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; var o=JSON.parse(raw); if(!o||typeof o!=="object") return;
+      for(var k in D){ if(Object.prototype.hasOwnProperty.call(o,k) && o[k]!=null) D[k]=o[k]; }
+      // keep required list/object shapes valid after restore
+      if(!Array.isArray(D.objectives)||!D.objectives.length) D.objectives=[""];
+      if(!Array.isArray(D.agenda)||!D.agenda.length) D.agenda=[{time:"",topic:""}];
+      if(!Array.isArray(D.credentials)||!D.credentials.length) D.credentials=[""];
+      if(!Array.isArray(D.students)||!D.students.length) D.students=[""];
+      if(!Array.isArray(D.competencies)) D.competencies=[];
+      if(!D.catHours||typeof D.catHours!=="object") D.catHours={Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""};
+      if(!String(D.evalCount||"").length) D.evalCount="1";
+    }catch(e){} }
+  function resetForm(){
+    if(!confirm("Start a new course? This clears the current entries but keeps your name, email, and location.")) return;
+    var keep={ instructor:D.instructor, instructorEmail:D.instructorEmail, location:D.location, otherInstructors:D.otherInstructors };
+    D.title="";D.date="";D.startEnd="";D.courseHours="";D.lectureHours="";D.labHours="";
+    D.catHours={Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""};
+    D.competencies=[];D.localComp="";D.objectives=[""];D.agenda=[{time:"",topic:""}];D.credentials=[""];
+    D.students=[""];D.evalCount="1";
+    D.instructor=keep.instructor;D.instructorEmail=keep.instructorEmail;D.location=keep.location;D.otherInstructors=keep.otherInstructors;
+    if(result){ URL.revokeObjectURL(result.url); result=null; }
+    showComp=false; showPaste=false; setError(""); saveDraft(); render();
+  }
+
+  /* ---------------- smart hours ---------------- */
+  function parseClock(str){
+    str=String(str).trim().toLowerCase(); if(!str) return null;
+    var ap=null, m=str.match(/([ap])\.?m?\.?$/); if(m){ ap=m[1]; str=str.replace(/([ap])\.?m?\.?$/,"").trim(); }
+    var h,min=0;
+    if(/^\d{3,4}$/.test(str)){ var n=str.length===3?"0"+str:str; h=parseInt(n.slice(0,2),10); min=parseInt(n.slice(2),10); }
+    else if(/^\d{1,2}:\d{2}$/.test(str)){ var p=str.split(":"); h=parseInt(p[0],10); min=parseInt(p[1],10); }
+    else if(/^\d{1,2}$/.test(str)){ h=parseInt(str,10); }
+    else return null;
+    if(ap==="p"&&h<12) h+=12; if(ap==="a"&&h===12) h=0;
+    if(isNaN(h)||isNaN(min)||h>23||min>59) return null;
+    return h*60+min;
+  }
+  function hoursFromRange(s){
+    var parts=String(s||"").split(/\s*(?:-|–|—|to)\s*/i); if(parts.length<2) return null;
+    var a=parseClock(parts[0]), b=parseClock(parts[1]); if(a==null||b==null) return null;
+    var diff=b-a; if(diff<0) diff+=24*60; var hrs=diff/60;
+    if(hrs<0.25||hrs>14) return null; return Math.round(hrs*100)/100;
+  }
+
+  function applyPaste(){
+    var ta=document.getElementById("ce-paste");
+    var lines=ta?ta.value.split(/[\r\n]+/).map(function(s){return s.trim();}).filter(Boolean):[];
+    if(lines.length){
+      var existing=D.students.filter(function(s){return (s||"").trim();});
+      var all=existing.concat(lines).slice(0,ROSTER_MAX_STUDENTS);
+      D.students=all.length?all:[""];
+      var cnt=D.students.filter(function(s){return (s||"").trim();}).length;
+      if(cnt) D.evalCount=String(Math.min(50,cnt));
+    }
+    showPaste=false; saveDraft(); render();
+  }
+
   function setError(msg){ var el=document.getElementById("ce-error"); if(el) el.textContent=msg||""; }
   async function onGenerate(){
-    setError(""); 
+    setError("");
+    Array.prototype.forEach.call(root.querySelectorAll(".ce-invalid"),function(el){ el.classList.remove("ce-invalid"); });
     var req=[["title","Course title"],["date","Date"],["startEnd","Start / end time"],["location","Location"],["instructor","Lead instructor"],["courseHours","Total course hours"]];
-    var missing=req.filter(function(r){return !String(D[r[0]]).trim();}).map(function(r){return r[1];});
-    if(missing.length){ setError("Add: "+missing.join(", ")+"."); return; }
+    var missing=req.filter(function(r){return !String(D[r[0]]).trim();});
+    if(missing.length){
+      var first=null;
+      missing.forEach(function(r){ var el=root.querySelector('[data-key="'+r[0]+'"]'); if(el){ el.classList.add("ce-invalid"); if(!first) first=el; } });
+      setError("Please fill the highlighted field"+(missing.length>1?"s":"")+": "+missing.map(function(r){return r[1];}).join(", ")+".");
+      if(first){ first.scrollIntoView({behavior:"smooth",block:"center"}); try{ first.focus({preventScroll:true}); }catch(e){ first.focus(); } }
+      return;
+    }
     busy=true; renderActions();
     try{
       var packet=await generatePacket(D);
@@ -412,6 +521,7 @@ body{margin:0;background:#fff;color:var(--ink);
   }
 
   if(!PDFLib){ root.innerHTML='<p style="padding:20px;color:#b00020">pdf-lib.min.js did not load. Make sure it sits next to this file.</p>'; return; }
+  loadDraft();
   render();
 })();
 </script>
