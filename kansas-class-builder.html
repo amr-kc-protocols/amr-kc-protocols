@@ -150,7 +150,8 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   ];
   var ROSTER_FIELD = { title:"Class Title", location:"Location", date:"Date", startEnd:"Time", hours:"Hours", instructor:"Print Name", otherInstructors:"Print Names" };
   var ROSTER_MAX_STUDENTS = 18; // fillable name rows in the template (2 pages)
-  var EVAL_OVERLAY = { title:{x:110,y:676}, date:{x:289,y:676}, instructor:{x:428,y:676} };
+  // maxW = space before the next printed label, so overlay text can't collide with it.
+  var EVAL_OVERLAY = { title:{x:110,y:676,maxW:144}, date:{x:289,y:676,maxW:84}, instructor:{x:428,y:676,maxW:128} };
 
   /* ---------------- helpers ---------------- */
   function b64ToBytes(b64){ var bin=atob(b64), out=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i); return out; }
@@ -204,7 +205,11 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     var PDFDocument=PDFLib.PDFDocument, StandardFonts=PDFLib.StandardFonts;
     var doc=await PDFDocument.load(await fetchPdfBytes(TPL.eval));
     var font=await doc.embedFont(StandardFonts.Helvetica), p=doc.getPage(0);
-    function draw(txt,pos){ if(txt) p.drawText(String(txt),{x:pos.x,y:pos.y,size:10,font:font}); }
+    // Shrink to fit the blank; if still too long, truncate with an ellipsis so it never runs into the next label.
+    function draw(txt,pos){ if(txt==null||txt==="") return; var t=String(txt), s=10, mw=pos.maxW||1000;
+      while(s>6 && font.widthOfTextAtSize(t,s)>mw) s-=0.5;
+      if(font.widthOfTextAtSize(t,s)>mw){ while(t.length>1 && font.widthOfTextAtSize(t+"...",s)>mw) t=t.slice(0,-1); t+="..."; }
+      p.drawText(t,{x:pos.x,y:pos.y,size:s,font:font}); }
     draw(D.title,EVAL_OVERLAY.title); draw(D.date,EVAL_OVERLAY.date); draw(D.instructor,EVAL_OVERLAY.instructor);
     return doc;
   }
@@ -398,7 +403,7 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   }
   function renderPreview(){
     var wrap=document.getElementById("ce-preview-wrap"); if(!wrap) return;
-    if(result){ wrap.innerHTML='<div class="ce-previewhead">Preview</div><iframe class="ce-preview" title="Packet preview" src="'+result.url+'#toolbar=1"></iframe><p class="ce-sub">If the preview is blank (some phones can’t show PDFs inline), use Download or Share above.</p>'; }
+    if(result){ wrap.innerHTML='<div class="ce-previewhead">Preview</div><iframe class="ce-preview" title="Packet preview" src="'+result.url+'#view=FitH&toolbar=1"></iframe><p class="ce-sub">Quick look only — some phone PDF viewers crop the page or approximate fonts. The downloaded/shared file is the accurate copy.</p>'; }
     else wrap.innerHTML="";
   }
   function section(title,body,right){ return '<section class="ce-section"><div class="ce-sectionhead"><h2>'+title+'</h2>'+(right||"")+'</div><div class="ce-sectionbody">'+body+'</div></section>'; }
