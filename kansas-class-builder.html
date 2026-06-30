@@ -125,6 +125,7 @@ body{margin:0;background:#fff;color:var(--ink);
     ["Operations",["At-Risk Populations","Ambulance Safety","Field Triage","Provider Hygiene","Culture of Safety","Pediatric Transport","Crew Resource Mngmt.","EMS Research","Evidence Based Guidelines"]]
   ];
   var ROSTER_FIELD = { title:"Class Title", location:"Location", date:"Date", startEnd:"Time", hours:"Hours", instructor:"Print Name", otherInstructors:"Print Names" };
+  var ROSTER_MAX_STUDENTS = 18; // fillable name rows in the template (2 pages)
   var EVAL_OVERLAY = { title:{x:110,y:676}, date:{x:289,y:676}, instructor:{x:428,y:676} };
 
   /* ---------------- helpers ---------------- */
@@ -134,6 +135,8 @@ body{margin:0;background:#fff;color:var(--ink);
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   async function fetchPdfBytes(url){ var res=await fetch(url); if(!res.ok) throw new Error("Could not load "+url+" ("+res.status+"). Check that the ce-templates folder is deployed."); return new Uint8Array(await res.arrayBuffer()); }
   function setText(form,name,value,size){ if(value==null||value==="") return; try{ var f=form.getTextField(name); f.setText(String(value)); if(size) f.setFontSize(size);}catch(e){} }
+  // Like setText, but shrinks the font (down to 5pt) so the value fits the field width. Caps at maxSize so short values aren't blown up.
+  function setTextFit(form,name,value,maxSize,font){ if(value==null||value==="") return; try{ var f=form.getTextField(name); var r=f.acroField.getWidgets()[0].getRectangle(); var usable=Math.max(r.width,r.height)-6; var s=maxSize; while(s>5 && font.widthOfTextAtSize(String(value),s)>usable) s-=0.5; f.setText(String(value)); f.setFontSize(s);}catch(e){} }
   function wrapLines(text,font,size,maxW){ var words=String(text).split(/\s+/),lines=[],cur=""; for(var i=0;i<words.length;i++){var t=cur?cur+" "+words[i]:words[i]; if(font.widthOfTextAtSize(t,size)<=maxW)cur=t; else{ if(cur)lines.push(cur); cur=words[i]; }} if(cur)lines.push(cur); return lines; }
 
   /* ---------------- PDF builders (validated engine) ---------------- */
@@ -149,17 +152,21 @@ body{margin:0;background:#fff;color:var(--ink);
     return doc;
   }
   async function buildRoster(D){
-    var PDFDocument=PDFLib.PDFDocument;
+    var PDFDocument=PDFLib.PDFDocument, StandardFonts=PDFLib.StandardFonts;
     var doc=await PDFDocument.load(await fetchPdfBytes(TPL.roster));
     var form=doc.getForm();
-    setText(form,ROSTER_FIELD.title,D.title,10);
-    setText(form,ROSTER_FIELD.location,D.location,9);
+    var helv=await doc.embedFont(StandardFonts.Helvetica);
+    setTextFit(form,ROSTER_FIELD.title,D.title,9,helv);
+    setTextFit(form,ROSTER_FIELD.location,D.location,8.5,helv);
     setText(form,ROSTER_FIELD.date,D.date,10);
     setText(form,ROSTER_FIELD.startEnd,D.startEnd,10);
     setText(form,ROSTER_FIELD.hours,D.courseHours,10);
     setText(form,ROSTER_FIELD.instructor,D.instructor,11);
-    setText(form,ROSTER_FIELD.otherInstructors,D.otherInstructors,10);
-    form.flatten(); // student rows left blank for handwritten sign-in
+    setTextFit(form,ROSTER_FIELD.otherInstructors,D.otherInstructors,10,helv);
+    // Pre-fill student names into the "Print Student Name" column; any remaining rows stay blank for walk-in sign-in.
+    var names=(D.students||[]).map(function(s){return (s||"").trim();}).filter(Boolean);
+    for(var i=0;i<names.length && i<ROSTER_MAX_STUDENTS;i++){ setTextFit(form,"Student Signature"+(i+1),names[i],9,helv); }
+    form.flatten();
     return doc;
   }
   async function buildEval(D){
@@ -204,12 +211,17 @@ body{margin:0;background:#fff;color:var(--ink);
     return doc;
   }
   async function generatePacket(D){
-    var built=await Promise.all([buildCover(D),buildInfoPage(D),buildEval(D),buildRoster(D)]);
+    var parts=await Promise.all([buildCover(D),buildInfoPage(D),buildEval(D),buildRoster(D)]);
+    var cover=parts[0], info=parts[1], evalDoc=parts[2], roster=parts[3];
     var out=await PDFLib.PDFDocument.create();
-    for(var i=0;i<built.length;i++){ var src=built[i]; var pages=await out.copyPages(src,src.getPageIndices()); pages.forEach(function(p){out.addPage(p);}); }
+    async function append(src){ var pages=await out.copyPages(src,src.getPageIndices()); pages.forEach(function(p){out.addPage(p);}); }
+    await append(cover); await append(info);
+    var evalCopies=Math.min(50,Math.max(1, parseInt(D.evalCount,10)||1));
+    for(var e=0;e<evalCopies;e++){ await append(evalDoc); } // post-eval, one per requested copy
+    await append(roster);
     out.setTitle("CE Packet - "+(D.title||"")); out.setSubject("Kansas CE submission · Provider "+PROGRAM.provider);
     var bytes=await out.save();
-    return new Blob([bytes],{type:"application/pdf"});
+    return { blob:new Blob([bytes],{type:"application/pdf"}), pages:out.getPageCount() };
   }
 
   /* ---------------- state ---------------- */
@@ -218,7 +230,8 @@ body{margin:0;background:#fff;color:var(--ink);
     courseHours:"", lectureHours:"", labHours:"",
     catHours:{Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
     competencies:[], localComp:"",
-    objectives:[""], agenda:[{time:"",topic:""}], credentials:[""]
+    objectives:[""], agenda:[{time:"",topic:""}], credentials:[""],
+    students:[""], evalCount:"1"
   };
   var showComp=false, busy=false, result=null;
   var root=document.getElementById("kcb-root");
@@ -275,13 +288,20 @@ body{margin:0;background:#fff;color:var(--ink);
     html+=section("Agenda",'<div id="ce-agenda"></div>','<button class="ce-ghost" data-action="add-agenda">+ Add</button>');
     // Credentials
     html+=section("Instructor credentials",'<div id="ce-credentials"></div>','<button class="ce-ghost" data-action="add-credential">+ Add</button>');
+    // Roster sign-in (student names)
+    html+=section("Roster sign-in",'<p class="ce-sub">Optional &mdash; names print on the roster (up to '+ROSTER_MAX_STUDENTS+'); blank rows stay open for walk-in sign-in.</p><div id="ce-students"></div>','<button class="ce-ghost" data-action="add-student">+ Add</button>');
+    // Post-evaluation copies
+    html+=section("Post-evaluation forms",
+      '<p class="ce-sub">How many blank evaluation forms to include in the packet (one per student).</p>'+
+      '<div class="ce-row"><div style="flex:0 0 120px">'+field("Copies","evalCount",{mode:"numeric",ph:"1"})+'</div></div>'
+    );
 
     html+='<p class="ce-error" id="ce-error"></p>';
     html+='<div class="ce-actions" id="ce-actions"></div>';
     html+='<p class="ce-done" id="ce-done"></p>';
 
     root.innerHTML=html;
-    renderObjectives(); renderAgenda(); renderCredentials(); renderActions(); updateHoursWarn();
+    renderObjectives(); renderAgenda(); renderCredentials(); renderStudents(); renderActions(); updateHoursWarn();
   }
   function section(title,body,right){ return '<section class="ce-section"><div class="ce-sectionhead"><h2>'+title+'</h2>'+(right||"")+'</div><div class="ce-sectionbody">'+body+'</div></section>'; }
 
@@ -303,6 +323,13 @@ body{margin:0;background:#fff;color:var(--ink);
       return '<div class="ce-listrow"><span class="ce-marker">•</span><input data-list="credentials" data-i="'+i+'" value="'+esc(c)+'" placeholder="Aaron Murray, NRP — KBEMS Cert #12345, 8 yrs field, AMR KC FTO" />'+rm+'</div>';
     }).join("");
   }
+  function renderStudents(){
+    document.getElementById("ce-students").innerHTML = D.students.map(function(s,i){
+      var rm = D.students.length>1 ? '<button class="ce-x" data-action="rm-student" data-i="'+i+'" aria-label="Remove">×</button>' : '<span class="ce-x-spacer"></span>';
+      var over = i>=ROSTER_MAX_STUDENTS ? ' style="opacity:.5"' : '';
+      return '<div class="ce-listrow"'+over+'><span class="ce-marker">'+(i+1)+'</span><input data-list="students" data-i="'+i+'" value="'+esc(s)+'" placeholder="Last, First" />'+rm+'</div>';
+    }).join("");
+  }
   function renderActions(){
     var el=document.getElementById("ce-actions"), done=document.getElementById("ce-done");
     if(!result){
@@ -311,7 +338,7 @@ body{margin:0;background:#fff;color:var(--ink);
     } else {
       var share = (navigator.share)? '<button class="ce-secondary" data-action="share">Share / email</button>' : '';
       el.innerHTML='<a class="ce-primary" href="'+result.url+'" download="'+result.filename+'">Download PDF</a>'+share+'<button class="ce-ghost" data-action="edit">Edit</button>';
-      done.textContent=result.filename+" · 5 pages · cover, info, eval, roster";
+      done.textContent=result.filename+" · "+result.pages+" pages";
     }
   }
   function updateHoursWarn(){
@@ -325,7 +352,13 @@ body{margin:0;background:#fff;color:var(--ink);
   /* ---------------- events ---------------- */
   root.addEventListener("input",function(e){
     var t=e.target, ds=t.dataset;
-    if(ds.key!=null){ setPath(ds.key, ds.key==="courseHours"||ds.key==="lectureHours"||ds.key==="labHours"? num(t.value): t.value); if(ds.key==="courseHours") updateHoursWarn(); }
+    if(ds.key!=null){
+      var v=t.value;
+      if(ds.key==="courseHours"||ds.key==="lectureHours"||ds.key==="labHours") v=num(v);
+      else if(ds.key==="evalCount"){ v=v.replace(/[^0-9]/g,""); if(v!==t.value) t.value=v; }
+      setPath(ds.key, v);
+      if(ds.key==="courseHours") updateHoursWarn();
+    }
     else if(ds.cat!=null){ D.catHours[ds.cat]=num(t.value); if(t.value!==D.catHours[ds.cat]) t.value=D.catHours[ds.cat]; updateHoursWarn(); }
     else if(ds.list!=null){ var i=+ds.i; if(ds.sub) D[ds.list][i][ds.sub]=t.value; else D[ds.list][i]=t.value; }
   });
@@ -341,6 +374,8 @@ body{margin:0;background:#fff;color:var(--ink);
     else if(a==="rm-agenda"){ D.agenda.splice(+b.dataset.i,1); renderAgenda(); }
     else if(a==="add-credential"){ D.credentials.push(""); renderCredentials(); }
     else if(a==="rm-credential"){ D.credentials.splice(+b.dataset.i,1); renderCredentials(); }
+    else if(a==="add-student"){ D.students.push(""); renderStudents(); }
+    else if(a==="rm-student"){ D.students.splice(+b.dataset.i,1); renderStudents(); }
     else if(a==="generate"){ onGenerate(); }
     else if(a==="share"){ onShare(); }
     else if(a==="edit"){ if(result){ URL.revokeObjectURL(result.url); result=null; } renderActions(); }
@@ -363,9 +398,9 @@ body{margin:0;background:#fff;color:var(--ink);
     if(missing.length){ setError("Add: "+missing.join(", ")+"."); return; }
     busy=true; renderActions();
     try{
-      var blob=await generatePacket(D);
+      var packet=await generatePacket(D);
       var filename="CE_"+(D.date||"packet")+"_"+slug(D.title)+".pdf";
-      result={ blob:blob, url:URL.createObjectURL(blob), filename:filename };
+      result={ blob:packet.blob, url:URL.createObjectURL(packet.blob), filename:filename, pages:packet.pages };
     }catch(err){ setError(err.message||"Could not generate the packet."); }
     finally{ busy=false; renderActions(); }
   }
