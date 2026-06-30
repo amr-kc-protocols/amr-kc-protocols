@@ -354,7 +354,8 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     async function append(src){ if(!src) return; var pages=await out.copyPages(src,src.getPageIndices()); pages.forEach(function(p){out.addPage(p);}); }
     await append(cover); await append(info);
     await append(summary); // results summary before the blank forms
-    var evalCopies=Math.min(50,Math.max(0, parseInt(D.evalCount,10)||0));
+    // A results summary stands in for the blank forms, so skip the blanks entirely when one is present.
+    var evalCopies=P.evalSummary ? 0 : Math.min(50,Math.max(0, parseInt(D.evalCount,10)||0));
     for(var e=0;e<evalCopies;e++){ await append(evalDoc); } // blank post-eval, one per requested copy
     await append(roster);
     out.setTitle("CE Packet - "+(D.title||"")); out.setSubject("Kansas CE submission · Provider "+PROGRAM.provider);
@@ -496,11 +497,13 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     html+=section("Roster sign-in",rosterBody,rosterRight);
     // Post-evaluation: blank copies + paste Microsoft Forms results -> summary page
     var evalRight=D.evalSummary?'<button class="ce-ghost" data-action="clear-eval">Clear results</button>':('<button class="ce-ghost" data-action="toggle-eval-paste">'+(showEvalPaste?"Close":"Paste results")+'</button>');
-    var evalBody='<p class="ce-sub">Blank evaluation forms to include (one per student). Set 0 if you only need the results summary.</p>'+
-      '<div class="ce-row"><div style="flex:0 0 120px">'+field("Blank copies","evalCount",{mode:"numeric",ph:"1"})+'</div></div>';
+    var evalBody="";
     if(D.evalSummary){ var sm=D.evalSummary, avg=sm.questions&&sm.questions.length?(sm.questions.reduce(function(a,q){return a+q.avg;},0)/sm.questions.length):null;
-      evalBody+='<div class="ce-evalchip">★ '+sm.count+' response'+(sm.count===1?'':'s')+' loaded'+(avg!=null?(' · avg '+avg.toFixed(1)+'/5'):'')+(sm.questions?(' · '+sm.questions.length+' rated questions'):'')+' &mdash; a results summary page will be added to the packet.</div>'; }
-    else { evalBody+='<p class="ce-sub" style="margin-top:8px">Paste your Microsoft Forms results (Excel) to add a one-page summary (average per question + comments).</p>';
+      evalBody+='<div class="ce-evalchip">★ '+sm.count+' response'+(sm.count===1?'':'s')+' loaded'+(avg!=null?(' · avg '+avg.toFixed(1)+'/5'):'')+(sm.questions?(' · '+sm.questions.length+' rated questions'):'')+' &mdash; a results summary page will be added to the packet.</div>';
+      evalBody+='<p class="ce-sub" style="margin-top:8px">Blank evaluation forms are omitted because the results summary is included. Use “Clear results” to switch back to blank copies.</p>'; }
+    else { evalBody+='<p class="ce-sub">Blank evaluation forms to include (one per student).</p>'+
+      '<div class="ce-row"><div style="flex:0 0 120px">'+field("Blank copies","evalCount",{mode:"numeric",ph:"1"})+'</div></div>'+
+      '<p class="ce-sub" style="margin-top:8px">Or paste your Microsoft Forms results (Excel) to add a one-page summary (average per question + comments) instead of blank forms.</p>';
       if(showEvalPaste){ evalBody+='<textarea class="ce-paste" id="ce-evalpaste" placeholder="Paste the Forms results from Excel — include the header row with the question text."></textarea>'+
         '<div class="ce-row" style="margin:8px 0 2px;gap:8px"><div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-eval-paste">Build summary</button></div><div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-eval-paste">Cancel</button></div></div>'; } }
     html+=section("Post-evaluation",evalBody,evalRight);
