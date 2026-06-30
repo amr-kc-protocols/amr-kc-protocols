@@ -94,6 +94,12 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
 .ce-preset .ce-x{flex:0 0 32px;height:auto;border:none;border-left:1px solid var(--line);border-radius:0;font-size:16px;background:#fff}
 .ce-compsearch{width:100%;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:10px 13px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;margin-bottom:2px}
 .ce-compsearch:focus{background:#fff;border-color:var(--amr-navy);box-shadow:0 0 0 3px rgba(0,53,149,.13)}
+.ce-stu{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:8px;display:flex;flex-direction:column;gap:7px}
+.ce-sturow{display:flex;align-items:center;gap:8px}
+.ce-sturow>input{flex:1 1 0;min-width:0}
+.ce-stusub>input{background:#fff}
+.ce-stunar{flex:0 0 86px!important}
+.ce-evalchip{font-size:12.5px;background:#eaf1fc;border:1px solid #d2e0f4;border-radius:11px;padding:9px 11px;color:var(--amr-navy);font-weight:600;line-height:1.4}
 .ce-previewhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--amr-navy);font-weight:800;margin:18px 2px 8px}
 .ce-preview{width:100%;height:540px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
 .ce-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;padding:16px 0 14px;background:linear-gradient(transparent,#e9ecf2 30%)}
@@ -150,6 +156,10 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   ];
   var ROSTER_FIELD = { title:"Class Title", location:"Location", date:"Date", startEnd:"Time", hours:"Hours", instructor:"Print Name", otherInstructors:"Print Names" };
   var ROSTER_MAX_STUDENTS = 18; // fillable name rows in the template (2 pages)
+  // Per-student columns that ARE fillable AcroForm fields (field name = base + row number).
+  var ROSTER_STU_FIELD = { name:"Student Signature", email:"Email AddressRow", dept:"OpDeptRow", amr:"AMR Emp YNRow", ksbems:"KSBEMS Attendent Row" };
+  // Columns with NO form field: drawn as rotated overlays. y = unrotated column band; insetX nudges down within the row.
+  var ROSTER_OVERLAY = { phone:{y:452,maxW:64}, timeIn:{y:592,maxW:34}, timeOut:{y:632,maxW:38}, hours:{y:678,maxW:50} };
   // maxW = space before the next printed label, so overlay text can't collide with it.
   var EVAL_OVERLAY = { title:{x:110,y:676,maxW:144}, date:{x:289,y:676,maxW:84}, instructor:{x:428,y:676,maxW:128} };
 
@@ -164,7 +174,9 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   function derivedStartEnd(d){ var a=milTime(d.startTime), b=milTime(d.endTime); return (a&&b)? (a+"-"+b) : (d.startEnd||""); }
   function hoursBetween(d){ var a=milTime(d.startTime), b=milTime(d.endTime); if(!a||!b) return null; var am=parseInt(a.slice(0,2),10)*60+parseInt(a.slice(2),10), bm=parseInt(b.slice(0,2),10)*60+parseInt(b.slice(2),10); var diff=bm-am; if(diff<0) diff+=1440; var h=diff/60; return (h>=0.25&&h<=14)? Math.round(h*100)/100 : null; }
   // Shallow clone with print-ready date + derived start/end, fed to the PDF builders.
-  function prep(d){ var P={},k; for(k in d) P[k]=d[k]; P.date=fmtDate(d.date); P.startEnd=derivedStartEnd(d); return P; }
+  function prep(d){ var P={},k; for(k in d) P[k]=d[k]; P.date=fmtDate(d.date); P.startEnd=derivedStartEnd(d);
+    P.timeIn=(d.timeIn||"").trim()||milTime(d.startTime); P.timeOut=(d.timeOut||"").trim()||milTime(d.endTime); P.hoursAwarded=(d.hoursAwarded||"").trim()||d.courseHours;
+    return P; }
   async function fetchPdfBytes(url){ var res=await fetch(url); if(!res.ok) throw new Error("Could not load "+url+" ("+res.status+"). Check that the ce-templates folder is deployed."); return new Uint8Array(await res.arrayBuffer()); }
   function setText(form,name,value,size){ if(value==null||value==="") return; try{ var f=form.getTextField(name); f.setText(String(value)); if(size) f.setFontSize(size);}catch(e){} }
   // Like setText, but shrinks the font (down to 5pt) so the value fits the field width. Caps at maxSize so short values aren't blown up.
@@ -184,10 +196,11 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     return doc;
   }
   async function buildRoster(D){
-    var PDFDocument=PDFLib.PDFDocument, StandardFonts=PDFLib.StandardFonts;
+    var PDFDocument=PDFLib.PDFDocument, StandardFonts=PDFLib.StandardFonts, degrees=PDFLib.degrees;
     var doc=await PDFDocument.load(await fetchPdfBytes(TPL.roster));
     var form=doc.getForm();
     var helv=await doc.embedFont(StandardFonts.Helvetica);
+    var pages=doc.getPages();
     setTextFit(form,ROSTER_FIELD.title,D.title,9,helv);
     setTextFit(form,ROSTER_FIELD.location,D.location,8.5,helv);
     setText(form,ROSTER_FIELD.date,D.date,10);
@@ -195,9 +208,36 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     setText(form,ROSTER_FIELD.hours,D.courseHours,10);
     setText(form,ROSTER_FIELD.instructor,D.instructor,11);
     setTextFit(form,ROSTER_FIELD.otherInstructors,D.otherInstructors,10,helv);
-    // Pre-fill student names into the "Print Student Name" column; any remaining rows stay blank for walk-in sign-in.
-    var names=(D.students||[]).map(function(s){return (s||"").trim();}).filter(Boolean);
-    for(var i=0;i<names.length && i<ROSTER_MAX_STUDENTS;i++){ setTextFit(form,"Student Signature"+(i+1),names[i],9,helv); }
+
+    // page lookup for a widget (roster spans 2 pages)
+    function pageOf(widget){ var ref=widget.P(); for(var i=0;i<pages.length;i++){ if(pages[i].ref===ref) return pages[i]; } return pages[0]; }
+    // Draw a value as rotated text in a no-field column, anchored to a row's existing field.
+    function drawCol(rowField,col,value){
+      if(value==null||value==="") return;
+      var w=rowField.acroField.getWidgets()[0], r=w.getRectangle(), pg=pageOf(w);
+      var t=String(value), s=8.5, mw=col.maxW;
+      while(s>5 && helv.widthOfTextAtSize(t,s)>mw) s-=0.5;
+      if(helv.widthOfTextAtSize(t,s)>mw){ while(t.length>1 && helv.widthOfTextAtSize(t+"…",s)>mw) t=t.slice(0,-1); t+="…"; }
+      pg.drawText(t,{ x:r.x+r.width*0.5+s*0.32, y:col.y, size:s, font:helv, rotate:degrees(90) });
+    }
+
+    var students=(D.students||[]).filter(function(s){return stuName(s).trim();});
+    for(var i=0;i<students.length && i<ROSTER_MAX_STUDENTS;i++){
+      var s=students[i], n=i+1;
+      setTextFit(form,ROSTER_STU_FIELD.name+n,stuName(s),9,helv);
+      setTextFit(form,ROSTER_STU_FIELD.email+n,s.email,8.5,helv);
+      setTextFit(form,ROSTER_STU_FIELD.dept+n,s.dept,8.5,helv);
+      setTextFit(form,ROSTER_STU_FIELD.amr+n,s.amr,9,helv);
+      setTextFit(form,ROSTER_STU_FIELD.ksbems+n,s.ksbems,8.5,helv);
+      // overlay columns (no form field): phone is per-student; time in/out + hours are class-wide.
+      var anchor; try{ anchor=form.getField(ROSTER_STU_FIELD.email+n); }catch(e){ anchor=null; }
+      if(anchor){
+        drawCol(anchor,ROSTER_OVERLAY.phone,s.phone);
+        drawCol(anchor,ROSTER_OVERLAY.timeIn,D.timeIn);
+        drawCol(anchor,ROSTER_OVERLAY.timeOut,D.timeOut);
+        drawCol(anchor,ROSTER_OVERLAY.hours,D.hoursAwarded);
+      }
+    }
     form.flatten();
     return doc;
   }
@@ -246,15 +286,62 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
       {x:M,y:40,size:8,font:ital,color:rgb(.3,.3,.3)});
     return doc;
   }
+  async function buildEvalSummary(D){
+    var PDFDocument=PDFLib.PDFDocument, StandardFonts=PDFLib.StandardFonts, rgb=PDFLib.rgb;
+    var sm=D.evalSummary, doc=await PDFDocument.create();
+    var reg=await doc.embedFont(StandardFonts.Helvetica), bold=await doc.embedFont(StandardFonts.HelveticaBold), ital=await doc.embedFont(StandardFonts.HelveticaOblique);
+    var W=612,M=72,cW=W-2*M,black=rgb(0,0,0),band=rgb(.9,.89,.84),navy=rgb(0,.21,.58);
+    var page=doc.addPage([612,792]), y=792-M;
+    function ensure(min){ if(y<min){ page=doc.addPage([612,792]); y=792-M; } }
+    var logo; try{ logo=await doc.embedJpg(b64ToBytes(AMR_LOGO_JPEG_B64)); }catch(e){}
+    var lw=100,lh=lw*149/435; if(logo) page.drawImage(logo,{x:M,y:y-lh+6,width:lw,height:lh});
+    page.drawText("Post-Course Evaluation Summary",{x:W-M-bold.widthOfTextAtSize("Post-Course Evaluation Summary",14),y:y-6,size:14,font:bold,color:black});
+    var sub="KBEMS Provider "+PROGRAM.provider; page.drawText(sub,{x:W-M-reg.widthOfTextAtSize(sub,9),y:y-22,size:9,font:reg,color:black});
+    y-=lh+12; page.drawLine({start:{x:M,y:y},end:{x:W-M,y:y},thickness:1,color:black}); y-=22;
+    page.drawText(D.title||"Untitled course",{x:M,y:y,size:11,font:bold,color:black}); y-=15;
+    var meta=[[D.date,D.startEnd].filter(Boolean).join("   "),D.location,D.instructor].filter(Boolean).join("   |   ");
+    if(meta){ page.drawText(meta,{x:M,y:y,size:9,font:reg,color:black}); y-=12; }
+    page.drawText((sm.count||0)+" response"+(sm.count===1?"":"s")+" collected via Microsoft Forms",{x:M,y:y,size:9,font:ital,color:rgb(.3,.3,.3)}); y-=20;
+    function banner(label){ ensure(120); page.drawRectangle({x:M,y:y-5,width:cW,height:18,color:band}); page.drawText(label,{x:M+6,y:y,size:11,font:bold,color:black}); y-=24; }
+    if(sm.questions && sm.questions.length){
+      banner("Average ratings (scale 1–5)");
+      sm.questions.forEach(function(q){
+        ensure(90);
+        var lines=wrapLines(q.label,reg,9.5,cW-150);
+        page.drawText(lines[0]||"",{x:M,y:y,size:9.5,font:reg,color:black});
+        var scoreTxt=q.avg.toFixed(1)+" / 5"; page.drawText(scoreTxt,{x:W-M-bold.widthOfTextAtSize(scoreTxt,10),y:y,size:10,font:bold,color:navy});
+        // mini bar
+        var barX=W-M-150, barW=92, filled=barW*(q.avg/5);
+        page.drawRectangle({x:barX,y:y-2,width:barW,height:5,color:rgb(.88,.9,.94)});
+        page.drawRectangle({x:barX,y:y-2,width:filled,height:5,color:navy});
+        y-=14;
+        for(var i=1;i<lines.length;i++){ page.drawText(lines[i],{x:M,y:y,size:9.5,font:reg,color:black}); y-=12; }
+        y-=3;
+      });
+      y-=6;
+    }
+    (sm.comments||[]).forEach(function(c){
+      if(!c.answers.length) return;
+      banner(c.label);
+      c.answers.forEach(function(a){ ensure(70); var lines=wrapLines("•  "+a,reg,9.5,cW-10); lines.forEach(function(ln,i){ ensure(70); page.drawText(ln,{x:M+(i?12:0),y:y,size:9.5,font:reg,color:black}); y-=12; }); y-=2; });
+      y-=6;
+    });
+    page.drawText("Generated by the AMR KC Field Guide · Kansas Class Builder · Provider "+PROGRAM.provider,
+      {x:M,y:40,size:8,font:ital,color:rgb(.3,.3,.3)});
+    return doc;
+  }
   async function generatePacket(D){
     var P=prep(D);
-    var parts=await Promise.all([buildCover(P),buildInfoPage(P),buildEval(P),buildRoster(P)]);
-    var cover=parts[0], info=parts[1], evalDoc=parts[2], roster=parts[3];
+    var jobs=[buildCover(P),buildInfoPage(P),buildEval(P),buildRoster(P)];
+    if(P.evalSummary) jobs.push(buildEvalSummary(P));
+    var parts=await Promise.all(jobs);
+    var cover=parts[0], info=parts[1], evalDoc=parts[2], roster=parts[3], summary=P.evalSummary?parts[4]:null;
     var out=await PDFLib.PDFDocument.create();
-    async function append(src){ var pages=await out.copyPages(src,src.getPageIndices()); pages.forEach(function(p){out.addPage(p);}); }
+    async function append(src){ if(!src) return; var pages=await out.copyPages(src,src.getPageIndices()); pages.forEach(function(p){out.addPage(p);}); }
     await append(cover); await append(info);
-    var evalCopies=Math.min(50,Math.max(1, parseInt(D.evalCount,10)||1));
-    for(var e=0;e<evalCopies;e++){ await append(evalDoc); } // post-eval, one per requested copy
+    await append(summary); // results summary before the blank forms
+    var evalCopies=Math.min(50,Math.max(0, parseInt(D.evalCount,10)||0));
+    for(var e=0;e<evalCopies;e++){ await append(evalDoc); } // blank post-eval, one per requested copy
     await append(roster);
     out.setTitle("CE Packet - "+(D.title||"")); out.setSubject("Kansas CE submission · Provider "+PROGRAM.provider);
     var bytes=await out.save();
@@ -268,9 +355,13 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     catHours:{Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
     competencies:[], localComp:"",
     objectives:[""], agenda:[{time:"",topic:""}], credentials:[""],
-    students:[""], evalCount:"1"
+    students:[{name:"",email:"",phone:"",dept:"",amr:"",ksbems:""}],
+    timeIn:"", timeOut:"", hoursAwarded:"",
+    evalCount:"1", evalSummary:null
   };
-  var showComp=false, showPaste=false, busy=false, result=null;
+  function emptyStudent(){ return {name:"",email:"",phone:"",dept:"",amr:"",ksbems:""}; }
+  function stuName(s){ return (s&&typeof s==="object")?(s.name||""):(s||""); }
+  var showComp=false, showPaste=false, showEvalPaste=false, busy=false, result=null;
   var root=document.getElementById("kcb-root");
   var STORAGE_KEY="kcb_draft_v1", PRESETS_KEY="kcb_presets_v1";
 
@@ -378,20 +469,27 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     html+=section("Agenda",'<div id="ce-agenda"></div>','<button class="ce-ghost" data-action="add-agenda">+ Add</button>');
     // Credentials
     html+=section("Instructor credentials",'<div id="ce-credentials"></div>','<button class="ce-ghost" data-action="add-credential">+ Add</button>');
-    // Roster sign-in (student names)
-    var stuCount=D.students.filter(function(s){return (s||"").trim();}).length;
-    var rosterRight='<button class="ce-ghost" data-action="toggle-paste">'+(showPaste?"Close":"Paste list")+'</button><button class="ce-ghost" data-action="add-student">+ Add</button>';
-    var rosterBody='<p class="ce-sub">Optional &mdash; names print on the roster ('+stuCount+' of '+ROSTER_MAX_STUDENTS+'); blank rows stay open for walk-in sign-in.</p>';
-    if(showPaste){ rosterBody+='<textarea class="ce-paste" id="ce-paste" placeholder="Paste one name per line, e.g.\nJones, Hunter\nMurray, Aaron"></textarea>'+
-      '<div class="ce-row" style="margin:8px 0 2px;gap:8px"><div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-paste">Add these names</button></div><div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-paste">Cancel</button></div></div>'; }
-    if(stuCount>ROSTER_MAX_STUDENTS){ rosterBody+='<p class="ce-warn">Only the first '+ROSTER_MAX_STUDENTS+' names print on the roster (template capacity). The remaining '+(stuCount-ROSTER_MAX_STUDENTS)+' won’t appear &mdash; add a second roster by hand if needed.</p>'; }
+    // Roster sign-in (students + class-wide time columns)
+    var stuCount=D.students.filter(function(s){return stuName(s).trim();}).length;
+    var rosterRight='<button class="ce-ghost" data-action="toggle-paste">'+(showPaste?"Close":"Paste from Excel")+'</button><button class="ce-ghost" data-action="add-student">+ Add</button>';
+    var rosterBody='<p class="ce-sub">Optional &mdash; fills the roster ('+stuCount+' of '+ROSTER_MAX_STUDENTS+'). Paste a roster exported from Microsoft Forms/Excel, or add rows by hand. Blank rows stay open for walk-in sign-in.</p>';
+    if(showPaste){ rosterBody+='<textarea class="ce-paste" id="ce-paste" placeholder="Paste from Excel — include the header row. Columns are matched by name (Name, Email, Phone, Op/Dept, AMR, KSBEMS #). One name per line also works."></textarea>'+
+      '<div class="ce-row" style="margin:8px 0 2px;gap:8px"><div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-paste">Add to roster</button></div><div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-paste">Cancel</button></div></div>'; }
+    rosterBody+='<p class="ce-sub" style="margin-top:6px">Time IN / OUT / Hours awarded (applied to every student row; defaults to the class times &amp; total hours):</p>';
+    rosterBody+='<div class="ce-row">'+field("Time IN","timeIn",{ph:milTime(D.startTime)||"0900"})+field("Time OUT","timeOut",{ph:milTime(D.endTime)||"1300"})+field("Hours awarded","hoursAwarded",{mode:"decimal",ph:D.courseHours||"4"})+'</div>';
+    if(stuCount>ROSTER_MAX_STUDENTS){ rosterBody+='<p class="ce-warn">Only the first '+ROSTER_MAX_STUDENTS+' students print on the roster (template capacity). The remaining '+(stuCount-ROSTER_MAX_STUDENTS)+' won’t appear &mdash; add a second roster by hand if needed.</p>'; }
     rosterBody+='<div id="ce-students"></div>';
     html+=section("Roster sign-in",rosterBody,rosterRight);
-    // Post-evaluation copies
-    html+=section("Post-evaluation forms",
-      '<p class="ce-sub">How many blank evaluation forms to include in the packet (one per student).</p>'+
-      '<div class="ce-row"><div style="flex:0 0 120px">'+field("Copies","evalCount",{mode:"numeric",ph:"1"})+'</div></div>'
-    );
+    // Post-evaluation: blank copies + paste Microsoft Forms results -> summary page
+    var evalRight=D.evalSummary?'<button class="ce-ghost" data-action="clear-eval">Clear results</button>':('<button class="ce-ghost" data-action="toggle-eval-paste">'+(showEvalPaste?"Close":"Paste results")+'</button>');
+    var evalBody='<p class="ce-sub">Blank evaluation forms to include (one per student). Set 0 if you only need the results summary.</p>'+
+      '<div class="ce-row"><div style="flex:0 0 120px">'+field("Blank copies","evalCount",{mode:"numeric",ph:"1"})+'</div></div>';
+    if(D.evalSummary){ var sm=D.evalSummary, avg=sm.questions&&sm.questions.length?(sm.questions.reduce(function(a,q){return a+q.avg;},0)/sm.questions.length):null;
+      evalBody+='<div class="ce-evalchip">★ '+sm.count+' response'+(sm.count===1?'':'s')+' loaded'+(avg!=null?(' · avg '+avg.toFixed(1)+'/5'):'')+(sm.questions?(' · '+sm.questions.length+' rated questions'):'')+' &mdash; a results summary page will be added to the packet.</div>'; }
+    else { evalBody+='<p class="ce-sub" style="margin-top:8px">Paste your Microsoft Forms results (Excel) to add a one-page summary (average per question + comments).</p>';
+      if(showEvalPaste){ evalBody+='<textarea class="ce-paste" id="ce-evalpaste" placeholder="Paste the Forms results from Excel — include the header row with the question text."></textarea>'+
+        '<div class="ce-row" style="margin:8px 0 2px;gap:8px"><div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-eval-paste">Build summary</button></div><div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-eval-paste">Cancel</button></div></div>'; } }
+    html+=section("Post-evaluation",evalBody,evalRight);
 
     html+='<p class="ce-error" id="ce-error"></p>';
     html+='<div class="ce-actions" id="ce-actions"></div>';
@@ -427,10 +525,15 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     }).join("");
   }
   function renderStudents(){
+    function inp(i,sub,ph,cls){ return '<input'+(cls?' class="'+cls+'"':'')+' data-list="students" data-sub="'+sub+'" data-i="'+i+'" value="'+esc(D.students[i][sub]||"")+'" placeholder="'+esc(ph)+'" />'; }
     document.getElementById("ce-students").innerHTML = D.students.map(function(s,i){
       var rm = D.students.length>1 ? '<button class="ce-x" data-action="rm-student" data-i="'+i+'" aria-label="Remove">×</button>' : '<span class="ce-x-spacer"></span>';
-      var over = i>=ROSTER_MAX_STUDENTS ? ' style="opacity:.5"' : '';
-      return '<div class="ce-listrow"'+over+'><span class="ce-marker">'+(i+1)+'</span><input data-list="students" data-i="'+i+'" value="'+esc(s)+'" placeholder="Last, First" />'+rm+'</div>';
+      var over = i>=ROSTER_MAX_STUDENTS ? ' style="opacity:.45"' : '';
+      return '<div class="ce-stu"'+over+'>'+
+        '<div class="ce-sturow"><span class="ce-marker">'+(i+1)+'</span>'+inp(i,"name","Last, First")+rm+'</div>'+
+        '<div class="ce-sturow ce-stusub">'+inp(i,"email","Email")+inp(i,"phone","Phone")+'</div>'+
+        '<div class="ce-sturow ce-stusub">'+inp(i,"dept","Op / Dept.")+inp(i,"amr","AMR Y/N","ce-stunar")+inp(i,"ksbems","KSBEMS / Cert #")+'</div>'+
+        '</div>';
     }).join("");
   }
   function renderActions(){
@@ -464,7 +567,7 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     if(t.classList) t.classList.remove("ce-invalid");
     if(ds.key!=null){
       var v=t.value;
-      if(ds.key==="courseHours"||ds.key==="lectureHours"||ds.key==="labHours") v=num(v);
+      if(ds.key==="courseHours"||ds.key==="lectureHours"||ds.key==="labHours"||ds.key==="hoursAwarded") v=num(v);
       else if(ds.key==="evalCount"){ v=v.replace(/[^0-9]/g,""); if(v!==t.value) t.value=v; }
       setPath(ds.key, v);
       if(ds.key==="courseHours") updateHoursWarn();
@@ -482,10 +585,13 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   root.addEventListener("keydown",function(e){
     if(e.key!=="Enter" || e.shiftKey) return;
     var t=e.target, ds=t.dataset; if(!ds||t.tagName!=="INPUT") return;
-    if(ds.list==="objectives"||ds.list==="credentials"||ds.list==="students"){
+    if(ds.list==="objectives"||ds.list==="credentials"){
       e.preventDefault(); var i=+ds.i; D[ds.list].splice(i+1,0,"");
-      ({objectives:renderObjectives,credentials:renderCredentials,students:renderStudents}[ds.list])(); saveDraft();
+      ({objectives:renderObjectives,credentials:renderCredentials}[ds.list])(); saveDraft();
       var el=root.querySelector('[data-list="'+ds.list+'"][data-i="'+(i+1)+'"]'); if(el) el.focus();
+    } else if(ds.list==="students"){
+      e.preventDefault(); var si=+ds.i; D.students.splice(si+1,0,emptyStudent()); renderStudents(); saveDraft();
+      var sel=root.querySelector('[data-list="students"][data-sub="name"][data-i="'+(si+1)+'"]'); if(sel) sel.focus();
     } else if(ds.list==="agenda"){
       e.preventDefault(); var j=+ds.i, nt=chainTime(D.agenda[j].time);
       D.agenda.splice(j+1,0,{time:nt,topic:""}); renderAgenda(); saveDraft();
@@ -495,18 +601,13 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   root.addEventListener("change",function(e){
     var t=e.target; if(t.dataset.comp!=null){ toggleComp(t.dataset.comp, t.checked, t); saveDraft(); }
   });
-  // Pasting multiple lines into a student row splits them into separate rows.
+  // Pasting a multi-line / Excel block into a student field fills the roster from it.
   root.addEventListener("paste",function(e){
     var t=e.target; if(!t.dataset || t.dataset.list!=="students") return;
     var text=((e.clipboardData||window.clipboardData)||{getData:function(){return "";}}).getData("text");
-    if(!text || !/[\r\n]/.test(text)) return;
+    if(!text || (!/[\r\n]/.test(text) && text.indexOf("\t")<0)) return;
     e.preventDefault();
-    var lines=text.split(/[\r\n]+/).map(function(s){return s.trim();}).filter(Boolean);
-    var i=+t.dataset.i;
-    Array.prototype.splice.apply(D.students,[i,1].concat(lines));
-    D.students=D.students.slice(0,ROSTER_MAX_STUDENTS); if(!D.students.length) D.students=[""];
-    var cnt=D.students.filter(function(s){return (s||"").trim();}).length; if(cnt) D.evalCount=String(Math.min(50,cnt));
-    saveDraft(); render();
+    ingestRoster(text);
   });
   root.addEventListener("click",function(e){
     var b=e.target.closest("[data-action]"); if(!b) return; var a=b.dataset.action;
@@ -517,10 +618,13 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     else if(a==="rm-agenda"){ D.agenda.splice(+b.dataset.i,1); renderAgenda(); saveDraft(); }
     else if(a==="add-credential"){ D.credentials.push(""); renderCredentials(); saveDraft(); }
     else if(a==="rm-credential"){ D.credentials.splice(+b.dataset.i,1); renderCredentials(); saveDraft(); }
-    else if(a==="add-student"){ D.students.push(""); renderStudents(); saveDraft(); }
-    else if(a==="rm-student"){ D.students.splice(+b.dataset.i,1); renderStudents(); saveDraft(); }
+    else if(a==="add-student"){ D.students.push(emptyStudent()); renderStudents(); saveDraft(); var ns=root.querySelector('[data-list="students"][data-sub="name"][data-i="'+(D.students.length-1)+'"]'); if(ns) ns.focus(); }
+    else if(a==="rm-student"){ D.students.splice(+b.dataset.i,1); if(!D.students.length) D.students=[emptyStudent()]; renderStudents(); saveDraft(); }
     else if(a==="toggle-paste"){ showPaste=!showPaste; render(); }
     else if(a==="apply-paste"){ applyPaste(); }
+    else if(a==="toggle-eval-paste"){ showEvalPaste=!showEvalPaste; render(); }
+    else if(a==="apply-eval-paste"){ applyEvalPaste(); }
+    else if(a==="clear-eval"){ D.evalSummary=null; saveDraft(); render(); }
     else if(a==="use-cat-total"){ D.courseHours=b.dataset.sum; var ch=root.querySelector('[data-key="courseHours"]'); if(ch) ch.value=D.courseHours; updateHoursWarn(); saveDraft(); }
     else if(a==="reset"){ resetForm(); }
     else if(a==="save-preset"){ saveCurrentPreset(); }
@@ -555,7 +659,9 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
       if(!Array.isArray(D.objectives)||!D.objectives.length) D.objectives=[""];
       if(!Array.isArray(D.agenda)||!D.agenda.length) D.agenda=[{time:"",topic:""}];
       if(!Array.isArray(D.credentials)||!D.credentials.length) D.credentials=[""];
-      if(!Array.isArray(D.students)||!D.students.length) D.students=[""];
+      // migrate students: older drafts stored plain name strings
+      if(!Array.isArray(D.students)||!D.students.length) D.students=[emptyStudent()];
+      else D.students=D.students.map(function(s){ if(s&&typeof s==="object"){ var e=emptyStudent(); for(var k in e) if(s[k]!=null) e[k]=s[k]; return e; } return Object.assign(emptyStudent(),{name:String(s||"")}); });
       if(!Array.isArray(D.competencies)) D.competencies=[];
       if(!D.catHours||typeof D.catHours!=="object") D.catHours={Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""};
       if(!String(D.evalCount||"").length) D.evalCount="1";
@@ -566,10 +672,10 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     D.title="";D.date="";D.startTime="";D.endTime="";D.startEnd="";D.courseHours="";D.lectureHours="";D.labHours="";
     D.catHours={Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""};
     D.competencies=[];D.localComp="";D.objectives=[""];D.agenda=[{time:"",topic:""}];D.credentials=[""];
-    D.students=[""];D.evalCount="1";
+    D.students=[emptyStudent()];D.timeIn="";D.timeOut="";D.hoursAwarded="";D.evalCount="1";D.evalSummary=null;
     D.instructor=keep.instructor;D.instructorEmail=keep.instructorEmail;D.location=keep.location;D.otherInstructors=keep.otherInstructors;
     if(result){ URL.revokeObjectURL(result.url); result=null; }
-    showComp=false; showPaste=false; setError(""); saveDraft(); render();
+    showComp=false; showPaste=false; showEvalPaste=false; setError(""); saveDraft(); render();
   }
 
   /* ---------------- smart hours ---------------- */
@@ -592,18 +698,56 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     if(hrs<0.25||hrs>14) return null; return Math.round(hrs*100)/100;
   }
 
-  function applyPaste(){
-    var ta=document.getElementById("ce-paste");
-    var lines=ta?ta.value.split(/[\r\n]+/).map(function(s){return s.trim();}).filter(Boolean):[];
-    if(lines.length){
-      var existing=D.students.filter(function(s){return (s||"").trim();});
-      var all=existing.concat(lines).slice(0,ROSTER_MAX_STUDENTS);
-      D.students=all.length?all:[""];
-      var cnt=D.students.filter(function(s){return (s||"").trim();}).length;
-      if(cnt) D.evalCount=String(Math.min(50,cnt));
-    }
+  /* ---------------- Excel / list paste ---------------- */
+  function splitTable(text){ return String(text||"").replace(/\r/g,"").split("\n").filter(function(l){return l.trim().length;})
+      .map(function(line){ return line.indexOf("\t")>-1 ? line.split("\t") : [line]; }); }
+  var ROSTER_HEADER_MATCH=[
+    ["email",/e-?mail/i],["phone",/phone|cell|mobile/i],
+    ["dept",/op.?\/?\s*dept|department|agency|service|station|unit/i],
+    ["amr",/\bamr\b|employee/i],
+    ["ksbems",/ksbems|kbems|attend[ae]nt|cert(ificate)?\s*#?|registry|nremt|licen[sc]e/i],
+    ["name",/(student|print).*name|^name$|full ?name|last.*first|attendee/i]
+  ];
+  function looksLikeHeader(cells){ return cells.some(function(c){ return /[a-z]/i.test(c) && /name|e-?mail|phone|dept|agency|amr|ksbems|kbems|attend|cert|registry/i.test(c); }); }
+  // Build student objects from pasted text (Excel TSV with headers, or one name per line).
+  function parseRoster(text){
+    var rows=splitTable(text); if(!rows.length) return [];
+    var header=rows[0], hasHeader=looksLikeHeader(header), map={};
+    if(hasHeader){ header.forEach(function(h,idx){ for(var k=0;k<ROSTER_HEADER_MATCH.length;k++){ if(map[ROSTER_HEADER_MATCH[k][0]]==null && ROSTER_HEADER_MATCH[k][1].test(h)){ map[ROSTER_HEADER_MATCH[k][0]]=idx; break; } } }); }
+    if(map.name==null) map.name=0; // fallback: first column is the name
+    var data=hasHeader?rows.slice(1):rows;
+    return data.map(function(cells){ var s=emptyStudent();
+      ["name","email","phone","dept","amr","ksbems"].forEach(function(f){ if(map[f]!=null) s[f]=(cells[map[f]]||"").trim(); });
+      return s; }).filter(function(s){ return s.name; });
+  }
+  function ingestRoster(text){
+    var add=parseRoster(text); if(!add.length) return;
+    var existing=D.students.filter(function(s){return stuName(s).trim();});
+    D.students=existing.concat(add).slice(0,ROSTER_MAX_STUDENTS); if(!D.students.length) D.students=[emptyStudent()];
+    var cnt=D.students.filter(function(s){return stuName(s).trim();}).length; if(cnt) D.evalCount=String(Math.min(50,cnt));
     showPaste=false; saveDraft(); render();
   }
+  function applyPaste(){ var ta=document.getElementById("ce-paste"); if(ta) ingestRoster(ta.value); }
+
+  // Parse Microsoft Forms results (Excel TSV) into a ratings/comments summary.
+  var EVAL_META=/^(id|start time|completion time|email|name|total points|points ?-|quiz ?feedback|feedback|last modified|submission)/i;
+  function parseEval(text){
+    var rows=splitTable(text); if(rows.length<2) return null;
+    var header=rows[0], data=rows.slice(1).filter(function(r){return r.join("").trim();}); if(!data.length) return null;
+    var questions=[], comments=[];
+    for(var c=0;c<header.length;c++){
+      var label=(header[c]||"").trim(); if(!label || EVAL_META.test(label)) continue;
+      var nums=[], texts=[];
+      for(var r=0;r<data.length;r++){ var v=(data[r][c]||"").trim(); if(!v) continue; var m=v.match(/^([1-5])(?:\s|$|\.|-|:)/)||v.match(/^([1-5])$/); if(m) nums.push(parseInt(m[1],10)); else texts.push(v); }
+      if(nums.length && nums.length>=data.length*0.4 && nums.length>=texts.length){ questions.push({label:label, avg:nums.reduce(function(a,b){return a+b;},0)/nums.length, n:nums.length}); }
+      else if(texts.length){ comments.push({label:label, answers:texts}); }
+    }
+    if(!questions.length && !comments.length) return null;
+    return { count:data.length, questions:questions, comments:comments };
+  }
+  function ingestEval(text){ var sm=parseEval(text); if(!sm){ setError("Couldn’t read evaluation results — paste the Excel cells including the header row."); return; }
+    D.evalSummary=sm; showEvalPaste=false; setError(""); saveDraft(); render(); }
+  function applyEvalPaste(){ var ta=document.getElementById("ce-evalpaste"); if(ta) ingestEval(ta.value); }
 
   function setError(msg){ var el=document.getElementById("ce-error"); if(el) el.textContent=msg||""; }
   async function onGenerate(){
