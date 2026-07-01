@@ -156,6 +156,7 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   ];
   var ROSTER_FIELD = { title:"Class Title", location:"Location", date:"Date", startEnd:"Time", hours:"Hours", instructor:"Print Name", otherInstructors:"Print Names" };
   var ROSTER_MAX_STUDENTS = 18; // fillable name rows in the template (2 pages)
+  var ROSTER_INPUT_CAP = 60;    // keep extras beyond capacity so the overflow warning shows; bound runaway pastes
   // Per-student columns that ARE fillable AcroForm fields (field name = base + row number).
   var ROSTER_STU_FIELD = { name:"Student Signature", email:"Email AddressRow", dept:"OpDeptRow", amr:"AMR Emp YNRow", ksbems:"KSBEMS Attendent Row" };
   // Columns with NO form field: drawn as rotated overlays. y = unrotated column band; insetX nudges down within the row.
@@ -173,8 +174,16 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   function milTime(t){ var m=/^(\d{1,2}):(\d{2})/.exec(String(t||"")); return m? (("0"+m[1]).slice(-2)+m[2]) : ""; }
   function derivedStartEnd(d){ var a=milTime(d.startTime), b=milTime(d.endTime); return (a&&b)? (a+"-"+b) : (d.startEnd||""); }
   function hoursBetween(d){ var a=milTime(d.startTime), b=milTime(d.endTime); if(!a||!b) return null; var am=parseInt(a.slice(0,2),10)*60+parseInt(a.slice(2),10), bm=parseInt(b.slice(0,2),10)*60+parseInt(b.slice(2),10); var diff=bm-am; if(diff<0) diff+=1440; var h=diff/60; return (h>=0.25&&h<=14)? Math.round(h*100)/100 : null; }
-  // Shallow clone with print-ready date + derived start/end, fed to the PDF builders.
-  function prep(d){ var P={},k; for(k in d) P[k]=d[k]; P.date=fmtDate(d.date); P.startEnd=derivedStartEnd(d);
+  // The embedded Helvetica uses WinAnsi (CP1252); characters outside it (emoji, etc.) would throw on
+  // draw. Transliterate common smart punctuation to ASCII and drop anything else not encodable.
+  function safe(v){ return String(v==null?"":v)
+    .replace(/[‘’‚‛]/g,"'").replace(/[“”„]/g,'"')
+    .replace(/[–—]/g,"-").replace(/…/g,"...").replace(/[•]/g,"-").replace(/ /g," ")
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g,""); }
+  function deepSafe(o){ if(typeof o==="string") return safe(o); if(Array.isArray(o)) return o.map(deepSafe);
+    if(o&&typeof o==="object"){ var r={}; for(var k in o) r[k]=deepSafe(o[k]); return r; } return o; }
+  // Deep-sanitized clone with print-ready date + derived start/end, fed to the PDF builders.
+  function prep(d){ var P=deepSafe(d); P.date=fmtDate(d.date); P.startEnd=derivedStartEnd(d);
     P.timeIn=(d.timeIn||"").trim()||milTime(d.startTime); P.timeOut=(d.timeOut||"").trim()||milTime(d.endTime); P.hoursAwarded=(d.hoursAwarded||"").trim()||d.courseHours;
     return P; }
   async function fetchPdfBytes(url){ var res=await fetch(url); if(!res.ok) throw new Error("Could not load "+url+" ("+res.status+"). Check that the ce-templates folder is deployed."); return new Uint8Array(await res.arrayBuffer()); }
@@ -746,7 +755,7 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
   function ingestRoster(text){
     var add=parseRoster(text); if(!add.length) return;
     var existing=D.students.filter(function(s){return stuName(s).trim();});
-    D.students=existing.concat(add).slice(0,ROSTER_MAX_STUDENTS); if(!D.students.length) D.students=[emptyStudent()];
+    D.students=existing.concat(add).slice(0,ROSTER_INPUT_CAP); if(!D.students.length) D.students=[emptyStudent()];
     var cnt=D.students.filter(function(s){return stuName(s).trim();}).length; if(cnt) D.evalCount=String(Math.min(50,cnt));
     showPaste=false; saveDraft(); render();
   }
