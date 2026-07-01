@@ -4,32 +4,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
 <title>ACLS 2025 — Flash Cards</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
 
 :root {
-–bg:       #0d1117;
-–surface:  #161b22;
-–border:   #30363d;
-–text:     #e6edf3;
-–muted:    #7d8590;
-–accent:   #58a6ff;
-–green:    #3fb950;
-–amber:    #d29922;
-–red:      #f85149;
-–purple:   #bc8cff;
-–card-front: #161b22;
-–card-back:  #1c2128;
+--bg:       #ffffff;
+--surface:  #ffffff;
+--border:   #e2e6ec;
+--text:     #152238;
+--muted:    #66707c;
+--accent:   #173a68;
+--green:    #15803d;
+--amber:    #a1590b;
+--red:      #dc2626;
+--purple:   #6d28d9;
+--card-front: #ffffff;
+--card-back:  #f4f6f9;
 }
 
-- { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-background: var(–bg);
-color: var(–text);
-font-family: ‘IBM Plex Sans’, sans-serif;
+background: var(--bg);
+color: var(--text);
+font-family: 'IBM Plex Sans', sans-serif;
 font-weight: 300;
+line-height: 1.5;
 min-height: 100vh;
 display: flex;
 flex-direction: column;
@@ -52,19 +54,19 @@ margin-bottom: 6px;
 }
 
 h1 {
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 13px;
 font-weight: 600;
 letter-spacing: 0.12em;
 text-transform: uppercase;
-color: var(–accent);
+color: var(--accent);
 }
 
 .version-tag {
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 11px;
-color: var(–muted);
-border: 1px solid var(–border);
+color: var(--muted);
+border: 1px solid var(--border);
 padding: 1px 7px;
 border-radius: 20px;
 }
@@ -78,20 +80,20 @@ margin-bottom: 20px;
 }
 
 .deck-btn {
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 11px;
 letter-spacing: 0.06em;
 padding: 5px 12px;
 border-radius: 4px;
-border: 1px solid var(–border);
+border: 1px solid var(--border);
 background: transparent;
-color: var(–muted);
+color: var(--muted);
 cursor: pointer;
 transition: all 0.15s;
 }
 
-.deck-btn:hover { color: var(–text); border-color: var(–muted); }
-.deck-btn.active { background: var(–accent); border-color: var(–accent); color: #0d1117; font-weight: 600; }
+.deck-btn:hover { color: var(--text); border-color: var(--muted); }
+.deck-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
 
 /* ── Progress bar ── */
 .progress-row {
@@ -104,22 +106,22 @@ margin-bottom: 20px;
 .progress-track {
 flex: 1;
 height: 3px;
-background: var(–border);
+background: var(--border);
 border-radius: 2px;
 overflow: hidden;
 }
 
 .progress-fill {
 height: 100%;
-background: var(–accent);
+background: var(--accent);
 border-radius: 2px;
 transition: width 0.3s ease;
 }
 
 .progress-label {
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 11px;
-color: var(–muted);
+color: var(--muted);
 white-space: nowrap;
 }
 
@@ -147,7 +149,7 @@ position: absolute;
 inset: 0;
 backface-visibility: hidden;
 -webkit-backface-visibility: hidden;
-border: 1px solid var(–border);
+border: 1px solid var(--border);
 border-radius: 10px;
 padding: 32px 36px;
 display: flex;
@@ -155,11 +157,11 @@ flex-direction: column;
 justify-content: center;
 }
 
-.card-front { background: var(–card-front); }
-.card-back  { background: var(–card-back); transform: rotateY(180deg); border-color: var(–accent); }
+.card-front { background: var(--card-front); }
+.card-back  { background: var(--card-back); transform: rotateY(180deg); border-color: var(--accent); }
 
 .card-tag {
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 10px;
 letter-spacing: 0.1em;
 text-transform: uppercase;
@@ -171,30 +173,30 @@ opacity: 0.5;
 font-size: 18px;
 font-weight: 400;
 line-height: 1.5;
-color: var(–text);
+color: var(--text);
 }
 
 .card-answer {
 font-size: 17px;
 font-weight: 400;
 line-height: 1.6;
-color: var(–text);
+color: var(--text);
 }
 
 .card-answer strong {
-color: var(–accent);
+color: var(--accent);
 font-weight: 600;
 }
 
-.card-answer .highlight-green { color: var(–green); font-weight: 600; }
-.card-answer .highlight-red   { color: var(–red);   font-weight: 600; }
-.card-answer .highlight-amber { color: var(–amber); font-weight: 600; }
+.card-answer .highlight-green { color: var(--green); font-weight: 600; }
+.card-answer .highlight-red   { color: var(--red);   font-weight: 600; }
+.card-answer .highlight-amber { color: var(--amber); font-weight: 600; }
 
 .flip-hint {
 margin-top: 20px;
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 10px;
-color: var(–muted);
+color: var(--muted);
 letter-spacing: 0.08em;
 }
 
@@ -208,28 +210,28 @@ max-width: 640px;
 
 .btn {
 flex: 1;
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 12px;
 font-weight: 600;
 letter-spacing: 0.06em;
 padding: 12px;
 border-radius: 6px;
-border: 1px solid var(–border);
-background: var(–surface);
-color: var(–text);
+border: 1px solid var(--border);
+background: var(--surface);
+color: var(--text);
 cursor: pointer;
 transition: all 0.15s;
 }
 
-.btn:hover { border-color: var(–accent); color: var(–accent); }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
 .btn:active { transform: scale(0.98); }
 .btn:disabled { opacity: 0.3; cursor: default; }
-.btn:disabled:hover { border-color: var(–border); color: var(–text); }
+.btn:disabled:hover { border-color: var(--border); color: var(--text); }
 
 .btn-shuffle {
 flex: 0 0 auto;
 padding: 12px 18px;
-color: var(–muted);
+color: var(--muted);
 font-size: 14px;
 }
 
@@ -246,28 +248,28 @@ max-width: 640px;
 display: flex;
 align-items: center;
 gap: 7px;
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 12px;
-color: var(–muted);
+color: var(--muted);
 cursor: pointer;
 transition: color 0.15s;
 }
 
-.score-item:hover { color: var(–text); }
+.score-item:hover { color: var(--text); }
 
 .score-dot {
 width: 8px; height: 8px;
 border-radius: 50%;
-border: 1.5px solid var(–border);
+border: 1.5px solid var(--border);
 transition: all 0.15s;
 }
 
-.score-item.marked-got .score-dot   { background: var(–green);  border-color: var(–green); }
-.score-item.marked-miss .score-dot  { background: var(–red);    border-color: var(–red); }
+.score-item.marked-got .score-dot   { background: var(--green);  border-color: var(--green); }
+.score-item.marked-miss .score-dot  { background: var(--red);    border-color: var(--red); }
 
 .score-count { font-size: 13px; font-weight: 600; }
-.score-got  .score-count { color: var(–green); }
-.score-miss .score-count { color: var(–red); }
+.score-got  .score-count { color: var(--green); }
+.score-miss .score-count { color: var(--red); }
 
 /* ── Done state ── */
 .done-screen {
@@ -279,45 +281,45 @@ gap: 14px;
 width: 100%;
 max-width: 640px;
 padding: 48px 24px;
-border: 1px solid var(–border);
+border: 1px solid var(--border);
 border-radius: 10px;
-background: var(–surface);
+background: var(--surface);
 }
 
 .done-screen.visible { display: flex; }
 
 .done-title {
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 13px;
 letter-spacing: 0.1em;
-color: var(–accent);
+color: var(--accent);
 text-transform: uppercase;
 }
 
 .done-stats {
 font-size: 40px;
 font-weight: 600;
-color: var(–green);
+color: var(--green);
 }
 
-.done-sub { font-size: 14px; color: var(–muted); }
+.done-sub { font-size: 14px; color: var(--muted); }
 
 .btn-restart {
 margin-top: 8px;
-font-family: ‘IBM Plex Mono’, monospace;
+font-family: 'IBM Plex Sans', sans-serif;
 font-size: 12px;
 font-weight: 600;
 letter-spacing: 0.08em;
 padding: 12px 28px;
 border-radius: 6px;
-border: 1px solid var(–accent);
+border: 1px solid var(--accent);
 background: transparent;
-color: var(–accent);
+color: var(--accent);
 cursor: pointer;
 transition: all 0.15s;
 }
 
-.btn-restart:hover { background: var(–accent); color: #0d1117; }
+.btn-restart:hover { background: var(--accent); color: #fff; }
 </style>
 
 </head>
