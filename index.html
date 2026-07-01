@@ -381,12 +381,15 @@ display:flex;align-items:center;justify-content:center;color:var(--teal2);font-s
 .home-hero-sub{font-size:12px;color:var(--gray);margin-top:4px;letter-spacing:0.02em}
 .home-name-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px}
 .home-name-edit{background:none;border:none;color:var(--gray);font-size:11px;cursor:pointer;text-decoration:underline;font-family:var(--sans);padding:2px 4px}
-.home-name-form{display:flex;gap:8px;justify-content:center;margin-top:10px;padding:0 16px}
-.home-name-input{flex:1;max-width:220px;background:var(--dim);border:1.5px solid var(--border);border-radius:8px;
-color:var(--white);font-family:var(--sans);font-size:14px;padding:9px 12px;outline:none;-webkit-appearance:none}
+.home-name-form{display:flex;flex-direction:column;gap:8px;max-width:280px;margin:10px auto 0;padding:0 16px}
+.home-name-input{background:var(--dim);border:1.5px solid var(--border);border-radius:8px;
+color:var(--white);font-family:var(--sans);font-size:14px;padding:9px 12px;outline:none;-webkit-appearance:none;width:100%}
 .home-name-input:focus{border-color:var(--teal)}
-.home-name-save{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:9px 16px;
+.home-name-save{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 16px;
 font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.home-name-save:disabled{opacity:0.5;cursor:default}
+.home-name-hint{font-size:10px;color:var(--gray);line-height:1.4;margin-top:2px}
+.home-name-err{font-size:11px;color:var(--danger);margin-top:2px;display:none}
 .stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 12px 6px}
 .stat-tile{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);
 border-radius:10px;padding:12px;text-decoration:none;color:inherit;transition:border-color 0.12s}
@@ -619,8 +622,48 @@ function escHtml(s){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
-function getName(){ try{ return (localStorage.getItem('amrkc_name')||'').trim(); }catch(e){ return ''; } }
-function setName(n){ try{ localStorage.setItem('amrkc_name', n.trim().slice(0,40)); }catch(e){} }
+// Provider profile — backed by a Google Apps Script + Sheet (see
+// provider-profile-AppsScript.gs). Deploy that script and paste the
+// resulting /exec URL below to enable cross-device recognition.
+// Until then, profiles are saved locally on this device only.
+var PROFILE_ENDPOINT = 'PASTE_YOUR_PROFILE_SCRIPT_URL_HERE';
+
+function getProfile(){ try{ return JSON.parse(localStorage.getItem('amrkc_profile')||'null'); }catch(e){ return null; } }
+function setProfile(p){ try{ localStorage.setItem('amrkc_profile', JSON.stringify(p)); }catch(e){} }
+function clearProfile(){ try{ localStorage.removeItem('amrkc_profile'); }catch(e){} }
+
+function profileConfigured(){ return !!PROFILE_ENDPOINT && PROFILE_ENDPOINT.indexOf('PASTE_') !== 0; }
+
+// Best-effort lookup by employee number so a returning provider is
+// recognized on a new device. Always calls back — null if not found,
+// not configured, offline, or slow (4s timeout).
+function lookupProfile(empNum, cb){
+  if(!profileConfigured()){ cb(null); return; }
+  var done = false;
+  var timer = setTimeout(function(){ if(!done){ done = true; cb(null); } }, 4000);
+  fetch(PROFILE_ENDPOINT + '?employeeNumber=' + encodeURIComponent(empNum))
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(done) return; done = true; clearTimeout(timer);
+      cb(data && data.found ? data.profile : null);
+    })
+    .catch(function(){
+      if(done) return; done = true; clearTimeout(timer);
+      cb(null);
+    });
+}
+
+// Fire-and-forget create/update — mirrors the pattern used by the
+// other Apps Script–backed features in this app (no response read).
+function saveProfileRemote(lastName, empNum){
+  if(!profileConfigured()) return;
+  var body = 'lastName=' + encodeURIComponent(lastName) + '&employeeNumber=' + encodeURIComponent(empNum);
+  fetch(PROFILE_ENDPOINT, {
+    method: 'POST', mode: 'no-cors',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: body
+  }).catch(function(){});
+}
 
 function getDaily5Stats(){
   try{ return JSON.parse(localStorage.getItem('d5stats')||'{}'); }catch(e){ return {}; }
@@ -639,17 +682,20 @@ function getVtaStats(){
 
 function renderHome(){
   var c = $('lv');
-  var name = getName();
+  var profile = getProfile();
   var h = '<div class="home-hero">';
-  if(name){
-    h += '<div class="home-hero-title">Welcome back, '+escHtml(name)+'</div>';
-    h += '<div class="home-name-row"><button class="home-name-edit" id="home-name-edit-btn">Not '+escHtml(name)+'?</button></div>';
+  if(profile && profile.lastName){
+    h += '<div class="home-hero-title">Welcome back, '+escHtml(profile.lastName)+'</div>';
+    h += '<div class="home-name-row"><button class="home-name-edit" id="home-name-edit-btn">Not '+escHtml(profile.lastName)+'?</button></div>';
   } else {
     h += '<div class="home-hero-title">AMR Kansas City</div>';
     h += '<div class="home-hero-sub">Field Guide 2026 &middot; Select a section below</div>';
     h += '<div class="home-name-form">';
-    h += '<input class="home-name-input" id="home-name-input" type="text" placeholder="Your first name" maxlength="40" autocomplete="off">';
-    h += '<button class="home-name-save" id="home-name-save-btn">Save</button>';
+    h += '<input class="home-name-input" id="home-lastname-input" type="text" placeholder="Last name" maxlength="40" autocomplete="off">';
+    h += '<input class="home-name-input" id="home-empnum-input" type="text" placeholder="Employee #" maxlength="20" autocomplete="off" inputmode="numeric">';
+    h += '<button class="home-name-save" id="home-name-save-btn">Save profile</button>';
+    h += '<div class="home-name-err" id="home-name-err">Enter both your last name and employee number.</div>';
+    h += '<div class="home-name-hint">Used to personalize your Field Guide &mdash; not shared outside AMR KC.</div>';
     h += '</div>';
   }
   h += '</div>';
@@ -1031,14 +1077,10 @@ document.addEventListener('DOMContentLoaded', function(){
       calcDoses();
       return;
     }
-    // Home name capture / edit
-    if(e.target.closest('#home-name-save-btn')){
-      var ni = $('home-name-input');
-      if(ni && ni.value.trim()){ setName(ni.value); renderHome(); }
-      return;
-    }
+    // Home profile capture / edit
+    if(e.target.closest('#home-name-save-btn')){ submitProfile(); return; }
     if(e.target.closest('#home-name-edit-btn')){
-      setName('');
+      clearProfile();
       renderHome();
       return;
     }
@@ -1049,13 +1091,36 @@ document.addEventListener('DOMContentLoaded', function(){
     if(e.target && e.target.id === 'wt') calcDoses();
   });
 
-  // Home name input — save on Enter
+  // Home profile inputs — save on Enter
   $('lv').addEventListener('keydown', function(e){
-    if(e.key === 'Enter' && e.target && e.target.id === 'home-name-input'){
+    if(e.key === 'Enter' && e.target && (e.target.id === 'home-lastname-input' || e.target.id === 'home-empnum-input')){
       e.preventDefault();
-      if(e.target.value.trim()){ setName(e.target.value); renderHome(); }
+      submitProfile();
     }
   });
+
+  // Validate, look up any existing record by employee number, and save
+  function submitProfile(){
+    var lnEl = $('home-lastname-input'), enEl = $('home-empnum-input');
+    var btn = $('home-name-save-btn'), errEl = $('home-name-err');
+    if(!lnEl || !enEl) return;
+    var lastName = lnEl.value.trim(), empNum = enEl.value.trim();
+    if(!lastName || !empNum){
+      if(errEl) errEl.style.display = 'block';
+      return;
+    }
+    if(errEl) errEl.style.display = 'none';
+    if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
+    lookupProfile(empNum, function(existing){
+      if(existing && existing.lastName){
+        setProfile({ lastName: existing.lastName, employeeNumber: empNum });
+      } else {
+        setProfile({ lastName: lastName, employeeNumber: empNum });
+        saveProfileRemote(lastName, empNum);
+      }
+      renderHome();
+    });
+  }
 
   // Back
   var bkBtn = $('bk');
