@@ -626,7 +626,7 @@ function escHtml(s){
 // provider-profile-AppsScript.gs). Deploy that script and paste the
 // resulting /exec URL below to enable cross-device recognition.
 // Until then, profiles are saved locally on this device only.
-var PROFILE_ENDPOINT = 'PASTE_YOUR_PROFILE_SCRIPT_URL_HERE';
+var PROFILE_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyc_iU6npoA1505QJbvBdPz_8-OGreOOBF0MIu_0EyivF8rDHKQnqCIQP7DtryclN45/exec';
 
 function getProfile(){ try{ return JSON.parse(localStorage.getItem('amrkc_profile')||'null'); }catch(e){ return null; } }
 function setProfile(p){ try{ localStorage.setItem('amrkc_profile', JSON.stringify(p)); }catch(e){} }
