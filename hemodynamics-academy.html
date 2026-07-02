@@ -471,10 +471,210 @@ var MODULES = [
     ]
   },
 
-  { id:2, available:false, title:"Arterial Line Monitoring",
-    desc:"Leveling and zeroing to the phlebostatic axis, waveform components, the square-wave (damping) test, and troubleshooting a bad tracing." },
-  { id:3, available:false, title:"Pharmacology I — Managing the Hypotensive Patient",
-    desc:"Norepinephrine, epinephrine, phenylephrine, vasopressin, dopamine, dobutamine, milrinone: receptor logic, push-dose pressors, and titration to a target." },
+  {
+    id: 2,
+    available: true,
+    title: "Arterial Line Monitoring",
+    desc: "Leveling and zeroing to the phlebostatic axis, waveform components, the square-wave (damping) test, and troubleshooting a bad tracing.",
+    objective: "Read an arterial waveform and its components, set up a line correctly by leveling and zeroing, use the square-wave test to judge whether the numbers can be trusted, and know which value survives distortion.",
+    content: [
+      { h:"1", t:"What an arterial line actually measures", html:
+        "<p>Strip away the mystique and an arterial line is plumbing. A continuous column of saline connects the patient's artery to a pressure transducer. Every heartbeat pushes on that column, the transducer converts the push into an electrical signal, and the monitor draws it as a wave. There is no magic — just a pressure sensor on the end of a fluid-filled tube.</p>"+
+        "<p>Why bother, when a blood-pressure cuff is right there? Because a cuff gives you a <em>snapshot</em> every three to five minutes, and it takes that snapshot by squeezing until flow stops. An arterial line gives you the true pressure <em>every single beat</em>, continuously, and it does it without interrupting flow. Think of it as a stethoscope for pressure that never blinks. In a patient on a vasopressor or crashing in front of you, the difference between a reading every beat and a guess every few minutes is the difference between steering and hoping.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>Arterial lines are the accepted standard for beat-to-beat pressure in shock and for titrating vasopressors, but that standing rests mainly on physiologic rationale and consistency, not on large trials showing they lower mortality versus a cuff. What is better supported is the other half of the argument: oscillometric (cuff) blood pressure becomes unreliable at low pressures and in low-flow states, where it tends to read inaccurately. So the case for the a-line in shock is really a case against trusting the cuff there.</p>"+
+        "<div class='grade'>Quality: moderate for cuff unreliability in hypotension (observational); the outcome case for a-lines is consensus and physiologic rather than RCT-proven.</div></div>"
+      },
+      { h:"2", t:"The anatomy of one beat", html:
+        "<p>Every beat writes a signature, and a healthy signature has recognizable parts. Reading left to right across a single wave:</p>"+
+        "<ul>"+
+        "<li><strong>Systolic upstroke</strong> — the near-vertical climb as the ventricle ejects. A brisk, steep upstroke reflects good contractility and ejection.</li>"+
+        "<li><strong>Systolic peak</strong> — the top of the wave. This is your systolic pressure (SBP).</li>"+
+        "<li><strong>Dicrotic notch</strong> — a small notch on the downslope marking aortic valve closure. It is the punctuation mark at the end of systole, the moment the ventricle stops ejecting and diastole begins.</li>"+
+        "<li><strong>Diastolic runoff</strong> — the gentle downhill glide as blood drains into the periphery.</li>"+
+        "<li><strong>End-diastole</strong> — the lowest point, just before the next upstroke. This is your diastolic pressure (DBP).</li>"+
+        "</ul>"+
+        "<p>The shape carries information beyond the numbers. A slurred, low-amplitude upstroke can hint at poor contractility or a low stroke volume. The height of the dicrotic notch tracks loosely with vascular tone — a high notch suggests high resistance, a low or vanishing notch suggests a wide-open, vasodilated circulation. And if the whole waveform bobs up and down with the ventilator, that respiratory swing is the fluid-responsiveness clue from Module 1 showing itself on the screen. Treat these as qualitative reads, not precise measurements.</p>"
+      },
+      { h:"3", t:"Leveling: why height changes the number", html:
+        "<p>Here is a fact that trips up more transports than any other: <em>the height of the transducer changes the pressure it reports.</em> The saline column has weight, and a taller column of fluid presses down harder. Move the transducer up or down and you add or subtract that hydrostatic pressure to every reading.</p>"+
+        "<div class='formula'>error ≈ <span class='fk'>7.4 mmHg</span> per <span class='fk'>10 cm</span> of vertical offset</div>"+
+        "<p>To make everyone measure from the same baseline, we agree on a reference point: the <strong>phlebostatic axis</strong> — the 4th intercostal space at the mid-axillary line, roughly the level of the atria. Level the transducer there and the readings mean what they should.</p>"+
+        "<ul>"+
+        "<li>Transducer <strong>below</strong> the phlebostatic axis → reads <em>falsely high</em> (extra column weight pushing on the sensor).</li>"+
+        "<li>Transducer <strong>above</strong> the axis → reads <em>falsely low</em>.</li>"+
+        "</ul>"+
+        "<p>Picture a water tower: the higher the column of water above you, the harder it pushes down at the bottom. The phlebostatic axis is simply the agreed 'sea level' for that column. On transport this is the single most common error — you raise the head of the stretcher, tilt for a transfer, or move the patient to the cot, and the transducer is no longer at the axis. Re-level after every position change.</p>"
+      },
+      { h:"4", t:"Zeroing: telling the monitor what 'nothing' feels like", html:
+        "<p>Leveling and zeroing are two different jobs, and both are required. <strong>Zeroing</strong> opens the transducer to room air and tells the monitor, 'call this pressure zero.' From then on it measures pressure <em>relative to atmosphere</em> rather than absolute pressure — which is what you want, since you care about pressure above ambient, not the weight of the whole atmosphere.</p>"+
+        "<p>The clean way to keep them straight: <em>zeroing sets the atmospheric reference; leveling sets the anatomic reference.</em> Zeroing is calibrating a scale to read 0 with nothing on it. Leveling is making sure that scale is sitting on flat ground before you weigh anything. Do both at setup, and re-zero whenever the transducer is moved or the numbers look implausible.</p>"
+      },
+      { h:"5", t:"The square-wave test: is the line telling the truth?", html:
+        "<p>Before you act on a systolic number, spend two seconds confirming the line isn't lying to you. Pull the fast-flush ('the pigtail'), which briefly slams the flush-bag pressure (~300 mmHg) into the tubing, then let go and watch the trace snap back. This is the <strong>square-wave</strong> or dynamic-response test, and it has three possible verdicts.</p>"+
+        "<ul>"+
+        "<li><strong>Optimally damped</strong> — sharp square, then one or two quick oscillations, then straight back to baseline. The numbers are trustworthy.</li>"+
+        "<li><strong>Underdamped</strong> — the trace 'rings,' bouncing through several oscillations and overshooting. It <em>overestimates SBP</em> and <em>underestimates DBP</em>. Think of a bell that won't stop ringing. Causes: stiff or overly long tubing, catheter whip, and fast heart rates.</li>"+
+        "<li><strong>Overdamped</strong> — sluggish, no oscillations, a slurred return that rounds off the waveform. It <em>underestimates SBP</em> and <em>overestimates DBP</em>. Think of ringing that same bell after wrapping it in a towel — a dull thud with no ring. Causes: air bubbles, a small clot, a kink, a loose connection, or a low flush-bag pressure.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The square-wave test is free, takes seconds, and tells you whether to trust the SBP and DBP. Run it before you titrate a drug to a systolic number.</div>"
+      },
+      { h:"6", t:"Why MAP is the number you can trust", html:
+        "<p>Damping mangles the extremes. An underdamped line inflates the peak and drops the trough; an overdamped line does the reverse. But notice what both leave alone: the middle. <strong>Mean arterial pressure is the integrated area under the curve</strong>, and averaging is remarkably resistant to distortion at the top and bottom.</p>"+
+        "<p>It is the same reason one disastrous exam barely moves your grade-point average: a single outlier swings your highest and lowest scores far more than it swings the mean. So when a waveform looks damped, or you simply aren't sure, <em>titrate to the MAP, not the systolic.</em> This is also why the MAP-based targets from Module 1 (a floor near 65 mmHg, individualized) are the right thing to chase at the bedside — the MAP is both the most physiologically meaningful number and the most artifact-resistant one on the screen.</p>"
+      },
+      { h:"7", t:"Peripheral amplification and site differences", html:
+        "<p>The waveform is not identical everywhere in the body. As the pulse travels from the aorta out to the radial artery and beyond, the systolic peak actually <em>rises</em> and the waveform narrows, while the diastolic pressure falls. The MAP, meanwhile, stays roughly constant along the way.</p>"+
+        "<p>The intuition is the crack of a whip: energy travels down the length and the far tip snaps upward with exaggerated amplitude. So a radial systolic can read <em>higher</em> than the true central aortic systolic, and that is normal — not a reason to chase it. The anchor, again, is the MAP.</p>"+
+        "<p>One important exception for the sickest patients: in severe shock or on high-dose vasopressors, intense peripheral vasoconstriction can make a radial line read <em>lower</em> than a central (femoral) line — a real central-to-peripheral pressure gradient. If a radial MAP looks impossibly low in a patient who otherwise seems to be perfusing, consider this gradient before escalating.</p>"
+      },
+      { h:"8", t:"Complications and the one rule you never break", html:
+        "<p>Arterial lines are generally safe, but the failure modes are worth respecting: hematoma and bleeding (a disconnected arterial line bleeds fast, because it is under arterial pressure), thrombosis, distal ischemia (uncommon), local infection (lower risk than a central line, but not zero), nerve injury, and air embolism.</p>"+
+        "<p>And then there is the absolute rule:</p>"+
+        "<div class='keybox'><span class='kt'>Never</span> Never inject medication into an arterial line. Intra-arterial injection can cause severe distal ischemia and limb loss. The a-line is a one-way window for reading pressure, not a door for drugs. Label it clearly and treat every port as read-only.</div>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The modified Allen test — occluding the radial and ulnar arteries and timing the return of color to check ulnar collateral flow before radial cannulation — is widely taught but poorly supported. Studies have found it does not reliably predict which patients will develop ischemic complications. Many clinicians still perform it out of habit or policy, but do not treat a 'passing' test as a guarantee of safety, or a 'failing' one as a firm contraindication.</p>"+
+        "<div class='grade'>Quality: low (observational; poor predictive value in the available evidence).</div></div>"+
+        "<p>For transport specifically: keep the flush bag pressurized to ~300 mmHg with a slow continuous flush (about 3 mL/hr) to hold the line open, double-check every connection because of the bleeding risk, and re-level and re-zero after any move.</p>"
+      }
+    ],
+    quiz: [
+      { q:"An arterial line transduces pressure through what?",
+        opts:["A wireless sensor at the catheter tip","A continuous fluid (saline) column connecting the artery to a transducer","An inflatable cuff that cycles automatically","An oscillometric sensor in the monitor"], ans:1,
+        expl:"The a-line is a fluid-filled column from artery to transducer; each beat pushes the column and the transducer converts that pressure into the displayed waveform." },
+      { q:"The dicrotic notch on the arterial waveform corresponds to:",
+        opts:["Opening of the mitral valve","Peak ventricular ejection","Closure of the aortic valve","The start of the systolic upstroke"], ans:2,
+        expl:"The dicrotic notch marks aortic valve closure — the punctuation mark ending systole and beginning diastolic runoff." },
+      { q:"A transducer positioned below the phlebostatic axis will:",
+        opts:["Read falsely high","Read falsely low","Read accurately","Only affect the heart rate"], ans:0,
+        expl:"A taller fluid column above the sensor adds hydrostatic pressure, so a transducer below the axis reads falsely high (about 7.4 mmHg per 10 cm of offset). Above the axis reads falsely low." },
+      { q:"Where is the phlebostatic axis?",
+        opts:["2nd intercostal space, sternal border","4th intercostal space, mid-axillary line","Suprasternal notch","Xiphoid process"], ans:1,
+        expl:"The phlebostatic axis is the 4th intercostal space at the mid-axillary line, approximately the level of the atria — the agreed reference for leveling." },
+      { q:"A square-wave (fast-flush) test that shows prolonged ringing with overshoot indicates a system that is:",
+        opts:["Optimally damped","Overdamped, underestimating SBP","Underdamped, overestimating SBP","Correctly zeroed only"], ans:2,
+        expl:"Ringing/overshoot = underdamped: it overestimates SBP and underestimates DBP. Causes include stiff or long tubing, catheter whip, and tachycardia." },
+      { q:"An overdamped arterial tracing (sluggish, no oscillations) most likely results from:",
+        opts:["An air bubble, clot, kink, or low flush-bag pressure","Excessively stiff tubing","A very high heart rate","Catheter whip"], ans:0,
+        expl:"Overdamping is caused by things that absorb the signal — air bubbles, clots, kinks, loose connections, low flush pressure. It underestimates SBP and overestimates DBP." },
+      { q:"When a waveform appears damped and you are unsure of the SBP/DBP, which value should you titrate to?",
+        opts:["Systolic pressure","Diastolic pressure","Mean arterial pressure","Pulse pressure"], ans:2,
+        expl:"MAP is the integrated area under the curve and is relatively resistant to damping distortion, which mangles the peak and trough. Titrate to MAP." },
+      { q:"As you move from the aorta to the radial artery, the systolic pressure typically:",
+        opts:["Decreases markedly","Increases (peripheral amplification)","Stays exactly the same","Becomes unmeasurable"], ans:1,
+        expl:"Distal pulse amplification raises the systolic peak and narrows the waveform peripherally, while MAP stays roughly constant. A high radial systolic is expected, not alarming." },
+      { q:"Which statement about arterial lines is an absolute rule?",
+        opts:["Always draw blood cultures from the a-line","Never inject medication into an arterial line","Zero the line only once per shift","Keep the flush bag at 100 mmHg"], ans:1,
+        expl:"Intra-arterial injection can cause severe distal ischemia and limb loss. The a-line is read-only — never a route for drugs." },
+      { q:"Regarding the modified Allen test before radial cannulation, current evidence shows it:",
+        opts:["Reliably predicts ischemic complications","Has poor predictive value and is weakly supported","Is contraindicated in all patients","Replaces the need for leveling"], ans:1,
+        expl:"The Allen test does not reliably predict ischemic complications; the evidence is low quality. It is still often performed by habit or policy, but should not be treated as a guarantee." }
+    ]
+  },
+
+  {
+    id: 3,
+    available: true,
+    title: "Pharmacology I — Managing the Hypotensive Patient",
+    desc: "Norepinephrine, epinephrine, phenylephrine, vasopressin, dopamine, dobutamine, milrinone: receptor logic, push-dose pressors, and titration to a target.",
+    objective: "Predict a vasoactive drug's effect from its receptor profile, match the right agent to the broken hemodynamic lever, and understand the evidence and delivery considerations behind the common pressors and inotropes.",
+    content: [
+      { h:"1", t:"The receptor switchboard", html:
+        "<p>You do not have to memorize a table of drugs if you understand the switchboard they plug into. Almost every vasoactive agent works by pushing some combination of a few receptors, and each receptor maps cleanly onto the levers from Module 1:</p>"+
+        "<ul>"+
+        "<li><strong>Alpha-1</strong> — <em>squeeze the pipes.</em> Arterial and venous vasoconstriction, which raises SVR and MAP.</li>"+
+        "<li><strong>Beta-1</strong> — <em>drive the pump.</em> Increased contractility (inotropy) and heart rate (chronotropy).</li>"+
+        "<li><strong>Beta-2</strong> — <em>relax the pipes</em> (and open the airways). Vasodilation in skeletal muscle; can lower SVR.</li>"+
+        "<li><strong>Dopaminergic</strong> — splanchnic and renal vasodilation at low doses (more on this myth below).</li>"+
+        "<li><strong>V1 (vasopressin)</strong> — <em>squeeze the pipes with a different key.</em> Vasoconstriction through a non-adrenergic pathway.</li>"+
+        "</ul>"+
+        "<p>Picture a mixing board with a few sliders. Every drug is just a preset that pushes those sliders up by different amounts. Know where a drug sits on the board and you can predict what it will do to pressure, flow, and rate before you ever start the pump.</p>"
+      },
+      { h:"2", t:"Match the drug to the broken lever", html:
+        "<p>The organizing question is never 'what's my favorite pressor?' It is 'which lever is broken?' — straight out of the shock lens:</p>"+
+        "<ul>"+
+        "<li><strong>Pipes too loose</strong> (distributive/vasodilatory shock, e.g. sepsis) → you need to squeeze the pipes: an alpha vasoconstrictor.</li>"+
+        "<li><strong>Pump too weak</strong> (cardiogenic shock) → you need to drive the pump: an inotrope (beta-1 or, bypassing beta entirely, a PDE-3 inhibitor).</li>"+
+        "<li><strong>Tank too empty</strong> (hypovolemic) → volume comes first; a pressor on an empty tank just squeezes a dry hose.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Pressure is not perfusion. Clamp a pure vasoconstrictor onto a failing pump and you can raise the MAP on the monitor while the cardiac output — the actual flow to organs — falls. Fixing the number is not the same as fixing the patient.</div>"
+      },
+      { h:"3", t:"Norepinephrine: the balanced default", html:
+        "<p>Norepinephrine is strong on alpha-1 with a modest beta-1 kick. That combination raises SVR and MAP while lending a little inotropic support, and it does so with relatively little tachycardia. Think of it as the all-wheel-drive pressor: good traction across most shock states, which is exactly why it is first-line for septic, vasodilatory, and undifferentiated shock.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>SOAP II (2010) randomized shock patients to norepinephrine or dopamine as first-line. There was more arrhythmia with dopamine, and a pre-specified cardiogenic-shock subgroup had higher mortality with dopamine. The Surviving Sepsis Campaign recommends norepinephrine as the first-line vasopressor in septic shock. This is one of the better-supported choices in critical care.</p>"+
+        "<div class='grade'>Quality: high (RCT plus strong guideline recommendation).</div></div>"
+      },
+      { h:"4", t:"The specialists: epinephrine, phenylephrine, vasopressin", html:
+        "<p><strong>Epinephrine</strong> pushes both alpha and beta hard. It is first-line in anaphylaxis and cardiac arrest and a common second-line add-on in septic shock. Two things to expect: it raises heart rate, and it produces a <em>benign</em> rise in lactate through beta-2-driven glycogenolysis and stimulation of the sodium-potassium pump. Do not mistake that lactate bump for worsening perfusion and chase it in circles.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>Head-to-head, epinephrine and norepinephrine achieve MAP targets comparably, but epinephrine causes more tachycardia and more transient lactic acidosis. It is a reasonable add-on, not usually the first choice, when norepinephrine alone is not enough.</p>"+
+        "<div class='grade'>Quality: moderate (RCTs comparing catecholamines; metabolic effects well described pharmacologically).</div></div>"+
+        "<p><strong>Phenylephrine</strong> is a pure alpha-1 agent: vasoconstriction with no inotropy or chronotropy, and it can actually cause a reflex bradycardia as the body responds to the rising pressure. That makes it handy when a tachyarrhythmia limits catecholamines, and as a quick push-dose agent. As a sole agent in septic shock it is less preferred, because with no inotropic support it can drop cardiac output even as pressure rises.</p>"+
+        "<p><strong>Vasopressin</strong> constricts through the V1 receptor — a completely different key from the adrenergic lock. It is given at a fixed low dose (0.03–0.04 units/min) as a catecholamine-sparing add-on to norepinephrine, not titrated up and down, and it does not cause tachycardia. Because it works outside the adrenergic system, it can still bite when acidosis and receptor downregulation have blunted the catecholamines.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>VASST (2008) added vasopressin to norepinephrine and found no overall mortality difference, with a possible benefit in less-severe shock. VANISH (2016) compared vasopressin-first to norepinephrine-first and found no difference in renal-failure-free days. The honest summary: vasopressin is a useful catecholamine-sparing adjunct, not a proven mortality-lowering agent.</p>"+
+        "<div class='grade'>Quality: high for the trials; the takeaway is 'adjunctive/sparing,' with genuine uncertainty about outcome benefit.</div></div>"
+      },
+      { h:"5", t:"Dopamine and the renal-dose myth", html:
+        "<p>Dopamine is often taught as tidily dose-dependent — dopaminergic at low doses, beta-1 in the middle, alpha at the top. In practice those ranges overlap messily, and the drug carries a real cost: more arrhythmias than norepinephrine, and the worse cardiogenic-shock signal from SOAP II. It has largely fallen out of favor as a first-line pressor.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The idea of 'renal-dose' dopamine to protect the kidneys is a myth that has been formally debunked. A randomized trial (Bellomo and colleagues, 2000) found low-dose dopamine did not prevent renal dysfunction. Increased urine output is not the same as preserved kidney function.</p>"+
+        "<div class='grade'>Quality: high (RCT evidence against renoprotection).</div></div>"
+      },
+      { h:"6", t:"Inotropes: pushing the pump, not squeezing the pipes", html:
+        "<p>When the problem is a failing pump, vasoconstrictors are the wrong tool. You need an inotrope.</p>"+
+        "<p><strong>Dobutamine</strong> is primarily a beta-1 inotrope with some beta-2 activity. It raises contractility and cardiac output — but the beta-2 effect can lower SVR and drop blood pressure, so in cardiogenic shock it is often paired with a vasopressor. It presses the gas pedal on the heart; it does not squeeze the pipes.</p>"+
+        "<p><strong>Milrinone</strong> takes a different route. It inhibits phosphodiesterase-3, raising intracellular cAMP <em>without going through the beta receptor at all</em>. That is its signature advantage: it still works when the beta 'front door' is locked — in patients on chronic beta-blockade or with the receptor downregulation of chronic heart failure. It is an 'inodilator': a positive inotrope that also dilates both systemic and pulmonary vessels, which makes it valuable in right-ventricular failure and pulmonary hypertension but also means it can cause hypotension. It is renally cleared with a longer half-life than dobutamine, so it is harder to titrate off quickly.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>DOREMI (2021) compared milrinone and dobutamine head-to-head in cardiogenic shock and found no significant difference in the primary composite outcome. Neither is a clear winner; the choice is patient-specific (for example, milrinone when beta-blockade or pulmonary hypertension dominates).</p>"+
+        "<div class='grade'>Quality: moderate-high (RCT showing no significant difference).</div></div>"+
+        "<div class='keybox'><span class='kt'>Caution</span> Every inotrope raises myocardial oxygen demand. In active ischemia, driving the pump harder can deepen the injury you are trying to survive.</div>"
+      },
+      { h:"7", t:"Delivery in the real world", html:
+        "<p>Knowing the drug is half the job; getting it into the patient safely is the other half.</p>"+
+        "<p><strong>Push-dose pressors</strong> bridge transient hypotension — the dip around intubation, or the gap while an infusion spins up. The common agents are push-dose epinephrine (roughly 10–20 mcg) and phenylephrine (roughly 50–200 mcg).</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The evidence for push-dose pressors is largely observational and extrapolated from the operating room, and the literature documents a real rate of dosing errors and hemodynamic overshoot from bedside dilution under pressure. Use them deliberately, with the dilution double-checked, not reflexively.</p>"+
+        "<div class='grade'>Quality: low (observational/extrapolated; known error risk).</div></div>"+
+        "<p><strong>Central versus peripheral.</strong> The classic teaching required a central line for vasopressors because extravasation can cause tissue necrosis. That teaching is softening: a growing body of observational data supports short-term peripheral norepinephrine through a good proximal, large-bore IV with close monitoring. It is not high-quality randomized evidence, so follow your protocol — but know the practice is evolving. If extravasation does occur, the antidote is phentolamine (an alpha-blocker) infiltrated locally.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Titrate to a MAP target (a floor near 65, individualized per Module 1), and confirm the number is buying real perfusion — improving lactate, mentation, and urine output — rather than treating the monitor alone.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Stimulation of alpha-1 receptors produces:",
+        opts:["Vasodilation and bronchodilation","Vasoconstriction and increased SVR","Increased heart rate only","Renal vasodilation"], ans:1,
+        expl:"Alpha-1 stimulation constricts arterial and venous vessels, raising SVR and MAP. It is the 'squeeze the pipes' lever." },
+      { q:"The recommended first-line vasopressor for septic shock, supported by SOAP II and the Surviving Sepsis Campaign, is:",
+        opts:["Dopamine","Phenylephrine","Norepinephrine","Vasopressin"], ans:2,
+        expl:"Norepinephrine is first-line. SOAP II showed more arrhythmia (and worse cardiogenic-shock outcomes) with dopamine, and guidelines favor norepinephrine." },
+      { q:"Beta-1 receptor stimulation primarily causes:",
+        opts:["Vasoconstriction","Increased contractility and heart rate","Bronchodilation","Renal vasodilation"], ans:1,
+        expl:"Beta-1 effects are on the heart: increased inotropy (contractility) and chronotropy (rate) — the 'drive the pump' lever." },
+      { q:"A patient on epinephrine develops a rising lactate. The most likely explanation is:",
+        opts:["Worsening tissue hypoperfusion in every case","A benign beta-2-mediated effect (glycogenolysis / Na-K pump)","An allergic reaction to the drug","Contamination of the infusion"], ans:1,
+        expl:"Epinephrine causes a well-described benign lactate rise via beta-2 stimulation. It should not be automatically read as worsening perfusion — interpret it alongside the clinical picture." },
+      { q:"Vasopressin, used in shock, is best described as:",
+        opts:["A titratable beta-agonist inotrope","A fixed-dose, non-catecholamine (V1) vasoconstrictor used as a catecholamine-sparing adjunct","A pure inodilator","A renal-protective agent"], ans:1,
+        expl:"Vasopressin acts on V1 receptors outside the adrenergic system, is given at a fixed low dose as an add-on to norepinephrine, and does not cause tachycardia. Trials support a sparing role, not a clear mortality benefit." },
+      { q:"'Renal-dose' dopamine to protect the kidneys is:",
+        opts:["Strongly evidence-based","A myth debunked by randomized data","Recommended in all septic patients","Only effective at high doses"], ans:1,
+        expl:"An RCT (Bellomo, 2000) showed low-dose dopamine does not prevent renal dysfunction. Increased urine output is not preserved kidney function." },
+      { q:"Phenylephrine is characterized by:",
+        opts:["Pure alpha-1 activity, no inotropy, and possible reflex bradycardia","Strong beta-1 inotropy","PDE-3 inhibition","Non-adrenergic V1 vasoconstriction"], ans:0,
+        expl:"Phenylephrine is a pure alpha-1 vasoconstrictor with no inotropic or chronotropic effect and can cause reflex bradycardia. As a sole septic-shock agent it may reduce cardiac output." },
+      { q:"Milrinone increases contractility by which mechanism, and why is that useful?",
+        opts:["Beta-1 agonism; useful in bradycardia","PDE-3 inhibition raising cAMP independent of beta-receptors; useful in beta-blockade or receptor downregulation","Alpha-1 agonism; useful in vasodilation","V1 agonism; useful in acidosis"], ans:1,
+        expl:"Milrinone inhibits PDE-3, raising cAMP without needing the beta receptor — so it still works when the beta 'front door' is locked, as in beta-blockade or chronic HF downregulation. It is an inodilator and can cause hypotension." },
+      { q:"Giving a pure vasoconstrictor to a patient in cardiogenic shock can:",
+        opts:["Always improve cardiac output","Raise the MAP while lowering cardiac output/flow","Have no hemodynamic effect","Cure the underlying pump failure"], ans:1,
+        expl:"On a failing pump, clamping the pipes can raise the pressure reading while actually reducing forward flow. Pressure is not perfusion — match the tool to the broken lever." },
+      { q:"Extravasation of peripheral norepinephrine is treated with local infiltration of:",
+        opts:["Calcium gluconate","Phentolamine","Sodium bicarbonate","Epinephrine"], ans:1,
+        expl:"Phentolamine, an alpha-blocker, is infiltrated locally to counteract the intense vasoconstriction and reduce tissue injury from norepinephrine extravasation." }
+    ]
+  },
+
   { id:4, available:false, title:"Pharmacology II — Managing the Hypertensive Patient",
     desc:"Nicardipine, clevidipine, labetalol, esmolol, nitroglycerin, nitroprusside; hypertensive emergency and dissection / ICH pressure targets." },
   { id:5, available:false, title:"Intra-Aortic Balloon Pump (IABP)",
