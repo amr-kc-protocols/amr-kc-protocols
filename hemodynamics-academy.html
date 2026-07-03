@@ -675,16 +675,450 @@ var MODULES = [
     ]
   },
 
-  { id:4, available:false, title:"Pharmacology II — Managing the Hypertensive Patient",
-    desc:"Nicardipine, clevidipine, labetalol, esmolol, nitroglycerin, nitroprusside; hypertensive emergency and dissection / ICH pressure targets." },
-  { id:5, available:false, title:"Intra-Aortic Balloon Pump (IABP)",
-    desc:"Counterpulsation physiology, augmentation and timing errors, triggering, complications, and what changes in transport." },
-  { id:6, available:false, title:"Impella",
-    desc:"Axial-flow physiology, P-levels, the purge system, suction alarms, positioning, and transport considerations." },
-  { id:7, available:false, title:"ECMO",
-    desc:"VA versus VV physiology, circuit components, Harlequin / oxygenator failure, and the transport team's role." },
-  { id:8, available:false, title:"LVAD",
-    desc:"Continuous-flow physiology, Doppler MAP, controller and alarms, assessing perfusion, and when to call the VAD coordinator." }
+  {
+    id: 4,
+    available: true,
+    title: "Pharmacology II — Managing the Hypertensive Patient",
+    desc: "Nicardipine, clevidipine, labetalol, esmolol, nitroglycerin, nitroprusside; hypertensive emergency and the dissection, stroke, and ICH pressure targets.",
+    objective: "Distinguish hypertensive emergency from urgency, lower pressure at the right speed for the situation, and choose the right agent and target for dissection, ICH, ischemic stroke, and sympathetic crisis.",
+    content: [
+      { h:"1", t:"Emergency versus urgency: the only distinction that matters first", html:
+        "<p>Before you reach for a drug, answer one question: is there <em>acute target-organ damage</em>? That single fact splits severe hypertension into two very different problems.</p>"+
+        "<ul>"+
+        "<li><strong>Hypertensive emergency</strong> — severe hypertension <em>with</em> acute organ injury: the brain (encephalopathy, stroke, hemorrhage), heart (ischemia, flash pulmonary edema), aorta (dissection), kidneys (acute injury), or eyes (papilledema). This needs controlled intravenous lowering, now.</li>"+
+        "<li><strong>Hypertensive urgency</strong> — a high number <em>without</em> acute organ damage. This does <em>not</em> need rapid lowering, and aggressive treatment here causes harm.</li>"+
+        "</ul>"+
+        "<p>The number alone does not make the emergency; the organ damage does. A systolic of 220 with no acute injury is treated slowly; a systolic of 170 that is tearing an aorta is treated in minutes.</p>"
+      },
+      { h:"2", t:"The cardinal rule: lower gradually", html:
+        "<p>The instinct to slam a high pressure back to normal is the classic beginner's error, and it comes from forgetting Module 1's autoregulation. In chronic hypertension the brain, heart, and kidneys <em>reset their autoregulatory range upward</em> — they have recalibrated their thermostat to run at a higher pressure. Drop the pressure to a textbook-normal number too fast and those organs are suddenly under-perfused at a pressure they should tolerate, causing the very strokes and infarcts you were trying to prevent.</p>"+
+        "<div class='formula'>Usual target: reduce <span class='fk'>MAP by ~10–20%</span> in the first hour,<br>then further over the next several hours.</div>"+
+        "<p>Ease off the accelerator; do not stomp the brake. The titratable IV agents below exist precisely because they let you control the <em>rate</em> of descent. The major exceptions to gradual lowering are aortic dissection, and to a lesser degree ICH — covered below.</p>"
+      },
+      { h:"3", t:"The toolbox: titratable IV agents", html:
+        "<ul>"+
+        "<li><strong>Nicardipine</strong> and <strong>clevidipine</strong> — dihydropyridine calcium-channel blockers that dilate arteries with little effect on heart rate. Clevidipine has an ultra-short half-life (about a minute) and is delivered in a lipid emulsion, so it titrates like a pencil with a good eraser. Excellent, predictable first-line agents for most emergencies.</li>"+
+        "<li><strong>Labetalol</strong> — combined alpha- and beta-blockade: it lowers pressure and rate together. A workhorse for dissection, stroke, and pregnancy.</li>"+
+        "<li><strong>Esmolol</strong> — an ultra-short-acting beta-1 blocker (half-life measured in minutes). Ideal when you need tight, reversible rate control, especially in dissection.</li>"+
+        "<li><strong>Nitroglycerin</strong> — predominantly a venodilator at low doses, reducing preload. Its home turf is ischemia and flash pulmonary edema, not primary afterload reduction.</li>"+
+        "<li><strong>Nitroprusside</strong> — a balanced arterial and venous dilator, immediate and powerful, but a double-edged blade: prolonged or high-dose use, especially in renal failure, produces cyanide and thiocyanate toxicity. Fast and strong, but it leaves a toxic residue.</li>"+
+        "<li><strong>Hydralazine</strong> — a direct arterial vasodilator with a long, somewhat unpredictable effect and reflex tachycardia; still common in preeclampsia.</li>"+
+        "</ul>"
+      },
+      { h:"4", t:"Aortic dissection: rate before pressure", html:
+        "<p>Dissection is the emergency that breaks the gradual-lowering rule and adds a rule of its own. The force that propagates the tear is not just the pressure but the <em>rate of rise</em> of pressure with each beat — the shearing force, dP/dt. That changes the order of operations.</p>"+
+        "<div class='keybox'><span class='kt'>Sequence</span> Give the beta-blocker (esmolol or labetalol) FIRST to slow the heart and blunt the shearing force, THEN add a vasodilator for the pressure. Targets are aggressive and fast: systolic ~100–120 mmHg and heart rate under 60, within about 20 minutes.</div>"+
+        "<p>Reverse that order and you cause harm. Give a pure vasodilator first and the reflex tachycardia it triggers <em>increases</em> dP/dt — like flooring the accelerator the instant you lift off the brake — driving the pulse harder into the tear and extending the dissection. Slow the current before you lower the water level.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The rate-before-pressure sequence and the ~100–120 systolic target rest on physiologic rationale and consistent guideline consensus rather than a randomized trial, but the mechanism (shear force propagates dissection) is well established and the recommendation is uniform across guidelines.</p>"+
+        "<div class='grade'>Quality: consensus and physiologic (uniform guideline recommendation).</div></div>"
+      },
+      { h:"5", t:"The brain: stroke and hemorrhage have their own targets", html:
+        "<p>Two acute brain emergencies pull blood pressure management in opposite directions from the usual instinct.</p>"+
+        "<p><strong>Acute ischemic stroke</strong> runs on <em>permissive hypertension</em>. The tissue around the clot survives on collateral flow that depends on pressure, so you generally do not lower it unless it is extreme: above about 220/120, or above 185/110 if the patient is a candidate for thrombolysis. Lower it aggressively and you can extend the infarct.</p>"+
+        "<p><strong>Intracerebral hemorrhage</strong> is the mirror image — here, high pressure can expand the bleed.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>Two trials define the ICH target. INTERACT2 (2013) found lowering systolic to under 140 was safe and modestly improved functional outcomes. ATACH-2 (2016) pushed harder (110–139 vs 140–179) and found no additional benefit and more renal adverse events. The practical synthesis: aim for a systolic around 140, which is safe and reasonable; going substantially lower does not clearly help and may harm.</p>"+
+        "<div class='grade'>Quality: high (two large RCTs converging on a ~140 target).</div></div>"
+      },
+      { h:"6", t:"Sympathetic crisis: mind the unopposed alpha", html:
+        "<p>In catecholamine-driven crises — cocaine or amphetamine toxicity, pheochromocytoma — the classic teaching is to avoid <em>unopposed beta-blockade</em>. Block beta (which includes beta-2 vasodilation) while leaving alpha-mediated vasoconstriction unchecked, and you can theoretically worsen the hypertension and coronary vasoconstriction. Preferred agents are benzodiazepines (which treat the sympathetic surge at its source), and vasodilators such as nicardipine or phentolamine.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The unopposed-alpha concern is widely taught and mechanistically plausible, but the clinical evidence is largely observational and case-based, and some recent data question how often it matters in practice. Treat it as a reasonable default — lead with benzodiazepines — rather than an ironclad law.</p>"+
+        "<div class='grade'>Quality: low (observational/theoretical); widely taught, genuinely debated.</div></div>"
+      },
+      { h:"7", t:"Putting the targets together", html:
+        "<div class='keybox'><span class='kt'>Anchor</span> Match the target to the organ. Most emergencies: gradual, MAP down ~10–20% in the first hour. Dissection: fast and hard, beta-blocker first, systolic ~100–120, HR under 60. ICH: systolic ~140. Ischemic stroke: leave it alone unless above ~220/120 (or 185/110 with thrombolysis). Sympathetic crisis: benzodiazepines first, avoid unopposed beta-blockade.</div>"
+      }
+    ],
+    quiz: [
+      { q:"What defines a hypertensive emergency (as opposed to urgency)?",
+        opts:["A systolic pressure over 180 regardless of symptoms","Severe hypertension WITH acute target-organ damage","Any pressure that fails to respond to oral agents","Elevated pressure only in the setting of anxiety"], ans:1,
+        expl:"It is the acute organ injury (brain, heart, aorta, kidneys, eyes), not the number itself, that defines an emergency and mandates controlled IV lowering." },
+      { q:"For most hypertensive emergencies, the initial goal is to:",
+        opts:["Normalize the pressure within 10 minutes","Reduce MAP by roughly 10–20% in the first hour","Lower systolic below 100 immediately","Withhold all treatment for 24 hours"], ans:1,
+        expl:"Chronic hypertension resets autoregulation upward; dropping too fast under-perfuses organs. Aim for ~10–20% MAP reduction in the first hour, then gradual further lowering." },
+      { q:"In acute aortic dissection, which should be given FIRST?",
+        opts:["A pure vasodilator such as nitroprusside","A beta-blocker (esmolol or labetalol) for rate/shear control","Hydralazine","Nitroglycerin"], ans:1,
+        expl:"Rate before pressure: beta-blockade first blunts the shearing force (dP/dt) that propagates the tear, then a vasodilator is added. Targets: systolic ~100–120, HR under 60." },
+      { q:"Why is giving a vasodilator BEFORE a beta-blocker dangerous in dissection?",
+        opts:["It causes reflex tachycardia that increases shear force and can extend the tear","It has no effect on pressure","It causes immediate cyanide toxicity","It raises the heart rate too slowly"], ans:0,
+        expl:"Vasodilator-induced reflex tachycardia increases dP/dt, driving the pulse harder into the dissection flap — like flooring the accelerator as you lift off the brake." },
+      { q:"For intracerebral hemorrhage, current evidence (INTERACT2/ATACH-2) supports a systolic target of approximately:",
+        opts:["90 mmHg","140 mmHg","180 mmHg","No lowering at all"], ans:1,
+        expl:"Lowering to ~140 is safe and reasonable; ATACH-2 showed going substantially lower adds no benefit and more renal adverse events." },
+      { q:"In acute ischemic stroke (no thrombolysis planned), blood pressure is generally not lowered unless it exceeds about:",
+        opts:["140/90","160/100","220/120","185/110"], ans:2,
+        expl:"Permissive hypertension preserves collateral flow. Threshold is ~220/120 without thrombolysis (or 185/110 if a thrombolysis candidate)." },
+      { q:"The major toxicity concern with prolonged or high-dose nitroprusside, especially in renal failure, is:",
+        opts:["Cyanide/thiocyanate toxicity","Hyperkalemia","Serotonin syndrome","Malignant hyperthermia"], ans:0,
+        expl:"Nitroprusside metabolism generates cyanide; thiocyanate accumulates in renal impairment. Powerful and fast, but it leaves a toxic residue." },
+      { q:"Clevidipine and esmolol share which useful property for a titrated drip?",
+        opts:["They are given as one-time boluses only","They have ultra-short half-lives allowing tight, reversible titration","They cannot be used in emergencies","They primarily reduce preload"], ans:1,
+        expl:"Both have very short half-lives (clevidipine ~1 min; esmolol minutes), so they titrate in and out quickly — a pencil with a good eraser." },
+      { q:"In cocaine-induced sympathetic crisis, the recommended first-line approach is to:",
+        opts:["Give unopposed beta-blockade immediately","Lead with benzodiazepines and avoid unopposed beta-blockade","Withhold all treatment","Give a pure beta-1 agonist"], ans:1,
+        expl:"Benzodiazepines treat the sympathetic surge at its source; unopposed beta-blockade is traditionally avoided (theoretical unopposed alpha vasoconstriction). The dogma is debated but remains the default." },
+      { q:"At low doses, nitroglycerin's predominant hemodynamic effect is:",
+        opts:["Arterial vasoconstriction","Venodilation and preload reduction","Direct positive inotropy","Beta-1 blockade"], ans:1,
+        expl:"Low-dose nitroglycerin is chiefly a venodilator, reducing preload — which is why it shines in ischemia and flash pulmonary edema." }
+    ]
+  },
+
+  {
+    id: 5,
+    available: true,
+    title: "Intra-Aortic Balloon Pump (IABP)",
+    desc: "Counterpulsation physiology, augmentation and timing errors, triggering, complications, and what changes in transport.",
+    objective: "Explain how counterpulsation helps the heart, recognize correct and mistimed augmentation on the waveform, know the contraindications and emergencies, and manage an IABP in transport.",
+    content: [
+      { h:"1", t:"Counterpulsation: a second heart that works the off-beats", html:
+        "<p>An intra-aortic balloon pump is a long balloon sitting in the descending aorta, and its whole trick is timing. It inflates during <em>diastole</em> and deflates during <em>systole</em> — exactly the opposite of the heart's own rhythm, which is why it is called counterpulsation. Think of it as a second, helper heart that works only on the off-beats.</p>"+
+        "<p>That timing buys two distinct benefits:</p>"+
+        "<ul>"+
+        "<li><strong>Diastolic augmentation.</strong> Inflating in diastole displaces blood and drives up diastolic pressure, which improves coronary artery perfusion (the coronaries fill in diastole) and pushes blood forward.</li>"+
+        "<li><strong>Afterload reduction (systolic unloading).</strong> Deflating an instant before systole creates a sudden empty space in the aorta — a partial vacuum — so the ventricle ejects against lower resistance. That reduces myocardial oxygen demand and increases stroke volume.</li>"+
+        "</ul>"+
+        "<p>More coronary supply, less cardiac work: it helps the heart from both directions at once. Note what it does <em>not</em> do — it does not actively pump blood the way an Impella or ECMO does. It only assists a heart that is still beating.</p>"
+      },
+      { h:"2", t:"Timing and triggering", html:
+        "<p>Because the benefit lives entirely in the timing, the pump needs to know exactly where it is in the cardiac cycle. It <strong>inflates at the dicrotic notch</strong> (aortic valve closure — the Module 2 landmark that marks the start of diastole) and <strong>deflates just before the systolic upstroke</strong>.</p>"+
+        "<p>It finds those moments using a trigger: usually the ECG (inflating off the T wave region, deflating on the R wave) or the arterial pressure waveform itself. The balloon is filled with <strong>helium</strong> for a specific reason — helium is a very low-density gas, so it shuttles in and out fast enough to keep up with the heart, and if the balloon ever leaks, helium is absorbed quickly and harmlessly.</p>"
+      },
+      { h:"3", t:"Reading the augmented waveform", html:
+        "<p>On the arterial trace, a correctly timed IABP rewrites the wave. You see a tall <em>augmentation</em> peak in diastole — often higher than the patient's own systolic — followed by a <em>lower</em> systolic peak on the next assisted beat and a <em>lower</em> end-diastolic pressure. Those three changes are the visual signature of the two benefits: the diastolic spike is augmentation; the reduced systolic and end-diastolic pressures are afterload reduction.</p>"+
+        "<p>To evaluate timing, clinicians run the pump at 1:2 (assisting every other beat) so an assisted beat sits right next to an unassisted one for comparison.</p>"
+      },
+      { h:"4", t:"The four timing errors", html:
+        "<p>Timing is like pushing a child on a swing: push at the right instant and you add energy; push at the wrong instant and you fight the motion. The four classic errors:</p>"+
+        "<ul>"+
+        "<li><strong>Early inflation</strong> — the balloon inflates before the aortic valve closes, driving against a still-ejecting ventricle and <em>increasing</em> afterload. Harmful.</li>"+
+        "<li><strong>Late inflation</strong> — inflates well after the notch; you simply lose augmentation.</li>"+
+        "<li><strong>Early deflation</strong> — deflates too soon; augmentation is lost and blood can flow backward into the deflating balloon.</li>"+
+        "<li><strong>Late deflation</strong> — the balloon is still inflated when systole begins, so the ventricle ejects against a balloon and afterload <em>rises</em>. Harmful.</li>"+
+        "</ul>"+
+        "<p>The two that actively hurt (early inflation and late deflation) share a theme: the balloon is up when it should be down, fighting the ventricle instead of helping it.</p>"
+      },
+      { h:"5", t:"Indications and contraindications", html:
+        "<p><strong>Indications</strong> include cardiogenic shock, the mechanical complications of MI (acute mitral regurgitation, ventricular septal rupture), refractory angina, and bridging to a definitive therapy.</p>"+
+        "<p><strong>Contraindications</strong> flow directly from the physiology:</p>"+
+        "<ul>"+
+        "<li><strong>Aortic regurgitation</strong> — diastolic augmentation drives blood backward through the leaky valve, worsening the regurgitation. A hard contraindication.</li>"+
+        "<li><strong>Aortic dissection or significant aneurysm</strong> — inflating a balloon in a compromised aorta risks rupture.</li>"+
+        "<li><strong>Severe peripheral arterial disease</strong> — the large femoral sheath threatens the limb.</li>"+
+        "</ul>"
+      },
+      { h:"6", t:"What the evidence actually shows", html:
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The IABP-SHOCK II trial (2012) randomized patients with acute-MI cardiogenic shock to IABP or no IABP and found no reduction in 30-day mortality (about 40% in both arms), a result that held at long-term follow-up. On the strength of that trial, guidelines downgraded the routine use of IABP in infarct-related cardiogenic shock.</p>"+
+        "<p>It has not vanished: the balloon pump still has a role in specific situations such as the mechanical complications of MI and as a bridge. But the era of reflexively placing one for cardiogenic shock is over.</p>"+
+        "<div class='grade'>Quality: high (large RCT with long-term follow-up).</div></div>"
+      },
+      { h:"7", t:"Complications and transport", html:
+        "<p>Respect these failure modes:</p>"+
+        "<ul>"+
+        "<li><strong>Limb ischemia</strong> — the most common complication, from the large femoral sheath. Check distal pulses and perfusion in that leg relentlessly.</li>"+
+        "<li><strong>Balloon rupture</strong> — blood or brownish flecks in the helium line is an emergency: it means the balloon has failed, risking gas embolism and clot formation on the balloon. Stop the pump and get help immediately.</li>"+
+        "<li><strong>Malposition</strong> — too high, it can occlude the left subclavian (check the left arm); too low, it can occlude the renal or mesenteric arteries (watch urine output).</li>"+
+        "<li>Thrombocytopenia, aortic injury, and infection round out the list.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Transport</span> Keep the console powered and helium adequate, maintain the trigger and timing, watch the augmented waveform and the distal limb, and keep the head of the bed relatively low. Never let the balloon sit idle for more than about 30 minutes — a stationary balloon grows clot.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The intra-aortic balloon pump inflates during ___ and deflates during ___.",
+        opts:["Systole; diastole","Diastole; systole","Inspiration; expiration","The QRS; the T wave"], ans:1,
+        expl:"Counterpulsation: inflate in diastole (augment coronary perfusion), deflate in systole (reduce afterload) — the opposite of the heart's own cycle." },
+      { q:"The two hemodynamic benefits of the IABP are:",
+        opts:["Diastolic augmentation and afterload reduction","Increased heart rate and contractility","Direct forward pumping and oxygenation","Preload increase and venoconstriction"], ans:0,
+        expl:"Inflation augments diastolic/coronary perfusion; deflation unloads the ventricle by reducing afterload. It assists a beating heart rather than pumping itself." },
+      { q:"Correct balloon inflation should be timed to occur at the:",
+        opts:["Systolic upstroke","Dicrotic notch (aortic valve closure)","Peak of the R wave","End of diastole only"], ans:1,
+        expl:"Inflation at the dicrotic notch marks the start of diastole — the right moment to augment. Deflation occurs just before the next systolic upstroke." },
+      { q:"Late deflation of the balloon is harmful because it:",
+        opts:["Has no effect","Leaves the balloon inflated into systole, increasing afterload","Reduces coronary perfusion only","Causes the balloon to rupture"], ans:1,
+        expl:"If the balloon is still up when systole begins, the ventricle ejects against it and afterload rises — the opposite of the intended unloading." },
+      { q:"The IABP is filled with helium primarily because helium:",
+        opts:["Is heavier than air for stability","Is low-density, shuttles quickly, and is absorbed safely if it leaks","Improves oxygenation of the blood","Prevents balloon rupture"], ans:1,
+        expl:"Helium's low density lets it move in and out fast enough to track the heart, and it is quickly absorbed if the balloon leaks." },
+      { q:"Blood or brownish flecks appearing in the helium drive line indicate:",
+        opts:["Normal operation","Balloon rupture — an emergency","A dead battery","Overdamping of the arterial line"], ans:1,
+        expl:"That finding means the balloon has ruptured, risking gas embolism and clot. Stop the pump and get help immediately." },
+      { q:"The most common complication of an IABP is:",
+        opts:["Limb ischemia","Hyperkalemia","Pulmonary embolism","Cyanide toxicity"], ans:0,
+        expl:"The large femoral sheath most often causes limb ischemia; distal pulses and perfusion must be checked frequently." },
+      { q:"Which is a contraindication to IABP?",
+        opts:["Cardiogenic shock","Significant aortic regurgitation","Refractory angina","Acute mitral regurgitation"], ans:1,
+        expl:"Diastolic augmentation drives blood backward through an incompetent aortic valve, worsening regurgitation. Aortic dissection is also a contraindication." },
+      { q:"IABP-SHOCK II showed that, in acute-MI cardiogenic shock, routine IABP:",
+        opts:["Halved mortality","Did not reduce 30-day mortality","Increased survival only in women","Eliminated the need for revascularization"], ans:1,
+        expl:"No mortality benefit was found (~40% in both arms), a result sustained long-term, leading guidelines to downgrade routine use in infarct-related cardiogenic shock." },
+      { q:"A balloon positioned too LOW in the aorta risks occluding the:",
+        opts:["Left subclavian artery","Renal/mesenteric arteries (watch urine output)","Carotid arteries","Pulmonary artery"], ans:1,
+        expl:"Too low, the balloon can occlude the renal or mesenteric vessels — a drop in urine output is a warning. Too high, it can occlude the left subclavian." }
+    ]
+  },
+
+  {
+    id: 6,
+    available: true,
+    title: "Impella",
+    desc: "Axial-flow physiology, P-levels, the purge system, suction alarms, positioning, and transport considerations.",
+    objective: "Explain how the Impella actively unloads the left ventricle, interpret P-levels and the placement signal, recognize suction and hemolysis, protect the purge system, and place the device in its current evidence context.",
+    content: [
+      { h:"1", t:"A screw pump across the valve", html:
+        "<p>Where the balloon pump only assists, the Impella actively <em>pumps</em>. It is a tiny micro-axial flow pump — think of an Archimedes screw — mounted on a catheter that sits across the aortic valve. Its inlet sits inside the left ventricle and its outlet in the ascending aorta, so it continuously draws blood out of the ventricle and expels it into the aorta.</p>"+
+        "<p>That does two things at once: it directly <strong>unloads the left ventricle</strong> (pulling volume and pressure out of a struggling chamber, reducing its work and oxygen demand) and it <strong>adds forward flow</strong> to the circulation. Unlike the IABP, its benefit does not depend on precise beat-to-beat timing — it simply runs.</p>"
+      },
+      { h:"2", t:"P-levels: the throttle", html:
+        "<p>Pump output is set by the <strong>P-level</strong> — the throttle, running from P0 (off) up to the maximum (P8 or P9 depending on the device). Higher P-level, more flow. The console that runs it is the Automated Impella Controller, which continuously displays flow, the placement signal, and the motor current.</p>"+
+        "<p>Weaning is done by stepping the P-level down and watching whether the patient's own heart can take back the load.</p>"
+      },
+      { h:"3", t:"Position is everything", html:
+        "<p>The whole device depends on the inlet being in the right place — roughly 3.5 cm below the aortic valve, well inside the ventricle, with the outlet above the valve. Two console readouts confirm it:</p>"+
+        "<ul>"+
+        "<li>The <strong>placement signal</strong> — a pressure waveform that should look <em>aortic</em> (from the outlet). If it starts reading like a <em>ventricular</em> tracing, the device has migrated.</li>"+
+        "<li>The <strong>motor current</strong> — normally pulsatile when the device spans the valve correctly; it flattens when position is wrong.</li>"+
+        "</ul>"+
+        "<p>Migration is the root of most Impella alarms: pulled too far into the aorta, output falls; pushed too deep into the ventricle, it causes suction.</p>"
+      },
+      { h:"4", t:"Suction events", html:
+        "<p>A suction alarm is the device telling you it is trying to pull more blood than is available — like a straw hitting the bottom of an empty cup. The inlet is either against the ventricular wall or the ventricle is underfilled.</p>"+
+        "<div class='keybox'><span class='kt'>Think RV and volume</span> The classic causes of suction are hypovolemia and right-ventricular failure — if the right heart cannot deliver blood to the left ventricle, the Impella starves. Respond by lowering the P-level, giving volume, and hunting for the reason the LV is empty (including an RV that cannot keep up now that the LV is unloaded).</div>"
+      },
+      { h:"5", t:"The purge system: the moat", html:
+        "<p>Spinning at high speed, the motor needs to keep blood out of its bearings, so a continuous <strong>purge fluid</strong> (a dextrose solution, often with heparin) flows outward through the motor — a moat that holds blood back. The console monitors purge pressure; a change can signal thrombus forming or a system problem.</p>"+
+        "<div class='keybox'><span class='kt'>Never</span> Never stop the purge. Losing it lets blood into the motor and destroys the pump.</div>"
+      },
+      { h:"6", t:"Complications", html:
+        "<ul>"+
+        "<li><strong>Hemolysis</strong> — the high-speed rotor can shear red cells (the blender effect), especially when malpositioned or suctioning. Watch for tea-colored urine and rising plasma-free hemoglobin and LDH.</li>"+
+        "<li><strong>Limb ischemia and bleeding</strong> — from the large-bore femoral access. Check the distal limb.</li>"+
+        "<li><strong>Migration</strong> and aortic valve injury.</li>"+
+        "<li><strong>Unmasked right-ventricular failure</strong> — once the LV is unloaded, an inadequate RV becomes the new bottleneck.</li>"+
+        "</ul>"
+      },
+      { h:"7", t:"What the evidence shows", html:
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>DanGer Shock (2024) is a landmark: it was the first randomized trial of any mechanical support device to show a survival benefit in acute-MI cardiogenic shock. In carefully selected STEMI shock patients, the Impella CP reduced 180-day mortality (45.8% vs 58.5%; hazard ratio 0.74; number needed to treat about 8), and long-term follow-up sustained the benefit — leading to a guideline upgrade to class 2a.</p>"+
+        "<p>Two honest caveats. First, the benefit came at a real cost: significantly more bleeding, vascular complications, renal-replacement therapy, and sepsis. Second, the trial was highly selective — it excluded comatose cardiac-arrest survivors, mechanical complications, and right-ventricular failure — so the result does not automatically generalize to every shock patient. Earlier, smaller trials (IMPRESS, ISAR-SHOCK) were neutral.</p>"+
+        "<div class='grade'>Quality: high for selected STEMI shock (RCT plus durable follow-up); benefit is real but bounded by strict selection and a higher complication rate.</div></div>"
+      },
+      { h:"8", t:"Transport", html:
+        "<div class='keybox'><span class='kt'>Transport</span> Keep the purge running and the anticoagulation going, monitor the placement signal and motor current for migration, watch for hemolysis (urine color) and distal limb perfusion, secure the catheter against any movement, and keep the console powered. A suction alarm on the road means: drop the P-level, consider volume, and reassess the RV.</div>"
+      }
+    ],
+    quiz: [
+      { q:"How does the Impella support the circulation?",
+        opts:["It inflates and deflates in time with the cardiac cycle","It is a micro-axial pump across the aortic valve that actively draws blood from the LV into the aorta","It oxygenates blood outside the body","It paces the ventricle electrically"], ans:1,
+        expl:"The Impella is an axial-flow pump spanning the aortic valve; it continuously unloads the LV and adds forward flow — actively pumping, unlike the IABP which only augments." },
+      { q:"The Impella P-level represents:",
+        opts:["The purge pressure","The pump speed/output setting (the throttle)","The patient's own cardiac output","The anticoagulation target"], ans:1,
+        expl:"P-levels (P0 off to P8/P9 max) set pump output. Weaning steps the P-level down while watching whether the native heart can resume the load." },
+      { q:"A suction alarm on the Impella most suggests:",
+        opts:["The left ventricle is overfilled","An underfilled LV — hypovolemia, RV failure, or malposition","The purge pressure is too high","The aortic valve is stenotic"], ans:1,
+        expl:"Suction means the device is pulling more than is available — a straw hitting an empty cup. Think hypovolemia or RV failure; lower the P-level and give volume." },
+      { q:"The purpose of the Impella purge system is to:",
+        opts:["Oxygenate the blood","Keep blood out of the motor bearings to prevent thrombus","Measure cardiac output","Deliver vasopressors"], ans:1,
+        expl:"A continuous dextrose (± heparin) purge flows outward through the motor — a moat that keeps blood out of the bearings. Never stop it." },
+      { q:"Tea-colored urine with a rising plasma-free hemoglobin and LDH in an Impella patient suggests:",
+        opts:["Normal function","Hemolysis (often from malposition or suction)","Adequate anticoagulation","A dead battery"], ans:1,
+        expl:"The high-speed rotor can shear red cells, especially when malpositioned or suctioning — the blender effect. Tea-colored urine is a red flag for hemolysis." },
+      { q:"For correct Impella function, the inlet should sit:",
+        opts:["In the right atrium","In the left ventricle, roughly 3.5 cm below the aortic valve, with the outlet in the aorta","In the pulmonary artery","Above the aortic arch"], ans:1,
+        expl:"Inlet in the LV (~3.5 cm below the valve), outlet in the ascending aorta. Migration causes reduced output (pulled up) or suction (pushed deep)." },
+      { q:"DanGer Shock (2024) was notable because it:",
+        opts:["Showed IABP was superior to Impella","Was the first MCS device RCT to show a mortality benefit in AMI cardiogenic shock","Proved Impella had no complications","Studied VV-ECMO in ARDS"], ans:1,
+        expl:"Impella CP reduced 180-day mortality in selected STEMI shock (45.8% vs 58.5%, HR 0.74), the first positive MCS device RCT in AMI-CS, prompting a class 2a upgrade." },
+      { q:"An important caveat to the DanGer Shock result is that it:",
+        opts:["Had no complications and applies to all shock patients","Came with more bleeding/vascular/renal complications and excluded comatose arrest, mechanical complications, and RV failure","Only enrolled patients over 90","Used the Impella as a bridge to transplant only"], ans:1,
+        expl:"The benefit was real but bounded: significantly higher complications, and strict exclusions (comatose arrest, mechanical complications, RV failure) limit generalizability." },
+      { q:"After the LV is unloaded by an Impella, which problem may become the new bottleneck?",
+        opts:["Left atrial hypertrophy","Right-ventricular failure","Aortic stenosis","Pulmonary embolism"], ans:1,
+        expl:"With the LV unloaded, an inadequate RV that cannot deliver blood forward becomes the limiting factor — and a common cause of suction." },
+      { q:"Impella position is confirmed at the console by the:",
+        opts:["Purge pressure alone","Placement signal waveform and the motor current","Heart rate","Sweep gas setting"], ans:1,
+        expl:"The placement signal should read aortic (not ventricular) and the motor current should be pulsatile when the device correctly spans the valve." }
+    ]
+  },
+
+  {
+    id: 7,
+    available: true,
+    title: "ECMO",
+    desc: "VA versus VV physiology, the circuit, Harlequin / oxygenator failure, and the transport team's role.",
+    objective: "Distinguish VA from VV ECMO and what each replaces, trace the circuit and its two gas controls, recognize differential hypoxia and oxygenator failure, and understand the transport team's role around the circuit.",
+    content: [
+      { h:"1", t:"Borrowed organs", html:
+        "<p>ECMO — extracorporeal membrane oxygenation — does outside the body what a failing heart or lungs cannot do inside it. Blood is drained from the patient, driven by a pump through an artificial lung, and returned. Everything about a given ECMO setup follows from one question: <em>where does the oxygenated blood come back?</em></p>"
+      },
+      { h:"2", t:"VA versus VV: the core distinction", html:
+        "<ul>"+
+        "<li><strong>VA (veno-arterial)</strong> — drains from a vein, returns to an <em>artery</em>. Because it puts blood back into the arterial system under pressure, it replaces <strong>both the heart and the lungs</strong>: flow bypasses the failing cardiopulmonary system entirely. This is the configuration for cardiogenic shock and cardiac arrest.</li>"+
+        "<li><strong>VV (veno-venous)</strong> — drains from a vein, returns to a <em>vein</em>. The freshly oxygenated blood still has to be pumped by the patient's own heart through the lungs and out to the body, so it replaces <strong>only the lungs</strong>. It requires an adequate native cardiac output. This is the configuration for severe respiratory failure such as ARDS.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> VA replaces the whole cardiopulmonary engine. VV is a bolt-on artificial lung that still relies on the patient's own pump. If the heart is failing, VV alone will not save it.</div>"
+      },
+      { h:"3", t:"The circuit and its two dials", html:
+        "<p>Follow the blood: a <strong>drainage cannula</strong> pulls venous blood to a <strong>centrifugal pump</strong>, which pushes it through the <strong>oxygenator</strong> (the membrane lung), and a <strong>return cannula</strong> sends it back. The oxygenator is where gas exchange happens, and it has two independent controls that map to the two blood gases:</p>"+
+        "<ul>"+
+        "<li><strong>Sweep gas</strong> — the flow of fresh gas across the membrane. It governs <em>CO2 removal</em>: turn up the sweep to blow off more CO2. It is the exhaust fan.</li>"+
+        "<li><strong>FdO2</strong> — the oxygen fraction of that gas. It governs <em>oxygenation</em>.</li>"+
+        "</ul>"+
+        "<p>Pump speed (RPM) sets the blood flow, which is the other major lever on oxygen delivery.</p>"
+      },
+      { h:"4", t:"Harlequin (North–South) syndrome", html:
+        "<p>This is the signature hazard of <em>peripheral</em> VA-ECMO, and it is worth understanding well. When blood is returned up the femoral artery, it flows <em>backward</em> up the aorta to meet the blood the heart is still ejecting forward. If the heart recovers some function but the lungs are still bad, the heart pumps <em>poorly oxygenated</em> blood that reaches the upper body first — the coronaries, the brain, the right arm — while the ECMO's well-oxygenated blood perfuses the lower body.</p>"+
+        "<p>Picture two rivers of different color meeting somewhere in the aorta: a watershed where blue upper-body blood and red ECMO blood collide. The dangerous part is that the heart and brain can be sitting in the blue river.</p>"+
+        "<div class='keybox'><span class='kt'>Monitor the right arm</span> Because the right radial artery is fed closest to the heart, a right-radial ABG or SpO2 is the early-warning sensor for differential hypoxia. Right-arm desaturation is the tell.</div>"
+      },
+      { h:"5", t:"Oxygenator failure and other complications", html:
+        "<p>The oxygenator is a consumable that clots and fails over time. Signs it is failing: a rising CO2, a falling post-oxygenator PaO2, and visible clot or condensation in the membrane. Other major complications:</p>"+
+        "<ul>"+
+        "<li><strong>Bleeding</strong> — the circuit demands systemic anticoagulation; bleeding is the most common serious complication.</li>"+
+        "<li><strong>Thrombosis</strong> anywhere in the circuit.</li>"+
+        "<li><strong>Limb ischemia</strong> — the arterial cannula can choke off the leg; a distal perfusion cannula is often placed to save it.</li>"+
+        "<li>Air entrainment, hemolysis, infection, and neurologic injury.</li>"+
+        "</ul>"
+      },
+      { h:"6", t:"What the evidence shows", html:
+        "<div class='evidence'><span class='etag'>Evidence check — VA-ECMO in infarct shock</span>"+
+        "<p>ECLS-SHOCK (2023), together with ECMO-CS and a meta-analysis, found that routine early VA-ECMO in acute-MI cardiogenic shock did <em>not</em> reduce 30-day mortality (about 48% vs 49%) and increased complications such as bleeding and limb ischemia, with no benefit in any subgroup. This has pushed the field away from reflexive VA-ECMO toward selective, individualized use.</p>"+
+        "<div class='grade'>Quality: high (RCT plus meta-analysis).</div></div>"+
+        "<div class='evidence'><span class='etag'>Evidence check — VV-ECMO in ARDS</span>"+
+        "<p>For severe ARDS the picture is more favorable but less clean. EOLIA (2018) compared VV-ECMO to conventional management; the mortality difference (35% vs 46%) did not reach statistical significance, partly because many control patients crossed over to ECMO as a rescue, and a later Bayesian re-analysis suggested a probable benefit. The earlier CESAR trial supported referral to an ECMO center. The reasonable read: VV-ECMO is a rescue therapy for refractory severe ARDS in experienced centers, not a routine first step.</p>"+
+        "<div class='grade'>Quality: moderate (one major RCT with high crossover; supportive but not definitive).</div></div>"
+      },
+      { h:"7", t:"The transport team's role", html:
+        "<p>On an ECMO transport, a trained ECMO specialist or perfusionist manages the circuit itself. The transport team's job is to manage the patient and to guard against the catastrophes — because with ECMO, the circuit <em>is</em> the patient's life.</p>"+
+        "<div class='keybox'><span class='kt'>Guard the circuit</span> The lethal events are cannula dislodgement (massive hemorrhage and loss of support in seconds), power loss, running out of oxygen or sweep gas, and a clotting circuit. Secure every cannula and connection obsessively, confirm redundant power and gas, and never let a line move.</div>"
+      }
+    ],
+    quiz: [
+      { q:"VA-ECMO provides support for:",
+        opts:["The lungs only","Both the heart and the lungs","The kidneys","The brain only"], ans:1,
+        expl:"VA returns blood to an artery under pressure, bypassing the cardiopulmonary system — so it supports both heart and lungs. It is used for cardiogenic shock/arrest." },
+      { q:"VV-ECMO differs from VA in that it:",
+        opts:["Returns blood to a vein and supports only the lungs, requiring adequate native cardiac output","Supports both heart and lungs","Requires an arterial cannula","Is used only in cardiac arrest"], ans:0,
+        expl:"VV returns oxygenated blood to a vein; the patient's own heart must still pump it. It supports the lungs only and needs adequate native cardiac output." },
+      { q:"On the ECMO oxygenator, the SWEEP GAS primarily controls:",
+        opts:["Oxygenation","CO2 removal","Blood flow rate","Anticoagulation"], ans:1,
+        expl:"Sweep gas is the fresh-gas flow across the membrane and governs CO2 clearance — the exhaust fan. FdO2 governs oxygenation." },
+      { q:"Oxygenation on ECMO is primarily governed by the FdO2 and by:",
+        opts:["The sweep gas flow","The pump speed / blood flow","The anticoagulation level","The patient's temperature"], ans:1,
+        expl:"Oxygen delivery depends on FdO2 (oxygen fraction) and on blood flow set by pump RPM. Sweep gas is the CO2 lever." },
+      { q:"Harlequin (North–South) syndrome occurs in peripheral VA-ECMO when:",
+        opts:["The oxygenator clots","A recovering heart ejects poorly oxygenated blood to the upper body while ECMO perfuses the lower body","The pump stops","The sweep gas is too high"], ans:1,
+        expl:"Two circulations meet in the aorta; if the lungs are still failing, the heart's deoxygenated output reaches the upper body (coronaries, brain, right arm) — differential hypoxia." },
+      { q:"To detect differential hypoxia early in peripheral VA-ECMO, monitor the:",
+        opts:["Left femoral artery","Right radial artery (upper body, closest to the heart)","Dorsalis pedis","Central venous line"], ans:1,
+        expl:"The right radial is fed closest to the heart and coronaries, so right-arm desaturation is the earliest warning of Harlequin syndrome." },
+      { q:"Signs of ECMO oxygenator failure include:",
+        opts:["Falling CO2 and rising post-oxygenator PaO2","Rising CO2, falling post-oxygenator PaO2, and visible clot","A slower heart rate only","Improved oxygenation"], ans:1,
+        expl:"A failing membrane lung clears less CO2 and adds less oxygen; rising CO2, a dropping post-oxygenator PaO2, and visible clot/condensation are the tells." },
+      { q:"ECLS-SHOCK (2023) found that routine early VA-ECMO in acute-MI cardiogenic shock:",
+        opts:["Halved mortality","Did not reduce 30-day mortality and increased complications","Was beneficial only in diabetics","Eliminated the need for revascularization"], ans:1,
+        expl:"No mortality reduction (~48% vs 49%), more complications, and no beneficial subgroup — shifting practice toward selective rather than routine use." },
+      { q:"For severe ARDS, the EOLIA trial of VV-ECMO showed:",
+        opts:["A clear, statistically significant mortality benefit","A mortality difference that was not statistically significant (with high crossover); ECMO is a rescue therapy for refractory cases","That ECMO was harmful in all patients","No difference and no crossover"], ans:1,
+        expl:"EOLIA's mortality difference (35% vs 46%) missed significance amid high control crossover; a later Bayesian analysis suggested probable benefit. VV-ECMO is reserved for refractory severe ARDS in experienced centers." },
+      { q:"During ECMO transport, the most catastrophic event to guard against is:",
+        opts:["A brief dip in SpO2","Cannula dislodgement causing massive hemorrhage and loss of support","A high sweep gas setting","A single missed lab draw"], ans:1,
+        expl:"With ECMO the circuit is the patient's life. Cannula dislodgement causes rapid exsanguination and loss of support; secure every line and connection." }
+    ]
+  },
+
+  {
+    id: 8,
+    available: true,
+    title: "LVAD",
+    desc: "Continuous-flow physiology, Doppler MAP, controller and alarms, assessing perfusion, and the resuscitation algorithm.",
+    objective: "Adapt assessment to continuous, non-pulsatile flow; obtain a Doppler MAP; interpret controller alarms; recognize the common LVAD complications; and apply the current perfusion-based resuscitation algorithm.",
+    content: [
+      { h:"1", t:"Continuous flow changes the rules", html:
+        "<p>Modern left-ventricular assist devices are continuous-flow impeller pumps — a smooth fan, not a drum. They move blood in a steady stream rather than in beats, and that single fact overturns almost every reflex you have about assessing a patient.</p>"+
+        "<div class='keybox'><span class='kt'>Reframe</span> Many LVAD patients have <em>no palpable pulse</em> and <em>no obtainable cuff blood pressure</em> — and that is completely normal. Absence of a pulse in an LVAD patient is not, by itself, cardiac arrest. Unlearning the pulse check is the whole game here.</div>"
+      },
+      { h:"2", t:"Assess perfusion, not pulse", html:
+        "<p>If you cannot rely on a pulse, you assess perfusion directly: mentation, skin color and warmth, capillary refill, and the sound of the device. Auscultate the chest — a working pump produces a continuous <em>hum</em>. To get a pressure, use Doppler:</p>"+
+        "<div class='formula'>Doppler over the brachial/radial artery + slowly deflate a cuff.<br>The first sound heard ≈ the <span class='fk'>MAP</span> (flow is continuous, so there is no separate systolic/diastolic).</div>"+
+        "<p>A typical LVAD MAP goal is roughly 70–90 mmHg, set by the VAD team and device. Pulse oximetry may not read reliably because of the low pulsatility. The pump is a smooth fan; do not expect to feel a beat.</p>"
+      },
+      { h:"3", t:"The controller and power", html:
+        "<p>The controller is the device's brain. It displays flow (L/min), speed (RPM), power (watts), and a pulsatility index, and it drives the pump from batteries or wall power. There are always two power sources for a reason.</p>"+
+        "<div class='keybox'><span class='kt'>Bring everything</span> The patient and caregiver know this device better than you do. Bring ALL of it to the hospital — the backup controller, spare batteries, and chargers — and get the VAD coordinator's number off the equipment early. Never let the controller lose power.</div>"
+      },
+      { h:"4", t:"Reading the alarms", html:
+        "<ul>"+
+        "<li><strong>Low-flow alarm</strong> — the broad one. Causes include hypovolemia, right-ventricular failure, tamponade, hypertension (high afterload chokes flow), a suction event, or cannula obstruction.</li>"+
+        "<li><strong>Power / electrical alarms</strong> — a connection or battery problem; check every connection.</li>"+
+        "<li><strong>High-power alarm</strong> — can indicate pump thrombosis, especially alongside signs of hemolysis (dark urine) and worsening heart failure.</li>"+
+        "</ul>"+
+        "<p>Call the VAD coordinator early — the number is on the device, and they can interpret the specific alarm and history faster than anyone at the scene.</p>"
+      },
+      { h:"5", t:"Why hypertension is dangerous for an LVAD", html:
+        "<p>These pumps are afterload-sensitive: high systemic pressure directly opposes pump output, reducing flow, and it raises the risk of stroke and bleeding. This is why LVAD patients are kept to a controlled MAP — a direct callback to Module 4. A hypertensive LVAD patient is not a minor issue; it can be the cause of a low-flow alarm.</p>"
+      },
+      { h:"6", t:"The complications LVAD patients present with", html:
+        "<ul>"+
+        "<li><strong>GI bleeding</strong> — the most common. Continuous, non-pulsatile flow promotes arteriovenous malformations and an acquired von Willebrand deficiency, so these patients bleed from the gut frequently.</li>"+
+        "<li><strong>Driveline infection</strong> — the percutaneous lead is a chronic portal for infection.</li>"+
+        "<li><strong>Pump thrombosis</strong> — dark urine (hemolysis), rising power, and heart failure.</li>"+
+        "<li><strong>Stroke</strong> — ischemic or hemorrhagic; a leading cause of death.</li>"+
+        "<li><strong>Right-ventricular failure and arrhythmias</strong> — strikingly, an LVAD patient can be in ventricular tachycardia or fibrillation and still be awake and perfusing, because the pump keeps moving blood regardless of the native rhythm.</li>"+
+        "</ul>"
+      },
+      { h:"7", t:"The resuscitation algorithm", html:
+        "<p>This is the highest-stakes reason the module exists, because the instinctive response is wrong. Work the algorithm:</p>"+
+        "<ul>"+
+        "<li><strong>Assess perfusion, not pulse</strong> — mentation, Doppler MAP, end-tidal CO2 — and auscultate for the hum.</li>"+
+        "<li><strong>Troubleshoot the device</strong> — check power, connections, and the controller, ideally with the VAD coordinator or a trained caregiver. Restarting a stopped pump may be the single most effective thing you can do.</li>"+
+        "<li><strong>If the device is running and the patient is perfusing</strong> (awake, adequate MAP/ETCO2) — do NOT start compressions, even if there is no pulse and even in VT/VF. Treat the rhythm; the pump is doing its job.</li>"+
+        "<li><strong>If the device is NOT functioning and cannot be restarted, AND there are no signs of life / inadequate perfusion</strong> (for example unresponsive with ETCO2 under 20 or MAP at or below 50) — chest compressions ARE now recommended.</li>"+
+        "<li><strong>Defibrillation is not contraindicated.</strong> Shock a shockable rhythm as usual.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The old blanket prohibition on compressions — out of fear of dislodging the outflow cannula — has been replaced by a perfusion-based approach (AHA scientific statement, 2017, carried into current ACLS/AHA guidance). The dislodgement fear was theoretical: there is no reported case of compressions dislodging an LVAD, and case series suggest compressions can be performed when truly indicated. The supporting evidence is consensus and observational, not randomized — so the algorithm is a reasoned default, prioritizing device troubleshooting first and reserving compressions for genuine pump failure with no perfusion.</p>"+
+        "<div class='grade'>Quality: low–moderate (expert consensus and case series; no RCT).</div></div>"
+      },
+      { h:"8", t:"Handoff", html:
+        "<div class='keybox'><span class='kt'>Transport</span> Bring the backup controller, batteries, and chargers; keep the driveline secured; document the specific device type; involve the VAD coordinator in the destination decision, because not every hospital can support this patient. Their equipment and their VAD center are part of the patient.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Why do many stable LVAD patients have no palpable pulse?",
+        opts:["Their heart has stopped","The device provides continuous, non-pulsatile flow","They are always in cardiac arrest","The pulse is blocked by the driveline"], ans:1,
+        expl:"Continuous-flow LVADs move blood as a steady stream rather than in beats, so a palpable pulse is often absent — and that is normal." },
+      { q:"How is a blood pressure best obtained in a continuous-flow LVAD patient?",
+        opts:["Standard automatic cuff","Doppler MAP (first sound as the cuff deflates)","Palpated systolic","It cannot be measured at all"], ans:1,
+        expl:"With continuous flow there is no distinct systolic/diastolic; a Doppler over the brachial/radial artery gives the MAP as the cuff deflates." },
+      { q:"In an LVAD patient, absence of a palpable pulse means:",
+        opts:["Cardiac arrest — begin compressions immediately","Not necessarily arrest — assess perfusion and device function first","The device has failed","Nothing can be done"], ans:1,
+        expl:"Pulselessness alone is expected with continuous flow. Assess perfusion (mentation, Doppler MAP, ETCO2, device hum) before concluding arrest." },
+      { q:"An LVAD patient is awake and perfusing but found to be in VT with no pulse. You should:",
+        opts:["Begin chest compressions immediately","Treat the rhythm but NOT start compressions, because the pump is perfusing","Turn off the LVAD","Do nothing at all"], ans:1,
+        expl:"If the pump is running and the patient is perfusing, compressions are not indicated even in VT/VF. Treat the rhythm; the LVAD keeps flow going independent of native rhythm." },
+      { q:"Chest compressions ARE now recommended in an LVAD patient when:",
+        opts:["Any time there is no palpable pulse","The device is not functioning, cannot be restarted, and there are no signs of life / inadequate perfusion","The patient is hypertensive","The battery alarm sounds"], ans:1,
+        expl:"After troubleshooting, if the pump cannot be restarted and perfusion is absent (e.g., unresponsive, ETCO2 <20, MAP ≤50), compressions are recommended. The old dislodgement fear was theoretical." },
+      { q:"Is defibrillation contraindicated in an LVAD patient?",
+        opts:["Yes, never defibrillate","No — defibrillate a shockable rhythm as usual","Only with the VAD coordinator present","Only after removing the controller"], ans:1,
+        expl:"Defibrillation is not contraindicated; treat shockable rhythms normally." },
+      { q:"The most common bleeding complication in LVAD patients is:",
+        opts:["Intracranial hemorrhage","Gastrointestinal bleeding (AV malformations + acquired von Willebrand deficiency)","Epistaxis","Hemothorax"], ans:1,
+        expl:"Continuous non-pulsatile flow promotes GI arteriovenous malformations and an acquired von Willebrand deficiency, making GI bleeding very common." },
+      { q:"A high-power alarm with dark urine and worsening heart failure suggests:",
+        opts:["Normal operation","Pump thrombosis","A dead battery only","Hypovolemia"], ans:1,
+        expl:"Rising power plus hemolysis (dark urine) and worsening failure point to pump thrombosis — escalate and contact the VAD coordinator." },
+      { q:"Why is hypertension particularly dangerous in an LVAD patient?",
+        opts:["It has no effect on the pump","High afterload reduces pump flow and raises stroke/bleeding risk","It speeds the pump dangerously","It only affects the right ventricle"], ans:1,
+        expl:"These pumps are afterload-sensitive: high systemic pressure opposes output (a cause of low-flow alarms) and increases stroke and bleeding risk — hence a controlled MAP target." },
+      { q:"The correct FIRST step in an unresponsive LVAD patient is to:",
+        opts:["Start chest compressions immediately","Assess perfusion, auscultate for the hum, check power/connections/controller, and contact the VAD coordinator","Remove the driveline","Defibrillate regardless of rhythm"], ans:1,
+        expl:"Lead with perfusion assessment and device troubleshooting (often with the VAD coordinator). Restarting a stopped pump may be the most effective intervention; compressions are reserved for genuine pump failure with no perfusion." }
+    ]
+  }
+
 ];
 
 /* ============================================================================
@@ -877,9 +1311,22 @@ function startModuleQuiz(id){
   activeQuiz = { questions:mod.quiz, isFinal:false, modId:id, answers:new Array(mod.quiz.length).fill(-1), submitted:false, title:mod.title, num:"MODULE "+pad2(id) };
   renderQuiz();
 }
+var FINAL_PER_MODULE = 4;   // questions sampled from each module's bank for the final exam
+function shuffled(arr){
+  var a = arr.slice();
+  for(var i=a.length-1; i>0; i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
 function startFinal(){
   var pool = [];
-  MODULES.forEach(function(m){ if(m.quiz){ m.quiz.forEach(function(q){ pool.push(q); }); } });
+  MODULES.forEach(function(m){
+    if(!m.quiz) return;
+    pool = pool.concat(shuffled(m.quiz).slice(0, FINAL_PER_MODULE));
+  });
+  pool = shuffled(pool);
   activeQuiz = { questions:pool, isFinal:true, modId:null, answers:new Array(pool.length).fill(-1), submitted:false, title:"Final Examination", num:"FINAL EXAM" };
   renderQuiz();
 }
