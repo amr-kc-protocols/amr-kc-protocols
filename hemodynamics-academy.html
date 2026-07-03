@@ -119,6 +119,12 @@ svg.wave{ display:block; width:100%; height:56px; }
 .progbar{ height:6px; background:var(--rule); overflow:hidden; margin:0 -20px 0; }
 .progbar > i{ display:block; height:100%; width:0%; background:var(--blue); transition:width .5s ease; }
 
+.storagewarn{
+  background:var(--amber-soft); border-bottom:1px solid var(--amber-line);
+  color:var(--amber); font-family:var(--sans); font-size:12.5px; font-weight:600;
+  text-align:center; padding:8px 20px;
+}
+
 /* ── Home: module list ─────────────────────────────────────────── */
 main{ padding:24px 0 60px; }
 .eyebrow{
@@ -306,6 +312,8 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
   </div>
   <div class="progbar"><i id="progFill"></i></div>
 </header>
+
+<div class="storagewarn hidden print-hide" id="storageWarn">Your device isn't saving progress (private browsing or storage is full) — quiz results and your certificate may not persist after you close this page.</div>
 
 <main>
   <div class="wrap">
@@ -1130,7 +1138,7 @@ var state = loadState();
 function blankState(){
   var m = {};
   MODULES.forEach(function(mod){ m[mod.id] = { read:false, passed:false, best:0 }; });
-  return { learnerName:"", modules:m, finalPassed:false, completedAt:null };
+  return { learnerName:"", modules:m, finalPassed:false, finalBest:0, completedAt:null };
 }
 function loadState(){
   try{
@@ -1140,6 +1148,7 @@ function loadState(){
     var base = blankState();
     base.learnerName = s.learnerName || "";
     base.finalPassed = !!s.finalPassed;
+    base.finalBest = s.finalBest || 0;
     base.completedAt = s.completedAt || null;
     MODULES.forEach(function(mod){
       if(s.modules && s.modules[mod.id]) base.modules[mod.id] = {
@@ -1148,7 +1157,13 @@ function loadState(){
     return base;
   }catch(e){ return blankState(); }
 }
-function saveState(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){
+    var w = document.getElementById("storageWarn");
+    if(w) w.classList.remove("hidden");
+  }
+}
 
 /* progression helpers */
 function isUnlocked(modId){
@@ -1203,8 +1218,7 @@ function show(v){
 }
 
 function updateHeader(){
-  var pc = passedCount(), pct = Math.round((pc/ (MODULES.length+1))*100);
-  if(state.finalPassed) pct = 100;
+  var pc = passedCount(), pct = Math.round((pc/MODULES.length)*100);
   document.getElementById("tkMods").textContent = pc + " / " + MODULES.length;
   document.getElementById("tkPct").textContent = pct + "%";
   document.getElementById("progFill").style.width = pct + "%";
@@ -1289,6 +1303,9 @@ function openReader(id){
   btn.disabled = !alreadyRead;
   note.textContent = alreadyRead ? "" : "Scroll through the full module to unlock the quiz.";
   show("reader");
+  // content may already fit the viewport with nothing to scroll — check once after layout settles
+  // instead of waiting on a 'scroll' event that would then never fire
+  if(!alreadyRead) requestAnimationFrame(function(){ requestAnimationFrame(onReaderScroll); });
 }
 function onReaderScroll(){
   if(scrolledEnough) return;
@@ -1361,19 +1378,19 @@ function renderQuiz(){
       b.addEventListener("click", function(){
         var qi=+b.dataset.q, oi=+b.dataset.o;
         activeQuiz.answers[qi]=oi;
-        renderQuiz();
+        // update just this question's selected option in place — a full renderQuiz()
+        // here would rebuild every question and reset scroll position on every tap
+        form.children[qi].querySelectorAll(".opt").forEach(function(ob){
+          ob.classList.toggle("sel", +ob.dataset.o === oi);
+        });
+        renderQuizActions();
       });
     });
   }
 
-  var actions = document.getElementById("quizActions");
   document.getElementById("resultSlot").innerHTML = "";
   if(!q.submitted){
-    var answered = q.answers.filter(function(a){return a>=0;}).length;
-    actions.innerHTML = "<button class='cta primary' id='submitQuiz'"+(answered<q.questions.length?" disabled":"")+">Submit answers</button>"+
-      "<p class='readnote'>"+answered+" of "+q.questions.length+" answered</p>";
-    var sb=document.getElementById("submitQuiz");
-    if(sb) sb.addEventListener("click", submitQuiz);
+    renderQuizActions();
   } else {
     var correct = scoreQuiz();
     var pct = Math.round(correct/q.questions.length*100);
@@ -1384,6 +1401,7 @@ function renderQuiz(){
         "<div class='rmsg'>"+correct+" of "+q.questions.length+" correct · "+
         (passed? "Passed — "+ (q.isFinal?"course complete":"next module unlocked") : "Need "+need+"% to pass")+"</div>"+
       "</div>";
+    var actions = document.getElementById("quizActions");
     if(passed){
       if(q.isFinal){
         actions.innerHTML = "<button class='cta teal' id='toCert'>View your certificate ›</button>";
@@ -1405,6 +1423,17 @@ function renderQuiz(){
   }
   show("quiz");
 }
+// builds just the submit button / "N of M answered" panel, for the unsubmitted quiz state —
+// called on every answer tap without touching the question list or scroll position
+function renderQuizActions(){
+  var q = activeQuiz;
+  var actions = document.getElementById("quizActions");
+  var answered = q.answers.filter(function(a){return a>=0;}).length;
+  actions.innerHTML = "<button class='cta primary' id='submitQuiz'"+(answered<q.questions.length?" disabled":"")+">Submit answers</button>"+
+    "<p class='readnote'>"+answered+" of "+q.questions.length+" answered</p>";
+  var sb=document.getElementById("submitQuiz");
+  if(sb) sb.addEventListener("click", submitQuiz);
+}
 function scoreQuiz(){
   var c=0; activeQuiz.questions.forEach(function(item,i){ if(activeQuiz.answers[i]===item.ans) c++; }); return c;
 }
@@ -1415,6 +1444,7 @@ function submitQuiz(){
   var need = activeQuiz.isFinal ? PASS_FINAL : PASS_MODULE;
   var passed = pct >= need;
   if(activeQuiz.isFinal){
+    if(pct > state.finalBest) state.finalBest = pct;
     if(passed){ state.finalPassed=true; state.completedAt = new Date().toISOString(); }
   } else {
     var m = state.modules[activeQuiz.modId];
@@ -1431,9 +1461,13 @@ function renderCertificate(){
   var name = (state.learnerName||"").trim() || "—";
   var dt = state.completedAt ? new Date(state.completedAt) : new Date();
   var dstr = dt.toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
-  // final score
-  var finalPct = "—";
-  // (recompute best-effort: not stored separately; show Passed)
+  var moduleCount = MODULES.length;
+  var deviceNames = MODULES.filter(function(m){ return m.id >= 5; })
+    .map(function(m){ return m.title.replace(/\s*\([^)]*\)\s*$/, ""); });
+  var deviceList = deviceNames.length > 1
+    ? deviceNames.slice(0,-1).join(", ") + ", and " + deviceNames[deviceNames.length-1]
+    : deviceNames.join("");
+  var scoreLine = state.finalBest ? (state.finalBest+"%") : "Passed";
   document.getElementById("certCard").innerHTML =
     "<div class='c-brand'>AMR Kansas City <b>◆</b> Clinical Education</div>"+
     "<div class='c-wave'><svg viewBox='0 0 220 26' preserveAspectRatio='none'><path d='"+certWavePath()+"' fill='none' stroke='#1B63C4' stroke-width='1.6'/></svg></div>"+
@@ -1442,9 +1476,10 @@ function renderCertificate(){
     "<div class='c-name'>"+escapeHtml(name)+"</div>"+
     "<div class='c-of'>has successfully completed</div>"+
     "<div class='c-course'>Hemodynamic Monitoring for Critical Care &amp; Interfacility Transport</div>"+
-    "<div class='c-body'>An eight-module program covering hemodynamic physiology, arterial-line monitoring, vasoactive pharmacology, and mechanical circulatory support (IABP, Impella, ECMO, and LVAD), with a comprehensive final examination passed at "+PASS_FINAL+"% or above.</div>"+
+    "<div class='c-body'>A comprehensive "+moduleCount+"-module program covering hemodynamic physiology, arterial-line monitoring, vasoactive pharmacology, and mechanical circulatory support ("+deviceList+"), with a final examination passed at "+PASS_FINAL+"% or above.</div>"+
     "<div class='c-meta'>"+
       "<div class='c-cell'><div class='cl'>Date completed</div><div class='cv'>"+dstr+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Final exam score</div><div class='cv'>"+scoreLine+"</div></div>"+
       "<div class='c-cell'><div class='cl'>Medical Director</div><div class='cv'>A. Deshmukh, MD</div></div>"+
       "<div class='c-cell'><div class='cl'>Clinical Education</div><div class='cv'>AMR KC</div></div>"+
     "</div>";
