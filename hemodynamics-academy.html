@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AMR KC Academy">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-193.png">
+<title>Hemodynamic Monitoring Academy &#x2014; AMR KC</title>
+<!--
+  Hemodynamic Monitoring for Critical Care Transport — AMR Kansas City
+  ====================================================================
+  Self-contained training academy. Plain HTML/CSS/JS, no external deps,
+  works offline. Progress persists in localStorage.
+
+  ARCHITECTURE
+  - MODULES[] is the single source of truth. To add a module later, append
+    an object with { available:true, content, quiz }. The lock/progression
+    logic and UI pick it up automatically.
+  - Progression: Module N unlocks when Module N-1's quiz is passed (>=80%).
+    A module you can reach but whose content isn't built yet has
+    available:false and shows a "content in development" state.
+  - Final exam unlocks when every module quiz is passed. Pass = >=85%.
+  - Certificate captures the learner name and prints clean via print CSS.
+
+  STATE (localStorage key: hemo_academy_v1)
+    { learnerName, modules:{ id:{read,passed,best} }, finalPassed, completedAt }
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --navy:#173A68;        /* brand dark — primary buttons, headings accent */
+  --ink:#152238;          /* headings / body text */
+  --ink-2:#66707C;        /* subtext */
+  --blue:#1B63C4;         /* accent — links, labels, pills */
+  --blue-dk:#154C8C;       /* deeper blue for inline emphasis */
+  --blue-soft:#EAF1FD;    /* tinted surface */
+  --blue-line:#BFD6F5;    /* tinted border */
+  --paper:#FFFFFF;
+  --card:#F4F6F9;          /* light tile */
+  --card-2:#F1F4F8;
+  --rule:#E2E6EC;
+  --rule-2:#D3DAE3;
+  --green:#15803D;         /* passed / correct */
+  --green-soft:#EAFBF1;
+  --green-line:#BFE3D0;
+  --red:#DC2626;           /* wrong / fail (functional only) */
+  --red-soft:#FDECEC;
+  --red-line:#F3C6C6;
+  --amber:#A1590B;
+  --amber-soft:#FEF3E2;
+  --amber-line:#E7C48A;
+  --lock:#9AA5B1;
+  --mono:'IBM Plex Sans', sans-serif;
+  --sans:'IBM Plex Sans', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --maxw: 760px;
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:0 20px; }
+
+/* ── Back to Field Guide ─────────────────────────────────────────── */
+.backlink{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--blue); text-decoration:none; opacity:.85; margin:14px 0 0;
+}
+.backlink:active{ opacity:.6; }
+
+/* ── Header (field-guide light chrome) ──────────────────────────── */
+header.mon{
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  position:relative; overflow:hidden;
+}
+.mon-inner{ max-width:var(--maxw); margin:0 auto; padding:0 20px 2px; position:relative; z-index:2; }
+.brandrow{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; }
+.brand{
+  font-family:var(--sans); font-weight:800; letter-spacing:.11em;
+  font-size:11px; color:var(--navy); text-transform:uppercase;
+}
+.brand b{ color:var(--blue); }
+.status-chip{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.04em;
+  color:var(--ink-2); border:1px solid var(--rule); background:var(--card-2);
+  border-radius:999px; padding:4px 10px; white-space:nowrap;
+}
+h1.course{
+  font-family:var(--sans); font-weight:800; letter-spacing:-.02em;
+  font-size:27px; line-height:1.1; margin:12px 0 2px; color:var(--ink);
+}
+.course-sub{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); margin:0 0 12px; font-weight:500; }
+.wave-strip{ height:56px; position:relative; margin:0 -20px; }
+svg.wave{ display:block; width:100%; height:56px; }
+.wave path.trace{
+  fill:none; stroke:var(--blue); stroke-width:2.2;
+  stroke-linejoin:round; stroke-linecap:round;
+  filter:drop-shadow(0 0 3px rgba(27,99,196,.30));
+}
+@keyframes sweep{ to{ stroke-dashoffset:0; } }
+.wave path.anim{ stroke-dasharray:2600; stroke-dashoffset:2600; animation:sweep 7s linear infinite; }
+.ticker{
+  display:flex; gap:22px; padding:6px 20px 12px; margin:0 -20px;
+  font-family:var(--sans);
+}
+.tk{ display:flex; flex-direction:column; }
+.tk .lab{ font-size:9.5px; letter-spacing:.12em; color:var(--lock); text-transform:uppercase; font-weight:700; }
+.tk .val{ font-size:15px; color:var(--ink); font-weight:700; font-family:var(--mono); }
+.tk .val.red{ color:var(--lock); }
+.tk .val.grn{ color:var(--green); }
+.progbar{ height:6px; background:var(--rule); overflow:hidden; margin:0 -20px 0; }
+.progbar > i{ display:block; height:100%; width:0%; background:var(--blue); transition:width .5s ease; }
+
+.storagewarn{
+  background:var(--amber-soft); border-bottom:1px solid var(--amber-line);
+  color:var(--amber); font-family:var(--sans); font-size:12.5px; font-weight:600;
+  text-align:center; padding:8px 20px;
+}
+
+/* ── Home: module list ─────────────────────────────────────────── */
+main{ padding:24px 0 60px; }
+.eyebrow{
+  font-family:var(--sans); font-weight:800; letter-spacing:.13em;
+  font-size:11px; text-transform:uppercase; color:var(--blue); margin:0 0 14px;
+}
+.modlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+.modcard{
+  display:flex; gap:14px; align-items:stretch;
+  background:var(--card); border:1px solid transparent; border-radius:16px;
+  padding:15px 16px 15px 0; overflow:hidden; position:relative;
+  transition:background .18s, box-shadow .18s, transform .06s;
+}
+.modcard .num{
+  font-family:var(--mono); font-weight:700; font-size:14px;
+  width:54px; min-width:54px; display:flex; align-items:center; justify-content:center;
+  color:var(--lock); border-right:1px solid var(--rule-2);
+}
+.modcard .body{ flex:1; min-width:0; }
+.modcard .mtitle{ font-family:var(--sans); font-weight:700; font-size:16.5px; letter-spacing:-.01em; color:var(--ink); margin:1px 0 3px; }
+.modcard .mdesc{ font-family:var(--sans); font-size:13px; color:var(--ink-2); line-height:1.45; margin:0; }
+.modcard .foot{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+.pill{ font-family:var(--sans); font-weight:600; font-size:11px; letter-spacing:.02em; padding:3px 9px; border-radius:999px; border:1px solid; }
+.pill.locked{ color:var(--lock); border-color:var(--rule-2); background:var(--paper); }
+.pill.ready{ color:var(--blue); border-color:var(--blue-line); background:var(--blue-soft); }
+.pill.passed{ color:var(--green); border-color:var(--green-line); background:var(--green-soft); }
+.pill.soon{ color:var(--amber); border-color:var(--amber-line); background:var(--amber-soft); }
+.go{ margin-left:auto; font-family:var(--sans); font-weight:700; font-size:13.5px; color:var(--blue); }
+
+.modcard.open{ cursor:pointer; background:var(--card); }
+.modcard.open:hover{ box-shadow:0 6px 20px rgba(23,58,104,.08); }
+.modcard.open:active{ transform:translateY(1px); }
+.modcard.open .num{ color:var(--blue); }
+.modcard.passed .num{ color:var(--green); }
+.modcard.locked{ opacity:.78; }
+.lockglyph{ width:13px; height:13px; vertical-align:-2px; margin-right:2px; }
+
+.finalcard{ margin-top:20px; border:1.5px dashed var(--rule-2); background:var(--card-2); }
+.finalcard.ready{ border:1.5px solid var(--blue); background:var(--blue-soft); }
+.finalcard .num{ color:var(--blue); border-right-color:var(--rule-2); }
+
+/* ── Reader view ───────────────────────────────────────────────── */
+.back{ display:inline-flex; align-items:center; gap:6px; background:none; border:none;
+  font-family:var(--sans); font-weight:600; font-size:14px; color:var(--blue); cursor:pointer; padding:6px 0; margin-bottom:6px; }
+.rd-num{ font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:var(--blue); font-weight:700; }
+h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.02em; font-size:25px; line-height:1.14; margin:4px 0 4px; color:var(--ink); }
+.rd-obj{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--blue); padding:8px 0 8px 13px; margin:14px 0 22px; background:linear-gradient(90deg,var(--blue-soft),transparent); border-radius:0 8px 8px 0; }
+.content h3{ font-family:var(--sans); font-weight:800; font-size:17px; letter-spacing:-.01em; color:var(--ink); margin:30px 0 8px; }
+.content h3 .h3n{ font-family:var(--mono); color:var(--blue); font-weight:700; font-size:13px; margin-right:9px; }
+.content p{ margin:12px 0; font-size:15px; }
+.content ul{ margin:12px 0; padding-left:22px; }
+.content li{ margin:6px 0; font-size:15px; }
+.content strong{ color:var(--ink); font-weight:700; }
+.content em{ color:var(--blue-dk); font-style:normal; font-weight:600; }
+.formula{
+  font-family:var(--mono); font-size:14px; line-height:1.7; color:var(--navy);
+  background:var(--blue-soft); border:1px solid var(--blue-line); border-left:4px solid var(--blue);
+  border-radius:10px; padding:12px 14px; margin:16px 0; overflow-x:auto;
+}
+.formula .fk{ color:var(--blue-dk); font-weight:700; }
+.evidence{
+  border:1px solid var(--rule); border-left:4px solid var(--blue);
+  background:var(--card-2); border-radius:10px; padding:13px 15px; margin:18px 0;
+}
+.evidence .etag{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:#fff; background:var(--blue); display:inline-block; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+.evidence p{ margin:6px 0 0; font-size:14.5px; }
+.evidence .grade{ font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:9px; padding-top:8px; border-top:1px solid var(--rule); }
+.keybox{ background:var(--green-soft); border:1px solid var(--green-line); border-radius:10px; padding:13px 15px; margin:18px 0; }
+.keybox .kt{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--green); display:block; margin-bottom:5px; }
+
+.cta{ display:block; width:100%; text-align:center; border:none; border-radius:13px; cursor:pointer;
+  font-family:var(--sans); font-weight:700; font-size:15.5px; letter-spacing:0; padding:15px; }
+.cta.primary{ background:var(--navy); color:#fff; box-shadow:0 4px 14px rgba(23,58,104,.26); }
+.cta.primary:active{ background:var(--ink); }
+.cta.teal{ background:var(--blue); color:#fff; box-shadow:0 4px 14px rgba(27,99,196,.22); }
+.cta.teal:active{ background:#144A93; }
+.cta.ghost{ background:var(--paper); color:var(--ink); border:1.5px solid var(--rule-2); box-shadow:none; }
+.cta[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+.cta-wrap{ margin:28px 0 4px; }
+.readnote{ font-family:var(--sans); font-size:12.5px; color:var(--ink-2); text-align:center; margin:9px 0 0; }
+
+/* ── Quiz view ─────────────────────────────────────────────────── */
+.qmeta{ font-family:var(--mono); font-size:11.5px; letter-spacing:.03em; color:var(--ink-2); margin:2px 0 18px; }
+.q{ background:var(--card); border:1px solid transparent; border-radius:16px; padding:16px 17px; margin:0 0 14px; }
+.q .qnum{ font-family:var(--mono); font-size:11px; color:var(--blue); font-weight:700; letter-spacing:.05em; }
+.q .qtext{ font-family:var(--sans); font-weight:600; font-size:15.5px; line-height:1.42; margin:6px 0 12px; color:var(--ink); }
+.opt{ display:block; width:100%; text-align:left; font-family:var(--sans); font-size:14.5px; line-height:1.4;
+  background:var(--paper); border:1.5px solid var(--rule); border-radius:11px; padding:12px 14px; margin:8px 0; cursor:pointer; color:var(--ink); transition:border-color .12s, background .12s; }
+.opt:hover{ border-color:var(--rule-2); }
+.opt .ol{ font-family:var(--mono); font-weight:700; color:var(--blue); margin-right:9px; }
+.opt.sel{ border-color:var(--blue); background:var(--blue-soft); }
+.opt.correct{ border-color:var(--green); background:var(--green-soft); }
+.opt.wrong{ border-color:var(--red); background:var(--red-soft); }
+.opt.correct .ol{ color:var(--green); }
+.opt.wrong .ol{ color:var(--red); }
+.expl{ font-family:var(--sans); font-size:13.5px; line-height:1.5; color:var(--ink-2); margin:11px 2px 0; padding-left:12px; border-left:2px solid var(--rule-2); }
+.expl b{ color:var(--ink); }
+.locked-opts .opt{ cursor:default; }
+
+.result{ border-radius:16px; padding:20px; margin:4px 0 18px; text-align:center; font-family:var(--sans); }
+.result.pass{ background:var(--green-soft); border:1.5px solid var(--green-line); }
+.result.fail{ background:var(--red-soft); border:1.5px solid var(--red-line); }
+.result .big{ font-size:32px; font-weight:800; letter-spacing:-.02em; }
+.result.pass .big{ color:var(--green); }
+.result.fail .big{ color:var(--red); }
+.result .rmsg{ font-size:14px; color:var(--ink-2); margin-top:4px; }
+
+/* ── Name capture ──────────────────────────────────────────────── */
+.namebox{ background:var(--card); border:1px solid transparent; border-radius:16px; padding:16px 17px; margin:0 0 20px; }
+.namebox label{ font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:block; margin-bottom:8px; }
+.namebox input{ width:100%; font-family:var(--sans); font-size:16px; padding:12px 13px; border:1.5px solid var(--rule-2); border-radius:11px; background:var(--paper); color:var(--ink); }
+.namebox input:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }
+
+/* ── Certificate ───────────────────────────────────────────────── */
+.cert{
+  background:#fff; border:1px solid var(--rule); border-radius:14px;
+  padding:34px 30px; margin:6px 0 18px; text-align:center; position:relative; overflow:hidden;
+  box-shadow:0 10px 34px rgba(23,58,104,.10);
+}
+.cert::before{ content:""; position:absolute; inset:10px; border:2px solid var(--blue); border-radius:8px; pointer-events:none; opacity:.35; }
+.cert::after{ content:""; position:absolute; inset:15px; border:1px solid var(--navy); border-radius:6px; pointer-events:none; opacity:.22; }
+.cert .c-brand{ font-family:var(--sans); font-weight:800; letter-spacing:.14em; font-size:12px; text-transform:uppercase; color:var(--navy); }
+.cert .c-brand b{ color:var(--blue); }
+.cert .c-kicker{ font-family:var(--sans); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-2); font-weight:700; margin:20px 0 6px; }
+.cert .c-course{ font-family:var(--sans); font-size:22px; font-weight:800; letter-spacing:-.01em; color:var(--ink); line-height:1.2; margin:0 auto; max-width:440px; }
+.cert .c-of{ font-family:var(--sans); font-size:12.5px; color:var(--ink-2); margin:22px 0 6px; }
+.cert .c-name{ font-family:var(--sans); font-size:30px; font-weight:800; letter-spacing:-.01em; color:var(--navy); border-bottom:2px solid var(--blue); display:inline-block; padding:0 26px 6px; margin:0 0 4px; }
+.cert .c-body{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); max-width:440px; margin:16px auto 22px; line-height:1.55; }
+.cert .c-wave{ height:24px; margin:6px auto 20px; opacity:.85; }
+.cert .c-wave svg{ height:24px; width:220px; }
+.cert .c-meta{ display:flex; justify-content:space-around; gap:14px; margin-top:14px; flex-wrap:wrap; }
+.cert .c-cell{ text-align:center; }
+.cert .c-cell .cl{ font-family:var(--sans); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--lock); font-weight:700; }
+.cert .c-cell .cv{ font-family:var(--mono); font-size:13px; color:var(--ink); font-weight:600; border-top:1px solid var(--rule); padding-top:5px; margin-top:5px; min-width:120px; }
+
+footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0; text-align:center; }
+.reset{ background:none; border:none; font-family:var(--mono); font-size:11px; color:var(--lock); cursor:pointer; text-decoration:underline; }
+
+.hidden{ display:none !important; }
+
+@media (max-width:480px){
+  body{ font-size:15.5px; }
+  h1.course{ font-size:23px; }
+  .cert{ padding:26px 18px; }
+  .cert .c-name{ font-size:25px; padding:0 14px 6px; }
+  .cert .c-course{ font-size:19px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .wave path.anim{ animation:none; stroke-dashoffset:0; }
+  .progbar > i{ transition:none; }
+}
+
+@media print{
+  body{ background:#fff; }
+  header.mon, main > *:not(#view-cert), .back, .cta-wrap, footer.adm, .print-hide{ display:none !important; }
+  #view-cert{ display:block !important; }
+  main{ padding:0; }
+  .wrap{ max-width:none; padding:0; }
+  .cert{ box-shadow:none; border:none; margin:0; }
+  @page{ size:landscape; margin:14mm; }
+}
+</style>
+</head>
+<body>
+
+<header class="mon">
+  <div class="mon-inner">
+    <a class="backlink print-hide" href="index.html">&#x2190; Field Guide</a>
+    <div class="brandrow">
+      <div class="brand">AMR Kansas City &middot; Clinical Education <b>&#x25c6;</b></div>
+      <div class="status-chip" id="statusChip">SESSION &middot; READY</div>
+    </div>
+    <h1 class="course">Hemodynamic Monitoring</h1>
+    <p class="course-sub">for Critical Care &amp; Interfacility Transport</p>
+  </div>
+  <div class="wave-strip">
+    <svg class="wave" id="waveSvg" viewBox="0 0 1200 64" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trace anim" id="wavePath" d=""></path>
+    </svg>
+  </div>
+  <div class="ticker">
+    <div class="tk"><span class="lab">Modules</span><span class="val" id="tkMods">0 / 8</span></div>
+    <div class="tk"><span class="lab">Progress</span><span class="val grn" id="tkPct">0%</span></div>
+    <div class="tk"><span class="lab">Final Exam</span><span class="val red" id="tkFinal">Locked</span></div>
+  </div>
+  <div class="progbar"><i id="progFill"></i></div>
+</header>
+
+<div class="storagewarn hidden print-hide" id="storageWarn">Your device isn't saving progress (private browsing or storage is full) — quiz results and your certificate may not persist after you close this page.</div>
+
+<main>
+  <div class="wrap">
+
+    <!-- ===== HOME ===== -->
+    <section id="view-home">
+      <div class="namebox print-hide">
+        <label for="nameInput">Learner name (appears on your certificate)</label>
+        <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
+      </div>
+      <p class="eyebrow">Course Modules &middot; Sequential</p>
+      <ul class="modlist" id="modList"></ul>
+      <div id="finalSlot"></div>
+      <footer class="adm">
+        <button class="reset" id="resetBtn">Reset my progress</button>
+      </footer>
+    </section>
+
+    <!-- ===== READER ===== -->
+    <section id="view-reader" class="hidden">
+      <button class="back" id="readerBack">&#x2039; All modules</button>
+      <div class="rd-num" id="rdNum"></div>
+      <h2 class="rd-title" id="rdTitle"></h2>
+      <div class="rd-obj" id="rdObj"></div>
+      <div class="content" id="rdContent"></div>
+      <div class="cta-wrap">
+        <button class="cta primary" id="toQuizBtn">Start the quiz &#x203a;</button>
+        <p class="readnote" id="readNote"></p>
+      </div>
+    </section>
+
+    <!-- ===== QUIZ ===== -->
+    <section id="view-quiz" class="hidden">
+      <button class="back" id="quizBack">&#x2039; Back to module</button>
+      <div class="rd-num" id="qzNum"></div>
+      <h2 class="rd-title" id="qzTitle"></h2>
+      <div class="qmeta" id="qzMeta"></div>
+      <div id="resultSlot"></div>
+      <div id="quizForm"></div>
+      <div class="cta-wrap" id="quizActions"></div>
+    </section>
+
+    <!-- ===== CERTIFICATE ===== -->
+    <section id="view-cert" class="hidden">
+      <button class="back print-hide" id="certBack">&#x2039; All modules</button>
+      <div class="cert" id="certCard"></div>
+      <div class="cta-wrap print-hide">
+        <button class="cta teal" id="printBtn">Print / save certificate</button>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+"use strict";
+/* ============================================================================
+   DATA — content model
+   ==========================================================================*/
+var PASS_MODULE = 80;   // %
+var PASS_FINAL  = 85;   // %
+
+var MODULES = [
+  {
+    id: 1,
+    available: true,
+    title: "Hemodynamic Physiology Foundations",
+    desc: "The pressure–flow relationship, the four determinants of cardiac output, oxygen delivery, and what a MAP target actually buys you.",
+    objective: "Explain how blood pressure, flow, and resistance relate; identify the determinants of stroke volume and oxygen delivery; and state a defensible MAP target with its evidence.",
+    content: [
+      { h:"1", t:"Pressure, flow, and resistance", html:
+        "<p>Every hemodynamic decision you make in transport traces back to one relationship. Blood pressure is not a thing the body regulates for its own sake — it is the <em>driving pressure</em> that pushes flow through the circulation. The relationship mirrors Ohm's law:</p>"+
+        "<div class='formula'><span class='fk'>MAP</span> ≈ <span class='fk'>CO</span> × <span class='fk'>SVR</span><br>&nbsp;&nbsp;(pressure = flow × resistance)</div>"+
+        "<p>Mean arterial pressure (MAP) is the number that matters for perfusion, not systolic. Organs are perfused throughout the cardiac cycle, and diastole occupies about two-thirds of it, so MAP is weighted toward diastolic pressure:</p>"+
+        "<div class='formula'><span class='fk'>MAP</span> = DBP + ⅓ (SBP − DBP)<br>&nbsp;&nbsp;= DBP + ⅓ × pulse pressure</div>"+
+        "<p>A pressure of 120/60 gives a MAP of 60 + ⅓(60) = <strong>80 mmHg</strong>. Normal MAP runs roughly 70–100 mmHg. As a working floor, most organs autoregulate flow down to a MAP near <strong>65 mmHg</strong>; below that, flow starts to track pressure directly and perfusion falls.</p>"+
+        "<p>Because MAP is the product of flow and resistance, a normal blood pressure can hide a failing patient: a low cardiac output can be masked by intense vasoconstriction (high SVR), and a high output can look hypotensive when the pipes are wide open (low SVR, as in distributive shock). Pressure alone never tells you which lever is moving.</p>"
+      },
+      { h:"2", t:"Cardiac output and the four determinants", html:
+        "<p>Flow through the circuit is cardiac output:</p>"+
+        "<div class='formula'><span class='fk'>CO</span> = <span class='fk'>HR</span> × <span class='fk'>SV</span><br>&nbsp;&nbsp;normal CO ≈ 4–8 L/min &middot; SV ≈ 60–100 mL</div>"+
+        "<p>Heart rate is one lever. The other three all act on <strong>stroke volume</strong>:</p>"+
+        "<ul>"+
+        "<li><strong>Preload</strong> — the volume stretching the ventricle at end-diastole. More stretch, more force, up to a limit.</li>"+
+        "<li><strong>Afterload</strong> — the resistance the ventricle ejects against.</li>"+
+        "<li><strong>Contractility</strong> — the intrinsic strength of the squeeze, independent of load.</li>"+
+        "</ul>"+
+        "<p>Heart rate cuts both ways. Too slow drops output directly; too fast shortens diastole, which is when the ventricle fills and the coronaries perfuse, so extreme tachycardia can <em>reduce</em> stroke volume and output at the same time.</p>"
+      },
+      { h:"3", t:"Preload and the Frank–Starling relationship", html:
+        "<p>The Frank–Starling mechanism describes how stretching cardiac muscle before contraction increases the force it generates. Plot preload against stroke volume and you get a curve that rises, then flattens: on the steep part, giving volume increases output; on the flat part, more volume just raises filling pressures and backs fluid into the lungs without buying you flow.</p>"+
+        "<p>The clinical question — <em>will this patient's output rise if I give fluid?</em> — is the question of fluid responsiveness. And this is where a common bedside habit fails.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — CVP</span>"+
+        "<p>Central venous pressure (CVP) is a poor predictor of fluid responsiveness. Systematic reviews across dozens of studies found essentially no reliable relationship between a static CVP value and whether cardiac output will rise with a fluid bolus (Marik and colleagues, 2008 and 2013).</p>"+
+        "<p>Dynamic measures perform far better: pulse-pressure or stroke-volume variation in a passively ventilated patient, or the change in output after a passive leg raise. Use trends and dynamic responses, not a single filling pressure.</p>"+
+        "<div class='grade'>Quality: moderate–high (consistent across multiple systematic reviews of mostly observational and physiologic data).</div></div>"
+      },
+      { h:"4", t:"Afterload", html:
+        "<p>Afterload is the load the ventricle works against to eject. For the left ventricle it is dominated by systemic vascular resistance and aortic impedance, but wall stress is the truer physiologic picture. Laplace's law captures it:</p>"+
+        "<div class='formula'>wall tension ∝ (<span class='fk'>Pressure</span> × <span class='fk'>radius</span>) / wall thickness</div>"+
+        "<p>Two consequences matter in transport. First, a dilated ventricle (large radius) faces higher wall stress at any given pressure, which is part of why the failing, dilated heart is exquisitely <strong>afterload-sensitive</strong> — lowering afterload can raise its stroke volume. Second, this is the lever that vasodilators and vasoconstrictors pull. A pressor that clamps down SVR raises MAP but can drop the output of a weak ventricle; a vasodilator can unload that same ventricle and improve flow while lowering pressure.</p>"
+      },
+      { h:"5", t:"Contractility", html:
+        "<p>Contractility (inotropy) is the strength of contraction at a fixed preload and afterload — the property inotropes change and ischemia degrades. You cannot measure it directly at the bedside, but ejection fraction is a rough surrogate, and the pressure response to an inotrope is a functional one.</p>"+
+        "<p>The practical point: preload, afterload, and contractility are independent levers. A patient can be adequately filled, with normal resistance, and still fail to generate output because the pump is weak. Recognizing <em>which</em> lever is broken is what separates a reflexive fluid bolus from the right intervention.</p>"
+      },
+      { h:"6", t:"From pressure to perfusion: oxygen delivery", html:
+        "<p>Blood pressure is a means, not the end. The end is oxygen delivered to tissue:</p>"+
+        "<div class='formula'><span class='fk'>DO₂</span> = <span class='fk'>CO</span> × <span class='fk'>CaO₂</span> × 10<br>CaO₂ = (1.34 × Hgb × SaO₂) + (0.003 × PaO₂)</div>"+
+        "<p>Read the second equation carefully. Oxygen <em>content</em> is carried almost entirely by hemoglobin bound to O₂; the dissolved fraction (0.003 × PaO₂) is trivial. That is why a patient with a good saturation and a low hemoglobin, or a good pressure and a low output, can still be starving tissue of oxygen. Delivery is the product of flow and content — optimizing one while ignoring the other is a common error.</p>"+
+        "<p>Because you cannot see DO₂ on the monitor, you infer perfusion adequacy from downstream markers: lactate (rising with anaerobic metabolism), and central or mixed venous oxygen saturation (ScvO₂ / SvO₂), which falls as tissues extract more oxygen from a falling supply.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> A normal blood pressure does not guarantee perfusion. MAP is a surrogate for organ perfusion <em>pressure</em>; DO₂, lactate, and venous saturation are closer to the thing you actually care about.</div>"
+      },
+      { h:"7", t:"What MAP target should you actually chase?", html:
+        "<p>MAP ≥ 65 mmHg is the conventional resuscitation floor, but the evidence tells a more nuanced story than a single universal number.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — MAP targets</span>"+
+        "<p><b>SEPSISPAM</b> (Asfar et al., NEJM 2014) randomized septic-shock patients to a high MAP target (80–85) versus 65–70. There was no overall mortality difference, and the higher target caused more atrial fibrillation. But a pre-specified subgroup with <em>chronic hypertension</em> had less renal injury and less need for dialysis at the higher target.</p>"+
+        "<p><b>The 65 Trial</b> (Lamontagne et al., JAMA 2020) tested permissive hypotension (target 60–65) in vasodilatory shock in patients 65 and older. It reduced vasopressor exposure with no clear increase in mortality — supporting a lower target in older patients.</p>"+
+        "<p><b>Bottom line:</b> MAP 65 is a reasonable default. Individualize upward for chronic hypertensives (their autoregulation is reset higher) and consider tolerating the low-to-mid 60s in older vasodilatory-shock patients rather than chasing pressure with escalating vasopressors.</p>"+
+        "<div class='grade'>Quality: high for the default (multiple RCTs); the individualized adjustments rest partly on subgroup and trial-specific findings — apply with judgment.</div></div>"
+      },
+      { h:"8", t:"The shock lens", html:
+        "<p>Everything in this course fits into one diagnostic frame. When perfusion fails, the problem is almost always one (or a mix) of:</p>"+
+        "<ul>"+
+        "<li><strong>The pump</strong> — cardiogenic. Output fails despite adequate volume. This is where inotropes, the balloon pump, Impella, and ECMO live.</li>"+
+        "<li><strong>The tank</strong> — hypovolemic or distributive. Not enough volume, or a tank that has become too large (vasodilation). Volume and vasopressors.</li>"+
+        "<li><strong>The pipes / obstruction</strong> — resistance too low (distributive) or flow mechanically blocked (tamponade, tension pneumothorax, PE).</li>"+
+        "</ul>"+
+        "<p>Hold this frame as you move through arterial-line monitoring, the pharmacology of raising and lowering pressure, and the mechanical support devices. Each one is a tool for a specific broken lever — and using the right tool depends on correctly reading which lever failed.</p>"
+      }
+    ],
+    quiz: [
+      { q:"A patient's blood pressure is 120/60 mmHg. What is the approximate MAP?",
+        opts:["70 mmHg","80 mmHg","90 mmHg","100 mmHg"], ans:1,
+        expl:"MAP = DBP + ⅓(SBP−DBP) = 60 + ⅓(60) = 80 mmHg. MAP is weighted toward diastolic because diastole occupies most of the cardiac cycle." },
+      { q:"Which relationship correctly expresses mean arterial pressure?",
+        opts:["MAP = HR × SV","MAP ≈ CO × SVR","MAP = SV ÷ SVR","MAP = CaO₂ × Hgb"], ans:1,
+        expl:"MAP ≈ CO × SVR is the circulatory analog of Ohm's law (pressure = flow × resistance). CO = HR × SV is a separate relationship describing flow itself." },
+      { q:"Cardiac output is the product of which two variables?",
+        opts:["MAP and SVR","Preload and afterload","Heart rate and stroke volume","Hemoglobin and SaO₂"], ans:2,
+        expl:"CO = HR × SV. Heart rate and stroke volume are the two direct determinants; preload, afterload, and contractility act on stroke volume." },
+      { q:"Which of the following is NOT one of the three determinants of stroke volume?",
+        opts:["Preload","Afterload","Contractility","Hemoglobin concentration"], ans:3,
+        expl:"Stroke volume is set by preload, afterload, and contractility. Hemoglobin affects oxygen content and delivery, not stroke volume." },
+      { q:"According to current evidence, a single central venous pressure (CVP) value is best described as:",
+        opts:["An accurate predictor of fluid responsiveness","A poor predictor of fluid responsiveness","The gold standard for preload assessment","Directly proportional to stroke volume"], ans:1,
+        expl:"Systematic reviews (Marik et al.) found essentially no reliable relationship between a static CVP and whether output will rise with fluid. Dynamic measures and passive leg raise perform far better." },
+      { q:"In the oxygen delivery equation, oxygen content (CaO₂) is carried almost entirely by:",
+        opts:["Dissolved oxygen (0.003 × PaO₂)","Hemoglobin bound to oxygen (1.34 × Hgb × SaO₂)","Plasma bicarbonate","Cardiac output"], ans:1,
+        expl:"The hemoglobin-bound term dominates; the dissolved fraction is trivial. This is why a low hemoglobin impairs delivery even with a normal PaO₂ and saturation." },
+      { q:"Why is the dilated, failing left ventricle described as 'afterload-sensitive'?",
+        opts:["A larger radius raises wall stress at any given pressure, so lowering afterload can improve stroke volume","Dilation eliminates the need for preload","Afterload has no effect on a failing ventricle","Higher afterload always improves output in heart failure"], ans:0,
+        expl:"By Laplace's law, wall tension rises with radius. The dilated ventricle faces high wall stress, so unloading it (lowering afterload) can raise stroke volume even as pressure falls." },
+      { q:"A patient has MAP 70, but lactate is rising and ScvO₂ is falling. The best interpretation is:",
+        opts:["Perfusion is adequate because MAP is above 65","An adequate pressure does not guarantee adequate oxygen delivery","The lactate is certainly a lab error","Afterload must be too low"], ans:1,
+        expl:"MAP is a surrogate for perfusion pressure, not delivery. Rising lactate and falling venous saturation suggest oxygen delivery is failing to meet demand despite an acceptable pressure." },
+      { q:"What did SEPSISPAM (2014) find about targeting a higher MAP (80–85) vs 65–70 in septic shock?",
+        opts:["Higher target reduced mortality in all patients","No overall mortality difference, but chronic-hypertension patients had less renal injury at the higher target","Higher target caused fewer arrhythmias","Lower target was uniformly harmful"], ans:1,
+        expl:"SEPSISPAM showed no overall mortality benefit and more atrial fibrillation at the higher target, but a chronic-hypertension subgroup had less renal injury / less dialysis at 80–85." },
+      { q:"Using the shock lens, cardiogenic shock is fundamentally a problem with:",
+        opts:["The tank (volume)","The pipes (resistance)","The pump (output despite adequate volume)","Oxygen content only"], ans:2,
+        expl:"Cardiogenic shock is a pump problem — output fails despite adequate filling. It is the domain of inotropes and mechanical support (IABP, Impella, ECMO)." }
+    ]
+  },
+
+  {
+    id: 2,
+    available: true,
+    title: "Arterial Line Monitoring",
+    desc: "Leveling and zeroing to the phlebostatic axis, waveform components, the square-wave (damping) test, and troubleshooting a bad tracing.",
+    objective: "Read an arterial waveform and its components, set up a line correctly by leveling and zeroing, use the square-wave test to judge whether the numbers can be trusted, and know which value survives distortion.",
+    content: [
+      { h:"1", t:"What an arterial line actually measures", html:
+        "<p>Strip away the mystique and an arterial line is plumbing. A continuous column of saline connects the patient's artery to a pressure transducer. Every heartbeat pushes on that column, the transducer converts the push into an electrical signal, and the monitor draws it as a wave. There is no magic — just a pressure sensor on the end of a fluid-filled tube.</p>"+
+        "<p>Why bother, when a blood-pressure cuff is right there? Because a cuff gives you a <em>snapshot</em> every three to five minutes, and it takes that snapshot by squeezing until flow stops. An arterial line gives you the true pressure <em>every single beat</em>, continuously, and it does it without interrupting flow. Think of it as a stethoscope for pressure that never blinks. In a patient on a vasopressor or crashing in front of you, the difference between a reading every beat and a guess every few minutes is the difference between steering and hoping.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>Arterial lines are the accepted standard for beat-to-beat pressure in shock and for titrating vasopressors, but that standing rests mainly on physiologic rationale and consistency, not on large trials showing they lower mortality versus a cuff. What is better supported is the other half of the argument: oscillometric (cuff) blood pressure becomes unreliable at low pressures and in low-flow states, where it tends to read inaccurately. So the case for the a-line in shock is really a case against trusting the cuff there.</p>"+
+        "<div class='grade'>Quality: moderate for cuff unreliability in hypotension (observational); the outcome case for a-lines is consensus and physiologic rather than RCT-proven.</div></div>"
+      },
+      { h:"2", t:"The anatomy of one beat", html:
+        "<p>Every beat writes a signature, and a healthy signature has recognizable parts. Reading left to right across a single wave:</p>"+
+        "<ul>"+
+        "<li><strong>Systolic upstroke</strong> — the near-vertical climb as the ventricle ejects. A brisk, steep upstroke reflects good contractility and ejection.</li>"+
+        "<li><strong>Systolic peak</strong> — the top of the wave. This is your systolic pressure (SBP).</li>"+
+        "<li><strong>Dicrotic notch</strong> — a small notch on the downslope marking aortic valve closure. It is the punctuation mark at the end of systole, the moment the ventricle stops ejecting and diastole begins.</li>"+
+        "<li><strong>Diastolic runoff</strong> — the gentle downhill glide as blood drains into the periphery.</li>"+
+        "<li><strong>End-diastole</strong> — the lowest point, just before the next upstroke. This is your diastolic pressure (DBP).</li>"+
+        "</ul>"+
+        "<p>The shape carries information beyond the numbers. A slurred, low-amplitude upstroke can hint at poor contractility or a low stroke volume. The height of the dicrotic notch tracks loosely with vascular tone — a high notch suggests high resistance, a low or vanishing notch suggests a wide-open, vasodilated circulation. And if the whole waveform bobs up and down with the ventilator, that respiratory swing is the fluid-responsiveness clue from Module 1 showing itself on the screen. Treat these as qualitative reads, not precise measurements.</p>"
+      },
+      { h:"3", t:"Leveling: why height changes the number", html:
+        "<p>Here is a fact that trips up more transports than any other: <em>the height of the transducer changes the pressure it reports.</em> The saline column has weight, and a taller column of fluid presses down harder. Move the transducer up or down and you add or subtract that hydrostatic pressure to every reading.</p>"+
+        "<div class='formula'>error ≈ <span class='fk'>7.4 mmHg</span> per <span class='fk'>10 cm</span> of vertical offset</div>"+
+        "<p>To make everyone measure from the same baseline, we agree on a reference point: the <strong>phlebostatic axis</strong> — the 4th intercostal space at the mid-axillary line, roughly the level of the atria. Level the transducer there and the readings mean what they should.</p>"+
+        "<ul>"+
+        "<li>Transducer <strong>below</strong> the phlebostatic axis → reads <em>falsely high</em> (extra column weight pushing on the sensor).</li>"+
+        "<li>Transducer <strong>above</strong> the axis → reads <em>falsely low</em>.</li>"+
+        "</ul>"+
+        "<p>Picture a water tower: the higher the column of water above you, the harder it pushes down at the bottom. The phlebostatic axis is simply the agreed 'sea level' for that column. On transport this is the single most common error — you raise the head of the stretcher, tilt for a transfer, or move the patient to the cot, and the transducer is no longer at the axis. Re-level after every position change.</p>"
+      },
+      { h:"4", t:"Zeroing: telling the monitor what 'nothing' feels like", html:
+        "<p>Leveling and zeroing are two different jobs, and both are required. <strong>Zeroing</strong> opens the transducer to room air and tells the monitor, 'call this pressure zero.' From then on it measures pressure <em>relative to atmosphere</em> rather than absolute pressure — which is what you want, since you care about pressure above ambient, not the weight of the whole atmosphere.</p>"+
+        "<p>The clean way to keep them straight: <em>zeroing sets the atmospheric reference; leveling sets the anatomic reference.</em> Zeroing is calibrating a scale to read 0 with nothing on it. Leveling is making sure that scale is sitting on flat ground before you weigh anything. Do both at setup, and re-zero whenever the transducer is moved or the numbers look implausible.</p>"
+      },
+      { h:"5", t:"The square-wave test: is the line telling the truth?", html:
+        "<p>Before you act on a systolic number, spend two seconds confirming the line isn't lying to you. Pull the fast-flush ('the pigtail'), which briefly slams the flush-bag pressure (~300 mmHg) into the tubing, then let go and watch the trace snap back. This is the <strong>square-wave</strong> or dynamic-response test, and it has three possible verdicts.</p>"+
+        "<ul>"+
+        "<li><strong>Optimally damped</strong> — sharp square, then one or two quick oscillations, then straight back to baseline. The numbers are trustworthy.</li>"+
+        "<li><strong>Underdamped</strong> — the trace 'rings,' bouncing through several oscillations and overshooting. It <em>overestimates SBP</em> and <em>underestimates DBP</em>. Think of a bell that won't stop ringing. Causes: stiff or overly long tubing, catheter whip, and fast heart rates.</li>"+
+        "<li><strong>Overdamped</strong> — sluggish, no oscillations, a slurred return that rounds off the waveform. It <em>underestimates SBP</em> and <em>overestimates DBP</em>. Think of ringing that same bell after wrapping it in a towel — a dull thud with no ring. Causes: air bubbles, a small clot, a kink, a loose connection, or a low flush-bag pressure.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The square-wave test is free, takes seconds, and tells you whether to trust the SBP and DBP. Run it before you titrate a drug to a systolic number.</div>"
+      },
+      { h:"6", t:"Why MAP is the number you can trust", html:
+        "<p>Damping mangles the extremes. An underdamped line inflates the peak and drops the trough; an overdamped line does the reverse. But notice what both leave alone: the middle. <strong>Mean arterial pressure is the integrated area under the curve</strong>, and averaging is remarkably resistant to distortion at the top and bottom.</p>"+
+        "<p>It is the same reason one disastrous exam barely moves your grade-point average: a single outlier swings your highest and lowest scores far more than it swings the mean. So when a waveform looks damped, or you simply aren't sure, <em>titrate to the MAP, not the systolic.</em> This is also why the MAP-based targets from Module 1 (a floor near 65 mmHg, individualized) are the right thing to chase at the bedside — the MAP is both the most physiologically meaningful number and the most artifact-resistant one on the screen.</p>"
+      },
+      { h:"7", t:"Peripheral amplification and site differences", html:
+        "<p>The waveform is not identical everywhere in the body. As the pulse travels from the aorta out to the radial artery and beyond, the systolic peak actually <em>rises</em> and the waveform narrows, while the diastolic pressure falls. The MAP, meanwhile, stays roughly constant along the way.</p>"+
+        "<p>The intuition is the crack of a whip: energy travels down the length and the far tip snaps upward with exaggerated amplitude. So a radial systolic can read <em>higher</em> than the true central aortic systolic, and that is normal — not a reason to chase it. The anchor, again, is the MAP.</p>"+
+        "<p>One important exception for the sickest patients: in severe shock or on high-dose vasopressors, intense peripheral vasoconstriction can make a radial line read <em>lower</em> than a central (femoral) line — a real central-to-peripheral pressure gradient. If a radial MAP looks impossibly low in a patient who otherwise seems to be perfusing, consider this gradient before escalating.</p>"
+      },
+      { h:"8", t:"Complications and the one rule you never break", html:
+        "<p>Arterial lines are generally safe, but the failure modes are worth respecting: hematoma and bleeding (a disconnected arterial line bleeds fast, because it is under arterial pressure), thrombosis, distal ischemia (uncommon), local infection (lower risk than a central line, but not zero), nerve injury, and air embolism.</p>"+
+        "<p>And then there is the absolute rule:</p>"+
+        "<div class='keybox'><span class='kt'>Never</span> Never inject medication into an arterial line. Intra-arterial injection can cause severe distal ischemia and limb loss. The a-line is a one-way window for reading pressure, not a door for drugs. Label it clearly and treat every port as read-only.</div>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The modified Allen test — occluding the radial and ulnar arteries and timing the return of color to check ulnar collateral flow before radial cannulation — is widely taught but poorly supported. Studies have found it does not reliably predict which patients will develop ischemic complications. Many clinicians still perform it out of habit or policy, but do not treat a 'passing' test as a guarantee of safety, or a 'failing' one as a firm contraindication.</p>"+
+        "<div class='grade'>Quality: low (observational; poor predictive value in the available evidence).</div></div>"+
+        "<p>For transport specifically: keep the flush bag pressurized to ~300 mmHg with a slow continuous flush (about 3 mL/hr) to hold the line open, double-check every connection because of the bleeding risk, and re-level and re-zero after any move.</p>"
+      }
+    ],
+    quiz: [
+      { q:"An arterial line transduces pressure through what?",
+        opts:["A wireless sensor at the catheter tip","A continuous fluid (saline) column connecting the artery to a transducer","An inflatable cuff that cycles automatically","An oscillometric sensor in the monitor"], ans:1,
+        expl:"The a-line is a fluid-filled column from artery to transducer; each beat pushes the column and the transducer converts that pressure into the displayed waveform." },
+      { q:"The dicrotic notch on the arterial waveform corresponds to:",
+        opts:["Opening of the mitral valve","Peak ventricular ejection","Closure of the aortic valve","The start of the systolic upstroke"], ans:2,
+        expl:"The dicrotic notch marks aortic valve closure — the punctuation mark ending systole and beginning diastolic runoff." },
+      { q:"A transducer positioned below the phlebostatic axis will:",
+        opts:["Read falsely high","Read falsely low","Read accurately","Only affect the heart rate"], ans:0,
+        expl:"A taller fluid column above the sensor adds hydrostatic pressure, so a transducer below the axis reads falsely high (about 7.4 mmHg per 10 cm of offset). Above the axis reads falsely low." },
+      { q:"Where is the phlebostatic axis?",
+        opts:["2nd intercostal space, sternal border","4th intercostal space, mid-axillary line","Suprasternal notch","Xiphoid process"], ans:1,
+        expl:"The phlebostatic axis is the 4th intercostal space at the mid-axillary line, approximately the level of the atria — the agreed reference for leveling." },
+      { q:"A square-wave (fast-flush) test that shows prolonged ringing with overshoot indicates a system that is:",
+        opts:["Optimally damped","Overdamped, underestimating SBP","Underdamped, overestimating SBP","Correctly zeroed only"], ans:2,
+        expl:"Ringing/overshoot = underdamped: it overestimates SBP and underestimates DBP. Causes include stiff or long tubing, catheter whip, and tachycardia." },
+      { q:"An overdamped arterial tracing (sluggish, no oscillations) most likely results from:",
+        opts:["An air bubble, clot, kink, or low flush-bag pressure","Excessively stiff tubing","A very high heart rate","Catheter whip"], ans:0,
+        expl:"Overdamping is caused by things that absorb the signal — air bubbles, clots, kinks, loose connections, low flush pressure. It underestimates SBP and overestimates DBP." },
+      { q:"When a waveform appears damped and you are unsure of the SBP/DBP, which value should you titrate to?",
+        opts:["Systolic pressure","Diastolic pressure","Mean arterial pressure","Pulse pressure"], ans:2,
+        expl:"MAP is the integrated area under the curve and is relatively resistant to damping distortion, which mangles the peak and trough. Titrate to MAP." },
+      { q:"As you move from the aorta to the radial artery, the systolic pressure typically:",
+        opts:["Decreases markedly","Increases (peripheral amplification)","Stays exactly the same","Becomes unmeasurable"], ans:1,
+        expl:"Distal pulse amplification raises the systolic peak and narrows the waveform peripherally, while MAP stays roughly constant. A high radial systolic is expected, not alarming." },
+      { q:"Which statement about arterial lines is an absolute rule?",
+        opts:["Always draw blood cultures from the a-line","Never inject medication into an arterial line","Zero the line only once per shift","Keep the flush bag at 100 mmHg"], ans:1,
+        expl:"Intra-arterial injection can cause severe distal ischemia and limb loss. The a-line is read-only — never a route for drugs." },
+      { q:"Regarding the modified Allen test before radial cannulation, current evidence shows it:",
+        opts:["Reliably predicts ischemic complications","Has poor predictive value and is weakly supported","Is contraindicated in all patients","Replaces the need for leveling"], ans:1,
+        expl:"The Allen test does not reliably predict ischemic complications; the evidence is low quality. It is still often performed by habit or policy, but should not be treated as a guarantee." }
+    ]
+  },
+
+  {
+    id: 3,
+    available: true,
+    title: "Pharmacology I — Managing the Hypotensive Patient",
+    desc: "Norepinephrine, epinephrine, phenylephrine, vasopressin, dopamine, dobutamine, milrinone: receptor logic, push-dose pressors, and titration to a target.",
+    objective: "Predict a vasoactive drug's effect from its receptor profile, match the right agent to the broken hemodynamic lever, and understand the evidence and delivery considerations behind the common pressors and inotropes.",
+    content: [
+      { h:"1", t:"The receptor switchboard", html:
+        "<p>You do not have to memorize a table of drugs if you understand the switchboard they plug into. Almost every vasoactive agent works by pushing some combination of a few receptors, and each receptor maps cleanly onto the levers from Module 1:</p>"+
+        "<ul>"+
+        "<li><strong>Alpha-1</strong> — <em>squeeze the pipes.</em> Arterial and venous vasoconstriction, which raises SVR and MAP.</li>"+
+        "<li><strong>Beta-1</strong> — <em>drive the pump.</em> Increased contractility (inotropy) and heart rate (chronotropy).</li>"+
+        "<li><strong>Beta-2</strong> — <em>relax the pipes</em> (and open the airways). Vasodilation in skeletal muscle; can lower SVR.</li>"+
+        "<li><strong>Dopaminergic</strong> — splanchnic and renal vasodilation at low doses (more on this myth below).</li>"+
+        "<li><strong>V1 (vasopressin)</strong> — <em>squeeze the pipes with a different key.</em> Vasoconstriction through a non-adrenergic pathway.</li>"+
+        "</ul>"+
+        "<p>Picture a mixing board with a few sliders. Every drug is just a preset that pushes those sliders up by different amounts. Know where a drug sits on the board and you can predict what it will do to pressure, flow, and rate before you ever start the pump.</p>"
+      },
+      { h:"2", t:"Match the drug to the broken lever", html:
+        "<p>The organizing question is never 'what's my favorite pressor?' It is 'which lever is broken?' — straight out of the shock lens:</p>"+
+        "<ul>"+
+        "<li><strong>Pipes too loose</strong> (distributive/vasodilatory shock, e.g. sepsis) → you need to squeeze the pipes: an alpha vasoconstrictor.</li>"+
+        "<li><strong>Pump too weak</strong> (cardiogenic shock) → you need to drive the pump: an inotrope (beta-1 or, bypassing beta entirely, a PDE-3 inhibitor).</li>"+
+        "<li><strong>Tank too empty</strong> (hypovolemic) → volume comes first; a pressor on an empty tank just squeezes a dry hose.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Pressure is not perfusion. Clamp a pure vasoconstrictor onto a failing pump and you can raise the MAP on the monitor while the cardiac output — the actual flow to organs — falls. Fixing the number is not the same as fixing the patient.</div>"
+      },
+      { h:"3", t:"Norepinephrine: the balanced default", html:
+        "<p>Norepinephrine is strong on alpha-1 with a modest beta-1 kick. That combination raises SVR and MAP while lending a little inotropic support, and it does so with relatively little tachycardia. Think of it as the all-wheel-drive pressor: good traction across most shock states, which is exactly why it is first-line for septic, vasodilatory, and undifferentiated shock.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>SOAP II (2010) randomized shock patients to norepinephrine or dopamine as first-line. There was more arrhythmia with dopamine, and a pre-specified cardiogenic-shock subgroup had higher mortality with dopamine. The Surviving Sepsis Campaign recommends norepinephrine as the first-line vasopressor in septic shock. This is one of the better-supported choices in critical care.</p>"+
+        "<div class='grade'>Quality: high (RCT plus strong guideline recommendation).</div></div>"
+      },
+      { h:"4", t:"The specialists: epinephrine, phenylephrine, vasopressin", html:
+        "<p><strong>Epinephrine</strong> pushes both alpha and beta hard. It is first-line in anaphylaxis and cardiac arrest and a common second-line add-on in septic shock. Two things to expect: it raises heart rate, and it produces a <em>benign</em> rise in lactate through beta-2-driven glycogenolysis and stimulation of the sodium-potassium pump. Do not mistake that lactate bump for worsening perfusion and chase it in circles.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>Head-to-head, epinephrine and norepinephrine achieve MAP targets comparably, but epinephrine causes more tachycardia and more transient lactic acidosis. It is a reasonable add-on, not usually the first choice, when norepinephrine alone is not enough.</p>"+
+        "<div class='grade'>Quality: moderate (RCTs comparing catecholamines; metabolic effects well described pharmacologically).</div></div>"+
+        "<p><strong>Phenylephrine</strong> is a pure alpha-1 agent: vasoconstriction with no inotropy or chronotropy, and it can actually cause a reflex bradycardia as the body responds to the rising pressure. That makes it handy when a tachyarrhythmia limits catecholamines, and as a quick push-dose agent. As a sole agent in septic shock it is less preferred, because with no inotropic support it can drop cardiac output even as pressure rises.</p>"+
+        "<p><strong>Vasopressin</strong> constricts through the V1 receptor — a completely different key from the adrenergic lock. It is given at a fixed low dose (0.03–0.04 units/min) as a catecholamine-sparing add-on to norepinephrine, not titrated up and down, and it does not cause tachycardia. Because it works outside the adrenergic system, it can still bite when acidosis and receptor downregulation have blunted the catecholamines.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>VASST (2008) added vasopressin to norepinephrine and found no overall mortality difference, with a possible benefit in less-severe shock. VANISH (2016) compared vasopressin-first to norepinephrine-first and found no difference in renal-failure-free days. The honest summary: vasopressin is a useful catecholamine-sparing adjunct, not a proven mortality-lowering agent.</p>"+
+        "<div class='grade'>Quality: high for the trials; the takeaway is 'adjunctive/sparing,' with genuine uncertainty about outcome benefit.</div></div>"
+      },
+      { h:"5", t:"Dopamine and the renal-dose myth", html:
+        "<p>Dopamine is often taught as tidily dose-dependent — dopaminergic at low doses, beta-1 in the middle, alpha at the top. In practice those ranges overlap messily, and the drug carries a real cost: more arrhythmias than norepinephrine, and the worse cardiogenic-shock signal from SOAP II. It has largely fallen out of favor as a first-line pressor.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The idea of 'renal-dose' dopamine to protect the kidneys is a myth that has been formally debunked. A randomized trial (Bellomo and colleagues, 2000) found low-dose dopamine did not prevent renal dysfunction. Increased urine output is not the same as preserved kidney function.</p>"+
+        "<div class='grade'>Quality: high (RCT evidence against renoprotection).</div></div>"
+      },
+      { h:"6", t:"Inotropes: pushing the pump, not squeezing the pipes", html:
+        "<p>When the problem is a failing pump, vasoconstrictors are the wrong tool. You need an inotrope.</p>"+
+        "<p><strong>Dobutamine</strong> is primarily a beta-1 inotrope with some beta-2 activity. It raises contractility and cardiac output — but the beta-2 effect can lower SVR and drop blood pressure, so in cardiogenic shock it is often paired with a vasopressor. It presses the gas pedal on the heart; it does not squeeze the pipes.</p>"+
+        "<p><strong>Milrinone</strong> takes a different route. It inhibits phosphodiesterase-3, raising intracellular cAMP <em>without going through the beta receptor at all</em>. That is its signature advantage: it still works when the beta 'front door' is locked — in patients on chronic beta-blockade or with the receptor downregulation of chronic heart failure. It is an 'inodilator': a positive inotrope that also dilates both systemic and pulmonary vessels, which makes it valuable in right-ventricular failure and pulmonary hypertension but also means it can cause hypotension. It is renally cleared with a longer half-life than dobutamine, so it is harder to titrate off quickly.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>DOREMI (2021) compared milrinone and dobutamine head-to-head in cardiogenic shock and found no significant difference in the primary composite outcome. Neither is a clear winner; the choice is patient-specific (for example, milrinone when beta-blockade or pulmonary hypertension dominates).</p>"+
+        "<div class='grade'>Quality: moderate-high (RCT showing no significant difference).</div></div>"+
+        "<div class='keybox'><span class='kt'>Caution</span> Every inotrope raises myocardial oxygen demand. In active ischemia, driving the pump harder can deepen the injury you are trying to survive.</div>"
+      },
+      { h:"7", t:"Delivery in the real world", html:
+        "<p>Knowing the drug is half the job; getting it into the patient safely is the other half.</p>"+
+        "<p><strong>Push-dose pressors</strong> bridge transient hypotension — the dip around intubation, or the gap while an infusion spins up. The common agents are push-dose epinephrine (roughly 10–20 mcg) and phenylephrine (roughly 50–200 mcg).</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The evidence for push-dose pressors is largely observational and extrapolated from the operating room, and the literature documents a real rate of dosing errors and hemodynamic overshoot from bedside dilution under pressure. Use them deliberately, with the dilution double-checked, not reflexively.</p>"+
+        "<div class='grade'>Quality: low (observational/extrapolated; known error risk).</div></div>"+
+        "<p><strong>Central versus peripheral.</strong> The classic teaching required a central line for vasopressors because extravasation can cause tissue necrosis. That teaching is softening: a growing body of observational data supports short-term peripheral norepinephrine through a good proximal, large-bore IV with close monitoring. It is not high-quality randomized evidence, so follow your protocol — but know the practice is evolving. If extravasation does occur, the antidote is phentolamine (an alpha-blocker) infiltrated locally.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Titrate to a MAP target (a floor near 65, individualized per Module 1), and confirm the number is buying real perfusion — improving lactate, mentation, and urine output — rather than treating the monitor alone.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Stimulation of alpha-1 receptors produces:",
+        opts:["Vasodilation and bronchodilation","Vasoconstriction and increased SVR","Increased heart rate only","Renal vasodilation"], ans:1,
+        expl:"Alpha-1 stimulation constricts arterial and venous vessels, raising SVR and MAP. It is the 'squeeze the pipes' lever." },
+      { q:"The recommended first-line vasopressor for septic shock, supported by SOAP II and the Surviving Sepsis Campaign, is:",
+        opts:["Dopamine","Phenylephrine","Norepinephrine","Vasopressin"], ans:2,
+        expl:"Norepinephrine is first-line. SOAP II showed more arrhythmia (and worse cardiogenic-shock outcomes) with dopamine, and guidelines favor norepinephrine." },
+      { q:"Beta-1 receptor stimulation primarily causes:",
+        opts:["Vasoconstriction","Increased contractility and heart rate","Bronchodilation","Renal vasodilation"], ans:1,
+        expl:"Beta-1 effects are on the heart: increased inotropy (contractility) and chronotropy (rate) — the 'drive the pump' lever." },
+      { q:"A patient on epinephrine develops a rising lactate. The most likely explanation is:",
+        opts:["Worsening tissue hypoperfusion in every case","A benign beta-2-mediated effect (glycogenolysis / Na-K pump)","An allergic reaction to the drug","Contamination of the infusion"], ans:1,
+        expl:"Epinephrine causes a well-described benign lactate rise via beta-2 stimulation. It should not be automatically read as worsening perfusion — interpret it alongside the clinical picture." },
+      { q:"Vasopressin, used in shock, is best described as:",
+        opts:["A titratable beta-agonist inotrope","A fixed-dose, non-catecholamine (V1) vasoconstrictor used as a catecholamine-sparing adjunct","A pure inodilator","A renal-protective agent"], ans:1,
+        expl:"Vasopressin acts on V1 receptors outside the adrenergic system, is given at a fixed low dose as an add-on to norepinephrine, and does not cause tachycardia. Trials support a sparing role, not a clear mortality benefit." },
+      { q:"'Renal-dose' dopamine to protect the kidneys is:",
+        opts:["Strongly evidence-based","A myth debunked by randomized data","Recommended in all septic patients","Only effective at high doses"], ans:1,
+        expl:"An RCT (Bellomo, 2000) showed low-dose dopamine does not prevent renal dysfunction. Increased urine output is not preserved kidney function." },
+      { q:"Phenylephrine is characterized by:",
+        opts:["Pure alpha-1 activity, no inotropy, and possible reflex bradycardia","Strong beta-1 inotropy","PDE-3 inhibition","Non-adrenergic V1 vasoconstriction"], ans:0,
+        expl:"Phenylephrine is a pure alpha-1 vasoconstrictor with no inotropic or chronotropic effect and can cause reflex bradycardia. As a sole septic-shock agent it may reduce cardiac output." },
+      { q:"Milrinone increases contractility by which mechanism, and why is that useful?",
+        opts:["Beta-1 agonism; useful in bradycardia","PDE-3 inhibition raising cAMP independent of beta-receptors; useful in beta-blockade or receptor downregulation","Alpha-1 agonism; useful in vasodilation","V1 agonism; useful in acidosis"], ans:1,
+        expl:"Milrinone inhibits PDE-3, raising cAMP without needing the beta receptor — so it still works when the beta 'front door' is locked, as in beta-blockade or chronic HF downregulation. It is an inodilator and can cause hypotension." },
+      { q:"Giving a pure vasoconstrictor to a patient in cardiogenic shock can:",
+        opts:["Always improve cardiac output","Raise the MAP while lowering cardiac output/flow","Have no hemodynamic effect","Cure the underlying pump failure"], ans:1,
+        expl:"On a failing pump, clamping the pipes can raise the pressure reading while actually reducing forward flow. Pressure is not perfusion — match the tool to the broken lever." },
+      { q:"Extravasation of peripheral norepinephrine is treated with local infiltration of:",
+        opts:["Calcium gluconate","Phentolamine","Sodium bicarbonate","Epinephrine"], ans:1,
+        expl:"Phentolamine, an alpha-blocker, is infiltrated locally to counteract the intense vasoconstriction and reduce tissue injury from norepinephrine extravasation." }
+    ]
+  },
+
+  {
+    id: 4,
+    available: true,
+    title: "Pharmacology II — Managing the Hypertensive Patient",
+    desc: "Nicardipine, clevidipine, labetalol, esmolol, nitroglycerin, nitroprusside; hypertensive emergency and the dissection, stroke, and ICH pressure targets.",
+    objective: "Distinguish hypertensive emergency from urgency, lower pressure at the right speed for the situation, and choose the right agent and target for dissection, ICH, ischemic stroke, and sympathetic crisis.",
+    content: [
+      { h:"1", t:"Emergency versus urgency: the only distinction that matters first", html:
+        "<p>Before you reach for a drug, answer one question: is there <em>acute target-organ damage</em>? That single fact splits severe hypertension into two very different problems.</p>"+
+        "<ul>"+
+        "<li><strong>Hypertensive emergency</strong> — severe hypertension <em>with</em> acute organ injury: the brain (encephalopathy, stroke, hemorrhage), heart (ischemia, flash pulmonary edema), aorta (dissection), kidneys (acute injury), or eyes (papilledema). This needs controlled intravenous lowering, now.</li>"+
+        "<li><strong>Hypertensive urgency</strong> — a high number <em>without</em> acute organ damage. This does <em>not</em> need rapid lowering, and aggressive treatment here causes harm.</li>"+
+        "</ul>"+
+        "<p>The number alone does not make the emergency; the organ damage does. A systolic of 220 with no acute injury is treated slowly; a systolic of 170 that is tearing an aorta is treated in minutes.</p>"
+      },
+      { h:"2", t:"The cardinal rule: lower gradually", html:
+        "<p>The instinct to slam a high pressure back to normal is the classic beginner's error, and it comes from forgetting Module 1's autoregulation. In chronic hypertension the brain, heart, and kidneys <em>reset their autoregulatory range upward</em> — they have recalibrated their thermostat to run at a higher pressure. Drop the pressure to a textbook-normal number too fast and those organs are suddenly under-perfused at a pressure they should tolerate, causing the very strokes and infarcts you were trying to prevent.</p>"+
+        "<div class='formula'>Usual target: reduce <span class='fk'>MAP by ~10–20%</span> in the first hour,<br>then further over the next several hours.</div>"+
+        "<p>Ease off the accelerator; do not stomp the brake. The titratable IV agents below exist precisely because they let you control the <em>rate</em> of descent. The major exceptions to gradual lowering are aortic dissection, and to a lesser degree ICH — covered below.</p>"
+      },
+      { h:"3", t:"The toolbox: titratable IV agents", html:
+        "<ul>"+
+        "<li><strong>Nicardipine</strong> and <strong>clevidipine</strong> — dihydropyridine calcium-channel blockers that dilate arteries with little effect on heart rate. Clevidipine has an ultra-short half-life (about a minute) and is delivered in a lipid emulsion, so it titrates like a pencil with a good eraser. Excellent, predictable first-line agents for most emergencies.</li>"+
+        "<li><strong>Labetalol</strong> — combined alpha- and beta-blockade: it lowers pressure and rate together. A workhorse for dissection, stroke, and pregnancy.</li>"+
+        "<li><strong>Esmolol</strong> — an ultra-short-acting beta-1 blocker (half-life measured in minutes). Ideal when you need tight, reversible rate control, especially in dissection.</li>"+
+        "<li><strong>Nitroglycerin</strong> — predominantly a venodilator at low doses, reducing preload. Its home turf is ischemia and flash pulmonary edema, not primary afterload reduction.</li>"+
+        "<li><strong>Nitroprusside</strong> — a balanced arterial and venous dilator, immediate and powerful, but a double-edged blade: prolonged or high-dose use, especially in renal failure, produces cyanide and thiocyanate toxicity. Fast and strong, but it leaves a toxic residue.</li>"+
+        "<li><strong>Hydralazine</strong> — a direct arterial vasodilator with a long, somewhat unpredictable effect and reflex tachycardia; still common in preeclampsia.</li>"+
+        "</ul>"
+      },
+      { h:"4", t:"Aortic dissection: rate before pressure", html:
+        "<p>Dissection is the emergency that breaks the gradual-lowering rule and adds a rule of its own. The force that propagates the tear is not just the pressure but the <em>rate of rise</em> of pressure with each beat — the shearing force, dP/dt. That changes the order of operations.</p>"+
+        "<div class='keybox'><span class='kt'>Sequence</span> Give the beta-blocker (esmolol or labetalol) FIRST to slow the heart and blunt the shearing force, THEN add a vasodilator for the pressure. Targets are aggressive and fast: systolic ~100–120 mmHg and heart rate under 60, within about 20 minutes.</div>"+
+        "<p>Reverse that order and you cause harm. Give a pure vasodilator first and the reflex tachycardia it triggers <em>increases</em> dP/dt — like flooring the accelerator the instant you lift off the brake — driving the pulse harder into the tear and extending the dissection. Slow the current before you lower the water level.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The rate-before-pressure sequence and the ~100–120 systolic target rest on physiologic rationale and consistent guideline consensus rather than a randomized trial, but the mechanism (shear force propagates dissection) is well established and the recommendation is uniform across guidelines.</p>"+
+        "<div class='grade'>Quality: consensus and physiologic (uniform guideline recommendation).</div></div>"
+      },
+      { h:"5", t:"The brain: stroke and hemorrhage have their own targets", html:
+        "<p>Two acute brain emergencies pull blood pressure management in opposite directions from the usual instinct.</p>"+
+        "<p><strong>Acute ischemic stroke</strong> runs on <em>permissive hypertension</em>. The tissue around the clot survives on collateral flow that depends on pressure, so you generally do not lower it unless it is extreme: above about 220/120, or above 185/110 if the patient is a candidate for thrombolysis. Lower it aggressively and you can extend the infarct.</p>"+
+        "<p><strong>Intracerebral hemorrhage</strong> is the mirror image — here, high pressure can expand the bleed.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>Two trials define the ICH target. INTERACT2 (2013) found lowering systolic to under 140 was safe and modestly improved functional outcomes. ATACH-2 (2016) pushed harder (110–139 vs 140–179) and found no additional benefit and more renal adverse events. The practical synthesis: aim for a systolic around 140, which is safe and reasonable; going substantially lower does not clearly help and may harm.</p>"+
+        "<div class='grade'>Quality: high (two large RCTs converging on a ~140 target).</div></div>"
+      },
+      { h:"6", t:"Sympathetic crisis: mind the unopposed alpha", html:
+        "<p>In catecholamine-driven crises — cocaine or amphetamine toxicity, pheochromocytoma — the classic teaching is to avoid <em>unopposed beta-blockade</em>. Block beta (which includes beta-2 vasodilation) while leaving alpha-mediated vasoconstriction unchecked, and you can theoretically worsen the hypertension and coronary vasoconstriction. Preferred agents are benzodiazepines (which treat the sympathetic surge at its source), and vasodilators such as nicardipine or phentolamine.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The unopposed-alpha concern is widely taught and mechanistically plausible, but the clinical evidence is largely observational and case-based, and some recent data question how often it matters in practice. Treat it as a reasonable default — lead with benzodiazepines — rather than an ironclad law.</p>"+
+        "<div class='grade'>Quality: low (observational/theoretical); widely taught, genuinely debated.</div></div>"
+      },
+      { h:"7", t:"Putting the targets together", html:
+        "<div class='keybox'><span class='kt'>Anchor</span> Match the target to the organ. Most emergencies: gradual, MAP down ~10–20% in the first hour. Dissection: fast and hard, beta-blocker first, systolic ~100–120, HR under 60. ICH: systolic ~140. Ischemic stroke: leave it alone unless above ~220/120 (or 185/110 with thrombolysis). Sympathetic crisis: benzodiazepines first, avoid unopposed beta-blockade.</div>"
+      }
+    ],
+    quiz: [
+      { q:"What defines a hypertensive emergency (as opposed to urgency)?",
+        opts:["A systolic pressure over 180 regardless of symptoms","Severe hypertension WITH acute target-organ damage","Any pressure that fails to respond to oral agents","Elevated pressure only in the setting of anxiety"], ans:1,
+        expl:"It is the acute organ injury (brain, heart, aorta, kidneys, eyes), not the number itself, that defines an emergency and mandates controlled IV lowering." },
+      { q:"For most hypertensive emergencies, the initial goal is to:",
+        opts:["Normalize the pressure within 10 minutes","Reduce MAP by roughly 10–20% in the first hour","Lower systolic below 100 immediately","Withhold all treatment for 24 hours"], ans:1,
+        expl:"Chronic hypertension resets autoregulation upward; dropping too fast under-perfuses organs. Aim for ~10–20% MAP reduction in the first hour, then gradual further lowering." },
+      { q:"In acute aortic dissection, which should be given FIRST?",
+        opts:["A pure vasodilator such as nitroprusside","A beta-blocker (esmolol or labetalol) for rate/shear control","Hydralazine","Nitroglycerin"], ans:1,
+        expl:"Rate before pressure: beta-blockade first blunts the shearing force (dP/dt) that propagates the tear, then a vasodilator is added. Targets: systolic ~100–120, HR under 60." },
+      { q:"Why is giving a vasodilator BEFORE a beta-blocker dangerous in dissection?",
+        opts:["It causes reflex tachycardia that increases shear force and can extend the tear","It has no effect on pressure","It causes immediate cyanide toxicity","It raises the heart rate too slowly"], ans:0,
+        expl:"Vasodilator-induced reflex tachycardia increases dP/dt, driving the pulse harder into the dissection flap — like flooring the accelerator as you lift off the brake." },
+      { q:"For intracerebral hemorrhage, current evidence (INTERACT2/ATACH-2) supports a systolic target of approximately:",
+        opts:["90 mmHg","140 mmHg","180 mmHg","No lowering at all"], ans:1,
+        expl:"Lowering to ~140 is safe and reasonable; ATACH-2 showed going substantially lower adds no benefit and more renal adverse events." },
+      { q:"In acute ischemic stroke (no thrombolysis planned), blood pressure is generally not lowered unless it exceeds about:",
+        opts:["140/90","160/100","220/120","185/110"], ans:2,
+        expl:"Permissive hypertension preserves collateral flow. Threshold is ~220/120 without thrombolysis (or 185/110 if a thrombolysis candidate)." },
+      { q:"The major toxicity concern with prolonged or high-dose nitroprusside, especially in renal failure, is:",
+        opts:["Cyanide/thiocyanate toxicity","Hyperkalemia","Serotonin syndrome","Malignant hyperthermia"], ans:0,
+        expl:"Nitroprusside metabolism generates cyanide; thiocyanate accumulates in renal impairment. Powerful and fast, but it leaves a toxic residue." },
+      { q:"Clevidipine and esmolol share which useful property for a titrated drip?",
+        opts:["They are given as one-time boluses only","They have ultra-short half-lives allowing tight, reversible titration","They cannot be used in emergencies","They primarily reduce preload"], ans:1,
+        expl:"Both have very short half-lives (clevidipine ~1 min; esmolol minutes), so they titrate in and out quickly — a pencil with a good eraser." },
+      { q:"In cocaine-induced sympathetic crisis, the recommended first-line approach is to:",
+        opts:["Give unopposed beta-blockade immediately","Lead with benzodiazepines and avoid unopposed beta-blockade","Withhold all treatment","Give a pure beta-1 agonist"], ans:1,
+        expl:"Benzodiazepines treat the sympathetic surge at its source; unopposed beta-blockade is traditionally avoided (theoretical unopposed alpha vasoconstriction). The dogma is debated but remains the default." },
+      { q:"At low doses, nitroglycerin's predominant hemodynamic effect is:",
+        opts:["Arterial vasoconstriction","Venodilation and preload reduction","Direct positive inotropy","Beta-1 blockade"], ans:1,
+        expl:"Low-dose nitroglycerin is chiefly a venodilator, reducing preload — which is why it shines in ischemia and flash pulmonary edema." }
+    ]
+  },
+
+  {
+    id: 5,
+    available: true,
+    title: "Intra-Aortic Balloon Pump (IABP)",
+    desc: "Counterpulsation physiology, augmentation and timing errors, triggering, complications, and what changes in transport.",
+    objective: "Explain how counterpulsation helps the heart, recognize correct and mistimed augmentation on the waveform, know the contraindications and emergencies, and manage an IABP in transport.",
+    content: [
+      { h:"1", t:"Counterpulsation: a second heart that works the off-beats", html:
+        "<p>An intra-aortic balloon pump is a long balloon sitting in the descending aorta, and its whole trick is timing. It inflates during <em>diastole</em> and deflates during <em>systole</em> — exactly the opposite of the heart's own rhythm, which is why it is called counterpulsation. Think of it as a second, helper heart that works only on the off-beats.</p>"+
+        "<p>That timing buys two distinct benefits:</p>"+
+        "<ul>"+
+        "<li><strong>Diastolic augmentation.</strong> Inflating in diastole displaces blood and drives up diastolic pressure, which improves coronary artery perfusion (the coronaries fill in diastole) and pushes blood forward.</li>"+
+        "<li><strong>Afterload reduction (systolic unloading).</strong> Deflating an instant before systole creates a sudden empty space in the aorta — a partial vacuum — so the ventricle ejects against lower resistance. That reduces myocardial oxygen demand and increases stroke volume.</li>"+
+        "</ul>"+
+        "<p>More coronary supply, less cardiac work: it helps the heart from both directions at once. Note what it does <em>not</em> do — it does not actively pump blood the way an Impella or ECMO does. It only assists a heart that is still beating.</p>"
+      },
+      { h:"2", t:"Timing and triggering", html:
+        "<p>Because the benefit lives entirely in the timing, the pump needs to know exactly where it is in the cardiac cycle. It <strong>inflates at the dicrotic notch</strong> (aortic valve closure — the Module 2 landmark that marks the start of diastole) and <strong>deflates just before the systolic upstroke</strong>.</p>"+
+        "<p>It finds those moments using a trigger: usually the ECG (inflating off the T wave region, deflating on the R wave) or the arterial pressure waveform itself. The balloon is filled with <strong>helium</strong> for a specific reason — helium is a very low-density gas, so it shuttles in and out fast enough to keep up with the heart, and if the balloon ever leaks, helium is absorbed quickly and harmlessly.</p>"
+      },
+      { h:"3", t:"Reading the augmented waveform", html:
+        "<p>On the arterial trace, a correctly timed IABP rewrites the wave. You see a tall <em>augmentation</em> peak in diastole — often higher than the patient's own systolic — followed by a <em>lower</em> systolic peak on the next assisted beat and a <em>lower</em> end-diastolic pressure. Those three changes are the visual signature of the two benefits: the diastolic spike is augmentation; the reduced systolic and end-diastolic pressures are afterload reduction.</p>"+
+        "<p>To evaluate timing, clinicians run the pump at 1:2 (assisting every other beat) so an assisted beat sits right next to an unassisted one for comparison.</p>"
+      },
+      { h:"4", t:"The four timing errors", html:
+        "<p>Timing is like pushing a child on a swing: push at the right instant and you add energy; push at the wrong instant and you fight the motion. The four classic errors:</p>"+
+        "<ul>"+
+        "<li><strong>Early inflation</strong> — the balloon inflates before the aortic valve closes, driving against a still-ejecting ventricle and <em>increasing</em> afterload. Harmful.</li>"+
+        "<li><strong>Late inflation</strong> — inflates well after the notch; you simply lose augmentation.</li>"+
+        "<li><strong>Early deflation</strong> — deflates too soon; augmentation is lost and blood can flow backward into the deflating balloon.</li>"+
+        "<li><strong>Late deflation</strong> — the balloon is still inflated when systole begins, so the ventricle ejects against a balloon and afterload <em>rises</em>. Harmful.</li>"+
+        "</ul>"+
+        "<p>The two that actively hurt (early inflation and late deflation) share a theme: the balloon is up when it should be down, fighting the ventricle instead of helping it.</p>"
+      },
+      { h:"5", t:"Indications and contraindications", html:
+        "<p><strong>Indications</strong> include cardiogenic shock, the mechanical complications of MI (acute mitral regurgitation, ventricular septal rupture), refractory angina, and bridging to a definitive therapy.</p>"+
+        "<p><strong>Contraindications</strong> flow directly from the physiology:</p>"+
+        "<ul>"+
+        "<li><strong>Aortic regurgitation</strong> — diastolic augmentation drives blood backward through the leaky valve, worsening the regurgitation. A hard contraindication.</li>"+
+        "<li><strong>Aortic dissection or significant aneurysm</strong> — inflating a balloon in a compromised aorta risks rupture.</li>"+
+        "<li><strong>Severe peripheral arterial disease</strong> — the large femoral sheath threatens the limb.</li>"+
+        "</ul>"
+      },
+      { h:"6", t:"What the evidence actually shows", html:
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The IABP-SHOCK II trial (2012) randomized patients with acute-MI cardiogenic shock to IABP or no IABP and found no reduction in 30-day mortality (about 40% in both arms), a result that held at long-term follow-up. On the strength of that trial, guidelines downgraded the routine use of IABP in infarct-related cardiogenic shock.</p>"+
+        "<p>It has not vanished: the balloon pump still has a role in specific situations such as the mechanical complications of MI and as a bridge. But the era of reflexively placing one for cardiogenic shock is over.</p>"+
+        "<div class='grade'>Quality: high (large RCT with long-term follow-up).</div></div>"
+      },
+      { h:"7", t:"Complications and transport", html:
+        "<p>Respect these failure modes:</p>"+
+        "<ul>"+
+        "<li><strong>Limb ischemia</strong> — the most common complication, from the large femoral sheath. Check distal pulses and perfusion in that leg relentlessly.</li>"+
+        "<li><strong>Balloon rupture</strong> — blood or brownish flecks in the helium line is an emergency: it means the balloon has failed, risking gas embolism and clot formation on the balloon. Stop the pump and get help immediately.</li>"+
+        "<li><strong>Malposition</strong> — too high, it can occlude the left subclavian (check the left arm); too low, it can occlude the renal or mesenteric arteries (watch urine output).</li>"+
+        "<li>Thrombocytopenia, aortic injury, and infection round out the list.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Transport</span> Keep the console powered and helium adequate, maintain the trigger and timing, watch the augmented waveform and the distal limb, and keep the head of the bed relatively low. Never let the balloon sit idle for more than about 30 minutes — a stationary balloon grows clot.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The intra-aortic balloon pump inflates during ___ and deflates during ___.",
+        opts:["Systole; diastole","Diastole; systole","Inspiration; expiration","The QRS; the T wave"], ans:1,
+        expl:"Counterpulsation: inflate in diastole (augment coronary perfusion), deflate in systole (reduce afterload) — the opposite of the heart's own cycle." },
+      { q:"The two hemodynamic benefits of the IABP are:",
+        opts:["Diastolic augmentation and afterload reduction","Increased heart rate and contractility","Direct forward pumping and oxygenation","Preload increase and venoconstriction"], ans:0,
+        expl:"Inflation augments diastolic/coronary perfusion; deflation unloads the ventricle by reducing afterload. It assists a beating heart rather than pumping itself." },
+      { q:"Correct balloon inflation should be timed to occur at the:",
+        opts:["Systolic upstroke","Dicrotic notch (aortic valve closure)","Peak of the R wave","End of diastole only"], ans:1,
+        expl:"Inflation at the dicrotic notch marks the start of diastole — the right moment to augment. Deflation occurs just before the next systolic upstroke." },
+      { q:"Late deflation of the balloon is harmful because it:",
+        opts:["Has no effect","Leaves the balloon inflated into systole, increasing afterload","Reduces coronary perfusion only","Causes the balloon to rupture"], ans:1,
+        expl:"If the balloon is still up when systole begins, the ventricle ejects against it and afterload rises — the opposite of the intended unloading." },
+      { q:"The IABP is filled with helium primarily because helium:",
+        opts:["Is heavier than air for stability","Is low-density, shuttles quickly, and is absorbed safely if it leaks","Improves oxygenation of the blood","Prevents balloon rupture"], ans:1,
+        expl:"Helium's low density lets it move in and out fast enough to track the heart, and it is quickly absorbed if the balloon leaks." },
+      { q:"Blood or brownish flecks appearing in the helium drive line indicate:",
+        opts:["Normal operation","Balloon rupture — an emergency","A dead battery","Overdamping of the arterial line"], ans:1,
+        expl:"That finding means the balloon has ruptured, risking gas embolism and clot. Stop the pump and get help immediately." },
+      { q:"The most common complication of an IABP is:",
+        opts:["Limb ischemia","Hyperkalemia","Pulmonary embolism","Cyanide toxicity"], ans:0,
+        expl:"The large femoral sheath most often causes limb ischemia; distal pulses and perfusion must be checked frequently." },
+      { q:"Which is a contraindication to IABP?",
+        opts:["Cardiogenic shock","Significant aortic regurgitation","Refractory angina","Acute mitral regurgitation"], ans:1,
+        expl:"Diastolic augmentation drives blood backward through an incompetent aortic valve, worsening regurgitation. Aortic dissection is also a contraindication." },
+      { q:"IABP-SHOCK II showed that, in acute-MI cardiogenic shock, routine IABP:",
+        opts:["Halved mortality","Did not reduce 30-day mortality","Increased survival only in women","Eliminated the need for revascularization"], ans:1,
+        expl:"No mortality benefit was found (~40% in both arms), a result sustained long-term, leading guidelines to downgrade routine use in infarct-related cardiogenic shock." },
+      { q:"A balloon positioned too LOW in the aorta risks occluding the:",
+        opts:["Left subclavian artery","Renal/mesenteric arteries (watch urine output)","Carotid arteries","Pulmonary artery"], ans:1,
+        expl:"Too low, the balloon can occlude the renal or mesenteric vessels — a drop in urine output is a warning. Too high, it can occlude the left subclavian." }
+    ]
+  },
+
+  {
+    id: 6,
+    available: true,
+    title: "Impella",
+    desc: "Axial-flow physiology, P-levels, the purge system, suction alarms, positioning, and transport considerations.",
+    objective: "Explain how the Impella actively unloads the left ventricle, interpret P-levels and the placement signal, recognize suction and hemolysis, protect the purge system, and place the device in its current evidence context.",
+    content: [
+      { h:"1", t:"A screw pump across the valve", html:
+        "<p>Where the balloon pump only assists, the Impella actively <em>pumps</em>. It is a tiny micro-axial flow pump — think of an Archimedes screw — mounted on a catheter that sits across the aortic valve. Its inlet sits inside the left ventricle and its outlet in the ascending aorta, so it continuously draws blood out of the ventricle and expels it into the aorta.</p>"+
+        "<p>That does two things at once: it directly <strong>unloads the left ventricle</strong> (pulling volume and pressure out of a struggling chamber, reducing its work and oxygen demand) and it <strong>adds forward flow</strong> to the circulation. Unlike the IABP, its benefit does not depend on precise beat-to-beat timing — it simply runs.</p>"
+      },
+      { h:"2", t:"P-levels: the throttle", html:
+        "<p>Pump output is set by the <strong>P-level</strong> — the throttle, running from P0 (off) up to the maximum (P8 or P9 depending on the device). Higher P-level, more flow. The console that runs it is the Automated Impella Controller, which continuously displays flow, the placement signal, and the motor current.</p>"+
+        "<p>Weaning is done by stepping the P-level down and watching whether the patient's own heart can take back the load.</p>"
+      },
+      { h:"3", t:"Position is everything", html:
+        "<p>The whole device depends on the inlet being in the right place — roughly 3.5 cm below the aortic valve, well inside the ventricle, with the outlet above the valve. Two console readouts confirm it:</p>"+
+        "<ul>"+
+        "<li>The <strong>placement signal</strong> — a pressure waveform that should look <em>aortic</em> (from the outlet). If it starts reading like a <em>ventricular</em> tracing, the device has migrated.</li>"+
+        "<li>The <strong>motor current</strong> — normally pulsatile when the device spans the valve correctly; it flattens when position is wrong.</li>"+
+        "</ul>"+
+        "<p>Migration is the root of most Impella alarms: pulled too far into the aorta, output falls; pushed too deep into the ventricle, it causes suction.</p>"
+      },
+      { h:"4", t:"Suction events", html:
+        "<p>A suction alarm is the device telling you it is trying to pull more blood than is available — like a straw hitting the bottom of an empty cup. The inlet is either against the ventricular wall or the ventricle is underfilled.</p>"+
+        "<div class='keybox'><span class='kt'>Think RV and volume</span> The classic causes of suction are hypovolemia and right-ventricular failure — if the right heart cannot deliver blood to the left ventricle, the Impella starves. Respond by lowering the P-level, giving volume, and hunting for the reason the LV is empty (including an RV that cannot keep up now that the LV is unloaded).</div>"
+      },
+      { h:"5", t:"The purge system: the moat", html:
+        "<p>Spinning at high speed, the motor needs to keep blood out of its bearings, so a continuous <strong>purge fluid</strong> (a dextrose solution, often with heparin) flows outward through the motor — a moat that holds blood back. The console monitors purge pressure; a change can signal thrombus forming or a system problem.</p>"+
+        "<div class='keybox'><span class='kt'>Never</span> Never stop the purge. Losing it lets blood into the motor and destroys the pump.</div>"
+      },
+      { h:"6", t:"Complications", html:
+        "<ul>"+
+        "<li><strong>Hemolysis</strong> — the high-speed rotor can shear red cells (the blender effect), especially when malpositioned or suctioning. Watch for tea-colored urine and rising plasma-free hemoglobin and LDH.</li>"+
+        "<li><strong>Limb ischemia and bleeding</strong> — from the large-bore femoral access. Check the distal limb.</li>"+
+        "<li><strong>Migration</strong> and aortic valve injury.</li>"+
+        "<li><strong>Unmasked right-ventricular failure</strong> — once the LV is unloaded, an inadequate RV becomes the new bottleneck.</li>"+
+        "</ul>"
+      },
+      { h:"7", t:"What the evidence shows", html:
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>DanGer Shock (2024) is a landmark: it was the first randomized trial of any mechanical support device to show a survival benefit in acute-MI cardiogenic shock. In carefully selected STEMI shock patients, the Impella CP reduced 180-day mortality (45.8% vs 58.5%; hazard ratio 0.74; number needed to treat about 8), and long-term follow-up sustained the benefit — leading to a guideline upgrade to class 2a.</p>"+
+        "<p>Two honest caveats. First, the benefit came at a real cost: significantly more bleeding, vascular complications, renal-replacement therapy, and sepsis. Second, the trial was highly selective — it excluded comatose cardiac-arrest survivors, mechanical complications, and right-ventricular failure — so the result does not automatically generalize to every shock patient. Earlier, smaller trials (IMPRESS, ISAR-SHOCK) were neutral.</p>"+
+        "<div class='grade'>Quality: high for selected STEMI shock (RCT plus durable follow-up); benefit is real but bounded by strict selection and a higher complication rate.</div></div>"
+      },
+      { h:"8", t:"Transport", html:
+        "<div class='keybox'><span class='kt'>Transport</span> Keep the purge running and the anticoagulation going, monitor the placement signal and motor current for migration, watch for hemolysis (urine color) and distal limb perfusion, secure the catheter against any movement, and keep the console powered. A suction alarm on the road means: drop the P-level, consider volume, and reassess the RV.</div>"
+      }
+    ],
+    quiz: [
+      { q:"How does the Impella support the circulation?",
+        opts:["It inflates and deflates in time with the cardiac cycle","It is a micro-axial pump across the aortic valve that actively draws blood from the LV into the aorta","It oxygenates blood outside the body","It paces the ventricle electrically"], ans:1,
+        expl:"The Impella is an axial-flow pump spanning the aortic valve; it continuously unloads the LV and adds forward flow — actively pumping, unlike the IABP which only augments." },
+      { q:"The Impella P-level represents:",
+        opts:["The purge pressure","The pump speed/output setting (the throttle)","The patient's own cardiac output","The anticoagulation target"], ans:1,
+        expl:"P-levels (P0 off to P8/P9 max) set pump output. Weaning steps the P-level down while watching whether the native heart can resume the load." },
+      { q:"A suction alarm on the Impella most suggests:",
+        opts:["The left ventricle is overfilled","An underfilled LV — hypovolemia, RV failure, or malposition","The purge pressure is too high","The aortic valve is stenotic"], ans:1,
+        expl:"Suction means the device is pulling more than is available — a straw hitting an empty cup. Think hypovolemia or RV failure; lower the P-level and give volume." },
+      { q:"The purpose of the Impella purge system is to:",
+        opts:["Oxygenate the blood","Keep blood out of the motor bearings to prevent thrombus","Measure cardiac output","Deliver vasopressors"], ans:1,
+        expl:"A continuous dextrose (± heparin) purge flows outward through the motor — a moat that keeps blood out of the bearings. Never stop it." },
+      { q:"Tea-colored urine with a rising plasma-free hemoglobin and LDH in an Impella patient suggests:",
+        opts:["Normal function","Hemolysis (often from malposition or suction)","Adequate anticoagulation","A dead battery"], ans:1,
+        expl:"The high-speed rotor can shear red cells, especially when malpositioned or suctioning — the blender effect. Tea-colored urine is a red flag for hemolysis." },
+      { q:"For correct Impella function, the inlet should sit:",
+        opts:["In the right atrium","In the left ventricle, roughly 3.5 cm below the aortic valve, with the outlet in the aorta","In the pulmonary artery","Above the aortic arch"], ans:1,
+        expl:"Inlet in the LV (~3.5 cm below the valve), outlet in the ascending aorta. Migration causes reduced output (pulled up) or suction (pushed deep)." },
+      { q:"DanGer Shock (2024) was notable because it:",
+        opts:["Showed IABP was superior to Impella","Was the first MCS device RCT to show a mortality benefit in AMI cardiogenic shock","Proved Impella had no complications","Studied VV-ECMO in ARDS"], ans:1,
+        expl:"Impella CP reduced 180-day mortality in selected STEMI shock (45.8% vs 58.5%, HR 0.74), the first positive MCS device RCT in AMI-CS, prompting a class 2a upgrade." },
+      { q:"An important caveat to the DanGer Shock result is that it:",
+        opts:["Had no complications and applies to all shock patients","Came with more bleeding/vascular/renal complications and excluded comatose arrest, mechanical complications, and RV failure","Only enrolled patients over 90","Used the Impella as a bridge to transplant only"], ans:1,
+        expl:"The benefit was real but bounded: significantly higher complications, and strict exclusions (comatose arrest, mechanical complications, RV failure) limit generalizability." },
+      { q:"After the LV is unloaded by an Impella, which problem may become the new bottleneck?",
+        opts:["Left atrial hypertrophy","Right-ventricular failure","Aortic stenosis","Pulmonary embolism"], ans:1,
+        expl:"With the LV unloaded, an inadequate RV that cannot deliver blood forward becomes the limiting factor — and a common cause of suction." },
+      { q:"Impella position is confirmed at the console by the:",
+        opts:["Purge pressure alone","Placement signal waveform and the motor current","Heart rate","Sweep gas setting"], ans:1,
+        expl:"The placement signal should read aortic (not ventricular) and the motor current should be pulsatile when the device correctly spans the valve." }
+    ]
+  },
+
+  {
+    id: 7,
+    available: true,
+    title: "ECMO",
+    desc: "VA versus VV physiology, the circuit, Harlequin / oxygenator failure, and the transport team's role.",
+    objective: "Distinguish VA from VV ECMO and what each replaces, trace the circuit and its two gas controls, recognize differential hypoxia and oxygenator failure, and understand the transport team's role around the circuit.",
+    content: [
+      { h:"1", t:"Borrowed organs", html:
+        "<p>ECMO — extracorporeal membrane oxygenation — does outside the body what a failing heart or lungs cannot do inside it. Blood is drained from the patient, driven by a pump through an artificial lung, and returned. Everything about a given ECMO setup follows from one question: <em>where does the oxygenated blood come back?</em></p>"
+      },
+      { h:"2", t:"VA versus VV: the core distinction", html:
+        "<ul>"+
+        "<li><strong>VA (veno-arterial)</strong> — drains from a vein, returns to an <em>artery</em>. Because it puts blood back into the arterial system under pressure, it replaces <strong>both the heart and the lungs</strong>: flow bypasses the failing cardiopulmonary system entirely. This is the configuration for cardiogenic shock and cardiac arrest.</li>"+
+        "<li><strong>VV (veno-venous)</strong> — drains from a vein, returns to a <em>vein</em>. The freshly oxygenated blood still has to be pumped by the patient's own heart through the lungs and out to the body, so it replaces <strong>only the lungs</strong>. It requires an adequate native cardiac output. This is the configuration for severe respiratory failure such as ARDS.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> VA replaces the whole cardiopulmonary engine. VV is a bolt-on artificial lung that still relies on the patient's own pump. If the heart is failing, VV alone will not save it.</div>"
+      },
+      { h:"3", t:"The circuit and its two dials", html:
+        "<p>Follow the blood: a <strong>drainage cannula</strong> pulls venous blood to a <strong>centrifugal pump</strong>, which pushes it through the <strong>oxygenator</strong> (the membrane lung), and a <strong>return cannula</strong> sends it back. The oxygenator is where gas exchange happens, and it has two independent controls that map to the two blood gases:</p>"+
+        "<ul>"+
+        "<li><strong>Sweep gas</strong> — the flow of fresh gas across the membrane. It governs <em>CO2 removal</em>: turn up the sweep to blow off more CO2. It is the exhaust fan.</li>"+
+        "<li><strong>FdO2</strong> — the oxygen fraction of that gas. It governs <em>oxygenation</em>.</li>"+
+        "</ul>"+
+        "<p>Pump speed (RPM) sets the blood flow, which is the other major lever on oxygen delivery.</p>"
+      },
+      { h:"4", t:"Harlequin (North–South) syndrome", html:
+        "<p>This is the signature hazard of <em>peripheral</em> VA-ECMO, and it is worth understanding well. When blood is returned up the femoral artery, it flows <em>backward</em> up the aorta to meet the blood the heart is still ejecting forward. If the heart recovers some function but the lungs are still bad, the heart pumps <em>poorly oxygenated</em> blood that reaches the upper body first — the coronaries, the brain, the right arm — while the ECMO's well-oxygenated blood perfuses the lower body.</p>"+
+        "<p>Picture two rivers of different color meeting somewhere in the aorta: a watershed where blue upper-body blood and red ECMO blood collide. The dangerous part is that the heart and brain can be sitting in the blue river.</p>"+
+        "<div class='keybox'><span class='kt'>Monitor the right arm</span> Because the right radial artery is fed closest to the heart, a right-radial ABG or SpO2 is the early-warning sensor for differential hypoxia. Right-arm desaturation is the tell.</div>"
+      },
+      { h:"5", t:"Oxygenator failure and other complications", html:
+        "<p>The oxygenator is a consumable that clots and fails over time. Signs it is failing: a rising CO2, a falling post-oxygenator PaO2, and visible clot or condensation in the membrane. Other major complications:</p>"+
+        "<ul>"+
+        "<li><strong>Bleeding</strong> — the circuit demands systemic anticoagulation; bleeding is the most common serious complication.</li>"+
+        "<li><strong>Thrombosis</strong> anywhere in the circuit.</li>"+
+        "<li><strong>Limb ischemia</strong> — the arterial cannula can choke off the leg; a distal perfusion cannula is often placed to save it.</li>"+
+        "<li>Air entrainment, hemolysis, infection, and neurologic injury.</li>"+
+        "</ul>"
+      },
+      { h:"6", t:"What the evidence shows", html:
+        "<div class='evidence'><span class='etag'>Evidence check — VA-ECMO in infarct shock</span>"+
+        "<p>ECLS-SHOCK (2023), together with ECMO-CS and a meta-analysis, found that routine early VA-ECMO in acute-MI cardiogenic shock did <em>not</em> reduce 30-day mortality (about 48% vs 49%) and increased complications such as bleeding and limb ischemia, with no benefit in any subgroup. This has pushed the field away from reflexive VA-ECMO toward selective, individualized use.</p>"+
+        "<div class='grade'>Quality: high (RCT plus meta-analysis).</div></div>"+
+        "<div class='evidence'><span class='etag'>Evidence check — VV-ECMO in ARDS</span>"+
+        "<p>For severe ARDS the picture is more favorable but less clean. EOLIA (2018) compared VV-ECMO to conventional management; the mortality difference (35% vs 46%) did not reach statistical significance, partly because many control patients crossed over to ECMO as a rescue, and a later Bayesian re-analysis suggested a probable benefit. The earlier CESAR trial supported referral to an ECMO center. The reasonable read: VV-ECMO is a rescue therapy for refractory severe ARDS in experienced centers, not a routine first step.</p>"+
+        "<div class='grade'>Quality: moderate (one major RCT with high crossover; supportive but not definitive).</div></div>"
+      },
+      { h:"7", t:"The transport team's role", html:
+        "<p>On an ECMO transport, a trained ECMO specialist or perfusionist manages the circuit itself. The transport team's job is to manage the patient and to guard against the catastrophes — because with ECMO, the circuit <em>is</em> the patient's life.</p>"+
+        "<div class='keybox'><span class='kt'>Guard the circuit</span> The lethal events are cannula dislodgement (massive hemorrhage and loss of support in seconds), power loss, running out of oxygen or sweep gas, and a clotting circuit. Secure every cannula and connection obsessively, confirm redundant power and gas, and never let a line move.</div>"
+      }
+    ],
+    quiz: [
+      { q:"VA-ECMO provides support for:",
+        opts:["The lungs only","Both the heart and the lungs","The kidneys","The brain only"], ans:1,
+        expl:"VA returns blood to an artery under pressure, bypassing the cardiopulmonary system — so it supports both heart and lungs. It is used for cardiogenic shock/arrest." },
+      { q:"VV-ECMO differs from VA in that it:",
+        opts:["Returns blood to a vein and supports only the lungs, requiring adequate native cardiac output","Supports both heart and lungs","Requires an arterial cannula","Is used only in cardiac arrest"], ans:0,
+        expl:"VV returns oxygenated blood to a vein; the patient's own heart must still pump it. It supports the lungs only and needs adequate native cardiac output." },
+      { q:"On the ECMO oxygenator, the SWEEP GAS primarily controls:",
+        opts:["Oxygenation","CO2 removal","Blood flow rate","Anticoagulation"], ans:1,
+        expl:"Sweep gas is the fresh-gas flow across the membrane and governs CO2 clearance — the exhaust fan. FdO2 governs oxygenation." },
+      { q:"Oxygenation on ECMO is primarily governed by the FdO2 and by:",
+        opts:["The sweep gas flow","The pump speed / blood flow","The anticoagulation level","The patient's temperature"], ans:1,
+        expl:"Oxygen delivery depends on FdO2 (oxygen fraction) and on blood flow set by pump RPM. Sweep gas is the CO2 lever." },
+      { q:"Harlequin (North–South) syndrome occurs in peripheral VA-ECMO when:",
+        opts:["The oxygenator clots","A recovering heart ejects poorly oxygenated blood to the upper body while ECMO perfuses the lower body","The pump stops","The sweep gas is too high"], ans:1,
+        expl:"Two circulations meet in the aorta; if the lungs are still failing, the heart's deoxygenated output reaches the upper body (coronaries, brain, right arm) — differential hypoxia." },
+      { q:"To detect differential hypoxia early in peripheral VA-ECMO, monitor the:",
+        opts:["Left femoral artery","Right radial artery (upper body, closest to the heart)","Dorsalis pedis","Central venous line"], ans:1,
+        expl:"The right radial is fed closest to the heart and coronaries, so right-arm desaturation is the earliest warning of Harlequin syndrome." },
+      { q:"Signs of ECMO oxygenator failure include:",
+        opts:["Falling CO2 and rising post-oxygenator PaO2","Rising CO2, falling post-oxygenator PaO2, and visible clot","A slower heart rate only","Improved oxygenation"], ans:1,
+        expl:"A failing membrane lung clears less CO2 and adds less oxygen; rising CO2, a dropping post-oxygenator PaO2, and visible clot/condensation are the tells." },
+      { q:"ECLS-SHOCK (2023) found that routine early VA-ECMO in acute-MI cardiogenic shock:",
+        opts:["Halved mortality","Did not reduce 30-day mortality and increased complications","Was beneficial only in diabetics","Eliminated the need for revascularization"], ans:1,
+        expl:"No mortality reduction (~48% vs 49%), more complications, and no beneficial subgroup — shifting practice toward selective rather than routine use." },
+      { q:"For severe ARDS, the EOLIA trial of VV-ECMO showed:",
+        opts:["A clear, statistically significant mortality benefit","A mortality difference that was not statistically significant (with high crossover); ECMO is a rescue therapy for refractory cases","That ECMO was harmful in all patients","No difference and no crossover"], ans:1,
+        expl:"EOLIA's mortality difference (35% vs 46%) missed significance amid high control crossover; a later Bayesian analysis suggested probable benefit. VV-ECMO is reserved for refractory severe ARDS in experienced centers." },
+      { q:"During ECMO transport, the most catastrophic event to guard against is:",
+        opts:["A brief dip in SpO2","Cannula dislodgement causing massive hemorrhage and loss of support","A high sweep gas setting","A single missed lab draw"], ans:1,
+        expl:"With ECMO the circuit is the patient's life. Cannula dislodgement causes rapid exsanguination and loss of support; secure every line and connection." }
+    ]
+  },
+
+  {
+    id: 8,
+    available: true,
+    title: "LVAD",
+    desc: "Continuous-flow physiology, Doppler MAP, controller and alarms, assessing perfusion, and the resuscitation algorithm.",
+    objective: "Adapt assessment to continuous, non-pulsatile flow; obtain a Doppler MAP; interpret controller alarms; recognize the common LVAD complications; and apply the current perfusion-based resuscitation algorithm.",
+    content: [
+      { h:"1", t:"Continuous flow changes the rules", html:
+        "<p>Modern left-ventricular assist devices are continuous-flow impeller pumps — a smooth fan, not a drum. They move blood in a steady stream rather than in beats, and that single fact overturns almost every reflex you have about assessing a patient.</p>"+
+        "<div class='keybox'><span class='kt'>Reframe</span> Many LVAD patients have <em>no palpable pulse</em> and <em>no obtainable cuff blood pressure</em> — and that is completely normal. Absence of a pulse in an LVAD patient is not, by itself, cardiac arrest. Unlearning the pulse check is the whole game here.</div>"
+      },
+      { h:"2", t:"Assess perfusion, not pulse", html:
+        "<p>If you cannot rely on a pulse, you assess perfusion directly: mentation, skin color and warmth, capillary refill, and the sound of the device. Auscultate the chest — a working pump produces a continuous <em>hum</em>. To get a pressure, use Doppler:</p>"+
+        "<div class='formula'>Doppler over the brachial/radial artery + slowly deflate a cuff.<br>The first sound heard ≈ the <span class='fk'>MAP</span> (flow is continuous, so there is no separate systolic/diastolic).</div>"+
+        "<p>A typical LVAD MAP goal is roughly 70–90 mmHg, set by the VAD team and device. Pulse oximetry may not read reliably because of the low pulsatility. The pump is a smooth fan; do not expect to feel a beat.</p>"
+      },
+      { h:"3", t:"The controller and power", html:
+        "<p>The controller is the device's brain. It displays flow (L/min), speed (RPM), power (watts), and a pulsatility index, and it drives the pump from batteries or wall power. There are always two power sources for a reason.</p>"+
+        "<div class='keybox'><span class='kt'>Bring everything</span> The patient and caregiver know this device better than you do. Bring ALL of it to the hospital — the backup controller, spare batteries, and chargers — and get the VAD coordinator's number off the equipment early. Never let the controller lose power.</div>"
+      },
+      { h:"4", t:"Reading the alarms", html:
+        "<ul>"+
+        "<li><strong>Low-flow alarm</strong> — the broad one. Causes include hypovolemia, right-ventricular failure, tamponade, hypertension (high afterload chokes flow), a suction event, or cannula obstruction.</li>"+
+        "<li><strong>Power / electrical alarms</strong> — a connection or battery problem; check every connection.</li>"+
+        "<li><strong>High-power alarm</strong> — can indicate pump thrombosis, especially alongside signs of hemolysis (dark urine) and worsening heart failure.</li>"+
+        "</ul>"+
+        "<p>Call the VAD coordinator early — the number is on the device, and they can interpret the specific alarm and history faster than anyone at the scene.</p>"
+      },
+      { h:"5", t:"Why hypertension is dangerous for an LVAD", html:
+        "<p>These pumps are afterload-sensitive: high systemic pressure directly opposes pump output, reducing flow, and it raises the risk of stroke and bleeding. This is why LVAD patients are kept to a controlled MAP — a direct callback to Module 4. A hypertensive LVAD patient is not a minor issue; it can be the cause of a low-flow alarm.</p>"
+      },
+      { h:"6", t:"The complications LVAD patients present with", html:
+        "<ul>"+
+        "<li><strong>GI bleeding</strong> — the most common. Continuous, non-pulsatile flow promotes arteriovenous malformations and an acquired von Willebrand deficiency, so these patients bleed from the gut frequently.</li>"+
+        "<li><strong>Driveline infection</strong> — the percutaneous lead is a chronic portal for infection.</li>"+
+        "<li><strong>Pump thrombosis</strong> — dark urine (hemolysis), rising power, and heart failure.</li>"+
+        "<li><strong>Stroke</strong> — ischemic or hemorrhagic; a leading cause of death.</li>"+
+        "<li><strong>Right-ventricular failure and arrhythmias</strong> — strikingly, an LVAD patient can be in ventricular tachycardia or fibrillation and still be awake and perfusing, because the pump keeps moving blood regardless of the native rhythm.</li>"+
+        "</ul>"
+      },
+      { h:"7", t:"The resuscitation algorithm", html:
+        "<p>This is the highest-stakes reason the module exists, because the instinctive response is wrong. Work the algorithm:</p>"+
+        "<ul>"+
+        "<li><strong>Assess perfusion, not pulse</strong> — mentation, Doppler MAP, end-tidal CO2 — and auscultate for the hum.</li>"+
+        "<li><strong>Troubleshoot the device</strong> — check power, connections, and the controller, ideally with the VAD coordinator or a trained caregiver. Restarting a stopped pump may be the single most effective thing you can do.</li>"+
+        "<li><strong>If the device is running and the patient is perfusing</strong> (awake, adequate MAP/ETCO2) — do NOT start compressions, even if there is no pulse and even in VT/VF. Treat the rhythm; the pump is doing its job.</li>"+
+        "<li><strong>If the device is NOT functioning and cannot be restarted, AND there are no signs of life / inadequate perfusion</strong> (for example unresponsive with ETCO2 under 20 or MAP at or below 50) — chest compressions ARE now recommended.</li>"+
+        "<li><strong>Defibrillation is not contraindicated.</strong> Shock a shockable rhythm as usual.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<p>The old blanket prohibition on compressions — out of fear of dislodging the outflow cannula — has been replaced by a perfusion-based approach (AHA scientific statement, 2017, carried into current ACLS/AHA guidance). The dislodgement fear was theoretical: there is no reported case of compressions dislodging an LVAD, and case series suggest compressions can be performed when truly indicated. The supporting evidence is consensus and observational, not randomized — so the algorithm is a reasoned default, prioritizing device troubleshooting first and reserving compressions for genuine pump failure with no perfusion.</p>"+
+        "<div class='grade'>Quality: low–moderate (expert consensus and case series; no RCT).</div></div>"
+      },
+      { h:"8", t:"Handoff", html:
+        "<div class='keybox'><span class='kt'>Transport</span> Bring the backup controller, batteries, and chargers; keep the driveline secured; document the specific device type; involve the VAD coordinator in the destination decision, because not every hospital can support this patient. Their equipment and their VAD center are part of the patient.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Why do many stable LVAD patients have no palpable pulse?",
+        opts:["Their heart has stopped","The device provides continuous, non-pulsatile flow","They are always in cardiac arrest","The pulse is blocked by the driveline"], ans:1,
+        expl:"Continuous-flow LVADs move blood as a steady stream rather than in beats, so a palpable pulse is often absent — and that is normal." },
+      { q:"How is a blood pressure best obtained in a continuous-flow LVAD patient?",
+        opts:["Standard automatic cuff","Doppler MAP (first sound as the cuff deflates)","Palpated systolic","It cannot be measured at all"], ans:1,
+        expl:"With continuous flow there is no distinct systolic/diastolic; a Doppler over the brachial/radial artery gives the MAP as the cuff deflates." },
+      { q:"In an LVAD patient, absence of a palpable pulse means:",
+        opts:["Cardiac arrest — begin compressions immediately","Not necessarily arrest — assess perfusion and device function first","The device has failed","Nothing can be done"], ans:1,
+        expl:"Pulselessness alone is expected with continuous flow. Assess perfusion (mentation, Doppler MAP, ETCO2, device hum) before concluding arrest." },
+      { q:"An LVAD patient is awake and perfusing but found to be in VT with no pulse. You should:",
+        opts:["Begin chest compressions immediately","Treat the rhythm but NOT start compressions, because the pump is perfusing","Turn off the LVAD","Do nothing at all"], ans:1,
+        expl:"If the pump is running and the patient is perfusing, compressions are not indicated even in VT/VF. Treat the rhythm; the LVAD keeps flow going independent of native rhythm." },
+      { q:"Chest compressions ARE now recommended in an LVAD patient when:",
+        opts:["Any time there is no palpable pulse","The device is not functioning, cannot be restarted, and there are no signs of life / inadequate perfusion","The patient is hypertensive","The battery alarm sounds"], ans:1,
+        expl:"After troubleshooting, if the pump cannot be restarted and perfusion is absent (e.g., unresponsive, ETCO2 <20, MAP ≤50), compressions are recommended. The old dislodgement fear was theoretical." },
+      { q:"Is defibrillation contraindicated in an LVAD patient?",
+        opts:["Yes, never defibrillate","No — defibrillate a shockable rhythm as usual","Only with the VAD coordinator present","Only after removing the controller"], ans:1,
+        expl:"Defibrillation is not contraindicated; treat shockable rhythms normally." },
+      { q:"The most common bleeding complication in LVAD patients is:",
+        opts:["Intracranial hemorrhage","Gastrointestinal bleeding (AV malformations + acquired von Willebrand deficiency)","Epistaxis","Hemothorax"], ans:1,
+        expl:"Continuous non-pulsatile flow promotes GI arteriovenous malformations and an acquired von Willebrand deficiency, making GI bleeding very common." },
+      { q:"A high-power alarm with dark urine and worsening heart failure suggests:",
+        opts:["Normal operation","Pump thrombosis","A dead battery only","Hypovolemia"], ans:1,
+        expl:"Rising power plus hemolysis (dark urine) and worsening failure point to pump thrombosis — escalate and contact the VAD coordinator." },
+      { q:"Why is hypertension particularly dangerous in an LVAD patient?",
+        opts:["It has no effect on the pump","High afterload reduces pump flow and raises stroke/bleeding risk","It speeds the pump dangerously","It only affects the right ventricle"], ans:1,
+        expl:"These pumps are afterload-sensitive: high systemic pressure opposes output (a cause of low-flow alarms) and increases stroke and bleeding risk — hence a controlled MAP target." },
+      { q:"The correct FIRST step in an unresponsive LVAD patient is to:",
+        opts:["Start chest compressions immediately","Assess perfusion, auscultate for the hum, check power/connections/controller, and contact the VAD coordinator","Remove the driveline","Defibrillate regardless of rhythm"], ans:1,
+        expl:"Lead with perfusion assessment and device troubleshooting (often with the VAD coordinator). Restarting a stopped pump may be the most effective intervention; compressions are reserved for genuine pump failure with no perfusion." }
+    ]
+  }
+
+];
+
+/* ============================================================================
+   STATE
+   ==========================================================================*/
+var LS_KEY = "hemo_academy_v1";
+var state = loadState();
+
+function blankState(){
+  var m = {};
+  MODULES.forEach(function(mod){ m[mod.id] = { read:false, passed:false, best:0 }; });
+  return { learnerName:"", modules:m, finalPassed:false, finalBest:0, completedAt:null };
+}
+function loadState(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(!raw) return blankState();
+    var s = JSON.parse(raw);
+    var base = blankState();
+    base.learnerName = s.learnerName || "";
+    base.finalPassed = !!s.finalPassed;
+    base.finalBest = s.finalBest || 0;
+    base.completedAt = s.completedAt || null;
+    MODULES.forEach(function(mod){
+      if(s.modules && s.modules[mod.id]) base.modules[mod.id] = {
+        read:!!s.modules[mod.id].read, passed:!!s.modules[mod.id].passed, best:s.modules[mod.id].best||0 };
+    });
+    return base;
+  }catch(e){ return blankState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){
+    var w = document.getElementById("storageWarn");
+    if(w) w.classList.remove("hidden");
+  }
+}
+
+/* progression helpers */
+function isUnlocked(modId){
+  if(modId === 1) return true;
+  return !!(state.modules[modId-1] && state.modules[modId-1].passed);
+}
+function allModulesPassed(){
+  return MODULES.every(function(m){ return state.modules[m.id] && state.modules[m.id].passed; });
+}
+function passedCount(){
+  return MODULES.filter(function(m){ return state.modules[m.id] && state.modules[m.id].passed; }).length;
+}
+function getModule(id){ for(var i=0;i<MODULES.length;i++){ if(MODULES[i].id===id) return MODULES[i]; } return null; }
+
+/* ============================================================================
+   WAVEFORM (header signature) — tile arterial beats into an SVG path
+   ==========================================================================*/
+function buildWave(){
+  var beatW = 150, n = 9, baseY = 46, path = "M 0 "+baseY;
+  for(var i=0;i<n;i++){
+    var x = i*beatW;
+    // baseline drift into upstroke, sharp systolic peak, dicrotic notch, runoff
+    path += " L "+(x+18)+" "+baseY;
+    path += " C "+(x+24)+" "+baseY+" "+(x+30)+" 8 "+(x+40)+" 8";      // steep systolic upstroke to peak
+    path += " C "+(x+50)+" 8 "+(x+56)+" 24 "+(x+64)+" 27";            // decline
+    path += " L "+(x+72)+" 30";                                        // toward notch
+    path += " C "+(x+76)+" 33 "+(x+78)+" 20 "+(x+86)+" 20";           // dicrotic notch + wave
+    path += " C "+(x+96)+" 20 "+(x+104)+" 36 "+(x+118)+" "+(baseY-3); // diastolic runoff
+    path += " L "+(x+beatW)+" "+baseY;
+  }
+  document.getElementById("wavePath").setAttribute("d", path);
+}
+function certWavePath(){
+  var beatW=55, n=4, baseY=18, path="M 0 "+baseY;
+  for(var i=0;i<n;i++){ var x=i*beatW;
+    path+=" L "+(x+8)+" "+baseY+" C "+(x+11)+" "+baseY+" "+(x+13)+" 3 "+(x+18)+" 3";
+    path+=" C "+(x+22)+" 3 "+(x+25)+" 11 "+(x+29)+" 12 L "+(x+33)+" 13";
+    path+=" C "+(x+35)+" 15 "+(x+36)+" 9 "+(x+40)+" 9 C "+(x+45)+" 9 "+(x+49)+" 16 "+(x+beatW)+" "+baseY;
+  }
+  return path;
+}
+
+/* ============================================================================
+   VIEWS
+   ==========================================================================*/
+var views = ["home","reader","quiz","cert"];
+function show(v){
+  views.forEach(function(name){
+    document.getElementById("view-"+name).classList.toggle("hidden", name!==v);
+  });
+  window.scrollTo(0,0);
+}
+
+function updateHeader(){
+  var pc = passedCount(), pct = Math.round((pc/MODULES.length)*100);
+  document.getElementById("tkMods").textContent = pc + " / " + MODULES.length;
+  document.getElementById("tkPct").textContent = pct + "%";
+  document.getElementById("progFill").style.width = pct + "%";
+  var fin = document.getElementById("tkFinal");
+  if(state.finalPassed){ fin.textContent="Complete"; fin.className="val grn"; }
+  else if(allModulesPassed()){ fin.textContent="Ready"; fin.className="val grn"; }
+  else { fin.textContent="Locked"; fin.className="val red"; }
+  document.getElementById("statusChip").textContent =
+    state.learnerName ? ("SESSION · "+state.learnerName.toUpperCase().slice(0,22)) : "SESSION · READY";
+}
+
+function renderHome(){
+  updateHeader();
+  var list = document.getElementById("modList");
+  list.innerHTML = "";
+  MODULES.forEach(function(mod){
+    var st = state.modules[mod.id];
+    var unlocked = isUnlocked(mod.id);
+    var openable = unlocked && mod.available;
+    var li = document.createElement("li");
+    li.className = "modcard " + (st.passed ? "passed " : "") + (openable ? "open " : "locked ");
+    var pill, go="";
+    if(st.passed){ pill = "<span class='pill passed'>✓ Passed · "+st.best+"%</span>"; go="<span class='go'>Review ›</span>"; }
+    else if(openable){ pill = "<span class='pill ready'>Ready</span>"; go="<span class='go'>Start ›</span>"; }
+    else if(unlocked && !mod.available){ pill = "<span class='pill soon'>Content in development</span>"; }
+    else { pill = "<span class='pill locked'>"+lockSvg()+"Locked</span>"; }
+    li.innerHTML =
+      "<div class='num'>"+pad2(mod.id)+"</div>"+
+      "<div class='body'>"+
+        "<div class='mtitle'>"+mod.title+"</div>"+
+        "<p class='mdesc'>"+mod.desc+"</p>"+
+        "<div class='foot'>"+pill+go+"</div>"+
+      "</div>";
+    if(openable) li.addEventListener("click", function(){ openReader(mod.id); });
+    list.appendChild(li);
+  });
+
+  // final exam slot
+  var slot = document.getElementById("finalSlot");
+  var ready = allModulesPassed();
+  slot.innerHTML =
+    "<div class='modcard finalcard "+(ready?"open ready":"locked")+"' id='finalCard'>"+
+      "<div class='num'>⚑</div>"+
+      "<div class='body'>"+
+        "<div class='mtitle'>Final Examination</div>"+
+        "<p class='mdesc'>Comprehensive exam across all modules. Pass at "+PASS_FINAL+"% to earn your certificate.</p>"+
+        "<div class='foot'>"+
+          (state.finalPassed
+            ? "<span class='pill passed'>✓ Passed</span><span class='go'>View certificate ›</span>"
+            : ready ? "<span class='pill ready'>Unlocked</span><span class='go'>Begin ›</span>"
+                    : "<span class='pill locked'>"+lockSvg()+"Complete all modules</span>")+
+        "</div>"+
+      "</div>"+
+    "</div>";
+  var fc = document.getElementById("finalCard");
+  if(state.finalPassed) fc.addEventListener("click", function(){ renderCertificate(); show("cert"); });
+  else if(ready) fc.addEventListener("click", startFinal);
+
+  show("home");
+}
+
+/* ---- Reader ---- */
+var currentModId = null, scrolledEnough = false;
+function openReader(id){
+  var mod = getModule(id);
+  if(!mod || !mod.available) return;
+  currentModId = id;
+  document.getElementById("rdNum").textContent = "MODULE "+pad2(id);
+  document.getElementById("rdTitle").textContent = mod.title;
+  document.getElementById("rdObj").innerHTML = "<strong>Objective.</strong> "+mod.objective;
+  var c = document.getElementById("rdContent"), html="";
+  mod.content.forEach(function(sec){
+    html += "<h3><span class='h3n'>"+sec.h+"</span>"+sec.t+"</h3>"+sec.html;
+  });
+  c.innerHTML = html;
+
+  // gate the quiz button until the reader is scrolled through (honest "must read")
+  var btn = document.getElementById("toQuizBtn");
+  var note = document.getElementById("readNote");
+  var alreadyRead = state.modules[id].read || state.modules[id].passed;
+  scrolledEnough = alreadyRead;
+  btn.disabled = !alreadyRead;
+  note.textContent = alreadyRead ? "" : "Scroll through the full module to unlock the quiz.";
+  show("reader");
+  // content may already fit the viewport with nothing to scroll — check once after layout settles
+  // instead of waiting on a 'scroll' event that would then never fire
+  if(!alreadyRead) requestAnimationFrame(function(){ requestAnimationFrame(onReaderScroll); });
+}
+function onReaderScroll(){
+  if(scrolledEnough) return;
+  var sec = document.getElementById("view-reader");
+  if(sec.classList.contains("hidden")) return;
+  var doc = document.documentElement;
+  var reachedBottom = (window.innerHeight + window.scrollY) >= (doc.scrollHeight - 120);
+  if(reachedBottom){
+    scrolledEnough = true;
+    if(currentModId){ state.modules[currentModId].read = true; saveState(); }
+    document.getElementById("toQuizBtn").disabled = false;
+    document.getElementById("readNote").textContent = "Module read — quiz unlocked.";
+  }
+}
+
+/* ---- Quiz (modules) ---- */
+var activeQuiz = null;     // {questions, isFinal, modId, answers[], submitted}
+function startModuleQuiz(id){
+  var mod = getModule(id);
+  activeQuiz = { questions:mod.quiz, isFinal:false, modId:id, answers:new Array(mod.quiz.length).fill(-1), submitted:false, title:mod.title, num:"MODULE "+pad2(id) };
+  renderQuiz();
+}
+var FINAL_PER_MODULE = 4;   // questions sampled from each module's bank for the final exam
+function shuffled(arr){
+  var a = arr.slice();
+  for(var i=a.length-1; i>0; i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function startFinal(){
+  var pool = [];
+  MODULES.forEach(function(m){
+    if(!m.quiz) return;
+    pool = pool.concat(shuffled(m.quiz).slice(0, FINAL_PER_MODULE));
+  });
+  pool = shuffled(pool);
+  activeQuiz = { questions:pool, isFinal:true, modId:null, answers:new Array(pool.length).fill(-1), submitted:false, title:"Final Examination", num:"FINAL EXAM" };
+  renderQuiz();
+}
+function renderQuiz(){
+  var q = activeQuiz;
+  document.getElementById("qzNum").textContent = q.num;
+  document.getElementById("qzTitle").textContent = q.submitted ? q.title+" — Results" : q.title;
+  var need = q.isFinal ? PASS_FINAL : PASS_MODULE;
+  document.getElementById("qzMeta").textContent =
+    q.questions.length+" questions · pass at "+need+"% · "+Math.ceil(q.questions.length*need/100)+" correct needed";
+
+  var form = document.getElementById("quizForm"); form.innerHTML="";
+  q.questions.forEach(function(item, qi){
+    var box = document.createElement("div"); box.className="q"+(q.submitted?" locked-opts":"");
+    var opts = "";
+    item.opts.forEach(function(o, oi){
+      var cls="opt";
+      if(q.submitted){
+        if(oi===item.ans) cls+=" correct";
+        else if(q.answers[qi]===oi) cls+=" wrong";
+      } else if(q.answers[qi]===oi){ cls+=" sel"; }
+      opts += "<button class='"+cls+"' data-q='"+qi+"' data-o='"+oi+"'>"+
+                "<span class='ol'>"+String.fromCharCode(65+oi)+"</span>"+o+"</button>";
+    });
+    var expl = q.submitted ? "<div class='expl'><b>Why:</b> "+item.expl+"</div>" : "";
+    box.innerHTML = "<div class='qnum'>Q"+(qi+1)+" / "+q.questions.length+"</div>"+
+                    "<div class='qtext'>"+item.q+"</div>"+opts+expl;
+    form.appendChild(box);
+  });
+  if(!q.submitted){
+    form.querySelectorAll(".opt").forEach(function(b){
+      b.addEventListener("click", function(){
+        var qi=+b.dataset.q, oi=+b.dataset.o;
+        activeQuiz.answers[qi]=oi;
+        // update just this question's selected option in place — a full renderQuiz()
+        // here would rebuild every question and reset scroll position on every tap
+        form.children[qi].querySelectorAll(".opt").forEach(function(ob){
+          ob.classList.toggle("sel", +ob.dataset.o === oi);
+        });
+        renderQuizActions();
+      });
+    });
+  }
+
+  document.getElementById("resultSlot").innerHTML = "";
+  if(!q.submitted){
+    renderQuizActions();
+  } else {
+    var correct = scoreQuiz();
+    var pct = Math.round(correct/q.questions.length*100);
+    var passed = pct >= need;
+    document.getElementById("resultSlot").innerHTML =
+      "<div class='result "+(passed?"pass":"fail")+"'>"+
+        "<div class='big'>"+pct+"%</div>"+
+        "<div class='rmsg'>"+correct+" of "+q.questions.length+" correct · "+
+        (passed? "Passed — "+ (q.isFinal?"course complete":"next module unlocked") : "Need "+need+"% to pass")+"</div>"+
+      "</div>";
+    var actions = document.getElementById("quizActions");
+    if(passed){
+      if(q.isFinal){
+        actions.innerHTML = "<button class='cta teal' id='toCert'>View your certificate ›</button>";
+        document.getElementById("toCert").addEventListener("click", function(){ renderCertificate(); show("cert"); });
+      } else {
+        actions.innerHTML = "<button class='cta teal' id='backHome'>Back to modules ›</button>";
+        document.getElementById("backHome").addEventListener("click", function(){ renderHome(); });
+      }
+    } else {
+      actions.innerHTML = "<button class='cta primary' id='retry'>Retake quiz</button>"+
+                          "<button class='cta ghost' id='reread' style='margin-top:10px'>Re-read the module</button>";
+      document.getElementById("retry").addEventListener("click", function(){
+        if(q.isFinal) startFinal(); else startModuleQuiz(q.modId);
+      });
+      document.getElementById("reread").addEventListener("click", function(){
+        if(q.isFinal){ renderHome(); } else { openReader(q.modId); }
+      });
+    }
+  }
+  show("quiz");
+}
+// builds just the submit button / "N of M answered" panel, for the unsubmitted quiz state —
+// called on every answer tap without touching the question list or scroll position
+function renderQuizActions(){
+  var q = activeQuiz;
+  var actions = document.getElementById("quizActions");
+  var answered = q.answers.filter(function(a){return a>=0;}).length;
+  actions.innerHTML = "<button class='cta primary' id='submitQuiz'"+(answered<q.questions.length?" disabled":"")+">Submit answers</button>"+
+    "<p class='readnote'>"+answered+" of "+q.questions.length+" answered</p>";
+  var sb=document.getElementById("submitQuiz");
+  if(sb) sb.addEventListener("click", submitQuiz);
+}
+function scoreQuiz(){
+  var c=0; activeQuiz.questions.forEach(function(item,i){ if(activeQuiz.answers[i]===item.ans) c++; }); return c;
+}
+function submitQuiz(){
+  activeQuiz.submitted = true;
+  var correct = scoreQuiz();
+  var pct = Math.round(correct/activeQuiz.questions.length*100);
+  var need = activeQuiz.isFinal ? PASS_FINAL : PASS_MODULE;
+  var passed = pct >= need;
+  if(activeQuiz.isFinal){
+    if(pct > state.finalBest) state.finalBest = pct;
+    if(passed){ state.finalPassed=true; state.completedAt = new Date().toISOString(); }
+  } else {
+    var m = state.modules[activeQuiz.modId];
+    if(pct > m.best) m.best = pct;
+    if(passed) m.passed = true;
+  }
+  saveState();
+  updateHeader();
+  renderQuiz();
+}
+
+/* ---- Certificate ---- */
+function renderCertificate(){
+  var name = (state.learnerName||"").trim() || "—";
+  var dt = state.completedAt ? new Date(state.completedAt) : new Date();
+  var dstr = dt.toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
+  var moduleCount = MODULES.length;
+  var deviceNames = MODULES.filter(function(m){ return m.id >= 5; })
+    .map(function(m){ return m.title.replace(/\s*\([^)]*\)\s*$/, ""); });
+  var deviceList = deviceNames.length > 1
+    ? deviceNames.slice(0,-1).join(", ") + ", and " + deviceNames[deviceNames.length-1]
+    : deviceNames.join("");
+  var scoreLine = state.finalBest ? (state.finalBest+"%") : "Passed";
+  document.getElementById("certCard").innerHTML =
+    "<div class='c-brand'>AMR Kansas City <b>◆</b> Clinical Education</div>"+
+    "<div class='c-wave'><svg viewBox='0 0 220 26' preserveAspectRatio='none'><path d='"+certWavePath()+"' fill='none' stroke='#1B63C4' stroke-width='1.6'/></svg></div>"+
+    "<div class='c-kicker'>Certificate of Completion</div>"+
+    "<div class='c-of'>This certifies that</div>"+
+    "<div class='c-name'>"+escapeHtml(name)+"</div>"+
+    "<div class='c-of'>has successfully completed</div>"+
+    "<div class='c-course'>Hemodynamic Monitoring for Critical Care &amp; Interfacility Transport</div>"+
+    "<div class='c-body'>A comprehensive "+moduleCount+"-module program covering hemodynamic physiology, arterial-line monitoring, vasoactive pharmacology, and mechanical circulatory support ("+deviceList+"), with a final examination passed at "+PASS_FINAL+"% or above.</div>"+
+    "<div class='c-meta'>"+
+      "<div class='c-cell'><div class='cl'>Date completed</div><div class='cv'>"+dstr+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Final exam score</div><div class='cv'>"+scoreLine+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Medical Director</div><div class='cv'>A. Deshmukh, MD</div></div>"+
+      "<div class='c-cell'><div class='cl'>Clinical Education</div><div class='cv'>AMR KC</div></div>"+
+    "</div>";
+}
+
+/* ============================================================================
+   UTIL
+   ==========================================================================*/
+function pad2(n){ return (n<10?"0":"")+n; }
+function lockSvg(){ return "<svg class='lockglyph' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2'><rect x='4.5' y='10.5' width='15' height='10' rx='2'/><path d='M8 10.5V7a4 4 0 0 1 8 0v3.5'/></svg>"; }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+
+/* ============================================================================
+   WIRING
+   ==========================================================================*/
+document.getElementById("readerBack").addEventListener("click", renderHome);
+document.getElementById("quizBack").addEventListener("click", function(){
+  if(activeQuiz && !activeQuiz.isFinal && activeQuiz.modId) openReader(activeQuiz.modId);
+  else renderHome();
+});
+document.getElementById("certBack").addEventListener("click", renderHome);
+document.getElementById("toQuizBtn").addEventListener("click", function(){
+  if(currentModId) startModuleQuiz(currentModId);
+});
+document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
+
+var nameInput = document.getElementById("nameInput");
+nameInput.value = state.learnerName || "";
+nameInput.addEventListener("input", function(){
+  state.learnerName = nameInput.value; saveState(); updateHeader();
+});
+
+document.getElementById("resetBtn").addEventListener("click", function(){
+  if(confirm("Reset all progress and your name? This clears every module and the final exam on this device.")){
+    state = blankState(); saveState(); nameInput.value=""; renderHome();
+  }
+});
+
+window.addEventListener("scroll", onReaderScroll, { passive:true });
+
+/* init */
+buildWave();
+renderHome();
+</script>
+</body>
+</html>

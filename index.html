@@ -680,6 +680,18 @@ function getVtaStats(){
   }catch(e){ return null; }
 }
 
+function getHemoStats(){
+  try{
+    var raw = localStorage.getItem('hemo_academy_v1');
+    if(!raw) return null;
+    var s = JSON.parse(raw);
+    var modules = s.modules || {};
+    var total = 8, done = 0;
+    for(var i=1;i<=total;i++){ if(modules[i] && modules[i].passed) done++; }
+    return { done: done, total: total, certificate: !!s.finalPassed };
+  }catch(e){ return null; }
+}
+
 function renderHome(){
   var c = $('lv');
   var profile = getProfile();
@@ -703,6 +715,7 @@ function renderHome(){
   // Personal stats strip
   var d5 = getDaily5Stats();
   var vta = getVtaStats();
+  var hemo = getHemoStats();
   h += '<div class="stat-strip">';
   if(d5.streak){
     h += '<a class="stat-tile" href="quiz-daily5.html">';
@@ -730,6 +743,22 @@ function renderHome(){
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
     h += '<div class="stat-tile-val">Start the course</div>';
     h += '<div class="stat-tile-lbl">Ventilator Academy</div></div></a>';
+  }
+  if(hemo && hemo.certificate){
+    h += '<a class="stat-tile" href="hemodynamics-academy.html">';
+    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
+    h += '<div class="stat-tile-val">Certified</div>';
+    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
+  } else if(hemo && hemo.done > 0){
+    h += '<a class="stat-tile" href="hemodynamics-academy.html">';
+    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
+    h += '<div class="stat-tile-val">'+hemo.done+'/'+hemo.total+' modules</div>';
+    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
+  } else {
+    h += '<a class="stat-tile empty" href="hemodynamics-academy.html">';
+    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
+    h += '<div class="stat-tile-val">Start the course</div>';
+    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
   }
   h += '</div>';
 
@@ -2029,6 +2058,14 @@ function renderMore(){
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Ventilator Academy</div>',
     '    <div class="more-card-sub">9-module interactive course \u2014 lessons, knowledge checks, drag-and-drop, and clinical scenarios. Progress saves automatically.</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</a>',
+    '<a class="more-card" href="hemodynamics-academy.html">',
+    '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Hemodynamics Academy</div>',
+    '    <div class="more-card-sub">8-module course on hemodynamic monitoring \u2014 physiology, arterial lines, pressors, and mechanical circulatory support, with a final exam and certificate.</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
