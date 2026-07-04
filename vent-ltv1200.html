@@ -2382,6 +2382,10 @@ function closeVictory(){
   var ov=document.getElementById('victory-overlay');
   if(ov) ov.classList.remove('show');
   if(_confettiRaf){ cancelAnimationFrame(_confettiRaf); _confettiRaf=null; }
+  // wipe any confetti still painted on the canvas — it sits above the app even when the overlay is hidden
+  var cc=document.getElementById('confetti-canvas');
+  if(cc) cc.getContext('2d').clearRect(0,0,cc.width,cc.height);
+  _confettiParts=[];
   if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; }
   // refresh mission bar to steady-state completion view
   renderMissionCard();
