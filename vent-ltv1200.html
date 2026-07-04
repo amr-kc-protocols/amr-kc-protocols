@@ -25,39 +25,40 @@ html,body{min-height:100%;background:#dfd2c1;font-family:var(--sans);color:var(-
 .sim-badge{background:var(--alarm);color:#fff;font-size:9px;font-weight:700;
   padding:2px 7px;border-radius:10px;letter-spacing:0.06em}
 
-.case-wrap{max-width:600px;margin:20px auto;padding:0 12px 100px}
-.case{background:var(--case);border-radius:16px;padding:16px;
+.case-wrap{max-width:600px;margin:16px auto;padding:0 10px 90px}
+.case{background:var(--case);border-radius:16px;padding:14px;
   box-shadow:0 12px 48px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.3),inset 0 -2px 4px rgba(0,0,0,0.1)}
 .panel{background:var(--panel);border-radius:10px;padding:12px;border:1px solid var(--border)}
 
-/* ── LIVE WAVEFORM CANVAS ── */
-.waveform-wrap{margin-bottom:12px;background:#080f08;border-radius:8px;
-  border:2px solid #0a120a;overflow:hidden;position:relative}
-.waveform-header{display:flex;align-items:center;justify-content:space-between;
-  padding:5px 10px 0;background:#080f08}
-.waveform-title{font-family:var(--mono);font-size:8px;color:#1a5a1a;letter-spacing:0.12em;text-transform:uppercase}
-.waveform-pip{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--lcd-green)}
-.waveform-pip-lbl{font-family:var(--mono);font-size:7px;color:#1a5a1a;margin-left:4px}
-.waveform-alarms{display:flex;gap:12px}
-.waveform-alarm-item{font-family:var(--mono);font-size:8px}
-.wa-hi{color:var(--alarm)}
-.wa-lo{color:var(--orange)}
-canvas#pip-canvas{display:block;width:100%;height:70px}
+/* ── PIP LED DISPLAY ── */
+.waveform-wrap{margin-bottom:16px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);border-radius:12px;
+  border:3px solid var(--purple-dark);overflow:hidden;position:relative;padding:16px;box-shadow:inset 0 2px 8px rgba(0,0,0,0.5),0 4px 12px rgba(0,0,0,0.3)}
+.waveform-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:16px}
+.waveform-title{font-family:var(--mono);font-size:9px;color:#888;letter-spacing:0.12em;text-transform:uppercase;flex:1}
+.waveform-pip{font-family:var(--mono);font-size:48px;font-weight:700;color:#39ff5a;letter-spacing:0.05em;line-height:1;text-shadow:0 0 10px rgba(57,255,90,0.5)}
+.waveform-pip-lbl{font-family:var(--mono);font-size:11px;color:#666;margin-top:4px;letter-spacing:0.08em}
+.waveform-alarms{display:flex;gap:16px;align-items:center}
+.waveform-alarm-item{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--mono);font-size:9px}
+.wa-hi{color:var(--alarm);font-weight:700;text-transform:uppercase}
+.wa-lo{color:var(--orange);font-weight:700;text-transform:uppercase}
+.status-led{width:12px;height:12px;border-radius:50%;box-shadow:0 0 6px currentColor}
+.led-on{background:#39ff5a;color:#39ff5a}
+.led-off{background:#1a2a1a;color:#2a4a2a}
+canvas#pip-canvas{display:none}
 
 /* ── LCD ── */
-.lcd{background:var(--lcd-bg);border-radius:8px;padding:10px 12px;margin-bottom:12px;
-  border:2px solid #0a120a;box-shadow:inset 0 2px 8px rgba(0,0,0,0.8)}
-.lcd-mode-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
-  padding-bottom:8px;border-bottom:1px solid #0f1f0f}
-.lcd-mode-main{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--lcd-green);letter-spacing:0.05em}
-.lcd-mode-sub{font-family:var(--mono);font-size:9px;color:#2a7a2a;margin-top:2px}
-.lcd-ie{font-family:var(--mono);font-size:12px;color:#2a6a2a;text-align:right}
-.lcd-ie-lbl{font-size:8px;color:var(--lcd-dim);letter-spacing:0.1em}
-.lcd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.lcd-cell{background:#080f08;border-radius:4px;padding:5px 7px;border:1px solid #0f1f0f;transition:opacity 0.2s}
-.lcd-lbl{font-family:var(--mono);font-size:7px;color:var(--lcd-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px}
-.lcd-val{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--lcd-green);line-height:1}
-.lcd-unit{font-size:8px;color:#2a6a2a}
+.lcd{background:var(--lcd-bg);border-radius:10px;padding:12px;margin-bottom:14px;
+  border:2px solid #0a120a;box-shadow:inset 0 3px 10px rgba(0,0,0,0.6);display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.lcd-mode-row{display:flex;align-items:flex-start;justify-content:space-between;grid-column:1;padding-bottom:0;border-bottom:none}
+.lcd-mode-main{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--lcd-green);letter-spacing:0.05em;line-height:1}
+.lcd-mode-sub{font-family:var(--mono);font-size:8px;color:#2a7a2a;margin-top:2px}
+.lcd-ie{font-family:var(--mono);font-size:13px;color:#2a6a2a;text-align:right;grid-column:2;justify-self:end}
+.lcd-ie-lbl{font-size:7px;color:var(--lcd-dim);letter-spacing:0.1em;margin-bottom:2px}
+.lcd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;grid-column:1/-1}
+.lcd-cell{background:#080f08;border-radius:4px;padding:6px 6px;border:1px solid #0f1f0f;transition:opacity 0.2s}
+.lcd-lbl{font-family:var(--mono);font-size:7px;color:var(--lcd-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1px}
+.lcd-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--lcd-green);line-height:1}
+.lcd-unit{font-size:7px;color:#2a6a2a}
 .lcd-cell.na{opacity:0.25}
 
 /* ── SECTION LABEL ── */
@@ -66,8 +67,8 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
 .sec-lbl.red{color:var(--alarm);border-bottom-color:var(--alarm)}
 
 /* ── MODE PANEL ── */
-.mode-panel{background:var(--panel);border-radius:12px;padding:14px;margin-bottom:16px;border:2px solid var(--purple-dark);box-shadow:inset 0 1px 3px rgba(0,0,0,0.1)}
-.mode-row{display:flex;gap:8px;margin-bottom:12px}
+.mode-panel{background:var(--panel);border-radius:12px;padding:12px;margin-bottom:12px;border:2px solid var(--purple-dark);box-shadow:inset 0 1px 3px rgba(0,0,0,0.1)}
+.mode-row{display:flex;gap:7px;margin-bottom:10px}
 .mode-row:last-child{margin-bottom:0}
 .mode-row-lbl{font-size:10px;color:var(--sub);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;
   width:70px;flex-shrink:0;display:flex;align-items:center}
@@ -85,7 +86,7 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
 .mode-btn.disabled-bt{opacity:0.3;pointer-events:none}
 
 /* ── CONTROL GRID ── */
-.ctrl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
+.ctrl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px}
 .ctrl-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:opacity 0.2s}
 .ctrl-wrap.dim{opacity:0.2;cursor:pointer}
 .knob-outer{width:80px;height:80px;border-radius:50%;
@@ -113,8 +114,8 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
 .ctrl-wrap.dim .adj-btn{opacity:0;pointer-events:none}
 
 /* ── PEEP ── */
-.peep-row{display:flex;align-items:center;gap:14px;background:var(--panel);border-radius:12px;
-  padding:14px 16px;margin-bottom:12px;cursor:pointer;border:2px solid var(--border);box-shadow:0 3px 8px rgba(0,0,0,0.1)}
+.peep-row{display:flex;align-items:center;gap:12px;background:var(--panel);border-radius:12px;
+  padding:12px 14px;margin-bottom:10px;cursor:pointer;border:2px solid var(--border);box-shadow:0 3px 8px rgba(0,0,0,0.1)}
 .peep-knob{width:76px;height:76px;border-radius:50%;flex-shrink:0;
   background:radial-gradient(circle at 32% 32%,#c8e6d9,#a0d9bf 55%,#7aca9f);
   border:3px solid #5ab878;position:relative;box-shadow:0 6px 14px rgba(21,128,61,0.25),inset 0 -2px 6px rgba(0,0,0,0.15),inset 0 1px 3px rgba(255,255,255,0.2)}
@@ -130,7 +131,7 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
 .peep-adj .adj-btn{width:36px;height:32px;font-size:16px;border:2px solid var(--border)}
 
 /* ── ALARMS ── */
-.alarm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+.alarm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px}
 .alarm-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
 .alarm-knob{width:70px;height:70px;border-radius:50%;
   background:radial-gradient(circle at 32% 32%,#ffcccc,#ff9999 55%,#dd3333);
@@ -492,17 +493,27 @@ canvas#pip-canvas{display:block;width:100%;height:70px}
     <div class="led led-amber" style="margin-left:6px"></div><span class="led-lbl">BATTERY OK</span>
   </div>
 
-  <!-- Live Waveform Canvas -->
+  <!-- PIP LED Display -->
   <div class="waveform-wrap">
     <div class="waveform-header">
       <div>
-        <div class="waveform-title">AIRWAY PRESSURE (cmH₂O)</div>
+        <div class="waveform-title">PEAK PRESSURE</div>
+        <div class="waveform-pip" id="pip-display">24</div>
+        <div class="waveform-pip-lbl">cmH₂O</div>
       </div>
       <div class="waveform-alarms">
-        <span class="waveform-alarm-item wa-lo">▸ LO <span id="wa-lo-val">10</span></span>
-        <span class="waveform-alarm-item" style="color:#2a6a2a">▸ PEEP <span id="wa-peep-val">0</span></span>
-        <span class="waveform-alarm-item wa-hi">▸ HI <span id="wa-hi-val">40</span></span>
-        <span class="waveform-alarm-item" style="color:var(--lcd-green);font-family:monospace;font-size:10px;font-weight:700">PIP <span id="wa-pip-live">—</span></span>
+        <div class="waveform-alarm-item">
+          <div class="status-led led-on"></div>
+          <div class="wa-lo">POWER OK</div>
+        </div>
+        <div class="waveform-alarm-item">
+          <div class="status-led led-on"></div>
+          <div class="wa-lo">BATTERY OK</div>
+        </div>
+        <div class="waveform-alarm-item">
+          <div class="status-led led-off"></div>
+          <div style="color:#666;font-size:9px">PATIENT</div>
+        </div>
       </div>
     </div>
     <canvas id="pip-canvas"></canvas>
@@ -1154,7 +1165,10 @@ function drawWaveform(){
     ctx.beginPath(); ctx.arc(dotX,dotY,3*dpr,0,Math.PI*2); ctx.fill();
 
     // Live PIP readout
-    document.getElementById('wa-pip-live').textContent=lastP.toFixed(1);
+    var pipVal = Math.round(lastP);
+    document.getElementById('pip-display').textContent = pipVal;
+    var waPipLive = document.getElementById('wa-pip-live');
+    if(waPipLive) waPipLive.textContent = lastP.toFixed(1);
 
     // INSP HOLD plateau annotation overlay
     if(inspHoldActive && inspHoldStartTs!==null){
