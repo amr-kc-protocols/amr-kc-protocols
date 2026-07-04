@@ -1,8 +1,8 @@
-const CACHE = 'amrkc-2026-v3';
+const CACHE = 'amrkc-2026-v4';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
-  './protocols-2026.pdf'
+  './educator.jpg', './protocols-2026.pdf'
 ];
 
 self.addEventListener('install', e => {

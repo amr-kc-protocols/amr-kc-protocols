@@ -138,6 +138,16 @@ color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointe
 .footer-note{margin:24px 16px 0;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);
 border-radius:10px;font-size:11px;color:var(--gray);line-height:1.7;text-align:center}
 .footer-note a{color:var(--teal2);text-decoration:none;font-weight:600}
+
+/* Ask the Educator */
+.edu-box{display:flex;align-items:center;gap:13px;margin:24px 16px 0;padding:14px 15px;
+background:var(--info-bg);border:1px solid var(--teal2);border-radius:12px;text-decoration:none}
+.edu-box:active{opacity:0.75}
+.edu-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--teal);flex-shrink:0}
+.edu-info{flex:1;min-width:0}
+.edu-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px}
+.edu-sub{font-size:11.5px;color:var(--gray);line-height:1.5}
+.edu-arr{color:var(--teal2);font-size:20px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -171,6 +181,15 @@ border-radius:10px;font-size:11px;color:var(--gray);line-height:1.7;text-align:c
   <div class="pane" id="pane-ref">
     <div id="refContent"></div>
   </div>
+
+  <a class="edu-box" href="index.html#ask">
+    <img class="edu-avatar" src="educator.jpg" alt="Your clinical educator">
+    <div class="edu-info">
+      <div class="edu-title">Still stuck? Ask the Educator</div>
+      <div class="edu-sub">Send your question straight to Clinical Education &mdash; 100% anonymous.</div>
+    </div>
+    <div class="edu-arr">&#x203A;</div>
+  </a>
 
   <div class="footer-note" id="footNote"></div>
 </div>

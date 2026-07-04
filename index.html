@@ -214,6 +214,9 @@ padding:12px 16px;text-align:center;font-size:10px;color:var(--gray);line-height
 .ask-wrap{padding:20px 16px 40px}
 .ask-hero{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:24px 18px;margin-bottom:20px;text-align:center}
 .ask-icon{font-size:40px;margin-bottom:12px}
+.ask-avatar{width:76px;height:76px;border-radius:50%;object-fit:cover;border:2.5px solid var(--teal);
+box-shadow:0 4px 12px rgba(23,58,104,0.25);margin-bottom:12px}
+.edu-avatar-sm{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--teal);display:block}
 .ask-hero-title{font-size:20px;font-weight:700;margin-bottom:6px}
 .ask-hero-sub{font-size:13px;color:var(--gray);line-height:1.65}
 .ask-anon-badge{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:5px 12px;background:var(--emt-bg);border:1px solid var(--emt);border-radius:20px;font-family:var(--mono);font-size:10px;color:var(--emt);letter-spacing:0.06em}
@@ -2142,7 +2145,7 @@ function renderMore(){
 
     '<div class="sec">FEEDBACK</div>',
     '<div class="more-card" data-goto="ask">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-message"></use></svg></div>',
+    '  <div class="more-card-ico"><img class="edu-avatar-sm" src="educator.jpg" alt=""></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Ask the Educator</div>',
     '    <div class="more-card-sub">Submit an anonymous question or feedback to Dr. Deshmukh</div>',
@@ -2162,7 +2165,7 @@ function renderAsk(){
     '<div class="ask-wrap">',
     '<div class="sub-back" data-goto="more">&#x2190; More</div>',
     '<div class="ask-hero">',
-    '  <div class="ask-icon"><svg class="icon"><use href="#i-message"></use></svg></div>',
+    '  <img class="ask-avatar" src="educator.jpg" alt="Your clinical educator">',
     '  <div class="ask-hero-title">Ask the Educator</div>',
     '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. No name required &mdash; submissions are completely anonymous.</div>',
     '  <div class="ask-anon-badge"><svg class="icon"><use href="#i-lock"></use></svg> 100% Anonymous</div>',
