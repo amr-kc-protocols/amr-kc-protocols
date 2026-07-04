@@ -1631,14 +1631,45 @@ var SCENARIO_LEVELS={
         correct:1,
         exp:'<strong>Expiratory flow failing to return to baseline</strong> means the lungs haven\'t fully emptied — trapped gas raises intrinsic PEEP (auto-PEEP). In COPD, target I:E ≥ 1:4 to 1:5. Reducing rate lengthens the expiratory window without changing Vt.'
       },
-      unlock:'✓ Lower rate → longer expiratory time → no more breath stacking. Level 2 complete!'
+      unlock:'✓ Lower rate → longer expiratory time → no more breath stacking. Next scenario.'
+    },
+
+    // ─── L2 S5: NEW ───────────────────────────────────────────
+    { name:'Anxiety & Dyssynchrony — High Flow Requirements',
+      badge:'L2 · Scenario 5 of 6', badgeCls:'scen-badge-2',
+      scenario:'28-year-old post-op. Fighting the ventilator on AC-VC. Peak flow alarm kept going off. Respiratory rate climbing to 28. Inadequate sedation. Reduce inspiratory time to 0.6s to allow longer exhalation and lower demand.',
+      vitals:[{k:'SpO₂',v:'97%'},{k:'RR actual',v:'28'},{k:'EtCO₂',v:'42 mmHg'},{k:'HR',v:'136'}],
+      setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.2,peep:5,pc:15,ps:8,fio2:40,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'it',val:0.6,label:'Insp Time',unit:'s'}],
+      quiz:{
+        q:'Patient is dyssynchronous — what does reducing inspiratory time achieve?',
+        choices:['Increases work of breathing','Lengthens expiration, reduces demand-stacking','Decreases oxygen delivery','Increases auto-PEEP immediately'],
+        correct:1,
+        exp:'Shorter IT → longer ET (since cycle time = 60÷rate). Longer exhalation lets lungs empty fully, reduces the sensation of flow insufficiency, and paradoxically improves comfort and synchrony. Sedation still needed, but flow-related dyssynchrony is mechanically addressable.'
+      },
+      unlock:'✓ Flow demand matched to patient effort. Next scenario.'
+    },
+    // ─── L2 S6: NEW ───────────────────────────────────────────
+    { name:'Sepsis — Metabolic Acidosis Requiring High MV',
+      badge:'L2 · Scenario 6 of 6', badgeCls:'scen-badge-2',
+      scenario:'56-year-old with septic shock. ABG: PaCO₂ 28 mmHg, pH 7.18 (metabolic + respiratory). Lactate 6.2. Already on aggressive vasoactive support. Increase minute ventilation to compensate for metabolic acidosis.',
+      vitals:[{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'},{k:'PaCO₂',v:'28'},{k:'HR',v:'142'}],
+      setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:8,pc:15,ps:10,fio2:60,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'rate',val:26,label:'Rate',unit:'bpm'}],
+      quiz:{
+        q:'In metabolic acidosis (PaCO₂ already low), what is the respiratory system\'s role?',
+        choices:['Hyperventilate aggressively to drop PaCO₂ below 20','Maintain low-normal PaCO₂ (28–35) to allow renal HCO₃ recovery','Increase FiO₂ to 100%','Switch to pressure control to reduce work'],
+        correct:1,
+        exp:'In metabolic acidosis, aggressive hyperventilation to PaCO₂ < 20 is counterproductive — it causes hypokalemia, hypomagnesemia, and rebound acidosis. Maintain PaCO₂ 28–35 to not worsen the pH, then fix the metabolic cause (treat infection, resuscitate). Over-breathing paradoxically worsens outcomes.'
+      },
+      unlock:'✓ Sepsis MV optimization complete. Level 2 complete — 6 core clinical scenarios mastered!'
     }
   ],
 
   3:[
     // ─── L3 S1 ────────────────────────────────────────────────
     { name:'ARDSnet Lung-Protective Ventilation',
-      badge:'L3 · Scenario 1 of 4', badgeCls:'scen-badge-3',
+      badge:'L3 · Scenario 1 of 6', badgeCls:'scen-badge-3',
       scenario:'32-year-old ARDS patient, IBW 70 kg. Current Vt 700 mL (10 mL/kg), Pplat 34 cmH₂O — above the ARDSnet 30 limit. Implement lung-protective settings: Vt 6 mL/kg IBW (400 mL), increase Rate to maintain MV, PEEP to 10.',
       vitals:[{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'pH',v:'7.32'},{k:'FiO₂',v:'60%'}],
       setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
@@ -1653,7 +1684,7 @@ var SCENARIO_LEVELS={
     },
     // ─── L3 S2 ────────────────────────────────────────────────
     { name:'Weaning — Transition to SIMV',
-      badge:'L3 · Scenario 2 of 4', badgeCls:'scen-badge-3',
+      badge:'L3 · Scenario 2 of 6', badgeCls:'scen-badge-3',
       scenario:'Day 4 post-op respiratory failure. Patient awake, initiating spontaneous breaths, meeting weaning criteria. Physician orders: transition from AC to SIMV Rate 10 with Pressure Support 8 to begin liberation.',
       vitals:[{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -1668,7 +1699,7 @@ var SCENARIO_LEVELS={
     },
     // ─── L3 S3 ────────────────────────────────────────────────
     { name:'Pressure Control — Limit Barotrauma Risk',
-      badge:'L3 · Scenario 3 of 4', badgeCls:'scen-badge-3',
+      badge:'L3 · Scenario 3 of 6', badgeCls:'scen-badge-3',
       scenario:'Asthmatic patient post-intubation. Dynamic obstruction causing fluctuating PIP 32–54 cmH₂O on volume control. Physician orders: switch to Pressure Control at PC 22 cmH₂O, IT 1.0s to cap peak airway pressure.',
       vitals:[{k:'SpO₂',v:'96%'},{k:'PIP range',v:'32–54 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'104'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:550,it:0.8,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
@@ -1683,7 +1714,7 @@ var SCENARIO_LEVELS={
     },
     // ─── L3 S4 ────────────────────────────────────────────────
     { name:'ARDS Day 2 — Refractory Hypoxemia',
-      badge:'L3 · Scenario 4 of 4', badgeCls:'scen-badge-3',
+      badge:'L3 · Scenario 4 of 6', badgeCls:'scen-badge-3',
       scenario:'ARDS day 2. Already on lung-protective settings. Despite PEEP 8 and FiO₂ 70%, SpO₂ is 82% (P/F ≈ 59 — severe ARDS). Per ARDSnet FiO₂/PEEP table, escalate to FiO₂ 90%, PEEP 14.',
       vitals:[{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
@@ -1694,7 +1725,37 @@ var SCENARIO_LEVELS={
         correct:2,
         exp:'<strong>Berlin criteria:</strong> Mild ARDS = P/F 200–300; Moderate = P/F 100–200; Severe = P/F < 100 — all with PEEP/CPAP ≥ 5 cmH₂O. This patient\'s P/F ≈ 59 places them in severe ARDS. High PEEP + high FiO₂ strategies, prone positioning, and ECMO referral are considerations.'
       },
-      unlock:'🎓 Level 3 complete. Severe ARDS management — one of the hardest scenarios in critical care.'
+      unlock:'✓ Severe ARDS escalation complete. Next scenario.'
+    },
+    // ─── L3 S5: NEW ───────────────────────────────────────────
+    { name:'Pulmonary Edema — CPAP & High PEEP',
+      badge:'L3 · Scenario 5 of 6', badgeCls:'scen-badge-3',
+      scenario:'67-year-old acute decompensated heart failure with acute pulmonary edema. SpO₂ 78% on 100% NRB, RR 34. Acute respiratory failure — non-intubated. Apply aggressive CPAP: CPAP 15 cmH₂O, FiO₂ 100% with hope to avoid intubation.',
+      vitals:[{k:'SpO₂',v:'78%'},{k:'RR',v:'34'},{k:'JVD',v:'Present'},{k:'Crackles',v:'Bilateral'}],
+      setup:{mode:'cpap',bt:'volume',rate:12,vt:400,it:1.0,peep:8,pc:15,ps:5,fio2:40,sens:5,hipres:40,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'mode',val:'cpap',label:'Mode',unit:''},{key:'peep',val:15,label:'CPAP',unit:'cmH₂O'},{key:'fio2',val:100,label:'FiO₂',unit:'%'}],
+      quiz:{
+        q:'In acute pulmonary edema (CHF), how does high CPAP help?',
+        choices:['Increases hydrostatic pressure to push fluid into alveoli','Recruits collapsed alveoli AND compresses pulmonary capillaries, reducing fluid transudation','Replaces diuretics','Prevents the need for intubation 100% of the time'],
+        correct:1,
+        exp:'High CPAP (12–20 cmH₂O) recruits atelectatic lung <strong>AND</strong> compresses pulmonary capillaries, reducing the hydrostatic gradient that drives pulmonary edema. Combined with IV diuretics and afterload reduction, CPAP can prevent intubation in ~70% of acute decompensated CHF cases. Monitor for fatigue — intubation may still be necessary.'
+      },
+      unlock:'✓ Non-invasive respiratory support mastery. Next scenario.'
+    },
+    // ─── L3 S6: NEW ───────────────────────────────────────────
+    { name:'Neurotrauma — Controlled Hypocarbia for ICP',
+      badge:'L3 · Scenario 6 of 6', badgeCls:'scen-badge-3',
+      scenario:'24-year-old motor vehicle crash, severe traumatic brain injury, ICP crisis (ICP 28 mmHg). Pupil blown (unilateral). Temporizing measure: hyperventilate to PaCO₂ 30–35 mmHg. Increase rate to 28 bpm while maintaining Vt and PEEP.',
+      vitals:[{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'},{k:'PaCO₂',v:'42'}],
+      setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
+      targets:[{key:'rate',val:28,label:'Rate',unit:'bpm'}],
+      quiz:{
+        q:'Acute hyperventilation to lower CO₂ reduces ICP by:',
+        choices:['Permanently solving the underlying cause','Causing immediate cerebral vasoconstriction, reducing cerebral blood volume','Increasing oxygen delivery to the brain','Making the patient\'s pH more alkalemic to prevent seizures'],
+        correct:1,
+        exp:'CO₂ is a potent cerebral vasodilator. Lowering PaCO₂ → cerebral vasoconstriction → decreased cerebral blood volume (CBV) → decreased ICP. <strong>This is a temporizing measure only</strong> (lasts 24–48 hours). Definitive treatment requires surgery, sedation, osmotic therapy. Chronic hypocarbia worsens outcomes — avoid keeping PaCO₂ < 35 beyond acute crisis.'
+      },
+      unlock:'🏆 Level 3 Complete — Advanced critical care management mastered. You are ready for the toughest cases.'
     }
   ]
 };
@@ -1790,7 +1851,7 @@ function renderMissionCard(){
       bar.innerHTML='<div class="lc-wrap">'
         +'<div class="lc-icon">'+(gameLevel===2?'⭐':'🏆')+'</div>'
         +'<div class="lc-title" style="color:'+(gameLevel===2?'var(--orange)':'var(--alarm)')+'">Level '+gameLevel+' Complete</div>'
-        +'<div class="lc-sub">'+(gameLevel===2?'All 4 clinical scenarios solved.':'Advanced management mastered — all 4 cases.')+'</div>'
+        +'<div class="lc-sub">'+(gameLevel===2?'All 6 clinical scenarios solved.':'Advanced management mastered — all 6 cases.')+'</div>'
         +'<div class="lc-btns">'
         +(gameLevel<3?'<button class="lc-btn lc-btn-next" onclick="startLevel('+nextLvl+')">'+nextTxt+' →</button>':'')
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
@@ -2218,7 +2279,7 @@ function showVictoryOverlay(level){
   } else if(level===2){
     icon='⭐'; glowCls='vc-glow-orange'; colorStr='var(--orange)';
     levelTxt='LEVEL 2 COMPLETE';
-    subTxt='All 4 clinical scenarios solved.<br>Ready for the advanced cases?';
+    subTxt='All 6 clinical scenarios solved.<br>Ready for the advanced cases?';
     btnsHtml='<div class="vc-btns">'
       +'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startLevel(3)">Level 3 →</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay here</button>'
@@ -2226,7 +2287,7 @@ function showVictoryOverlay(level){
   } else {
     icon='🏆'; glowCls='vc-glow-red'; colorStr='var(--alarm)';
     levelTxt='LEVEL 3 COMPLETE';
-    subTxt='Advanced management mastered.<br>All 4 complex cases solved.<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>';
+    subTxt='Advanced management mastered.<br>All 6 complex cases solved.<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>';
     btnsHtml='<div class="vc-btns">'
       +'<button class="vc-btn vc-btn-red" onclick="closeVictory();openLevelSelect()">Level Select</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Keep exploring</button>'
@@ -2308,7 +2369,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
         <div class="lvl-name">Level 2 — Clinical Scenarios</div>
         <span class="lvl-badge lvl-badge-2">Intermediate</span>
       </div>
-      <div class="lvl-desc">4 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
+      <div class="lvl-desc">6 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
       <span class="lvl-arrow">›</span>
     </div>
     <div class="lvl-card" onclick="startLevel(3)">
@@ -2316,7 +2377,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
         <div class="lvl-name">Level 3 — Advanced Management</div>
         <span class="lvl-badge lvl-badge-3">Advanced</span>
       </div>
-      <div class="lvl-desc">4 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
+      <div class="lvl-desc">6 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
       <span class="lvl-arrow">›</span>
     </div>
   </div>
