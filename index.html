@@ -541,6 +541,12 @@ const D = {"formulary": [{"num": "III-1", "name": "Adenosine", "scope": "pm", "t
 
 var TAB = 'home', QUERY = '', CURRENT = null, AGE = 'adult';
 
+// Deep links: index.html#forms opens the Caregiver Signature Form, etc.
+(function(){
+  var h = (location.hash || '').replace('#', '');
+  if(['calc','hosp','formulary','vent','pcs','more','ask','forms'].indexOf(h) !== -1) TAB = h;
+})();
+
 function $(id){ return document.getElementById(id); }
 
 function updatePad(){
