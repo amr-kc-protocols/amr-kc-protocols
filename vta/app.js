@@ -997,6 +997,8 @@ const MODULES = [
   title: "LTV 1200 — The Platform Tour",
   blurb: "Every knob, every screen, every alarm — without a patient on it. POST every shift, every patient.",
   estMin: 50,
+  practiceLevel: 1,
+  practiceNote: "Learn the controls hands-on: work the LTV 1200 tutorial on the simulator.",
 
   lessons: [
     {
@@ -1182,6 +1184,8 @@ const MODULES = [
   title: "Alarms & Troubleshooting",
   blurb: "Every alarm is information. DOPE is the universal algorithm. The 10-second rule is non-negotiable.",
   estMin: 55,
+  practiceLevel: 2,
+  practiceNote: "Test yourself on the simulator's clinical scenarios — set alarm limits and correct the vent under pressure.",
 
   lessons: [
     {
@@ -1630,6 +1634,8 @@ const MODULES = [
   title: "Special Populations",
   blurb: "Same vent. Different goals. Asthma/COPD, ARDS, TBI, pediatrics. Pick the goal first; the settings follow.",
   estMin: 60,
+  practiceLevel: 3,
+  practiceNote: "Take on the simulator's advanced cases — ARDS, COPD, TBI and more, no hand-holding.",
 
   lessons: [
     {
@@ -2235,7 +2241,26 @@ function renderCourseHub() {
     );
   });
 
-  mount(el("div", null, hero, grid, buildCapstoneCard(), buildResourcesCard()));
+  mount(el("div", null, hero, grid, buildSimulatorCard(), buildCapstoneCard(), buildResourcesCard()));
+}
+
+// Practice Lab: hands-on LTV 1200 simulator game — reinforces the course on the real control layout.
+function buildSimulatorCard() {
+  const doneCount = MODULES.filter(m => Store.isModuleComplete(m.id)).length;
+  const sub = doneCount > 0
+    ? "Put the modules into practice — drive the LTV 1200 through graded clinical scenarios."
+    : "Hands-on LTV 1200 trainer. Tutorial, then graded clinical scenarios. Great alongside the modules.";
+  return el("div", { class: "resources" },
+    el("p", { class: "resources-kicker" }, "Practice Lab"),
+    el("a", { class: "resource-link", href: "../vent-ltv1200.html" },
+      el("span", { class: "resource-ico" }, "🫁"),
+      el("span", { class: "resource-text" },
+        el("span", { class: "resource-title" }, "Ventilator Simulator"),
+        el("span", { class: "resource-sub" }, sub)
+      ),
+      el("span", { class: "resource-arr" }, "→")
+    )
+  );
 }
 
 // Course resources — link to the full written Provider Manual.
@@ -2397,7 +2422,26 @@ function renderModuleHome() {
     el("button", { class: "btn btn-ghost", type: "button", onclick: () => Nav.exitToCourse() }, "← Back to Course Hub")
   );
 
-  const container = el("div", null, hero, grid, exit);
+  const container = el("div", null, hero, grid);
+
+  // Optional hands-on tie-in to the ventilator simulator, when this module maps to a level.
+  if (m.practiceLevel) {
+    container.appendChild(
+      el("div", { class: "resources" },
+        el("p", { class: "resources-kicker" }, "Practice Lab"),
+        el("a", { class: "resource-link", href: `../vent-ltv1200.html?level=${m.practiceLevel}` },
+          el("span", { class: "resource-ico" }, "🫁"),
+          el("span", { class: "resource-text" },
+            el("span", { class: "resource-title" }, "Practice on the Simulator"),
+            el("span", { class: "resource-sub" }, m.practiceNote || "Apply this module on the LTV 1200 simulator.")
+          ),
+          el("span", { class: "resource-arr" }, "→")
+        )
+      )
+    );
+  }
+
+  container.appendChild(exit);
 
   if (ms.completed) {
     container.insertBefore(

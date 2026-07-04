@@ -2154,8 +2154,16 @@ function openLevelSelect(){
 }
 
 // ── INIT GAME ─────────────────────────────────────────────────
-// Show level select on first load
-openLevelSelect();
+// Deep link: ?level=1|2|3 jumps straight into a level (used by the Ventilator Academy);
+// otherwise show the level-select screen on first load. Deferred until the DOM is parsed
+// so the level-select overlay (defined later in the body) exists when we toggle it.
+function initGameEntry(){
+  var lvl=parseInt(new URLSearchParams(window.location.search).get('level'),10);
+  if(lvl===1||lvl===2||lvl===3) startLevel(lvl);
+  else openLevelSelect();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initGameEntry);
+else initGameEntry();
 
 // ════════════════════════════════════════════════════════════════
 // AUDIO ENGINE — button sounds + event SFX
