@@ -2253,6 +2253,12 @@ function renderAsk(){
   }
 }
 
+// ── PWA: register service worker for offline use ───────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
 </script>
 
 <style>

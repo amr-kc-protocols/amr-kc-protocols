@@ -1,5 +1,9 @@
-const CACHE = 'amrkc-2026-v2';
-const ASSETS = ['./', './index.html', './manifest.json'];
+const CACHE = 'amrkc-2026-v3';
+const ASSETS = [
+  './', './index.html', './manifest.json',
+  './icon-192.png', './icon-193.png', './icon-512.png',
+  './protocols-2026.pdf'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -22,16 +26,19 @@ self.addEventListener('fetch', e => {
   // Network-first: always try network, fall back to cache if offline
   e.respondWith(
     fetch(e.request).then(res => {
-      // Update cache with fresh response
-      if (res && res.status === 200 && res.type === 'basic') {
+      // Update cache with fresh response (same-origin + CDN cors responses)
+      if (res && res.status === 200 && (res.type === 'basic' || res.type === 'cors')) {
         const clone = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
       }
       return res;
     }).catch(() => {
-      // Offline fallback — serve from cache
+      // Offline fallback — serve from cache; only fall back to the app
+      // shell for page navigations, never for scripts/styles/assets
       return caches.match(e.request).then(cached => {
-        return cached || caches.match('./index.html');
+        if (cached) return cached;
+        if (e.request.mode === 'navigate') return caches.match('./index.html');
+        return Response.error();
       });
     })
   );
