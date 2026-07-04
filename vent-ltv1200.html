@@ -1662,7 +1662,7 @@ var SCENARIO_LEVELS={
         correct:1,
         exp:'In metabolic acidosis, aggressive hyperventilation to PaCO₂ < 20 is counterproductive — it causes hypokalemia, hypomagnesemia, and rebound acidosis. Maintain PaCO₂ 28–35 to not worsen the pH, then fix the metabolic cause (treat infection, resuscitate). Over-breathing paradoxically worsens outcomes.'
       },
-      unlock:'✓ Level 2 Complete — 6 core clinical scenarios mastered!'
+      unlock:'✓ Sepsis MV optimization complete. Level 2 complete — 6 core clinical scenarios mastered!'
     }
   ],
 
@@ -1684,7 +1684,7 @@ var SCENARIO_LEVELS={
     },
     // ─── L3 S2 ────────────────────────────────────────────────
     { name:'Weaning — Transition to SIMV',
-      badge:'L3 · Scenario 2 of 4', badgeCls:'scen-badge-3',
+      badge:'L3 · Scenario 2 of 6', badgeCls:'scen-badge-3',
       scenario:'Day 4 post-op respiratory failure. Patient awake, initiating spontaneous breaths, meeting weaning criteria. Physician orders: transition from AC to SIMV Rate 10 with Pressure Support 8 to begin liberation.',
       vitals:[{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -1699,7 +1699,7 @@ var SCENARIO_LEVELS={
     },
     // ─── L3 S3 ────────────────────────────────────────────────
     { name:'Pressure Control — Limit Barotrauma Risk',
-      badge:'L3 · Scenario 3 of 4', badgeCls:'scen-badge-3',
+      badge:'L3 · Scenario 3 of 6', badgeCls:'scen-badge-3',
       scenario:'Asthmatic patient post-intubation. Dynamic obstruction causing fluctuating PIP 32–54 cmH₂O on volume control. Physician orders: switch to Pressure Control at PC 22 cmH₂O, IT 1.0s to cap peak airway pressure.',
       vitals:[{k:'SpO₂',v:'96%'},{k:'PIP range',v:'32–54 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'104'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:550,it:0.8,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
