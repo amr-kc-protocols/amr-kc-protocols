@@ -1851,7 +1851,7 @@ function renderMissionCard(){
       bar.innerHTML='<div class="lc-wrap">'
         +'<div class="lc-icon">'+(gameLevel===2?'⭐':'🏆')+'</div>'
         +'<div class="lc-title" style="color:'+(gameLevel===2?'var(--orange)':'var(--alarm)')+'">Level '+gameLevel+' Complete</div>'
-        +'<div class="lc-sub">'+(gameLevel===2?'All 4 clinical scenarios solved.':'Advanced management mastered — all 4 cases.')+'</div>'
+        +'<div class="lc-sub">'+(gameLevel===2?'All 6 clinical scenarios solved.':'Advanced management mastered — all 6 cases.')+'</div>'
         +'<div class="lc-btns">'
         +(gameLevel<3?'<button class="lc-btn lc-btn-next" onclick="startLevel('+nextLvl+')">'+nextTxt+' →</button>':'')
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
@@ -2279,7 +2279,7 @@ function showVictoryOverlay(level){
   } else if(level===2){
     icon='⭐'; glowCls='vc-glow-orange'; colorStr='var(--orange)';
     levelTxt='LEVEL 2 COMPLETE';
-    subTxt='All 4 clinical scenarios solved.<br>Ready for the advanced cases?';
+    subTxt='All 6 clinical scenarios solved.<br>Ready for the advanced cases?';
     btnsHtml='<div class="vc-btns">'
       +'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startLevel(3)">Level 3 →</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay here</button>'
@@ -2287,7 +2287,7 @@ function showVictoryOverlay(level){
   } else {
     icon='🏆'; glowCls='vc-glow-red'; colorStr='var(--alarm)';
     levelTxt='LEVEL 3 COMPLETE';
-    subTxt='Advanced management mastered.<br>All 4 complex cases solved.<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>';
+    subTxt='Advanced management mastered.<br>All 6 complex cases solved.<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>';
     btnsHtml='<div class="vc-btns">'
       +'<button class="vc-btn vc-btn-red" onclick="closeVictory();openLevelSelect()">Level Select</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Keep exploring</button>'
@@ -2369,7 +2369,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
         <div class="lvl-name">Level 2 — Clinical Scenarios</div>
         <span class="lvl-badge lvl-badge-2">Intermediate</span>
       </div>
-      <div class="lvl-desc">4 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
+      <div class="lvl-desc">6 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
       <span class="lvl-arrow">›</span>
     </div>
     <div class="lvl-card" onclick="startLevel(3)">
@@ -2377,7 +2377,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
         <div class="lvl-name">Level 3 — Advanced Management</div>
         <span class="lvl-badge lvl-badge-3">Advanced</span>
       </div>
-      <div class="lvl-desc">4 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
+      <div class="lvl-desc">6 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
       <span class="lvl-arrow">›</span>
     </div>
   </div>
