@@ -2357,6 +2357,38 @@ var ACADEMY_SCENARIOS={
       readout:function(){ return 'Trigger sensitivity  '+vals.sens.v+' L/min'; }
     },
     confirm:'✓ Easy trigger set — now the vent works with the patient, not against them. But the real treatment here is analgesia-first, then sedation, targeted to a light, comfortable level (not deep coma). Not every "fighting the vent" is a ventilator problem — sometimes the best setting change is a medication.'
+  },
+  'capstone':{
+    name:'Capstone — The Whole Package',
+    badge:'Academy · Capstone', badgeCls:'scen-badge-3',
+    intro:'Final challenge. The sickest patient of your shift: severe ARDS going to an ECMO center, hours on the road. Everything you\'ve learned lands on this one vent — lung protection, oxygenation, minute ventilation, and safe alarms, all at once. No hand-holding. Get it right.',
+    scenario:'28-year-old, severe ARDS, IBW 70 kg. Handed over at Vt 650 mL (9.3 mL/kg), PEEP 5, FiO₂ 70%, and SpO₂ still only 85%. The lungs are stiff and the plateau is high. Make it lung-protective AND oxygenating for a long transport.',
+    vitals:[{k:'HR',v:'116'},{k:'SpO₂',v:'85%'},{k:'Pplat',v:'33 cmH₂O'},{k:'FiO₂',v:'70%'}],
+    setup:{mode:'ac',bt:'volume',rate:14,vt:650,it:1.0,peep:5,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
+    diagnose:{
+      q:'Severe ARDS with an injurious volume AND refractory hypoxemia. What framework do you apply?',
+      choices:[
+        'Fix oxygenation only — raise PEEP and FiO₂, leave the volume',
+        'Protect the lung AND oxygenate: drop Vt to ~6 mL/kg (raise the rate to hold MV), keep Pplat ≤ 30, and climb PEEP/FiO₂',
+        'Give the biggest breath the alarm allows to recruit lung',
+        'Switch to pressure control and stop watching volume'
+      ],
+      correct:1,
+      exp:'Severe ARDS demands both at once: <strong>lung-protective</strong> (≈6 mL/kg, Pplat ≤ 30, rate up to hold minute ventilation) <strong>and</strong> <strong>oxygenation</strong> (climb the PEEP/FiO₂ ladder). Do one and neglect the other and the patient loses ground on a long transport.'
+    },
+    goal:{
+      text:'Put it all together: <strong>Vt ≈ 6 mL/kg (350–460 mL)</strong>, <strong>Pplat ≤ 30</strong>, <strong>minute ventilation ≥ 6.5 L/min</strong> (raise the rate), and recruit with <strong>PEEP 10–16</strong>.',
+      check:function(){
+        var pplat=calcPplat();
+        return vals.vt.v>=350 && vals.vt.v<=460 && pplat!==null && pplat.pplat<=30 &&
+               estMinuteVolume()>=6.5 && vals.peep.v>=10 && vals.peep.v<=16;
+      },
+      readout:function(){
+        var pplat=calcPplat();
+        return 'Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg · PEEP '+vals.peep.v+' · Pplat '+(pplat?pplat.pplat.toFixed(0):'—')+' · MV '+estMinuteVolume().toFixed(1);
+      }
+    },
+    confirm:'🏆 Everything at once: a lung-protective tidal volume, plateau under 30, the rate raised to hold minute ventilation, and PEEP climbed to recruit and oxygenate. That is the whole discipline of transport ventilation in one patient — and you just ran it cold. You\'re ready.'
   }
 };
 

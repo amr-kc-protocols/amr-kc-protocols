@@ -1000,8 +1000,9 @@ select.cert-input { cursor: pointer; }
   padding: 10px;
 }
 .cert-inner {
+  --cert-gold: #c9a14c;   /* true gold for the diploma trim, independent of the warn token */
   border: 2px solid var(--navy);
-  outline: 1px solid var(--gold);
+  outline: 1px solid var(--cert-gold);
   outline-offset: 5px;
   border-radius: 4px;
   padding: 2.6rem 2rem 2rem;
@@ -1013,8 +1014,8 @@ select.cert-input { cursor: pointer; }
   height: 72px;
   margin: 0 auto 1rem;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, var(--gold), #9c7a2f);
-  box-shadow: 0 0 0 4px var(--white), 0 0 0 6px var(--gold);
+  background: radial-gradient(circle at 35% 30%, var(--cert-gold), #9c7a2f);
+  box-shadow: 0 0 0 4px var(--white), 0 0 0 6px var(--cert-gold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1037,7 +1038,7 @@ select.cert-input { cursor: pointer; }
   font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--cert-gold);
 }
 .cert-heading {
   margin: 1.4rem 0 0.2rem;
@@ -1060,7 +1061,7 @@ select.cert-input { cursor: pointer; }
   font-size: 2.1rem;
   font-weight: 700;
   color: var(--navy);
-  border-bottom: 1.5px solid var(--gold);
+  border-bottom: 1.5px solid var(--cert-gold);
   display: inline-block;
   padding: 0 1.2rem 0.3rem;
 }
@@ -1171,6 +1172,43 @@ select.cert-input { cursor: pointer; }
 }
 .resource-link:hover { border-color: var(--navy); transform: translateY(-2px); }
 .resource-ico { font-size: 1.6rem; flex-shrink: 0; }
+
+/* Practice Lab index — a compact list of every simulator mission */
+.practice-list {
+  background: var(--white);
+  border: 1.5px solid var(--soft);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.practice-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  border-top: 1px solid var(--soft);
+  transition: background 0.12s ease;
+}
+.practice-row:first-child { border-top: none; }
+.practice-row:hover { background: var(--bg); }
+.practice-mod {
+  flex-shrink: 0;
+  width: 2.6rem;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--terra);
+  background: var(--terra-soft);
+  border-radius: 7px;
+  padding: 0.35rem 0.2rem;
+  line-height: 1.1;
+}
+.practice-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.practice-title { font-weight: 700; color: var(--navy); font-size: 0.95rem; }
+.practice-sub { font-size: 0.8rem; color: var(--muted); }
 .resource-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .resource-title { font-weight: 700; color: var(--navy); }
 .resource-sub { font-size: 0.85rem; color: var(--muted); }

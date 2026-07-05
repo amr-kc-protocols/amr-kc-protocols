@@ -2254,22 +2254,34 @@ function renderCourseHub() {
   mount(el("div", null, hero, grid, buildSimulatorCard(), buildCapstoneCard(), buildResourcesCard()));
 }
 
-// Practice Lab: hands-on LTV 1200 simulator game — reinforces the course on the real control layout.
+// Every hands-on simulator mission, in course order — the Practice Lab index.
+const PRACTICE_MISSIONS = [
+  { mod: "1 · 6", title: "Setup Walkthrough", sub: "Build every LTV control from scratch — the tutorial.", href: "../vent-ltv1200.html?level=1" },
+  { mod: "2", title: "Which Kind of Failure?", sub: "Name Type I vs II, then treat it.", href: "../vent-ltv1200.html?scenario=failure-type" },
+  { mod: "3", title: "Tube or Mask?", sub: "The NIV-vs-intubation indication call, then set BiPAP.", href: "../vent-ltv1200.html?scenario=niv-vs-tube" },
+  { mod: "4", title: "Initial Settings", sub: "Safe starting settings on a fresh intubation.", href: "../vent-ltv1200.html?scenario=initial-settings" },
+  { mod: "5", title: "Non-Invasive Setup", sub: "CPAP for the awake CHF patient.", href: "../vent-ltv1200.html?scenario=niv-setup" },
+  { mod: "7", title: "Clinical Scenarios", sub: "Six graded cases — alarms, ARDS, COPD & more.", href: "../vent-ltv1200.html?level=2" },
+  { mod: "8", title: "Not Every Fight Is a Knob", sub: "Recognize when the fix is a drug, not a setting.", href: "../vent-ltv1200.html?scenario=agitation" },
+  { mod: "9", title: "Advanced Management", sub: "Six advanced multi-parameter cases.", href: "../vent-ltv1200.html?level=3" },
+  { mod: "★", title: "Capstone — The Whole Package", sub: "Severe ARDS to ECMO: everything at once.", href: "../vent-ltv1200.html?scenario=capstone" },
+];
+
+// Practice Lab index: browse every hands-on LTV 1200 mission in one place.
 function buildSimulatorCard() {
-  const doneCount = MODULES.filter(m => Store.isModuleComplete(m.id)).length;
-  const sub = doneCount > 0
-    ? "Put the modules into practice — drive the LTV 1200 through graded clinical scenarios."
-    : "Hands-on LTV 1200 trainer. Tutorial, then graded clinical scenarios. Great alongside the modules.";
-  return el("div", { class: "resources" },
-    el("p", { class: "resources-kicker" }, "Practice Lab"),
-    el("a", { class: "resource-link", href: "../vent-ltv1200.html" },
-      el("span", { class: "resource-ico" }, "🫁"),
-      el("span", { class: "resource-text" },
-        el("span", { class: "resource-title" }, "Ventilator Simulator"),
-        el("span", { class: "resource-sub" }, sub)
+  const rows = PRACTICE_MISSIONS.map(pm =>
+    el("a", { class: "practice-row", href: pm.href },
+      el("span", { class: "practice-mod" }, pm.mod),
+      el("span", { class: "practice-text" },
+        el("span", { class: "practice-title" }, pm.title),
+        el("span", { class: "practice-sub" }, pm.sub)
       ),
       el("span", { class: "resource-arr" }, "→")
     )
+  );
+  return el("div", { class: "resources practice-lab" },
+    el("p", { class: "resources-kicker" }, "Practice Lab · LTV 1200 Simulator"),
+    el("div", { class: "practice-list" }, ...rows)
   );
 }
 
