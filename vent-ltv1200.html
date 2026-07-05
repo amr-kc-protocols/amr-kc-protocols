@@ -2008,94 +2008,154 @@ var SCENARIO_LEVELS={
 
   3:[
     // ─── L3 S1 ────────────────────────────────────────────────
-    { name:'ARDSnet Lung-Protective Ventilation',
+    { name:'The Injurious Tidal Volume',
       badge:'L3 · Scenario 1 of 6', badgeCls:'scen-badge-3',
-      scenario:'32-year-old ARDS patient, IBW 70 kg. Current Vt 700 mL (10 mL/kg), Pplat 34 cmH₂O — above the ARDSnet 30 limit. Implement lung-protective settings: Vt 6 mL/kg IBW (400 mL), increase Rate to maintain MV, PEEP to 10.',
-      vitals:[{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'pH',v:'7.32'},{k:'FiO₂',v:'60%'}],
+      scenario:'32-year-old with ARDS, IBW 70 kg. The vent is delivering Vt 700 mL — that\'s 10 mL/kg — and the plateau pressure is 34 cmH₂O. Oxygenation is borderline. The lungs are small and stiff.',
+      vitals:[{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'Vt now',v:'10 mL/kg'},{k:'FiO₂',v:'60%'}],
       setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'vt',val:400,label:'Tidal Vol',unit:'mL'},{key:'rate',val:20,label:'Rate',unit:'bpm'},{key:'peep',val:10,label:'PEEP',unit:'cmH₂O'}],
-      quiz:{
-        q:'The ARMA trial (ARDSnet 2000) demonstrated mortality benefit with Vt of:',
-        choices:['4 mL/kg IBW — smaller is always safer','6 mL/kg IBW — proven 22% relative mortality reduction','8 mL/kg IBW — current standard for all ICU patients','10 mL/kg IBW — approximates normal tidal breathing'],
+      diagnose:{
+        q:'Vt 10 mL/kg IBW and Pplat 34 in ARDS. What is the priority — and what does it cost you?',
+        choices:[
+          'Leave the volume; just raise PEEP to fix oxygenation',
+          'Cut the tidal volume toward 6 mL/kg to protect the lung — then raise the rate so minute ventilation doesn\'t collapse',
+          'Increase the tidal volume to recruit more lung',
+          'Switch to pressure control and accept whatever volume results'
+        ],
         correct:1,
-        exp:'The landmark ARMA trial showed <strong>6 mL/kg IBW reduces 28-day mortality by ~22%</strong> vs 12 mL/kg. IBW (not actual weight) is used because lung size correlates with height, not obesity. Target Pplat ≤ 30 cmH₂O.'
+        exp:'Large tidal volumes and Pplat > 30 drive ventilator-induced lung injury. Lung-protective ventilation means <strong>~6 mL/kg IBW and Pplat ≤ 30</strong> — but a smaller breath lowers minute ventilation, so you must <strong>raise the rate to compensate</strong>. That trade-off is the whole skill.'
       },
-      unlock:'✓ ARDSnet protocol applied. 3 parameters, one framework. Next scenario.'
+      goal:{
+        text:'Make it lung-protective, all three at once: <strong>Vt ≈ 6 mL/kg (about 350–450 mL), Pplat ≤ 30, and minute ventilation ≥ 6.5 L/min</strong> — so raise the rate as you drop the volume. (Add PEEP if you like; it helps oxygenation.)',
+        check:function(){
+          var pplat=calcPplat();
+          return vals.vt.v<=450 && vals.vt.v>=350 && pplat!==null && pplat.pplat<=30 && estMinuteVolume()>=6.5;
+        },
+        readout:function(){
+          var pplat=calcPplat();
+          return 'Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg  ·  Pplat '+(pplat?pplat.pplat.toFixed(0):'—')+'  ·  MV '+estMinuteVolume().toFixed(1);
+        }
+      },
+      confirm:'✓ Lung-protective settings dialed in: ~6 mL/kg, plateau under 30, and the rate raised to hold minute ventilation. The ARMA trial showed 6 mL/kg IBW cut mortality ~22% versus 12 mL/kg — IBW, because lung size tracks height, not weight. Permissive hypercapnia is acceptable as long as pH ≥ 7.20.'
     },
     // ─── L3 S2 ────────────────────────────────────────────────
-    { name:'Weaning — Transition to SIMV',
+    { name:'Ready to Come Down',
       badge:'L3 · Scenario 2 of 6', badgeCls:'scen-badge-3',
-      scenario:'Day 4 post-op respiratory failure. Patient awake, initiating spontaneous breaths, meeting weaning criteria. Physician orders: transition from AC to SIMV Rate 10 with Pressure Support 8 to begin liberation.',
+      scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support and the RSBI is 62. They\'re fully controlled on AC right now.',
       vitals:[{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'mode',val:'simv',label:'Mode',unit:''},{key:'rate',val:10,label:'Rate',unit:'bpm'},{key:'ps',val:8,label:'Press Supp',unit:'cmH₂O'}],
-      quiz:{
-        q:'In SIMV at Rate 10, the patient breathes 22 total times/min. What are the extra 12 breaths?',
-        choices:['Mandatory breaths triggered early by the patient\'s effort','Patient-initiated breaths augmented by pressure support only','Completely unsupported spontaneous breaths — patient does all the work','Additional pressure-controlled breaths at the set PC level'],
+      diagnose:{
+        q:'Awake, strong effort, RSBI 62, good gas exchange. What\'s the move?',
+        choices:[
+          'Keep full AC control — it\'s working, don\'t rock the boat',
+          'Begin liberation — move to SIMV with pressure support so the patient does more of the work while a backup rate protects them',
+          'Extubate immediately, no weaning trial needed',
+          'Deepen sedation to keep them synchronized on AC'
+        ],
         correct:1,
-        exp:'SIMV delivers <strong>10 mandatory breaths</strong> (volume-targeted). The extra 12 are spontaneous breaths between mandatory windows — each augmented by <strong>PS 8 cmH₂O</strong> above PEEP. This reduces patient work of breathing during the weaning transition.'
+        exp:'An RSBI (rate/Vt) under 105 predicts weaning success, and full control wastes a ready patient\'s effort. <strong>SIMV + pressure support</strong> lowers the mandatory rate and lets the patient carry more of the load, with a backup rate for safety — the classic weaning bridge.'
       },
-      unlock:'✓ SIMV + PS is the classic weaning bridge. Next scenario.'
+      goal:{
+        text:'Set up a weaning configuration: switch to <strong>SIMV</strong>, drop the mandatory <strong>rate to ≤ 10</strong>, and add <strong>pressure support 6–10 cmH₂O</strong> to offload the spontaneous breaths.',
+        check:function(){ return ventMode==='simv' && vals.rate.v<=10 && vals.ps.v>=6 && vals.ps.v<=10; },
+        readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  Rate '+vals.rate.v+'  ·  PS '+vals.ps.v; }
+      },
+      confirm:'✓ SIMV with pressure support in place — mandatory breaths guarantee a floor, spontaneous breaths are boosted, and the patient ramps up their own work. Trend the RSBI and tolerance; this is the bridge toward a spontaneous breathing trial and extubation.'
     },
     // ─── L3 S3 ────────────────────────────────────────────────
-    { name:'Pressure Control — Limit Barotrauma Risk',
+    { name:'The Swinging Peak Pressure',
       badge:'L3 · Scenario 3 of 6', badgeCls:'scen-badge-3',
-      scenario:'Asthmatic patient post-intubation. Dynamic obstruction causing fluctuating PIP 32–54 cmH₂O on volume control. Physician orders: switch to Pressure Control at PC 22 cmH₂O, IT 1.0s to cap peak airway pressure.',
-      vitals:[{k:'SpO₂',v:'96%'},{k:'PIP range',v:'32–54 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'104'}],
+      scenario:'Intubated status asthmaticus. On volume control the peak pressure lurches breath to breath — 32 one breath, 54 the next — as the dynamic obstruction changes. You\'re worried about barotrauma from those spikes. SpO₂ and CO₂ are holding for now.',
+      vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'104'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:550,it:0.8,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'breathtype',val:'pressure',label:'Breath Type',unit:''},{key:'pc',val:22,label:'Pres Ctrl',unit:'cmH₂O'},{key:'it',val:1.0,label:'Insp Time',unit:'s'}],
-      quiz:{
-        q:'Switched to PC 22 cmH₂O. Compliance then drops acutely. What happens to delivered Vt?',
-        choices:['Stays the same — the vent compensates automatically','Decreases — same ΔP now moves less volume through stiffer lungs','Increases — stiffer lungs store more energy per breath','The vent alarms and switches to volume control automatically'],
+      diagnose:{
+        q:'Peak pressure is swinging dangerously high on volume control. How do you put a ceiling on airway pressure — and what becomes variable instead?',
+        choices:[
+          'Stay on volume control and just raise the high-pressure alarm limit',
+          'Switch to pressure control — you set the pressure and the vent lets tidal volume vary',
+          'Increase the tidal volume to push through the obstruction',
+          'Increase the rate to lower each breath\'s pressure'
+        ],
         correct:1,
-        exp:'Pressure control delivers a <strong>set pressure, not a set volume</strong>. When compliance drops, the same ΔP (PC − PEEP) moves less volume — Vt falls. This is the critical difference from volume control. Always monitor delivered Vt when using pressure-targeted modes.'
+        exp:'In <strong>pressure control</strong> you command the pressure and the vent delivers whatever volume that pressure produces — so peak pressure is capped by design. The trade-off flips: now <strong>tidal volume is the variable</strong> and must be watched, because if compliance drops the same pressure moves less air.'
       },
-      unlock:'✓ Pressure control caps PIP — trade-off is variable Vt. Next scenario.'
+      goal:{
+        text:'Cap the pressure: switch <strong>Breath Type to Pressure</strong>, set <strong>PC around 18–26 cmH₂O</strong>, and keep <strong>inspiratory time ≥ 1.0 s</strong> to give obstructed lungs time to fill.',
+        check:function(){ return breathType==='pressure' && vals.pc.v>=18 && vals.pc.v<=26 && vals.it.v>=1.0-0.001; },
+        readout:function(){ return 'Type '+(breathType==='pressure'?'PRESSURE':'VOLUME')+'  ·  PC '+vals.pc.v+'  ·  IT '+vals.it.v.toFixed(1)+'s'; }
+      },
+      confirm:'✓ Pressure control caps the peak pressure and smooths the swings. Now watch delivered tidal volume like a hawk — if bronchospasm worsens and compliance falls, the same PC delivers less volume and CO₂ climbs. Cap the pressure, monitor the volume.'
     },
     // ─── L3 S4 ────────────────────────────────────────────────
-    { name:'ARDS Day 2 — Refractory Hypoxemia',
+    { name:'Losing the Oxygenation Battle',
       badge:'L3 · Scenario 4 of 6', badgeCls:'scen-badge-3',
-      scenario:'ARDS day 2. Already on lung-protective settings. Despite PEEP 8 and FiO₂ 70%, SpO₂ is 82% (P/F ≈ 59 — severe ARDS). Per ARDSnet FiO₂/PEEP table, escalate to FiO₂ 90%, PEEP 14.',
+      scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82% — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
       vitals:[{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'fio2',val:90,label:'FiO₂',unit:'%'},{key:'peep',val:14,label:'PEEP',unit:'cmH₂O'}],
-      quiz:{
-        q:'The Berlin definition classifies severe ARDS as P/F ratio:',
-        choices:['< 300 mmHg on PEEP ≥ 5 — mild ARDS','< 200 mmHg on PEEP ≥ 5 — moderate ARDS','< 100 mmHg on PEEP ≥ 5 — severe ARDS','< 50 mmHg on any PEEP level'],
-        correct:2,
-        exp:'<strong>Berlin criteria:</strong> Mild ARDS = P/F 200–300; Moderate = P/F 100–200; Severe = P/F < 100 — all with PEEP/CPAP ≥ 5 cmH₂O. This patient\'s P/F ≈ 59 places them in severe ARDS. High PEEP + high FiO₂ strategies, prone positioning, and ECMO referral are considerations.'
+      diagnose:{
+        q:'Severe, refractory hypoxemia (P/F ≈ 59) already on lung-protective volumes. What\'s the next ventilator move?',
+        choices:[
+          'Increase the tidal volume to recruit more lung',
+          'Climb the ARDSnet FiO₂/PEEP ladder — raise PEEP and FiO₂ together',
+          'Increase the respiratory rate — that will raise the oxygen level',
+          'Lower the PEEP to reduce dead space'
+        ],
+        correct:1,
+        exp:'P/F < 100 is <strong>severe ARDS</strong> (Berlin). Bigger breaths injure; rate fixes CO₂, not oxygen. The evidence-based next step is to <strong>escalate PEEP and FiO₂ in tandem</strong> per the ARDSnet table to recruit lung and buy oxygenation — while you set up prone positioning and consider ECMO referral.'
       },
-      unlock:'✓ Severe ARDS escalation complete. Next scenario.'
+      goal:{
+        text:'Escalate up the oxygenation ladder: raise <strong>PEEP to ≥ 12–14</strong> and <strong>FiO₂ to ≥ 90%</strong> together. Recruit and oxygenate while the rest of the rescue plan spins up.',
+        check:function(){ return vals.peep.v>=12 && vals.fio2.v>=90; },
+        readout:function(){ return 'PEEP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
+      },
+      confirm:'✓ PEEP and FiO₂ escalated together per the ARDSnet ladder. This is severe ARDS (Berlin P/F < 100) — beyond high PEEP/FiO₂, the proven moves are prone positioning, neuromuscular blockade for dyssynchrony, and early ECMO referral. The ventilator is one piece of a bigger rescue.'
     },
     // ─── L3 S5: NEW ───────────────────────────────────────────
-    { name:'Pulmonary Edema — CPAP & High PEEP',
+    { name:'Drowning on Dry Land',
       badge:'L3 · Scenario 5 of 6', badgeCls:'scen-badge-3',
-      scenario:'67-year-old acute decompensated heart failure with acute pulmonary edema. SpO₂ 78% on 100% NRB, RR 34. Acute respiratory failure — non-intubated. Apply aggressive CPAP: CPAP 15 cmH₂O, FiO₂ 100% with hope to avoid intubation.',
+      scenario:'67-year-old, acute decompensated heart failure. Flash pulmonary edema: SpO₂ 78% on a 100% non-rebreather, RR 34, bilateral crackles to the apices, JVD. Awake and protecting the airway — not yet intubated. The team is pushing nitroglycerin and a diuretic.',
       vitals:[{k:'SpO₂',v:'78%'},{k:'RR',v:'34'},{k:'JVD',v:'Present'},{k:'Crackles',v:'Bilateral'}],
       setup:{mode:'cpap',bt:'volume',rate:12,vt:400,it:1.0,peep:8,pc:15,ps:5,fio2:40,sens:5,hipres:40,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'mode',val:'cpap',label:'Mode',unit:''},{key:'peep',val:15,label:'CPAP',unit:'cmH₂O'},{key:'fio2',val:100,label:'FiO₂',unit:'%'}],
-      quiz:{
-        q:'In acute pulmonary edema (CHF), how does high CPAP help?',
-        choices:['Increases hydrostatic pressure to push fluid into alveoli','Recruits collapsed alveoli AND compresses pulmonary capillaries, reducing fluid transudation','Replaces diuretics','Prevents the need for intubation 100% of the time'],
+      diagnose:{
+        q:'Awake CHF patient, flash edema, failing on a non-rebreather but still protecting the airway. Best initial respiratory support?',
+        choices:[
+          'Intubate immediately — non-invasive support has no role here',
+          'Non-invasive CPAP at high pressure with high FiO₂ — recruit lung and reduce preload/afterload',
+          'Nasal cannula and watchful waiting',
+          'Bag-mask ventilation until the diuretic works'
+        ],
         correct:1,
-        exp:'High CPAP (12–20 cmH₂O) recruits atelectatic lung <strong>AND</strong> compresses pulmonary capillaries, reducing the hydrostatic gradient that drives pulmonary edema. Combined with IV diuretics and afterload reduction, CPAP can prevent intubation in ~70% of acute decompensated CHF cases. Monitor for fatigue — intubation may still be necessary.'
+        exp:'An awake patient who can protect their airway in flash pulmonary edema is the ideal candidate for <strong>CPAP</strong>. High airway pressure recruits flooded alveoli AND squeezes preload/afterload down — it treats the physiology while the drugs work, and avoids intubation in most cases.'
       },
-      unlock:'✓ Non-invasive respiratory support mastery. Next scenario.'
+      goal:{
+        text:'Set up non-invasive rescue: <strong>CPAP mode</strong>, high pressure <strong>12–18 cmH₂O</strong>, and <strong>FiO₂ ≥ 95%</strong>. Buy oxygenation and unload the heart.',
+        check:function(){ return ventMode==='cpap' && vals.peep.v>=12 && vals.peep.v<=18 && vals.fio2.v>=95; },
+        readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  CPAP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
+      },
+      confirm:'✓ High CPAP recruits collapsed lung and, by raising intrathoracic pressure, drops both preload and afterload — often turning a crashing CHF patient around within minutes and averting intubation in ~70% of cases. Watch for fatigue or a failing mental status; if they tire, intubate.'
     },
     // ─── L3 S6: NEW ───────────────────────────────────────────
-    { name:'Neurotrauma — Controlled Hypocarbia for ICP',
+    { name:'The Blown Pupil',
       badge:'L3 · Scenario 6 of 6', badgeCls:'scen-badge-3',
-      scenario:'24-year-old motor vehicle crash, severe traumatic brain injury, ICP crisis (ICP 28 mmHg). Pupil blown (unilateral). Temporizing measure: hyperventilate to PaCO₂ 30–35 mmHg. Increase rate to 28 bpm while maintaining Vt and PEEP.',
-      vitals:[{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'},{k:'PaCO₂',v:'42'}],
+      scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. The neurosurgeon is 6 minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
+      vitals:[{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'},{k:'PaCO₂',v:'42 mmHg'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'rate',val:28,label:'Rate',unit:'bpm'}],
-      quiz:{
-        q:'Acute hyperventilation to lower CO₂ reduces ICP by:',
-        choices:['Permanently solving the underlying cause','Causing immediate cerebral vasoconstriction, reducing cerebral blood volume','Increasing oxygen delivery to the brain','Making the patient\'s pH more alkalemic to prevent seizures'],
+      diagnose:{
+        q:'Acute herniation, surgeon minutes away. What emergency ventilator maneuver buys time — and what is the trap?',
+        choices:[
+          'Hyperventilate hard to PaCO₂ below 25 — the lower the better',
+          'Controlled, mild hyperventilation to PaCO₂ ~30–35 — vasoconstrict just enough to drop ICP, as a short bridge',
+          'Hypoventilate to raise PaCO₂ and cerebral blood flow',
+          'Add PEEP to 20 to push blood out of the head'
+        ],
         correct:1,
-        exp:'CO₂ is a potent cerebral vasodilator. Lowering PaCO₂ → cerebral vasoconstriction → decreased cerebral blood volume (CBV) → decreased ICP. <strong>This is a temporizing measure only</strong> (lasts 24–48 hours). Definitive treatment requires surgery, sedation, osmotic therapy. Chronic hypocarbia worsens outcomes — avoid keeping PaCO₂ < 35 beyond acute crisis.'
+        exp:'CO₂ is a potent cerebral vasodilator: lowering PaCO₂ constricts cerebral vessels, shrinks blood volume, and drops ICP within minutes. But over-doing it (PaCO₂ < 25–30) causes ischemia and rebound — so the target is a <strong>controlled, mild</strong> hyperventilation to ~30–35, as a <strong>temporizing bridge only</strong>.'
       },
-      unlock:'🏆 Level 3 Complete — Advanced critical care management mastered. You are ready for the toughest cases.'
+      goal:{
+        text:'Mildly hyperventilate as a bridge — raise <strong>minute ventilation to about 10–13 L/min</strong> (target PaCO₂ ~30–35) by increasing the rate. Don\'t overshoot into aggressive hypocapnia.',
+        check:function(){ var mv=estMinuteVolume(); return mv>=10 && mv<=13.5; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min'; }
+      },
+      confirm:'🏆 Controlled mild hyperventilation buys minutes by shrinking cerebral blood volume — a bridge to the OR, osmotic therapy, and sedation, not a destination. Sustained PaCO₂ < 30 worsens outcomes, so back off once the crisis is controlled. Level 3 complete — you\'re managing the toughest cases.'
     }
   ]
 };
