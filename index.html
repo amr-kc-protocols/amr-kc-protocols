@@ -91,11 +91,11 @@ box-shadow:0 4px 14px rgba(23,58,104,0.45),0 0 0 4px var(--bg);transition:transf
 .nb-home.on{color:var(--teal2)}
 .nb-home.on .nb-home-circle{background:var(--teal2)}
 .nb-home span:last-child{margin-top:4px}
-.hlink{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 9px;
-border-radius:8px;border:1px solid var(--border);background:var(--dim);
+.hlink{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;
+border-radius:8px;border:none;background:none;
 color:var(--gray);text-decoration:none;font-size:9px;font-family:var(--sans);
-letter-spacing:0.04em;transition:all 0.12s;flex-shrink:0}
-.hlink:active,.hlink:hover{background:var(--teal);border-color:var(--teal);color:#fff}
+letter-spacing:0.04em;transition:color 0.12s;flex-shrink:0}
+.hlink:active,.hlink:hover{color:var(--teal2)}
 .hlink-ic{font-size:15px;line-height:1}
 .hlinks{display:flex;gap:6px;align-items:center;margin-left:6px;flex-shrink:0}
 
@@ -108,8 +108,8 @@ letter-spacing:0.14em;color:var(--teal);text-transform:uppercase}
 .sec-sub{padding:4px 14px 2px;font-size:11px;color:var(--gray);letter-spacing:0.04em}
 
 /* ── DOSE CALCULATOR ──────────────────────────────────────────────── */
-.calc-card{margin:10px 12px;background:var(--surface2);border:2px solid var(--teal);
-border-radius:12px;padding:16px}
+.calc-card{margin:10px 12px;background:var(--surface2);border:1px solid var(--teal);
+border-radius:14px;padding:16px}
 .calc-title{font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:0.1em;
 text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px}
 .calc-inputs{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
@@ -143,10 +143,10 @@ border-radius:8px;padding:10px 12px;text-align:center;min-width:80px}
 .vtc-v{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--teal2)}
 
 /* FORMULARY CARDS */
-.drug-card{margin:4px 10px;border-radius:10px;border:1px solid var(--border);
-background:var(--surface2);cursor:pointer;overflow:hidden}
-.drug-card:active{opacity:0.7}
-.dci{display:flex;align-items:center;gap:10px;padding:15px 14px}
+.drug-card{margin:0 12px;border-bottom:1px solid var(--border);cursor:pointer}
+.drug-card:last-of-type{border-bottom:none}
+.drug-card:active{background:var(--dim)}
+.dci{display:flex;align-items:center;gap:10px;padding:14px 4px}
 .dnum{font-family:var(--mono);font-size:11px;color:var(--gray);min-width:48px;flex-shrink:0}
 .dtitle{flex:1;font-size:16px;font-weight:500}
 .dbadge{flex-shrink:0;padding:3px 8px;border-radius:3px;font-family:var(--mono);
@@ -157,10 +157,10 @@ font-size:10px;font-weight:600;letter-spacing:0.04em}
 .darr{color:var(--gray);font-size:13px;flex-shrink:0}
 
 /* HOSPITAL MEDS CARDS */
-.hm-card{margin:4px 10px;border-radius:10px;border:1px solid var(--border);
-background:var(--surface2);cursor:pointer;overflow:hidden}
-.hm-card:active{opacity:0.7}
-.hmi{display:flex;align-items:flex-start;gap:10px;padding:15px 14px}
+.hm-card{margin:0 12px;border-bottom:1px solid var(--border);cursor:pointer}
+.hm-card:last-of-type{border-bottom:none}
+.hm-card:active{background:var(--dim)}
+.hmi{display:flex;align-items:flex-start;gap:10px;padding:13px 4px}
 .hm-names{flex:1;min-width:0}
 .hm-name{font-size:16px;font-weight:600;color:var(--white)}
 .hm-trade{font-size:12px;color:var(--teal2);font-family:var(--mono);margin-top:2px}
@@ -207,8 +207,8 @@ padding:11px 14px;font-size:14px;color:var(--teal);line-height:1.55;margin-botto
 .dt td:last-child{color:var(--white)}
 
 /* FOOTER DISCLAIMER */
-.disc-footer{background:var(--surface2);border-top:1px solid var(--border);
-padding:12px 16px;text-align:center;font-size:10px;color:var(--gray);line-height:1.6}
+.disc-footer{border-top:1px solid var(--border);
+padding:14px 20px;text-align:center;font-size:10px;color:var(--gray);line-height:1.6}
 .disc-footer strong{color:var(--gray)}
 /* ASK THE EDUCATOR */
 .ask-wrap{padding:20px 16px 40px}
@@ -276,12 +276,12 @@ box-shadow:0 4px 12px rgba(23,58,104,0.25);margin-bottom:12px}
 
 /* MORE HUB */
 .more-hub{padding:8px 0 48px}
-.more-card{display:flex;align-items:center;gap:14px;margin:4px 12px;padding:15px 14px;
-background:var(--surface2);border:1px solid var(--border);border-radius:10px;
-cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-color:transparent;
-transition:border-color 0.12s}
-.more-card:active,.more-card:hover{border-color:var(--teal)}
-.more-card-ico{font-size:26px;flex-shrink:0;width:36px;text-align:center}
+.more-card{display:flex;align-items:center;gap:13px;margin:0 12px;padding:14px 4px;
+border-bottom:1px solid var(--border);
+cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-color:transparent}
+.more-card:last-of-type{border-bottom:none}
+.more-card:active,.more-card:hover{background:var(--dim)}
+.more-card-ico{font-size:21px;flex-shrink:0;width:30px;text-align:center;color:var(--teal2)}
 .more-card-info{flex:1;min-width:0}
 .more-card-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:3px}
 .more-card-sub{font-size:12px;color:var(--gray);line-height:1.45}
@@ -372,19 +372,22 @@ fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linej
 .pcs-door{display:flex;align-items:center;gap:5px}
 .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 12px 6px}
 .qa-tile{display:flex;flex-direction:column;gap:9px;background:var(--surface2);
-border:1px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;
+border:1px solid transparent;border-radius:12px;padding:14px 12px;cursor:pointer;
 text-align:left;transition:border-color 0.12s}
 .qa-tile:active,.qa-tile:hover{border-color:var(--teal)}
 .qa-ico{width:30px;height:30px;border-radius:8px;background:var(--dim);
 display:flex;align-items:center;justify-content:center;color:var(--teal2);font-size:16px}
 .qa-label{font-size:13px;font-weight:600;color:var(--white)}
 .qa-sub{font-size:11px;color:var(--gray);line-height:1.4}
-.home-hero{padding:20px 16px 14px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:14px}
-.home-hero-title{font-size:19px;font-weight:700;color:var(--white)}
-.home-hero-sub{font-size:12px;color:var(--gray);margin-top:4px;letter-spacing:0.02em}
+.home-hero{padding:18px 16px 8px;text-align:center}
+.home-hero-title{font-size:17px;font-weight:700;color:var(--white);letter-spacing:-0.01em}
+.home-hero-sub{font-size:12px;color:var(--gray);margin-top:3px;letter-spacing:0.02em}
 .home-name-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px}
 .home-name-edit{background:none;border:none;color:var(--gray);font-size:11px;cursor:pointer;text-decoration:underline;font-family:var(--sans);padding:2px 4px}
-.home-name-form{display:flex;flex-direction:column;gap:8px;max-width:280px;margin:10px auto 0;padding:0 16px}
+.home-name-form{display:flex;flex-wrap:wrap;gap:8px;max-width:320px;margin:12px auto 0;padding:0 16px}
+.home-name-form .home-name-input{flex:1 1 130px;width:auto;min-width:0}
+.home-name-form .home-name-save{flex:1 1 100%}
+.home-name-form .home-name-hint,.home-name-form .home-name-err{flex:1 1 100%}
 .home-name-input{background:var(--dim);border:1.5px solid var(--border);border-radius:8px;
 color:var(--white);font-family:var(--sans);font-size:14px;padding:9px 12px;outline:none;-webkit-appearance:none;width:100%}
 .home-name-input:focus{border-color:var(--teal)}
@@ -393,14 +396,14 @@ font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}
 .home-name-save:disabled{opacity:0.5;cursor:default}
 .home-name-hint{font-size:10px;color:var(--gray);line-height:1.4;margin-top:2px}
 .home-name-err{font-size:11px;color:var(--danger);margin-top:2px;display:none}
-.stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 12px 6px}
-.stat-tile{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);
-border-radius:10px;padding:12px;text-decoration:none;color:inherit;transition:border-color 0.12s}
+.stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 12px}
+.stat-tile{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid transparent;
+border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:border-color 0.12s}
 .stat-tile:active,.stat-tile:hover{border-color:var(--teal)}
-.stat-tile-ico{font-size:22px;flex-shrink:0;width:28px;text-align:center;color:var(--teal2);display:flex;align-items:center;justify-content:center}
-.stat-tile-val{font-size:17px;font-weight:700;color:var(--white);line-height:1.2}
+.stat-tile-ico{font-size:18px;flex-shrink:0;width:26px;text-align:center;color:var(--teal2);display:flex;align-items:center;justify-content:center}
+.stat-tile-val{font-size:13px;font-weight:600;color:var(--white);line-height:1.25}
 .stat-tile-lbl{font-size:10px;color:var(--gray);letter-spacing:0.02em;margin-top:1px}
-.stat-tile.empty .stat-tile-val{font-size:12px;font-weight:600;color:var(--teal2)}
+.stat-tile.empty .stat-tile-val{color:var(--teal2)}
 </style>
 
 </head>
@@ -709,8 +712,8 @@ function renderHome(){
     h += '<div class="home-hero-title">Welcome back, '+escHtml(profile.lastName)+'</div>';
     h += '<div class="home-name-row"><button class="home-name-edit" id="home-name-edit-btn">Not '+escHtml(profile.lastName)+'?</button></div>';
   } else {
-    h += '<div class="home-hero-title">AMR Kansas City</div>';
-    h += '<div class="home-hero-sub">Field Guide 2026 &middot; Select a section below</div>';
+    h += '<div class="home-hero-title">Set up your Field Guide</div>';
+    h += '<div class="home-hero-sub">Add your name to personalize and track progress</div>';
     h += '<div class="home-name-form">';
     h += '<input class="home-name-input" id="home-lastname-input" type="text" placeholder="Last name" maxlength="40" autocomplete="off">';
     h += '<input class="home-name-input" id="home-empnum-input" type="text" placeholder="Employee #" maxlength="20" autocomplete="off" inputmode="numeric">';
@@ -2046,7 +2049,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-calendar"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Daily 5</div>',
-    '    <div class="more-card-sub">Five questions a day from your cert level \u2014 build a streak</div>',
+    '    <div class="more-card-sub">Five questions a day \u2014 build a streak</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2054,7 +2057,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Rhythm Strip ID</div>',
-    '    <div class="more-card-sub">Identify 12 EMS-relevant rhythms from canvas ECG strips</div>',
+    '    <div class="more-card-sub">Identify 12 EMS rhythms from ECG strips</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2062,7 +2065,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Impella &amp; ECMO CE</div>',
-    '    <div class="more-card-sub">10-question CE quiz with instant feedback and a certificate of completion</div>',
+    '    <div class="more-card-sub">10-question CE quiz with certificate</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2070,7 +2073,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Ventilator Academy</div>',
-    '    <div class="more-card-sub">9-module interactive course \u2014 lessons, knowledge checks, drag-and-drop, and clinical scenarios. Progress saves automatically.</div>',
+    '    <div class="more-card-sub">9-module course \u2014 lessons, knowledge checks &amp; scenarios</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2078,7 +2081,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Hemodynamics Academy</div>',
-    '    <div class="more-card-sub">8-module course on hemodynamic monitoring \u2014 physiology, arterial lines, pressors, and mechanical circulatory support, with a final exam and certificate.</div>',
+    '    <div class="more-card-sub">8-module course \u2014 pressors, arterial lines &amp; MCS devices</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2086,7 +2089,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">ImageTrend Job Aid</div>',
-    '    <div class="more-card-sub">Searchable ePCR charting reference \u2014 dispositions, worksheets, validation, and troubleshooting</div>',
+    '    <div class="more-card-sub">Searchable ePCR charting reference</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2112,7 +2115,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">VenTilaTor 3000 THE GAME </div>',
-    '    <div class="more-card-sub">Interactive controls reference \u2014 tap any knob to learn its function</div>',
+    '    <div class="more-card-sub">Tap any knob to learn its function</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2122,7 +2125,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-cap"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Kansas Class Builder</div>',
-    '    <div class="more-card-sub">Enter course details once and generate a print-ready Kansas CE submission packet (cover sheet, info sheet, evaluation, roster)</div>',
+    '    <div class="more-card-sub">Generate a print-ready Kansas CE submission packet</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2130,7 +2133,7 @@ function renderMore(){
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Caregiver Signature Form</div>',
-    '    <div class="more-card-sub">Complete and download a signed PDF for missing PCR signatures</div>',
+    '    <div class="more-card-sub">Signed PDF for missing PCR signatures</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</div>',
@@ -2148,7 +2151,7 @@ function renderMore(){
     '  <div class="more-card-ico"><img class="edu-avatar-sm" src="educator.jpg" alt=""></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Ask the Educator</div>',
-    '    <div class="more-card-sub">Submit an anonymous question or feedback to Dr. Deshmukh</div>',
+    '    <div class="more-card-sub">Anonymous questions &amp; feedback to Dr. Deshmukh</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</div>',
@@ -2271,7 +2274,7 @@ if('serviceWorker' in navigator){
 </script>
 
 <style>
-.pcs-banner{margin:10px 12px 4px;background:var(--surface2);border:1.5px solid var(--warn);border-radius:10px;padding:12px 14px}
+.pcs-banner{margin:10px 12px 4px;background:var(--warn-bg);border:none;border-left:3px solid var(--warn);border-radius:0 10px 10px 0;padding:12px 14px}
 .pcs-rule{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--warn);letter-spacing:0.04em}
 .pcs-rule-sub{font-size:11px;color:var(--gray);margin-top:3px}
 .pcs-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
