@@ -628,6 +628,8 @@ const MODULES = [
   title: "Vent Vocabulary & Initial Settings",
   blurb: "The eight numbers every vented patient has. IBW math, the ARDSNet history, and how to defend any setting you turn.",
   estMin: 50,
+  practiceScenario: "initial-settings",
+  practiceNote: "Build safe initial settings on a freshly intubated patient — Vt by IBW, PEEP, and minute ventilation.",
 
   lessons: [
     {
@@ -815,6 +817,8 @@ const MODULES = [
   title: "Modes of Ventilation",
   blurb: "Volume targeted, pressure targeted, and the partnerships in between. Pick the mode the patient needs — not the mode you remember.",
   estMin: 60,
+  practiceScenario: "niv-setup",
+  practiceNote: "Pick and set the right mode for an awake CHF patient — non-invasive CPAP before the tube.",
 
   lessons: [
     {
@@ -2424,15 +2428,19 @@ function renderModuleHome() {
 
   const container = el("div", null, hero, grid);
 
-  // Optional hands-on tie-in to the ventilator simulator, when this module maps to a level.
-  if (m.practiceLevel) {
+  // Optional hands-on tie-in to the ventilator simulator. A module can point at a
+  // purpose-built academy scenario (practiceScenario) or a whole difficulty level.
+  if (m.practiceScenario || m.practiceLevel) {
+    const href = m.practiceScenario
+      ? `../vent-ltv1200.html?scenario=${m.practiceScenario}`
+      : `../vent-ltv1200.html?level=${m.practiceLevel}`;
     container.appendChild(
       el("div", { class: "resources" },
         el("p", { class: "resources-kicker" }, "Practice Lab"),
-        el("a", { class: "resource-link", href: `../vent-ltv1200.html?level=${m.practiceLevel}` },
+        el("a", { class: "resource-link", href },
           el("span", { class: "resource-ico" }, "🫁"),
           el("span", { class: "resource-text" },
-            el("span", { class: "resource-title" }, "Practice on the Simulator"),
+            el("span", { class: "resource-title" }, m.practiceScenario ? "Simulator Scenario" : "Practice on the Simulator"),
             el("span", { class: "resource-sub" }, m.practiceNote || "Apply this module on the LTV 1200 simulator.")
           ),
           el("span", { class: "resource-arr" }, "→")

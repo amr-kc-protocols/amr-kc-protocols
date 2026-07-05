@@ -2228,6 +2228,77 @@ var SCENARIO_LEVELS={
   ]
 };
 
+// ── CUSTOM ACADEMY SCENARIOS ──────────────────────────────────
+// Standalone missions launched from the Ventilator Training Academy via
+// ?scenario=<id>. Same diagnose→goal→confirm engine as the levels, but they run
+// as a one-off (no level progression) and return to the academy when solved.
+var ACADEMY_SCENARIOS={
+  'initial-settings':{
+    name:'Initial Settings — Newly Intubated',
+    badge:'Academy · Initial Vent Setup', badgeCls:'scen-badge-2',
+    intro:'Module 4 practice. You\'re accepting an 80 kg (≈75 kg IBW) man, just intubated for airway protection before a transfer. His lungs are healthy — no ARDS, no obstruction. The sending RT handed him over on whatever was dialed up in a hurry. Build safe initial settings from here.',
+    scenario:'75 kg IBW, healthy lungs, fully sedated for transport. The vent came to you at Vt 700 mL (that\'s ~9 mL/kg), PEEP 0, and 100% oxygen. Set sane, lung-protective starting settings for the road.',
+    vitals:[{k:'HR',v:'92'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'38 mmHg'},{k:'BP',v:'128/74'}],
+    setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:0,pc:15,ps:10,fio2:100,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+    diagnose:{
+      q:'Healthy lungs, 75 kg IBW, just intubated. What defines a safe INITIAL tidal volume and baseline?',
+      choices:[
+        'Whatever was set at the sending hospital — don\'t change it',
+        'About 6–8 mL/kg IBW (≈450–600 mL) with a little PEEP (~5) — lung-protective from breath one',
+        'The biggest volume the high-pressure alarm allows',
+        '4 mL/kg — always use the smallest possible breath'
+      ],
+      correct:1,
+      exp:'Start every intubated patient lung-protective: <strong>6–8 mL/kg of ideal body weight</strong> (here ~450–600 mL), physiologic <strong>PEEP ~5</strong>, and a rate that gives a normal minute ventilation. You don\'t wait for ARDS to protect the lung — you start protected. 9 mL/kg on healthy lungs is still too much.'
+    },
+    goal:{
+      text:'Dial safe initial settings for a 75 kg IBW adult: <strong>Vt about 450–600 mL (6–8 mL/kg)</strong>, <strong>PEEP ~5</strong>, and a rate giving <strong>MV 7–9 L/min</strong>.',
+      check:function(){ var mv=estMinuteVolume(); return vals.vt.v>=450&&vals.vt.v<=600&&vals.peep.v>=4&&vals.peep.v<=6&&mv>=7&&mv<=9.5; },
+      readout:function(){ return 'Vt '+(vals.vt.v/75).toFixed(1)+' mL/kg  ·  PEEP '+vals.peep.v+'  ·  MV '+estMinuteVolume().toFixed(1); }
+    },
+    confirm:'✓ Lung-protective from the first breath: 6–8 mL/kg, PEEP 5, and a normal minute ventilation. Titrate FiO₂ down to keep SpO₂ 92–96% once you\'ve confirmed placement — 100% is fine for pre-oxygenation but not for the whole transport. Good initial setup.'
+  },
+  'niv-setup':{
+    name:'Non-Invasive Setup — CHF',
+    badge:'Academy · NIV / CPAP', badgeCls:'scen-badge-3',
+    intro:'Module 5 practice. Dispatched for a "difficulty breathing" transfer, you find an awake CHF patient in early flash pulmonary edema — working hard, but protecting their airway and following commands. The sending facility wants them at the cardiac center. You\'d rather not intubate if CPAP can hold them.',
+    scenario:'Awake, oriented, tripoding on a non-rebreather at SpO₂ 89%, RR 30, bilateral crackles. Good airway reflexes. This is a set-up-non-invasive-support decision, not an intubation.',
+    vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'89%'},{k:'RR',v:'30'},{k:'BP',v:'176/98'}],
+    setup:{mode:'ac',bt:'volume',rate:12,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+    diagnose:{
+      q:'Awake, protecting the airway, CHF flash edema failing on a mask. Best respiratory support to set up?',
+      choices:[
+        'Intubate now — non-invasive support is contraindicated',
+        'Non-invasive CPAP: high baseline pressure with high FiO₂ to recruit lung and unload the heart',
+        'Simple nasal cannula and reassess in 20 minutes',
+        'Full A/C volume ventilation without intubating'
+      ],
+      correct:1,
+      exp:'An awake CHF patient with intact airway reflexes is the textbook <strong>CPAP</strong> candidate. High airway pressure recruits flooded alveoli and drops preload/afterload — buying time while nitrates and diuretics work, and avoiding the tube in most cases.'
+    },
+    goal:{
+      text:'Set up non-invasive support: switch to <strong>CPAP mode</strong>, high baseline <strong>10–15 cmH₂O</strong>, and <strong>FiO₂ ≥ 90%</strong>.',
+      check:function(){ return ventMode==='cpap'&&vals.peep.v>=10&&vals.peep.v<=15&&vals.fio2.v>=90; },
+      readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  CPAP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
+    },
+    confirm:'✓ CPAP up, pressure recruiting lung and unloading the heart, oxygen high. Coach the patient to the mask, watch for fatigue or a dropping mental status, and be ready to intubate if they tire — but most flash-edema patients turn the corner on CPAP within minutes.'
+  }
+};
+
+// Launch a standalone academy scenario (from ?scenario=<id>)
+var academyMode=false;
+function startAcademyScenario(id){
+  var sc=ACADEMY_SCENARIOS[id];
+  if(!sc){ openLevelSelect(); return; }
+  academyMode=true;
+  SCENARIO_LEVELS[9]=[sc];        // park it in a private level slot
+  gameLevel=9; scenarioIdx=0;
+  var ov=document.getElementById('lvlsel-overlay'); if(ov) ov.classList.add('hidden');
+  loadScenario(sc);
+  showIntro(sc);
+  renderMissionCard();
+}
+
 var gameStage=0;
 var quizAnsweredCorrect=false;
 
@@ -2386,6 +2457,17 @@ function renderMissionCard(){
 
   // ── LEVEL COMPLETE STATE ──────────────────────────────────
   if(gameDone()){
+    if(academyMode){
+      bar.innerHTML='<div class="lc-wrap">'
+        +'<div class="lc-icon">✅</div>'
+        +'<div class="lc-title" style="color:var(--green)">Mission Complete</div>'
+        +'<div class="lc-sub">Nicely done — you set this one correctly.</div>'
+        +'<div class="lc-btns">'
+        +'<button class="lc-btn lc-btn-next" onclick="location.href=\'vta/academy.html\'">← Back to Academy</button>'
+        +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Free Play</button>'
+        +'</div></div>';
+      return;
+    }
     if(gameLevel===1){
       bar.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
         +'<span style="font-size:20px">🎓</span>'
@@ -2442,7 +2524,9 @@ function renderMissionCard(){
 
   var vitalsHtml=renderMonitor(sc.vitals);
 
-  var header='<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
+  var backAction=academyMode?"location.href='vta/academy.html'":'openLevelSelect()';
+  var backLabel=academyMode?'‹ Back to Academy':'‹ Level Select';
+  var header='<button class="scen-back-btn" onclick="'+backAction+'">'+backLabel+'</button>'
     +'<div class="scen-header">'
     +'<div class="mission-stage">'+sc.name+'</div>'
     +'<span class="scen-badge '+sc.badgeCls+'">'+sc.badge+'</span>'
@@ -2522,7 +2606,7 @@ function showIntro(sc){
   var ov=document.getElementById('intro-overlay'), card=document.getElementById('intro-card');
   if(!ov||!card) return;
   var isTut=gameLevel===1;
-  var kicker=isTut?'Training · Setup':(gameLevel===3?'Incoming · Advanced':'Incoming · Clinical');
+  var kicker=isTut?'Training · Setup':(academyMode?'Academy · Practice':(gameLevel===3?'Incoming · Advanced':'Incoming · Clinical'));
   var narr=sc.intro||sc.scenario;
   var obj=isTut
     ? '<span class="intro-step">Decide</span><span class="intro-arrow">→</span>'
@@ -2629,7 +2713,7 @@ function advanceStage(){
   }
   if(gameDone()){
     sfxComplete();
-    showVictoryOverlay(gameLevel);
+    if(!academyMode) showVictoryOverlay(gameLevel);   // academy missions show an inline complete card
   } else {
     sfxUnlock();
   }
@@ -2771,7 +2855,10 @@ function openLevelSelect(){
 // otherwise show the level-select screen on first load. Deferred until the DOM is parsed
 // so the level-select overlay (defined later in the body) exists when we toggle it.
 function initGameEntry(){
-  var lvl=parseInt(new URLSearchParams(window.location.search).get('level'),10);
+  var params=new URLSearchParams(window.location.search);
+  var sid=params.get('scenario');
+  if(sid && ACADEMY_SCENARIOS[sid]){ startAcademyScenario(sid); return; }
+  var lvl=parseInt(params.get('level'),10);
   if(lvl===1||lvl===2||lvl===3) startLevel(lvl);
   else openLevelSelect();
 }
