@@ -1919,7 +1919,7 @@ const STORAGE_KEY = "vta-pwa-state-v2";
 // Three ways in: the "Admin" button in the footer (password-gated, persists on
 // this device), or the ?admin / #admin URL shortcut. NOTE: this is a soft
 // convenience gate, not real security — the password lives in this client file.
-const ADMIN_PASSWORD = "amrkc-vent";
+const ADMIN_PASSWORD = "Brbull1142$";
 const ADMIN = (function () {
   try {
     if (localStorage.getItem("vta_admin") === "1") return true;
