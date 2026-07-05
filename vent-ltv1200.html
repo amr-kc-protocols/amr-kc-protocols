@@ -1860,49 +1860,76 @@ function ieExpRatio(){
 var SCENARIO_LEVELS={
   2:[
     // ─── L2 S1 ────────────────────────────────────────────────
-    { name:'Hypercapnia — Increase Minute Ventilation',
+    { name:'The Rising CO₂',
       badge:'L2 · Scenario 1 of 6', badgeCls:'scen-badge-2',
-      scenario:'45-year-old post-op patient, not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. Oxygenation adequate. Increase minute ventilation to correct the respiratory acidosis.',
-      vitals:[{k:'SpO₂',v:'93%'},{k:'EtCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'HR',v:'102'}],
+      scenario:'45-year-old post-op, sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
+      vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'HR',v:'102'}],
       setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'rate',val:16,label:'Rate',unit:'bpm'}],
-      quiz:{
-        q:'After changing Rate to 16 with Vt 450 mL, what is the Minute Ventilation?',
-        choices:['4.5 L/min','6.0 L/min','7.2 L/min','9.0 L/min'],
-        correct:2,
-        exp:'<strong>MV = Rate × Vt = 16 × 0.45 = 7.2 L/min.</strong> Previously 10 × 0.45 = 4.5 L/min — nearly doubled. Higher MV blows off more CO₂, correcting the respiratory acidosis.'
+      diagnose:{
+        q:'PaCO₂ 62, pH 7.28, oxygenation adequate. What is the disturbance, and what has to change?',
+        choices:[
+          'Hypoxemia — raise FiO₂ and PEEP',
+          'Respiratory acidosis from inadequate minute ventilation — increase MV',
+          'Metabolic acidosis — this is compensatory, leave the vent alone',
+          'Air-trapping — lengthen exhalation'
+        ],
+        correct:1,
+        exp:'A high PaCO₂ with a low pH and normal oxygenation is a <strong>respiratory acidosis</strong>. CO₂ clearance is proportional to minute ventilation (Rate × Vt) — so raising MV is the fix.'
       },
-      unlock:'✓ Good call. Higher rate increases MV and CO₂ clearance. Next scenario loading.'
+      goal:{
+        text:'Raise minute ventilation to clear the CO₂ — get <strong>MV into roughly 7–10 L/min</strong> (it\'s 4.5 now). Increase the rate, the tidal volume, or both — but keep Vt lung-safe.',
+        check:function(){ var mv=estMinuteVolume(); return mv>=7 && mv<=10.5; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min'; }
+      },
+      confirm:'✓ Minute ventilation roughly doubled — CO₂ clearance rises and the acidosis corrects. There was no single right knob: more rate or more volume both raise MV. Watch the ceiling — driving MV far above need blows off too much CO₂ and can cause alkalosis.'
     },
     // ─── L2 S2 ────────────────────────────────────────────────
-    { name:'Hypoxemia — Recruit with PEEP',
+    { name:'Hypoxemia That Won\'t Budge',
       badge:'L2 · Scenario 2 of 6', badgeCls:'scen-badge-2',
-      scenario:'62-year-old ARDS patient. Despite FiO₂ 60%, SpO₂ remains 85%. CXR shows bilateral infiltrates. Increase PEEP to recruit collapsed alveoli.',
-      vitals:[{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'HR',v:'118'}],
+      scenario:'62-year-old with ARDS. SpO₂ is stuck at 85% even on FiO₂ 60%. CXR shows dense bilateral infiltrates. PEEP is currently only 3 cmH₂O. EtCO₂ and pH are acceptable.',
+      vitals:[{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'PEEP',v:'3 cmH₂O'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:400,it:1.0,peep:3,pc:15,ps:10,fio2:60,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'peep',val:10,label:'PEEP',unit:'cmH₂O'}],
-      quiz:{
-        q:'In ARDS, how does PEEP primarily improve oxygenation?',
-        choices:['Increases rate of CO₂ elimination','Recruits collapsed alveoli, increasing FRC','Reduces tidal volume delivered per breath','Decreases peak inspiratory pressure'],
+      diagnose:{
+        q:'Refractory hypoxemia on a high FiO₂ with diffuse infiltrates and PEEP of 3. What will help most?',
+        choices:[
+          'Increase the respiratory rate to blow off more CO₂',
+          'Raise PEEP to recruit collapsed alveoli and increase FRC',
+          'Increase tidal volume to open the lung',
+          'Increase inspiratory time to hold the breath longer'
+        ],
         correct:1,
-        exp:'<strong>PEEP holds alveoli open at end-expiration</strong>, recruiting collapsed lung units and increasing functional residual capacity (FRC). This reduces intrapulmonary shunt and improves V/Q matching — directly raising PaO₂ without increasing FiO₂.'
+        exp:'The problem is <strong>shunt</strong> — blood passing collapsed, flooded alveoli. Rate changes CO₂, not oxygenation. Bigger tidal volumes injure ARDS lungs. <strong>PEEP</strong> holds alveoli open at end-expiration, recruiting lung and cutting the shunt.'
       },
-      unlock:'✓ Correct — PEEP recruits, FRC rises, shunt falls. Next scenario.'
+      goal:{
+        text:'Recruit the lung with PEEP — bring PEEP into a therapeutic range of about <strong>8–14 cmH₂O</strong>. Enough to open alveoli, not so much you overdistend and drop the blood pressure.',
+        check:function(){ return vals.peep.v>=8 && vals.peep.v<=14; },
+        readout:function(){ return 'PEEP   '+vals.peep.v+' cmH₂O'; }
+      },
+      confirm:'✓ PEEP raised into the recruiting range — FRC rises, shunt falls, and SpO₂ improves without touching FiO₂. Above ~15 cmH₂O, watch for overdistension and falling cardiac output. PEEP and FiO₂ are titrated together on the ARDSnet ladder.'
     },
     // ─── L2 S3 ────────────────────────────────────────────────
-    { name:'Hi-Pressure Alarm — Fix the Limit',
+    { name:'The Alarm That Won\'t Stop',
       badge:'L2 · Scenario 3 of 6', badgeCls:'scen-badge-2',
-      scenario:'Post-intubation. Hi-Pressure alarm fires on every single breath at the same pressure (30 cmH₂O). Breath sounds equal bilaterally, no secretions. The alarm limit is simply set too low — correct it.',
+      scenario:'Freshly intubated adult. The High Pressure alarm is sounding on every single breath — at the exact same pressure each time. Breath sounds are equal bilaterally, the tube is patent, there are no secretions, and the patient looks comfortable. The PIP is a normal 30 cmH₂O.',
       vitals:[{k:'SpO₂',v:'98%'},{k:'PIP',v:'30 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'88'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:25,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'hipres',val:40,label:'Hi Pres Limit',unit:'cmH₂O'}],
-      quiz:{
-        q:'The Hi-Pressure alarm fires at the exact same pressure every breath. This most likely means:',
-        choices:['A tension pneumothorax is developing','A mucus plug is obstructing the airway','The alarm limit is set at or below the patient\'s normal PIP','Auto-PEEP is elevating circuit pressure'],
+      diagnose:{
+        q:'The alarm fires at the SAME pressure every breath, with a normal exam and normal PIP. What is going on?',
+        choices:[
+          'A tension pneumothorax is developing',
+          'A mucus plug is obstructing the airway',
+          'The High Pressure limit is set at or below the patient\'s normal PIP',
+          'Auto-PEEP is elevating the circuit pressure'
+        ],
         correct:2,
-        exp:'When the alarm fires at the <strong>exact same pressure every breath</strong>, the limit is at or below normal PIP. Secretions, bronchospasm, or pneumothorax cause <em>escalating or variable</em> pressures. Rule: set Hi Pres 5–10 cmH₂O above the patient\'s normal PIP.'
+        exp:'A real airway problem — plug, bronchospasm, pneumothorax — makes pressures <em>climb or vary</em>. An alarm that trips at the <strong>exact same pressure every breath</strong>, with a normal exam, is a <strong>limit-setting problem</strong>: it\'s set too close to the patient\'s normal PIP.'
       },
-      unlock:'✓ Hi Pres alarm corrected. Set this on every intubation. Next scenario.'
+      goal:{
+        text:'Set the High Pressure limit correctly — about <strong>5–10 cmH₂O above the patient\'s PIP (~30)</strong>, so it catches real trouble without nuisance-alarming. Aim for roughly 35–45 cmH₂O. (Listen — the alarm stops when you clear the PIP.)',
+        check:function(){ return vals.hipres.v>=35 && vals.hipres.v<=45; },
+        readout:function(){ return 'Hi-Pres  '+vals.hipres.v+'   ·   PIP ~30'; }
+      },
+      confirm:'✓ Limit set 5–10 above PIP — the nuisance alarm stops and you\'ll still be warned of true obstruction. Set too low it cries wolf; set too high (e.g. 60) it misses a real plug or pneumothorax. Reset this on every intubation and after every big settings change.'
     },
     // ─── L2 S4 ────────────────────────────────────────────────
     { name:'COPD — Stop the Air-Trapping',
@@ -1930,34 +1957,52 @@ var SCENARIO_LEVELS={
     },
 
     // ─── L2 S5: NEW ───────────────────────────────────────────
-    { name:'Anxiety & Dyssynchrony — High Flow Requirements',
+    { name:'Fighting the Vent',
       badge:'L2 · Scenario 5 of 6', badgeCls:'scen-badge-2',
-      scenario:'28-year-old post-op. Fighting the ventilator on AC-VC. Peak flow alarm kept going off. Respiratory rate climbing to 28. Inadequate sedation. Reduce inspiratory time to 0.6s to allow longer exhalation and lower demand.',
-      vitals:[{k:'SpO₂',v:'97%'},{k:'RR actual',v:'28'},{k:'EtCO₂',v:'42 mmHg'},{k:'HR',v:'136'}],
+      scenario:'28-year-old post-op, awake and air-hungry on AC-VC. Pulling hard at the start of each breath, the flow alarm keeps tripping, and the total rate has climbed to 28. Oxygenation and CO₂ are fine. Inspiratory time is set long at 1.2 s. Sedation is being addressed — but there is also a mechanical fix.',
+      vitals:[{k:'SpO₂',v:'97%'},{k:'RR total',v:'28'},{k:'EtCO₂',v:'42 mmHg'},{k:'HR',v:'136'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.2,peep:5,pc:15,ps:8,fio2:40,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'it',val:0.6,label:'Insp Time',unit:'s'}],
-      quiz:{
-        q:'Patient is dyssynchronous — what does reducing inspiratory time achieve?',
-        choices:['Increases work of breathing','Lengthens expiration, reduces demand-stacking','Decreases oxygen delivery','Increases auto-PEEP immediately'],
+      diagnose:{
+        q:'A vigorous patient is out-pacing the vent\'s flow and stacking effort against a long inspiration. Besides sedation, what setting change helps most?',
+        choices:[
+          'Lengthen inspiratory time further to slow them down',
+          'Shorten inspiratory time — deliver the breath faster and give more time to exhale',
+          'Increase PEEP to reduce their effort',
+          'Increase tidal volume to satisfy the air hunger'
+        ],
         correct:1,
-        exp:'Shorter IT → longer ET (since cycle time = 60÷rate). Longer exhalation lets lungs empty fully, reduces the sensation of flow insufficiency, and paradoxically improves comfort and synchrony. Sedation still needed, but flow-related dyssynchrony is mechanically addressable.'
+        exp:'A long, slow inspiration starves a high-demand patient of flow and eats into exhalation time. <strong>Shortening inspiratory time</strong> delivers the set volume faster (higher flow) and lengthens expiration — both improve synchrony. Sedation still matters, but the mechanics are fixable.'
       },
-      unlock:'✓ Flow demand matched to patient effort. Next scenario.'
+      goal:{
+        text:'Speed up the breath and free up exhalation — shorten <strong>inspiratory time to ≤ 0.8 s</strong>. (Watch the live I:E open up as you do.)',
+        check:function(){ return vals.it.v<=0.8+0.001; },
+        readout:function(){ var e=ieExpRatio(); return 'IT  '+vals.it.v.toFixed(1)+' s    ·    I:E 1:'+(e===null?'—':e.toFixed(1)); }
+      },
+      confirm:'✓ Shorter inspiration → higher inspiratory flow and a longer exhale → the flow hunger and stacking ease. Flow-related dyssynchrony is mechanically addressable; pair it with adequate sedation and reassess.'
     },
     // ─── L2 S6: NEW ───────────────────────────────────────────
-    { name:'Sepsis — Metabolic Acidosis Requiring High MV',
+    { name:'The Compensating Septic Patient',
       badge:'L2 · Scenario 6 of 6', badgeCls:'scen-badge-2',
-      scenario:'56-year-old with septic shock. ABG: PaCO₂ 28 mmHg, pH 7.18 (metabolic + respiratory). Lactate 6.2. Already on aggressive vasoactive support. Increase minute ventilation to compensate for metabolic acidosis.',
-      vitals:[{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'},{k:'PaCO₂',v:'28'},{k:'HR',v:'142'}],
+      scenario:'56-year-old in septic shock, lactate 6.2. ABG: pH 7.18 with PaCO₂ already low at 28. They were breathing 30+ before intubation. On the current settings MV is only 7.2 L/min — and the low PaCO₂ says they were doing much more work than that themselves.',
+      vitals:[{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'},{k:'PaCO₂',v:'28 mmHg'},{k:'HR',v:'142'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:8,pc:15,ps:10,fio2:60,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'rate',val:26,label:'Rate',unit:'bpm'}],
-      quiz:{
-        q:'In metabolic acidosis (PaCO₂ already low), what is the respiratory system\'s role?',
-        choices:['Hyperventilate aggressively to drop PaCO₂ below 20','Maintain low-normal PaCO₂ (28–35) to allow renal HCO₃ recovery','Increase FiO₂ to 100%','Switch to pressure control to reduce work'],
+      diagnose:{
+        q:'pH 7.18 but PaCO₂ is already LOW at 28. What is the vent\'s job here?',
+        choices:[
+          'Normalize the PaCO₂ toward 40 — it\'s too low',
+          'Maintain a HIGH minute ventilation to sustain the respiratory compensation for the metabolic acidosis',
+          'Hyperventilate hard to drive PaCO₂ below 20',
+          'Nothing — add PEEP and leave ventilation alone'
+        ],
         correct:1,
-        exp:'In metabolic acidosis, aggressive hyperventilation to PaCO₂ < 20 is counterproductive — it causes hypokalemia, hypomagnesemia, and rebound acidosis. Maintain PaCO₂ 28–35 to not worsen the pH, then fix the metabolic cause (treat infection, resuscitate). Over-breathing paradoxically worsens outcomes.'
+        exp:'The low PaCO₂ is <strong>compensation</strong> for a severe metabolic (lactic) acidosis. If you let PaCO₂ drift up to 40, the pH crashes. If you over-ventilate below 20, you cause its own harm. The vent must <strong>match the high MV the patient was generating</strong> to hold the compensation while the team treats the sepsis.'
       },
-      unlock:'✓ Sepsis MV optimization complete. Level 2 complete — 6 core clinical scenarios mastered!'
+      goal:{
+        text:'Match the patient\'s compensatory drive — raise <strong>minute ventilation to about 10–13 L/min</strong> to hold PaCO₂ in the high-compensation range (~28–34). Don\'t overshoot below that.',
+        check:function(){ var mv=estMinuteVolume(); return mv>=10 && mv<=13.5; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min'; }
+      },
+      confirm:'✓ Minute ventilation raised to sustain the compensation — the pH holds while the team resuscitates and treats the source. Never normalize PaCO₂ in a compensating metabolic acidosis, and don\'t over-ventilate below the target — both worsen outcomes. Level 2 complete!'
     }
   ],
 
