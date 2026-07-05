@@ -221,6 +221,8 @@ const MODULES = [
   title: "Recognizing Respiratory Failure",
   blurb: "Call it before the patient calls it. Type I vs Type II, the SpO₂/PaO₂ cliff, capnography waveforms, and the pre-arrest signs everyone misses.",
   estMin: 45,
+  practiceScenario: "failure-type",
+  practiceNote: "Name the failure type from the monitor, then treat it — oxygenation vs ventilation.",
 
   lessons: [
     {
@@ -424,6 +426,8 @@ const MODULES = [
   title: "Indications for Ventilatory Support",
   blurb: "Pick the right level of support — first time. CPAP for CHF. BiPAP for COPD. Invasive for failure. The evidence behind each and the contraindications that must not be missed.",
   estMin: 40,
+  practiceScenario: "niv-vs-tube",
+  practiceNote: "Make the indication call on an awake COPD patient — BiPAP trial vs the tube — then set it up.",
 
   lessons: [
     {
@@ -1386,6 +1390,8 @@ const MODULES = [
   title: "Sedation & Analgesia",
   blurb: "If the patient can fight the vent, the vent will lose. Analgesia first. Push-dose pressors ready before you push the induction agent.",
   estMin: 40,
+  practiceScenario: "agitation",
+  practiceNote: "A patient fighting the vent with normal mechanics — recognize when the fix is a drug, not a knob.",
 
   lessons: [
     {

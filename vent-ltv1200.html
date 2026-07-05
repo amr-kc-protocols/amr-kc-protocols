@@ -2282,6 +2282,81 @@ var ACADEMY_SCENARIOS={
       readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  CPAP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
     },
     confirm:'✓ CPAP up, pressure recruiting lung and unloading the heart, oxygen high. Coach the patient to the mask, watch for fatigue or a dropping mental status, and be ready to intubate if they tire — but most flash-edema patients turn the corner on CPAP within minutes.'
+  },
+  'failure-type':{
+    name:'Which Kind of Failure?',
+    badge:'Academy · Recognize & Treat', badgeCls:'scen-badge-2',
+    intro:'Module 2 practice. You\'re called for a transfer of a pneumonia patient who\'s "not doing well." Before you can fix the vent you have to name the problem: which type of respiratory failure are you looking at — and does the fix live in oxygenation or ventilation?',
+    scenario:'72-year-old, lobar pneumonia, intubated. SpO₂ 86% on FiO₂ 40% with PEEP 5. The CO₂ and pH are fine — this is purely an oxygen problem. Dense infiltrate in one lung base.',
+    vitals:[{k:'HR',v:'104'},{k:'SpO₂',v:'86%'},{k:'EtCO₂',v:'40 mmHg'},{k:'FiO₂',v:'40%'}],
+    setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+    diagnose:{
+      q:'Low oxygen, normal CO₂ and pH. Which failure type — and where does the fix live?',
+      choices:[
+        'Type II (hypercapnic) — increase minute ventilation',
+        'Type I (hypoxemic) — fix oxygenation with FiO₂ and PEEP',
+        'Neither — this is a metabolic problem',
+        'Type I — but the fix is a faster respiratory rate'
+      ],
+      correct:1,
+      exp:'Low O₂ with a normal CO₂/pH is <strong>Type I (hypoxemic) failure</strong> — a gas-exchange/shunt problem, not a ventilation problem. Rate and minute ventilation move CO₂, not oxygen. Fix it with <strong>FiO₂ and PEEP</strong>.'
+    },
+    goal:{
+      text:'Treat the oxygenation failure: raise <strong>FiO₂ to ≥ 60%</strong> and add recruiting <strong>PEEP of 8–12</strong>. (Leave rate and volume alone — they\'re not the problem here.)',
+      check:function(){ return vals.fio2.v>=60 && vals.peep.v>=8 && vals.peep.v<=12; },
+      readout:function(){ return 'FiO₂ '+vals.fio2.v+'%  ·  PEEP '+vals.peep.v; }
+    },
+    confirm:'✓ You named it Type I and treated the oxygen: more FiO₂ plus PEEP to recruit lung and cut the shunt. Contrast with Type II (hypercapnic) failure, where the lever is minute ventilation. Recognizing which failure you\'re in tells you which knob to reach for.'
+  },
+  'niv-vs-tube':{
+    name:'Tube or Mask?',
+    badge:'Academy · Indication Call', badgeCls:'scen-badge-3',
+    intro:'Module 3 practice. A COPD exacerbation is failing on the floor and the sending team has you transporting to the ICU. They\'re asking whether to intubate before you leave. The patient is awake, protecting the airway, and hypercapnic. Make the indication call, then set it up.',
+    scenario:'Awake, hypercapnic COPD exacerbation (pH 7.30, PaCO₂ 68), tiring but following commands and protecting the airway. Not yet intubated. This is a "what support is indicated" decision.',
+    vitals:[{k:'HR',v:'110'},{k:'SpO₂',v:'88%'},{k:'RR',v:'28'},{k:'PaCO₂',v:'68 mmHg'}],
+    setup:{mode:'ac',bt:'volume',rate:12,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+    diagnose:{
+      q:'Awake, airway-protecting COPD patient in hypercapnic failure. What is indicated first?',
+      choices:[
+        'Immediate intubation — NIV has no role in COPD',
+        'A trial of NIV / BiPAP — pressure support to offload CO₂ and avoid the tube',
+        'CPAP alone — a single pressure is all they need',
+        'Nasal cannula and recheck a gas in an hour'
+      ],
+      correct:1,
+      exp:'Awake, cooperative, airway-protecting hypercapnic COPD is the <strong>strongest evidence-based indication for NIV/BiPAP</strong> — the pressure-support (IPAP above EPAP) unloads the respiratory muscles and blows off CO₂, avoiding intubation in most. CPAP (one pressure) helps oxygenation but doesn\'t augment ventilation the way BiPAP does.'
+    },
+    goal:{
+      text:'Set up a BiPAP trial: switch to <strong>NPPV mode</strong>, set <strong>pressure support 8–15</strong> (IPAP above EPAP) to blow off CO₂, and a modest <strong>EPAP of 4–8</strong>.',
+      check:function(){ return ventMode==='nppv' && vals.ps.v>=8 && vals.ps.v<=15 && vals.peep.v>=4 && vals.peep.v<=8; },
+      readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  PS(IPAP) '+vals.ps.v+'  ·  EPAP '+vals.peep.v; }
+    },
+    confirm:'✓ BiPAP trial set — pressure support drives CO₂ down and rests the muscles, EPAP holds the airways open. Coach the mask, reassess the gas and mental status in 30–60 minutes, and intubate if they tire or can\'t protect the airway. The right indication call keeps a lot of COPD patients off the ventilator.'
+  },
+  'agitation':{
+    name:'Not Every Fight Is a Knob',
+    badge:'Academy · Sedation & Comfort', badgeCls:'scen-badge-2',
+    intro:'Module 8 practice. Your intubated patient is agitated and "fighting the vent." The reflex is to start turning knobs — but the numbers tell a different story. Read the mechanics before you reach for a setting.',
+    scenario:'Intubated, awake and agitated, pulling at the tube. But the mechanics are clean: I:E is fine, no breath-stacking, SpO₂ 98%, CO₂ normal. The one thing set poorly is a hard trigger sensitivity that makes them work for every breath.',
+    vitals:[{k:'HR',v:'124'},{k:'SpO₂',v:'98%'},{k:'EtCO₂',v:'41 mmHg'},{k:'BP',v:'158/92'}],
+    setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:0.9,peep:5,pc:15,ps:10,fio2:40,sens:8,hipres:40,lowpres:10,lowmv:3,apnea:20},
+    diagnose:{
+      q:'Agitated and bucking, but gas exchange and mechanics are all normal. What is the primary problem?',
+      choices:[
+        'Air-trapping — drop the rate',
+        'Hypoxemia — raise FiO₂',
+        'Pain / agitation — the fix is analgesia & sedation; mechanically, just make the vent easy to trigger',
+        'The tidal volume is too low'
+      ],
+      correct:2,
+      exp:'When a patient fights the vent but the mechanics and gas exchange are <strong>normal</strong>, the answer usually isn\'t another knob — it\'s <strong>analgesia and sedation</strong>. Treat pain first, then sedation. Mechanically, all you owe them is a vent that isn\'t fighting back: an easy trigger and adequate support.'
+    },
+    goal:{
+      text:'Make the vent comfortable while the team addresses analgesia/sedation: set an <strong>easy trigger — Sensitivity 1–3</strong> so a light effort opens the valve.',
+      check:function(){ return vals.sens.v>=1 && vals.sens.v<=3; },
+      readout:function(){ return 'Trigger sensitivity  '+vals.sens.v+' L/min'; }
+    },
+    confirm:'✓ Easy trigger set — now the vent works with the patient, not against them. But the real treatment here is analgesia-first, then sedation, targeted to a light, comfortable level (not deep coma). Not every "fighting the vent" is a ventilator problem — sometimes the best setting change is a medication.'
   }
 };
 
