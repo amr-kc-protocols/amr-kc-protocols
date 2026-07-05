@@ -164,6 +164,26 @@ canvas#pip-canvas{display:none}
 .alarm-adj{width:100%;display:flex;gap:6px}
 .alarm-adj .adj-btn{color:var(--text);background:var(--btn-face);border-color:var(--btn-edge)}
 
+/* ── ACTIVE ALARM BANNER ── */
+.alarm-banner{align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;border-radius:10px;
+  color:#fff;font-weight:800;letter-spacing:0.06em;box-shadow:0 2px 8px rgba(0,0,0,0.25)}
+.alarm-banner.high{background:#d92d20;animation:alarm-flash 0.7s steps(1) infinite}
+.alarm-banner.med{background:#c2410c;animation:alarm-flash 1.4s steps(1) infinite}
+@keyframes alarm-flash{0%,50%{filter:brightness(1)}50.01%,100%{filter:brightness(0.62)}}
+.alarm-banner-ico{font-size:14px;line-height:1}
+.alarm-banner-txt{flex:1;font-size:12px}
+.alarm-silence-count{font-family:var(--mono);font-size:11px;font-weight:700;opacity:0.9}
+.alarm-banner-silence{background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.6);
+  color:#fff;font-weight:800;font-size:10px;letter-spacing:0.06em;padding:6px 10px;border-radius:7px;cursor:pointer}
+.alarm-banner-silence:active{transform:scale(0.96)}
+/* PIP window flashes red while a high alarm sounds */
+.waveform-wrap.alarm-hi{border-color:#d92d20;box-shadow:0 0 0 2px rgba(217,45,32,0.5),0 1px 4px rgba(0,0,0,0.08)}
+/* status-strip badges (leak comp, O2 flush) */
+#leak-comp,#o2-flush-badge{display:none;align-items:center;font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:0.08em;padding:2px 6px;border-radius:5px;margin-left:8px;vertical-align:middle}
+#leak-comp{background:#0c4a6e;color:#7dd3fc}
+#o2-flush-badge{background:#7c2d12;color:#fdba74}
+
 /* ── FUNCTION BUTTONS — LTV lavender w/ indicator bars ── */
 .fn-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:14px}
 .fn-btn{padding:18px 4px 10px;border-radius:10px;border:1.5px solid var(--btn-edge);background:var(--btn-face);
@@ -510,9 +530,20 @@ canvas#pip-canvas{display:none}
   <!-- MISSION BAR -->
   <div class="mission-bar" id="mission-bar"></div>
 
+  <!-- ALARM BANNER -->
+  <div id="alarm-banner" class="alarm-banner" style="display:none">
+    <span class="alarm-banner-ico">▲</span>
+    <span class="alarm-banner-txt">HIGH PRESSURE</span>
+    <span class="alarm-silence-count"></span>
+    <button class="alarm-banner-silence" onclick="alarmSilence();event.stopPropagation()">SILENCE</button>
+  </div>
+
   <!-- LTV DISPLAY STRIP -->
   <div class="waveform-wrap">
-    <div class="press-title">Airway Pressure (cmH₂O)</div>
+    <div class="press-title">Airway Pressure (cmH₂O)
+      <span id="leak-comp" style="display:none">LEAK COMP</span>
+      <span id="o2-flush-badge" style="display:none">100% O₂</span>
+    </div>
     <div class="press-bar" id="press-bar"></div>
     <div class="press-scale"><span>-10</span><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>70</span><span>80</span><span>90</span><span>100</span></div>
     <div class="pip-row">
@@ -605,7 +636,7 @@ canvas#pip-canvas{display:none}
         <div class="knob-val"><div class="knob-val-num" id="kv-rate">12</div><div class="knob-val-unit">bpm</div></div>
         <div class="dim-lock">🔒</div>
       </div>
-      <div class="knob-lbl">BREATH<br>RATE</div>
+      <div class="knob-lbl" id="lbl-rate">BREATH<br>RATE</div>
       <div class="knob-adj">
         <button class="adj-btn" onclick="adj('rate',-1);event.stopPropagation()">−</button>
         <button class="adj-btn" onclick="adj('rate',1);event.stopPropagation()">+</button>
@@ -766,11 +797,11 @@ canvas#pip-canvas{display:none}
   <!-- FUNCTION BUTTONS -->
   <div class="sec-lbl">FUNCTION</div>
   <div class="fn-grid">
-    <div class="fn-btn green" onclick="openDrawer('manual')">MANUAL<br>BREATH</div>
+    <div class="fn-btn green" onclick="manualBreath()">MANUAL<br>BREATH</div>
     <div class="fn-btn blue"  onclick="triggerInspHold()">INSP<br>HOLD</div>
     <div class="fn-btn blue"  onclick="openDrawer('exphold')">EXP<br>HOLD</div>
-    <div class="fn-btn orange" onclick="openDrawer('o2flush')">100%<br>O₂</div>
-    <div class="fn-btn red"   onclick="openDrawer('silence')">ALARM<br>SILENCE</div>
+    <div class="fn-btn orange" onclick="o2Flush()">100%<br>O₂</div>
+    <div class="fn-btn red"   onclick="alarmSilence()">ALARM<br>SILENCE</div>
   </div>
 
 </div></div></div>
@@ -788,25 +819,28 @@ canvas#pip-canvas{display:none}
 var breathType = 'volume';
 var ventMode   = 'ac';  // ac | simv | cpap | nppv
 
+// Ranges mirror the Pulmonetic/CareFusion LTV 1200 control limits.
 var vals = {
-  rate:   {v:12,  min:1,   max:80,  step:1},
-  vt:     {v:500, min:50,  max:2000,step:25},
-  pc:     {v:15,  min:5,   max:55,  step:1},
-  it:     {v:1.0, min:0.3, max:3.0, step:0.1},
-  ps:     {v:10,  min:0,   max:40,  step:1},
-  fio2:   {v:40,  min:21,  max:100, step:5},
-  sens:   {v:3,   min:1,   max:9,   step:1},
-  peep:   {v:0,   min:0,   max:20,  step:1},
-  hipres: {v:40,  min:20,  max:80,  step:5},
-  lowpres:{v:10,  min:0,   max:20,  step:1},
-  lowmv:  {v:3,   min:0,   max:20,  step:1},
-  apnea:  {v:20,  min:10,  max:60,  step:5},
+  rate:   {v:12,  min:1,   max:80,  step:1},    // breaths/min
+  vt:     {v:500, min:50,  max:2000,step:25},   // mL
+  pc:     {v:15,  min:1,   max:99,  step:1},    // cmH₂O above PEEP
+  it:     {v:1.0, min:0.3, max:9.9, step:0.1},  // s (also capped by I:E 4:1)
+  ps:     {v:10,  min:0,   max:60,  step:1},    // cmH₂O above PEEP (0 = OFF)
+  fio2:   {v:40,  min:21,  max:100, step:5},    // %
+  sens:   {v:3,   min:1,   max:9,   step:1},    // L/min flow trigger
+  peep:   {v:0,   min:0,   max:20,  step:1},    // cmH₂O
+  hipres: {v:40,  min:10,  max:100, step:5},    // cmH₂O
+  lowpres:{v:10,  min:0,   max:60,  step:1},    // cmH₂O (0 = OFF)
+  lowmv:  {v:3,   min:0,   max:99,  step:1},    // L/min (0 = OFF)
+  apnea:  {v:20,  min:10,  max:60,  step:5},    // s
 };
 
 // ── ACTIVE CONTROL LOGIC ──────────────────────────────────────
 function isActive(key){
   var bt=breathType, vm=ventMode;
-  if(key==='rate')   return vm!=='cpap' && vm!=='nppv';
+  // Rate is the mandatory rate in A/C & SIMV, and the apnea-backup rate in NPPV.
+  // Pure CPAP is fully spontaneous — no set rate.
+  if(key==='rate')   return vm!=='cpap';
   if(key==='vt')     return bt==='volume' && vm!=='cpap' && vm!=='nppv';
   if(key==='pc')     return bt==='pressure' && vm!=='cpap' && vm!=='nppv';
   if(key==='it')     return vm!=='cpap';
@@ -847,13 +881,17 @@ function updateKnob(key){
   var d=document.getElementById('disp-'+key);
   if(d)   d.textContent=disp;
 }
-// ── RATE ↔ INSP TIME CONSTRAINT ──────────────────────────────
-// Min exp time = 0.5 s  →  max IT = (60/rate) − 0.5
-// Floor at it.min (0.3 s) — at very high rates both constraints can't be met simultaneously
+// ── RATE ↔ INSP TIME CONSTRAINT (LTV 1200) ───────────────────
+// The LTV 1200 will not allow an inspiratory time that drives the I:E ratio
+// past 4:1 (inverse). I:E ≤ 4:1  ⇒  IT ≤ 4·ET, and IT+ET = 60/rate,
+// so max IT = 0.8 × breath period. Absolute IT range on the device is 0.3–9.9 s.
+function maxITForRate(rate){
+  var cycleS = 60 / rate;
+  var raw    = cycleS * 0.8;                 // 4:1 inverse-ratio limit
+  return Math.min(9.9, Math.max(vals.it.min, Math.round(raw * 10) / 10));
+}
 function enforceITLimit(){
-  var cycleS  = 60 / vals.rate.v;
-  var rawMax  = cycleS - 0.5;
-  var maxIT   = Math.round(Math.max(vals.it.min, rawMax) * 10) / 10;
+  var maxIT = maxITForRate(vals.rate.v);
   vals.it.max = maxIT;
   if(vals.it.v > maxIT){
     vals.it.v = maxIT;
@@ -931,6 +969,11 @@ function updateUI(){
     document.getElementById('nppv-ipap').textContent=vals.peep.v+vals.ps.v;
     document.getElementById('nppv-ps').textContent=vals.ps.v;
   }
+  // Rate doubles as the apnea-backup rate in NPPV; leak compensation runs in NPPV.
+  var rateLbl=document.getElementById('lbl-rate');
+  if(rateLbl) rateLbl.innerHTML = isNPPV ? 'APNEA<br>BACKUP' : 'BREATH<br>RATE';
+  var leak=document.getElementById('leak-comp');
+  if(leak) leak.style.display = (ventMode==='nppv'||ventMode==='cpap') ? 'inline-flex' : 'none';
 
   // Dim/undim controls
   ['rate','vt','pc','it','ps','fio2','sens'].forEach(function(k){
@@ -940,6 +983,154 @@ function updateUI(){
     if(l) l.classList.toggle('na',!isActive(k));
   });
 
+}
+
+// ── ALARM ENGINE (LTV 1200) ───────────────────────────────────
+// Live monitoring of peak pressure, low peak/disconnect, and minute volume,
+// with priority-ranked audible tones and a 60-second silence (like the LTV
+// "Silence / Reset" key). Delivered tidal/MV is estimated from the same lung
+// model the waveform uses (static compliance ≈ 20 mL/cmH₂O).
+var SIM_COMPLIANCE=20; // mL/cmH₂O — matches calcPressure/calcPplat
+var alarms={
+  hipres: {active:false, priority:'high', label:'HIGH PRESSURE'},
+  lowpres:{active:false, priority:'high', label:'LOW PRESSURE / DISCONNECT'},
+  lowmv:  {active:false, priority:'med',  label:'LOW MINUTE VOLUME'},
+};
+var alarmActiveKey=null;
+var alarmSilencedUntil=0;   // performance.now() timestamp
+var _alarmTimer=null;
+
+function estMinuteVolume(){
+  // Litres/min delivered, estimated from current mode + settings
+  if(ventMode==='cpap'||ventMode==='nppv'){
+    // Spontaneous patient generates their own tidal (~400 mL) augmented by support
+    var spontRate=15;
+    var tidal=400 + vals.ps.v*SIM_COMPLIANCE;
+    return (tidal*spontRate)/1000;
+  }
+  if(breathType==='volume') return (vals.vt.v*vals.rate.v)/1000;
+  return (vals.pc.v*SIM_COMPLIANCE*vals.rate.v)/1000;      // pressure control estimate
+}
+
+function alarmsSuppressed(){
+  // Don't monitor on the level-select screen
+  var ov=document.getElementById('lvlsel-overlay');
+  if(ov && !ov.classList.contains('hidden')) return true;
+  if(typeof gameLevel!=='undefined' && gameLevel===0) return true;
+  return false;
+}
+
+function evaluateAlarms(){
+  if(alarmsSuppressed()){
+    alarms.hipres.active=alarms.lowpres.active=alarms.lowmv.active=false;
+    updateAlarmState();
+    return;
+  }
+  var n=pressureHistory.length;
+  if(n<6){ updateAlarmState(); return; }
+  // Peak / trough over roughly the last breath
+  var perSamples=Math.min(n, Math.max(30, Math.ceil((60/vals.rate.v)*60)));
+  var start=Math.max(0,n-perSamples), pk=-Infinity, tr=Infinity;
+  for(var i=start;i<n;i++){ var p=pressureHistory[i]; if(p>pk)pk=p; if(p<tr)tr=p; }
+
+  var spont=(ventMode==='cpap'||ventMode==='nppv');
+  // High pressure: peak reached the limit (waveform is pressure-limited at hi)
+  alarms.hipres.active = pk >= (vals.hipres.v-0.5);
+  // Low peak / disconnect: peak never rose to the low-pressure setting.
+  // Suppressed in NPPV/CPAP where mask leak is expected (leak compensation).
+  alarms.lowpres.active = !spont && vals.lowpres.v>0 && pk < vals.lowpres.v;
+  // Low minute volume (0 = OFF)
+  alarms.lowmv.active = vals.lowmv.v>0 && estMinuteVolume() < vals.lowmv.v;
+
+  updateAlarmState();
+}
+
+function highestAlarm(){
+  var order=['hipres','lowpres','lowmv'];
+  for(var i=0;i<order.length;i++) if(alarms[order[i]].active) return order[i];
+  return null;
+}
+
+function updateAlarmState(){
+  var key=highestAlarm();
+  alarmActiveKey=key;
+  var banner=document.getElementById('alarm-banner');
+  var wrap=document.querySelector('.waveform-wrap');
+  if(!banner) return;
+  if(!key){
+    banner.style.display='none';
+    if(wrap) wrap.classList.remove('alarm-hi');
+    alarmSilencedUntil=0;   // clear silence once resolved
+    return;
+  }
+  var now=performance.now();
+  var silenced=now<alarmSilencedUntil;
+  banner.style.display='flex';
+  banner.className='alarm-banner '+(alarms[key].priority==='high'?'high':'med');
+  banner.querySelector('.alarm-banner-txt').textContent=alarms[key].label;
+  banner.querySelector('.alarm-silence-count').textContent=
+    silenced ? ('🔕 '+Math.ceil((alarmSilencedUntil-now)/1000)+'s') : '';
+  if(wrap) wrap.classList.toggle('alarm-hi', alarms[key].priority==='high' && !silenced);
+}
+
+function alarmSilence(){
+  if(alarmActiveKey){
+    alarmSilencedUntil=performance.now()+60000;   // LTV: 60-second silence
+    var ac=getAC(); if(!audioMuted) playNote(880,0.06,ac.currentTime,0.10,'square');
+    updateAlarmState();
+  } else {
+    openDrawer('silence');   // no active alarm → educational info
+  }
+}
+
+// Priority beep patterns (approximating IEC 60601-1-8 urgency)
+function playAlarmBurst(count,freq){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime+0.02;
+  for(var i=0;i<count;i++) playNote(freq,0.10,t+i*0.16,0.16,'square');
+}
+function alarmBeepLoop(){
+  clearTimeout(_alarmTimer);
+  var key=alarmActiveKey;
+  var silenced=performance.now()<alarmSilencedUntil;
+  if(!key || silenced || audioMuted){ _alarmTimer=setTimeout(alarmBeepLoop,400); return; }
+  if(alarms[key].priority==='high'){ playAlarmBurst(5,680); _alarmTimer=setTimeout(alarmBeepLoop,2100); }
+  else { playAlarmBurst(3,540); _alarmTimer=setTimeout(alarmBeepLoop,5000); }
+}
+alarmBeepLoop();
+
+// ── 100% O₂ FLUSH ─────────────────────────────────────────────
+// Overrides FiO₂ to 100% then auto-reverts (LTV ~2 min; compressed to 20 s here
+// so it's observable). Tap again to cancel early.
+var _o2SavedFio2=null, _o2Timer=null;
+function o2Flush(){
+  var badge=document.getElementById('o2-flush-badge');
+  if(_o2Timer){ clearTimeout(_o2Timer); revertO2(); return; } // cancel
+  if(vals.fio2.v>=100){ return; }
+  _o2SavedFio2=vals.fio2.v;
+  vals.fio2.v=100; updateKnob('fio2');
+  if(badge) badge.style.display='inline-flex';
+  var ac=getAC(); if(!audioMuted) playNote(1000,0.08,ac.currentTime,0.10,'square');
+  _o2Timer=setTimeout(revertO2,20000);
+}
+function revertO2(){
+  if(_o2SavedFio2!=null){ vals.fio2.v=_o2SavedFio2; updateKnob('fio2'); _o2SavedFio2=null; }
+  _o2Timer=null;
+  var badge=document.getElementById('o2-flush-badge'); if(badge) badge.style.display='none';
+}
+
+// ── MANUAL BREATH ─────────────────────────────────────────────
+// Delivers one mandatory breath now. Most useful in the spontaneous modes
+// (pre-oxygenation before suction) where it overlays a full mandatory breath
+// on the waveform; in mandatory modes it just confirms with a breath tone.
+var manualBreathActive=false, manualBreathStart=0;
+function manualBreath(){
+  var ac=getAC();
+  if(!audioMuted){ playNote(300,0.14,ac.currentTime,0.13,'sine'); playNote(240,0.18,ac.currentTime+0.14,0.11,'sine'); }
+  var led=document.getElementById('led-patient'); if(led){ led.classList.add('on'); setTimeout(function(){ led.classList.remove('on'); },600); }
+  if(ventMode==='cpap'||ventMode==='nppv'){
+    manualBreathActive=true; manualBreathStart=simTime;
+  }
 }
 
 // ── PRESSURE SIMULATION ───────────────────────────────────────
@@ -997,6 +1188,18 @@ function calcPressure(tMs){
       var fade=(elapsed-3800)/400;
       return inspHoldPplat+(peep-inspHoldPplat)*fade;
     }
+  }
+
+  // Manual mandatory breath overlay (spontaneous modes)
+  if(manualBreathActive){
+    var mEl=tMs-manualBreathStart;         // ms since press
+    var itMs=vals.it.v*1000;
+    var mTarget=peep+vals.pc.v;             // mandatory pressure breath to PC above PEEP
+    if(mEl<0){ manualBreathActive=false; }
+    else if(mEl<itMs*0.15){ return Math.min(hi,peep+(mTarget-peep)*(mEl/(itMs*0.15))); }
+    else if(mEl<itMs){ return Math.min(hi,mTarget); }
+    else if(mEl<itMs+500){ return Math.min(hi,Math.max(peep,mTarget-(mTarget-peep)*((mEl-itMs)/500))); }
+    else { manualBreathActive=false; }
   }
 
   // Spontaneous modes (CPAP / NPPV)
@@ -1242,6 +1445,7 @@ function drawWaveform(){
   }
 }
 
+var _alarmEvalAcc=0;
 function animLoop(ts){
   if(lastTs!==null){
     var dt=Math.min(ts-lastTs,50); // cap at 50ms to handle tab visibility
@@ -1253,6 +1457,9 @@ function animLoop(ts){
     var maxLen=Math.ceil(CANVAS_SECS*60);
     if(pressureHistory.length>maxLen) pressureHistory.shift();
     drawWaveform();
+    // Evaluate alarms ~4×/sec (also refreshes the silence countdown)
+    _alarmEvalAcc+=dt;
+    if(_alarmEvalAcc>=250){ _alarmEvalAcc=0; evaluateAlarms(); }
   }
   lastTs=ts;
   requestAnimationFrame(animLoop);
@@ -1373,9 +1580,9 @@ var CONTROLS={
     avail:[{mode:'All modes',yes:true,note:'Auto-reverts after ~2 min. Verify FiO₂ display returns to set value afterward.'}],
     pearl:'Standard pre-suction protocol. Suction events cause significant desaturation — never skip this step.'
   },
-  silence:{tag:'button',tagCls:'tag-button',title:'Alarm Silence / Reset',range:'Silences ~2 minutes',
-    desc:'Mutes audible alarm while you assess the cause. Visual alarms remain active.',
-    avail:[{mode:'All modes',yes:true,note:'2-minute countdown. Alarm re-sounds if not corrected. Silence → Assess → Correct → Confirm.'}],
+  silence:{tag:'button',tagCls:'tag-button',title:'Alarm Silence / Reset',range:'Silences 60 seconds',
+    desc:'Mutes the audible alarm for 60 seconds while you assess the cause. The visual banner stays up and counts down; if the cause isn\'t corrected, the tone returns.',
+    avail:[{mode:'All modes',yes:true,note:'When an alarm is sounding, tap Silence (here or on the banner) for a 60-second reprieve. Silence → Assess → Correct → Confirm.'}],
     pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
   },
 };
@@ -1433,8 +1640,8 @@ function openDrawer(key){
   var rangeStr=c.range;
   if(key==='it'){
     var cycleS=Math.round(60/vals.rate.v*10)/10;
-    var maxIT=Math.round(Math.max(0.3,cycleS-0.5)*10)/10;
-    rangeStr='0.3 – <strong>'+maxIT+' s</strong> (at '+vals.rate.v+' bpm, cycle='+cycleS+'s, min exp=0.5s)  |  Typical: 0.8–1.2 s';
+    var maxIT=maxITForRate(vals.rate.v);
+    rangeStr='0.3 – <strong>'+maxIT+' s</strong> (at '+vals.rate.v+' bpm, cycle='+cycleS+'s). Capped at I:E 4:1 — the LTV won\'t allow a longer inspiration than 0.8× the breath period.  |  Typical: 0.8–1.2 s';
   }
   html+='<div class="drawer-range">'+rangeStr+'</div>';
   if(inactive){
