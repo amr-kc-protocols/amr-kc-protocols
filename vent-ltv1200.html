@@ -365,6 +365,20 @@ canvas#pip-canvas{display:none}
 .scen-vital-v{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--orange);margin-top:1px}
 .scen-text{font-size:11px;color:var(--sub);line-height:1.5;margin-bottom:8px}
 
+/* Problem-solving goal (new scenario format) */
+.scen-dx{display:flex;align-items:center;gap:6px;background:#eef7ee;border:1px solid var(--green);
+  border-radius:7px;padding:6px 9px;margin-bottom:8px;font-size:10px;color:var(--green);font-weight:600}
+.scen-dx-ico{font-size:12px}
+.scen-goal{background:#eaf1fd;border:1px solid var(--blue);border-radius:8px;padding:8px 10px;
+  margin-bottom:8px;font-size:11px;color:var(--text);line-height:1.5}
+.scen-goal-lbl{font-size:8px;font-weight:700;letter-spacing:0.1em;color:var(--blue);text-transform:uppercase;margin-bottom:3px}
+.scen-goal.done{background:#eafbf1;border-color:var(--green)}
+.scen-goal.done .scen-goal-lbl{color:var(--green)}
+.scen-readout{display:flex;align-items:center;justify-content:center;gap:6px;
+  font-family:var(--mono);font-size:16px;font-weight:700;color:var(--sub);
+  background:var(--panel);border:1.5px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px}
+.scen-readout.hit{color:var(--green);border-color:var(--green);background:#eafbf1}
+
 /* Level-complete card */
 .lc-wrap{text-align:center;padding:10px 0 4px}
 .lc-icon{font-size:26px;margin-bottom:6px}
@@ -1832,7 +1846,16 @@ var STAGE_DEFS=[
 // ── LEVEL SYSTEM ──────────────────────────────────────────────
 var gameLevel=0;     // 0=selecting, 1=tutorial, 2=clinical, 3=advanced
 var scenarioIdx=0;   // which scenario within L2 or L3
+var scenarioDiagnosed=false; // problem-solving format: has the clinician diagnosed the case?
 var _autoTimer=null; // auto-progress countdown handle
+
+// Numeric I:E — returns the E value in "1:E" (expiratory/inspiratory), or null in spontaneous modes
+function ieExpRatio(){
+  if(ventMode==='cpap'||ventMode==='nppv') return null;
+  var cycleMs=60000/vals.rate.v, inspMs=vals.it.v*1000, expMs=cycleMs-inspMs;
+  if(expMs<=0) return 0;
+  return expMs/inspMs;
+}
 
 var SCENARIO_LEVELS={
   2:[
@@ -1882,19 +1905,28 @@ var SCENARIO_LEVELS={
       unlock:'✓ Hi Pres alarm corrected. Set this on every intubation. Next scenario.'
     },
     // ─── L2 S4 ────────────────────────────────────────────────
-    { name:'COPD — Allow Adequate Exhalation',
+    { name:'COPD — Stop the Air-Trapping',
       badge:'L2 · Scenario 4 of 6', badgeCls:'scen-badge-2',
-      scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. Flow-time curve shows expiratory flow hasn\'t returned to zero before the next breath — breath stacking (auto-PEEP). Decrease rate to allow full exhalation.',
-      vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'I:E',v:'1 : 2.3'},{k:'HR',v:'112'}],
+      scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. The flow–time curve shows expiratory flow never returns to zero before the next breath begins, EtCO₂ is climbing, and the patient is beginning to fight the vent.',
+      vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'pH',v:'7.30'},{k:'HR',v:'112'}],
       setup:{mode:'ac',bt:'volume',rate:18,vt:500,it:1.0,peep:0,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
-      targets:[{key:'rate',val:10,label:'Rate',unit:'bpm'}],
-      quiz:{
-        q:'In a patient with COPD on AC mode, which waveform finding confirms breath stacking (auto-PEEP)?',
-        choices:['A spike at the start of the inspiratory pressure waveform','Expiratory flow fails to return to zero before the next breath begins','Irregular tidal volumes breath to breath','Elevated plateau pressure above 30 cmH₂O'],
+      diagnose:{
+        q:'Expiratory flow never returns to baseline before the next breath, and CO₂ is rising. What is the problem?',
+        choices:[
+          'Hypoxemic respiratory failure — needs more PEEP',
+          'Breath stacking / auto-PEEP — not enough time to exhale',
+          'A large leak in the circuit',
+          'Oversedation causing hypoventilation'
+        ],
         correct:1,
-        exp:'<strong>Expiratory flow failing to return to baseline</strong> means the lungs haven\'t fully emptied — trapped gas raises intrinsic PEEP (auto-PEEP). In COPD, target I:E ≥ 1:4 to 1:5. Reducing rate lengthens the expiratory window without changing Vt.'
+        exp:'Gas trapped from incomplete exhalation builds <strong>intrinsic (auto) PEEP</strong>. The fix is to give the lungs more time to empty — lengthen expiration. Adding PEEP or sedating would make it worse.'
       },
-      unlock:'✓ Lower rate → longer expiratory time → no more breath stacking. Next scenario.'
+      goal:{
+        text:'Give the lungs time to empty — lengthen expiration until <strong>I:E is at least 1:4</strong>. Drop the rate, shorten the inspiratory time, or both — your call.',
+        check:function(){ var e=ieExpRatio(); return e!==null && e>=4-0.05; },
+        readout:function(){ var e=ieExpRatio(); return e===null?'I:E  —':'I:E   1 : '+e.toFixed(1); }
+      },
+      confirm:'✓ Exhalation lengthened to I:E ≥ 1:4 — the lungs empty fully and auto-PEEP resolves. In COPD, protect the exhale: lower rate and/or shorter inspiratory time, and accept permissive hypercapnia as long as pH ≥ 7.20. There was no single right number here — several combinations work, as long as the trapping stops.'
     },
 
     // ─── L2 S5: NEW ───────────────────────────────────────────
@@ -2069,6 +2101,9 @@ function checkTarget(t){
 function allTargetsMet(){
   if(gameDone()) return false;
   var task=curTask(); if(!task) return false;
+  // New problem-solving format: completion = diagnosed + physiologic goal reached
+  if(task.goal) return scenarioDiagnosed && task.goal.check();
+  if(!task.targets) return false;
   return task.targets.every(function(t){return checkTarget(t);});
 }
 
@@ -2155,17 +2190,37 @@ function renderMissionCard(){
   });
   vitalsHtml+='</div>';
 
-  var cta2='<button class="mission-cta visible '+(ready2?'ready':'wait')+'" onclick="'+(ready2?'openQuiz()':'')+'">'
-    +(ready2?'✓ SETTINGS CORRECT — ANSWER THE QUESTION':'Adjust settings to match targets above')+'</button>';
-
-  bar.innerHTML='<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
+  var header='<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
     +'<div class="scen-header">'
     +'<div class="mission-stage">'+sc.name+'</div>'
     +'<span class="scen-badge '+sc.badgeCls+'">'+sc.badge+'</span>'
     +'</div>'
     +'<div class="scen-text">'+sc.scenario+'</div>'
-    +vitalsHtml
-    +renderTargetBadges(sc.targets)+cta2;
+    +vitalsHtml;
+
+  // ── NEW PROBLEM-SOLVING FORMAT (Assess → Decide → Act → Confirm) ──
+  if(sc.diagnose && sc.goal){
+    var body;
+    if(!scenarioDiagnosed){
+      body='<button class="mission-cta visible ready" onclick="openDiagnose()">▶ STEP 1 · DIAGNOSE THE PROBLEM</button>';
+    } else {
+      var met=sc.goal.check();
+      body='<div class="scen-dx"><span class="scen-dx-ico">✓</span> Diagnosed — now fix it on the vent</div>'
+        +'<div class="scen-goal'+(met?' done':'')+'"><div class="scen-goal-lbl">🎯 Goal</div>'+sc.goal.text+'</div>'
+        +'<div class="scen-readout'+(met?' hit':'')+'">'+(met?'✓ ':'')+sc.goal.readout()+'</div>'
+        +(met
+           ?'<button class="mission-cta visible ready" onclick="openConfirm()">✓ GOAL REACHED — CONFIRM</button>'
+           :'<button class="mission-cta visible wait">Adjust the vent to reach the goal</button>');
+    }
+    bar.innerHTML=header+body;
+    return;
+  }
+
+  // ── LEGACY TARGET-MATCH FORMAT ──
+  var cta2='<button class="mission-cta visible '+(ready2?'ready':'wait')+'" onclick="'+(ready2?'openQuiz()':'')+'">'
+    +(ready2?'✓ SETTINGS CORRECT — ANSWER THE QUESTION':'Adjust settings to match targets above')+'</button>';
+
+  bar.innerHTML=header+renderTargetBadges(sc.targets)+cta2;
 }
 
 // ── QUIZ ──────────────────────────────────────────────────────
@@ -2187,7 +2242,9 @@ function openQuiz(){
   html+='<div class="quiz-unlock" id="qunlock">'+s.unlock+'</div>';
 
   document.getElementById('quiz-inner').innerHTML=html;
-  document.getElementById('quiz-continue').style.display='none';
+  var cb=document.getElementById('quiz-continue');
+  cb.style.display='none';
+  cb.onclick=function(){ advanceStage(); };   // legacy knowledge-check → advance
   document.getElementById('quiz-overlay').classList.add('open');
 }
 
@@ -2216,6 +2273,61 @@ function submitAnswer(idx){
 
 function closeQuiz(){
   document.getElementById('quiz-overlay').classList.remove('open');
+}
+
+// ── PROBLEM-SOLVING FLOW: DIAGNOSE (Step 1) ───────────────────
+function openDiagnose(){
+  var sc=curScenario(); if(!sc||!sc.diagnose) return;
+  var d=sc.diagnose;
+  var html='<div class="quiz-badge">'+sc.name+' — Step 1: Diagnose</div>';
+  html+='<div class="quiz-q">'+d.q+'</div><div class="quiz-choices">';
+  d.choices.forEach(function(c,i){
+    html+='<button class="quiz-btn" onclick="submitDiagnose('+i+')">'+c+'</button>';
+  });
+  html+='</div><div class="quiz-exp" id="qexp">'+d.exp+'</div>';
+  document.getElementById('quiz-inner').innerHTML=html;
+  var cb=document.getElementById('quiz-continue');
+  cb.style.display='none';
+  document.getElementById('quiz-overlay').classList.add('open');
+}
+function submitDiagnose(idx){
+  var d=curScenario().diagnose;
+  var btns=document.querySelectorAll('.quiz-btn');
+  if(!btns.length||btns[0].classList.contains('disabled')) return;
+  var ok=(idx===d.correct);
+  btns.forEach(function(b,i){
+    b.classList.add('disabled');
+    if(i===d.correct)   b.classList.add('correct');
+    else if(i===idx)    b.classList.add('wrong');
+    else                b.classList.add('reveal');
+  });
+  document.getElementById('qexp').style.display='block';
+  var cb=document.getElementById('quiz-continue');
+  cb.style.display='block';
+  if(ok){
+    scenarioDiagnosed=true; sfxCorrect();
+    cb.textContent='Now fix it on the vent →';
+    cb.onclick=function(){ closeQuiz(); renderMissionCard(); };
+  } else {
+    sfxWrong();
+    cb.textContent='Reconsider — try again';
+    cb.onclick=function(){ openDiagnose(); };
+  }
+}
+
+// ── PROBLEM-SOLVING FLOW: CONFIRM (goal reached) ──────────────
+function openConfirm(){
+  var sc=curScenario(); if(!sc) return;
+  if(!(scenarioDiagnosed && sc.goal && sc.goal.check())) return;
+  var html='<div class="quiz-badge">'+sc.name+' — Solved</div>';
+  html+='<div class="quiz-unlock" style="display:block">'+(sc.confirm||'✓ Goal achieved.')+'</div>';
+  document.getElementById('quiz-inner').innerHTML=html;
+  var cb=document.getElementById('quiz-continue');
+  cb.style.display='block';
+  cb.textContent='Continue →';
+  cb.onclick=function(){ advanceStage(); };
+  sfxCorrect();
+  document.getElementById('quiz-overlay').classList.add('open');
 }
 
 function advanceStage(){
@@ -2326,6 +2438,7 @@ function loadScenario(s){
   keys.forEach(function(k){ if(su[k]!==undefined) vals[k].v=su[k]; });
   enforceITLimit();
   simTime=0; pressureHistory=[];
+  scenarioDiagnosed=false;   // reset problem-solving progress for the new case
   keys.forEach(function(k){ updateKnob(k); });
   updateUI();
 }
