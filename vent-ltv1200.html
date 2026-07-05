@@ -1907,7 +1907,7 @@ var SCENARIO_LEVELS={
     // ─── L2 S1 ────────────────────────────────────────────────
     { name:'The Rising CO₂',
       badge:'L2 · Scenario 1 of 6', badgeCls:'scen-badge-2',
-      intro:'You\'re covering the ICU overnight. The nurse flags a fresh post-op patient whose CO₂ has crept up on the last two blood gases. You pull back the curtain to take a look.',
+      intro:'Interfacility transfer — you\'re moving a fresh post-op patient from a community hospital to the tertiary ICU. During your pre-transport assessment the sending RT mentions the CO₂ has crept up on the last two gases. You get your LTV set before you load.',
       scenario:'45-year-old post-op, sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
       vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'HR',v:'102'}],
       setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -1932,7 +1932,7 @@ var SCENARIO_LEVELS={
     // ─── L2 S2 ────────────────────────────────────────────────
     { name:'Hypoxemia That Won\'t Budge',
       badge:'L2 · Scenario 2 of 6', badgeCls:'scen-badge-2',
-      intro:'Handoff from the day team: an ARDS patient whose oxygen saturation just won\'t come up, even after they cranked the FiO₂ wide open. They\'re hoping you can turn it around.',
+      intro:'The sending ED hands you an ARDS patient for transfer to the tertiary ICU. Their sat just won\'t come up, even on max FiO₂. Before you commit to the road, you need it more stable than this.',
       scenario:'62-year-old with ARDS. SpO₂ is stuck at 85% even on FiO₂ 60%. CXR shows dense bilateral infiltrates. PEEP is currently only 3 cmH₂O. EtCO₂ and pH are acceptable.',
       vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'PEEP',v:'3 cmH₂O'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:400,it:1.0,peep:3,pc:15,ps:10,fio2:60,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -1957,7 +1957,7 @@ var SCENARIO_LEVELS={
     // ─── L2 S3 ────────────────────────────────────────────────
     { name:'The Alarm That Won\'t Stop',
       badge:'L2 · Scenario 3 of 6', badgeCls:'scen-badge-2',
-      intro:'You walk in to a High Pressure alarm shrieking on every single breath. The bedside nurse looks up at you: "It\'s done that since we hooked him up — but he looks completely fine."',
+      intro:'You\'re packaging a freshly intubated patient for transfer. The moment you switch them onto your LTV, the High Pressure alarm shrieks on every breath. The sending nurse shrugs: "It did that on our vent too — but he looks completely fine."',
       scenario:'Freshly intubated adult. The High Pressure alarm is sounding on every single breath — at the exact same pressure each time. Breath sounds are equal bilaterally, the tube is patent, there are no secretions, and the patient looks comfortable. The PIP is a normal 30 cmH₂O.',
       vitals:[{k:'SpO₂',v:'98%'},{k:'PIP',v:'30 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'88'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:25,lowpres:10,lowmv:3,apnea:20},
@@ -1982,7 +1982,7 @@ var SCENARIO_LEVELS={
     // ─── L2 S4 ────────────────────────────────────────────────
     { name:'COPD — Stop the Air-Trapping',
       badge:'L2 · Scenario 4 of 6', badgeCls:'scen-badge-2',
-      intro:'A COPD patient was tubed in the field an hour ago. Now the CO₂ is climbing and he\'s starting to buck the ventilator. The respiratory therapist waves you over to the bedside.',
+      intro:'You\'re fifteen minutes into a transfer with an intubated COPD patient when the CO₂ starts climbing on your inline monitor and he begins bucking your vent. You\'re in the back of a moving truck — this is yours to fix.',
       scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. The flow–time curve shows expiratory flow never returns to zero before the next breath begins, EtCO₂ is climbing, and the patient is beginning to fight the vent.',
       vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'pH',v:'7.30'},{k:'HR',v:'112'}],
       setup:{mode:'ac',bt:'volume',rate:18,vt:500,it:1.0,peep:0,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -2008,7 +2008,7 @@ var SCENARIO_LEVELS={
     // ─── L2 S5: NEW ───────────────────────────────────────────
     { name:'Fighting the Vent',
       badge:'L2 · Scenario 5 of 6', badgeCls:'scen-badge-2',
-      intro:'Recovery calls you: their young post-op patient is awake, agitated, and "fighting the ventilator." The flow alarm keeps going off and the nurse is worried. You head over.',
+      intro:'Loaded and rolling. Your young post-op transfer wakes up, gets agitated, and starts fighting the transport vent. The flow alarm keeps tripping in the back of the truck and the family member riding along is getting nervous.',
       scenario:'28-year-old post-op, awake and air-hungry on AC-VC. Pulling hard at the start of each breath, the flow alarm keeps tripping, and the total rate has climbed to 28. Oxygenation and CO₂ are fine. Inspiratory time is set long at 1.2 s. Sedation is being addressed — but there is also a mechanical fix.',
       vitals:[{k:'SpO₂',v:'97%'},{k:'RR total',v:'28'},{k:'EtCO₂',v:'42 mmHg'},{k:'HR',v:'136'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.2,peep:5,pc:15,ps:8,fio2:40,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
@@ -2033,7 +2033,7 @@ var SCENARIO_LEVELS={
     // ─── L2 S6: NEW ───────────────────────────────────────────
     { name:'The Compensating Septic Patient',
       badge:'L2 · Scenario 6 of 6', badgeCls:'scen-badge-2',
-      intro:'Septic shock, just intubated, lactate through the roof. The blood gas comes back with a frighteningly low pH. The team is resuscitating hard — the ventilator is your piece of this.',
+      intro:'You accept a septic-shock patient for an emergent transfer to a higher level of care. Just intubated, lactate through the roof, and the sending gas shows a frighteningly low pH. Vasopressors are running — the ventilator is your piece of the package.',
       scenario:'56-year-old in septic shock, lactate 6.2. ABG: pH 7.18 with PaCO₂ already low at 28. They were breathing 30+ before intubation. On the current settings MV is only 7.2 L/min — and the low PaCO₂ says they were doing much more work than that themselves.',
       vitals:[{k:'HR',v:'142'},{k:'SpO₂',v:'95%'},{k:'PaCO₂',v:'28 mmHg'},{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:8,pc:15,ps:10,fio2:60,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
@@ -2061,7 +2061,7 @@ var SCENARIO_LEVELS={
     // ─── L3 S1 ────────────────────────────────────────────────
     { name:'The Injurious Tidal Volume',
       badge:'L3 · Scenario 1 of 6', badgeCls:'scen-badge-3',
-      intro:'Handoff on an ARDS patient: "Vent\'s been running since the ED — I never touched the volume." You glance at the plateau pressure and wince. This lung is being hurt with every breath.',
+      intro:'You arrive to transfer an ARDS patient to the tertiary center. "The vent\'s been running since the ED — nobody touched the volume," the nurse says. As you set up your LTV you clock the plateau pressure and wince. This lung is being hurt with every breath.',
       scenario:'32-year-old with ARDS, IBW 70 kg. The vent is delivering Vt 700 mL — that\'s 10 mL/kg — and the plateau pressure is 34 cmH₂O. Oxygenation is borderline. The lungs are small and stiff.',
       vitals:[{k:'HR',v:'110'},{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'Vt now',v:'10 mL/kg'},{k:'FiO₂',v:'60%'}],
       setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
@@ -2092,7 +2092,7 @@ var SCENARIO_LEVELS={
     // ─── L3 S2 ────────────────────────────────────────────────
     { name:'Ready to Come Down',
       badge:'L3 · Scenario 2 of 6', badgeCls:'scen-badge-3',
-      intro:'Day 4. Your patient is awake, following commands, and clearly doing more of the breathing than the vent is. It\'s time to start bringing the support down and let them work toward liberation.',
+      intro:'A long-distance transfer to a rehab-capable facility. Your patient is awake, following commands, and clearly doing more of the breathing than the vent is. Medical control has cleared you to begin easing the support down for the ride.',
       scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support and the RSBI is 62. They\'re fully controlled on AC right now.',
       vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -2117,7 +2117,7 @@ var SCENARIO_LEVELS={
     // ─── L3 S3 ────────────────────────────────────────────────
     { name:'The Swinging Peak Pressure',
       badge:'L3 · Scenario 3 of 6', badgeCls:'scen-badge-3',
-      intro:'Status asthmaticus, just intubated. The peak pressure is bouncing wildly with every breath and you\'re watching for barotrauma. You step in to take control of the airway pressures.',
+      intro:'Mid-transport with an intubated status asthmaticus. The peak pressure is bouncing wildly with every breath and you\'re watching for barotrauma miles from the receiving hospital. You take control of the airway pressures.',
       scenario:'Intubated status asthmaticus. On volume control the peak pressure lurches breath to breath — 32 one breath, 54 the next — as the dynamic obstruction changes. You\'re worried about barotrauma from those spikes. SpO₂ and CO₂ are holding for now.',
       vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'104'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:550,it:0.8,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
@@ -2142,7 +2142,7 @@ var SCENARIO_LEVELS={
     // ─── L3 S4 ────────────────────────────────────────────────
     { name:'Losing the Oxygenation Battle',
       badge:'L3 · Scenario 4 of 6', badgeCls:'scen-badge-3',
-      intro:'Day two of ARDS, and the saturations are sliding despite everything the night team tried. The monitor keeps alarming. This is the oxygenation battle — and right now you\'re losing it.',
+      intro:'You\'re transferring a severe ARDS patient to an ECMO center. Partway there the saturations start sliding despite everything the sending team set. The monitor keeps alarming in the back of the truck — this is the oxygenation battle, and you\'re losing it.',
       scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82% — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
       vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
@@ -2167,7 +2167,7 @@ var SCENARIO_LEVELS={
     // ─── L3 S5: NEW ───────────────────────────────────────────
     { name:'Drowning on Dry Land',
       badge:'L3 · Scenario 5 of 6', badgeCls:'scen-badge-3',
-      intro:'The medics roll in a heart-failure patient soaked in his own lung fluid, gasping on a non-rebreather. He\'s awake and terrified. You have one shot to keep him off the tube.',
+      intro:'A "routine" transfer goes sideways: your heart-failure patient decompensates into flash pulmonary edema en route, soaked in his own lung fluid and gasping on the non-rebreather. He\'s awake and terrified. You have one shot with your transport vent to keep him off the tube before the receiving ED.',
       scenario:'67-year-old, acute decompensated heart failure. Flash pulmonary edema: SpO₂ 78% on a 100% non-rebreather, RR 34, bilateral crackles to the apices, JVD. Awake and protecting the airway — not yet intubated. The team is pushing nitroglycerin and a diuretic.',
       vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'78%'},{k:'RR',v:'34'},{k:'JVD',v:'Present'},{k:'Crackles',v:'Bilateral'}],
       setup:{mode:'cpap',bt:'volume',rate:12,vt:400,it:1.0,peep:8,pc:15,ps:5,fio2:40,sens:5,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -2192,7 +2192,7 @@ var SCENARIO_LEVELS={
     // ─── L3 S6: NEW ───────────────────────────────────────────
     { name:'The Blown Pupil',
       badge:'L3 · Scenario 6 of 6', badgeCls:'scen-badge-3',
-      intro:'Trauma bay. Severe head injury — and the left pupil has just blown. The brain is herniating in front of you and the neurosurgeon is minutes away. You need a bridge from the ventilator, right now.',
+      intro:'You\'re transporting a head-injured trauma patient to the neuro center. Halfway there the left pupil blows — herniation, in the back of your truck, still twelve minutes out. You need a bridge from the ventilator right now to buy this brain time.',
       scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. The neurosurgeon is 6 minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
       vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'99%'},{k:'PaCO₂',v:'42 mmHg'},{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
