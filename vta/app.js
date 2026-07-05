@@ -1914,14 +1914,23 @@ const FINAL_EXAM = {
 const STORAGE_KEY = "vta-pwa-state-v2";
 
 // ---------- ADMIN MODE ----------
-// Add ?admin=1 (or #admin) to the URL to unlock every module and the final
-// exam for review — lets an educator open any quiz, match, scenario, or the
-// final exam without completing prerequisites. Not persisted: drop the
-// parameter and reload to return to the normal gated experience.
+// Unlocks every module and the final exam for review — lets an educator open any
+// quiz, match, scenario, or the final exam without completing prerequisites.
+// Three ways in: the "Admin" button in the footer (password-gated, persists on
+// this device), or the ?admin / #admin URL shortcut. NOTE: this is a soft
+// convenience gate, not real security — the password lives in this client file.
+const ADMIN_PASSWORD = "amrkc-vent";
 const ADMIN = (function () {
-  try { return new URLSearchParams(location.search).has("admin") || /(?:^|[#&])admin\b/.test(location.hash); }
-  catch (e) { return false; }
+  try {
+    if (localStorage.getItem("vta_admin") === "1") return true;
+    return new URLSearchParams(location.search).has("admin") || /(?:^|[#&])admin\b/.test(location.hash);
+  } catch (e) { return false; }
 })();
+function disableAdmin() {
+  if (!confirm("Turn OFF admin mode? Modules will be gated normally again.")) return;
+  try { localStorage.removeItem("vta_admin"); } catch (e) {}
+  location.href = location.pathname;   // also drops any ?admin / #admin
+}
 
 // ---------- SCORE LOGGING (Google Sheets → exportable to Excel) ----------
 // Paste the Web App /exec URL from vta-certifications-AppsScript.gs here to log
@@ -3283,8 +3292,26 @@ function boot() {
     document.body.classList.add("is-admin");
     const badge = document.createElement("div");
     badge.className = "admin-badge";
-    badge.textContent = "ADMIN · all modules unlocked";
+    badge.textContent = "ADMIN · all modules unlocked · tap to exit";
+    badge.title = "Tap to turn off admin mode";
+    badge.addEventListener("click", disableAdmin);
     document.body.appendChild(badge);
+  }
+  // Password-gated admin toggle (footer button) — persists on this device.
+  const adminBtn = document.getElementById("adminButton");
+  if (adminBtn) {
+    adminBtn.textContent = ADMIN ? "Admin ✓" : "Admin";
+    adminBtn.addEventListener("click", () => {
+      if (ADMIN) { disableAdmin(); return; }
+      const pw = prompt("Enter admin password to unlock all modules:");
+      if (pw == null) return;
+      if (pw === ADMIN_PASSWORD) {
+        try { localStorage.setItem("vta_admin", "1"); } catch (e) {}
+        location.reload();
+      } else {
+        alert("Incorrect password.");
+      }
+    });
   }
   document.getElementById("resetButton").addEventListener("click", () => {
     if (Nav.moduleId != null) {
