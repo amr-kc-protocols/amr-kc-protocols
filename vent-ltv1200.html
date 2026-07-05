@@ -365,6 +365,27 @@ canvas#pip-canvas{display:none}
 .scen-vital-v{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--orange);margin-top:1px}
 .scen-text{font-size:11px;color:var(--sub);line-height:1.5;margin-bottom:8px}
 
+/* ── PATIENT MONITOR (LifePak 15 inspired) ── */
+.monitor{background:#05070a;border:2px solid #20242c;border-radius:10px;padding:6px 8px;margin-bottom:8px;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,0.7)}
+.mon-lane{display:flex;align-items:stretch;gap:6px;height:38px;border-bottom:1px solid #12151b}
+.mon-lane:last-of-type{border-bottom:none}
+.mon-wave{flex:1;overflow:hidden;position:relative;min-width:0}
+.mon-wave svg{position:absolute;left:0;top:50%;transform:translateY(-50%);height:30px;width:200%;
+  animation:monSweep linear infinite}
+@keyframes monSweep{from{transform:translate(0,-50%)}to{transform:translate(-50%,-50%)}}
+.mon-val{width:82px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-right:2px}
+.mon-val-lbl{font-family:var(--mono);font-size:7px;letter-spacing:0.1em;opacity:0.75;line-height:1}
+.mon-val-num{font-family:var(--mono);font-weight:700;font-size:22px;line-height:1;margin-top:1px}
+.mon-val-unit{font-family:var(--mono);font-size:7px;opacity:0.7}
+.mon-ecg{color:#39ff5a} .mon-spo2{color:#35d6e6} .mon-co2{color:#f5d312} .mon-nibp{color:#f2f2f2}
+.mon-sub{font-family:var(--mono);font-size:8px;opacity:0.7;margin-top:1px}
+/* discrete clinical data (labs / exam / context) shown as chips under the monitor */
+.mon-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.mon-chip{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:3px 8px;line-height:1.2}
+.mon-chip-k{font-size:7px;color:var(--sub);text-transform:uppercase;letter-spacing:0.06em}
+.mon-chip-v{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--purple-dark)}
+
 /* Problem-solving goal (new scenario format) */
 .scen-dx{display:flex;align-items:center;gap:6px;background:#eef7ee;border:1px solid var(--green);
   border-radius:7px;padding:6px 9px;margin-bottom:8px;font-size:10px;color:var(--green);font-weight:600}
@@ -1887,7 +1908,7 @@ var SCENARIO_LEVELS={
     { name:'Hypoxemia That Won\'t Budge',
       badge:'L2 · Scenario 2 of 6', badgeCls:'scen-badge-2',
       scenario:'62-year-old with ARDS. SpO₂ is stuck at 85% even on FiO₂ 60%. CXR shows dense bilateral infiltrates. PEEP is currently only 3 cmH₂O. EtCO₂ and pH are acceptable.',
-      vitals:[{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'PEEP',v:'3 cmH₂O'}],
+      vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'PEEP',v:'3 cmH₂O'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:400,it:1.0,peep:3,pc:15,ps:10,fio2:60,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Refractory hypoxemia on a high FiO₂ with diffuse infiltrates and PEEP of 3. What will help most?',
@@ -1984,7 +2005,7 @@ var SCENARIO_LEVELS={
     { name:'The Compensating Septic Patient',
       badge:'L2 · Scenario 6 of 6', badgeCls:'scen-badge-2',
       scenario:'56-year-old in septic shock, lactate 6.2. ABG: pH 7.18 with PaCO₂ already low at 28. They were breathing 30+ before intubation. On the current settings MV is only 7.2 L/min — and the low PaCO₂ says they were doing much more work than that themselves.',
-      vitals:[{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'},{k:'PaCO₂',v:'28 mmHg'},{k:'HR',v:'142'}],
+      vitals:[{k:'HR',v:'142'},{k:'SpO₂',v:'95%'},{k:'PaCO₂',v:'28 mmHg'},{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:8,pc:15,ps:10,fio2:60,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'pH 7.18 but PaCO₂ is already LOW at 28. What is the vent\'s job here?',
@@ -2011,7 +2032,7 @@ var SCENARIO_LEVELS={
     { name:'The Injurious Tidal Volume',
       badge:'L3 · Scenario 1 of 6', badgeCls:'scen-badge-3',
       scenario:'32-year-old with ARDS, IBW 70 kg. The vent is delivering Vt 700 mL — that\'s 10 mL/kg — and the plateau pressure is 34 cmH₂O. Oxygenation is borderline. The lungs are small and stiff.',
-      vitals:[{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'Vt now',v:'10 mL/kg'},{k:'FiO₂',v:'60%'}],
+      vitals:[{k:'HR',v:'110'},{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'Vt now',v:'10 mL/kg'},{k:'FiO₂',v:'60%'}],
       setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Vt 10 mL/kg IBW and Pplat 34 in ARDS. What is the priority — and what does it cost you?',
@@ -2041,7 +2062,7 @@ var SCENARIO_LEVELS={
     { name:'Ready to Come Down',
       badge:'L3 · Scenario 2 of 6', badgeCls:'scen-badge-3',
       scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support and the RSBI is 62. They\'re fully controlled on AC right now.',
-      vitals:[{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
+      vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Awake, strong effort, RSBI 62, good gas exchange. What\'s the move?',
@@ -2089,7 +2110,7 @@ var SCENARIO_LEVELS={
     { name:'Losing the Oxygenation Battle',
       badge:'L3 · Scenario 4 of 6', badgeCls:'scen-badge-3',
       scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82% — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
-      vitals:[{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
+      vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Severe, refractory hypoxemia (P/F ≈ 59) already on lung-protective volumes. What\'s the next ventilator move?',
@@ -2113,7 +2134,7 @@ var SCENARIO_LEVELS={
     { name:'Drowning on Dry Land',
       badge:'L3 · Scenario 5 of 6', badgeCls:'scen-badge-3',
       scenario:'67-year-old, acute decompensated heart failure. Flash pulmonary edema: SpO₂ 78% on a 100% non-rebreather, RR 34, bilateral crackles to the apices, JVD. Awake and protecting the airway — not yet intubated. The team is pushing nitroglycerin and a diuretic.',
-      vitals:[{k:'SpO₂',v:'78%'},{k:'RR',v:'34'},{k:'JVD',v:'Present'},{k:'Crackles',v:'Bilateral'}],
+      vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'78%'},{k:'RR',v:'34'},{k:'JVD',v:'Present'},{k:'Crackles',v:'Bilateral'}],
       setup:{mode:'cpap',bt:'volume',rate:12,vt:400,it:1.0,peep:8,pc:15,ps:5,fio2:40,sens:5,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Awake CHF patient, flash edema, failing on a non-rebreather but still protecting the airway. Best initial respiratory support?',
@@ -2137,7 +2158,7 @@ var SCENARIO_LEVELS={
     { name:'The Blown Pupil',
       badge:'L3 · Scenario 6 of 6', badgeCls:'scen-badge-3',
       scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. The neurosurgeon is 6 minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
-      vitals:[{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'},{k:'PaCO₂',v:'42 mmHg'}],
+      vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'99%'},{k:'PaCO₂',v:'42 mmHg'},{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'}],
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Acute herniation, surgeon minutes away. What emergency ventilator maneuver buys time — and what is the trap?',
@@ -2226,6 +2247,69 @@ function renderTargetBadges(targets){
   return tgts+'</div>';
 }
 
+// ── PATIENT MONITOR (LifePak 15 inspired) ─────────────────────
+// Renders the scenario's continuous vitals as a color-coded monitor with
+// animated ECG / pleth / capnography traces; discrete labs & exam findings
+// drop below as clinical-data chips.
+function _monWavePath(type){
+  var d='', x=0, W=240;
+  if(type==='ecg'){            // period 40 — stylized PQRST
+    for(x=0;x<W;x+=40){
+      d+='M'+x+',15 H'+(x+11)+' L'+(x+13)+',12 L'+(x+15)+',15 L'+(x+18)+',15 L'+(x+19)+',5 L'+(x+21)+',26 L'+(x+22.5)+',15 H'+(x+40)+' ';
+    }
+  } else if(type==='pleth'){   // period 40 — pulse with dicrotic notch
+    for(x=0;x<W;x+=40){
+      d+='M'+x+',26 C'+(x+6)+',26 '+(x+8)+',6 '+(x+16)+',7 C'+(x+20)+',7 '+(x+20)+',15 '+(x+24)+',15 C'+(x+30)+',15 '+(x+34)+',26 '+(x+40)+',26 ';
+    }
+  } else {                     // capno — period 60, rectangular plateau
+    for(x=0;x<W;x+=60){
+      d+='M'+x+',26 H'+(x+9)+' L'+(x+12)+',6 L'+(x+35)+',4 L'+(x+38)+',26 H'+(x+60)+' ';
+    }
+  }
+  return d;
+}
+function _monLane(type,color,dur,lbl,num,unit,sub){
+  var svg='<div class="mon-wave"><svg viewBox="0 0 240 30" preserveAspectRatio="none" style="animation-duration:'+dur+'s">'
+    +'<path d="'+_monWavePath(type)+'" fill="none" stroke="'+color+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>';
+  var cls=type==='ecg'?'mon-ecg':(type==='pleth'?'mon-spo2':'mon-co2');
+  return '<div class="mon-lane">'+svg
+    +'<div class="mon-val '+cls+'"><div class="mon-val-lbl">'+lbl+'</div>'
+    +'<div class="mon-val-num">'+num+'</div>'
+    +(sub?'<div class="mon-sub">'+sub+'</div>':'<div class="mon-val-unit">'+unit+'</div>')
+    +'</div></div>';
+}
+function _splitVal(s){
+  var m=String(s).match(/^\s*([<>≈]?\s*[\d.\/–—-]+)\s*(.*)$/);
+  return m?{num:m[1].trim(),unit:m[2].trim()}:{num:String(s),unit:''};
+}
+function renderMonitor(vitals){
+  var slot={}, chips=[];
+  vitals.forEach(function(v){
+    var key=v.k.replace(/₂/g,'2').replace(/\s+/g,' ').trim().toLowerCase();
+    if(key==='hr') slot.hr=v.v;
+    else if(key==='spo2'||key==='sao2') slot.spo2=v.v;
+    else if(key==='etco2'||key==='paco2') slot.co2=v.v;
+    else if(key==='rr'||key==='rr total'||key==='rr actual') slot.rr=v.v;
+    else chips.push(v);
+  });
+  // Render a lane only when that parameter is actually measured (like a real monitor).
+  var lanes='';
+  if(slot.hr)   lanes+=_monLane('ecg','#39ff5a',3.2,'HR',_splitVal(slot.hr).num,'bpm');
+  if(slot.spo2) lanes+=_monLane('pleth','#35d6e6',3.2,'SpO₂',_splitVal(slot.spo2).num,'%');
+  if(slot.co2)  lanes+=_monLane('co2','#f5d312',6.5,'EtCO₂',_splitVal(slot.co2).num,'mmHg',slot.rr?('RR '+_splitVal(slot.rr).num):null);
+  else if(slot.rr) chips.unshift({k:'RR',v:_splitVal(slot.rr).num}); // RR without capno → chip
+  var mon=lanes?('<div class="monitor">'+lanes+'</div>'):'';
+  var chipHtml='';
+  if(chips.length){
+    chipHtml='<div class="mon-chips">';
+    chips.forEach(function(v){
+      chipHtml+='<div class="mon-chip"><div class="mon-chip-k">'+v.k+'</div><div class="mon-chip-v">'+v.v+'</div></div>';
+    });
+    chipHtml+='</div>';
+  }
+  return mon+chipHtml;
+}
+
 // ── MISSION CARD RENDER ───────────────────────────────────────
 function renderMissionCard(){
   var bar=document.getElementById('mission-bar');
@@ -2289,11 +2373,7 @@ function renderMissionCard(){
   if(!sc) return;
   var ready2=allTargetsMet();
 
-  var vitalsHtml='<div class="scen-vitals">';
-  sc.vitals.forEach(function(v){
-    vitalsHtml+='<div class="scen-vital"><div class="scen-vital-k">'+v.k+'</div><div class="scen-vital-v">'+v.v+'</div></div>';
-  });
-  vitalsHtml+='</div>';
+  var vitalsHtml=renderMonitor(sc.vitals);
 
   var header='<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
     +'<div class="scen-header">'
