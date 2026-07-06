@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AMR KC PALS Quiz">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<title>AMR KC PALS 2025 Study Quiz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --navy:#ffffff;--navy2:#f4f6f9;--teal:#173a68;--teal2:#1b63c4;
+  --white:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --vent:#6d28d9;--vent2:#7c3aed;--vent-bg:#f3ecfd;--vent-border:#6d28d9;
+  --correct:#15803d;--correct-bg:#eafbf1;
+  --wrong:#dc2626;--wrong-bg:#fdecec;
+  --warn:#a1590b;--warn-bg:#fef3e2;
+  --surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
+  --mono:'IBM Plex Sans',sans-serif;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:var(--sans);background:var(--surface);color:var(--white);min-height:100vh;line-height:1.5}
+.hidden{display:none!important}
+
+#loading{position:fixed;inset:0;background:var(--surface);display:flex;flex-direction:column;
+align-items:center;justify-content:center;z-index:9999;transition:opacity 0.4s}
+.load-logo{font-family:var(--mono);font-size:38px;font-weight:600;color:var(--vent2);
+letter-spacing:-0.02em;margin-bottom:4px}
+.load-sub{font-size:11px;color:var(--gray);letter-spacing:0.16em;text-transform:uppercase}
+.load-bar{width:180px;height:2px;background:var(--dim);border-radius:2px;margin-top:28px;overflow:hidden}
+.load-fill{height:100%;background:linear-gradient(90deg,var(--vent),var(--vent2));
+animation:fill 1.2s ease-out forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+
+/* HOME */
+.home-hdr{background:var(--navy2);
+border-bottom:2px solid var(--vent);padding:28px 20px;text-align:center}
+.home-badge{font-family:var(--mono);font-size:10px;color:var(--vent2);
+letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px}
+.home-title{font-size:26px;font-weight:700;margin-bottom:4px}
+.home-sub{font-size:13px;color:var(--gray)}
+.home-body{padding:24px 16px 40px}
+.home-intro{font-size:14px;color:var(--white);line-height:1.6;margin-bottom:24px;
+background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.home-intro strong{color:var(--vent2)}
+
+.quiz-card{margin-bottom:16px;border-radius:14px;overflow:hidden;border:2px solid var(--vent-border)}
+.qci{padding:24px;background:linear-gradient(135deg,#f3ecfd,#e9ddfb)}
+.qc-icon{font-size:34px;margin-bottom:10px}
+.qc-level{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--vent2);
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
+.qc-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.qc-desc{font-size:13px;color:var(--gray);line-height:1.5}
+.qc-meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.meta-tag{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:20px;
+background:var(--vent-bg);color:var(--vent2);border:1px solid var(--vent-border)}
+.start-btn{display:block;width:100%;padding:15px;border-radius:8px;border:none;
+font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;font-family:var(--sans);
+background:var(--vent);color:#fff}
+
+.home-links{display:flex;justify-content:center;gap:12px;margin-top:20px}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--gray);text-decoration:none;
+letter-spacing:0.06em;display:inline-flex;align-items:center;gap:4px}
+.back-link:hover{color:var(--teal2)}
+
+/* QUIZ */
+.quiz-hdr{position:sticky;top:0;z-index:50;background:var(--navy);
+border-bottom:1px solid var(--border);padding:12px 16px}
+.quiz-hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.quit-btn{background:var(--dim);border:1px solid var(--border);color:var(--gray);
+font-size:12px;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans)}
+.quiz-hdr-info{flex:1}
+.qlevel{font-family:var(--mono);font-size:9px;font-weight:600;
+letter-spacing:0.1em;text-transform:uppercase;color:var(--vent2)}
+.qcount{font-size:13px;color:var(--gray);margin-top:2px}
+.qscore{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--vent2)}
+.prog{height:4px;background:var(--dim);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width 0.3s;
+background:linear-gradient(90deg,var(--vent),var(--vent2))}
+.q-wrap{padding:20px 16px 32px}
+.q-cat{font-family:var(--mono);font-size:10px;color:var(--vent2);
+letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.q-type{display:inline-block;padding:2px 9px;border-radius:10px;
+font-family:var(--mono);font-size:9px;font-weight:600;margin-bottom:14px;
+background:var(--vent-bg);color:var(--vent);border:1px solid var(--vent-border)}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;margin-bottom:22px;color:var(--white)}
+.opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.opt{padding:15px 16px;border-radius:10px;border:2px solid var(--border);
+background:var(--surface2);font-size:14px;line-height:1.4;
+color:var(--white);text-align:left;font-family:var(--sans);width:100%;cursor:pointer}
+.opt:active{opacity:0.85}
+.opt.correct{border-color:var(--correct)!important;background:var(--correct-bg)!important;color:var(--correct)!important}
+.opt.wrong{border-color:var(--wrong)!important;background:var(--wrong-bg)!important;color:var(--wrong)!important}
+.feedback{border-radius:10px;padding:15px 16px;margin-bottom:20px;border-left:4px solid;line-height:1.6}
+.feedback.correct{background:var(--correct-bg);border-color:var(--correct)}
+.feedback.wrong{background:var(--wrong-bg);border-color:var(--wrong)}
+.fb-hdr{font-size:15px;font-weight:700;margin-bottom:6px}
+.feedback.correct .fb-hdr{color:var(--correct)}
+.feedback.wrong .fb-hdr{color:var(--wrong)}
+.fb-exp{font-size:13px;color:var(--white);line-height:1.6}
+.fb-ref{font-family:var(--mono);font-size:10px;color:var(--vent2);margin-top:8px;letter-spacing:0.04em}
+.next-btn{display:block;width:100%;padding:15px;border-radius:10px;border:none;
+font-size:16px;font-weight:700;cursor:pointer;font-family:var(--sans);
+background:var(--vent);color:#fff;margin-top:8px}
+
+/* RESULTS */
+.res-hdr{background:var(--navy2);
+border-bottom:2px solid var(--vent);padding:28px 20px;text-align:center}
+.res-level{font-family:var(--mono);font-size:10px;color:var(--vent2);
+letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
+.res-title{font-size:20px;font-weight:700;margin-bottom:16px}
+.res-score{font-family:var(--mono);font-size:58px;font-weight:600;line-height:1;color:var(--vent2)}
+.res-denom{font-size:20px;color:var(--gray)}
+.res-pct{font-size:17px;font-weight:600;margin-top:6px;color:var(--vent2)}
+.res-grade{font-size:13px;color:var(--gray);margin-top:4px}
+.res-body{padding:20px 16px 40px}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.bdi{background:var(--surface2);border:1px solid var(--border);
+border-radius:10px;padding:14px;text-align:center}
+.bdi-num{font-family:var(--mono);font-size:26px;font-weight:700;margin-bottom:4px}
+.bdi-num.c{color:var(--correct)}.bdi-num.w{color:var(--wrong)}
+.bdi-label{font-size:11px;color:var(--gray)}
+.sec-label{font-family:var(--mono);font-size:10px;color:var(--gray);
+letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;
+padding-bottom:6px;border-bottom:1px solid var(--border)}
+.cat-row{display:flex;align-items:center;gap:10px;padding:8px 0;
+border-bottom:1px solid var(--border)}
+.cat-name{flex:1;font-size:13px;color:var(--white)}
+.cat-sc{font-family:var(--mono);font-size:12px;color:var(--gray);min-width:36px;text-align:right}
+.cat-bar-wrap{width:72px;height:5px;background:var(--dim);border-radius:3px;overflow:hidden}
+.cat-bar{height:100%;border-radius:3px}
+.missed-item{background:var(--surface2);border:1px solid var(--border);
+border-radius:8px;padding:13px;margin-bottom:8px}
+.missed-q{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--wrong)}
+.missed-ans{font-size:12px;color:var(--correct);margin-bottom:4px}
+.missed-exp{font-size:12px;color:var(--gray);line-height:1.5}
+.actions{display:flex;flex-direction:column;gap:10px}
+.act-btn{padding:14px;border-radius:10px;border:none;font-size:15px;
+font-weight:700;cursor:pointer;font-family:var(--sans)}
+.act-btn.primary{background:var(--vent);color:#fff}
+.act-btn.secondary{background:var(--surface2);color:var(--white);border:1px solid var(--border)}
+.act-btn.ghost{background:var(--navy2);color:var(--white);border:1px solid var(--border)}
+.disclaimer{font-size:11px;color:var(--gray);line-height:1.5;margin-top:18px;text-align:center;padding:0 8px}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-logo">PALS</div>
+  <div class="load-sub">Pediatric Advanced Life Support &middot; AMR KC 2025</div>
+  <div class="load-bar"><div class="load-fill"></div></div>
+</div>
+
+<!-- HOME -->
+<div id="screen-home">
+  <div class="home-hdr">
+    <div class="home-badge">AMR Kansas City &middot; Study Aid &middot; PALS 2025</div>
+    <div class="home-title">PALS 2025 Study Quiz</div>
+    <div class="home-sub">Pediatric Advanced Life Support &middot; AHA-aligned review</div>
+  </div>
+  <div class="home-body">
+    <div class="home-intro">
+      <strong>20 board-style questions</strong> across CPR &amp; BLS quality, bradycardia, tachycardia, cardiac arrest, respiratory &amp; airway, shock, and post-ROSC pharmacology. Answer and you get the <strong>explanation behind every choice</strong> &mdash; right or wrong &mdash; so this doubles as a study guide. Grounded in the AHA <strong>PALS 2020 guidelines and 2024 focused update</strong>.
+    </div>
+    <div class="quiz-card">
+      <div class="qci">
+        <div class="qc-icon">&#x1F9D2;</div>
+        <div class="qc-level">Pediatric Advanced Life Support &middot; AHA 2020 / 2024</div>
+        <div class="qc-title">PALS 2025 Review</div>
+        <div class="qc-desc">High-quality CPR, brady/tachy algorithms, VF/pVT &amp; PEA, defibrillation and drug doses, respiratory failure and airway, shock and fluids, and post-arrest care &mdash; each with a full teaching explanation.</div>
+        <div class="qc-meta">
+          <span class="meta-tag">20 Questions</span>
+          <span class="meta-tag">Explains Every Answer</span>
+          <span class="meta-tag">AHA-Aligned</span>
+          <span class="meta-tag">Study &amp; Test</span>
+        </div>
+        <button class="start-btn" id="btn-start">Start PALS Quiz &rarr;</button>
+      </div>
+    </div>
+    <div class="home-links">
+      <a class="back-link" href="index.html">&#x2190; Field Guide</a>
+    </div>
+    <div class="disclaimer">
+      Educational study aid for authorized AMR Kansas City personnel. Not a substitute for the AHA PALS Provider Course or for direct medical oversight. Follow current AHA guidelines and your local protocols.
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="hidden">
+  <div class="quiz-hdr">
+    <div class="quiz-hdr-top">
+      <button class="quit-btn" id="btn-quit" aria-label="Quit quiz">&#x2715; Quit</button>
+      <div class="quiz-hdr-info">
+        <div class="qlevel" id="qlevel">PALS 2025</div>
+        <div class="qcount" id="qcount">Question 1 of 20</div>
+      </div>
+      <div class="qscore" id="qscore" aria-live="polite">0/0</div>
+    </div>
+    <div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="prog">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="q-wrap" class="q-wrap"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="hidden">
+  <div class="res-hdr">
+    <div class="res-level" id="res-level">PALS 2025</div>
+    <div class="res-title">Quiz Complete</div>
+    <div class="res-score" id="res-score">0<span class="res-denom">/20</span></div>
+    <div class="res-pct" id="res-pct"></div>
+    <div class="res-grade" id="res-grade"></div>
+  </div>
+  <div class="res-body">
+    <div class="breakdown">
+      <div class="bdi"><div class="bdi-num c" id="r-correct">0</div><div class="bdi-label">Correct</div></div>
+      <div class="bdi"><div class="bdi-num w" id="r-wrong">0</div><div class="bdi-label">Incorrect</div></div>
+    </div>
+    <div class="sec-label">PERFORMANCE BY CATEGORY</div>
+    <div id="r-cats" style="margin-bottom:24px"></div>
+    <div id="r-missed-section" style="margin-bottom:28px"></div>
+    <div class="actions">
+      <button class="act-btn primary" id="btn-retry">Retake Quiz &rarr;</button>
+      <button class="act-btn secondary" id="btn-retry-missed" style="display:none">Retry Missed Only</button>
+      <button class="act-btn ghost" id="btn-home">&#x2190; Home</button>
+      <a class="act-btn ghost" href="index.html" style="text-align:center;text-decoration:none;display:block;padding:14px">&#x1F3E0; Back to Field Guide</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var QUIZ = [
+
+  // ── CPR & BLS QUALITY ───────────────────────────────────────────────────
+  {id:1, cat:"CPR & BLS Quality", type:"mc",
+   q:"You are performing CPR on a 6-month-old in cardiac arrest. Which compression depth and rate are correct?",
+   opts:["A. At least 2 inches (5 cm) at 100–120/min","B. About 1.5 inches (4 cm) — roughly one-third the AP chest diameter — at 100–120/min","C. About 1 inch (2.5 cm) at 80–100/min","D. As deep as possible at whatever rate you can sustain"],
+   ans:1,
+   exp:"Infants: compress about 1.5 inches (4 cm), roughly one-third the anterior-posterior chest diameter. Children: about 2 inches (5 cm), also ⅓ AP diameter. Rate is 100–120/min for all ages. Allow full chest recoil between compressions and minimize interruptions — both are core high-quality-CPR metrics.",
+   ref:"AHA PALS 2020"},
+
+  {id:2, cat:"CPR & BLS Quality", type:"mc",
+   q:"Two EMS providers are doing CPR on a 4-year-old in arrest with no advanced airway in place. What is the correct compression-to-ventilation ratio?",
+   opts:["A. 30:2","B. 15:2","C. 5:1","D. Continuous compressions with no ventilations"],
+   ans:1,
+   exp:"For infants and children, a lone rescuer uses 30:2, but two healthcare rescuers use 15:2. Once an advanced airway is placed, switch to continuous compressions with 1 breath every 2–3 seconds. (Adult CPR stays 30:2 regardless of the number of rescuers.)",
+   ref:"AHA PALS 2020"},
+
+  {id:3, cat:"CPR & BLS Quality", type:"mc",
+   q:"An 8-year-old in cardiac arrest now has a supraglottic airway placed and confirmed. How should ventilation be delivered during ongoing CPR?",
+   opts:["A. Pause compressions for 2 breaths every 15 compressions","B. Continuous compressions with 1 breath every 6 seconds (10/min)","C. Continuous compressions with 1 breath every 2–3 seconds (20–30/min)","D. Hyperventilate at about 40/min to maximize oxygenation"],
+   ans:2,
+   exp:"The 2020 update raised the ventilation rate during pediatric CPR with an advanced airway to 1 breath every 2–3 seconds (20–30/min) — higher than the adult rate of 1 every 6 seconds. Deliver just enough volume for visible chest rise; over-ventilation raises intrathoracic pressure and lowers cardiac output.",
+   ref:"AHA PALS 2020 update"},
+
+  // ── BRADYCARDIA ─────────────────────────────────────────────────────────
+  {id:4, cat:"Bradycardia", type:"mc",
+   q:"A 2-year-old has a heart rate of 50 with signs of poor perfusion (mottled skin, weak pulses, altered mental status) that persist despite effective oxygenation and ventilation. What is the next step?",
+   opts:["A. Give atropine and reassess in 2 minutes","B. Begin chest compressions (start CPR)","C. Perform immediate synchronized cardioversion","D. Give a fluid bolus and continue to observe"],
+   ans:1,
+   exp:"In pediatrics, bradycardia with poor perfusion is usually hypoxic in origin — so oxygenate and ventilate first. If the heart rate stays below 60/min with signs of poor perfusion DESPITE adequate oxygenation and ventilation, start CPR. Then give epinephrine 0.01 mg/kg; consider atropine for increased vagal tone or AV block, and consider pacing.",
+   ref:"AHA PALS 2020 — Bradycardia algorithm"},
+
+  {id:5, cat:"Bradycardia", type:"mc",
+   q:"What is the correct IV/IO epinephrine dose for a child in symptomatic bradycardia or cardiac arrest?",
+   opts:["A. 0.1 mg/kg of the 0.1 mg/mL concentration","B. 0.01 mg/kg (0.1 mL/kg of the 0.1 mg/mL concentration), max 1 mg, every 3–5 minutes","C. 1 mg IV every 3–5 minutes regardless of weight","D. 0.5 mg/kg of the 1 mg/mL concentration"],
+   ans:1,
+   exp:"Epinephrine is 0.01 mg/kg IV/IO — that is 0.1 mL/kg of the 0.1 mg/mL (1:10,000) concentration — with a maximum single dose of 1 mg, repeated every 3–5 minutes. Note the concentration carefully: the 1 mg/mL (1:1,000) concentration is used for IM epinephrine, not IV/IO push.",
+   ref:"AHA PALS 2020"},
+
+  {id:6, cat:"Bradycardia", type:"mc",
+   q:"In pediatric bradycardia, when is atropine the preferred first medication rather than epinephrine?",
+   opts:["A. For all pediatric bradycardia","B. When the bradycardia is due to increased vagal tone or primary AV (heart) block","C. For ventricular fibrillation","D. For supraventricular tachycardia"],
+   ans:1,
+   exp:"Epinephrine is first-line for most symptomatic pediatric bradycardia (which is usually hypoxic). Atropine is preferred when the cause is increased vagal tone or primary AV nodal block. Dose: 0.02 mg/kg IV/IO (commonly taught minimum 0.1 mg, maximum single dose 0.5 mg), may repeat once. Fix oxygenation and ventilation regardless of which drug you choose.",
+   ref:"AHA PALS 2020"},
+
+  // ── TACHYCARDIA ─────────────────────────────────────────────────────────
+  {id:7, cat:"Tachycardia", type:"mc",
+   q:"An infant has a heart rate of 240 with a narrow QRS, no visible P waves, and no beat-to-beat rate variability. The history is vague and perfusion is currently adequate. Most likely rhythm and initial management?",
+   opts:["A. Sinus tachycardia — treat the underlying cause","B. SVT — attempt vagal maneuvers, then adenosine if IV/IO access is available","C. Ventricular tachycardia — give amiodarone","D. Sinus tachycardia — perform synchronized cardioversion"],
+   ans:1,
+   exp:"SVT clues: infants usually >220/min (children >180), narrow QRS, absent/abnormal P waves, no rate variability, and abrupt onset with a vague history. Sinus tach has a findable cause, visible P waves, and beat-to-beat variability. Stable SVT: vagal maneuvers (ice/cold to the face in infants), then adenosine.",
+   ref:"AHA PALS 2020 — Tachycardia algorithm"},
+
+  {id:8, cat:"Tachycardia", type:"mc",
+   q:"You have a child in stable SVT with IV access. What is the correct first dose of adenosine and how is it given?",
+   opts:["A. 0.1 mg/kg rapid IV push (max 6 mg) followed immediately by a rapid saline flush","B. 0.2 mg/kg slow IV push over 2 minutes","C. A fixed 6 mg dose for all children","D. 0.5 mg/kg IV over 5 minutes"],
+   ans:0,
+   exp:"Adenosine first dose is 0.1 mg/kg (max 6 mg), given as a rapid IV/IO push through the most proximal (largest) vein followed by an immediate rapid saline flush — its half-life is only seconds. If it fails, the second dose is 0.2 mg/kg (max 12 mg). Adenosine will not convert atrial flutter or VT but can help unmask them.",
+   ref:"AHA PALS 2020"},
+
+  {id:9, cat:"Tachycardia", type:"mc",
+   q:"A child with SVT has become hypotensive, mottled, and lethargic. IV/IO access is not yet established. What is the correct action?",
+   opts:["A. Keep attempting IV access and give adenosine when ready","B. Perform synchronized cardioversion at 0.5–1 J/kg, increasing to 2 J/kg if needed","C. Defibrillate (unsynchronized) at 2 J/kg","D. Continue vagal maneuvers only"],
+   ans:1,
+   exp:"Unstable SVT (or VT) WITH a pulse is treated with SYNCHRONIZED cardioversion — start at 0.5–1 J/kg and increase to 2 J/kg if ineffective. If IV/IO is already in place, a dose of adenosine may be tried as long as it doesn't delay cardioversion. Unsynchronized defibrillation is reserved for PULSELESS VF/pVT.",
+   ref:"AHA PALS 2020"},
+
+  // ── CARDIAC ARREST ──────────────────────────────────────────────────────
+  {id:10, cat:"Cardiac Arrest", type:"mc",
+   q:"A child is in ventricular fibrillation. What are the correct first and subsequent defibrillation energy doses?",
+   opts:["A. 1 J/kg first, then 2 J/kg","B. 2 J/kg first, 4 J/kg second, then ≥4 J/kg (not to exceed 10 J/kg or the adult dose)","C. 4 J/kg for every shock","D. A fixed 200 J for every shock"],
+   ans:1,
+   exp:"Pediatric defibrillation: first shock 2 J/kg, second 4 J/kg, and subsequent shocks at least 4 J/kg — not to exceed 10 J/kg or the adult dose. Resume high-quality CPR immediately after each shock; don't pause to recheck the rhythm or pulse right after defibrillating.",
+   ref:"AHA PALS 2020"},
+
+  {id:11, cat:"Cardiac Arrest", type:"mc",
+   q:"After the third shock and a dose of epinephrine, a child remains in VF. Which antiarrhythmic and dose is appropriate?",
+   opts:["A. Adenosine 0.1 mg/kg IV push","B. Amiodarone 5 mg/kg IV/IO bolus (may repeat up to 2 more times) OR lidocaine 1 mg/kg","C. Atropine 0.02 mg/kg IV","D. Routine magnesium 50 mg/kg for all refractory VF"],
+   ans:1,
+   exp:"For shock-refractory VF/pulseless VT, give amiodarone 5 mg/kg IV/IO bolus (may repeat up to 2 times, max ~15 mg/kg) OR lidocaine 1 mg/kg bolus. Magnesium (25–50 mg/kg, max 2 g) is reserved for torsades de pointes or documented hypomagnesemia — not routine VF. Continue the shock–CPR–drug cycle.",
+   ref:"AHA PALS 2020"},
+
+  {id:12, cat:"Cardiac Arrest", type:"mc",
+   q:"A 3-year-old is in PEA. High-quality CPR is underway and IO access is established. When should the first dose of epinephrine be given?",
+   opts:["A. Only after 3 full rounds of CPR","B. As soon as feasible — ideally within the first 5 minutes","C. Only after a defibrillation attempt","D. Epinephrine is not indicated in PEA"],
+   ans:1,
+   exp:"For a non-shockable arrest (asystole/PEA), give epinephrine as EARLY as possible — evidence links earlier epinephrine to better survival. Dose 0.01 mg/kg every 3–5 minutes. Meanwhile keep compressions high-quality and aggressively search for and treat reversible causes.",
+   ref:"AHA PALS 2020 / 2024 update"},
+
+  {id:13, cat:"Cardiac Arrest", type:"mc",
+   q:"Which framework guides the search for reversible causes in pediatric cardiac arrest, and which two are the MOST common in children?",
+   opts:["A. SAMPLE — allergies and medications","B. The H's and T's — with Hypoxia and Hypovolemia being the most common pediatric causes","C. OPQRST — provocation and radiation","D. AVPU — alert and unresponsive"],
+   ans:1,
+   exp:"The H's and T's: Hypoxia, Hypovolemia, Hydrogen ion (acidosis), Hypo-/Hyperkalemia, Hypoglycemia, Hypothermia; Tension pneumothorax, Tamponade, Toxins, Thrombosis (pulmonary or coronary). In children, Hypoxia and Hypovolemia dominate — which is why airway/ventilation and volume are addressed early and often.",
+   ref:"AHA PALS 2020"},
+
+  // ── RESPIRATORY & AIRWAY ────────────────────────────────────────────────
+  {id:14, cat:"Respiratory & Airway", type:"mc",
+   q:"A toddler has retractions, nasal flaring, and a RR of 60 with SpO2 91% on room air, but she is alert and maintaining her own airway. How is this best classified, and what is the priority?",
+   opts:["A. Respiratory failure — intubate immediately","B. Respiratory distress — support with oxygen and positioning, and reassess for progression to failure","C. Shock — give a fluid bolus","D. Normal work of breathing for her age"],
+   ans:1,
+   exp:"Increased work of breathing with maintained oxygenation and mental status is respiratory DISTRESS. Respiratory FAILURE (inadequate oxygenation/ventilation, altered mental status, bradypnea or apnea) requires assisted ventilation. Because most pediatric arrests are the end result of untreated respiratory failure or shock, aggressively supporting distress early is what prevents arrest.",
+   ref:"AHA PALS 2020"},
+
+  {id:15, cat:"Respiratory & Airway", type:"mc",
+   q:"You are selecting a cuffed endotracheal tube for a 4-year-old. What is the estimated internal-diameter formula?",
+   opts:["A. (age in years / 4) + 4","B. (age in years / 4) + 3.5","C. age in years + 4","D. (age in years / 2) + 4"],
+   ans:1,
+   exp:"Cuffed ETT internal diameter (mm) ≈ (age/4) + 3.5; uncuffed ≈ (age/4) + 4. Cuffed tubes are now preferred in most pediatric settings (better seal, fewer exchanges) — just use appropriate cuff-inflation pressure. Always confirm placement with continuous waveform capnography.",
+   ref:"AHA PALS 2020"},
+
+  {id:16, cat:"Respiratory & Airway", type:"mc",
+   q:"During bag-mask ventilation of an apneic child who has a pulse, your partner is squeezing the bag about 40 times per minute. Why is this harmful, and what is correct?",
+   opts:["A. It's fine — faster ventilation is always safer","B. Over-ventilation raises intrathoracic pressure (cutting venous return and cardiac output) and causes gastric insufflation; deliver 1 breath every 2–3 seconds (20–30/min)","C. Slow to 1 breath every 10 seconds","D. Only ventilate when the SpO2 falls below 80%"],
+   ans:1,
+   exp:"Hyperventilation increases intrathoracic pressure — reducing venous return, cardiac output, and cerebral blood flow — and inflates the stomach, raising aspiration risk. For an infant or child with a pulse, give 1 breath every 2–3 seconds (20–30/min), each just enough for visible chest rise. Watch the rate deliberately; it's easy to over-bag under stress.",
+   ref:"AHA PALS 2020 update"},
+
+  // ── SHOCK & FLUIDS ──────────────────────────────────────────────────────
+  {id:17, cat:"Shock & Fluids", type:"mc",
+   q:"A 10 kg child is in compensated hypovolemic shock (tachycardia, delayed capillary refill, normal blood pressure). What is the appropriate initial IV/IO fluid?",
+   opts:["A. D5W 20 mL/kg wide open","B. Isotonic crystalloid 10–20 mL/kg over 5–20 minutes, then reassess (lungs, liver size, work of breathing)","C. 60 mL/kg as fast as possible without reassessing","D. Packed red cells before any crystalloid"],
+   ans:1,
+   exp:"Give an isotonic crystalloid (normal saline or LR) 10–20 mL/kg over 5–20 minutes and REASSESS after each bolus. Septic shock may require repeated boluses (up to 40–60 mL/kg) with frequent reassessment. Between boluses, check for new hepatomegaly, rales, or increasing work of breathing — signs you're overshooting.",
+   ref:"AHA PALS 2020"},
+
+  {id:18, cat:"Shock & Fluids", type:"mc",
+   q:"A child with myocarditis presents in shock with hepatomegaly, rales, and a gallop rhythm. How should fluid resuscitation differ from ordinary hypovolemic shock?",
+   opts:["A. Use the same 20 mL/kg rapid boluses","B. Give smaller aliquots (5–10 mL/kg) slowly with careful reassessment, and consider early inotropic support and expert consult","C. Withhold all fluids and all oxygen","D. Give 60 mL/kg, then start a vasopressor"],
+   ans:1,
+   exp:"In cardiogenic shock (myocarditis, cardiomyopathy), large rapid boluses overload a failing heart and worsen pulmonary edema. Give smaller aliquots (5–10 mL/kg) slowly, reassess frequently for worsening respiratory status and hepatomegaly, and start inotropic/vasoactive support early with expert consultation. The same caution applies in DKA.",
+   ref:"AHA PALS 2020"},
+
+  // ── POST-ROSC & PHARMACOLOGY ────────────────────────────────────────────
+  {id:19, cat:"Post-ROSC & Pharmacology", type:"mc",
+   q:"After return of spontaneous circulation in a child, the SpO2 reads 100% on 100% FiO2. What should you do?",
+   opts:["A. Keep FiO2 at 100% to guarantee maximum oxygen delivery","B. Titrate FiO2 down to a target SpO2 of 94–99%, avoiding both hyperoxia and hypoxemia","C. Reduce FiO2 until the SpO2 falls to about 85%","D. Deliberately hyperventilate to a low CO2"],
+   ans:1,
+   exp:"Post-ROSC, titrate oxygen to an SpO2 of 94–99% — hyperoxia generates harmful free radicals, while hypoxemia is also damaging. Maintain age-appropriate normocapnia (avoid routine hyperventilation), support blood pressure (avoid hypotension), manage temperature (avoid fever / provide targeted temperature management), treat seizures, and monitor glucose.",
+   ref:"AHA PALS 2020 — Post-cardiac-arrest care"},
+
+  {id:20, cat:"Post-ROSC & Pharmacology", type:"mc",
+   q:"A seizing 20 kg child has a point-of-care glucose of 38 mg/dL. What is the correct dextrose dosing?",
+   opts:["A. D50 1 mL/kg IV push","B. 0.5–1 g/kg of dextrose — e.g., D10 5–10 mL/kg or D25 2–4 mL/kg","C. Oral glucose gel only","D. No treatment — 38 mg/dL is acceptable in children"],
+   ans:1,
+   exp:"Treat symptomatic pediatric hypoglycemia with 0.5–1 g/kg of dextrose: D10 at 5–10 mL/kg, or D25 at 2–4 mL/kg. Avoid D50 in young children — it is hyperosmolar and can damage veins. Recheck the glucose after treatment and look for an underlying cause. Hypoglycemia is one of the reversible 'H's' in arrest.",
+   ref:"AHA PALS 2020"}
+
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+var S = { current:0, score:0, questions:[], history:[], missedIds:[] };
+
+function showScreen(name) {
+  ['home','quiz','results'].forEach(function(s) {
+    var el = document.getElementById('screen-' + s);
+    if (el) el.classList[s === name ? 'remove' : 'add']('hidden');
+  });
+  window.scrollTo(0, 0);
+}
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function startQuiz(missedOnly) {
+  S.current = 0; S.score = 0; S.history = [];
+  if (missedOnly && S.missedIds.length) {
+    var pool = [];
+    for (var k = 0; k < QUIZ.length; k++) {
+      if (S.missedIds.indexOf(QUIZ[k].id) >= 0) pool.push(QUIZ[k]);
+    }
+    S.questions = shuffle(pool);
+    document.getElementById('qlevel').textContent = 'PALS 2025 — MISSED ONLY';
+  } else {
+    S.questions = shuffle(QUIZ);
+    document.getElementById('qlevel').textContent = 'PALS 2025';
+  }
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  var q = S.questions[S.current];
+  var total = S.questions.length;
+  var pct = Math.round((S.current / total) * 100);
+  var pf = document.getElementById('prog-fill');
+  pf.style.width = pct + '%';
+  document.getElementById('prog').setAttribute('aria-valuenow', pct);
+  document.getElementById('qcount').textContent = 'Question ' + (S.current + 1) + ' of ' + total;
+  document.getElementById('qscore').textContent = S.score + '/' + S.current;
+  var typeBadge = '<span class="q-type">SCENARIO &mdash; MULTIPLE CHOICE</span>';
+  var optsHtml = '<div class="opts" id="opts-container">';
+  for (var i = 0; i < q.opts.length; i++) {
+    optsHtml += '<button class="opt" id="opt-' + i + '" data-idx="' + i + '">' + q.opts[i] + '</button>';
+  }
+  optsHtml += '</div>';
+  document.getElementById('q-wrap').innerHTML =
+    '<div class="q-cat">' + q.cat + '</div>' +
+    typeBadge +
+    '<div class="q-text">' + q.q + '</div>' +
+    optsHtml +
+    '<div id="feedback-area"></div>';
+  for (var j = 0; j < q.opts.length; j++) {
+    (function(idx) {
+      var btn = document.getElementById('opt-' + idx);
+      if (btn) btn.onclick = function() { handleAnswer(idx); };
+    })(j);
+  }
+}
+
+function handleAnswer(selectedIdx) {
+  var q = S.questions[S.current];
+  var correct = selectedIdx === q.ans;
+  if (correct) S.score++;
+  S.history.push({ id:q.id, correct:correct, cat:q.cat, q:q.q, correctOpt:q.opts[q.ans], exp:q.exp });
+  document.getElementById('qscore').textContent = S.score + '/' + (S.current + 1);
+  for (var i = 0; i < q.opts.length; i++) {
+    var btn = document.getElementById('opt-' + i);
+    if (!btn) continue;
+    btn.onclick = null; btn.style.cursor = 'default';
+    if (i === q.ans) btn.classList.add('correct');
+    else if (i === selectedIdx && !correct) btn.classList.add('wrong');
+  }
+  var fbArea = document.getElementById('feedback-area');
+  var fbClass = correct ? 'correct' : 'wrong';
+  var fbHeader = correct ? '&#x2705; Correct!' : '&#x274C; Incorrect';
+  var isLast = S.current >= S.questions.length - 1;
+  fbArea.innerHTML =
+    '<div class="feedback ' + fbClass + '">' +
+    '<div class="fb-hdr">' + fbHeader + '</div>' +
+    '<div class="fb-exp">' + q.exp + '</div>' +
+    '<div class="fb-ref">&#x1F4D6; Ref: ' + q.ref + '</div>' +
+    '</div>' +
+    '<button class="next-btn" id="btn-next">' + (isLast ? 'See Results' : 'Next Question &#x2192;') + '</button>';
+  document.getElementById('btn-next').onclick = function() {
+    S.current++;
+    if (S.current >= S.questions.length) showResults();
+    else { renderQuestion(); window.scrollTo(0,0); }
+  };
+  setTimeout(function() {
+    var fb = document.getElementById('feedback-area');
+    if (fb) fb.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 100);
+}
+
+function showResults() {
+  var total = S.questions.length;
+  var pct = Math.round((S.score / total) * 100);
+  var grade = pct >= 90 ? '&#x1F3C6; Excellent — strong PALS readiness' :
+              pct >= 80 ? '&#x1F44D; Good — review the missed items and you\'re there' :
+              pct >= 70 ? '&#x26A0;&#xFE0F; Borderline — revisit the algorithms and drug doses' :
+                          '&#x274C; Keep studying — work through the explanations and retry';
+  document.getElementById('res-level').textContent = 'PALS 2025' + (S.missedIds.length && S.questions.length < QUIZ.length ? ' — MISSED ONLY' : '');
+  document.getElementById('res-score').innerHTML = S.score + '<span class="res-denom">/' + total + '</span>';
+  document.getElementById('res-pct').textContent = pct + '%';
+  document.getElementById('res-grade').innerHTML = grade;
+  document.getElementById('r-correct').textContent = S.score;
+  document.getElementById('r-wrong').textContent = total - S.score;
+  var cats = {};
+  for (var i = 0; i < S.history.length; i++) {
+    var h = S.history[i];
+    if (!cats[h.cat]) cats[h.cat] = { t:0, c:0 };
+    cats[h.cat].t++;
+    if (h.correct) cats[h.cat].c++;
+  }
+  var catKeys = Object.keys(cats).sort();
+  var catHtml = '';
+  for (var k = 0; k < catKeys.length; k++) {
+    var cat = catKeys[k];
+    var d = cats[cat];
+    var p = Math.round((d.c / d.t) * 100);
+    var color = p >= 80 ? 'var(--correct)' : p >= 60 ? 'var(--warn)' : 'var(--wrong)';
+    catHtml += '<div class="cat-row"><div class="cat-name">' + cat + '</div>' +
+      '<div class="cat-sc">' + d.c + '/' + d.t + '</div>' +
+      '<div class="cat-bar-wrap"><div class="cat-bar" style="width:' + p + '%;background:' + color + '"></div></div></div>';
+  }
+  document.getElementById('r-cats').innerHTML = catHtml;
+  var missed = [];
+  for (var m = 0; m < S.history.length; m++) {
+    if (!S.history[m].correct) missed.push(S.history[m]);
+  }
+  S.missedIds = [];
+  for (var n = 0; n < missed.length; n++) S.missedIds.push(missed[n].id);
+  document.getElementById('btn-retry-missed').style.display = missed.length ? 'block' : 'none';
+  if (missed.length === 0) {
+    document.getElementById('r-missed-section').innerHTML =
+      '<div style="text-align:center;padding:20px;color:var(--correct);font-weight:600">&#x1F389; Perfect score — excellent PALS knowledge!</div>';
+  } else {
+    var mHtml = '<div class="sec-label">MISSED QUESTIONS (' + missed.length + ')</div>';
+    for (var x = 0; x < missed.length; x++) {
+      var ms = missed[x];
+      mHtml += '<div class="missed-item">' +
+        '<div class="missed-q">' + ms.q.substring(0,120) + (ms.q.length > 120 ? '…' : '') + '</div>' +
+        '<div class="missed-ans">&#x2705; ' + ms.correctOpt + '</div>' +
+        '<div class="missed-exp">' + ms.exp.substring(0,200) + (ms.exp.length > 200 ? '…' : '') + '</div>' +
+        '</div>';
+    }
+    document.getElementById('r-missed-section').innerHTML = mHtml;
+  }
+  showScreen('results');
+}
+
+document.getElementById('btn-start').onclick = function() { startQuiz(false); };
+document.getElementById('btn-quit').onclick = function() {
+  if (confirm('Quit quiz? Your progress will be lost.')) showScreen('home');
+};
+document.getElementById('btn-retry').onclick = function() { startQuiz(false); };
+document.getElementById('btn-retry-missed').onclick = function() { startQuiz(true); };
+document.getElementById('btn-home').onclick = function() { showScreen('home'); };
+
+window.onload = function() {
+  setTimeout(function() {
+    var l = document.getElementById('loading');
+    l.style.opacity = '0';
+    setTimeout(function() { l.style.display = 'none'; showScreen('home'); }, 400);
+  }, 900);
+};
+</script>
+</body>
+</html>
