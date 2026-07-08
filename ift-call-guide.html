@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AMR KC Calls">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-193.png">
+<title>IFT Call Guide &mdash; AMR KC</title>
+<meta name="description" content="How-to guide for AMR Kansas City interfacility transports — logistics, monitoring, and documentation for cardiac, neuro, medical, and accompanied specialty call types.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#ffffff;--surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
+  --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --danger:#dc2626;--danger-bg:#fdecec;--warn:#a1590b;--warn-bg:#fef3e2;--info-bg:#eaf4fc;
+  --emt:#15803d;--emt-bg:#eafbf1;--aemt:#1d4ed8;--aemt-bg:#eaf1fd;--pm:#6d28d9;--pm-bg:#f3ecfd;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg)}
+body{font-family:var(--sans);color:var(--white);min-height:100vh;line-height:1.5;padding-bottom:40px}
+
+.backlink{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;
+letter-spacing:0.08em;text-transform:uppercase;color:var(--teal2);text-decoration:none;padding:14px 16px 0}
+.backlink:active{opacity:0.6}
+
+#hdr{background:var(--bg);border-bottom:1px solid var(--border);padding:2px 16px 12px;position:sticky;top:0;z-index:50}
+.hdr-title{font-size:20px;font-weight:700;margin-top:6px}
+.hdr-sub{font-size:12px;color:var(--gray);margin-top:3px;line-height:1.5}
+.sw{margin-top:12px;position:relative}
+#srch{width:100%;height:42px;background:var(--dim);border:1.5px solid var(--border);border-radius:8px;
+color:var(--white);font-family:var(--sans);font-size:15px;padding:0 38px 0 36px;outline:none;-webkit-appearance:none;transition:border-color 0.15s}
+#srch:focus{border-color:var(--teal)}
+#srch::placeholder{color:var(--gray)}
+.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:15px;pointer-events:none}
+#sc{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gray);font-size:16px;cursor:pointer;display:none;line-height:1;padding:6px}
+
+.tabs{display:flex;gap:6px;padding:10px 16px 0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);
+background:var(--dim);color:var(--gray);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.tab-btn.on{border-color:var(--teal);color:#fff;background:var(--teal)}
+
+#main{padding:14px 0 20px}
+.pane{display:none}
+.pane.on{display:block}
+
+.sec-lbl{padding:6px 16px 8px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.12em;color:var(--teal);text-transform:uppercase}
+
+/* How-To step cards */
+.step-card{margin:0 12px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.step-card-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.step-card-ico{width:30px;height:30px;border-radius:8px;background:var(--dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--teal2)}
+.step-card-title{font-size:15px;font-weight:700}
+.chk{list-style:none}
+.chk li{position:relative;padding:6px 0 6px 24px;font-size:13.5px;line-height:1.5;border-bottom:1px solid var(--border)}
+.chk li:last-child{border-bottom:none}
+.chk li::before{content:'';position:absolute;left:2px;top:12px;width:9px;height:9px;border:1.5px solid var(--teal2);border-radius:3px}
+.chk li b{color:var(--white);font-weight:600}
+.callout{margin:0 12px 10px;border-left:3px solid var(--warn);background:var(--warn-bg);border-radius:0 10px 10px 0;padding:12px 14px}
+.callout.danger{border-color:var(--danger);background:var(--danger-bg)}
+.callout.info{border-color:var(--teal2);background:var(--info-bg)}
+.callout-t{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:5px;color:var(--warn)}
+.callout.danger .callout-t{color:var(--danger)}
+.callout.info .callout-t{color:var(--teal2)}
+.callout-b{font-size:13px;line-height:1.6;color:var(--white)}
+.jumplink{display:inline-flex;align-items:center;gap:5px;color:var(--teal2);text-decoration:none;font-weight:600}
+
+/* Responsibility split */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.split-col{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 11px}
+.split-h{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.split-col.amr .split-h{color:var(--teal2)}
+.split-col.team .split-h{color:var(--pm)}
+.split-col ul{list-style:none}
+.split-col li{font-size:11.5px;line-height:1.4;padding:4px 0;color:var(--white)}
+
+/* Call-type list */
+.cat-block{margin-bottom:6px}
+.call{margin:0 12px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.call-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.call-name{flex:1;font-size:14px;font-weight:600;line-height:1.3}
+.badge{flex-shrink:0;padding:3px 8px;border-radius:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:0.04em}
+.badge.als{background:var(--pm-bg);color:var(--pm);border:1px solid var(--pm)}
+.badge.bls{background:var(--emt-bg);color:var(--emt);border:1px solid var(--emt)}
+.badge.both{background:var(--aemt-bg);color:var(--aemt);border:1px solid var(--aemt)}
+.badge.urgent{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger)}
+.call-chevron{color:var(--gray);font-size:12px;flex-shrink:0;transition:transform 0.2s}
+.call.open .call-chevron{transform:rotate(90deg)}
+.call-body{display:none;padding:0 14px 14px}
+.call.open .call-body{display:block}
+.call-field{margin-top:10px}
+.call-field-l{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--teal2);margin-bottom:4px}
+.call-field-l.watch{color:var(--warn)}
+.call-field-l.doc{color:var(--emt)}
+.call-field-l.divert{color:var(--danger)}
+.call-field-v{font-size:13px;line-height:1.55;color:var(--white)}
+.call-field-v ul{list-style:none;margin-top:2px}
+.call-field-v li{position:relative;padding:2px 0 2px 12px}
+.call-field-v li::before{content:'';position:absolute;left:0;top:9px;width:4px;height:4px;border-radius:50%;background:var(--gray)}
+.urgent-note{display:inline-block;margin-top:8px;font-size:11px;color:var(--danger);font-weight:600}
+mark{background:#fde68a;color:inherit;border-radius:2px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--gray);font-size:13px}
+
+/* ALS/BLS reference */
+.abtable{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 12px}
+.abcol{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 13px}
+.abcol.als{border-top:3px solid var(--pm)}
+.abcol.bls{border-top:3px solid var(--emt)}
+.abcol-h{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.04em;margin-bottom:8px}
+.abcol.als .abcol-h{color:var(--pm)}
+.abcol.bls .abcol-h{color:var(--emt)}
+.abcol ul{list-style:none}
+.abcol li{font-size:12px;line-height:1.45;padding:4px 0 4px 12px;position:relative;border-bottom:1px solid var(--border)}
+.abcol li:last-child{border-bottom:none}
+.abcol li::before{content:'';position:absolute;left:0;top:10px;width:4px;height:4px;border-radius:50%;background:var(--gray)}
+
+.footer-note{margin:24px 16px 0;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--gray);line-height:1.7;text-align:center}
+.footer-note a{color:var(--teal2);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+
+<a class="backlink" href="index.html">&#x2190; Field Guide</a>
+<div id="hdr">
+  <div class="hdr-title">IFT Call Guide</div>
+  <div class="hdr-sub">How to run &amp; document the transfers you'll see in KC &mdash; logistics, monitoring, and charting</div>
+  <div class="sw">
+    <span class="si">&#x2315;</span>
+    <input id="srch" type="text" placeholder="Search a call type&hellip; (STEMI, ECMO, dialysis)" autocomplete="off">
+    <button id="sc">&times;</button>
+  </div>
+</div>
+
+<div id="main">
+  <div class="tabs">
+    <button class="tab-btn on" data-tab="howto">How-To</button>
+    <button class="tab-btn" data-tab="calls">Call Types</button>
+    <button class="tab-btn" data-tab="scope">ALS vs BLS</button>
+  </div>
+
+  <div class="pane on" id="pane-howto"></div>
+  <div class="pane" id="pane-calls"></div>
+  <div class="pane" id="pane-scope"></div>
+
+  <div class="footer-note">
+    Operational summary derived from the <strong>AMR KC Medical Protocols (Effective 2026)</strong> and the
+    New Hire Academy IFT Call Types brief. Where this conflicts with the current protocol PDF or a sending
+    physician's written orders, those control. Charting steps reference the
+    <a href="imagetrend-job-aid.html">ImageTrend Job Aid</a>.
+  </div>
+</div>
+
+<script>
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function hl(text,q){
+  var e = esc(text);
+  if(!q) return e;
+  var qe = esc(q).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return e.replace(new RegExp('('+qe+')','ig'),'<mark>$1</mark>');
+}
+function lvl(l){
+  if(l==='ALS') return '<span class="badge als">ALS</span>';
+  if(l==='BLS') return '<span class="badge bls">BLS</span>';
+  return '<span class="badge both">ALS / BLS</span>';
+}
+
+/* ── HOW-TO: universal logistics + documentation workflow ─────────────── */
+function renderHowto(){
+  var h = '';
+
+  h += '<div class="callout info"><div class="callout-t">The one question that shapes every call</div>'
+     + '<div class="callout-b"><b>Why does this patient need us?</b> Every IFT exists because the level of care, '
+     + 'a specialist, or a capability isn\'t available at the sending facility. Knowing the reason for transfer sets '
+     + 'your monitoring priorities before you ever touch the cot.</div></div>';
+
+  h += '<div class="sec-lbl">1 &middot; Before you take the patient</div>';
+  h += '<div class="step-card"><div class="step-card-h">'
+     + '<div class="step-card-ico"><svg class="icon" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><use href="#i-clipboard"></use></svg></div>'
+     + '<div class="step-card-title">Transfer of care &mdash; sending facility</div></div>'
+     + '<ul class="chk">'
+     + '<li>Get a <b>complete verbal report</b> from the sending RN/MD: diagnosis, current status, active meds &amp; infusions, relevant history, allergies, DNR/DPOA status, transport parameters.</li>'
+     + '<li>Review the <b>transfer order</b>; confirm the receiving facility and the level of care.</li>'
+     + '<li>Run <b>pre-departure verification</b> on every active infusion (concentration, rate, access) per the infusion protocol.</li>'
+     + '<li>Confirm patient identity with <b>at least two identifiers</b>.</li>'
+     + '<li>Verify &amp; document <b>IV access, airway status, and device function</b> before you roll.</li>'
+     + '</ul></div>';
+
+  h += '<div class="callout danger"><div class="callout-t">Scope stop &mdash; do not depart</div>'
+     + '<div class="callout-b">If the patient\'s active therapies or clinical status <b>exceed your credential level</b>, '
+     + 'do not leave the sending facility. Notify dispatch and request an intercept or reassignment. '
+     + 'AEMTs cannot initiate or titrate IV infusions &mdash; contact the Paramedic or Direct Medical Oversight first.</div></div>';
+
+  h += '<div class="sec-lbl">2 &middot; High-risk transports</div>';
+  h += '<div class="step-card"><div class="step-card-h">'
+     + '<div class="step-card-ico"><svg class="icon" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><use href="#i-alert"></use></svg></div>'
+     + '<div class="step-card-title">These require pre-departure verification</div></div>'
+     + '<ul class="chk">'
+     + '<li>Intubated / ventilated patients</li>'
+     + '<li>Vasopressor-dependent patients</li>'
+     + '<li>Active sedation infusions</li>'
+     + '<li>Blood product administration</li>'
+     + '<li>Chest tube patients</li>'
+     + '<li>Psychiatric patients requiring restraint</li>'
+     + '<li>Any transport exceeding <b>60 minutes</b></li>'
+     + '<li>Mechanical circulatory support (LVAD, IABP, Impella, ECMO)</li>'
+     + '</ul></div>';
+  h += '<div class="callout"><div class="callout-t">Long-distance risk mitigation</div>'
+     + '<div class="callout-b"><b>Over 60 min:</b> carry oxygen equal to at least <b>2&times;</b> the calculated need. '
+     + '<b>Over 90 min:</b> verify pump &amp; ventilator batteries and carry spares. '
+     + '<b>Over 3 hours:</b> supervisor notification required before departure.</div></div>';
+
+  h += '<div class="sec-lbl">3 &middot; Lights are off &mdash; the clock is still running</div>';
+  h += '<div class="callout info"><div class="callout-t">Urgent IFT doctrine</div>'
+     + '<div class="callout-b">Non-emergency response <b>does not</b> mean non-critical patient. STEMIs, strokes, sepsis, '
+     + 'and neurosurgical emergencies move non-emergent by default &mdash; but door-to-balloon and time-is-brain windows are '
+     + 'still counting. Escalation to lights-and-sirens requires clinical justification and should be communicated to the '
+     + 'receiving facility.</div></div>';
+
+  h += '<div class="sec-lbl">4 &middot; Transfer of care &mdash; receiving facility</div>';
+  h += '<div class="step-card"><div class="step-card-h">'
+     + '<div class="step-card-ico"><svg class="icon" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><use href="#i-check"></use></svg></div>'
+     + '<div class="step-card-title">Handoff at the receiving facility</div></div>'
+     + '<ul class="chk">'
+     + '<li>Give a <b>complete verbal report</b> to the receiving nurse/physician: identity, sending diagnosis, interventions during transport, current status, and any changes en route.</li>'
+     + '<li>Transfer <b>all accompanying documentation</b> &mdash; transfer orders, medication lists, imaging.</li>'
+     + '<li>Document the <b>receiving provider name and time</b> of transfer of care.</li>'
+     + '<li><b>Do not leave the patient</b> until a receiving provider has assumed care.</li>'
+     + '</ul></div>';
+
+  h += '<div class="sec-lbl">5 &middot; Documenting the call in ImageTrend</div>';
+  h += '<div class="step-card"><div class="step-card-h">'
+     + '<div class="step-card-ico"><svg class="icon" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><use href="#i-doc"></use></svg></div>'
+     + '<div class="step-card-title">What every IFT chart needs</div></div>'
+     + '<ul class="chk">'
+     + '<li><b>Sending</b> provider name + time of verbal report; patient ID method used.</li>'
+     + '<li>All <b>active infusions at departure</b> with rates verified.</li>'
+     + '<li>Clinical status at departure and <b>every change</b> during transport, with times.</li>'
+     + '<li>Interventions with <b>doses, routes, and times</b>; response to each.</li>'
+     + '<li><b>Receiving</b> provider name + time of transfer of care.</li>'
+     + '<li>For a treated-and-transported patient, complete the <b>ABA</b> (Ambulance Billing Authorization) worksheet.</li>'
+     + '</ul>'
+     + '<div style="margin-top:10px;font-size:12.5px;color:var(--gray);line-height:1.6">Need the disposition combo, the ABA signature path, or how to fix a validation rule? '
+     + '<a class="jumplink" href="imagetrend-job-aid.html">Open the ImageTrend Job Aid &#x203A;</a></div>'
+     + '</div>';
+  h += '<div class="callout"><div class="callout-t">If it wasn\'t documented, it didn\'t happen</div>'
+     + '<div class="callout-b">Chart objectively, use the patient\'s own words in quotes, and note relevant negatives. '
+     + 'A routine SNF transfer that deteriorates en route is still your patient and your documentation. Complete the PCR '
+     + 'as close to the time of care as possible &mdash; before end of shift.</div></div>';
+
+  h += '<div class="sec-lbl">6 &middot; Accompanied specialty transports</div>';
+  h += '<div class="callout info"><div class="callout-t">You support &mdash; you don\'t lead</div>'
+     + '<div class="callout-b">On NICU, IABP, Impella, and ECMO transports, the <b>accompanying clinician holds authority</b> '
+     + 'over the specialty device and all clinical decisions for it. AMR provides the platform, monitors within scope, and '
+     + 'assists as directed. <b>Do not initiate, adjust, or troubleshoot</b> a specialty device &mdash; even if the team asks '
+     + 'you to. Decline actions outside AMR scope and say so.</div></div>';
+
+  var split =
+    '<div class="split">'
+    + '<div class="split-col amr"><div class="split-h">AMR Crew</div><ul>'
+    + '<li>Safe vehicle operation &amp; route planning</li>'
+    + '<li>Equipment loading, securing, unloading</li>'
+    + '<li>Patient monitoring within AMR scope</li>'
+    + '<li>IV access integrity</li>'
+    + '<li>Vehicle power, environment, scene safety</li>'
+    + '<li>Assist team as directed within scope</li>'
+    + '<li>Document device type, team names, alarms reported</li>'
+    + '</ul></div>'
+    + '<div class="split-col team"><div class="split-h">Specialty Team</div><ul>'
+    + '<li>All device management &amp; adjustment</li>'
+    + '<li>Pump / circuit / oxygenator settings</li>'
+    + '<li>Cannula &amp; line position, anticoagulation</li>'
+    + '<li>Alarm response &amp; troubleshooting</li>'
+    + '<li>All specialty clinical decision-making</li>'
+    + '<li>Diversion call is theirs to make</li>'
+    + '</ul></div></div>';
+  h += '<div class="step-card"><div class="step-card-h">'
+     + '<div class="step-card-ico"><svg class="icon" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><use href="#i-split"></use></svg></div>'
+     + '<div class="step-card-title">Who does what</div></div>'
+     + split
+     + '<div style="margin-top:10px;font-size:12.5px;color:var(--gray)">Device-by-device detail (NICU, IABP, Impella, ECMO, donor) is in the '
+     + '<a class="jumplink" href="#" data-gotab="calls" data-gocat="Accompanied Specialty">Call Types &#x203A;</a> tab.</div>'
+     + '</div>';
+
+  $('pane-howto').innerHTML = h;
+}
+
+/* ── CALL TYPES ──────────────────────────────────────────────────────── */
+var CATS = ['Cardiac','Neurologic','Pulmonary / Medical / Psych','Routine BLS','Accompanied Specialty','Uncommon Specialty'];
+
+var CALLS = [
+  // ── Cardiac ──
+  {cat:'Cardiac',name:'STEMI — PCI Transfer',lvl:'ALS',urgent:true,kw:'heart attack cath lab door to balloon pci mi',
+   why:'Community ED → St. Luke’s Mid America Heart or KU Med cath lab. Time-critical; door-to-balloon is counting.',
+   run:'Heparin + nitroglycerin drips (Paramedic managed), aspirin, oxygen, 12-lead monitoring.',
+   watch:['Continuous ECG; repeat 12-lead on any change','Recurrent/worsening chest pain','Hypotension, arrhythmia, cardiac arrest'],
+   doc:['Serial 12-leads at departure and any change','Infusion rates verified at departure','Times for every rhythm change and intervention']},
+  {cat:'Cardiac',name:'NSTEMI / ACS Evaluation',lvl:'ALS',kw:'acs unstable angina anticoagulation cardiology',
+   why:'Transfer for cardiology consult or cath capability. Anticoagulation in progress; monitor for progression to STEMI.',
+   run:'Anticoagulation infusion, nitroglycerin if ordered, cardiac monitoring.',
+   watch:['ST changes / progression','Chest pain trajectory','Hemodynamic stability'],
+   doc:['Anticoagulation infusion rate verification','12-lead trend','Meds and infusions with rates and times']},
+  {cat:'Cardiac',name:'Decompensated CHF',lvl:'ALS/BLS',kw:'heart failure pulmonary edema chf bipap',
+   why:'Transfer for higher-level cardiac or respiratory management.',
+   run:'CPAP/BiPAP often in place, nitroglycerin drip common.',
+   watch:['Work of breathing / respiratory fatigue','SpO₂ and CPAP tolerance','Blood pressure response to nitro'],
+   doc:['CPAP/BiPAP settings and tolerance','Nitro infusion rate and BP response','Respiratory trend']},
+  {cat:'Cardiac',name:'Post-Cardiac Arrest (ROSC)',lvl:'ALS',urgent:true,kw:'rosc post arrest sedated ventilated ttm',
+   why:'Highest-risk single category we transport. Sedated, vasopressors, ventilated after return of circulation.',
+   run:'Ventilator, vasopressor infusions, sedation, targeted temperature if initiated.',
+   watch:['Airway and ventilator function','MAP ≥65 mmHg','Re-arrest / rhythm deterioration'],
+   doc:['Vent settings and any changes','Vasopressor + sedation rates','Neuro/hemodynamic status at intervals']},
+  {cat:'Cardiac',name:'Cardiogenic Shock',lvl:'ALS',kw:'shock vasopressor mechanical circulatory support map',
+   why:'Vasopressor-dependent. Transfer for advanced hemodynamic support or mechanical circulatory assist.',
+   run:'Vasopressor infusions, cardiac monitoring, possible MCS device.',
+   watch:['MAP ≥65 and end-organ perfusion (mental status)','Vasopressor rate and access','Worsening shock / arrhythmia'],
+   doc:['Vasopressor rates and access site q15 min','Hemodynamic trend','Perfusion markers']},
+  {cat:'Cardiac',name:'Arrhythmia Management',lvl:'ALS',kw:'svt afib rvr vt bradycardia ep pacemaker rate control',
+   why:'Bradycardia, SVT, A-fib RVR, or VT — transferring for EP consult, pacemaker, or rate control.',
+   run:'Cardiac monitoring, antiarrhythmic or rate-control infusion if initiated, pacing if applicable.',
+   watch:['Continuous rhythm; pacing capture q15 min if paced','Rate and hemodynamic response','Progression to unstable rhythm'],
+   doc:['Rhythm strips at departure and any change','Pacing settings: rate, output, capture','Antiarrhythmic/rate-control infusion rates']},
+
+  // ── Neuro ──
+  {cat:'Neurologic',name:'Acute Stroke — Thrombectomy Transfer',lvl:'ALS',urgent:true,kw:'cva stroke tpa thrombectomy time is brain window',
+   why:'Community ED → KU Med or St. Luke’s stroke center. Window-dependent; time is brain.',
+   run:'Antihypertensive drip if ordered, IV access, frequent neuro checks.',
+   watch:['BP within the ordered target — critical','GCS and focal deficit changes','Airway if declining'],
+   doc:['Last-known-well time','BP trend and antihypertensive rate','Serial neuro exams with times']},
+  {cat:'Neurologic',name:'Intracranial Hemorrhage (ICH)',lvl:'ALS',urgent:true,kw:'ich bleed neurosurgery antihypertensive gcs pupils',
+   why:'Neurosurgical capability transfer. Surgical window may be closing.',
+   run:'Antihypertensive drip, airway management, sedation if intubated.',
+   watch:['Pupils and GCS — primary monitors','BP within ordered target','Herniation signs'],
+   doc:['Pupil and GCS trend with times','BP and antihypertensive rate','Any acute deterioration']},
+  {cat:'Neurologic',name:'Subarachnoid Hemorrhage (SAH)',lvl:'ALS',kw:'sah aneurysm neurointerventional sudden collapse',
+   why:'Aneurysmal SAH needing neurointerventional capability. Risk of sudden collapse in transport.',
+   run:'Antihypertensive drip, airway support, sedation if intubated.',
+   watch:['Sudden neuro change / collapse','BP control','Airway and oxygenation'],
+   doc:['Neuro exam trend','BP management','Any collapse event and response']},
+  {cat:'Neurologic',name:'TBI — Trauma Center Transfer',lvl:'ALS',kw:'tbi head injury hypoxia hypotension sedation',
+   why:'Traumatic brain injury to a trauma/neurosurgical center.',
+   run:'Airway/ventilator, sedation if intubated, BP support.',
+   watch:['Avoid hypoxia AND hypotension — both worsen outcome','GCS/pupils','Ventilation (normocapnia)'],
+   doc:['SpO₂ and BP continuously — document any dip','Neuro exam trend','Vent settings']},
+  {cat:'Neurologic',name:'Seizure / Status Epilepticus',lvl:'ALS',kw:'seizure status epilepticus postictal benzodiazepine airway',
+   why:'ICU or neurology transfer. Postictal or actively managed.',
+   run:'Benzodiazepine per protocol, airway management, IV access.',
+   watch:['Airway — primary concern','Recurrent seizure activity','Oxygenation and ventilation'],
+   doc:['Seizure activity, duration, and meds given with times','Airway interventions','Postictal neuro status']},
+  {cat:'Neurologic',name:'Encephalopathy / Delirium',lvl:'ALS/BLS',kw:'ams altered mental status delirium combative restraint',
+   why:'Altered mental status from metabolic, infectious, or toxic cause. Frequently combative.',
+   run:'Supportive care; sedation/restraint may be appropriate per protocol.',
+   watch:['Mental status trend','Airway if declining','Safety — self and crew'],
+   doc:['Mental status with times','Restraint justification, monitoring, response','Any sedation given']},
+
+  // ── Pulmonary / Medical / Psych ──
+  {cat:'Pulmonary / Medical / Psych',name:'Ventilated Patient — ICU to ICU',lvl:'ALS',kw:'vent ltv 1200 ventilator icu bvm',
+   why:'ICU-to-ICU move of a ventilated patient. LTV 1200 on board.',
+   run:'LTV 1200 ventilator; ALS manages vent, BLS monitors and keeps BVM ready at all times.',
+   watch:['Vent circuit integrity and alarms','SpO₂ / EtCO₂','Tube position after every patient move'],
+   doc:['Vent settings and any changes','Alarm events and response','ABG/EtCO₂ if available']},
+  {cat:'Pulmonary / Medical / Psych',name:'Respiratory Failure — CPAP/BiPAP',lvl:'ALS/BLS',urgent:true,kw:'respiratory failure cpap bipap flow-safe fatigue intubation',
+   why:'Non-invasive support in place; risk of tiring and needing intubation. Load and go.',
+   run:'Flow-Safe II / CPAP or BiPAP in place.',
+   watch:['SpO₂ and work of breathing continuously','Fatigue = escalate / prepare to intubate','Mental status'],
+   doc:['CPAP/BiPAP settings and tolerance','Respiratory trend and fatigue signs','Escalation decisions with times']},
+  {cat:'Pulmonary / Medical / Psych',name:'Sepsis / Septic Shock',lvl:'ALS',urgent:true,kw:'sepsis septic shock vasopressor antibiotics map lactate',
+   why:'Common high-acuity IFT. May decompensate en route.',
+   run:'Vasopressors and antibiotics running; IV fluids. MAP ≥65 target.',
+   watch:['MAP ≥65 and perfusion','Vasopressor rate and access','Respiratory / mental status decline'],
+   doc:['Vasopressor and antibiotic rates','Fluid given and BP response','Perfusion trend with times']},
+  {cat:'Pulmonary / Medical / Psych',name:'DKA / HHS Transfer',lvl:'ALS',urgent:true,kw:'dka hhs insulin drip glucose potassium mental status',
+   why:'Metabolic emergency for endocrine/ICU capability. Deteriorating mental status is a red flag.',
+   run:'Insulin drip and IV fluids.',
+   watch:['Mental status changes — warning sign','Airway','Glucose and hemodynamics'],
+   doc:['Insulin infusion rate','Glucose checks with times','Mental status and airway status']},
+  {cat:'Pulmonary / Medical / Psych',name:'GI Bleed',lvl:'ALS/BLS',kw:'gi bleed hemorrhage large bore volume hemodynamic',
+   why:'Active hemorrhage risk; hemodynamic deterioration possible.',
+   run:'Large-bore IV access, volume as ordered, monitoring.',
+   watch:['Hemodynamic status / ongoing bleeding','Volume status','Signs of shock'],
+   doc:['IV access and fluids/blood given','Vital-sign trend','Any hemodynamic deterioration']},
+  {cat:'Pulmonary / Medical / Psych',name:'Psychiatric / Behavioral Health',lvl:'ALS/BLS',kw:'psych behavioral restraint midazolam secure facility',
+   why:'Inpatient psych or secure facility placement. Restraints often applied pre-transport.',
+   run:'Restraints per protocol; midazolam per protocol if needed.',
+   watch:['Escalation risk','Airway if sedated','Restraint circulation checks'],
+   doc:['Restraint type, justification, monitoring intervals, response','Any sedation with times','Behavior observed (objective)']},
+
+  // ── Routine BLS ──
+  {cat:'Routine BLS',name:'Post-Op Orthopedic Transfer',lvl:'BLS',kw:'ortho hip knee spinal fusion snf rehab pain positioning',
+   why:'Hip, knee, or spinal fusion, SNF- or rehab-bound.',
+   run:'Pain management and positioning are the primary concerns.',
+   watch:['Pain and positioning','Neurovascular checks distal to surgery','Stable vitals'],
+   doc:['Positioning and comfort measures','Neurovascular checks','Handoff to receiving nursing']},
+  {cat:'Routine BLS',name:'Dialysis / ESRD Transfer',lvl:'BLS',kw:'dialysis esrd fistula av fluid status',
+   why:'To or from a dialysis center.',
+   run:'Routine monitoring; note fluid status.',
+   watch:['Do NOT take BP on the AV fistula arm','Fluid status / breathing','Access site'],
+   doc:['BP arm used (never the fistula arm)','Fluid status noted','Access site condition']},
+  {cat:'Routine BLS',name:'Oncology Transfer',lvl:'BLS',kw:'oncology chemo port immunocompromised pain',
+   why:'Chemo infusions, port access, pain management. Immunocompromised.',
+   run:'Routine monitoring; minimize infection exposure.',
+   watch:['Minimize exposure risk','Pain','Port/line if present'],
+   doc:['Exposure precautions taken','Pain management','Line/port status']},
+  {cat:'Routine BLS',name:'SNF / LTAC Admission',lvl:'BLS',kw:'snf ltac post-acute placement nursing handoff',
+   why:'Post-acute placement; patient stable but needs ongoing nursing.',
+   run:'Routine monitoring.',
+   watch:['Stable vitals','Any change from baseline'],
+   doc:['Complete handoff documented','Baseline assessment','Receiving nurse name + time']},
+  {cat:'Routine BLS',name:'Post-CVA Rehab Transfer',lvl:'BLS',kw:'stroke rehab neuro deficit aspiration positioning',
+   why:'Stable stroke patient to inpatient rehab. Neuro deficits present.',
+   run:'Routine monitoring; aspiration precautions.',
+   watch:['Aspiration risk — position correctly','Neuro baseline','Swallow precautions'],
+   doc:['Neuro baseline','Positioning for aspiration risk','Handoff']},
+  {cat:'Routine BLS',name:'Behavioral Health — Stable',lvl:'BLS',kw:'voluntary psych stable behavioral low acuity',
+   why:'Voluntary psychiatric admission, lower acuity.',
+   run:'Routine monitoring; still watch for escalation.',
+   watch:['Escalation despite stable presentation','Rapport and safety'],
+   doc:['Behavior observed (objective)','Any change in cooperation','Handoff']},
+  {cat:'Routine BLS',name:'Wound Care / Surgical Follow-up',lvl:'BLS',kw:'wound care surgical follow up outpatient',
+   why:'To a wound care center or back from a specialist visit.',
+   run:'Routine monitoring.',
+   watch:['Stable vitals','Wound/dressing if relevant'],
+   doc:['Reason for transfer','Assessment','Handoff — documentation still matters']},
+  {cat:'Routine BLS',name:'Return to SNF / Home',lvl:'BLS',kw:'return discharge snf home report called ahead',
+   why:'Patient returning after a hospital stay.',
+   run:'Routine monitoring.',
+   watch:['Confirm receiving facility is prepared','Report called ahead','Stable vitals'],
+   doc:['Confirmation receiving facility ready','Assessment','Handoff']},
+
+  // ── Accompanied Specialty ──
+  {cat:'Accompanied Specialty',name:'NICU — Neonatal Transport (OPRMC)',lvl:'BLS',kw:'nicu neonatal oprmc rn rt md driver assist',
+   why:'Hospital NICU team (RN/RT/MD) manages the neonate. AMR drives, loads, and assists as directed.',
+   run:'NICU team runs the neonatal vent, lines, meds, and airway. AMR does not independently manage any of it.',
+   watch:['Vehicle power / inverter function','Compartment temperature','Equipment stability during movement; smooth route'],
+   divert:'Airway compromise, equipment failure without backup, hemodynamic collapse, NICU team request, or vehicle compromise.',
+   doc:['Names and credentials of all NICU team members','Equipment transported with patient','Transfer-of-care at both facilities','Any adverse events or diversion']},
+  {cat:'Accompanied Specialty',name:'Flight Team Ground Assist',lvl:'BLS',kw:'flight crew ground assist weather driver platform',
+   why:'Flight crew accompanies by ground when weather or distance prevents air transport.',
+   run:'Flight team holds clinical authority. AMR is platform and driver.',
+   watch:['Vehicle operation and route','Equipment securing','Assist as directed within scope'],
+   doc:['Flight team member names and credentials','Equipment aboard','Transfer of care']},
+  {cat:'Accompanied Specialty',name:'IABP — Intra-Aortic Balloon Pump',lvl:'ALS',kw:'iabp balloon pump cardiogenic shock perfusionist augmentation limb ischemia',
+   why:'Mechanical circulatory support in cardiogenic shock / high-risk cardiac. Perfusionist or specialty RN/MD accompanies.',
+   run:'Team manages IABP timing and augmentation. AMR does not adjust device settings under any circumstance.',
+   watch:['MAP ≥65 unless physician specifies otherwise','Limb ischemia at insertion site: pallor, coolness, absent pulse','Cardiac rhythm; pump alarms as reported by team'],
+   divert:'Loss of peripheral perfusion, uncontrolled access-site bleeding, sustained significant dysrhythmia, or clinician request.',
+   doc:['Device presence and type','Specialty clinician name + credential','Hemodynamic trends at intervals','Alarms/interruptions reported by team','Transfer-of-care acknowledgment']},
+  {cat:'Accompanied Specialty',name:'Impella Device Transport',lvl:'ALS',kw:'impella pvad percutaneous ventricular assist hemolysis cannula',
+   why:'Percutaneous ventricular assist device in cardiogenic shock. Perfusionist or specialty RN/MD accompanies.',
+   run:'Team manages flow and performance level. AMR does not adjust Impella settings, flow, or cannula position — ever.',
+   watch:['MAP and peripheral perfusion','Access-site bleeding (groin or axillary)','Hemolysis signs: dark/red urine; device alarms per team'],
+   divert:'Loss of circulatory support with collapse, uncontrolled access-site bleeding, or clinician request.',
+   doc:['Device type and model','Specialty clinician name + credential','Hemodynamic trends','Alarms/concerns noted by team','Transfer-of-care acknowledgment']},
+  {cat:'Accompanied Specialty',name:'ECMO Transport',lvl:'ALS',kw:'ecmo va vv perfusionist oxygenator cannula circuit anticoagulation',
+   why:'Highest-acuity IFT in the KC area. VA-ECMO supports heart + lungs; VV-ECMO supports lungs.',
+   run:'ECMO team (perfusionist + credentialed RN/MD) present throughout. AMR does not touch the circuit, oxygenator, or cannulas under any circumstance.',
+   watch:['Patient hemodynamics within AMR scope','Bleeding surveillance at cannula sites','IV access continuity; ventilator if not managed by team'],
+   divert:'At ECMO team request, or per team clinical judgment.',
+   doc:['ECMO team names and credentials','Cannula sites and any bleeding','Transfer-of-care at both facilities','Any events during transport']},
+
+  // ── Uncommon Specialty ──
+  {cat:'Uncommon Specialty',name:'Donor Patient Management',lvl:'ALS',kw:'donor organ procurement brain death vasopressor temperature dignity',
+   why:'Medically maintained brain-dead patient transferring for organ procurement. Treat the physiology; maintain hemodynamics, oxygenation, and temperature.',
+   run:'Ventilation, vasopressor infusions (Paramedic managed), hormone replacement if ordered, targeted temperature, IV fluids.',
+   watch:['MAP ≥65 and HR <100 per sending orders','Vent function and normocapnia','Temperature device; urine output catheter patency'],
+   divert:'Refractory hypotension, sustained cardiac arrest, uncorrectable hypoxemia, or any condition precluding organ viability.',
+   doc:['Vasopressor rates and access q15 min','Vent settings, temperature, glucose, urine output','Unique donor documentation; treat with full dignity and rigor']},
+  {cat:'Uncommon Specialty',name:'Organ / Tissue Transport (Unaccompanied)',lvl:'BLS',kw:'organ tissue no patient point to point eta time sensitive',
+   why:'Transport of procured organ or tissue — no patient on board. Time-sensitive, point-to-point.',
+   run:'No patient care. Coordinate receiving-facility contact and confirm ETA throughout.',
+   watch:['Container integrity and security','Route and timing','Chain-of-custody'],
+   doc:['Pickup and delivery times','Receiving contact and ETA updates','Chain-of-custody documentation']},
+  {cat:'Uncommon Specialty',name:'Pediatric Critical Care Transfer',lvl:'ALS',kw:'peds pediatric children mercy weight based airway team',
+   why:'Non-neonatal pediatric patient to Children’s Mercy. Peds team may accompany.',
+   run:'Weight-based vasopressors, smaller airway, peds dosing.',
+   watch:['Airway (smaller, less reserve)','Weight-based infusion accuracy','Confirm pediatric equipment before loading'],
+   doc:['Weight and weight-based doses','Peds team names if accompanying','Serial assessments with times']},
+  {cat:'Uncommon Specialty',name:'Bariatric Transfer',lvl:'ALS/BLS',kw:'bariatric weight limit stretcher lift positioning airway',
+   why:'Patient exceeds standard stretcher weight limit. Bariatric equipment required.',
+   run:'Confirm destination bed and lift capability before transport.',
+   watch:['Positioning and airway management differ','Equipment weight limits','Skin/pressure points'],
+   doc:['Equipment used and lift plan','Positioning','Destination bed/lift confirmed']},
+  {cat:'Uncommon Specialty',name:'Long-Distance Transfer (3+ Hours)',lvl:'ALS/BLS',kw:'long distance oxygen batteries supervisor 3 hours',
+   why:'Extended transport requiring extra planning and resources.',
+   run:'Confirm all therapies sustainable for the full duration.',
+   watch:['Supervisor notification at/before the 3-hour threshold','Oxygen supply = 2× calculated requirement','Pump and vent battery life verified; spares aboard'],
+   doc:['Supervisor notification time','Oxygen and battery calculations','Serial assessments throughout']},
+  {cat:'Uncommon Specialty',name:'Prison / Custody Transport',lvl:'ALS/BLS',kw:'prison custody law enforcement detainee security',
+   why:'Law enforcement accompanies. Patient is both patient and detainee.',
+   run:'Treat the medical need; security decisions belong to custody.',
+   watch:['Medical needs first, within a secure environment','Custody officer presence','Scene and crew safety'],
+   doc:['Accurate, thorough documentation','Custody presence noted','Objective findings only']},
+];
+
+function callHtml(c,q,open){
+  var h = '<div class="call'+(open?' open':'')+'" data-call="'+esc(c.name)+'">';
+  h += '<div class="call-hdr" data-toggle-call>';
+  h += '<div class="call-name">'+hl(c.name,q)+'</div>';
+  if(c.urgent) h += '<span class="badge urgent">URGENT</span>';
+  h += lvl(c.lvl);
+  h += '<div class="call-chevron">&#x203A;</div></div>';
+  h += '<div class="call-body">';
+  h += '<div class="call-field"><div class="call-field-l">Why the transfer</div><div class="call-field-v">'+hl(c.why,q)+'</div></div>';
+  if(c.run) h += '<div class="call-field"><div class="call-field-l">What’s running</div><div class="call-field-v">'+hl(c.run,q)+'</div></div>';
+  if(c.watch){ h += '<div class="call-field"><div class="call-field-l watch">Watch</div><div class="call-field-v"><ul>';
+    c.watch.forEach(function(w){ h += '<li>'+hl(w,q)+'</li>'; }); h += '</ul></div></div>'; }
+  if(c.divert) h += '<div class="call-field"><div class="call-field-l divert">Divert if</div><div class="call-field-v">'+hl(c.divert,q)+'</div></div>';
+  if(c.doc){ h += '<div class="call-field"><div class="call-field-l doc">Document</div><div class="call-field-v"><ul>';
+    c.doc.forEach(function(d){ h += '<li>'+hl(d,q)+'</li>'; }); h += '</ul></div></div>'; }
+  if(c.urgent) h += '<div class="urgent-note">&#9888; Non-emergent response &mdash; time-critical patient.</div>';
+  h += '</div></div>';
+  return h;
+}
+
+function renderCalls(){
+  var h = '';
+  CATS.forEach(function(cat){
+    var items = CALLS.filter(function(c){ return c.cat===cat; });
+    if(!items.length) return;
+    h += '<div class="cat-block" data-cat="'+esc(cat)+'"><div class="sec-lbl">'+esc(cat)+'</div>';
+    items.forEach(function(c){ h += callHtml(c,'',false); });
+    h += '</div>';
+  });
+  $('pane-calls').innerHTML = h;
+}
+
+function scoreCall(c,ql){
+  var s = 0;
+  if(c.name.toLowerCase().indexOf(ql)!==-1) s += 10;
+  if((c.kw||'').toLowerCase().indexOf(ql)!==-1) s += 6;
+  if((c.why||'').toLowerCase().indexOf(ql)!==-1) s += 3;
+  if((c.run||'').toLowerCase().indexOf(ql)!==-1) s += 2;
+  if(c.cat.toLowerCase().indexOf(ql)!==-1) s += 2;
+  return s;
+}
+
+function renderCallSearch(q){
+  var ql = q.toLowerCase();
+  var res = CALLS.map(function(c){ return {c:c,s:scoreCall(c,ql)}; })
+    .filter(function(r){ return r.s>0; }).sort(function(a,b){ return b.s-a.s; });
+  if(!res.length){ $('pane-calls').innerHTML = '<div class="empty-state">No call type matches &ldquo;'+esc(q)+'&rdquo;.<br>Try a shorter term like &ldquo;stroke&rdquo; or &ldquo;dialysis&rdquo;.</div>'; return; }
+  var h = '<div class="sec-lbl">'+res.length+' match'+(res.length===1?'':'es')+'</div>';
+  res.forEach(function(r){ h += callHtml(r.c,q,true); });
+  $('pane-calls').innerHTML = h;
+}
+
+/* ── ALS vs BLS ──────────────────────────────────────────────────────── */
+function renderScope(){
+  var als = ['Any active IV medication infusion','Vasopressor-dependent patients','Intubated / ventilated patients',
+    'Cardiac monitoring with dysrhythmia','Post-cardiac arrest (ROSC)','Sedation infusions running',
+    'STEMI / ACS transfers','Acute stroke in treatment window','Blood product administration','IO access present',
+    'IABP / Impella / ECMO support','High-risk transport criteria met'];
+  var bls = ['Stable post-op (hip, knee, spine)','Dialysis / ESRD without complications','SNF / LTAC admissions — stable',
+    'Oncology — stable, no active infusion','Post-CVA rehab — hemodynamically stable','Behavioral health — voluntary, calm',
+    'Return transports to SNF or home','Isotonic IV fluid monitoring only','NICU transport (driver + assist role)',
+    'Organ / tissue (no patient on board)','Flight team ground assist (driver role)','Wound care / outpatient procedure'];
+  var h = '<div class="callout info"><div class="callout-t">Scope drives dispatch</div>'
+    + '<div class="callout-b">Dispatch assigns crew level by the clinical needs of the call. If the situation at the '
+    + 'sending facility exceeds your assigned scope, notify dispatch and request intercept or reassignment <b>before departure</b>. '
+    + 'When in doubt, ask.</div></div>';
+  h += '<div class="abtable">';
+  h += '<div class="abcol als"><div class="abcol-h">ALS Required</div><ul>';
+  als.forEach(function(x){ h += '<li>'+esc(x)+'</li>'; });
+  h += '</ul></div>';
+  h += '<div class="abcol bls"><div class="abcol-h">BLS Appropriate</div><ul>';
+  bls.forEach(function(x){ h += '<li>'+esc(x)+'</li>'; });
+  h += '</ul></div></div>';
+  $('pane-scope').innerHTML = h;
+}
+
+/* ── events ──────────────────────────────────────────────────────────── */
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-tab')===tab); });
+  document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('on'); });
+  $('pane-'+tab).classList.add('on');
+}
+
+document.addEventListener('click', function(ev){
+  var tabBtn = ev.target.closest('.tab-btn');
+  if(tabBtn){ switchTab(tabBtn.getAttribute('data-tab')); window.scrollTo(0,0); return; }
+
+  var gotab = ev.target.closest('[data-gotab]');
+  if(gotab){
+    ev.preventDefault();
+    switchTab(gotab.getAttribute('data-gotab'));
+    var cat = gotab.getAttribute('data-gocat');
+    if($('srch')){ $('srch').value=''; $('sc').style.display='none'; renderCalls(); }
+    if(cat){
+      var el = document.querySelector('.cat-block[data-cat="'+cat+'"]');
+      if(el) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); }, 60);
+    } else { window.scrollTo(0,0); }
+    return;
+  }
+
+  var toggle = ev.target.closest('[data-toggle-call]');
+  if(toggle){ toggle.closest('.call').classList.toggle('open'); return; }
+});
+
+$('srch').addEventListener('input', function(){
+  var q = this.value.trim();
+  $('sc').style.display = q ? 'block' : 'none';
+  if(document.querySelector('.tab-btn.on').getAttribute('data-tab') !== 'calls') switchTab('calls');
+  if(q.length >= 2){ renderCallSearch(q); } else { renderCalls(); }
+});
+$('sc').addEventListener('click', function(){ $('srch').value=''; this.style.display='none'; renderCalls(); $('srch').focus(); });
+
+renderHowto();
+renderCalls();
+renderScope();
+</script>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 2.5h8.5L19 7v14.5H6z"/><path d="M14.5 2.5V7H19"/><path d="M9 12h6M9 15.5h6M9 8.5h2.5"/></symbol>
+<symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.3" width="6" height="3.2" rx="1"/><path d="M8.5 11h7M8.5 15h7"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.3"/><path d="M7.8 12.3l2.7 2.7 5.7-6"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 22 20.5H2z"/><path d="M12 9.5v4.5"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-split" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 8H3.5v8H5M19 8h1.5v8H19"/><path d="M8 12H4M20 12h-4"/></symbol>
+</defs></svg>
+
+</body>
+</html>
