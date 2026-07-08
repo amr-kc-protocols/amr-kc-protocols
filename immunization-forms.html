@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AMR KC Health Forms">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<title>AMR KC Health &amp; Immunization Forms</title>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
+  --correct:#15803d;--correct-bg:#eafbf1;--wrong:#dc2626;--wrong-bg:#fdecec;--warn:#a1590b;--warn-bg:#fef3e2;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-height:1.5}
+.hidden{display:none!important}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;gap:10px}
+.hdr-logo{width:34px;height:34px;border-radius:9px;background:var(--teal);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;letter-spacing:0.02em}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:15px;font-weight:700;color:var(--teal);line-height:1.15}
+.hdr-sub{font-size:11px;color:var(--gray)}
+.hdr-back{font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;padding:6px 10px;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface2);white-space:nowrap;cursor:pointer}
+
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px 60px}
+
+/* HOME CARDS */
+.home-intro{font-size:13px;color:var(--white);background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:14px;margin-bottom:16px;line-height:1.6}
+.home-intro strong{color:var(--teal2)}
+.pick-card{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);
+  border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(21,34,56,.05);
+  cursor:pointer;transition:border-color .12s,transform .12s;text-align:left;width:100%;font-family:var(--sans)}
+.pick-card:hover{border-color:var(--teal);transform:translateY(-2px)}
+.pick-ico{font-size:26px;flex-shrink:0}
+.pick-t{font-size:16px;font-weight:700;color:var(--teal)}
+.pick-s{font-size:12px;color:var(--gray);margin-top:2px}
+.pick-arr{margin-left:auto;color:var(--teal2);font-weight:700;font-size:18px}
+
+/* FORM */
+.form-title{font-size:19px;font-weight:700;color:var(--teal);margin-bottom:4px}
+.form-src{font-size:11px;color:var(--gray);margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+.card-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal2);
+  margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.statement{font-size:13px;color:var(--white);line-height:1.65}
+.statement p{margin-bottom:10px}
+.statement ul{margin:0 0 10px 18px}
+.statement li{margin-bottom:7px;font-size:13px;line-height:1.55}
+.fine{font-size:11px;color:var(--gray)}
+
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--white);margin-bottom:5px}
+.field .req{color:var(--wrong)}
+.input{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:15px;font-family:var(--sans);color:var(--white);background:#fff}
+.input:focus{outline:none;border-color:var(--teal2)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.field{flex:1;min-width:130px}
+.hint{font-size:11px;color:var(--gray);margin-top:4px}
+
+.opt-row{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1.5px solid var(--border);
+  border-radius:10px;margin-bottom:8px;cursor:pointer;background:#fff}
+.opt-row.sel{border-color:var(--teal2);background:#eaf1fd}
+.opt-row input{margin-top:3px;flex-shrink:0;width:18px;height:18px;accent-color:var(--teal2)}
+.opt-row .opt-t{font-size:13px;line-height:1.45}
+.opt-row .opt-note{font-size:11px;color:var(--warn);font-weight:600}
+
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5}
+.chk input{margin-top:2px;width:18px;height:18px;flex-shrink:0;accent-color:var(--teal2)}
+
+/* SIGNATURE */
+.sig-wrap{margin-top:6px}
+.sig-canvas{width:100%;height:130px;background:var(--surface2);border-radius:9px;
+  border:2px dashed #9aa5b1;touch-action:none;display:block;cursor:crosshair}
+.sig-canvas.has{border:2px solid var(--teal);background:#fff}
+.sig-bar{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.sig-hint{font-size:11px;color:var(--gray)}
+.sig-clear{font-size:12px;color:var(--teal2);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:600}
+
+.status{min-height:20px;font-size:13px;font-weight:600;margin:4px 0 10px;text-align:center;color:var(--wrong)}
+.status.ok{color:var(--correct)}
+.btn{display:block;width:100%;padding:15px;border-radius:10px;border:none;font-size:16px;font-weight:700;
+  cursor:pointer;font-family:var(--sans);background:var(--teal);color:#fff;margin-top:6px}
+.btn.secondary{background:var(--surface2);color:var(--teal);border:1px solid var(--border)}
+.privacy{font-size:11px;color:var(--gray);line-height:1.5;margin-top:14px;text-align:center;padding:0 6px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">KC</div>
+  <div class="hdr-txt">
+    <div class="hdr-title" id="hdr-title">Health &amp; Immunization Forms</div>
+    <div class="hdr-sub">AMR Kansas City &middot; Sign &amp; download</div>
+  </div>
+  <a class="hdr-back" id="hdr-back" href="index.html">&#x2190; Field Guide</a>
+</div>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <div id="screen-home">
+    <div class="home-intro">
+      Complete, sign, and download any of the forms below as a <strong>PDF</strong> you can email to your supervisor or HR. The form is filled out and signed <strong>on this device only</strong> &mdash; nothing you enter (including SSN or date of birth) is uploaded or transmitted anywhere.
+    </div>
+    <button class="pick-card" onclick="openForm('flu')">
+      <span class="pick-ico">&#x1F489;</span>
+      <span><span class="pick-t">Influenza Declination</span><span class="pick-s">Seasonal flu vaccination declination statement</span></span>
+      <span class="pick-arr">&#x203A;</span>
+    </button>
+    <button class="pick-card" onclick="openForm('hbv')">
+      <span class="pick-ico">&#x1FA78;</span>
+      <span><span class="pick-t">Hepatitis B Registration / Refusal</span><span class="pick-s">Begin series, refuse, or acknowledge prior series</span></span>
+      <span class="pick-arr">&#x203A;</span>
+    </button>
+    <button class="pick-card" onclick="openForm('ppd')">
+      <span class="pick-ico">&#x1F9EA;</span>
+      <span><span class="pick-t">TB / PPD Skin Test</span><span class="pick-s">Mantoux acceptance or declination statement</span></span>
+      <span class="pick-arr">&#x203A;</span>
+    </button>
+    <div class="privacy">
+      These reproduce the official GMR / AMR forms for convenience. If your facility requires the original signed paper form, use that instead. Not a substitute for your employer's HR process.
+    </div>
+  </div>
+
+  <!-- FORM CONTAINER -->
+  <div id="screen-form" class="hidden">
+    <div class="form-title" id="f-title"></div>
+    <div class="form-src" id="f-src"></div>
+    <div id="f-body"></div>
+    <div class="status" id="f-status"></div>
+    <button class="btn" id="f-submit">Download Signed PDF</button>
+    <button class="btn secondary" id="f-back" style="margin-top:10px">&#x2190; Choose a different form</button>
+    <div class="privacy">Generated on your device. Nothing is uploaded. Save or email the PDF to your supervisor / HR.</div>
+  </div>
+
+</div>
+
+<script>
+// ── SIGNATURE PADS ────────────────────────────────────────────────────────
+var SIG = {}; // id -> {canvas, has}
+function setupSig(id){
+  var orig=document.getElementById(id); if(!orig) return;
+  var canvas=orig.cloneNode(false); orig.parentNode.replaceChild(canvas,orig);
+  var dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*dpr; canvas.height=canvas.offsetHeight*dpr;
+  var ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.strokeStyle='#0d1526'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  SIG[id]={canvas:canvas,has:false};
+  var drawing=false;
+  function pos(e){var r=canvas.getBoundingClientRect();var s=e.touches?e.touches[0]:e;return {x:s.clientX-r.left,y:s.clientY-r.top};}
+  function start(e){e.preventDefault();drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);}
+  function move(e){e.preventDefault();if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();SIG[id].has=true;canvas.classList.add('has');}
+  function end(e){e.preventDefault();drawing=false;}
+  canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('mouseup',end);canvas.addEventListener('mouseleave',end);
+  canvas.addEventListener('touchstart',start,{passive:false});
+  canvas.addEventListener('touchmove',move,{passive:false});
+  canvas.addEventListener('touchend',end,{passive:false});
+  var clr=document.getElementById('clr-'+id);
+  if(clr){ clr.onclick=function(){ctx.clearRect(0,0,canvas.width,canvas.height);SIG[id].has=false;canvas.classList.remove('has');}; }
+}
+function sigBlock(id,label){
+  return '<div class="field"><label>'+label+' <span class="req">*</span></label>'+
+    '<div class="sig-wrap"><canvas class="sig-canvas" id="'+id+'"></canvas>'+
+    '<div class="sig-bar"><span class="sig-hint">Draw your signature above</span>'+
+    '<button class="sig-clear" id="clr-'+id+'" type="button">Clear</button></div></div></div>';
+}
+function sigDataURL(id){
+  var s=SIG[id]; if(!s||!s.has) return null;
+  return s.canvas.toDataURL('image/png');
+}
+function today(){var d=new Date();return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();}
+function val(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+
+// ── FORM DEFINITIONS ──────────────────────────────────────────────────────
+var CURRENT=null;
+
+function fieldRow(fields){ // fields: [{id,label,req,ph,type,half}]
+  return '<div class="row">'+fields.map(function(f){
+    return '<div class="field"><label>'+f.label+(f.req?' <span class="req">*</span>':'')+'</label>'+
+      '<input class="input" id="'+f.id+'" type="'+(f.type||'text')+'" placeholder="'+(f.ph||'')+'" '+(f.val?('value="'+f.val+'"'):'')+'></div>';
+  }).join('')+'</div>';
+}
+
+var FORMS={
+  // ──────────────────────────────────────────────────────────────── FLU
+  flu:{
+    title:'Seasonal Influenza Vaccination Declination Statement',
+    src:'Global Medical Response &middot; August 2020',
+    render:function(){
+      return ''+
+      '<div class="card"><div class="card-lbl">Employee Information</div>'+
+        fieldRow([{id:'flu-name',label:'Print Name',req:true}])+
+        fieldRow([{id:'flu-eeid',label:'EE ID #',req:true},{id:'flu-fac',label:'Facility / County'}])+
+      '</div>'+
+      '<div class="card"><div class="card-lbl">Statement &mdash; Please read</div><div class="statement">'+
+        '<p>My employer, Global Medical Response, has recommended that I receive the influenza vaccination to protect myself, my colleagues, and the patients I serve. I acknowledge that I am aware of the following facts:</p>'+
+        '<ul>'+
+        '<li>Influenza is a serious respiratory disease that kills an average of 36,000 persons and hospitalizes more than 200,000 persons in the US each year.</li>'+
+        '<li>If I contract influenza, I will shed the virus for 24&ndash;48 hours before symptoms appear.</li>'+
+        '<li>I understand that the strains of virus that cause influenza infection change almost every year, which is why a different influenza vaccine is recommended each year.</li>'+
+        '<li>I understand I cannot contract influenza from the influenza vaccine.</li>'+
+        '<li>The consequences of my refusing to be vaccinated could have life-threatening consequences to my health and the health of those with whom I have contact, including my patients, my co-workers, my family, and my community.</li>'+
+        '<li>I understand that I can change my mind at any time and accept the influenza vaccination, if the vaccine is available, anytime during the influenza season.</li>'+
+        '</ul>'+
+        '<p>By my signature below I acknowledge that I am additionally aware that local healthcare facilities may require ambulance personnel, working in patient care areas, to don an appropriate mask if they have not received a flu vaccine.</p>'+
+        fieldRow([{id:'flu-initial',label:'Initial (masking acknowledgment)',req:true}])+
+      '</div></div>'+
+      '<div class="card"><div class="card-lbl">Declination</div>'+
+        '<label class="chk" style="margin-bottom:12px"><input type="checkbox" id="flu-decline"><span><strong>No, I do not wish to have the influenza vaccination given to me.</strong></span></label>'+
+        '<div class="statement fine"><p>I understand that due to my occupational exposure to aerosol transmissible diseases, I may be at risk of acquiring seasonal influenza. I have been given the opportunity to be vaccinated against this infection at no charge to me. I decline this vaccination at this time. I understand that by declining this vaccine, I continue to be at increased risk of acquiring influenza. If, during the season for which the CDC recommends administration of the influenza vaccine, I continue to have occupational exposure to aerosol transmissible diseases and want to be vaccinated, I can receive the vaccination at no charge to me.</p></div>'+
+        fieldRow([{id:'flu-date',label:'Date',req:true,val:today()}])+
+        sigBlock('flu-sig','Employee Signature')+
+      '</div>';
+    },
+    init:function(){ setupSig('flu-sig'); },
+    collect:function(st){
+      var name=val('flu-name'),eeid=val('flu-eeid'),initial=val('flu-initial'),date=val('flu-date');
+      if(!name){return err(st,'Print name is required.');}
+      if(!eeid){return err(st,'EE ID # is required.');}
+      if(!initial){return err(st,'Please add your initials for the masking acknowledgment.');}
+      if(!document.getElementById('flu-decline').checked){return err(st,'Please check the box declining the vaccination.');}
+      var sig=sigDataURL('flu-sig'); if(!sig){return err(st,'Please sign in the signature box.');}
+      return {
+        title:'Seasonal Influenza Vaccination Declination Statement',
+        src:'Global Medical Response — August 2020',
+        info:[['Print Name',name],['EE ID #',eeid],['Facility / County',val('flu-fac')||'—'],['Masking acknowledgment initials',initial]],
+        statements:[
+          'My employer, Global Medical Response, has recommended that I receive the influenza vaccination. I acknowledge the facts presented (serious disease; asymptomatic viral shedding 24-48h; annual strain change; cannot contract flu from the vaccine; life-threatening consequences of refusal; may accept anytime during the season; may be required to mask if unvaccinated).',
+          'DECLINATION: No, I do not wish to have the influenza vaccination given to me. I understand that due to my occupational exposure to aerosol transmissible diseases I may be at risk of acquiring seasonal influenza. I have been given the opportunity to be vaccinated at no charge. I decline this vaccination at this time and understand I continue to be at increased risk. I may receive the vaccination at no charge later in the season if I choose.'
+        ],
+        sigs:[['Employee Signature',sig,date]]
+      };
+    }
+  },
+  // ──────────────────────────────────────────────────────────────── HBV
+  hbv:{
+    title:'Employee Hepatitis B Registration / Refusal Form',
+    src:'AMR &middot; Attachment A',
+    render:function(){
+      return ''+
+      '<div class="card"><div class="card-lbl">Employee Information</div>'+
+        fieldRow([{id:'hbv-name',label:'Employee Name',req:true}])+
+        fieldRow([{id:'hbv-title',label:'Job Title'},{id:'hbv-primary',label:'Primary County / Dept.'}])+
+        fieldRow([{id:'hbv-secondary',label:'Secondary County (if any)'},{id:'hbv-dob',label:'Date of Birth',ph:'MM/DD/YYYY'}])+
+        fieldRow([{id:'hbv-ssn',label:'SSN (optional)',ph:'___-__-____'},{id:'hbv-phone',label:'Contact Telephone'}])+
+        '<div class="hint">Telephone type: circle on the PDF, or note here (home / work / cell / other).</div>'+
+      '</div>'+
+      '<div class="card"><div class="card-lbl">Choose one <span style="color:var(--wrong)">*</span></div>'+
+        hbvOpt('begin','I have not received the hepatitis B vaccination series prior to my AMR hire date and I would like to <strong>begin the series</strong>.','All expenses covered by AMR — do not sign the declination.')+
+        hbvOpt('refuse','I have not received the hepatitis B vaccination series prior to my AMR hire date and I have made an informed choice to <strong>refuse the vaccination</strong>.','You must sign the refusal below.')+
+        hbvOpt('inprogress','I am currently in the process of <strong>completing the hepatitis B vaccination series from another provider</strong>.','Sign the declination below.')+
+        hbvOpt('completed','I have <strong>already completed the hepatitis B vaccination series</strong>.','Sign the declination below.')+
+      '</div>'+
+      '<div class="card" id="hbv-refusal-card"><div class="card-lbl">Refusal of AMR-Paid Hepatitis B Vaccination Series</div>'+
+        '<div class="statement fine"><p>I understand that due to my occupational exposure to blood or other potentially infectious materials I may be at risk of acquiring hepatitis B (HBV) infection. I have been given the opportunity to be vaccinated with hepatitis B vaccine, at no charge to myself. However, I decline hepatitis B vaccination at this time. I understand that by declining the vaccine, I continue to be at risk of acquiring hepatitis B, a serious disease. If in the future I continue to have occupational exposure to blood or other potentially infectious materials and I want to be vaccinated with hepatitis B vaccine, I can receive the vaccination series at no cost to me.</p></div>'+
+        fieldRow([{id:'hbv-refdate',label:'Date',val:today()}])+
+        sigBlock('hbv-refsig','Signature indicating my refusal (if applicable)')+
+      '</div>'+
+      '<div class="card"><div class="card-lbl">Acknowledgment &mdash; Mandatory for all</div>'+
+        '<div class="statement fine"><p>I hereby certify that AMR has explained the benefits of Hepatitis B vaccination and I understand that I can seek further information from my supervisor at any time.</p></div>'+
+        fieldRow([{id:'hbv-ackdate',label:'Date',req:true,val:today()}])+
+        sigBlock('hbv-acksig','Signature (mandatory for all)')+
+      '</div>';
+    },
+    init:function(){ setupSig('hbv-refsig'); setupSig('hbv-acksig'); toggleHbvRefusal(); },
+    collect:function(st){
+      var name=val('hbv-name');
+      var choice=(document.querySelector('input[name="hbv-choice"]:checked')||{}).value;
+      if(!name){return err(st,'Employee name is required.');}
+      if(!choice){return err(st,'Please choose one of the four options.');}
+      var acksig=sigDataURL('hbv-acksig'); var ackdate=val('hbv-ackdate');
+      if(!acksig){return err(st,'The acknowledgment signature (mandatory for all) is required.');}
+      var needRefusal=(choice!=='begin');
+      var refsig=sigDataURL('hbv-refsig'); var refdate=val('hbv-refdate');
+      if(needRefusal && !refsig){return err(st,'This choice requires the refusal/declination signature.');}
+      var choiceText={
+        begin:'I have not received the hepatitis B vaccination series prior to my AMR hire date and I would like to BEGIN THE SERIES. (All expenses covered by AMR; declination not signed.)',
+        refuse:'I have not received the hepatitis B vaccination series prior to my AMR hire date and I have made an informed choice to REFUSE the vaccination.',
+        inprogress:'I am currently in the process of completing the hepatitis B vaccination series FROM ANOTHER PROVIDER.',
+        completed:'I have ALREADY COMPLETED the hepatitis B vaccination series.'
+      }[choice];
+      var statements=['SELECTION: '+choiceText];
+      if(needRefusal){
+        statements.push('REFUSAL of AMR-Paid Hepatitis B Vaccination Series: I understand that due to my occupational exposure to blood or other potentially infectious materials I may be at risk of acquiring hepatitis B (HBV) infection. I have been given the opportunity to be vaccinated at no charge. However, I decline hepatitis B vaccination at this time and understand I continue to be at risk. I may receive the vaccination series at no cost later if I choose.');
+      }
+      statements.push('ACKNOWLEDGMENT (mandatory): I hereby certify that AMR has explained the benefits of Hepatitis B vaccination and I understand that I can seek further information from my supervisor at any time.');
+      var sigs=[];
+      if(needRefusal && refsig) sigs.push(['Refusal Signature',refsig,refdate]);
+      sigs.push(['Acknowledgment Signature',acksig,ackdate]);
+      return {
+        title:'Employee Hepatitis B Registration / Refusal Form (Attachment A)',
+        src:'AMR — Attachment A',
+        info:[['Employee Name',name],['Job Title',val('hbv-title')||'—'],['Primary County / Dept.',val('hbv-primary')||'—'],['Secondary County',val('hbv-secondary')||'—'],['Date of Birth',val('hbv-dob')||'—'],['SSN',val('hbv-ssn')||'—'],['Contact Telephone',val('hbv-phone')||'—']],
+        statements:statements, sigs:sigs
+      };
+    }
+  },
+  // ──────────────────────────────────────────────────────────────── PPD
+  ppd:{
+    title:'Mantoux Skin Test (PPD) — TB Acceptance / Declination',
+    src:'AMR TB Exposure Prevention &amp; Skin Testing Policy &middot; v1.2 (Eff. 10/31/2017) &middot; SRM #1215',
+    render:function(){
+      return ''+
+      '<div class="card"><div class="card-lbl">Employee Information</div>'+
+        fieldRow([{id:'ppd-name',label:'Print Name',req:true}])+
+        fieldRow([{id:'ppd-ssn',label:'Social Security #',ph:'___-__-____'}])+
+        '<div class="hint">OSHA requires social security numbers on this medical record.</div>'+
+      '</div>'+
+      '<div class="card"><div class="card-lbl">Notice</div><div class="statement fine">'+
+        '<p>Tuberculosis (TB) poses an occupational health threat. While TB is usually treatable, some forms are multi-drug resistant (MDR-TB). This disease is an airborne pathogen and is spread from one person to another through the air.</p>'+
+        '<p>To protect yourself, use an N-95 respirator that you were fit tested for. Also, get a Mantoux skin test for early detection of the disease. Paramedics, EMTs and Transportation Service Personnel should receive a Mantoux test every year.</p>'+
+        '<p>According to OSHA&rsquo;s Standard Interpretation Letter dated September 23, 1997, &ldquo;OSHA does not require that employees participate in TB skin testing.&rdquo; If you decline the offer, you must sign the declination statement below.</p>'+
+      '</div></div>'+
+      '<div class="card"><div class="card-lbl">Choose one <span style="color:var(--wrong)">*</span></div>'+
+        ppdOpt('accept','I ACCEPT the offer for a free Mantoux Skin Test.')+
+        ppdOpt('decline','I DECLINE the offer at this time.')+
+      '</div>'+
+      '<div class="card" id="ppd-accept-card"><div class="card-lbl">Acceptance Statement</div><div class="statement fine">'+
+        '<p>I accept the offer for free Mantoux Skin Test. The Mantoux is administered using intermediate tuberculin purified protein derivative (PPD). I understand that the test occurs in two visits. During the first visit, a small injection is made in the arm. A second visit is scheduled for 48 to 72 hours later. During the second visit, the PPD plant is examined and interpreted, and the results are documented.</p>'+
+        '<p>I consent to having the PPD planted during the first visit. I agree that I&rsquo;m responsible for attending the second visit, as scheduled. I recognize that failure to attend the second visit precludes the opportunity to document test results.</p>'+
+        '</div>'+
+        fieldRow([{id:'ppd-accdate',label:'Date',val:today()}])+
+        sigBlock('ppd-accsig','Employee Signature (acceptance)')+
+        '<div class="card-lbl" style="margin-top:16px">For Clinic / Administrator Use (optional)</div>'+
+        fieldRow([{id:'ppd-mfr',label:'PPD Manufacturer'},{id:'ppd-lot',label:'Lot Number'}])+
+        fieldRow([{id:'ppd-planted',label:'1st Visit — Date Planted'},{id:'ppd-site',label:'Site'}])+
+        fieldRow([{id:'ppd-plantedby',label:'Planted by'}])+
+        fieldRow([{id:'ppd-examdate',label:'2nd Visit — Date Examined'},{id:'ppd-results',label:'Results'}])+
+        fieldRow([{id:'ppd-interpby',label:'Interpreted by'}])+
+      '</div>'+
+      '<div class="card" id="ppd-decline-card"><div class="card-lbl">Declination Statement</div><div class="statement fine">'+
+        '<p>Thank you for offering me a free Mantoux Skin (PPD) test. However, I decline the offer at this time. I will notify a supervisor if I decide to change my mind at a later date.</p>'+
+        '</div>'+
+        fieldRow([{id:'ppd-decdate',label:'Date',val:today()}])+
+        sigBlock('ppd-decsig','Employee Signature (declination)')+
+      '</div>';
+    },
+    init:function(){ setupSig('ppd-accsig'); setupSig('ppd-decsig'); togglePpd(); },
+    collect:function(st){
+      var name=val('ppd-name');
+      var choice=(document.querySelector('input[name="ppd-choice"]:checked')||{}).value;
+      if(!name){return err(st,'Print name is required.');}
+      if(!choice){return err(st,'Please choose Accept or Decline.');}
+      var info=[['Print Name',name],['Social Security #',val('ppd-ssn')||'—']];
+      var statements=[]; var sigs=[];
+      if(choice==='accept'){
+        var accsig=sigDataURL('ppd-accsig'); if(!accsig){return err(st,'Please sign the acceptance statement.');}
+        statements.push('ACCEPTANCE: I accept the offer for a free Mantoux Skin Test (intermediate tuberculin PPD). I understand the test occurs in two visits (injection, then read at 48-72 hours). I consent to the PPD being planted at the first visit, agree I am responsible for attending the scheduled second visit, and recognize that failing to attend precludes documenting the result.');
+        var clinic=[['PPD Manufacturer',val('ppd-mfr')],['Lot Number',val('ppd-lot')],['1st Visit Date Planted',val('ppd-planted')],['Site',val('ppd-site')],['Planted by',val('ppd-plantedby')],['2nd Visit Date Examined',val('ppd-examdate')],['Results',val('ppd-results')],['Interpreted by',val('ppd-interpby')]].filter(function(r){return r[1];});
+        info=info.concat(clinic);
+        sigs.push(['Employee Signature (Acceptance)',accsig,val('ppd-accdate')]);
+      } else {
+        var decsig=sigDataURL('ppd-decsig'); if(!decsig){return err(st,'Please sign the declination statement.');}
+        statements.push('DECLINATION: Thank you for offering me a free Mantoux Skin (PPD) test. However, I decline the offer at this time. I will notify a supervisor if I decide to change my mind at a later date.');
+        sigs.push(['Employee Signature (Declination)',decsig,val('ppd-decdate')]);
+      }
+      return {
+        title:'Mantoux Skin Test (PPD) — TB '+(choice==='accept'?'Acceptance':'Declination'),
+        src:'AMR TB Exposure Prevention & Skin Testing Policy v1.2 (Eff. 10/31/2017) — SRM #1215',
+        info:info, statements:statements, sigs:sigs
+      };
+    }
+  }
+};
+
+function hbvOpt(v,text,note){
+  return '<label class="opt-row" data-name="hbv-choice"><input type="radio" name="hbv-choice" value="'+v+'">'+
+    '<span class="opt-t">'+text+(note?'<br><span class="opt-note">'+note+'</span>':'')+'</span></label>';
+}
+function ppdOpt(v,text){
+  return '<label class="opt-row" data-name="ppd-choice"><input type="radio" name="ppd-choice" value="'+v+'">'+
+    '<span class="opt-t">'+text+'</span></label>';
+}
+function toggleHbvRefusal(){
+  var c=(document.querySelector('input[name="hbv-choice"]:checked')||{}).value;
+  var card=document.getElementById('hbv-refusal-card');
+  if(card) card.style.opacity=(c && c!=='begin')?'1':'0.5';
+}
+function togglePpd(){
+  var c=(document.querySelector('input[name="ppd-choice"]:checked')||{}).value;
+  var a=document.getElementById('ppd-accept-card'), d=document.getElementById('ppd-decline-card');
+  if(a) a.classList.toggle('hidden', c!=='accept');
+  if(d) d.classList.toggle('hidden', c!=='decline');
+}
+
+function err(st,msg){ st.textContent='⚠ '+msg; st.className='status'; return null; }
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function openForm(key){
+  CURRENT=key; SIG={};
+  var f=FORMS[key];
+  document.getElementById('f-title').innerHTML=f.title;
+  document.getElementById('f-src').innerHTML='Source: '+f.src;
+  document.getElementById('f-body').innerHTML=f.render();
+  document.getElementById('f-status').textContent='';
+  document.getElementById('hdr-title').textContent='Health & Immunization Forms';
+  document.getElementById('screen-home').classList.add('hidden');
+  document.getElementById('screen-form').classList.remove('hidden');
+  window.scrollTo(0,0);
+  setTimeout(function(){
+    f.init();
+    // wire option highlight + toggles
+    document.querySelectorAll('.opt-row').forEach(function(row){
+      row.addEventListener('click',function(){
+        var name=row.getAttribute('data-name');
+        document.querySelectorAll('.opt-row[data-name="'+name+'"]').forEach(function(r){r.classList.remove('sel');});
+        row.classList.add('sel');
+        if(name==='hbv-choice') toggleHbvRefusal();
+        if(name==='ppd-choice') togglePpd();
+      });
+    });
+  },30);
+}
+function goHome(){
+  document.getElementById('screen-form').classList.add('hidden');
+  document.getElementById('screen-home').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+document.getElementById('f-back').onclick=goHome;
+
+// ── PDF GENERATION ────────────────────────────────────────────────────────
+document.getElementById('f-submit').onclick=function(){
+  var st=document.getElementById('f-status');
+  var data=FORMS[CURRENT].collect(st);
+  if(!data) return;
+  try{
+    var jsPDF=window.jspdf.jsPDF;
+    var doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+    var W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
+    var m=48, y=54;
+    function ensure(space){ if(y+space>H-54){ doc.addPage(); y=54; } }
+    // Header
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(23,58,104);
+    doc.text('AMR KANSAS CITY',m,y); y+=16;
+    doc.setFontSize(15); doc.setTextColor(20,34,56);
+    doc.text(doc.splitTextToSize(data.title,W-2*m),m,y); y+=doc.getTextDimensions(doc.splitTextToSize(data.title,W-2*m)).h+4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120,120,130);
+    doc.text(data.src,m,y); y+=18;
+    doc.setDrawColor(210,215,225); doc.line(m,y,W-m,y); y+=18;
+    // Info block
+    doc.setFontSize(10);
+    data.info.forEach(function(kv){
+      ensure(18);
+      doc.setFont('helvetica','bold'); doc.setTextColor(90,96,110);
+      var label=kv[0]+':';
+      doc.text(label,m,y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(20,34,56);
+      var lw=doc.getTextWidth(label)+6;
+      var vlines=doc.splitTextToSize(String(kv[1]),W-2*m-lw);
+      doc.text(vlines,m+lw,y);
+      y+=Math.max(16,doc.getTextDimensions(vlines).h+4);
+    });
+    y+=6; doc.setDrawColor(210,215,225); doc.line(m,y,W-m,y); y+=16;
+    // Statements
+    doc.setFontSize(9.5); doc.setTextColor(30,30,40);
+    data.statements.forEach(function(p){
+      var lines=doc.splitTextToSize(p,W-2*m);
+      ensure(doc.getTextDimensions(lines).h+10);
+      doc.setFont('helvetica','normal');
+      doc.text(lines,m,y); y+=doc.getTextDimensions(lines).h+10;
+    });
+    y+=6;
+    // Signatures
+    data.sigs.forEach(function(s){
+      ensure(78);
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(90,96,110);
+      doc.text(s[0].toUpperCase(),m,y); y+=6;
+      try{ doc.addImage(s[1],'PNG',m,y,180,54); }catch(e){}
+      doc.setDrawColor(120,120,130); doc.line(m,y+56,m+220,y+56);
+      // date to the right
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(20,34,56);
+      doc.text('Date: '+(s[2]||''),m+250,y+50);
+      y+=78;
+    });
+    // Footer
+    ensure(30); y+=6; doc.setDrawColor(210,215,225); doc.line(m,y,W-m,y); y+=14;
+    doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(120,120,130);
+    doc.text(doc.splitTextToSize('Generated '+new Date().toLocaleString()+' via the AMR KC Field Guide app as a supplemental signed record. Verify against your employer’s official form and HR process.',W-2*m),m,y);
+    // Save
+    var safe=(data.info[0]&&data.info[0][1]?data.info[0][1]:'employee').replace(/[^a-z0-9]+/gi,'_');
+    var fname=CURRENT.toUpperCase()+'_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+    doc.save(fname);
+    st.textContent='✓ Signed PDF downloaded. Email or hand it to your supervisor / HR.';
+    st.className='status ok';
+  }catch(e){
+    st.textContent='⚠ Could not generate the PDF ('+e.message+'). Check your connection and try again.';
+    st.className='status';
+  }
+};
+</script>
+</body>
+</html>
