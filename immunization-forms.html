@@ -42,13 +42,20 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
   border-radius:12px;padding:14px;margin-bottom:16px;line-height:1.6}
 .home-intro strong{color:var(--teal2)}
 .pick-card{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);
-  border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(21,34,56,.05);
-  cursor:pointer;transition:border-color .12s,transform .12s;text-align:left;width:100%;font-family:var(--sans)}
-.pick-card:hover{border-color:var(--teal);transform:translateY(-2px)}
-.pick-ico{font-size:26px;flex-shrink:0}
-.pick-t{font-size:16px;font-weight:700;color:var(--teal)}
-.pick-s{font-size:12px;color:var(--gray);margin-top:2px}
-.pick-arr{margin-left:auto;color:var(--teal2);font-weight:700;font-size:18px}
+  border-radius:16px;padding:15px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(21,34,56,.04);
+  cursor:pointer;transition:border-color .14s,box-shadow .14s,transform .14s;text-align:left;width:100%;font-family:var(--sans)}
+.pick-card:hover{border-color:var(--teal);box-shadow:0 6px 18px rgba(21,34,56,.10);transform:translateY(-2px)}
+.pick-card:active{transform:translateY(0);box-shadow:0 1px 2px rgba(21,34,56,.06)}
+.pick-ico{width:46px;height:46px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:24px;border-radius:12px;background:var(--surface2);line-height:1}
+.pick-card.flu .pick-ico{background:#e8f0fd}
+.pick-card.hbv .pick-ico{background:#fdeaea}
+.pick-card.ppd .pick-ico{background:#e7f6ec}
+.pick-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pick-t{display:block;font-size:15.5px;font-weight:700;color:var(--teal);line-height:1.25}
+.pick-s{display:block;font-size:12px;color:var(--gray);line-height:1.4}
+.pick-arr{margin-left:6px;color:#b7c0cc;font-weight:700;font-size:20px;flex-shrink:0}
+.pick-card:hover .pick-arr{color:var(--teal2)}
 
 /* FORM */
 .form-title{font-size:19px;font-weight:700;color:var(--teal);margin-bottom:4px}
@@ -118,19 +125,19 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
     <div class="home-intro">
       Complete, sign, and download any of the forms below as a <strong>PDF</strong> you can email to your supervisor or HR. The form is filled out and signed <strong>on this device only</strong> &mdash; nothing you enter (including SSN or date of birth) is uploaded or transmitted anywhere.
     </div>
-    <button class="pick-card" onclick="openForm('flu')">
+    <button class="pick-card flu" onclick="openForm('flu')">
       <span class="pick-ico">&#x1F489;</span>
-      <span><span class="pick-t">Influenza Declination</span><span class="pick-s">Seasonal flu vaccination declination statement</span></span>
+      <span class="pick-body"><span class="pick-t">Influenza Declination</span><span class="pick-s">Seasonal flu vaccination declination statement</span></span>
       <span class="pick-arr">&#x203A;</span>
     </button>
-    <button class="pick-card" onclick="openForm('hbv')">
+    <button class="pick-card hbv" onclick="openForm('hbv')">
       <span class="pick-ico">&#x1FA78;</span>
-      <span><span class="pick-t">Hepatitis B Registration / Refusal</span><span class="pick-s">Begin series, refuse, or acknowledge prior series</span></span>
+      <span class="pick-body"><span class="pick-t">Hepatitis B Registration / Refusal</span><span class="pick-s">Begin series, refuse, or acknowledge prior series</span></span>
       <span class="pick-arr">&#x203A;</span>
     </button>
-    <button class="pick-card" onclick="openForm('ppd')">
+    <button class="pick-card ppd" onclick="openForm('ppd')">
       <span class="pick-ico">&#x1F9EA;</span>
-      <span><span class="pick-t">TB / PPD Skin Test</span><span class="pick-s">Mantoux acceptance or declination statement</span></span>
+      <span class="pick-body"><span class="pick-t">TB / PPD Skin Test</span><span class="pick-s">Mantoux acceptance or declination statement</span></span>
       <span class="pick-arr">&#x203A;</span>
     </button>
     <div class="privacy">
