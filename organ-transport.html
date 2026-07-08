@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Organ Transport">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Internal familiarization training for AMR Kansas City — the three organ-transport mission types, your role on each, who to coordinate with, and how to chart it. Not for CE credit.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Organ Transport — AMR KC Training</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
+  --green:#15803d;--green-bg:#eafbf1;--green-line:#bfe6cd;
+  --red:#dc2626;--red-bg:#fdecec;--warn:#a1590b;--warn-bg:#fef3e2;--warn-line:#f3d9ab;
+  --sans:'IBM Plex Sans',sans-serif;--mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-height:1.5}
+.hidden{display:none!important}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;gap:10px}
+.hdr-logo{width:34px;height:34px;border-radius:9px;background:var(--teal);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;letter-spacing:0.02em}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:15px;font-weight:700;color:var(--teal);line-height:1.15}
+.hdr-sub{font-size:11px;color:var(--gray)}
+.hdr-back{font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;padding:6px 10px;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface2);white-space:nowrap;cursor:pointer}
+
+.wrap{max-width:660px;margin:0 auto;padding:16px 14px 72px}
+
+/* NOT-CE / DRAFT banners */
+.notice{border-radius:11px;padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.5;
+  display:flex;gap:9px;align-items:flex-start}
+.notice .ni{flex-shrink:0;font-size:15px;line-height:1.3}
+.notice.info{background:#eaf1fd;border:1px solid #c9dcfb;color:#123a72}
+.notice.draft{background:var(--warn-bg);border:1px solid var(--warn-line);color:#7a4408}
+.notice strong{font-weight:700}
+
+.draft-tag{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:#7a4408;background:var(--warn-bg);border:1px solid var(--warn-line);
+  border-radius:4px;padding:2px 6px;margin-bottom:6px}
+.draft-block{background:var(--warn-bg);border:1px dashed var(--warn-line);border-radius:10px;padding:12px 13px;margin:12px 0}
+.draft-block p{margin:0 0 6px}
+.draft-block p:last-child{margin-bottom:0}
+
+/* HERO / HOME */
+.hero{background:linear-gradient(150deg,#173a68,#1b4f9c);border-radius:16px;padding:20px 18px;margin-bottom:14px;color:#fff}
+.hero h1{font-size:21px;font-weight:700;line-height:1.15;margin-bottom:6px}
+.hero p{font-size:13px;opacity:.92;line-height:1.55}
+.hero .meta{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.hero .chip{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.04em;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 10px}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
+.card-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--teal2);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+
+/* Decision aid */
+.decide{display:flex;flex-direction:column;gap:9px}
+.decide-row{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border:1px solid var(--border);border-radius:11px;background:var(--surface2)}
+.decide-q{font-size:19px;flex-shrink:0;line-height:1}
+.decide-t{font-size:13.5px;line-height:1.5}
+.decide-t b{color:var(--teal)}
+.decide-t .mtag{font-family:var(--mono);font-size:10px;font-weight:700;color:#fff;background:var(--teal2);
+  border-radius:4px;padding:1px 6px;margin-right:6px;letter-spacing:.03em}
+
+/* Lesson list */
+.lsn{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--border);border-radius:13px;
+  padding:14px;margin-bottom:10px;cursor:pointer;width:100%;font-family:var(--sans);text-align:left;
+  transition:border-color .13s,box-shadow .13s,transform .13s}
+.lsn:hover{border-color:var(--teal);box-shadow:0 5px 16px rgba(21,34,56,.09);transform:translateY(-1px)}
+.lsn-num{width:34px;height:34px;flex-shrink:0;border-radius:9px;background:var(--dim);color:var(--teal2);
+  font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.lsn.done .lsn-num{background:var(--green-bg);color:var(--green)}
+.lsn-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lsn-t{display:block;font-size:14.5px;font-weight:600;color:var(--white);line-height:1.3}
+.lsn-s{display:block;font-size:11.5px;color:var(--gray)}
+.lsn-arr{color:#b7c0cc;font-size:19px;flex-shrink:0}
+.lsn.done .lsn-arr::before{content:'\2713';color:var(--green);font-size:15px;font-weight:700}
+.lsn.done .lsn-arr{font-size:0}
+
+.progress-wrap{height:7px;background:var(--dim);border-radius:5px;overflow:hidden;margin:4px 0 14px}
+.progress-bar{height:100%;background:var(--teal2);border-radius:5px;transition:width .3s}
+.progress-txt{font-size:12px;color:var(--gray);margin-bottom:6px}
+
+/* LESSON VIEW */
+.lesson-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.lesson-kicker{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal2)}
+.lesson-title{font-size:20px;font-weight:700;color:var(--teal);line-height:1.2;margin-bottom:12px}
+.prose{font-size:14px;line-height:1.68;color:#232f45}
+.prose h3{font-size:15px;color:var(--teal);margin:18px 0 7px;font-weight:700}
+.prose p{margin-bottom:11px}
+.prose ul{margin:0 0 12px 4px;list-style:none}
+.prose li{position:relative;padding:3px 0 3px 16px;font-size:13.5px;line-height:1.55}
+.prose li::before{content:'';position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--teal2)}
+.prose b,.prose strong{color:var(--teal)}
+.keybox{background:#eaf1fd;border-left:3px solid var(--teal2);border-radius:9px;padding:12px 13px;margin:14px 0;font-size:13.5px;line-height:1.55}
+.keybox .kt{display:block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal2);margin-bottom:5px}
+.respectbox{background:#f6f2fb;border-left:3px solid #6d28d9;border-radius:9px;padding:12px 13px;margin:14px 0;font-size:13.5px;line-height:1.6}
+.respectbox .kt{display:block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6d28d9;margin-bottom:5px}
+.donot{background:var(--red-bg);border-left:3px solid var(--red);border-radius:9px;padding:12px 13px;margin:14px 0;font-size:13.5px;line-height:1.55}
+.donot .kt{display:block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin-bottom:5px}
+
+.navbtns{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;padding:14px;border-radius:11px;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);text-align:center}
+.btn.primary{background:var(--teal);color:#fff}
+.btn.ghost{background:#fff;color:var(--teal);border:1px solid var(--border)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-block{display:block;width:100%}
+
+/* QUIZ */
+.q-count{font-family:var(--mono);font-size:11px;color:var(--gray);letter-spacing:.04em;margin-bottom:8px}
+.q-text{font-size:16px;font-weight:600;color:var(--white);line-height:1.4;margin-bottom:14px}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:11px;
+  padding:13px 14px;margin-bottom:10px;font-size:14px;font-family:var(--sans);color:var(--white);cursor:pointer;line-height:1.45}
+.opt:hover{border-color:var(--teal2)}
+.opt.correct{border-color:var(--green);background:var(--green-bg)}
+.opt.wrong{border-color:var(--red);background:var(--red-bg)}
+.opt.dim{opacity:.6}
+.fb{border-radius:11px;padding:13px 14px;margin:6px 0 4px;font-size:13.5px;line-height:1.6}
+.fb.correct{background:var(--green-bg);border:1px solid var(--green-line)}
+.fb.wrong{background:var(--red-bg);border:1px solid #f2c4c4}
+.fb-head{font-weight:700;margin-bottom:4px}
+.fb.correct .fb-head{color:var(--green)}
+.fb.wrong .fb-head{color:var(--red)}
+
+/* RESULT + RECORD */
+.result{text-align:center;padding:26px 18px;border-radius:16px;margin-bottom:14px}
+.result.pass{background:var(--green-bg);border:1.5px solid var(--green-line)}
+.result.fail{background:var(--warn-bg);border:1.5px solid var(--warn-line)}
+.result .big{font-size:40px;font-weight:700;line-height:1}
+.result.pass .big{color:var(--green)}
+.result.fail .big{color:var(--warn)}
+.result .rlbl{font-size:14px;font-weight:600;margin-top:8px}
+
+.record{background:#fff;border:2px solid var(--teal);border-radius:16px;padding:26px 20px;text-align:center;margin-bottom:14px}
+.record .r-kicker{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal2)}
+.record .r-title{font-size:20px;font-weight:700;color:var(--teal);margin:8px 0 4px}
+.record .r-name{font-size:24px;font-weight:700;color:var(--white);margin:14px 0 4px;border-bottom:1px solid var(--border);padding-bottom:12px}
+.record .r-meta{font-size:12.5px;color:var(--gray);margin-top:10px;line-height:1.6}
+.record .r-notce{margin-top:14px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.04em;color:#7a4408;background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:7px;padding:8px 10px}
+
+.namefield{margin:12px 0}
+.namefield label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+.namefield input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:var(--sans)}
+.namefield input:focus{outline:none;border-color:var(--teal2)}
+
+.footnote{font-size:11px;color:var(--gray);line-height:1.55;text-align:center;margin-top:16px;padding:0 6px}
+.xlink{color:var(--teal2);font-weight:600;text-decoration:none}
+@media print{.hdr,.navbtns,.hdr-back,.print-hide{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">KC</div>
+  <div class="hdr-txt">
+    <div class="hdr-title">Organ Transport</div>
+    <div class="hdr-sub">AMR Kansas City &middot; Familiarization training</div>
+  </div>
+  <a class="hdr-back" href="index.html">&#x2190; Field Guide</a>
+</div>
+
+<div class="wrap">
+
+  <!-- ===================== HOME ===================== -->
+  <div id="view-home">
+    <div class="hero">
+      <h1>&ldquo;Organ run&rdquo; is not one call type.</h1>
+      <p>It's three different missions &mdash; each with a different patient (or none), a different role for you, and a different way to chart it. Knowing which one you're on is the whole job. This short course gets you from &ldquo;never heard of an organ run&rdquo; to knowing the mission types, your role, who to call, and how to document it &mdash; before you're assigned one solo.</p>
+      <div class="meta">
+        <span class="chip">5 LESSONS</span>
+        <span class="chip">KNOWLEDGE CHECK</span>
+        <span class="chip">~15 MIN</span>
+      </div>
+    </div>
+
+    <div class="notice info"><span class="ni">&#8505;</span><span><strong>Internal familiarization training &mdash; not for CE credit.</strong> It carries no NREMT or Kansas (KBEMS) credit or recertification hours, and completion is an internal record only.</span></div>
+
+    <div class="notice draft"><span class="ni">&#9888;</span><span><strong>DRAFT &mdash; pending medical review.</strong> Items marked <span class="draft-tag" style="margin:0">DRAFT</span> below are placeholders awaiting sign-off from Hunter Jones, CES (OPO contacts, response-mode policy, donor-management specifics, and the exact charting path). Do not treat flagged items as authoritative until confirmed.</span></div>
+
+    <div class="card">
+      <div class="card-lbl">The one thing to get right</div>
+      <div class="decide">
+        <div class="decide-row">
+          <span class="decide-q">&#x1F9CA;</span>
+          <span class="decide-t"><span class="mtag">A</span> A <b>cooler, a perfusion device, and/or a recovery team</b> &mdash; often no patient on board. &rarr; <b>Recovery / logistics run.</b> The clock (cold ischemia time) is everything.</span>
+        </div>
+        <div class="decide-row">
+          <span class="decide-q">&#x1FAC1;</span>
+          <span class="decide-t"><span class="mtag">B</span> A <b>ventilated, supported donor</b> going to the recovery hospital / OR. &rarr; <b>Donor patient transport.</b> The goal is organ perfusion, not resuscitation of the person.</span>
+        </div>
+        <div class="decide-row">
+          <span class="decide-q">&#x1F3C3;</span>
+          <span class="decide-t"><span class="mtag">C</span> A <b>recipient</b> who &ldquo;got the call.&rdquo; &rarr; <b>Recipient transport.</b> Usually stable &mdash; your job is not to delay.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-txt" id="progressTxt">Not started</div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+
+    <div id="lessonList"></div>
+
+    <button class="lsn" id="quizCard" style="border-color:var(--teal2)">
+      <span class="lsn-num" style="background:#eaf1fd">&#x2713;?</span>
+      <span class="lsn-body"><span class="lsn-t">Knowledge check</span><span class="lsn-s" id="quizCardSub">6 questions &middot; pass at 80% &middot; explains every answer</span></span>
+      <span class="lsn-arr">&#x203A;</span>
+    </button>
+
+    <div class="footnote">
+      Full field reference for these calls lives in the
+      <a class="xlink" href="ift-call-guide.html">IFT Call Guide &rarr; Accompanied Specialty</a>.
+      Familiarization level only &mdash; no dosing or protocol authority is implied.
+    </div>
+  </div>
+
+  <!-- ===================== LESSON ===================== -->
+  <div id="view-lesson" class="hidden">
+    <button class="hdr-back print-hide" id="lessonBack" style="margin-bottom:12px">&#x2039; All lessons</button>
+    <div class="lesson-top"><div class="lesson-kicker" id="lessonKicker"></div></div>
+    <div class="lesson-title" id="lessonTitle"></div>
+    <div class="prose" id="lessonBody"></div>
+    <div class="navbtns">
+      <button class="btn ghost" id="prevBtn">&#x2039; Back</button>
+      <button class="btn primary" id="nextBtn">Next &#x203A;</button>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ ===================== -->
+  <div id="view-quiz" class="hidden">
+    <button class="hdr-back print-hide" id="quizBack" style="margin-bottom:12px">&#x2039; All lessons</button>
+    <div class="q-count" id="qCount"></div>
+    <div class="q-text" id="qText"></div>
+    <div id="qOpts"></div>
+    <div id="qFeedback"></div>
+    <div class="navbtns"><button class="btn primary btn-block hidden" id="qNext">Next &#x203A;</button></div>
+  </div>
+
+  <!-- ===================== RESULT ===================== -->
+  <div id="view-result" class="hidden">
+    <div class="result" id="resultCard">
+      <div class="big" id="resultPct">0%</div>
+      <div class="rlbl" id="resultLbl"></div>
+    </div>
+    <div id="resultActions"></div>
+  </div>
+
+  <!-- ===================== RECORD ===================== -->
+  <div id="view-record" class="hidden">
+    <div class="record">
+      <div class="r-kicker">Completion Record</div>
+      <div class="r-title">Organ Transport &mdash; Familiarization Training</div>
+      <div class="r-name" id="recName">&mdash;</div>
+      <div class="r-meta" id="recMeta"></div>
+      <div class="r-notce">INTERNAL TRAINING &mdash; NOT FOR CE CREDIT</div>
+    </div>
+    <div class="namefield print-hide" id="nameEntry">
+      <label for="learnerName">Your name (appears on the record)</label>
+      <input id="learnerName" type="text" placeholder="Last, First" autocomplete="off">
+    </div>
+    <div class="navbtns print-hide">
+      <button class="btn ghost" id="recHome">&#x2039; Home</button>
+      <button class="btn primary" id="recPrint">Print / save</button>
+    </div>
+    <div class="footnote print-hide">This record confirms internal familiarization training only. It <strong>does not</strong> count toward NREMT or Kansas (KBEMS) recertification and carries no credit or hours.</div>
+  </div>
+
+</div>
+
+<script>
+/* ── STATE ─────────────────────────────────────────────────────────── */
+var LS_KEY='organ_training_v1';
+var PASS_PCT=80;
+function freshState(){ return {learnerName:'',read:{},best:0,passed:false,completedAt:null}; }
+var state=load();
+function load(){
+  try{ var raw=localStorage.getItem(LS_KEY); if(raw){ var s=JSON.parse(raw); s.read=s.read||{}; return s; } }catch(e){}
+  return freshState();
+}
+function save(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){} }
+
+function $(id){ return document.getElementById(id); }
+function show(v){
+  ['home','lesson','quiz','result','record'].forEach(function(x){ $('view-'+x).classList.add('hidden'); });
+  $('view-'+v).classList.remove('hidden'); window.scrollTo(0,0);
+}
+
+/* ── DRAFT helper ──────────────────────────────────────────────────── */
+function draft(inner){
+  return "<div class='draft-block'><span class='draft-tag'>Draft &mdash; pending medical review</span>"+inner+"</div>";
+}
+
+/* ── LESSON CONTENT ────────────────────────────────────────────────── */
+var LESSONS=[
+  { id:'l1', title:"What an “organ run” actually means", sub:"Three mission types — and how to tell them apart",
+    html:
+      "<p>New crews hear &ldquo;you've got an organ run&rdquo; and picture one thing. In reality the phrase covers <b>three distinct missions</b>, and the first job on any of them is to figure out which one you're actually on. Get that wrong and everything downstream &mdash; your mindset, your priorities, and your charting &mdash; is wrong too.</p>"+
+      "<div class='keybox'><span class='kt'>The decision, in one question</span>Is there a <b>living patient</b>? A <b>ventilated donor</b>? Or a <b>cooler / team and no patient</b>? Your answer routes the whole call.</div>"+
+      "<h3>Mission A &mdash; Recovery / logistics run</h3>"+
+      "<p>You're moving a <b>recovery surgical team</b> and/or a <b>recovered organ</b> (in a cooler for cold static storage, or on a perfusion device) between an OR, a hospital, and/or an airport. Often there is <b>no patient on board at all</b>. It is time-critical because <b>cold ischemia time</b> &mdash; how long the organ tolerates being out of a body &mdash; is counting down the entire trip.</p>"+
+      "<h3>Mission B &mdash; Donor patient transport</h3>"+
+      "<p>You're transporting a <b>mechanically ventilated, hemodynamically supported organ donor</b> to the donor hospital or OR for recovery. The mental model is different from any other call you run, and Lesson 3 covers it plainly and respectfully.</p>"+
+      "<h3>Mission C &mdash; Recipient transport</h3>"+
+      "<p>A transplant <b>recipient</b> &ldquo;got the call&rdquo; that an organ is available and needs to get to the transplant center. Usually a stable patient; the whole emphasis is on <b>not delaying</b>.</p>"+
+      "<div class='keybox'><span class='kt'>Anchor</span>One name, three jobs. Before anything else on an organ mission, name which one it is.</div>"
+  },
+  { id:'l2', title:"Mission A — Recovery / logistics runs", sub:"The clock, the cooler, and chain of custody",
+    html:
+      "<p>On a logistics run your value is <b>safe, timely, well-coordinated transport</b> &mdash; and protecting the thing you're carrying. There may be no patient to assess, but the stakes are just as real: a recovered organ has a limited window before it's no longer usable.</p>"+
+      "<h3>The clock is the mission</h3>"+
+      "<p><b>Cold ischemia time</b> drives everything. Every organ has a tolerance window (hearts and lungs are the tightest; kidneys the most forgiving). The organ procurement organization (OPO) coordinates timing across the OR, your transport, and sometimes a flight. Your job is to not be the delay: confirm the route, confirm the receiving contact, and give honest ETAs.</p>"+
+      "<div class='donot'><span class='kt'>Never do this with the cooler or perfusion device</span>Do not <b>open</b> it, <b>tilt</b> or invert it, <b>set it down roughly</b>, or otherwise <b>tamper</b> with it. If it's a running perfusion device, you do not adjust it &mdash; the specialty team owns it. Secure it so it can't shift in the compartment.</div>"+
+      "<h3>Chain of custody</h3>"+
+      "<p>A recovered organ travels with <b>paperwork and a chain of custody</b> &mdash; who handed it off, when, and who received it. Treat it like evidence: know what you were handed, keep it secured and continuously accounted for, and document every hand-off with names and times.</p>"+
+      draft(
+        "<p><b>Chain-of-custody paperwork &amp; signature workflow</b> &mdash; the specific forms that travel with the cooler, who signs, and where, are pending Hunter's confirmation.</p>"+
+        "<p><b>Response-mode / lights-and-sirens policy</b> for time-critical organ runs is pending the AMR policy reference.</p>"
+      )+
+      "<h3>Charting a “no patient” run</h3>"+
+      "<p>A logistics run with no patient is still a documented run &mdash; it just follows a different disposition path than a patient transport.</p>"+
+      draft("<p>The exact ImageTrend <b>disposition / combo</b> for a no-patient logistics run is pending confirmation. Until then: capture pickup and delivery times, the receiving contact and ETA updates, and the chain-of-custody documentation, and confirm the disposition with your supervisor.</p>")
+  },
+  { id:'l3', title:"Mission B — Donor patient transport", sub:"The goal-of-care shift, handled plainly and respectfully",
+    html:
+      "<p>This is the mission that feels different, because it <em>is</em> different. You are transporting a <b>ventilated, hemodynamically supported donor</b> to the recovery hospital or OR. Consent and family conversations have already been handled by the OPO. Your role is <b>transport and maintenance</b>.</p>"+
+      "<div class='respectbox'><span class='kt'>The mental-model shift</span>On every other call, the goal of care is to resuscitate and stabilize <b>the person</b>. Here, the goal of care is <b>organ perfusion &mdash; keeping the organs viable</b> &mdash; guided by donor-management goals. In brain-death cases the patient is <b>legally deceased</b>; support is maintaining the organs, not the person. <b>Donation after circulatory death (DCD)</b> is different, and withdrawal of support occurs at the recovery facility, not in your truck. This is emotionally and ethically heavy work. Treat the patient, the family's decision, and the gift with complete dignity and professionalism.</div>"+
+      "<h3>What you maintain en route</h3>"+
+      "<p>In broad terms you keep doing what's already running: <b>ventilation, perfusion / pressor support, and temperature</b> &mdash; strictly <b>per the sending facility's orders and the OPO donor-management protocol</b>. You do not freelance the plan; you maintain it and escalate problems.</p>"+
+      "<ul>"+
+      "<li>Keep the ventilator and oxygenation stable and documented.</li>"+
+      "<li>Maintain vasopressor / infusion support at ordered rates; verify access.</li>"+
+      "<li>Protect temperature per the plan.</li>"+
+      "<li>Escalate to medical control per protocol for anything outside the orders.</li>"+
+      "</ul>"+
+      draft(
+        "<p><b>Donor-management goals &amp; targets, medications, and code-status handling</b> for this mission are protocol-sourced and pending Hunter's supply/verification. Do not treat any specific number, drug, or target as authoritative until it's filled in from the protocol. Familiarization level only &mdash; no dosing here.</p>"
+      )+
+      "<div class='keybox'><span class='kt'>Anchor</span>Maintain the plan, protect perfusion, escalate per protocol &mdash; and carry yourself with the gravity the situation deserves.</div>"
+  },
+  { id:'l4', title:"Mission C — Recipient transport", sub:"Don't be the delay",
+    html:
+      "<p>The recipient has waited &mdash; sometimes years &mdash; and just got <b>&ldquo;the call.&rdquo;</b> An organ is available and matched, and there is a window to get them to the transplant center. Clinically they're usually <b>stable</b>; the mission is about <b>time and coordination</b>, not intervention.</p>"+
+      "<h3>Priorities</h3>"+
+      "<ul>"+
+      "<li><b>Timeliness above all.</b> The organ and the OR are scheduled around arrival. Confirm the route and don't introduce delay.</li>"+
+      "<li><b>NPO status.</b> The recipient is heading to surgery &mdash; they should be nothing-by-mouth. Reinforce it; don't offer food or drink.</li>"+
+      "<li><b>Clear communication with the receiving transplant team.</b> Give an accurate ETA and update it if anything changes.</li>"+
+      "<li>Routine monitoring appropriate to the patient's acuity &mdash; but the headline is: <b>get them there, on time, calm and informed.</b></li>"+
+      "</ul>"+
+      "<div class='keybox'><span class='kt'>Anchor</span>Stable patient, high-stakes clock. Your job is a smooth, on-time, NPO transport with clean comms to the transplant team.</div>"
+  },
+  { id:'l5', title:"Who to call, response mode, custody & charting", sub:"The cross-cutting logistics for all three missions",
+    html:
+      "<p>These apply no matter which mission you're on.</p>"+
+      "<h3>Who coordinates, and who you call</h3>"+
+      "<p>The <b>organ procurement organization (OPO)</b> coordinates the overall mission &mdash; timing, destinations, and the recovery. For clinical problems in your truck, you escalate the way you always do: <b>medical control</b> and your <b>operations supervisor</b>.</p>"+
+      draft("<p><b>Regional OPO &amp; current contacts.</b> The KC-area OPO is regionally <b>Midwest Transplant Network</b> &mdash; the current coordinator contact and after-hours line are pending Hunter's confirmation. <b>KC facilities / OR / airport hand-off points</b> relevant to organ runs are also pending confirmation.</p>")+
+      "<h3>Response mode</h3>"+
+      draft("<p>The <b>lights-and-siren / response-mode policy</b> for time-critical organ runs is pending the AMR policy reference. Follow current AMR emergency-response policy until this is filled in.</p>")+
+      "<h3>Chain of custody &amp; paperwork</h3>"+
+      "<p>When an organ or tissue is aboard, it is continuously accounted for. Document every hand-off with <b>names, credentials, and times</b>, and keep the custody paperwork with the specimen.</p>"+
+      "<h3>Professionalism &amp; emotional weight</h3>"+
+      "<p>Organ missions sit at the intersection of a family's worst day and someone else's second chance. You may be around grieving families, recovery teams under time pressure, and a patient who is a donor. Be <b>calm, respectful, and precise</b>. You don't need to say much &mdash; carry yourself with the gravity of the moment and do your part flawlessly.</p>"+
+      "<div class='keybox'><span class='kt'>Anchor</span>OPO coordinates; you escalate through med control and your supervisor. Account for custody. Handle the whole thing with dignity.</div>"
+  }
+];
+
+var QUIZ=[
+  { q:"You're dispatched to move a “recovery team and a cooler.” Is there a patient, and what drives your urgency?",
+    opts:[
+      "There's a critical patient; urgency is their vital signs",
+      "Often no patient on board; urgency is the organ's cold ischemia time",
+      "No patient and no urgency — it's a routine parcel run",
+      "There's a patient, but they're stable so there's no rush"],
+    ans:1,
+    expl:"A recovery/logistics run (Mission A) frequently has no patient aboard. What makes it time-critical is cold ischemia time — the countdown on how long the recovered organ stays viable." },
+  { q:"On a donor patient transport (Mission B), what is the goal of care en route?",
+    opts:[
+      "Aggressively resuscitate the patient back to health",
+      "Maintain organ perfusion / donor-management goals per orders — not resuscitation of the person",
+      "Withdraw support during transport",
+      "Minimize all interventions and let nature take its course"],
+    ans:1,
+    expl:"The mental-model shift: the goal is keeping the organs viable (perfusion, ventilation, temperature) per the sending facility's orders and the OPO donor-management protocol — not resuscitating the person. You maintain the plan and escalate per protocol." },
+  { q:"Who coordinates an organ recovery mission, and who do you call with a clinical problem en route?",
+    opts:[
+      "You coordinate it yourself and handle problems on your own",
+      "The organ procurement organization (OPO) coordinates; escalate clinical problems via medical control and your supervisor",
+      "The receiving hospital coordinates everything including your truck",
+      "Dispatch coordinates and no medical escalation is available"],
+    ans:1,
+    expl:"The OPO coordinates the overall mission (timing, destinations, recovery). For clinical problems you escalate the usual way — medical control and your ops supervisor. (DRAFT: the specific regional OPO contact/after-hours line is pending confirmation — regionally Midwest Transplant Network.)" },
+  { q:"A transplant recipient just “got the call.” What's your priority?",
+    opts:[
+      "Aggressive interventions — they're a high-acuity patient",
+      "Timeliness, NPO status, and clear comms with the transplant team — don't be the delay",
+      "Stop for food since it may be a long day",
+      "Take the scenic route to keep them calm"],
+    ans:1,
+    expl:"Recipients (Mission C) are usually stable. The mission is time and coordination: get them there on time, keep them NPO for surgery, and keep the receiving transplant team updated with an accurate ETA." },
+  { q:"What should you never do with the transport cooler or perfusion device?",
+    opts:[
+      "Secure it so it can't shift",
+      "Document the hand-off times",
+      "Open it, tilt/invert it, or otherwise tamper with it — and never adjust a running perfusion device",
+      "Confirm the receiving contact and ETA"],
+    ans:2,
+    expl:"Never open, tilt, or tamper with the cooler/device, and never adjust a running perfusion device — that belongs to the specialty team. Secure it, preserve the chain of custody, and document hand-offs." },
+  { q:"How should you document a “no patient” logistics run?",
+    opts:[
+      "Skip the PCR entirely — no patient means no documentation",
+      "Chart it as a normal patient transport with vitals",
+      "Follow AMR's no-transport / logistics disposition path (confirm the exact ImageTrend combo locally); capture pickup/delivery times, receiving contact/ETAs, and chain-of-custody",
+      "Write it up only if something goes wrong"],
+    ans:2,
+    expl:"A no-patient logistics run is still documented, on a different disposition path than a patient transport. Capture times, receiving contact/ETAs, and chain-of-custody. (DRAFT: the exact ImageTrend disposition/combo is pending confirmation — verify locally with your supervisor.)" }
+];
+
+/* ── HOME RENDER ───────────────────────────────────────────────────── */
+function renderHome(){
+  var list=$('lessonList'); list.innerHTML='';
+  var readCount=0;
+  LESSONS.forEach(function(L,i){
+    if(state.read[L.id]) readCount++;
+    var b=document.createElement('button');
+    b.className='lsn'+(state.read[L.id]?' done':'');
+    b.innerHTML="<span class='lsn-num'>"+(i+1)+"</span>"+
+      "<span class='lsn-body'><span class='lsn-t'>"+L.title+"</span><span class='lsn-s'>"+L.sub+"</span></span>"+
+      "<span class='lsn-arr'>&#x203A;</span>";
+    b.addEventListener('click',function(){ openLesson(i); });
+    list.appendChild(b);
+  });
+  var pct=Math.round(readCount/LESSONS.length*100);
+  $('progressBar').style.width=pct+'%';
+  $('progressTxt').textContent= state.passed
+    ? ('Completed — knowledge check passed ('+state.best+'%)')
+    : (readCount===0 ? 'Not started' : readCount+' of '+LESSONS.length+' lessons read');
+  $('quizCardSub').textContent = state.passed
+    ? ('Passed — best '+state.best+'%. Tap to review or view your record.')
+    : '6 questions · pass at '+PASS_PCT+'% · explains every answer';
+  show('home');
+}
+
+/* ── LESSON VIEW ───────────────────────────────────────────────────── */
+var curLesson=0;
+function openLesson(i){
+  curLesson=i; var L=LESSONS[i];
+  $('lessonKicker').textContent='Lesson '+(i+1)+' of '+LESSONS.length;
+  $('lessonTitle').textContent=L.title;
+  $('lessonBody').innerHTML=L.html;
+  $('prevBtn').disabled = (i===0);
+  $('nextBtn').textContent = (i===LESSONS.length-1) ? 'Finish — to knowledge check ›' : 'Next ›';
+  state.read[L.id]=true; save();
+  show('lesson');
+}
+$('lessonBack').addEventListener('click',renderHome);
+$('prevBtn').addEventListener('click',function(){ if(curLesson>0) openLesson(curLesson-1); });
+$('nextBtn').addEventListener('click',function(){
+  if(curLesson<LESSONS.length-1){ openLesson(curLesson+1); }
+  else { startQuiz(); }
+});
+
+/* ── QUIZ ──────────────────────────────────────────────────────────── */
+var qi=0, correct=0, answered=false;
+function startQuiz(){ qi=0; correct=0; renderQ(); show('quiz'); }
+$('quizCard').addEventListener('click',function(){
+  if(state.passed){ renderRecord(); } else { startQuiz(); }
+});
+$('quizBack').addEventListener('click',renderHome);
+function renderQ(){
+  answered=false;
+  var Q=QUIZ[qi];
+  $('qCount').textContent='Question '+(qi+1)+' of '+QUIZ.length;
+  $('qText').textContent=Q.q;
+  $('qFeedback').innerHTML='';
+  $('qNext').classList.add('hidden');
+  var box=$('qOpts'); box.innerHTML='';
+  Q.opts.forEach(function(opt,idx){
+    var b=document.createElement('button');
+    b.className='opt'; b.textContent=opt;
+    b.addEventListener('click',function(){ pick(idx); });
+    box.appendChild(b);
+  });
+}
+function pick(idx){
+  if(answered) return; answered=true;
+  var Q=QUIZ[qi]; var opts=$('qOpts').children;
+  for(var k=0;k<opts.length;k++){
+    opts[k].disabled=true;
+    if(k===Q.ans) opts[k].classList.add('correct');
+    else if(k===idx) opts[k].classList.add('wrong');
+    else opts[k].classList.add('dim');
+  }
+  var right=(idx===Q.ans); if(right) correct++;
+  $('qFeedback').innerHTML="<div class='fb "+(right?'correct':'wrong')+"'><div class='fb-head'>"+
+    (right?'✓ Correct':'✗ Not quite')+"</div>"+Q.expl+"</div>";
+  $('qNext').textContent = (qi===QUIZ.length-1) ? 'See results ›' : 'Next ›';
+  $('qNext').classList.remove('hidden');
+}
+$('qNext').addEventListener('click',function(){
+  if(qi<QUIZ.length-1){ qi++; renderQ(); window.scrollTo(0,0); }
+  else { finishQuiz(); }
+});
+function finishQuiz(){
+  var pct=Math.round(correct/QUIZ.length*100);
+  var pass=pct>=PASS_PCT;
+  if(pct>state.best) state.best=pct;
+  if(pass && !state.passed){ state.passed=true; state.completedAt=new Date().toISOString(); }
+  save();
+  var rc=$('resultCard');
+  rc.className='result '+(pass?'pass':'fail');
+  $('resultPct').textContent=pct+'%';
+  $('resultLbl').textContent = pass
+    ? ('Passed — '+correct+' of '+QUIZ.length+' correct')
+    : ('Not yet — '+correct+' of '+QUIZ.length+' correct. Pass mark is '+PASS_PCT+'%.');
+  var acts=$('resultActions'); acts.innerHTML='';
+  if(pass){
+    acts.innerHTML="<div class='navbtns'><button class='btn ghost' id='raHome'>&#x2039; Home</button>"+
+      "<button class='btn primary' id='raRec'>View completion record &#x203A;</button></div>";
+    $('raRec').addEventListener('click',renderRecord);
+  } else {
+    acts.innerHTML="<div class='navbtns'><button class='btn ghost' id='raHome'>&#x2039; Home</button>"+
+      "<button class='btn primary' id='raRetry'>Try again &#x203A;</button></div>"+
+      "<div class='footnote'>Review the lessons, then retake the check.</div>";
+    $('raRetry').addEventListener('click',startQuiz);
+  }
+  $('raHome').addEventListener('click',renderHome);
+  show('result');
+}
+
+/* ── COMPLETION RECORD ─────────────────────────────────────────────── */
+function fmtDate(iso){ try{ var d=new Date(iso); return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); }catch(e){ return ''; } }
+function renderRecord(){
+  $('learnerName').value=state.learnerName||'';
+  updateRecName();
+  $('recMeta').innerHTML='Knowledge check passed at <strong>'+state.best+'%</strong><br>'+
+    'Completed '+(state.completedAt?fmtDate(state.completedAt):fmtDate(new Date().toISOString()))+
+    '<br>AMR Kansas City &middot; Organ Transport familiarization';
+  show('record');
+}
+function updateRecName(){ $('recName').textContent = state.learnerName ? state.learnerName : '—'; }
+$('learnerName').addEventListener('input',function(){ state.learnerName=this.value.trim(); updateRecName(); save(); });
+$('recHome').addEventListener('click',renderHome);
+$('recPrint').addEventListener('click',function(){ window.print(); });
+
+/* ── BOOT ──────────────────────────────────────────────────────────── */
+renderHome();
+</script>
+</body>
+</html>

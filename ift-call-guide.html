@@ -463,6 +463,13 @@ var CALLS = [
    watch:['Patient hemodynamics within AMR scope','Bleeding surveillance at cannula sites','IV access continuity; ventilator if not managed by team'],
    divert:'At ECMO team request, or per team clinical judgment.',
    doc:['ECMO team names and credentials','Cannula sites and any bleeding','Transfer-of-care at both facilities','Any events during transport']},
+  {cat:'Accompanied Specialty',name:'Organ Transport',lvl:'ALS/BLS',kw:'organ donor recovery opo midwest transplant network cooler perfusion recipient cold ischemia procurement tissue',
+   why:'“Organ run” is three different missions — know which one you’re on. (A) Recovery/logistics run: a cooler, perfusion device, and/or recovery team, often no patient — the clock is cold ischemia time. (B) Donor patient transport: a ventilated, supported donor to the recovery hospital/OR. (C) Recipient transport: a recipient who “got the call.”',
+   run:'A: safe timely transport + chain of custody — do not open/tilt/tamper with the cooler or adjust a running device. B: maintain ventilation, perfusion/pressor support, and temperature per sending orders + OPO donor-management protocol; goal is organ perfusion, not resuscitation; escalate to med control. C: don’t delay, keep NPO, clear comms with the transplant team.',
+   watch:['Which mission you’re actually on — it changes everything','Cold ischemia time / on-time arrival','B: vent, perfusion/pressors, temperature per orders','Cooler/device integrity and chain of custody'],
+   divert:'Mission B: refractory hypotension, sustained arrest, uncorrectable hypoxemia, or any condition precluding organ viability — per orders and med control.',
+   doc:['Which mission type','Hand-off names/credentials and times; chain-of-custody','B: vent settings, infusion rates, temperature at intervals','A: no-patient logistics disposition (confirm ImageTrend path)','ETA updates and receiving contact'],
+   train:'organ-transport.html'},
 
   // ── Uncommon Specialty ──
   {cat:'Uncommon Specialty',name:'Donor Patient Management',lvl:'ALS',kw:'donor organ procurement brain death vasopressor temperature dignity',
@@ -514,6 +521,7 @@ function callHtml(c,q,open){
   if(c.doc){ h += '<div class="call-field"><div class="call-field-l doc">Document</div><div class="call-field-v"><ul>';
     c.doc.forEach(function(d){ h += '<li>'+hl(d,q)+'</li>'; }); h += '</ul></div></div>'; }
   if(c.urgent) h += '<div class="urgent-note">&#9888; Non-emergent response &mdash; time-critical patient.</div>';
+  if(c.train) h += '<div class="call-field"><a class="jumplink" href="'+esc(c.train)+'">Full training &#x2192;</a></div>';
   h += '</div></div>';
   return h;
 }
