@@ -188,7 +188,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 
     <div class="notice info"><span class="ni">&#8505;</span><span><strong>Internal familiarization training &mdash; not for CE credit.</strong> It carries no NREMT or Kansas (KBEMS) credit or recertification hours, and completion is an internal record only.</span></div>
 
-    <div class="notice draft"><span class="ni">&#9888;</span><span><strong>DRAFT &mdash; pending medical review.</strong> Items marked <span class="draft-tag" style="margin:0">DRAFT</span> below are placeholders awaiting sign-off from Hunter Jones, CES (OPO contacts, response-mode policy, donor-management specifics, and the exact charting path). Do not treat flagged items as authoritative until confirmed.</span></div>
+    <div class="notice draft"><span class="ni">&#9888;</span><span><strong>DRAFT &mdash; pending medical review.</strong> Items marked <span class="draft-tag" style="margin:0">DRAFT</span> below are placeholders awaiting sign-off from Hunter Jones, CES (OPO contacts and donor-management specifics). Do not treat flagged items as authoritative until confirmed.</span></div>
 
     <div class="card">
       <div class="card-lbl">The one thing to get right</div>
@@ -324,13 +324,9 @@ var LESSONS=[
       "<div class='donot'><span class='kt'>Never do this with the cooler or perfusion device</span>Do not <b>open</b> it, <b>tilt</b> or invert it, <b>set it down roughly</b>, or otherwise <b>tamper</b> with it. If it's a running perfusion device, you do not adjust it &mdash; the specialty team owns it. Secure it so it can't shift in the compartment.</div>"+
       "<h3>Chain of custody</h3>"+
       "<p>A recovered organ travels with <b>paperwork and a chain of custody</b> &mdash; who handed it off, when, and who received it. Treat it like evidence: know what you were handed, keep it secured and continuously accounted for, and document every hand-off with names and times.</p>"+
-      draft(
-        "<p><b>Chain-of-custody paperwork &amp; signature workflow</b> &mdash; the specific forms that travel with the cooler, who signs, and where, are pending Hunter's confirmation.</p>"+
-        "<p><b>Response-mode / lights-and-sirens policy</b> for time-critical organ runs is pending the AMR policy reference.</p>"
-      )+
       "<h3>Charting a “no patient” run</h3>"+
-      "<p>A logistics run with no patient is still a documented run &mdash; it just follows a different disposition path than a patient transport.</p>"+
-      draft("<p>The exact ImageTrend <b>disposition / combo</b> for a no-patient logistics run is pending confirmation. Until then: capture pickup and delivery times, the receiving contact and ETA updates, and the chain-of-custody documentation, and confirm the disposition with your supervisor.</p>")
+      "<p>There are <b>no special forms</b> for an organ-only transport &mdash; but a <b>PCR is still required</b>, and it must record <b>who is in the ambulance</b> (crew and anyone else aboard). In ImageTrend, choose the <b>“Organ &amp; Body Part Transports”</b> preset on the <em>Type of Call</em> screen; the preset guides the rest of the report. Capture pickup and delivery times, the receiving contact and ETA updates, and the chain-of-custody hand-offs.</p>"+
+      "<div class='keybox'><span class='kt'>Charting</span>ImageTrend &rarr; Type of Call &rarr; <b>Organ &amp; Body Part Transports</b>. No special organ forms; complete a PCR and document everyone on board.</div>"
   },
   { id:'l3', title:"Mission B — Donor patient transport", sub:"The goal-of-care shift, handled plainly and respectfully",
     html:
@@ -367,8 +363,8 @@ var LESSONS=[
       "<h3>Who coordinates, and who you call</h3>"+
       "<p>The <b>organ procurement organization (OPO)</b> coordinates the overall mission &mdash; timing, destinations, and the recovery. For clinical problems in your truck, you escalate the way you always do: <b>medical control</b> and your <b>operations supervisor</b>.</p>"+
       draft("<p><b>Regional OPO &amp; current contacts.</b> The KC-area OPO is regionally <b>Midwest Transplant Network</b> &mdash; the current coordinator contact and after-hours line are pending Hunter's confirmation. <b>KC facilities / OR / airport hand-off points</b> relevant to organ runs are also pending confirmation.</p>")+
-      "<h3>Response mode</h3>"+
-      draft("<p>The <b>lights-and-siren / response-mode policy</b> for time-critical organ runs is pending the AMR policy reference. Follow current AMR emergency-response policy until this is filled in.</p>")+
+      "<h3>Response mode &mdash; lights &amp; sirens</h3>"+
+      "<p>Lights-and-sirens is a <b>driver-and-crew&ndash;level decision</b>, as always: weigh <b>risk versus reward</b> for the specific run. Do <b>not</b> base it solely on a hospital's or caller's recommendation. Time-critical does not automatically mean emergent &mdash; the clock is real, but so is the risk of driving hot.</p>"+
       "<h3>Chain of custody &amp; paperwork</h3>"+
       "<p>When an organ or tissue is aboard, it is continuously accounted for. Document every hand-off with <b>names, credentials, and times</b>, and keep the custody paperwork with the specimen.</p>"+
       "<h3>Professionalism &amp; emotional weight</h3>"+
@@ -418,14 +414,22 @@ var QUIZ=[
       "Confirm the receiving contact and ETA"],
     ans:2,
     expl:"Never open, tilt, or tamper with the cooler/device, and never adjust a running perfusion device — that belongs to the specialty team. Secure it, preserve the chain of custody, and document hand-offs." },
-  { q:"How should you document a “no patient” logistics run?",
+  { q:"How should you document a “no patient” organ-only logistics run?",
     opts:[
       "Skip the PCR entirely — no patient means no documentation",
       "Chart it as a normal patient transport with vitals",
-      "Follow AMR's no-transport / logistics disposition path (confirm the exact ImageTrend combo locally); capture pickup/delivery times, receiving contact/ETAs, and chain-of-custody",
+      "Complete a PCR using ImageTrend's “Organ & Body Part Transports” Type-of-Call preset, and record who's on board",
       "Write it up only if something goes wrong"],
     ans:2,
-    expl:"A no-patient logistics run is still documented, on a different disposition path than a patient transport. Capture times, receiving contact/ETAs, and chain-of-custody. (DRAFT: the exact ImageTrend disposition/combo is pending confirmation — verify locally with your supervisor.)" }
+    expl:"There are no special organ-transport forms, but a PCR is still required. Use the ImageTrend “Organ & Body Part Transports” Type-of-Call preset — it guides the report — and document everyone in the ambulance, plus pickup/delivery times and chain-of-custody hand-offs." },
+  { q:"Who decides whether an organ run goes lights-and-sirens?",
+    opts:[
+      "The sending hospital or caller — follow their recommendation",
+      "Always emergent, because organ runs are time-critical",
+      "The driver and crew, weighing risk versus reward — not the hospital/caller alone",
+      "Dispatch decides and the crew cannot change it"],
+    ans:2,
+    expl:"Lights-and-sirens is a driver-and-crew–level decision based on risk versus reward for that specific run. Time-criticality, and a hospital or caller's recommendation, do not by themselves justify emergent transport." }
 ];
 
 /* ── HOME RENDER ───────────────────────────────────────────────────── */
@@ -449,7 +453,7 @@ function renderHome(){
     : (readCount===0 ? 'Not started' : readCount+' of '+LESSONS.length+' lessons read');
   $('quizCardSub').textContent = state.passed
     ? ('Passed — best '+state.best+'%. Tap to review or view your record.')
-    : '6 questions · pass at '+PASS_PCT+'% · explains every answer';
+    : QUIZ.length+' questions · pass at '+PASS_PCT+'% · explains every answer';
   show('home');
 }
 
