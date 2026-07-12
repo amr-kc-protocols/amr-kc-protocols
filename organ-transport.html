@@ -188,7 +188,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 
     <div class="notice info"><span class="ni">&#8505;</span><span><strong>Internal familiarization training &mdash; not for CE credit.</strong> It carries no NREMT or Kansas (KBEMS) credit or recertification hours, and completion is an internal record only.</span></div>
 
-    <div class="notice draft"><span class="ni">&#9888;</span><span><strong>DRAFT &mdash; pending medical review.</strong> Items marked <span class="draft-tag" style="margin:0">DRAFT</span> below are placeholders awaiting sign-off from Hunter Jones, CES (OPO contacts, response-mode policy, donor-management specifics, and the exact charting path). Do not treat flagged items as authoritative until confirmed.</span></div>
+    <div class="notice draft"><span class="ni">&#9888;</span><span><strong>Familiarization only.</strong> Clinical specifics &mdash; especially <b>donor management</b> &mdash; follow the current <b>AMR KC Protocols (II-25 &amp; Section VII)</b>, which govern. This module orients you to the mission types and your role; it does not replace the protocol or a sending physician's orders.</span></div>
 
     <div class="card">
       <div class="card-lbl">The one thing to get right</div>
@@ -297,11 +297,6 @@ function show(v){
   $('view-'+v).classList.remove('hidden'); window.scrollTo(0,0);
 }
 
-/* ── DRAFT helper ──────────────────────────────────────────────────── */
-function draft(inner){
-  return "<div class='draft-block'><span class='draft-tag'>Draft &mdash; pending medical review</span>"+inner+"</div>";
-}
-
 /* ── LESSON CONTENT ────────────────────────────────────────────────── */
 var LESSONS=[
   { id:'l1', title:"What an “organ run” actually means", sub:"Three mission types — and how to tell them apart",
@@ -324,13 +319,9 @@ var LESSONS=[
       "<div class='donot'><span class='kt'>Never do this with the cooler or perfusion device</span>Do not <b>open</b> it, <b>tilt</b> or invert it, <b>set it down roughly</b>, or otherwise <b>tamper</b> with it. If it's a running perfusion device, you do not adjust it &mdash; the specialty team owns it. Secure it so it can't shift in the compartment.</div>"+
       "<h3>Chain of custody</h3>"+
       "<p>A recovered organ travels with <b>paperwork and a chain of custody</b> &mdash; who handed it off, when, and who received it. Treat it like evidence: know what you were handed, keep it secured and continuously accounted for, and document every hand-off with names and times.</p>"+
-      draft(
-        "<p><b>Chain-of-custody paperwork &amp; signature workflow</b> &mdash; the specific forms that travel with the cooler, who signs, and where, are pending Hunter's confirmation.</p>"+
-        "<p><b>Response-mode / lights-and-sirens policy</b> for time-critical organ runs is pending the AMR policy reference.</p>"
-      )+
       "<h3>Charting a “no patient” run</h3>"+
-      "<p>A logistics run with no patient is still a documented run &mdash; it just follows a different disposition path than a patient transport.</p>"+
-      draft("<p>The exact ImageTrend <b>disposition / combo</b> for a no-patient logistics run is pending confirmation. Until then: capture pickup and delivery times, the receiving contact and ETA updates, and the chain-of-custody documentation, and confirm the disposition with your supervisor.</p>")
+      "<p>There are <b>no special forms</b> for an organ-only transport &mdash; but a <b>PCR is still required</b>, and it must record <b>who is in the ambulance</b> (crew and anyone else aboard). In ImageTrend, choose the <b>“Organ &amp; Body Part Transports”</b> preset on the <em>Type of Call</em> screen; the preset guides the rest of the report. Capture pickup and delivery times, the receiving contact and ETA updates, and the chain-of-custody hand-offs.</p>"+
+      "<div class='keybox'><span class='kt'>Charting</span>ImageTrend &rarr; Type of Call &rarr; <b>Organ &amp; Body Part Transports</b>. No special organ forms; complete a PCR and document everyone on board.</div>"
   },
   { id:'l3', title:"Mission B — Donor patient transport", sub:"The goal-of-care shift, handled plainly and respectfully",
     html:
@@ -344,10 +335,9 @@ var LESSONS=[
       "<li>Protect temperature per the plan.</li>"+
       "<li>Escalate to medical control per protocol for anything outside the orders.</li>"+
       "</ul>"+
-      draft(
-        "<p><b>Donor-management goals &amp; targets, medications, and code-status handling</b> for this mission are protocol-sourced and pending Hunter's supply/verification. Do not treat any specific number, drug, or target as authoritative until it's filled in from the protocol. Familiarization level only &mdash; no dosing here.</p>"
-      )+
-      "<div class='keybox'><span class='kt'>Anchor</span>Maintain the plan, protect perfusion, escalate per protocol &mdash; and carry yourself with the gravity the situation deserves.</div>"
+      "<p>Donor management has a <b>full standing-order section in the AMR KC Protocols</b> &mdash; <b>Donor Patient Management Transfer (II-25)</b> and the specialty-transport section (VII). It covers the perfusion, ventilation, and temperature goals (for example, maintaining MAP and heart rate per the sending facility's orders, normocapnia, glucose, and urine-output monitoring). Read that section before you run one; this module is familiarization only and does not restate dosing.</p>"+
+      "<div class='donot'><span class='kt'>Common charting error &mdash; get this right</span>Document the patient's <b>actual name</b> in the PCR &mdash; <b>not</b> &ldquo;donor patient&rdquo; or a placeholder. A donor is a named patient with a chart like any other. This is the single most commonly confused item on these runs.</div>"+
+      "<div class='keybox'><span class='kt'>Anchor</span>Maintain the plan (per Protocols II-25 / VII), protect perfusion, escalate per protocol, chart the patient's real name &mdash; and carry yourself with the gravity the situation deserves.</div>"
   },
   { id:'l4', title:"Mission C — Recipient transport", sub:"Don't be the delay",
     html:
@@ -365,10 +355,9 @@ var LESSONS=[
     html:
       "<p>These apply no matter which mission you're on.</p>"+
       "<h3>Who coordinates, and who you call</h3>"+
-      "<p>The <b>organ procurement organization (OPO)</b> coordinates the overall mission &mdash; timing, destinations, and the recovery. For clinical problems in your truck, you escalate the way you always do: <b>medical control</b> and your <b>operations supervisor</b>.</p>"+
-      draft("<p><b>Regional OPO &amp; current contacts.</b> The KC-area OPO is regionally <b>Midwest Transplant Network</b> &mdash; the current coordinator contact and after-hours line are pending Hunter's confirmation. <b>KC facilities / OR / airport hand-off points</b> relevant to organ runs are also pending confirmation.</p>")+
-      "<h3>Response mode</h3>"+
-      draft("<p>The <b>lights-and-siren / response-mode policy</b> for time-critical organ runs is pending the AMR policy reference. Follow current AMR emergency-response policy until this is filled in.</p>")+
+      "<p>An <b>organ procurement organization (OPO)</b> coordinates the overall mission &mdash; timing, destinations, and the recovery. In this region it's usually <b>Midwest Transplant Network</b>, but it varies &mdash; and <b>you don't need to memorize which one.</b> What matters is that you <b>communicate clearly</b> with the outside (non-AMR) personnel on the run, and coordinate through <b>AMR dispatch</b> and your <b>operations supervisor</b>. For clinical problems in your truck, escalate the way you always do: <b>medical control</b> and your supervisor.</p>"+
+      "<h3>Response mode &mdash; lights &amp; sirens</h3>"+
+      "<p>Lights-and-sirens is a <b>driver-and-crew&ndash;level decision</b>, as always: weigh <b>risk versus reward</b> for the specific run. Do <b>not</b> base it solely on a hospital's or caller's recommendation. Time-critical does not automatically mean emergent &mdash; the clock is real, but so is the risk of driving hot.</p>"+
       "<h3>Chain of custody &amp; paperwork</h3>"+
       "<p>When an organ or tissue is aboard, it is continuously accounted for. Document every hand-off with <b>names, credentials, and times</b>, and keep the custody paperwork with the specimen.</p>"+
       "<h3>Professionalism &amp; emotional weight</h3>"+
@@ -401,7 +390,7 @@ var QUIZ=[
       "The receiving hospital coordinates everything including your truck",
       "Dispatch coordinates and no medical escalation is available"],
     ans:1,
-    expl:"The OPO coordinates the overall mission (timing, destinations, recovery). For clinical problems you escalate the usual way — medical control and your ops supervisor. (DRAFT: the specific regional OPO contact/after-hours line is pending confirmation — regionally Midwest Transplant Network.)" },
+    expl:"An OPO coordinates the overall mission (timing, destinations, recovery) — usually Midwest Transplant Network in this region, but it varies and you don't need to memorize which. Communicate clearly with the outside personnel and coordinate through AMR dispatch and your supervisor; escalate clinical problems to medical control." },
   { q:"A transplant recipient just “got the call.” What's your priority?",
     opts:[
       "Aggressive interventions — they're a high-acuity patient",
@@ -418,14 +407,30 @@ var QUIZ=[
       "Confirm the receiving contact and ETA"],
     ans:2,
     expl:"Never open, tilt, or tamper with the cooler/device, and never adjust a running perfusion device — that belongs to the specialty team. Secure it, preserve the chain of custody, and document hand-offs." },
-  { q:"How should you document a “no patient” logistics run?",
+  { q:"How should you document a “no patient” organ-only logistics run?",
     opts:[
       "Skip the PCR entirely — no patient means no documentation",
       "Chart it as a normal patient transport with vitals",
-      "Follow AMR's no-transport / logistics disposition path (confirm the exact ImageTrend combo locally); capture pickup/delivery times, receiving contact/ETAs, and chain-of-custody",
+      "Complete a PCR using ImageTrend's “Organ & Body Part Transports” Type-of-Call preset, and record who's on board",
       "Write it up only if something goes wrong"],
     ans:2,
-    expl:"A no-patient logistics run is still documented, on a different disposition path than a patient transport. Capture times, receiving contact/ETAs, and chain-of-custody. (DRAFT: the exact ImageTrend disposition/combo is pending confirmation — verify locally with your supervisor.)" }
+    expl:"There are no special organ-transport forms, but a PCR is still required. Use the ImageTrend “Organ & Body Part Transports” Type-of-Call preset — it guides the report — and document everyone in the ambulance, plus pickup/delivery times and chain-of-custody hand-offs." },
+  { q:"Who decides whether an organ run goes lights-and-sirens?",
+    opts:[
+      "The sending hospital or caller — follow their recommendation",
+      "Always emergent, because organ runs are time-critical",
+      "The driver and crew, weighing risk versus reward — not the hospital/caller alone",
+      "Dispatch decides and the crew cannot change it"],
+    ans:2,
+    expl:"Lights-and-sirens is a driver-and-crew–level decision based on risk versus reward for that specific run. Time-criticality, and a hospital or caller's recommendation, do not by themselves justify emergent transport." },
+  { q:"On a donor patient transport, whose name goes in the PCR?",
+    opts:[
+      "“Donor patient” — you don't use the real name",
+      "The patient's actual name — a donor is a named patient charted like any other",
+      "The OPO coordinator's name",
+      "Leave the name blank for privacy"],
+    ans:1,
+    expl:"Document the patient's actual name, not “donor patient” or a placeholder — this is the most commonly confused item on donor runs. Manage the patient per the AMR KC Protocols Donor Patient Management section (II-25 / VII)." }
 ];
 
 /* ── HOME RENDER ───────────────────────────────────────────────────── */
@@ -449,7 +454,7 @@ function renderHome(){
     : (readCount===0 ? 'Not started' : readCount+' of '+LESSONS.length+' lessons read');
   $('quizCardSub').textContent = state.passed
     ? ('Passed — best '+state.best+'%. Tap to review or view your record.')
-    : '6 questions · pass at '+PASS_PCT+'% · explains every answer';
+    : QUIZ.length+' questions · pass at '+PASS_PCT+'% · explains every answer';
   show('home');
 }
 
