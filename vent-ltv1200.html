@@ -565,6 +565,199 @@ canvas#pip-canvas{display:none}
   .fn-btn{padding:14px 2px 8px;font-size:7.5px}
   .fn-btn::before{top:5px;width:12px}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTHENTIC INTERACTION GRAMMAR — Select-then-turn-knob
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── SINGLE SCANNING DISPLAY WINDOW (replaces the always-on LCD grid) ── */
+.scan-wrap{background:var(--lcd-bg);border-radius:10px;padding:10px 12px;margin-bottom:14px;
+  border:2px solid #0d0805;box-shadow:inset 0 3px 10px rgba(0,0,0,0.6)}
+.scan-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.scan-mode-main{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--lcd-green);
+  letter-spacing:0.05em;line-height:1;text-shadow:0 0 8px rgba(255,74,40,0.4)}
+.scan-mode-sub{font-family:var(--mono);font-size:9px;color:#e0885a;margin-top:3px;letter-spacing:0.04em}
+.scan-ie{font-family:var(--mono);text-align:right;flex-shrink:0}
+.scan-ie-lbl{font-size:8px;color:var(--lcd-dim);letter-spacing:0.1em;margin-bottom:2px}
+.scan-ie-val{font-size:15px;font-weight:700;color:#ff9a5c;text-shadow:0 0 6px rgba(255,120,60,0.35)}
+/* the scrolling monitored-data / message line */
+.scan-window{background:#0a0603;border:1px solid #241208;border-radius:6px;
+  padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  min-height:46px;overflow:hidden;position:relative}
+.scan-window.msg{border-color:#5a2410}
+.scan-window.alarm{border-color:#d92d20;animation:scan-alarm-flash 0.7s steps(1) infinite}
+@keyframes scan-alarm-flash{0%,50%{background:#0a0603}50.01%,100%{background:#220a06}}
+.scan-line{display:flex;align-items:baseline;gap:9px;min-width:0}
+.scan-param{font-family:var(--mono);font-size:11px;font-weight:700;color:#ff9a5c;letter-spacing:0.12em;flex-shrink:0}
+.scan-value{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--lcd-green);line-height:1;
+  text-shadow:0 0 8px rgba(255,74,40,0.4)}
+.scan-unit{font-family:var(--mono);font-size:10px;color:#e0885a}
+.scan-window.alarm .scan-value,.scan-window.alarm .scan-param{color:#ff5a3c}
+.scan-window.msg .scan-value{font-size:20px;letter-spacing:0.06em}
+/* the little scan-position dots + HALT/SCAN state chip */
+.scan-state{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.scan-chip{font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:0.12em;
+  padding:2px 6px;border-radius:4px;border:1px solid #3a1e0e;color:#e0885a;background:#150c06}
+.scan-chip.halt{color:#ffb020;border-color:#6a4410}
+.scan-dots{display:flex;gap:3px}
+.scan-dot{width:5px;height:5px;border-radius:50%;background:#3a1e0e}
+.scan-dot.on{background:var(--lcd-green);box-shadow:0 0 4px rgba(255,74,40,0.6)}
+.scan-vcalc{font-family:var(--mono);font-size:9px;color:#38bdf8;margin-top:6px;letter-spacing:0.04em;display:none}
+.scan-vcalc.show{display:block}
+
+/* ── MODE SELECT TOGGLES (two real Select buttons + LED indicator strips) ── */
+.select-block{background:var(--panel);border-radius:12px;padding:10px 12px;margin-bottom:12px;
+  border:1.5px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.select-row{display:flex;align-items:center;gap:10px}
+.select-row+.select-row{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.select-btn{flex-shrink:0;width:62px;padding:9px 4px;border-radius:10px;border:1.5px solid var(--btn-edge);
+  background:var(--btn-face);color:var(--text);font-size:11px;font-weight:700;letter-spacing:0.04em;
+  cursor:pointer;text-align:center;line-height:1.2;position:relative;
+  box-shadow:0 2px 3px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.6);transition:all 0.1s}
+.select-btn:active{transform:scale(0.95);box-shadow:inset 0 1px 3px rgba(0,0,0,0.25)}
+.select-btn-sub{font-size:7px;color:var(--sub);letter-spacing:0.06em;margin-top:2px;text-transform:uppercase}
+/* LED indicator strip — one lamp per option, active one lit like the silkscreen */
+.led-strip{flex:1;display:flex;gap:6px;min-width:0}
+.led-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 2px;
+  border-radius:8px;border:1px solid transparent;transition:all 0.15s;min-width:0}
+.led-opt-lamp{width:100%;max-width:34px;height:6px;border-radius:3px;background:#b9b3a4;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,0.25);transition:all 0.15s}
+.led-opt-lbl{font-size:9px;font-weight:700;color:var(--sub);letter-spacing:0.03em;text-align:center;line-height:1.15}
+.led-opt.on .led-opt-lamp{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+.led-opt.on .led-opt-lbl{color:var(--text)}
+.led-opt.flash .led-opt-lamp{animation:led-flash 0.5s steps(1) infinite}
+.led-opt.flash .led-opt-lbl{color:var(--purple-dark)}
+@keyframes led-flash{0%,50%{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+  50.01%,100%{background:#b9b3a4;box-shadow:inset 0 1px 1px rgba(0,0,0,0.25)}}
+.led-opt.disabled{opacity:0.3}
+
+/* ── CONTROL TILE: Select button + LED window (no +/- buttons) ── */
+.ctrl2-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 8px;margin-bottom:6px}
+.ctrl2{display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:opacity 0.2s;position:relative}
+.ctrl2-lbl{font-size:10px;font-weight:700;color:var(--text);letter-spacing:0.01em;text-align:center;
+  line-height:1.2;min-height:26px;display:flex;align-items:flex-end;justify-content:center}
+.ctrl2-win{height:50px;border-radius:8px;background:var(--win);border:2px solid #0d0805;position:relative;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.8),0 1px 0 rgba(255,255,255,0.5);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;transition:all 0.15s;opacity:0.55}
+.ctrl2-num{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--led-red);line-height:1;
+  text-shadow:0 0 8px rgba(255,74,40,0.55)}
+.ctrl2-unit{font-family:var(--mono);font-size:8px;color:#b0522f;margin-top:1px}
+/* selected control: window bright + ring; all others dimmed (mirrors real device) */
+.ctrl2.selected .ctrl2-win{opacity:1;border-color:#ffb020;box-shadow:inset 0 2px 8px rgba(0,0,0,0.8),0 0 0 2px rgba(255,176,32,0.7),0 0 12px rgba(255,176,32,0.4)}
+.ctrl2.selected .ctrl2-lbl{color:var(--purple-dark)}
+/* when ANY control is selected, non-selected active windows read a touch dimmer */
+.panel.has-selection .ctrl2:not(.selected) .ctrl2-win{opacity:0.4}
+/* inactive-in-this-mode control */
+.ctrl2.dim{opacity:0.5}
+.ctrl2.dim .ctrl2-win{opacity:0.28}
+.ctrl2.dim .ctrl2-num{color:#7a5a3a}
+.ctrl2-lock{position:absolute;inset:0 0 auto 0;top:32px;display:none;align-items:center;justify-content:center;font-size:16px;color:#7a5a3a}
+.ctrl2.dim .ctrl2-lock{display:flex}
+/* dashes shown when a control reads "off/---" (e.g. CPAP rate) */
+.ctrl2-num.dashes{color:#b0522f;letter-spacing:0.1em}
+/* game-lock reuse */
+.ctrl2.game-locked{opacity:0.16;pointer-events:none!important}
+.ctrl2.game-locked .ctrl2-win{opacity:0.2}
+
+/* ── BOTTOM CONTROL DECK: On/Standby · Set Value knob · Control Lock · Monitor ── */
+.deck{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;
+  background:var(--panel);border-radius:12px;padding:12px;margin-bottom:12px;
+  border:1.5px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.deck-btns{display:flex;flex-direction:column;gap:8px;min-width:0}
+.deck-btn{padding:9px 6px;border-radius:9px;border:1.5px solid var(--btn-edge);background:var(--btn-face);
+  color:var(--text);font-size:9px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;
+  cursor:pointer;text-align:center;line-height:1.2;position:relative;white-space:normal;min-width:0;
+  box-shadow:0 2px 3px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.6);transition:all 0.1s}
+.deck-btn:active{transform:scale(0.96);box-shadow:inset 0 1px 3px rgba(0,0,0,0.25)}
+.deck-btn .lamp{display:inline-block;width:16px;height:4px;border-radius:2px;background:rgba(32,38,92,0.18);
+  margin-top:4px;transition:all 0.15s}
+.deck-btn.on .lamp{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+.deck-btn.locked{border-color:var(--purple-dark);background:linear-gradient(180deg,#5c5cae,#42427e);color:#fff}
+.deck-btn.locked .lamp{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+/* Set Value knob */
+.knob-block{display:flex;flex-direction:column;align-items:center;gap:5px;justify-self:center}
+.knob-title{font-size:9px;font-weight:700;letter-spacing:0.14em;color:var(--sub);text-transform:uppercase}
+.knob{width:104px;height:104px;border-radius:50%;position:relative;cursor:grab;touch-action:none;
+  background:radial-gradient(circle at 38% 32%,var(--knob-hi),var(--knob) 62%,#b3a6d4 100%);
+  border:2px solid var(--btn-edge);
+  box-shadow:0 4px 10px rgba(0,0,0,0.3),inset 0 2px 4px rgba(255,255,255,0.55),inset 0 -3px 8px rgba(0,0,0,0.28);
+  -webkit-user-select:none;user-select:none}
+.knob:active{cursor:grabbing}
+.knob.armed{border-color:#ffb020;box-shadow:0 4px 10px rgba(0,0,0,0.3),inset 0 2px 4px rgba(255,255,255,0.55),inset 0 -3px 8px rgba(0,0,0,0.28),0 0 0 3px rgba(255,176,32,0.45),0 0 16px rgba(255,176,32,0.35)}
+/* knurled ticks around the rim */
+.knob-ticks{position:absolute;inset:0;border-radius:50%;pointer-events:none}
+.knob-pointer{position:absolute;top:6px;left:50%;width:5px;height:24px;border-radius:3px;
+  background:var(--knob-ind);transform:translateX(-50%);transform-origin:50% 46px;
+  box-shadow:0 0 3px rgba(32,38,92,0.5)}
+.knob-hub{position:absolute;inset:34px;border-radius:50%;
+  background:radial-gradient(circle at 40% 34%,#e6def4,#c4b5e6);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,0.7),0 1px 3px rgba(0,0,0,0.25);
+  display:flex;align-items:center;justify-content:center}
+.knob-hub-lbl{font-size:7px;font-weight:700;letter-spacing:0.08em;color:var(--purple-dark);text-align:center;line-height:1.15;text-transform:uppercase}
+.knob-hint{font-size:8px;color:var(--sub);text-align:center;line-height:1.3;max-width:120px}
+
+/* ── POWER-ON / POST / PATIENT QUERY overlay ── */
+.boot-overlay{position:fixed;inset:0;z-index:360;display:flex;align-items:center;justify-content:center;
+  padding:22px;background:radial-gradient(120% 100% at 50% 0%,#161020,#080510 70%);
+  opacity:0;pointer-events:none;transition:opacity 0.3s}
+.boot-overlay.open{opacity:1;pointer-events:all}
+.boot-card{width:100%;max-width:420px;background:var(--case);border-radius:18px;padding:22px 20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);text-align:center}
+.boot-lcd{background:var(--lcd-bg);border:2px solid #0d0805;border-radius:10px;padding:18px 16px;margin-bottom:16px;
+  box-shadow:inset 0 3px 10px rgba(0,0,0,0.6);min-height:96px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px}
+.boot-lcd-line{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--lcd-green);
+  letter-spacing:0.08em;text-shadow:0 0 8px rgba(255,74,40,0.4)}
+.boot-lcd-sub{font-family:var(--mono);font-size:10px;color:#e0885a;letter-spacing:0.06em}
+.boot-bar{width:100%;height:8px;background:#120a06;border-radius:4px;overflow:hidden;margin-top:4px}
+.boot-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#c2410c,#ffb020);border-radius:4px;transition:width 0.2s linear}
+.boot-title{font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--purple-dark);text-transform:uppercase;margin-bottom:6px}
+.boot-msg{font-size:13px;color:#2c3242;line-height:1.55;margin-bottom:16px}
+.boot-btns{display:flex;flex-direction:column;gap:9px}
+.boot-btn{width:100%;padding:13px;border:none;border-radius:11px;font-size:14px;font-weight:700;
+  letter-spacing:0.02em;cursor:pointer}
+.boot-btn.primary{background:linear-gradient(180deg,#2f6fed,#1d4ed8);color:#fff;box-shadow:0 4px 14px rgba(29,78,216,0.4)}
+.boot-btn.ghost{background:var(--panel);border:1.5px solid var(--border);color:var(--text)}
+.boot-btn:active{transform:scale(0.98)}
+.boot-preset-row{display:flex;gap:8px}
+.boot-preset{flex:1;padding:12px 6px;border-radius:11px;border:1.5px solid var(--border);background:#fff;
+  cursor:pointer;transition:all 0.15s}
+.boot-preset:active{transform:scale(0.96)}
+.boot-preset.sel{border-color:var(--blue);background:#eaf1fd}
+.boot-preset-name{font-size:12px;font-weight:700;color:var(--text)}
+.boot-preset-wt{font-size:9px;color:var(--sub);margin-top:2px}
+
+/* Standby scrim over the panel while device is off */
+.panel.standby{position:relative}
+.panel.standby::after{content:'';position:absolute;inset:0;background:rgba(20,16,12,0.55);border-radius:10px;z-index:5;pointer-events:none}
+.standby-hint{display:none;text-align:center;font-size:12px;color:var(--sub);padding:10px;line-height:1.5}
+.panel.standby .standby-hint{display:block}
+
+@media (pointer:coarse){
+  .scan-wrap{padding:8px 10px;margin-bottom:10px}
+  .scan-mode-main{font-size:18px}
+  .scan-value{font-size:26px}
+  .scan-window{min-height:42px}
+  .select-btn{width:54px;font-size:10px}
+  .led-opt-lbl{font-size:8px}
+  .ctrl2-grid{gap:9px 6px}
+  .ctrl2-win{height:44px}
+  .ctrl2-num{font-size:18px}
+  .ctrl2-lbl{font-size:9px;min-height:22px}
+  .knob{width:82px;height:82px}
+  .knob-pointer{transform-origin:50% 35px;height:20px}
+  .knob-hub{inset:26px}
+  .deck-btn{font-size:8px;padding:8px 4px;letter-spacing:0.02em}
+  .deck{gap:7px;padding:9px}
+  .knob-hint{font-size:7px;max-width:96px}
+}
+@media (max-width:340px){
+  .knob{width:72px;height:72px}
+  .knob-pointer{transform-origin:50% 31px;height:18px}
+  .knob-hub{inset:22px}
+  .deck{gap:5px;padding:8px}
+  .deck-btn{font-size:7.5px;padding:7px 3px}
+}
 </style>
 </head>
 <body>
@@ -621,184 +814,86 @@ canvas#pip-canvas{display:none}
     <canvas id="pip-canvas"></canvas>
   </div>
 
-  <!-- LCD -->
-  <div class="lcd">
-    <div class="lcd-mode-row">
+  <!-- SINGLE SCANNING DISPLAY WINDOW (authentic LTV) -->
+  <div class="scan-wrap">
+    <div class="scan-top">
       <div>
-        <div class="lcd-mode-main" id="disp-mode-main">AC-VC</div>
-        <div class="lcd-mode-sub" id="disp-mode-sub">Assist Control · Volume</div>
+        <div class="scan-mode-main" id="disp-mode-main">AC-VC</div>
+        <div class="scan-mode-sub" id="disp-mode-sub">Assist Control · Volume</div>
       </div>
-      <div style="text-align:right">
-        <div class="lcd-ie-lbl" id="lcd-ie-lbl">I:E RATIO</div>
-        <div class="lcd-ie" id="disp-ie">1 : 2.6</div>
-      </div>
-    </div>
-    <div class="lcd-grid">
-      <div class="lcd-cell" id="lcd-rate">
-        <div class="lcd-lbl">RATE SET</div>
-        <div class="lcd-val"><span id="disp-rate">12</span><span class="lcd-unit"> bpm</span></div>
-      </div>
-      <div class="lcd-cell" id="lcd-vt">
-        <div class="lcd-lbl" id="lcd-lbl-vt">TIDAL VOL</div>
-        <div class="lcd-val"><span id="disp-vt">500</span><span class="lcd-unit" id="lcd-unit-vt"> mL</span></div>
-      </div>
-      <div class="lcd-cell" id="lcd-pc">
-        <div class="lcd-lbl" id="lcd-lbl-pc">PRES CTRL</div>
-        <div class="lcd-val"><span id="disp-pc">15</span><span class="lcd-unit"> cmH₂O</span></div>
-      </div>
-      <div class="lcd-cell" id="lcd-it">
-        <div class="lcd-lbl">INSP TIME</div>
-        <div class="lcd-val"><span id="disp-it">1.0</span><span class="lcd-unit"> s</span></div>
-      </div>
-      <div class="lcd-cell" id="lcd-ps">
-        <div class="lcd-lbl" id="lcd-lbl-ps">PRESS SUPP</div>
-        <div class="lcd-val"><span id="disp-ps">10</span><span class="lcd-unit"> cmH₂O</span></div>
-      </div>
-      <div class="lcd-cell" id="lcd-fio2">
-        <div class="lcd-lbl">FiO₂</div>
-        <div class="lcd-val"><span id="disp-fio2">40</span><span class="lcd-unit"> %</span></div>
-      </div>
-      <div class="lcd-cell" id="lcd-peep">
-        <div class="lcd-lbl" id="lcd-lbl-peep">PEEP</div>
-        <div class="lcd-val"><span id="disp-peep">0</span><span class="lcd-unit"> cmH₂O</span></div>
-      </div>
-      <div class="lcd-cell" id="lcd-sens">
-        <div class="lcd-lbl">SENSITIV</div>
-        <div class="lcd-val"><span id="disp-sens">3</span><span class="lcd-unit"> lpm</span></div>
+      <div class="scan-ie">
+        <div class="scan-ie-lbl" id="lcd-ie-lbl">I:E</div>
+        <div class="scan-ie-val" id="disp-ie">1 : 2.6</div>
       </div>
     </div>
+    <div class="scan-window" id="scan-window">
+      <div class="scan-line">
+        <span class="scan-param" id="scan-param">PIP</span>
+        <span class="scan-value" id="scan-value">—</span>
+        <span class="scan-unit" id="scan-unit">cmH₂O</span>
+      </div>
+      <div class="scan-state">
+        <span class="scan-chip" id="scan-chip">SCAN</span>
+        <div class="scan-dots" id="scan-dots"></div>
+      </div>
+    </div>
+    <div class="scan-vcalc" id="scan-vcalc"></div>
   </div>
 
-  <!-- MODE SELECTOR -->
+  <!-- MODE / BREATH-TYPE SELECT TOGGLES -->
   <div class="sec-lbl">Controls</div>
-  <div class="mode-panel">
-    <div class="mode-row">
-      <div class="mode-row-lbl">BREATH<br>TYPE</div>
-      <button class="mode-btn active-vol" id="btn-vol" onclick="setBreathType('volume')">VOLUME</button>
-      <button class="mode-btn" id="btn-pres" onclick="setBreathType('pressure')">PRESSURE</button>
+  <div class="select-block">
+    <div class="select-row">
+      <button class="select-btn" onclick="pressBreathSelect()">SELECT<div class="select-btn-sub">Vol/Pres</div></button>
+      <div class="led-strip" id="bt-strip">
+        <div class="led-opt on" id="bt-volume"><div class="led-opt-lamp"></div><div class="led-opt-lbl">VOLUME</div></div>
+        <div class="led-opt" id="bt-pressure"><div class="led-opt-lamp"></div><div class="led-opt-lbl">PRESSURE</div></div>
+      </div>
     </div>
-    <div class="mode-row">
-      <div class="mode-row-lbl">MODE</div>
-      <button class="mode-btn active-ac"  id="btn-ac"   onclick="setMode('ac')">A/C</button>
-      <button class="mode-btn"            id="btn-simv" onclick="setMode('simv')">SIMV</button>
-      <button class="mode-btn"            id="btn-cpap" onclick="setMode('cpap')">CPAP/<br>PSV</button>
-      <button class="mode-btn"            id="btn-nppv" onclick="setMode('nppv')">NPPV/<br>BiPAP</button>
+    <div class="select-row">
+      <button class="select-btn" onclick="pressModeSelect()">SELECT<div class="select-btn-sub">Mode</div></button>
+      <div class="led-strip" id="mode-strip">
+        <div class="led-opt on" id="mode-ac"><div class="led-opt-lamp"></div><div class="led-opt-lbl">ASSIST<br>CONTROL</div></div>
+        <div class="led-opt" id="mode-simv"><div class="led-opt-lamp"></div><div class="led-opt-lbl">SIMV</div></div>
+        <div class="led-opt" id="mode-cpap"><div class="led-opt-lamp"></div><div class="led-opt-lbl">CPAP</div></div>
+        <div class="led-opt" id="mode-nppv"><div class="led-opt-lamp"></div><div class="led-opt-lbl">NPPV</div></div>
+      </div>
     </div>
   </div>
 
-  <!-- CONTROLS -->
-  <div class="ctrl-grid">
-
-    <div class="ctrl-wrap" id="cw-rate" onclick="openDrawer('rate')">
-      <div class="knob-outer">
-        <div class="knob-ind" id="ind-rate"></div>
-        <div class="knob-val"><div class="knob-val-num" id="kv-rate">12</div><div class="knob-val-unit">bpm</div></div>
-        <div class="dim-lock">🔒</div>
-      </div>
-      <div class="knob-lbl" id="lbl-rate">BREATH<br>RATE</div>
-      <div class="knob-adj">
-        <button class="adj-btn" onclick="adj('rate',-1);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('rate',1);event.stopPropagation()">+</button>
-      </div>
+  <!-- CONTROLS — Select button + LED window per control -->
+  <div class="ctrl2-grid">
+    <div class="ctrl2 selected" id="cw-rate" data-key="rate">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-rate">12</div><div class="ctrl2-unit">bpm</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl" id="lbl-rate">Breath Rate</div>
     </div>
-
-    <div class="ctrl-wrap" id="cw-vt" onclick="openDrawer('vt')">
-      <div class="knob-outer">
-        <div class="knob-ind" id="ind-vt"></div>
-        <div class="knob-val"><div class="knob-val-num" id="kv-vt">500</div><div class="knob-val-unit">mL</div></div>
-        <div class="dim-lock">🔒</div>
-      </div>
-      <div class="knob-lbl" id="lbl-vt">TIDAL<br>VOL</div>
-      <div class="knob-adj">
-        <button class="adj-btn" onclick="adj('vt',-25);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('vt',25);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-vt" data-key="vt">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-vt">500</div><div class="ctrl2-unit">mL</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl" id="lbl-vt">Tidal Volume</div>
     </div>
-
-    <div class="ctrl-wrap" id="cw-pc" onclick="openDrawer('pc')">
-      <div class="knob-outer">
-        <div class="knob-ind" id="ind-pc"></div>
-        <div class="knob-val"><div class="knob-val-num" id="kv-pc">15</div><div class="knob-val-unit">cmH₂O</div></div>
-        <div class="dim-lock">🔒</div>
-      </div>
-      <div class="knob-lbl" id="lbl-pc">PRES<br>CTRL</div>
-      <div class="knob-adj">
-        <button class="adj-btn" onclick="adj('pc',-1);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('pc',1);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-pc" data-key="pc">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-pc">15</div><div class="ctrl2-unit">cmH₂O</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl" id="lbl-pc">Pres. Control</div>
     </div>
-
-    <div class="ctrl-wrap" id="cw-it" onclick="openDrawer('it')">
-      <div class="knob-outer">
-        <div class="knob-ind" id="ind-it"></div>
-        <div class="knob-val"><div class="knob-val-num" id="kv-it">1.0</div><div class="knob-val-unit">sec</div></div>
-        <div class="dim-lock">🔒</div>
-      </div>
-      <div class="knob-lbl">INSP<br>TIME</div>
-      <div class="knob-adj">
-        <button class="adj-btn" onclick="adjStep('it',-0.1);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adjStep('it',0.1);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-it" data-key="it">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-it">1.0</div><div class="ctrl2-unit">sec</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl">Insp. Time</div>
     </div>
-
-    <div class="ctrl-wrap" id="cw-ps" onclick="openDrawer('ps')">
-      <div class="knob-outer">
-        <div class="knob-ind" id="ind-ps"></div>
-        <div class="knob-val"><div class="knob-val-num" id="kv-ps">10</div><div class="knob-val-unit" id="kv-ps-unit">cmH₂O</div></div>
-        <div class="dim-lock">🔒</div>
-      </div>
-      <div class="knob-lbl" id="lbl-ps">PRESS<br>SUPP</div>
-      <div class="knob-adj">
-        <button class="adj-btn" onclick="adj('ps',-1);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('ps',1);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-ps" data-key="ps">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-ps">10</div><div class="ctrl2-unit" id="kv-ps-unit">cmH₂O</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl" id="lbl-ps">Pres. Support</div>
     </div>
-
-    <div class="ctrl-wrap" id="cw-fio2" onclick="openDrawer('fio2')">
-      <div class="knob-outer">
-        <div class="knob-ind" id="ind-fio2"></div>
-        <div class="knob-val"><div class="knob-val-num" id="kv-fio2">40</div><div class="knob-val-unit">% O₂</div></div>
-        <div class="dim-lock">🔒</div>
-      </div>
-      <div class="knob-lbl">FiO₂ /<br>O₂ FLUSH</div>
-      <div class="knob-adj">
-        <button class="adj-btn" onclick="adj('fio2',-5);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('fio2',5);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-fio2" data-key="fio2">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-fio2">40</div><div class="ctrl2-unit">% O₂</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl">O₂ %</div>
     </div>
-
-    <div class="ctrl-wrap" id="cw-sens" onclick="openDrawer('sens')">
-      <div class="knob-outer">
-        <div class="knob-ind" id="ind-sens"></div>
-        <div class="knob-val"><div class="knob-val-num" id="kv-sens">3</div><div class="knob-val-unit">lpm</div></div>
-        <div class="dim-lock">🔒</div>
-      </div>
-      <div class="knob-lbl">SENSI-<br>TIVITY</div>
-      <div class="knob-adj">
-        <button class="adj-btn" onclick="adj('sens',-1);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('sens',1);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-sens" data-key="sens">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-sens">3</div><div class="ctrl2-unit">lpm</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl">Sensitivity</div>
     </div>
-
-  </div><!-- /ctrl-grid -->
-
-  <!-- PEEP -->
-  <div class="sec-lbl" id="peep-sec-lbl">PEEP / CPAP</div>
-  <div class="peep-row" onclick="openDrawer('peep')">
-    <div class="peep-knob">
-      <div class="peep-ind" id="ind-peep"></div>
-      <div class="peep-val">
-        <div class="peep-val-num" id="kv-peep">0</div>
-        <div class="peep-val-unit" id="peep-unit-lbl">cmH₂O</div>
-      </div>
-    </div>
-    <div class="peep-info">
-      <div class="peep-lbl" id="peep-main-lbl">PEEP / CPAP</div>
-      <div class="peep-sub" id="peep-sub-lbl">Active in ALL modes. In CPAP/PSV, sets baseline pressure. In NPPV, this is EPAP.</div>
-    </div>
-    <div class="peep-adj" onclick="event.stopPropagation()">
-      <button class="adj-btn" onclick="adj('peep',1)">+</button>
-      <button class="adj-btn" onclick="adj('peep',-1)">−</button>
+    <div class="ctrl2" id="cw-peep" data-key="peep">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-peep">0</div><div class="ctrl2-unit" id="peep-unit-lbl">cmH₂O</div><div class="ctrl2-lock">🔒</div></div>
+      <div class="ctrl2-lbl" id="peep-main-lbl">PEEP</div>
     </div>
   </div>
 
@@ -813,57 +908,65 @@ canvas#pip-canvas{display:none}
   </div>
 
   <!-- ALARM LIMITS -->
-  <div class="sec-lbl red">ALARM LIMITS</div>
-  <div class="alarm-grid">
-    <div class="alarm-wrap" onclick="openDrawer('hipres')">
-      <div class="alarm-knob"><div class="alarm-ind" id="ind-hipres"></div>
-        <div class="alarm-val"><div class="alarm-val-num" id="kv-hipres">40</div><div class="alarm-val-unit">cmH₂O</div></div></div>
-      <div class="alarm-lbl">HIGH PRES<br>LIMIT</div>
-      <div class="knob-adj alarm-adj">
-        <button class="adj-btn" onclick="adj('hipres',-5);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('hipres',5);event.stopPropagation()">+</button>
-      </div>
+  <div class="sec-lbl red">Alarms</div>
+  <div class="ctrl2-grid">
+    <div class="ctrl2" id="cw-hipres" data-key="hipres">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-hipres">40</div><div class="ctrl2-unit">cmH₂O</div></div>
+      <div class="ctrl2-lbl">High Pres. Limit</div>
     </div>
-    <div class="alarm-wrap" onclick="openDrawer('lowpres')">
-      <div class="alarm-knob"><div class="alarm-ind" id="ind-lowpres"></div>
-        <div class="alarm-val"><div class="alarm-val-num" id="kv-lowpres">10</div><div class="alarm-val-unit">cmH₂O</div></div></div>
-      <div class="alarm-lbl">LOW<br>PRESSURE</div>
-      <div class="knob-adj alarm-adj">
-        <button class="adj-btn" onclick="adj('lowpres',-1);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('lowpres',1);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-lowpres" data-key="lowpres">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-lowpres">10</div><div class="ctrl2-unit">cmH₂O</div></div>
+      <div class="ctrl2-lbl">Low Pressure</div>
     </div>
-    <div class="alarm-wrap" onclick="openDrawer('lowmv')">
-      <div class="alarm-knob"><div class="alarm-ind" id="ind-lowmv"></div>
-        <div class="alarm-val"><div class="alarm-val-num" id="kv-lowmv">3</div><div class="alarm-val-unit">L/min</div></div></div>
-      <div class="alarm-lbl">LOW MIN<br>VOLUME</div>
-      <div class="knob-adj alarm-adj">
-        <button class="adj-btn" onclick="adj('lowmv',-1);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('lowmv',1);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-lowmv" data-key="lowmv">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-lowmv">3</div><div class="ctrl2-unit">L/min</div></div>
+      <div class="ctrl2-lbl">Low Min. Vol.</div>
     </div>
-    <div class="alarm-wrap" onclick="openDrawer('apnea')">
-      <div class="alarm-knob"><div class="alarm-ind" id="ind-apnea"></div>
-        <div class="alarm-val"><div class="alarm-val-num" id="kv-apnea">20</div><div class="alarm-val-unit">sec</div></div></div>
-      <div class="alarm-lbl">VENT<br>INOP</div>
-      <div class="knob-adj alarm-adj">
-        <button class="adj-btn" onclick="adj('apnea',-5);event.stopPropagation()">−</button>
-        <button class="adj-btn" onclick="adj('apnea',5);event.stopPropagation()">+</button>
-      </div>
+    <div class="ctrl2" id="cw-apnea" data-key="apnea">
+      <div class="ctrl2-win"><div class="ctrl2-num" id="kv-apnea">20</div><div class="ctrl2-unit">sec</div></div>
+      <div class="ctrl2-lbl">Apnea Interval</div>
     </div>
   </div>
 
-  <!-- FUNCTION BUTTONS -->
-  <div class="sec-lbl">FUNCTION</div>
+  <!-- BOTTOM CONTROL DECK: On/Standby · Set Value knob · Control Lock/Monitor -->
+  <div class="deck">
+    <div class="deck-btns">
+      <button class="deck-btn on" id="btn-onstandby" onmousedown="onStandbyDown()" onmouseup="onStandbyUp()" onmouseleave="onStandbyUp()" ontouchstart="onStandbyDown();event.preventDefault()" ontouchend="onStandbyUp()">On / Standby<span class="lamp"></span></button>
+      <button class="deck-btn" id="btn-monitor" onclick="pressMonitor()">Monitor Select<span class="lamp"></span></button>
+    </div>
+    <div class="knob-block">
+      <div class="knob-title">Set Value</div>
+      <div class="knob" id="setknob" role="slider" aria-label="Set Value">
+        <div class="knob-pointer"></div>
+        <div class="knob-ticks" id="knob-ticks"></div>
+        <div class="knob-hub"><div class="knob-hub-lbl">Set<br>Value</div></div>
+      </div>
+      <div class="knob-hint" id="knob-hint">Select a control, then turn</div>
+    </div>
+    <div class="deck-btns">
+      <button class="deck-btn" id="btn-lock" onmousedown="lockDown()" onmouseup="lockUp()" onmouseleave="lockUp()" ontouchstart="lockDown();event.preventDefault()" ontouchend="lockUp()">Control Lock<span class="lamp"></span></button>
+      <button class="deck-btn" id="btn-alarm-silence" onclick="alarmSilence()">Silence / Reset<span class="lamp"></span></button>
+    </div>
+  </div>
+
+  <!-- SPECIAL FUNCTION BUTTONS -->
+  <div class="sec-lbl">Special Functions</div>
   <div class="fn-grid">
     <div class="fn-btn green" onclick="manualBreath()">MANUAL<br>BREATH</div>
     <div class="fn-btn blue"  onclick="triggerInspHold()">INSP<br>HOLD</div>
     <div class="fn-btn blue"  onclick="openDrawer('exphold')">EXP<br>HOLD</div>
     <div class="fn-btn orange" onclick="o2Flush()">100%<br>O₂</div>
-    <div class="fn-btn red"   onclick="alarmSilence()">ALARM<br>SILENCE</div>
+    <div class="fn-btn purple" onclick="openDrawer('grammar')">HOW TO<br>USE</div>
   </div>
 
+  <div class="standby-hint">⏻ Ventilator in Standby — press <strong>On / Standby</strong> to power up.</div>
+
 </div></div></div>
+
+<!-- POWER-ON / POST / PATIENT QUERY overlay -->
+<div class="boot-overlay" id="boot-overlay">
+  <div class="boot-card" id="boot-card"></div>
+</div>
 
 <!-- DRAWER -->
 <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
@@ -926,19 +1029,31 @@ function calcIE(){
   return '1 : '+(expMs/inspMs).toFixed(1);
 }
 
-// ── KNOB UPDATES ──────────────────────────────────────────────
-function valToAngle(key){
-  var c=vals[key], pct=(c.v-c.min)/(c.max-c.min);
-  return -135+pct*270;
-}
+// ── CONTROL WINDOW UPDATES ────────────────────────────────────
+// Each control now shows its value in an LED window (no rotating indicator).
 function updateKnob(key){
-  var ind=document.getElementById('ind-'+key);
-  var kv =document.getElementById('kv-'+key);
-  if(ind) ind.style.transform='translateX(-50%) rotate('+valToAngle(key)+'deg)';
-  var disp=key==='it'?vals[key].v.toFixed(1):vals[key].v;
-  if(kv)  kv.textContent=disp;
-  var d=document.getElementById('disp-'+key);
-  if(d)   d.textContent=disp;
+  var kv=document.getElementById('kv-'+key);
+  if(!kv) return;
+  // Breath Rate reads dashes in pure CPAP (spontaneous — no set rate), like the real LTV.
+  if(key==='rate' && ventMode==='cpap'){
+    kv.textContent='- -'; kv.classList.add('dashes');
+  } else {
+    kv.classList.remove('dashes');
+    kv.textContent = key==='it' ? vals[key].v.toFixed(1) : vals[key].v;
+  }
+  if(key===selectedControl) updateKnobPointer();
+}
+// Rotate the Set Value pointer to reflect the selected control's position in range.
+function updateKnobPointer(){
+  var ptr=document.querySelector('#setknob .knob-pointer');
+  if(!ptr) return;
+  var deg=0;
+  if(selectedControl && vals[selectedControl]){
+    var c=vals[selectedControl];
+    var pct=(c.v-c.min)/(c.max-c.min);
+    deg=-150+pct*300;
+  }
+  ptr.style.transform='translateX(-50%) rotate('+deg+'deg)';
 }
 // ── RATE ↔ INSP TIME CONSTRAINT (LTV 1200) ───────────────────
 // The LTV 1200 will not allow an inspiratory time that drives the I:E ratio
@@ -981,7 +1096,7 @@ function adj(key,delta){
 }
 function adjStep(key,delta){ adj(key,delta); }
 
-// ── MODE SETTERS ──────────────────────────────────────────────
+// ── MODE SETTERS (programmatic — the game & presets call these directly) ──
 function setBreathType(bt){
   if(ventMode==='cpap'||ventMode==='nppv') return;
   breathType=bt;
@@ -990,59 +1105,375 @@ function setBreathType(bt){
 function setMode(m){
   ventMode=m;
   if(m==='cpap'||m==='nppv') breathType='pressure';
+  // If the selected control just became inactive in the new mode, drop the selection.
+  if(selectedControl && !isActive(selectedControl)) deselect();
   updateUI();
+}
+
+// ── LED STRIP RENDERING (Select-toggle indicators) ────────────
+function renderBTStrip(){
+  var isSpont=(ventMode==='cpap'||ventMode==='nppv');
+  var vo=document.getElementById('bt-volume'), pr=document.getElementById('bt-pressure');
+  if(!vo||!pr) return;
+  // In CPAP/NPPV breath type is forced to pressure and the toggle is inert.
+  vo.className='led-opt'+(!isSpont&&breathType==='volume'?' on':'')+(isSpont?' disabled':'');
+  pr.className='led-opt'+((isSpont||breathType==='pressure')?' on':'')+(isSpont?' disabled':'');
+}
+function renderModeStrip(){
+  // Base render only shows selection/candidate state. The game layer's updateUI
+  // patch adds the `.disabled` look for modes a tutorial stage hasn't unlocked.
+  ['ac','simv','cpap','nppv'].forEach(function(m){
+    var el=document.getElementById('mode-'+m); if(!el) return;
+    var cls='led-opt';
+    if(_modeCandidate){ if(m===_modeCandidate) cls+=' flash'; else if(m===ventMode) cls+=' on'; }
+    else if(m===ventMode) cls+=' on';
+    el.className=cls;
+  });
 }
 
 // ── FULL UI UPDATE ────────────────────────────────────────────
 function updateUI(){
-  // Breath type buttons
-  var bv=document.getElementById('btn-vol'),bp=document.getElementById('btn-pres');
-  var isLocked=(ventMode==='cpap'||ventMode==='nppv');
-  bv.className='mode-btn'+(breathType==='volume'&&!isLocked?' active-vol':'')+(isLocked?' disabled-bt':'');
-  bp.className='mode-btn'+(breathType==='pressure'||isLocked?' active-pres':'')+(isLocked?' disabled-bt':'');
+  renderBTStrip();
+  renderModeStrip();
 
-  // Mode buttons
-  document.getElementById('btn-ac').className  ='mode-btn'+(ventMode==='ac'  ?' active-ac':'');
-  document.getElementById('btn-simv').className ='mode-btn'+(ventMode==='simv'?' active-simv':'');
-  document.getElementById('btn-cpap').className ='mode-btn'+(ventMode==='cpap'?' active-cpap':'');
-  document.getElementById('btn-nppv').className ='mode-btn'+(ventMode==='nppv'?' active-nppv':'');
-
-  // Mode label
+  // Scan-window mode line + I:E
   var lbl=getModeLabel();
-  document.getElementById('disp-mode-main').textContent=lbl.main;
-  document.getElementById('disp-mode-sub').textContent=lbl.sub;
-  document.getElementById('disp-ie').textContent=calcIE();
+  var mm=document.getElementById('disp-mode-main'); if(mm) mm.textContent=lbl.main;
+  var ms=document.getElementById('disp-mode-sub');  if(ms) ms.textContent=lbl.sub;
+  var ie=document.getElementById('disp-ie');         if(ie) ie.textContent=calcIE();
 
-  // NPPV relabeling
+  // NPPV relabeling on the control tiles
   var isNPPV=(ventMode==='nppv');
-  document.getElementById('lcd-lbl-ps').textContent       = isNPPV?'IPAP ABOVE EPAP':'PRESS SUPP';
-  document.getElementById('lcd-lbl-peep').textContent     = isNPPV?'EPAP':'PEEP';
-  document.getElementById('lbl-ps').innerHTML             = isNPPV?'IPAP<br>(PS)':'PRESS<br>SUPP';
-  document.getElementById('kv-ps-unit').textContent       = isNPPV?'above EPAP':'cmH₂O';
-  document.getElementById('peep-main-lbl').textContent    = isNPPV?'EPAP':'PEEP / CPAP';
-  document.getElementById('peep-sub-lbl').textContent     = isNPPV?'Expiratory Positive Airway Pressure — the baseline the patient exhales against. Equivalent to PEEP.':'Active in ALL modes. In CPAP/PSV, sets baseline pressure. In NPPV, this is EPAP.';
-  document.getElementById('peep-sec-lbl').textContent     = isNPPV?'EPAP (PEEP)':'PEEP / CPAP';
-  document.getElementById('ipap-display').style.display   = isNPPV?'block':'none';
+  var lblPs=document.getElementById('lbl-ps');   if(lblPs) lblPs.textContent = isNPPV?'IPAP (above EPAP)':'Pres. Support';
+  var unPs =document.getElementById('kv-ps-unit');if(unPs) unPs.textContent = isNPPV?'+EPAP':'cmH₂O';
+  var lblPeep=document.getElementById('peep-main-lbl'); if(lblPeep) lblPeep.textContent = isNPPV?'EPAP':'PEEP';
+  var unPeep=document.getElementById('peep-unit-lbl');  if(unPeep) unPeep.textContent='cmH₂O';
+  var lblRate=document.getElementById('lbl-rate');       if(lblRate) lblRate.textContent = isNPPV?'Apnea Backup':'Breath Rate';
+  var ipap=document.getElementById('ipap-display'); if(ipap) ipap.style.display=isNPPV?'block':'none';
   if(isNPPV){
     document.getElementById('nppv-epap').textContent=vals.peep.v;
     document.getElementById('nppv-ipap').textContent=vals.peep.v+vals.ps.v;
     document.getElementById('nppv-ps').textContent=vals.ps.v;
   }
-  // Rate doubles as the apnea-backup rate in NPPV; leak compensation runs in NPPV.
-  var rateLbl=document.getElementById('lbl-rate');
-  if(rateLbl) rateLbl.innerHTML = isNPPV ? 'APNEA<br>BACKUP' : 'BREATH<br>RATE';
   var leak=document.getElementById('leak-comp');
   if(leak) leak.style.display = (ventMode==='nppv'||ventMode==='cpap') ? 'inline-flex' : 'none';
 
-  // Dim/undim controls
-  ['rate','vt','pc','it','ps','fio2','sens'].forEach(function(k){
+  // Dim/undim inactive-in-mode controls; refresh their value windows
+  ['rate','vt','pc','it','ps','fio2','sens','peep'].forEach(function(k){
     var w=document.getElementById('cw-'+k);
-    var l=document.getElementById('lcd-'+k);
     if(w) w.classList.toggle('dim',!isActive(k));
-    if(l) l.classList.toggle('na',!isActive(k));
+    updateKnob(k);
   });
 
+  refreshSelection();
 }
+
+// ══════════════════════════════════════════════════════════════
+// AUTHENTIC INTERACTION GRAMMAR — Select → turn Set Value → confirm
+// ══════════════════════════════════════════════════════════════
+var CONTROL_SHORT={rate:'Breath Rate',vt:'Tidal Volume',pc:'Pres. Control',it:'Insp. Time',
+  ps:'Pres. Support',fio2:'O₂ %',sens:'Sensitivity',peep:'PEEP',
+  hipres:'High Pres. Limit',lowpres:'Low Pressure',lowmv:'Low Min. Vol.',apnea:'Apnea Interval'};
+
+// ── DEVICE POWER STATE ────────────────────────────────────────
+var deviceState='standby';   // 'standby' | 'run' (POST/query handled by overlay)
+(function(){ var p=new URLSearchParams(location.search);
+  if(p.get('scenario')||p.get('level')) deviceState='run'; })();   // academy deep-links boot straight to run
+function deviceRunning(){ return deviceState==='run'; }
+function applyStandbyVisual(){
+  var panel=document.querySelector('.panel');
+  if(panel) panel.classList.toggle('standby',deviceState!=='run');
+  var b=document.getElementById('btn-onstandby');
+  if(b) b.classList.toggle('on',deviceState==='run');
+}
+
+// ── SELECTION STATE ───────────────────────────────────────────
+var selectedControl=null, _confirmTimer=null;
+function refreshSelection(){
+  var panel=document.querySelector('.panel');
+  document.querySelectorAll('.ctrl2').forEach(function(t){
+    t.classList.toggle('selected',t.getAttribute('data-key')===selectedControl);
+  });
+  if(panel) panel.classList.toggle('has-selection',!!selectedControl);
+  var knob=document.getElementById('setknob'); if(knob) knob.classList.toggle('armed',!!selectedControl);
+  var hint=document.getElementById('knob-hint');
+  if(hint) hint.textContent = selectedControl ? ('Turn to set '+(CONTROL_SHORT[selectedControl]||selectedControl)) : 'Select a control, then turn';
+  updateKnobPointer(); renderVcalc();
+}
+function selectControl(key){
+  if(!deviceRunning()) return;
+  if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
+  if(typeof isControlUnlocked==='function' && !isControlUnlocked(key)) return;   // game progressive lock
+  if(!isActive(key)){ openDrawer(key); return; }   // inactive-in-mode → open the teaching card
+  if(selectedControl===key){ deselect(); return; }  // press again confirms/deselects
+  selectedControl=key; sfxModeBtn(); armConfirm(); refreshSelection();
+}
+function deselect(){ selectedControl=null; clearTimeout(_confirmTimer); refreshSelection(); }
+function armConfirm(){ clearTimeout(_confirmTimer); _confirmTimer=setTimeout(deselect,5000); } // 5-s auto-confirm
+function knobTurn(dir){
+  if(!deviceRunning()) return;
+  if(!selectedControl){ scanMessage('SELECT A CONTROL',1000); return; }
+  var c=vals[selectedControl]; if(!c) return;
+  adj(selectedControl, dir*c.step);   // adj is game-patched (respects locks + plays tick)
+  armConfirm(); updateKnobPointer(); renderVcalc();
+}
+
+// ── CONTROL LOCK ──────────────────────────────────────────────
+var controlsLocked=false, _lockHoldTimer=null, _lockHeld=false;
+function lockDown(){
+  if(!deviceRunning()) return;
+  _lockHeld=false;
+  if(controlsLocked){ _lockHoldTimer=setTimeout(function(){
+    controlsLocked=false; _lockHeld=true; updateLockUI(); scanMessage('CONTROLS UNLOCKED',1400);
+  },3000); }
+}
+function lockUp(){
+  clearTimeout(_lockHoldTimer);
+  if(_lockHeld){ _lockHeld=false; return; }
+  if(!deviceRunning()) return;
+  if(!controlsLocked){ controlsLocked=true; deselect(); updateLockUI(); scanMessage('CONTROLS LOCKED',1400); sfxModeBtn(); }
+}
+function updateLockUI(){ var b=document.getElementById('btn-lock'); if(b) b.classList.toggle('locked',controlsLocked); }
+
+// ── MODE / BREATH-TYPE SELECT TOGGLES ─────────────────────────
+var _modeCandidate=null, _modeCommitTimer=null, modeSeq=['ac','simv','cpap','nppv'];
+function pressModeSelect(){
+  if(!deviceRunning()) return;
+  if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
+  sfxModeBtn();
+  var cur=_modeCandidate||ventMode, idx=modeSeq.indexOf(cur);
+  for(var n=1;n<=modeSeq.length;n++){
+    var cand=modeSeq[(idx+n)%modeSeq.length];
+    if(typeof isModeUnlocked!=='function' || isModeUnlocked(cand)){ _modeCandidate=cand; break; }
+  }
+  renderModeStrip();
+  scanMessage('SET MODE?  '+(_modeCandidate?_modeCandidate.toUpperCase():''),820);
+  clearTimeout(_modeCommitTimer); _modeCommitTimer=setTimeout(commitMode,850); // pause commits, like the flashing-LED confirm
+}
+function commitMode(){ if(_modeCandidate){ var m=_modeCandidate; _modeCandidate=null; setMode(m); } renderModeStrip(); }
+function pressBreathSelect(){
+  if(!deviceRunning()) return;
+  if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
+  if(ventMode==='cpap'||ventMode==='nppv'){ scanMessage('PRESSURE ONLY',1200); return; }
+  sfxModeBtn();
+  setBreathType(breathType==='volume'?'pressure':'volume');
+}
+
+// ── SET VALUE KNOB (drag ↕ / scroll / arrow keys) ─────────────
+(function(){
+  var knob=document.getElementById('setknob'); if(!knob) return;
+  var active=false,lastY=0,acc=0,STEP=9;
+  knob.addEventListener('pointerdown',function(e){ active=true; lastY=e.clientY; acc=0; try{knob.setPointerCapture(e.pointerId);}catch(_){}} );
+  knob.addEventListener('pointermove',function(e){
+    if(!active) return;
+    var dy=lastY-e.clientY; lastY=e.clientY; acc+=dy;
+    while(acc>=STEP){ knobTurn(1); acc-=STEP; }
+    while(acc<=-STEP){ knobTurn(-1); acc+=STEP; }
+    e.preventDefault();
+  },{passive:false});
+  function end(){ active=false; }
+  knob.addEventListener('pointerup',end); knob.addEventListener('pointercancel',end);
+  knob.addEventListener('wheel',function(e){ e.preventDefault(); knobTurn(e.deltaY<0?1:-1); },{passive:false});
+  knob.setAttribute('tabindex','0');
+  knob.addEventListener('keydown',function(e){
+    if(e.key==='ArrowUp'||e.key==='ArrowRight'){ knobTurn(1); e.preventDefault(); }
+    if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ knobTurn(-1); e.preventDefault(); }
+  });
+})();
+
+// ── CONTROL TILE TAP (select) + LONG-PRESS (teaching card) ────
+(function(){
+  document.querySelectorAll('.ctrl2').forEach(function(t){
+    var key=t.getAttribute('data-key'), lpTimer=null, longFired=false, sy=0, moved=false;
+    t.addEventListener('pointerdown',function(e){ longFired=false; moved=false; sy=e.clientY;
+      lpTimer=setTimeout(function(){ longFired=true; openDrawer(key); },550); });
+    t.addEventListener('pointermove',function(e){ if(Math.abs(e.clientY-sy)>10){ moved=true; clearTimeout(lpTimer); } });
+    t.addEventListener('pointerup',function(){ clearTimeout(lpTimer); if(longFired||moved) return; selectControl(key); });
+    t.addEventListener('pointercancel',function(){ clearTimeout(lpTimer); });
+  });
+})();
+
+// ── SINGLE SCANNING DISPLAY WINDOW ────────────────────────────
+var scanIdx=0, scanMode='scan', _scanMsg=null, _scanMsgUntil=0, _scanTick=0;
+function scanMessage(txt,ms){ _scanMsg=txt; _scanMsgUntil=performance.now()+(ms||1400); renderScan(); }
+function buildScanDots(){ var c=document.getElementById('scan-dots'); if(!c) return; c.innerHTML='';
+  for(var i=0;i<7;i++){ var d=document.createElement('div'); d.className='scan-dot'; c.appendChild(d); } }
+function renderScanDots(idx){ var c=document.getElementById('scan-dots'); if(!c) return;
+  var ds=c.children; for(var i=0;i<ds.length;i++) ds[i].className='scan-dot'+(i===idx?' on':''); }
+function livePeak(){
+  if(!pressureHistory||pressureHistory.length<3) return null;
+  var n=pressureHistory.length, per=Math.min(n,Math.max(30,Math.ceil((60/vals.rate.v)*60))), s=Math.max(0,n-per), pk=-1e9;
+  for(var i=s;i<n;i++) if(pressureHistory[i]>pk) pk=pressureHistory[i];
+  return pk;
+}
+function liveMean(){
+  if(!pressureHistory||!pressureHistory.length) return null;
+  var sum=0; for(var i=0;i<pressureHistory.length;i++) sum+=pressureHistory[i];
+  return sum/pressureHistory.length;
+}
+function monitorData(){
+  var spont=(ventMode==='cpap'||ventMode==='nppv');
+  var pip=livePeak(), map=liveMean();
+  var f=spont?15:vals.rate.v, vte;
+  if(spont) vte=Math.round(400+vals.ps.v*SIM_COMPLIANCE);
+  else if(breathType==='volume') vte=vals.vt.v;
+  else vte=Math.round(vals.pc.v*SIM_COMPLIANCE);
+  return [
+    {p:'PIP', v:(pip==null?'--':Math.round(pip)), u:'cmH₂O'},
+    {p:'MAP', v:(map==null?'--':Math.round(map)), u:'cmH₂O'},
+    {p:'PEEP',v:vals.peep.v, u:'cmH₂O'},
+    {p:'f',   v:(spont?'~'+f:f), u:'bpm'},
+    {p:'Vte', v:vte, u:'mL'},
+    {p:'VE',  v:estMinuteVolume().toFixed(1), u:'L/min'},
+    {p:'I:E', v:calcIE(), u:''}
+  ];
+}
+function renderScan(){
+  var win=document.getElementById('scan-window'); if(!win) return;
+  var pEl=document.getElementById('scan-param'), vEl=document.getElementById('scan-value'),
+      uEl=document.getElementById('scan-unit'), chip=document.getElementById('scan-chip');
+  var now=performance.now();
+  if(!deviceRunning()){
+    win.className='scan-window msg'; pEl.textContent=''; vEl.textContent='STANDBY'; uEl.textContent='';
+    chip.textContent='OFF'; chip.className='scan-chip'; renderScanDots(-1); return;
+  }
+  if(_scanMsg && now<_scanMsgUntil){
+    win.className='scan-window msg'; pEl.textContent=''; vEl.textContent=_scanMsg; uEl.textContent='';
+    chip.textContent='MSG'; chip.className='scan-chip'; renderScanDots(-1); return;
+  }
+  if(typeof alarmActiveKey!=='undefined' && alarmActiveKey){
+    win.className='scan-window alarm'; pEl.textContent='⚠'; vEl.textContent=alarms[alarmActiveKey].label; uEl.textContent='';
+    chip.textContent='ALARM'; chip.className='scan-chip halt'; renderScanDots(-1); return;
+  }
+  var data=monitorData(); if(scanIdx>=data.length) scanIdx=0;
+  var d=data[scanIdx];
+  win.className='scan-window';
+  pEl.textContent=d.p; vEl.textContent=d.v; uEl.textContent=d.u;
+  chip.textContent=(scanMode==='halt'?'HALT':'SCAN'); chip.className='scan-chip'+(scanMode==='halt'?' halt':'');
+  renderScanDots(scanIdx);
+}
+function renderVcalc(){
+  var el=document.getElementById('scan-vcalc'); if(!el) return;
+  var show=(selectedControl==='vt'||selectedControl==='it') && breathType==='volume' && ventMode!=='cpap' && ventMode!=='nppv';
+  if(show){
+    var flow=Math.round((vals.vt.v/1000)/vals.it.v*60);
+    el.classList.add('show');
+    el.textContent='Vcalc (peak flow) '+flow+' L/min  ·  Vt '+vals.vt.v+' mL  ·  IT '+vals.it.v.toFixed(1)+' s';
+  } else el.classList.remove('show');
+}
+// ── MONITOR SELECT (halt / step / double-press resume) ────────
+var _monLastPress=0;
+function pressMonitor(){
+  if(!deviceRunning()) return;
+  var now=Date.now();
+  if(now-_monLastPress<320){ scanMode='scan'; scanMessage('SCAN RESUMED',700); }
+  else if(scanMode==='scan'){ scanMode='halt'; }
+  else { scanIdx=(scanIdx+1)%7; }
+  _monLastPress=now; sfxModeBtn(); updateMonitorLamp(); renderScan();
+}
+function updateMonitorLamp(){ var b=document.getElementById('btn-monitor'); if(b) b.classList.toggle('on',scanMode==='halt'); }
+
+// ── POWER-ON SEQUENCE: POST → PATIENT QUERY → RUN ─────────────
+var _bootThen=null, _pendingPreset=null;
+var PRESETS={   // factory presets from the LTV 1200/1150 Quick Reference Guide
+  adult:    {mode:'ac',bt:'volume',  rate:12,vt:500,it:1.0,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+  pediatric:{mode:'ac',bt:'pressure',rate:15,vt:250,it:0.7,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:30,lowpres:10,lowmv:1,apnea:20},
+  infant:   {mode:'ac',bt:'pressure',rate:20,vt:50, it:0.3,pc:15,ps:10,peep:0,fio2:40,sens:2,hipres:30,lowpres:10,lowmv:1,apnea:20}
+};
+function applyPreset(name){
+  var p=PRESETS[name]; if(!p) return;
+  ventMode=p.mode; breathType=p.bt;
+  var keys=['rate','vt','it','pc','ps','peep','fio2','sens','hipres','lowpres','lowmv','apnea'];
+  keys.forEach(function(k){ if(p[k]!==undefined) vals[k].v=p[k]; });
+  enforceITLimit(); keys.forEach(updateKnob);
+  simTime=0; pressureHistory=[]; updateUI();
+}
+function powerOnSequence(then){ _bootThen=then||null; try{getAC();}catch(_){}; runPOST(); }
+function runPOST(){
+  var ov=document.getElementById('boot-overlay'), card=document.getElementById('boot-card');
+  if(!ov||!card){ patientQuery(); return; }
+  ov.classList.add('open');
+  card.innerHTML='<div class="boot-title">Power-On Self Test</div>'
+    +'<div class="boot-lcd"><div class="boot-lcd-line" id="post-line">LTV® 1200</div>'
+    +'<div class="boot-lcd-sub" id="post-sub">SELF TEST…</div>'
+    +'<div class="boot-bar"><div class="boot-bar-fill" id="post-fill"></div></div></div>'
+    +'<div class="boot-msg">Running power-on self test — checking transducers, alarms and the exhalation valve.</div>';
+  try{ var ac=getAC(); if(!audioMuted) playNote(880,0.09,ac.currentTime,0.08,'square'); }catch(_){}
+  var steps=[['SELF TEST…','CHECK SENSORS'],['XDCR AUTOZERO','FLOW / PRESSURE'],['POST','ALARMS OK'],['POST PASS','READY']];
+  var i=0, fill=document.getElementById('post-fill');
+  (function tick(){
+    if(i>=steps.length){ patientQuery(); return; }
+    var line=document.getElementById('post-line'), sub=document.getElementById('post-sub');
+    if(line) line.textContent=(i===steps.length-1)?'POST PASS':'LTV® 1200';
+    if(sub) sub.textContent=steps[i][0]+' · '+steps[i][1];
+    if(fill) fill.style.width=Math.round(((i+1)/steps.length)*100)+'%';
+    i++; setTimeout(tick,600);
+  })();
+}
+function patientQuery(){
+  var card=document.getElementById('boot-card'); if(!card){ finishBoot(); return; }
+  card.innerHTML='<div class="boot-title">Patient Query</div>'
+    +'<div class="boot-lcd"><div class="boot-lcd-line">SAME PATIENT?</div>'
+    +'<div class="boot-lcd-sub">Resume last settings, or set up a new patient</div></div>'
+    +'<div class="boot-msg">The ventilator has powered up. Continue with the settings from the last power cycle, or load factory presets for a new patient.</div>'
+    +'<div class="boot-btns">'
+    +'<button class="boot-btn primary" onclick="samePatient()">SAME PATIENT — resume settings</button>'
+    +'<button class="boot-btn ghost" onclick="newPatient()">NEW PATIENT — load presets</button></div>';
+}
+function samePatient(){ finishBoot(); }
+function newPatient(){
+  var card=document.getElementById('boot-card'); if(!card){ finishBoot(); return; }
+  card.innerHTML='<div class="boot-title">New Patient — Select Type</div>'
+    +'<div class="boot-lcd"><div class="boot-lcd-line">SELECT PATIENT</div>'
+    +'<div class="boot-lcd-sub">Preset values load by patient size (LTV QRG)</div></div>'
+    +'<div class="boot-msg">Choose the patient category to load the factory presets, then reassess every setting before use.</div>'
+    +'<div class="boot-preset-row">'
+    +'<div class="boot-preset" onclick="pickPreset(this,\'infant\')"><div class="boot-preset-name">INFANT</div><div class="boot-preset-wt">5–10 kg</div></div>'
+    +'<div class="boot-preset" onclick="pickPreset(this,\'pediatric\')"><div class="boot-preset-name">PEDIATRIC</div><div class="boot-preset-wt">10–40 kg</div></div>'
+    +'<div class="boot-preset" onclick="pickPreset(this,\'adult\')"><div class="boot-preset-name">ADULT</div><div class="boot-preset-wt">&gt; 40 kg</div></div>'
+    +'</div>'
+    +'<div class="boot-btns" style="margin-top:14px"><button class="boot-btn primary" id="preset-go" style="opacity:0.5;pointer-events:none" onclick="confirmPreset()">SELECT</button></div>';
+}
+function pickPreset(el,name){
+  _pendingPreset=name;
+  document.querySelectorAll('.boot-preset').forEach(function(p){ p.classList.remove('sel'); });
+  el.classList.add('sel');
+  var go=document.getElementById('preset-go'); if(go){ go.style.opacity='1'; go.style.pointerEvents='auto'; }
+}
+function confirmPreset(){ if(_pendingPreset) applyPreset(_pendingPreset); finishBoot(); }
+function finishBoot(){
+  var ov=document.getElementById('boot-overlay'); if(ov) ov.classList.remove('open');
+  deviceState='run'; applyStandbyVisual(); updateUI();
+  if(_bootThen){ var f=_bootThen; _bootThen=null; f(); }
+}
+// ── SHUTDOWN (hold On/Standby 3 s) ────────────────────────────
+var _osHoldTimer=null, _osHeld=false;
+function onStandbyDown(){
+  _osHeld=false;
+  if(deviceState==='run'){ _osHoldTimer=setTimeout(function(){ _osHeld=true; shutdownDevice(); },3000); }
+}
+function onStandbyUp(){
+  clearTimeout(_osHoldTimer);
+  if(_osHeld){ _osHeld=false; return; }
+  if(deviceState==='standby'){ powerOnSequence(openLevelSelect); }
+  else if(deviceState==='run'){ scanMessage('HOLD 3 s TO POWER OFF',1500); }
+}
+function shutdownDevice(){
+  try{ playAlarmBurst(4,700); }catch(_){}
+  deviceState='standby'; _modeCandidate=null; controlsLocked=false; updateLockUI(); deselect();
+  applyStandbyVisual(); scanMessage('STANDBY',2000); renderScan();
+}
+
+// ── grammar/lifecycle boot wiring ─────────────────────────────
+buildScanDots(); applyStandbyVisual(); updateLockUI();
+setInterval(function(){
+  _scanTick++;
+  var msgUp=(_scanMsg && performance.now()<_scanMsgUntil);
+  var almUp=(typeof alarmActiveKey!=='undefined' && alarmActiveKey);
+  if(deviceRunning() && scanMode==='scan' && !msgUp && !almUp && _scanTick%4===0){ scanIdx=(scanIdx+1)%7; }
+  renderScan();
+},500);
+renderScan();
 
 // ── ALARM ENGINE (LTV 1200) ───────────────────────────────────
 // Live monitoring of peak pressure, low peak/disconnect, and minute volume,
@@ -1072,6 +1503,8 @@ function estMinuteVolume(){
 }
 
 function alarmsSuppressed(){
+  // No monitoring while the ventilator is in Standby / booting
+  if(!deviceRunning()) return true;
   // Don't monitor on the level-select screen
   var ov=document.getElementById('lvlsel-overlay');
   if(ov && !ov.classList.contains('hidden')) return true;
@@ -1643,6 +2076,11 @@ var CONTROLS={
     desc:'Mutes the audible alarm for 60 seconds while you assess the cause. The visual banner stays up and counts down; if the cause isn\'t corrected, the tone returns.',
     avail:[{mode:'All modes',yes:true,note:'When an alarm is sounding, tap Silence (here or on the banner) for a 60-second reprieve. Silence → Assess → Correct → Confirm.'}],
     pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
+  },
+  grammar:{tag:'button',tagCls:'tag-button',title:'How to Use This Panel',range:'Same workflow as the real LTV 1200',
+    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — drag it up/down, scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press-and-hold 3 seconds to unlock. <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
+    avail:[{mode:'Fidelity note',yes:true,note:'The real LTV 1200 has no +/- buttons — every setting is made by selecting the control and turning the single Set Value knob. Practicing that here builds the muscle memory you\'ll use on the actual device.'}],
+    pearl:'Select → Turn → Confirm. If nothing happens when you turn the knob, you haven\'t selected a control yet — press the control first.'
   },
 };
 
@@ -2855,32 +3293,24 @@ var _origUpdateUI=updateUI;
 updateUI=function(){
   _origUpdateUI();
 
-  // Lock/unlock knob controls
-  ['rate','vt','it','pc','ps','fio2','sens'].forEach(function(k){
+  // Lock/unlock control tiles (knob controls + PEEP + alarm limits)
+  ['rate','vt','it','pc','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(function(k){
     var w=document.getElementById('cw-'+k);
     if(w) w.classList.toggle('game-locked',!isControlUnlocked(k));
   });
 
-  // PEEP row
-  var pr=document.querySelector('.peep-row');
-  if(pr) pr.classList.toggle('game-locked',!isControlUnlocked('peep'));
-
-  // Alarm grid
-  var ag=document.querySelector('.alarm-grid');
-  if(ag) ag.classList.toggle('game-locked',!isControlUnlocked('hipres'));
-
-  // Mode buttons
+  // Mode LED options (disabled look when the stage hasn't unlocked them)
   ['ac','simv','cpap','nppv'].forEach(function(m){
-    var el=document.getElementById('btn-'+m);
-    if(el) el.classList.toggle('game-locked',!isModeUnlocked(m));
+    var el=document.getElementById('mode-'+m);
+    if(el && !isModeUnlocked(m)) el.classList.add('disabled');
   });
-  var bv=document.getElementById('btn-vol'),bp=document.getElementById('btn-pres');
-  if(bv) bv.classList.toggle('game-locked',!isBTUnlocked('volume'));
-  if(bp) bp.classList.toggle('game-locked',!isBTUnlocked('pressure'));
 
-  // FiO2 knob: locked in L1 until completion; always free in L2/L3
+  // FiO2 tile: locked in L1 until completion; always free in L2/L3
   var fw=document.getElementById('cw-fio2');
   if(fw) fw.classList.toggle('game-locked', gameLevel===1 && !gameDone());
+
+  // If the currently-selected control just got game-locked, drop the selection
+  if(selectedControl && !isControlUnlocked(selectedControl)) deselect();
 
   // Refresh mission card
   renderMissionCard();
@@ -2964,10 +3394,14 @@ function openLevelSelect(){
 function initGameEntry(){
   var params=new URLSearchParams(window.location.search);
   var sid=params.get('scenario');
-  if(sid && ACADEMY_SCENARIOS[sid]){ startAcademyScenario(sid); return; }
+  if(sid && ACADEMY_SCENARIOS[sid]){ startAcademyScenario(sid); return; }   // deep-link: already booted to run
   var lvl=parseInt(params.get('level'),10);
-  if(lvl===1||lvl===2||lvl===3) startLevel(lvl);
-  else openLevelSelect();
+  if(lvl===1||lvl===2||lvl===3){ startLevel(lvl); return; }                 // deep-link: already booted to run
+  // Plain load: leave the device in Standby. The learner powers it up with
+  // On/Standby → POST → Patient Query, and finishBoot() opens the level chooser.
+  gameLevel=0;
+  applyStandbyVisual();
+  renderScan();
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initGameEntry);
 else initGameEntry();
@@ -3227,8 +3661,8 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
   <div id="victory-card"></div>
 </div>
 
-<!-- LEVEL SELECT OVERLAY -->
-<div class="lvlsel-overlay" id="lvlsel-overlay">
+<!-- LEVEL SELECT OVERLAY (hidden until the device powers up) -->
+<div class="lvlsel-overlay hidden" id="lvlsel-overlay">
   <div class="lvlsel-inner">
     <div class="lvlsel-title">Ventilator Simulator</div>
     <div class="lvlsel-sub">Choose a difficulty level</div>
