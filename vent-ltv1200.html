@@ -968,7 +968,7 @@ canvas#pip-canvas{display:none}
       <div class="knob-hint" id="knob-hint">Select a control, then turn</div>
     </div>
     <div class="deck-btns">
-      <button class="deck-btn" id="btn-lock" onmousedown="lockDown()" onmouseup="lockUp()" onmouseleave="lockUp()" ontouchstart="lockDown();event.preventDefault()" ontouchend="lockUp()">Control Lock<span class="lamp"></span></button>
+      <button class="deck-btn" id="btn-lock" onclick="toggleLock()">Control Lock<span class="lamp"></span></button>
       <button class="deck-btn" id="btn-alarm-silence" onclick="alarmSilence()">Silence / Reset<span class="lamp"></span></button>
     </div>
   </div>
@@ -1244,19 +1244,16 @@ function knobTurn(dir){
 }
 
 // ── CONTROL LOCK ──────────────────────────────────────────────
-var controlsLocked=false, _lockHoldTimer=null, _lockHeld=false;
-function lockDown(){
+// Single press toggles the lock, matching the LTV's default "easy" unlock
+// setting (the 3-second hard-unlock is an Extended Features option).
+var controlsLocked=false;
+function toggleLock(){
   if(!deviceRunning()) return;
-  _lockHeld=false;
-  if(controlsLocked){ _lockHoldTimer=setTimeout(function(){
-    controlsLocked=false; _lockHeld=true; updateLockUI(); scanMessage('CONTROLS UNLOCKED',1400);
-  },3000); }
-}
-function lockUp(){
-  clearTimeout(_lockHoldTimer);
-  if(_lockHeld){ _lockHeld=false; return; }
-  if(!deviceRunning()) return;
-  if(!controlsLocked){ controlsLocked=true; deselect(); updateLockUI(); scanMessage('CONTROLS LOCKED',1400); sfxModeBtn(); }
+  controlsLocked=!controlsLocked;
+  if(controlsLocked) deselect();
+  updateLockUI();
+  scanMessage(controlsLocked?'CONTROLS LOCKED':'CONTROLS UNLOCKED',1400);
+  sfxModeBtn();
 }
 function updateLockUI(){ var b=document.getElementById('btn-lock'); if(b) b.classList.toggle('locked',controlsLocked); }
 
@@ -2116,7 +2113,7 @@ var CONTROLS={
     pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
   },
   grammar:{tag:'button',tagCls:'tag-button',title:'How to Use This Panel',range:'Same workflow as the real LTV 1200',
-    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — drag it up/down, scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press-and-hold 3 seconds to unlock. <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
+    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — drag it up/down, scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
     avail:[{mode:'Fidelity note',yes:true,note:'The real LTV 1200 has no +/- buttons — every setting is made by selecting the control and turning the single Set Value knob. Practicing that here builds the muscle memory you\'ll use on the actual device.'}],
     pearl:'Select → Turn → Confirm. If nothing happens when you turn the knob, you haven\'t selected a control yet — press the control first.'
   },
