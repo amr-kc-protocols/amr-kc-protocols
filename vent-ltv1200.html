@@ -779,8 +779,8 @@ canvas#pip-canvas{display:none}
 <div class="case">
 <div class="panel">
 
-  <!-- MISSION BAR -->
-  <div class="mission-bar" id="mission-bar"></div>
+  <!-- MISSION BAR (hidden until a level/scenario renders into it) -->
+  <div class="mission-bar" id="mission-bar" style="display:none"></div>
 
   <!-- ALARM BANNER -->
   <div id="alarm-banner" class="alarm-banner" style="display:none">
@@ -1136,11 +1136,12 @@ function updateUI(){
   renderBTStrip();
   renderModeStrip();
 
-  // Scan-window mode line + I:E
-  var lbl=getModeLabel();
+  // Scan-window mode line + I:E (dark while the device is in Standby)
+  var on=(typeof deviceRunning!=='function')||deviceRunning();
+  var lbl=on?getModeLabel():{main:'',sub:''};
   var mm=document.getElementById('disp-mode-main'); if(mm) mm.textContent=lbl.main;
   var ms=document.getElementById('disp-mode-sub');  if(ms) ms.textContent=lbl.sub;
-  var ie=document.getElementById('disp-ie');         if(ie) ie.textContent=calcIE();
+  var ie=document.getElementById('disp-ie');         if(ie) ie.textContent=on?calcIE():'';
 
   // NPPV relabeling on the control tiles
   var isNPPV=(ventMode==='nppv');
@@ -1461,7 +1462,7 @@ function onStandbyUp(){
 function shutdownDevice(){
   try{ playAlarmBurst(4,700); }catch(_){}
   deviceState='standby'; _modeCandidate=null; controlsLocked=false; updateLockUI(); deselect();
-  applyStandbyVisual(); scanMessage('STANDBY',2000); renderScan();
+  applyStandbyVisual(); updateUI(); scanMessage('STANDBY',2000); renderScan();
 }
 
 // ── grammar/lifecycle boot wiring ─────────────────────────────
@@ -1937,19 +1938,32 @@ function drawWaveform(){
   }
 }
 
+// Blank the breath-driven displays (Standby: no breaths, dark bar, no PIP)
+function clearBreathDisplays(){
+  pressureHistory=[];
+  var pd=document.getElementById('pip-display'); if(pd) pd.textContent='—';
+  for(var i=0;i<_pressSegs.length;i++) _pressSegs[i].className='pseg';
+  var led=document.getElementById('led-patient'); if(led) led.classList.remove('on');
+  _prevBarP=0;
+}
+
 var _alarmEvalAcc=0;
 function animLoop(ts){
   if(lastTs!==null){
     var dt=Math.min(ts-lastTs,50); // cap at 50ms to handle tab visibility
-    if(inspHoldActive && inspHoldStartTs===null) inspHoldStartTs=ts;
-    simTime+=dt;
-    var p=calcPressure(simTime);
-    pressureHistory.push(p);
-    // Keep only CANVAS_SECS worth of history at ~60fps
-    var maxLen=Math.ceil(CANVAS_SECS*60);
-    if(pressureHistory.length>maxLen) pressureHistory.shift();
-    drawWaveform();
-    // Evaluate alarms ~4×/sec (also refreshes the silence countdown)
+    if(deviceRunning()){
+      if(inspHoldActive && inspHoldStartTs===null) inspHoldStartTs=ts;
+      simTime+=dt;
+      var p=calcPressure(simTime);
+      pressureHistory.push(p);
+      // Keep only CANVAS_SECS worth of history at ~60fps
+      var maxLen=Math.ceil(CANVAS_SECS*60);
+      if(pressureHistory.length>maxLen) pressureHistory.shift();
+      drawWaveform();
+    } else if(pressureHistory.length){
+      clearBreathDisplays();   // just powered off — go dark
+    }
+    // Evaluate alarms ~4×/sec (also refreshes the silence countdown / clears on standby)
     _alarmEvalAcc+=dt;
     if(_alarmEvalAcc>=250){ _alarmEvalAcc=0; evaluateAlarms(); }
   }
@@ -2994,11 +3008,13 @@ function renderMissionCard(){
   var bar=document.getElementById('mission-bar');
   if(!bar) return;
 
-  // ── LEVEL 0: no level selected yet ───────────────────────
+  // ── LEVEL 0: no level selected yet — hide the bar entirely ──
   if(gameLevel===0){
     bar.innerHTML='';
+    bar.style.display='none';
     return;
   }
+  bar.style.display='';
 
   // ── LEVEL COMPLETE STATE ──────────────────────────────────
   if(gameDone()){
@@ -3400,6 +3416,7 @@ function initGameEntry(){
   // Plain load: leave the device in Standby. The learner powers it up with
   // On/Standby → POST → Patient Query, and finishBoot() opens the level chooser.
   gameLevel=0;
+  renderMissionCard();
   applyStandbyVisual();
   renderScan();
 }
