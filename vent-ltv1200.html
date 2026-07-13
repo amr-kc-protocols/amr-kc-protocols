@@ -570,6 +570,10 @@ canvas#pip-canvas{display:none}
    AUTHENTIC INTERACTION GRAMMAR — Select-then-turn-knob
    ═══════════════════════════════════════════════════════════════ */
 
+/* No text selection on panel hardware — long-press means "teach me", not "select text" */
+.ctrl2,.select-btn,.deck-btn,.fn-btn,.led-opt,.mode-btn,.power-card-btn{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+
 /* ── SINGLE SCANNING DISPLAY WINDOW (replaces the always-on LCD grid) ── */
 .scan-wrap{background:var(--lcd-bg);border-radius:10px;padding:10px 12px;margin-bottom:14px;
   border:2px solid #0d0805;box-shadow:inset 0 3px 10px rgba(0,0,0,0.6)}
@@ -667,6 +671,7 @@ canvas#pip-canvas{display:none}
 .deck-btn{padding:9px 6px;border-radius:9px;border:1.5px solid var(--btn-edge);background:var(--btn-face);
   color:var(--text);font-size:9px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;
   cursor:pointer;text-align:center;line-height:1.2;position:relative;white-space:normal;min-width:0;
+  min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   box-shadow:0 2px 3px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.6);transition:all 0.1s}
 .deck-btn:active{transform:scale(0.96);box-shadow:inset 0 1px 3px rgba(0,0,0,0.25)}
 .deck-btn .lamp{display:inline-block;width:16px;height:4px;border-radius:2px;background:rgba(32,38,92,0.18);
@@ -732,6 +737,26 @@ canvas#pip-canvas{display:none}
 .panel.standby::after{content:'';position:absolute;inset:0;background:rgba(20,16,12,0.55);border-radius:10px;z-index:5;pointer-events:none}
 .standby-hint{display:none;text-align:center;font-size:12px;color:var(--sub);padding:10px;line-height:1.5}
 .panel.standby .standby-hint{display:block}
+/* ── FLOATING SET VALUE DOCK ─────────────────────────────────
+   When a control is selected but the deck knob is scrolled out of view,
+   a fixed dock brings the Set Value knob within thumb's reach. */
+.knob-dock{position:fixed;bottom:14px;left:50%;transform:translateX(-50%) translateY(120%);z-index:90;
+  display:flex;align-items:center;gap:14px;background:#ffffff;border:1.5px solid var(--btn-edge);
+  border-radius:18px;padding:10px 16px;box-shadow:0 10px 34px rgba(0,0,0,0.4);
+  transition:transform 0.22s cubic-bezier(0.25,0.8,0.25,1);pointer-events:none;max-width:calc(100vw - 20px)}
+.knob-dock.show{transform:translateX(-50%) translateY(0);pointer-events:all}
+.dock-info{min-width:86px}
+.dock-name{font-size:9px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;margin-bottom:2px}
+.dock-val{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--purple-dark);line-height:1}
+.dock-unit{font-size:9px;color:var(--sub);margin-top:1px}
+.knob-dock .knob{width:64px;height:64px;flex-shrink:0}
+.knob-dock .knob-pointer{transform-origin:50% 27px;height:16px;top:5px;width:4px}
+.knob-dock .knob-hub{inset:20px}
+.dock-confirm{padding:10px 12px;border-radius:10px;border:1.5px solid var(--green);background:#eafbf1;
+  color:var(--green);font-size:10px;font-weight:800;letter-spacing:0.06em;cursor:pointer;flex-shrink:0;
+  -webkit-user-select:none;user-select:none}
+.dock-confirm:active{transform:scale(0.95)}
+
 /* Prominent power-on card — first thing seen on a cold open, sits above the scrim */
 .power-card{display:none;position:relative;z-index:6;background:#ffffff;border:1.5px solid var(--border);
   border-radius:14px;padding:16px;margin-bottom:12px;text-align:center;
@@ -968,7 +993,7 @@ canvas#pip-canvas{display:none}
       <div class="knob-hint" id="knob-hint">Select a control, then turn</div>
     </div>
     <div class="deck-btns">
-      <button class="deck-btn" id="btn-lock" onmousedown="lockDown()" onmouseup="lockUp()" onmouseleave="lockUp()" ontouchstart="lockDown();event.preventDefault()" ontouchend="lockUp()">Control Lock<span class="lamp"></span></button>
+      <button class="deck-btn" id="btn-lock" onclick="toggleLock()">Control Lock<span class="lamp"></span></button>
       <button class="deck-btn" id="btn-alarm-silence" onclick="alarmSilence()">Silence / Reset<span class="lamp"></span></button>
     </div>
   </div>
@@ -990,6 +1015,20 @@ canvas#pip-canvas{display:none}
 <!-- POWER-ON / POST / PATIENT QUERY overlay -->
 <div class="boot-overlay" id="boot-overlay">
   <div class="boot-card" id="boot-card"></div>
+</div>
+
+<!-- FLOATING SET VALUE DOCK (shows when a control is selected & deck knob off-screen) -->
+<div class="knob-dock" id="knob-dock">
+  <div class="dock-info">
+    <div class="dock-name" id="dock-name">—</div>
+    <div class="dock-val" id="dock-val">—</div>
+    <div class="dock-unit" id="dock-unit"></div>
+  </div>
+  <div class="knob armed" id="dockknob" role="slider" aria-label="Set Value">
+    <div class="knob-pointer"></div>
+    <div class="knob-hub"><div class="knob-hub-lbl">Set<br>Value</div></div>
+  </div>
+  <button class="dock-confirm" onclick="deselect()">✓<br>SET</button>
 </div>
 
 <!-- DRAWER -->
@@ -1067,17 +1106,18 @@ function updateKnob(key){
   }
   if(key===selectedControl) updateKnobPointer();
 }
-// Rotate the Set Value pointer to reflect the selected control's position in range.
+// Rotate the Set Value pointers (panel knob + floating dock knob).
 function updateKnobPointer(){
-  var ptr=document.querySelector('#setknob .knob-pointer');
-  if(!ptr) return;
   var deg=0;
   if(selectedControl && vals[selectedControl]){
     var c=vals[selectedControl];
     var pct=(c.v-c.min)/(c.max-c.min);
     deg=-150+pct*300;
   }
-  ptr.style.transform='translateX(-50%) rotate('+deg+'deg)';
+  ['#setknob','#dockknob'].forEach(function(id){
+    var ptr=document.querySelector(id+' .knob-pointer');
+    if(ptr) ptr.style.transform='translateX(-50%) rotate('+deg+'deg)';
+  });
 }
 // ── RATE ↔ INSP TIME CONSTRAINT (LTV 1200) ───────────────────
 // The LTV 1200 will not allow an inspiratory time that drives the I:E ratio
@@ -1224,6 +1264,7 @@ function refreshSelection(){
   var hint=document.getElementById('knob-hint');
   if(hint) hint.textContent = selectedControl ? ('Turn to set '+(CONTROL_SHORT[selectedControl]||selectedControl)) : 'Select a control, then turn';
   updateKnobPointer(); renderVcalc();
+  if(typeof renderDock==='function') renderDock();
 }
 function selectControl(key){
   if(!deviceRunning()) return;
@@ -1244,19 +1285,16 @@ function knobTurn(dir){
 }
 
 // ── CONTROL LOCK ──────────────────────────────────────────────
-var controlsLocked=false, _lockHoldTimer=null, _lockHeld=false;
-function lockDown(){
+// Single press toggles the lock, matching the LTV's default "easy" unlock
+// setting (the 3-second hard-unlock is an Extended Features option).
+var controlsLocked=false;
+function toggleLock(){
   if(!deviceRunning()) return;
-  _lockHeld=false;
-  if(controlsLocked){ _lockHoldTimer=setTimeout(function(){
-    controlsLocked=false; _lockHeld=true; updateLockUI(); scanMessage('CONTROLS UNLOCKED',1400);
-  },3000); }
-}
-function lockUp(){
-  clearTimeout(_lockHoldTimer);
-  if(_lockHeld){ _lockHeld=false; return; }
-  if(!deviceRunning()) return;
-  if(!controlsLocked){ controlsLocked=true; deselect(); updateLockUI(); scanMessage('CONTROLS LOCKED',1400); sfxModeBtn(); }
+  controlsLocked=!controlsLocked;
+  if(controlsLocked) deselect();
+  updateLockUI();
+  scanMessage(controlsLocked?'CONTROLS LOCKED':'CONTROLS UNLOCKED',1400);
+  sfxModeBtn();
 }
 function updateLockUI(){ var b=document.getElementById('btn-lock'); if(b) b.classList.toggle('locked',controlsLocked); }
 
@@ -1285,8 +1323,9 @@ function pressBreathSelect(){
 }
 
 // ── SET VALUE KNOB (drag ↕ / scroll / arrow keys) ─────────────
-(function(){
-  var knob=document.getElementById('setknob'); if(!knob) return;
+// Same gestures on the panel knob and the floating dock knob.
+function attachKnobGestures(knob){
+  if(!knob) return;
   var active=false,lastY=0,acc=0,STEP=9;
   knob.addEventListener('pointerdown',function(e){ active=true; lastY=e.clientY; acc=0; try{knob.setPointerCapture(e.pointerId);}catch(_){}} );
   knob.addEventListener('pointermove',function(e){
@@ -1304,7 +1343,30 @@ function pressBreathSelect(){
     if(e.key==='ArrowUp'||e.key==='ArrowRight'){ knobTurn(1); e.preventDefault(); }
     if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ knobTurn(-1); e.preventDefault(); }
   });
-})();
+}
+attachKnobGestures(document.getElementById('setknob'));
+attachKnobGestures(document.getElementById('dockknob'));
+
+// ── FLOATING SET VALUE DOCK ───────────────────────────────────
+// The deck knob can be scrolled far off-screen when a control tile is
+// tapped; the dock brings the same knob within thumb's reach.
+function deckKnobInView(){
+  var k=document.getElementById('setknob'); if(!k) return true;
+  var r=k.getBoundingClientRect();
+  return r.top < (window.innerHeight-70) && r.bottom > 70;
+}
+function renderDock(){
+  var dock=document.getElementById('knob-dock'); if(!dock) return;
+  var show=!!selectedControl && !deckKnobInView();
+  dock.classList.toggle('show',show);
+  if(!show) return;
+  var key=selectedControl, c=vals[key];
+  document.getElementById('dock-name').textContent=CONTROL_SHORT[key]||key;
+  document.getElementById('dock-val').textContent = key==='it'? c.v.toFixed(1) : c.v;
+  document.getElementById('dock-unit').textContent = (typeof KNOB_UNITS!=='undefined' && KNOB_UNITS[key])||'';
+}
+window.addEventListener('scroll',function(){ if(selectedControl) renderDock(); },{passive:true});
+window.addEventListener('resize',function(){ if(selectedControl) renderDock(); });
 
 // ── CONTROL TILE TAP (select) + LONG-PRESS (teaching card) ────
 (function(){
@@ -1551,13 +1613,17 @@ function evaluateAlarms(){
   for(var i=start;i<n;i++){ var p=pressureHistory[i]; if(p>pk)pk=p; if(p<tr)tr=p; }
 
   var spont=(ventMode==='cpap'||ventMode==='nppv');
+  // "Not yet a full breath on record" grace — right after a scenario load or
+  // power-up the history is too short to have seen a peak, and the low-side
+  // alarms would false-fire on every start.
+  var fullBreath = n >= Math.min(Math.ceil((60/vals.rate.v)*60), CANVAS_SECS*60-5);
   // High pressure: peak reached the limit (waveform is pressure-limited at hi)
   alarms.hipres.active = pk >= (vals.hipres.v-0.5);
   // Low peak / disconnect: peak never rose to the low-pressure setting.
   // Suppressed in NPPV/CPAP where mask leak is expected (leak compensation).
-  alarms.lowpres.active = !spont && vals.lowpres.v>0 && pk < vals.lowpres.v;
+  alarms.lowpres.active = fullBreath && !spont && vals.lowpres.v>0 && pk < vals.lowpres.v;
   // Low minute volume (0 = OFF)
-  alarms.lowmv.active = vals.lowmv.v>0 && estMinuteVolume() < vals.lowmv.v;
+  alarms.lowmv.active = fullBreath && vals.lowmv.v>0 && estMinuteVolume() < vals.lowmv.v;
 
   updateAlarmState();
 }
@@ -1591,6 +1657,7 @@ function updateAlarmState(){
 }
 
 function alarmSilence(){
+  if(!deviceRunning()) return;   // panel dead in Standby
   if(alarmActiveKey){
     alarmSilencedUntil=performance.now()+60000;   // LTV: 60-second silence
     var ac=getAC(); if(!audioMuted) playNote(880,0.06,ac.currentTime,0.10,'square');
@@ -1621,6 +1688,7 @@ alarmBeepLoop();
 // so it's observable). Tap again to cancel early.
 var _o2SavedFio2=null, _o2Timer=null;
 function o2Flush(){
+  if(!deviceRunning()) return;   // panel dead in Standby
   var badge=document.getElementById('o2-flush-badge');
   if(_o2Timer){ clearTimeout(_o2Timer); revertO2(); return; } // cancel
   if(vals.fio2.v>=100){ return; }
@@ -1642,6 +1710,7 @@ function revertO2(){
 // on the waveform; in mandatory modes it just confirms with a breath tone.
 var manualBreathActive=false, manualBreathStart=0;
 function manualBreath(){
+  if(!deviceRunning()) return;   // panel dead in Standby
   var ac=getAC();
   if(!audioMuted){ playNote(300,0.14,ac.currentTime,0.13,'sine'); playNote(240,0.18,ac.currentTime+0.14,0.11,'sine'); }
   var led=document.getElementById('led-patient'); if(led){ led.classList.add('on'); setTimeout(function(){ led.classList.remove('on'); },600); }
@@ -1679,6 +1748,7 @@ function calcPplat(){
 }
 
 function triggerInspHold(){
+  if(!deviceRunning()) return;   // panel dead in Standby
   if(ventMode==='cpap'||ventMode==='nppv'){openDrawer('insphold');return;}
   var d=calcPplat();
   if(!d){openDrawer('insphold');return;} // Pressure mode — just show info
@@ -2116,7 +2186,7 @@ var CONTROLS={
     pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
   },
   grammar:{tag:'button',tagCls:'tag-button',title:'How to Use This Panel',range:'Same workflow as the real LTV 1200',
-    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — drag it up/down, scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press-and-hold 3 seconds to unlock. <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
+    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — drag it up/down, scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
     avail:[{mode:'Fidelity note',yes:true,note:'The real LTV 1200 has no +/- buttons — every setting is made by selecting the control and turning the single Set Value knob. Practicing that here builds the muscle memory you\'ll use on the actual device.'}],
     pearl:'Select → Turn → Confirm. If nothing happens when you turn the knob, you haven\'t selected a control yet — press the control first.'
   },
@@ -2876,6 +2946,7 @@ function startAcademyScenario(id){
   academyMode=true;
   SCENARIO_LEVELS[9]=[sc];        // park it in a private level slot
   gameLevel=9; scenarioIdx=0;
+  if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
   var ov=document.getElementById('lvlsel-overlay'); if(ov) ov.classList.add('hidden');
   loadScenario(sc);
   showIntro(sc);
@@ -3133,10 +3204,18 @@ function renderMissionCard(){
 }
 
 // ── QUIZ ──────────────────────────────────────────────────────
+// The quiz must own the screen: close the teaching drawer (whose full-page
+// overlay would silently swallow taps) and drop any pending control
+// selection (dock + 5-s confirm timer) before opening.
+function prepQuizSurface(){
+  if(typeof closeDrawer==='function') closeDrawer();
+  if(typeof deselect==='function') deselect();
+}
 function openQuiz(){
   if(!allTargetsMet()) return;
   var s=curTask();
   if(!s) return;
+  prepQuizSurface();
   var q=s.quiz;
   quizAnsweredCorrect=false;
 
@@ -3160,7 +3239,9 @@ function openQuiz(){
 function submitAnswer(idx){
   var btns=document.querySelectorAll('.quiz-btn');
   if(!btns.length||btns[0].classList.contains('disabled')) return;
-  var correct=curTask().quiz.correct;
+  var task=curTask();
+  if(!task||!task.quiz){ closeQuiz(); return; }   // state reset out from under the quiz
+  var correct=task.quiz.correct;
   quizAnsweredCorrect=(idx===correct);
   btns.forEach(function(b,i){
     b.classList.add('disabled');
@@ -3219,6 +3300,7 @@ function beginScenario(){
 // ── PROBLEM-SOLVING FLOW: DIAGNOSE (Step 1) ───────────────────
 function openDiagnose(){
   var sc=curTask(); if(!sc||!sc.diagnose) return;
+  prepQuizSurface();
   var d=sc.diagnose;
   var stepLbl=gameLevel===1?' — Step 1: Decide':' — Step 1: Diagnose';
   var html='<div class="quiz-badge">'+sc.name+stepLbl+'</div>';
@@ -3233,7 +3315,9 @@ function openDiagnose(){
   document.getElementById('quiz-overlay').classList.add('open');
 }
 function submitDiagnose(idx){
-  var d=curTask().diagnose;
+  var task=curTask();
+  if(!task||!task.diagnose){ closeQuiz(); return; }   // state reset out from under the quiz
+  var d=task.diagnose;
   var btns=document.querySelectorAll('.quiz-btn');
   if(!btns.length||btns[0].classList.contains('disabled')) return;
   var ok=(idx===d.correct);
@@ -3261,6 +3345,7 @@ function submitDiagnose(idx){
 function openConfirm(){
   var sc=curTask(); if(!sc) return;
   if(!(scenarioDiagnosed && sc.goal && sc.goal.check())) return;
+  prepQuizSurface();
   var html='<div class="quiz-badge">'+sc.name+(gameLevel===1?' — Set':' — Solved')+'</div>';
   html+='<div class="quiz-unlock" style="display:block">'+(sc.confirm||'✓ Goal achieved.')+'</div>';
   document.getElementById('quiz-inner').innerHTML=html;
@@ -3396,6 +3481,9 @@ function loadScenario(s){
 // ── LEVEL MANAGEMENT ──────────────────────────────────────────
 function startLevel(n){
   gameLevel=n;
+  // Entering a level implies a running vent — covers the header LEVELS
+  // shortcut taken while the device is still in Standby.
+  if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
   var ov=document.getElementById('lvlsel-overlay');
   if(ov) ov.classList.add('hidden');
 
@@ -3421,6 +3509,11 @@ function startLevel(n){
 }
 
 function openLevelSelect(){
+  // Own the screen: whatever was up (quiz, drawer, selection dock) goes away
+  // so a stale overlay can never swallow taps under/over the level chooser.
+  if(typeof closeQuiz==='function') closeQuiz();
+  if(typeof closeDrawer==='function') closeDrawer();
+  if(typeof deselect==='function') deselect();
   var ov=document.getElementById('lvlsel-overlay');
   if(ov) ov.classList.remove('hidden');
   gameLevel=0;
