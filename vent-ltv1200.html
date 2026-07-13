@@ -3204,10 +3204,18 @@ function renderMissionCard(){
 }
 
 // ── QUIZ ──────────────────────────────────────────────────────
+// The quiz must own the screen: close the teaching drawer (whose full-page
+// overlay would silently swallow taps) and drop any pending control
+// selection (dock + 5-s confirm timer) before opening.
+function prepQuizSurface(){
+  if(typeof closeDrawer==='function') closeDrawer();
+  if(typeof deselect==='function') deselect();
+}
 function openQuiz(){
   if(!allTargetsMet()) return;
   var s=curTask();
   if(!s) return;
+  prepQuizSurface();
   var q=s.quiz;
   quizAnsweredCorrect=false;
 
@@ -3231,7 +3239,9 @@ function openQuiz(){
 function submitAnswer(idx){
   var btns=document.querySelectorAll('.quiz-btn');
   if(!btns.length||btns[0].classList.contains('disabled')) return;
-  var correct=curTask().quiz.correct;
+  var task=curTask();
+  if(!task||!task.quiz){ closeQuiz(); return; }   // state reset out from under the quiz
+  var correct=task.quiz.correct;
   quizAnsweredCorrect=(idx===correct);
   btns.forEach(function(b,i){
     b.classList.add('disabled');
@@ -3290,6 +3300,7 @@ function beginScenario(){
 // ── PROBLEM-SOLVING FLOW: DIAGNOSE (Step 1) ───────────────────
 function openDiagnose(){
   var sc=curTask(); if(!sc||!sc.diagnose) return;
+  prepQuizSurface();
   var d=sc.diagnose;
   var stepLbl=gameLevel===1?' — Step 1: Decide':' — Step 1: Diagnose';
   var html='<div class="quiz-badge">'+sc.name+stepLbl+'</div>';
@@ -3304,7 +3315,9 @@ function openDiagnose(){
   document.getElementById('quiz-overlay').classList.add('open');
 }
 function submitDiagnose(idx){
-  var d=curTask().diagnose;
+  var task=curTask();
+  if(!task||!task.diagnose){ closeQuiz(); return; }   // state reset out from under the quiz
+  var d=task.diagnose;
   var btns=document.querySelectorAll('.quiz-btn');
   if(!btns.length||btns[0].classList.contains('disabled')) return;
   var ok=(idx===d.correct);
@@ -3332,6 +3345,7 @@ function submitDiagnose(idx){
 function openConfirm(){
   var sc=curTask(); if(!sc) return;
   if(!(scenarioDiagnosed && sc.goal && sc.goal.check())) return;
+  prepQuizSurface();
   var html='<div class="quiz-badge">'+sc.name+(gameLevel===1?' — Set':' — Solved')+'</div>';
   html+='<div class="quiz-unlock" style="display:block">'+(sc.confirm||'✓ Goal achieved.')+'</div>';
   document.getElementById('quiz-inner').innerHTML=html;
@@ -3495,6 +3509,11 @@ function startLevel(n){
 }
 
 function openLevelSelect(){
+  // Own the screen: whatever was up (quiz, drawer, selection dock) goes away
+  // so a stale overlay can never swallow taps under/over the level chooser.
+  if(typeof closeQuiz==='function') closeQuiz();
+  if(typeof closeDrawer==='function') closeDrawer();
+  if(typeof deselect==='function') deselect();
   var ov=document.getElementById('lvlsel-overlay');
   if(ov) ov.classList.remove('hidden');
   gameLevel=0;
