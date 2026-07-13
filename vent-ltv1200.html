@@ -752,8 +752,8 @@ canvas#pip-canvas{display:none}
 .knob-dock .knob{width:64px;height:64px;flex-shrink:0}
 .knob-dock .knob-pointer{transform-origin:50% 27px;height:16px;top:5px;width:4px}
 .knob-dock .knob-hub{inset:20px}
-.dock-confirm{padding:10px 12px;border-radius:10px;border:1.5px solid var(--green);background:#eafbf1;
-  color:var(--green);font-size:10px;font-weight:800;letter-spacing:0.06em;cursor:pointer;flex-shrink:0;
+.dock-confirm{padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--panel);
+  color:var(--sub);font-size:10px;font-weight:700;letter-spacing:0.06em;cursor:pointer;flex-shrink:0;
   -webkit-user-select:none;user-select:none}
 .dock-confirm:active{transform:scale(0.95)}
 
@@ -1028,7 +1028,7 @@ canvas#pip-canvas{display:none}
     <div class="knob-pointer"></div>
     <div class="knob-hub"><div class="knob-hub-lbl">Set<br>Value</div></div>
   </div>
-  <button class="dock-confirm" onclick="deselect()">✓<br>SET</button>
+  <button class="dock-confirm" onclick="deselect()">DONE</button>
 </div>
 
 <!-- DRAWER -->
@@ -1303,12 +1303,17 @@ var _modeCandidate=null, _modeCommitTimer=null, modeSeq=['ac','simv','cpap','npp
 function pressModeSelect(){
   if(!deviceRunning()) return;
   if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
-  sfxModeBtn();
-  var cur=_modeCandidate||ventMode, idx=modeSeq.indexOf(cur);
+  var cur=_modeCandidate||ventMode, idx=modeSeq.indexOf(cur), next=null;
   for(var n=1;n<=modeSeq.length;n++){
     var cand=modeSeq[(idx+n)%modeSeq.length];
-    if(typeof isModeUnlocked!=='function' || isModeUnlocked(cand)){ _modeCandidate=cand; break; }
+    if(typeof isModeUnlocked!=='function' || isModeUnlocked(cand)){ next=cand; break; }
   }
+  // Tutorial progressive unlock: no other mode available yet — say so
+  if(next===null || (next===ventMode && !_modeCandidate)){
+    scanMessage('LOCKED — UNLOCKS LATER IN TUTORIAL',1600); sfxWrong(); return;
+  }
+  sfxModeBtn();
+  _modeCandidate=next;
   renderModeStrip();
   scanMessage('SET MODE?  '+(_modeCandidate?_modeCandidate.toUpperCase():''),820);
   clearTimeout(_modeCommitTimer); _modeCommitTimer=setTimeout(commitMode,850); // pause commits, like the flashing-LED confirm
@@ -1318,24 +1323,43 @@ function pressBreathSelect(){
   if(!deviceRunning()) return;
   if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
   if(ventMode==='cpap'||ventMode==='nppv'){ scanMessage('PRESSURE ONLY',1200); return; }
+  var target=(breathType==='volume'?'pressure':'volume');
+  // Tutorial progressive unlock: say so instead of failing silently
+  if(typeof isBTUnlocked==='function' && !isBTUnlocked(target)){
+    scanMessage('LOCKED — UNLOCKS LATER IN TUTORIAL',1600); sfxWrong(); return;
+  }
   sfxModeBtn();
-  setBreathType(breathType==='volume'?'pressure':'volume');
+  setBreathType(target);
 }
 
-// ── SET VALUE KNOB (drag ↕ / scroll / arrow keys) ─────────────
+// ── SET VALUE KNOB (rotate: clockwise = increase / scroll / arrow keys) ──
+// True rotational tracking, like the physical dial: the finger's angle
+// around the knob center is followed, so a clockwise arc increases the
+// value and a counter-clockwise arc decreases it, wherever the thumb sits.
 // Same gestures on the panel knob and the floating dock knob.
 function attachKnobGestures(knob){
   if(!knob) return;
-  var active=false,lastY=0,acc=0,STEP=9;
-  knob.addEventListener('pointerdown',function(e){ active=true; lastY=e.clientY; acc=0; try{knob.setPointerCapture(e.pointerId);}catch(_){}} );
+  var active=false,lastAng=null,accDeg=0,cx=0,cy=0;
+  var DETENT_DEG=12;   // degrees of rotation per click-stop (≈30 detents/turn)
+  function angleOf(e){ return Math.atan2(e.clientY-cy, e.clientX-cx)*180/Math.PI; }
+  knob.addEventListener('pointerdown',function(e){
+    var r=knob.getBoundingClientRect();
+    cx=r.left+r.width/2; cy=r.top+r.height/2;
+    active=true; lastAng=angleOf(e); accDeg=0;
+    try{knob.setPointerCapture(e.pointerId);}catch(_){}
+  });
   knob.addEventListener('pointermove',function(e){
     if(!active) return;
-    var dy=lastY-e.clientY; lastY=e.clientY; acc+=dy;
-    while(acc>=STEP){ knobTurn(1); acc-=STEP; }
-    while(acc<=-STEP){ knobTurn(-1); acc+=STEP; }
+    var ang=angleOf(e);
+    var d=ang-lastAng;
+    d=((d+540)%360)-180;      // shortest signed arc (screen-clockwise is positive)
+    lastAng=ang;
+    accDeg+=d;
+    while(accDeg>=DETENT_DEG){ knobTurn(1); accDeg-=DETENT_DEG; }
+    while(accDeg<=-DETENT_DEG){ knobTurn(-1); accDeg+=DETENT_DEG; }
     e.preventDefault();
   },{passive:false});
-  function end(){ active=false; }
+  function end(){ active=false; lastAng=null; }
   knob.addEventListener('pointerup',end); knob.addEventListener('pointercancel',end);
   knob.addEventListener('wheel',function(e){ e.preventDefault(); knobTurn(e.deltaY<0?1:-1); },{passive:false});
   knob.setAttribute('tabindex','0');
@@ -2186,7 +2210,7 @@ var CONTROLS={
     pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
   },
   grammar:{tag:'button',tagCls:'tag-button',title:'How to Use This Panel',range:'Same workflow as the real LTV 1200',
-    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — drag it up/down, scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
+    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — trace a circle on it with your finger (clockwise = increase, like the real dial), scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
     avail:[{mode:'Fidelity note',yes:true,note:'The real LTV 1200 has no +/- buttons — every setting is made by selecting the control and turning the single Set Value knob. Practicing that here builds the muscle memory you\'ll use on the actual device.'}],
     pearl:'Select → Turn → Confirm. If nothing happens when you turn the knob, you haven\'t selected a control yet — press the control first.'
   },
@@ -3429,6 +3453,10 @@ updateUI=function(){
     var el=document.getElementById('mode-'+m);
     if(el && !isModeUnlocked(m)) el.classList.add('disabled');
   });
+  // Breath-type lamps too (Pressure stays locked until the tutorial unlocks it)
+  var bv=document.getElementById('bt-volume'), bp=document.getElementById('bt-pressure');
+  if(bv && !isBTUnlocked('volume'))   bv.classList.add('disabled');
+  if(bp && !isBTUnlocked('pressure')) bp.classList.add('disabled');
 
   // FiO2 tile: locked in L1 until completion; always free in L2/L3
   var fw=document.getElementById('cw-fio2');
