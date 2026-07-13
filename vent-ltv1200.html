@@ -252,6 +252,14 @@ canvas#pip-canvas{display:none}
 /* ── GAMIFICATION ─────────────────────────────────────────── */
 .mission-bar{background:linear-gradient(135deg,#eaf1fd,#f4f6f9);border:1px solid var(--blue);
   border-radius:10px;padding:12px 14px;margin-bottom:12px}
+/* brief attention flash when a scenario opens, to pull the eye to the case brief */
+.mission-bar.mission-attention{animation:mission-attn 2.4s ease-out 1}
+@keyframes mission-attn{
+  0%{box-shadow:0 0 0 0 rgba(29,78,216,0);border-color:var(--blue)}
+  12%{box-shadow:0 0 0 4px rgba(29,78,216,0.35),0 8px 26px rgba(29,78,216,0.28);border-color:#1d4ed8;transform:scale(1.012)}
+  30%{box-shadow:0 0 0 3px rgba(29,78,216,0.18);transform:scale(1)}
+  60%{box-shadow:0 0 0 3px rgba(29,78,216,0.18)}
+  100%{box-shadow:0 0 0 0 rgba(29,78,216,0)}}
 .mission-progress{display:flex;align-items:center;gap:0;margin-bottom:8px}
 .prog-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;
   background:#ffffff;border:1.5px solid var(--border);transition:all 0.4s}
@@ -1339,25 +1347,28 @@ function pressBreathSelect(){
 // Same gestures on the panel knob and the floating dock knob.
 function attachKnobGestures(knob){
   if(!knob) return;
-  var active=false,lastAng=null,accDeg=0,cx=0,cy=0;
-  var DETENT_DEG=12;   // degrees of rotation per click-stop (≈30 detents/turn)
+  var active=false,lastAng=null,accDeg=0,cx=0,cy=0,radius=40;
+  var DETENT_DEG=16;    // degrees of rotation per click-stop (~22 detents/turn) — calmer
+  var DEADZONE=0.42;    // ignore movement inside this fraction of the radius (angle is unstable near center)
   function angleOf(e){ return Math.atan2(e.clientY-cy, e.clientX-cx)*180/Math.PI; }
+  function distOf(e){ var dx=e.clientX-cx, dy=e.clientY-cy; return Math.sqrt(dx*dx+dy*dy); }
   knob.addEventListener('pointerdown',function(e){
     var r=knob.getBoundingClientRect();
-    cx=r.left+r.width/2; cy=r.top+r.height/2;
-    active=true; lastAng=angleOf(e); accDeg=0;
+    cx=r.left+r.width/2; cy=r.top+r.height/2; radius=r.width/2;
+    active=true; lastAng=null; accDeg=0;   // don't seed angle until finger clears the deadzone
     try{knob.setPointerCapture(e.pointerId);}catch(_){}
   });
   knob.addEventListener('pointermove',function(e){
     if(!active) return;
+    e.preventDefault();
+    if(distOf(e) < radius*DEADZONE){ lastAng=null; return; }  // too close to pivot — wait
     var ang=angleOf(e);
-    var d=ang-lastAng;
-    d=((d+540)%360)-180;      // shortest signed arc (screen-clockwise is positive)
-    lastAng=ang;
-    accDeg+=d;
+    if(lastAng===null){ lastAng=ang; return; }
+    var d=((ang-lastAng+540)%360)-180;     // shortest signed arc (screen-clockwise positive)
+    if(Math.abs(d)>90){ lastAng=ang; return; }  // teleport / finger lift — don't count it
+    lastAng=ang; accDeg+=d;
     while(accDeg>=DETENT_DEG){ knobTurn(1); accDeg-=DETENT_DEG; }
     while(accDeg<=-DETENT_DEG){ knobTurn(-1); accDeg+=DETENT_DEG; }
-    e.preventDefault();
   },{passive:false});
   function end(){ active=false; lastAng=null; }
   knob.addEventListener('pointerup',end); knob.addEventListener('pointercancel',end);
@@ -3047,26 +3058,36 @@ function renderTargetBadges(targets){
 // Renders the scenario's continuous vitals as a color-coded monitor with
 // animated ECG / pleth / capnography traces; discrete labs & exam findings
 // drop below as clinical-data chips.
-function _monWavePath(type){
-  var d='', x=0, W=240;
-  if(type==='ecg'){            // period 40 — stylized PQRST
-    for(x=0;x<W;x+=40){
-      d+='M'+x+',15 H'+(x+11)+' L'+(x+13)+',12 L'+(x+15)+',15 L'+(x+18)+',15 L'+(x+19)+',5 L'+(x+21)+',26 L'+(x+22.5)+',15 H'+(x+40)+' ';
+function _monWavePath(type,opts){
+  opts=opts||{};
+  var d='', x=0, W=240, P;
+  if(type==='ecg'){            // PQRST — one complex per period P
+    P=opts.period||40;
+    for(x=0;x<W;x+=P){
+      d+='M'+x+',15 H'+(x+P*0.28)+' L'+(x+P*0.33)+',12 L'+(x+P*0.38)+',15 L'+(x+P*0.45)+',15 L'+(x+P*0.48)+',5 L'+(x+P*0.53)+',26 L'+(x+P*0.56)+',15 H'+(x+P)+' ';
     }
-  } else if(type==='pleth'){   // period 40 — pulse with dicrotic notch
-    for(x=0;x<W;x+=40){
-      d+='M'+x+',26 C'+(x+6)+',26 '+(x+8)+',6 '+(x+16)+',7 C'+(x+20)+',7 '+(x+20)+',15 '+(x+24)+',15 C'+(x+30)+',15 '+(x+34)+',26 '+(x+40)+',26 ';
+  } else if(type==='pleth'){   // pulse with dicrotic notch — one per period
+    P=opts.period||40;
+    for(x=0;x<W;x+=P){
+      d+='M'+x+',26 C'+(x+P*0.15)+',26 '+(x+P*0.2)+',6 '+(x+P*0.4)+',7 C'+(x+P*0.5)+',7 '+(x+P*0.5)+',15 '+(x+P*0.6)+',15 C'+(x+P*0.75)+',15 '+(x+P*0.85)+',26 '+(x+P)+',26 ';
     }
-  } else {                     // capno — period 60, rectangular plateau
-    for(x=0;x<W;x+=60){
-      d+='M'+x+',26 H'+(x+9)+' L'+(x+12)+',6 L'+(x+35)+',4 L'+(x+38)+',26 H'+(x+60)+' ';
+  } else {                     // capno — one breath per period P
+    P=opts.period||60;
+    for(x=0;x<W;x+=P){
+      if(opts.obstructive){
+        // "shark-fin": slurred, up-sloping plateau — bronchospasm / obstruction
+        d+='M'+x+',26 L'+(x+P*0.30)+',15 L'+(x+P*0.62)+',5 L'+(x+P*0.63)+',26 H'+(x+P)+' ';
+      } else {
+        // normal rectangular alveolar plateau
+        d+='M'+x+',26 H'+(x+P*0.15)+' L'+(x+P*0.2)+',6 L'+(x+P*0.58)+',4 L'+(x+P*0.63)+',26 H'+(x+P)+' ';
+      }
     }
   }
   return d;
 }
-function _monLane(type,color,dur,lbl,num,unit,sub){
+function _monLane(type,color,dur,lbl,num,unit,sub,opts){
   var svg='<div class="mon-wave"><svg viewBox="0 0 240 30" preserveAspectRatio="none" style="animation-duration:'+dur+'s">'
-    +'<path d="'+_monWavePath(type)+'" fill="none" stroke="'+color+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>';
+    +'<path d="'+_monWavePath(type,opts)+'" fill="none" stroke="'+color+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>';
   var cls=type==='ecg'?'mon-ecg':(type==='pleth'?'mon-spo2':'mon-co2');
   return '<div class="mon-lane">'+svg
     +'<div class="mon-val '+cls+'"><div class="mon-val-lbl">'+lbl+'</div>'
@@ -3074,11 +3095,13 @@ function _monLane(type,color,dur,lbl,num,unit,sub){
     +(sub?'<div class="mon-sub">'+sub+'</div>':'<div class="mon-val-unit">'+unit+'</div>')
     +'</div></div>';
 }
+// Parse the leading integer out of a vitals string like "102", "85%", "32–54".
+function _firstNum(s){ var m=String(s).match(/\d+/); return m?parseInt(m[0],10):null; }
 function _splitVal(s){
   var m=String(s).match(/^\s*([<>≈]?\s*[\d.\/–—-]+)\s*(.*)$/);
   return m?{num:m[1].trim(),unit:m[2].trim()}:{num:String(s),unit:''};
 }
-function renderMonitor(vitals){
+function renderMonitor(vitals,sc){
   var slot={}, chips=[];
   vitals.forEach(function(v){
     var key=v.k.replace(/₂/g,'2').replace(/\s+/g,' ').trim().toLowerCase();
@@ -3088,11 +3111,26 @@ function renderMonitor(vitals){
     else if(key==='rr'||key==='rr total'||key==='rr actual') slot.rr=v.v;
     else chips.push(v);
   });
+  // Sweep timing: 3 ECG/pleth complexes and 2 capno breaths fit one visible
+  // window, so duration = complexes ÷ (rate/60). Clamp for sane animation speed.
+  function sweepDur(rate,perWindow){
+    if(!rate||rate<=0) return null;
+    return Math.max(0.6, Math.min(6, perWindow*60/rate));
+  }
+  var hr=_firstNum(slot.hr), rr=_firstNum(slot.rr);
+  var ecgDur=sweepDur(hr,3)||3.2;
+  var capnoDur=sweepDur(rr,2)||6.0;
+  // Obstructive capnograph (shark-fin) when the case involves bronchospasm.
+  var obstructive=false;
+  if(sc){
+    var hay=((sc.name||'')+' '+(sc.scenario||'')+' '+(sc.intro||'')).toLowerCase();
+    obstructive=/copd|asthma|asthmaticus|bronchospasm|bronchoconstrict|wheez|air-?trap|obstruct/.test(hay);
+  }
   // Render a lane only when that parameter is actually measured (like a real monitor).
   var lanes='';
-  if(slot.hr)   lanes+=_monLane('ecg','#39ff5a',3.2,'HR',_splitVal(slot.hr).num,'bpm');
-  if(slot.spo2) lanes+=_monLane('pleth','#35d6e6',3.2,'SpO₂',_splitVal(slot.spo2).num,'%');
-  if(slot.co2)  lanes+=_monLane('co2','#f5d312',6.5,'EtCO₂',_splitVal(slot.co2).num,'mmHg',slot.rr?('RR '+_splitVal(slot.rr).num):null);
+  if(slot.hr)   lanes+=_monLane('ecg','#39ff5a',ecgDur,'HR',_splitVal(slot.hr).num,'bpm');
+  if(slot.spo2) lanes+=_monLane('pleth','#35d6e6',ecgDur,'SpO₂',_splitVal(slot.spo2).num,'%'); // pleth tracks the pulse
+  if(slot.co2)  lanes+=_monLane('co2','#f5d312',capnoDur,'EtCO₂',_splitVal(slot.co2).num,'mmHg',slot.rr?('RR '+_splitVal(slot.rr).num):null,{obstructive:obstructive});
   else if(slot.rr) chips.unshift({k:'RR',v:_splitVal(slot.rr).num}); // RR without capno → chip
   var mon=lanes?('<div class="monitor">'+lanes+'</div>'):'';
   var chipHtml='';
@@ -3149,14 +3187,14 @@ function renderMissionCard(){
       return;
     }
     if(gameLevel===1){
-      bar.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
-        +'<span style="font-size:20px">🎓</span>'
-        +'<div style="flex:1">'
-        +'<div style="font-size:10px;color:var(--blue);font-weight:700;letter-spacing:0.1em">LEVEL 1 COMPLETE</div>'
-        +'<div style="font-size:11px;color:var(--sub);margin-top:2px" id="auto-progress-msg">All controls unlocked. Starting Level 2…</div>'
-        +'</div>'
-        +'<button onclick="cancelAuto()" style="background:none;border:1px solid var(--border);color:var(--sub);padding:4px 9px;border-radius:6px;font-size:10px;cursor:pointer;white-space:nowrap">Stay here</button>'
-        +'</div>';
+      bar.innerHTML='<div class="lc-wrap">'
+        +'<div class="lc-icon">🎓</div>'
+        +'<div class="lc-title" style="color:var(--blue)">Level 1 Complete</div>'
+        +'<div class="lc-sub">All controls unlocked. Ready for clinical scenarios?</div>'
+        +'<div class="lc-btns">'
+        +'<button class="lc-btn lc-btn-next" onclick="startLevel(2)">Level 2 →</button>'
+        +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
+        +'</div></div>';
     } else {
       var nextLvl=gameLevel<3?gameLevel+1:0;
       var nextTxt=gameLevel<3?'Try Level '+(gameLevel+1):'Level Select';
@@ -3202,7 +3240,7 @@ function renderMissionCard(){
   if(!sc) return;
   var ready2=allTargetsMet();
 
-  var vitalsHtml=renderMonitor(sc.vitals);
+  var vitalsHtml=renderMonitor(sc.vitals,sc);
 
   var backAction=academyMode?"location.href='vta/academy.html'":'openLevelSelect()';
   var backLabel=academyMode?'‹ Back to Academy':'‹ Level Select';
@@ -3319,6 +3357,17 @@ function beginScenario(){
   var ov=document.getElementById('intro-overlay');
   if(ov) ov.classList.remove('open');
   try{ getAC(); }catch(e){}   // unlock audio on this user gesture
+  // Land the learner on the case brief: scroll it to the top and flash it,
+  // so attention goes to the clinical picture before the vent controls.
+  setTimeout(function(){
+    var bar=document.getElementById('mission-bar');
+    if(!bar) return;
+    try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){ window.scrollTo(0,0); }
+    bar.classList.remove('mission-attention');   // restart the animation
+    void bar.offsetWidth;
+    bar.classList.add('mission-attention');
+    setTimeout(function(){ bar.classList.remove('mission-attention'); }, 2600);
+  }, 260);
 }
 
 // ── PROBLEM-SOLVING FLOW: DIAGNOSE (Step 1) ───────────────────
@@ -3739,10 +3788,11 @@ function showVictoryOverlay(level){
   if(level===1){
     icon='🎓'; glowCls='vc-glow-blue'; colorStr='var(--blue)';
     levelTxt='LEVEL 1 COMPLETE';
-    subTxt='All ventilator controls unlocked.<br>Advancing to clinical scenarios…';
-    btnsHtml='<div class="vc-auto-bar"><div class="vc-auto-fill" id="vc-auto-fill"></div></div>'
-      +'<div class="vc-auto-txt" id="vc-auto-txt">Starting Level 2…</div>'
-      +'<div style="margin-top:10px"><button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay &amp; explore</button></div>';
+    subTxt='All ventilator controls are unlocked.<br>Ready for the clinical scenarios?';
+    btnsHtml='<div class="vc-btns">'
+      +'<button class="vc-btn vc-btn-primary" onclick="closeVictory();startLevel(2)">Level 2 →</button>'
+      +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay &amp; explore</button>'
+      +'</div>';
   } else if(level===2){
     icon='⭐'; glowCls='vc-glow-orange'; colorStr='var(--orange)';
     levelTxt='LEVEL 2 COMPLETE';
@@ -3771,22 +3821,6 @@ function showVictoryOverlay(level){
   ov.classList.add('show');
   setTimeout(function(){ card.classList.add(glowCls); }, 350);
   spawnConfetti();
-
-  if(level===1){
-    var secs=5;
-    function autoTick(){
-      var fill=document.getElementById('vc-auto-fill');
-      var txt=document.getElementById('vc-auto-txt');
-      if(!fill){ _autoTimer=null; return; }
-      if(fill) fill.style.width=(((5-secs)/5)*100)+'%';
-      if(secs<=0){ closeVictory(); startLevel(2); return; }
-      if(txt) txt.textContent='Starting Level 2 in '+secs+'…';
-      secs--;
-      _autoTimer=setTimeout(autoTick,1000);
-    }
-    if(_autoTimer) clearTimeout(_autoTimer);
-    autoTick();
-  }
 }
 
 function closeVictory(){
