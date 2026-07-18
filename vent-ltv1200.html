@@ -427,6 +427,8 @@ canvas#pip-canvas{display:none}
 .scen-goal-lbl{font-size:8px;font-weight:700;letter-spacing:0.1em;color:var(--blue);text-transform:uppercase;margin-bottom:3px}
 .scen-goal.done{background:#eafbf1;border-color:var(--green)}
 .scen-goal.done .scen-goal-lbl{color:var(--green)}
+.solve-how{font-size:11px;color:#1d4ed8;background:#eef4ff;border:1px dashed var(--blue);
+  border-radius:7px;padding:7px 10px;margin-bottom:8px;line-height:1.55}
 .scen-readout{display:flex;align-items:center;justify-content:center;gap:6px;
   font-family:var(--mono);font-size:16px;font-weight:700;color:var(--sub);
   background:var(--panel);border:1.5px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px}
@@ -1297,7 +1299,15 @@ function knobTurn(dir){
   if(!selectedControl){ scanMessage('SELECT A CONTROL',1000); return; }
   var c=vals[selectedControl]; if(!c) return;
   adj(selectedControl, dir*c.step);   // adj is game-patched (respects locks + plays tick)
-  armConfirm(); updateKnobPointer(); renderVcalc();
+  armConfirm(); updateKnobPointer(); renderVcalc(); markOperated();
+}
+// One-time flag: has the learner successfully worked a control with the dial?
+// Used to retire the "how to operate" coach hint once they've got the grammar.
+var hasOperatedVent=false;
+function markOperated(){
+  if(hasOperatedVent) return;
+  hasOperatedVent=true;
+  if(typeof renderMissionCard==='function') renderMissionCard();
 }
 
 // ── CONTROL LOCK ──────────────────────────────────────────────
@@ -3220,12 +3230,18 @@ function renderSolveBody(task){
   }
   var met=task.goal.check();
   var dxTxt=gameLevel===1?'Decided — now set the control':'Diagnosed — now fix it on the vent';
+  // Operating coach: shown until the learner has worked the dial once, so anyone
+  // who skipped the tutorial still knows HOW to change a setting.
+  var how=(!met && !hasOperatedVent)
+    ? '<div class="solve-how">▸ <b>How to change a setting:</b> tap a control below to select it, then turn the <b>Set Value</b> dial (it pops up within reach).</div>'
+    : '';
   return '<div class="scen-dx"><span class="scen-dx-ico">✓</span> '+dxTxt+'</div>'
     +'<div class="scen-goal'+(met?' done':'')+'"><div class="scen-goal-lbl">🎯 Goal</div>'+task.goal.text+'</div>'
+    +how
     +'<div class="scen-readout'+(met?' hit':'')+'">'+(met?'✓ ':'')+task.goal.readout()+'</div>'
     +(met
        ?'<button class="mission-cta visible ready" onclick="openConfirm()">✓ GOAL REACHED — CONFIRM</button>'
-       :'<button class="mission-cta visible wait">Adjust the vent to reach the goal</button>');
+       :'<button class="mission-cta visible wait">Dial the setting to reach the goal…</button>');
 }
 
 // ── MISSION CARD RENDER ───────────────────────────────────────
@@ -3907,7 +3923,7 @@ function closeVictory(){
 }
 
 var KNOB_UNITS={rate:"bpm",vt:"mL",pc:"cmH₂O",it:"sec",ps:"cmH₂O",fio2:"%",sens:"lpm",peep:"cmH₂O",hipres:"cmH₂O",lowpres:"cmH₂O",lowmv:"L/min",apnea:"sec"};
-function adjAndUpdate(key,delta){adj(key,delta);var el=document.getElementById("dv-num-"+key);if(el)el.textContent=(key==="it")?vals[key].v.toFixed(1):vals[key].v;}
+function adjAndUpdate(key,delta){adj(key,delta);var el=document.getElementById("dv-num-"+key);if(el)el.textContent=(key==="it")?vals[key].v.toFixed(1):vals[key].v;markOperated();}
 // Tap handler: opens drawer on tap, never blocks page scroll
 function setupSwipe(el,key){
   var sy=0,moved=false;
