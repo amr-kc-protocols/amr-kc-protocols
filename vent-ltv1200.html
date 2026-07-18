@@ -1172,11 +1172,13 @@ function adjStep(key,delta){ adj(key,delta); }
 function setBreathType(bt){
   if(ventMode==='cpap'||ventMode==='nppv') return;
   breathType=bt;
+  _btCandidate=null;   // a direct set cancels any flashing preview
   updateUI();
 }
 function setMode(m){
   ventMode=m;
   if(m==='cpap'||m==='nppv') breathType='pressure';
+  _modeCandidate=null; _btCandidate=null;   // a direct set cancels any flashing preview
   // If the selected control just became inactive in the new mode, drop the selection.
   if(selectedControl && !isActive(selectedControl)) deselect();
   updateUI();
@@ -1188,8 +1190,13 @@ function renderBTStrip(){
   var vo=document.getElementById('bt-volume'), pr=document.getElementById('bt-pressure');
   if(!vo||!pr) return;
   // In CPAP/NPPV breath type is forced to pressure and the toggle is inert.
-  vo.className='led-opt'+(!isSpont&&breathType==='volume'?' on':'')+(isSpont?' disabled':'');
-  pr.className='led-opt'+((isSpont||breathType==='pressure')?' on':'')+(isSpont?' disabled':'');
+  function cls(opt){
+    if(isSpont) return 'led-opt disabled'+(opt==='pressure'?' on':'');
+    if(_btCandidate){ return 'led-opt'+(opt===_btCandidate?' flash':(opt===breathType?' on':'')); }
+    return 'led-opt'+(opt===breathType?' on':'');
+  }
+  vo.className=cls('volume');
+  pr.className=cls('pressure');
 }
 function renderModeStrip(){
   // Base render only shows selection/candidate state. The game layer's updateUI
@@ -1277,6 +1284,7 @@ function refreshSelection(){
 function selectControl(key){
   if(!deviceRunning()) return;
   if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
+  commitPending();   // touching a control confirms any flashing mode/breath-type preview
   if(typeof isControlUnlocked==='function' && !isControlUnlocked(key)) return;   // game progressive lock
   if(!isActive(key)){ openDrawer(key); return; }   // inactive-in-mode → open the teaching card
   if(selectedControl===key){ deselect(); return; }  // press again confirms/deselects
@@ -1307,37 +1315,95 @@ function toggleLock(){
 function updateLockUI(){ var b=document.getElementById('btn-lock'); if(b) b.classList.toggle('locked',controlsLocked); }
 
 // ── MODE / BREATH-TYPE SELECT TOGGLES ─────────────────────────
-var _modeCandidate=null, _modeCommitTimer=null, modeSeq=['ac','simv','cpap','nppv'];
+// Faithful LTV behaviour: pressing a Select button makes the NEXT option's
+// LED *flash* (pending — not yet applied). Press again to move the flash
+// along; a deliberate press on the flashing option (after a short beat), or
+// touching any other control, CONFIRMS it. A long idle also settles it.
+var MODE_LABEL={ac:'ASSIST/CTRL',simv:'SIMV',cpap:'CPAP',nppv:'NPPV'};
+var CYCLE_MS=1300;        // re-press within this window = keep cycling the flash
+var SETTLE_MS=4000;       // idle this long on a pending choice = auto-confirm
+
+// ---- Mode ----
+var _modeCandidate=null, _modeCommitTimer=null, _lastModePress=0, modeSeq=['ac','simv','cpap','nppv'];
+function nextUnlockedMode(from){
+  var idx=modeSeq.indexOf(from);
+  for(var n=1;n<=modeSeq.length;n++){
+    var cand=modeSeq[(idx+n)%modeSeq.length];
+    if(typeof isModeUnlocked!=='function' || isModeUnlocked(cand)) return cand;
+  }
+  return null;
+}
 function pressModeSelect(){
   if(!deviceRunning()) return;
   if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
-  var cur=_modeCandidate||ventMode, idx=modeSeq.indexOf(cur), next=null;
-  for(var n=1;n<=modeSeq.length;n++){
-    var cand=modeSeq[(idx+n)%modeSeq.length];
-    if(typeof isModeUnlocked!=='function' || isModeUnlocked(cand)){ next=cand; break; }
+  var now=Date.now();
+  if(_modeCandidate===null){
+    // Start a preview at the next mode
+    var first=nextUnlockedMode(ventMode);
+    if(first===null || first===ventMode){ scanMessage('LOCKED — UNLOCKS LATER IN TUTORIAL',1600); sfxWrong(); return; }
+    _modeCandidate=first;
+  } else if(now-_lastModePress < CYCLE_MS){
+    // Rapid re-press → keep cycling the flash to the next mode
+    var nx=nextUnlockedMode(_modeCandidate);
+    _modeCandidate = (nx===null)?_modeCandidate:nx;
+  } else {
+    // Deliberate press after a beat → confirm the flashing mode
+    commitMode(); return;
   }
-  // Tutorial progressive unlock: no other mode available yet — say so
-  if(next===null || (next===ventMode && !_modeCandidate)){
-    scanMessage('LOCKED — UNLOCKS LATER IN TUTORIAL',1600); sfxWrong(); return;
-  }
+  _lastModePress=now;
   sfxModeBtn();
-  _modeCandidate=next;
   renderModeStrip();
-  scanMessage('SET MODE?  '+(_modeCandidate?_modeCandidate.toUpperCase():''),820);
-  clearTimeout(_modeCommitTimer); _modeCommitTimer=setTimeout(commitMode,850); // pause commits, like the flashing-LED confirm
+  scanMessage('SET MODE? '+MODE_LABEL[_modeCandidate]+' — PRESS TO CONFIRM',CYCLE_MS+400);
+  clearTimeout(_modeCommitTimer); _modeCommitTimer=setTimeout(commitMode,SETTLE_MS);
 }
-function commitMode(){ if(_modeCandidate){ var m=_modeCandidate; _modeCandidate=null; setMode(m); } renderModeStrip(); }
+function commitMode(){
+  clearTimeout(_modeCommitTimer);
+  if(_modeCandidate){ var m=_modeCandidate; _modeCandidate=null;
+    if(m!==ventMode){ setMode(m); scanMessage(MODE_LABEL[m]+' SET',1000); }
+    else renderModeStrip();
+  }
+  renderModeStrip();
+}
+
+// ---- Breath type ----
+var _btCandidate=null, _btCommitTimer=null, _lastBtPress=0;
 function pressBreathSelect(){
   if(!deviceRunning()) return;
   if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
   if(ventMode==='cpap'||ventMode==='nppv'){ scanMessage('PRESSURE ONLY',1200); return; }
-  var target=(breathType==='volume'?'pressure':'volume');
-  // Tutorial progressive unlock: say so instead of failing silently
-  if(typeof isBTUnlocked==='function' && !isBTUnlocked(target)){
-    scanMessage('LOCKED — UNLOCKS LATER IN TUTORIAL',1600); sfxWrong(); return;
+  var now=Date.now();
+  var other=function(bt){ return bt==='volume'?'pressure':'volume'; };
+  if(_btCandidate===null){
+    var first=other(breathType);
+    if(typeof isBTUnlocked==='function' && !isBTUnlocked(first)){ scanMessage('LOCKED — UNLOCKS LATER IN TUTORIAL',1600); sfxWrong(); return; }
+    _btCandidate=first;
+  } else if(now-_lastBtPress < CYCLE_MS){
+    var nx=other(_btCandidate);
+    if(typeof isBTUnlocked==='function' && !isBTUnlocked(nx)){ /* stay on current candidate */ }
+    else _btCandidate=nx;
+  } else {
+    commitBT(); return;
   }
+  _lastBtPress=now;
   sfxModeBtn();
-  setBreathType(target);
+  renderBTStrip();
+  scanMessage('SET '+_btCandidate.toUpperCase()+'? — PRESS TO CONFIRM',CYCLE_MS+400);
+  clearTimeout(_btCommitTimer); _btCommitTimer=setTimeout(commitBT,SETTLE_MS);
+}
+function commitBT(){
+  clearTimeout(_btCommitTimer);
+  if(_btCandidate){ var bt=_btCandidate; _btCandidate=null;
+    if(bt!==breathType){ setBreathType(bt); scanMessage(bt.toUpperCase()+' SET',1000); }
+    else renderBTStrip();
+  }
+  renderBTStrip();
+}
+
+// Confirm any pending mode/breath-type preview when the operator does anything
+// else meaningful (touches a control, turns the knob, powers off).
+function commitPending(){
+  if(_modeCandidate) commitMode();
+  if(_btCandidate) commitBT();
 }
 
 // ── SET VALUE KNOB (rotate: clockwise = increase / scroll / arrow keys) ──
@@ -1582,7 +1648,9 @@ function onStandbyUp(){
 }
 function shutdownDevice(){
   try{ playAlarmBurst(4,700); }catch(_){}
-  deviceState='standby'; _modeCandidate=null; controlsLocked=false; updateLockUI(); deselect();
+  deviceState='standby'; _modeCandidate=null; _btCandidate=null;
+  clearTimeout(_modeCommitTimer); clearTimeout(_btCommitTimer);
+  controlsLocked=false; updateLockUI(); deselect();
   applyStandbyVisual(); updateUI(); scanMessage('STANDBY',2000); renderScan();
 }
 
@@ -2221,7 +2289,7 @@ var CONTROLS={
     pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
   },
   grammar:{tag:'button',tagCls:'tag-button',title:'How to Use This Panel',range:'Same workflow as the real LTV 1200',
-    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — trace a circle on it with your finger (clockwise = increase, like the real dial), scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons: one toggles Volume ↔ Pressure, the other steps through Assist/Control → SIMV → CPAP → NPPV (the lamp flashes, then commits). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
+    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — trace a circle on it with your finger (clockwise = increase, like the real dial), scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons, just like the real LTV: press once and the next option\'s lamp <strong>flashes</strong> (pending — not yet applied); press again to move the flash along (Assist/Control → SIMV → CPAP → NPPV, or Volume ↔ Pressure); when the one you want is flashing, <strong>press it once more to confirm</strong> (or just start setting another control and it locks in). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
     avail:[{mode:'Fidelity note',yes:true,note:'The real LTV 1200 has no +/- buttons — every setting is made by selecting the control and turning the single Set Value knob. Practicing that here builds the muscle memory you\'ll use on the actual device.'}],
     pearl:'Select → Turn → Confirm. If nothing happens when you turn the knob, you haven\'t selected a control yet — press the control first.'
   },
@@ -3433,6 +3501,7 @@ function openConfirm(){
 // Apply a tutorial stage's starting state (deliberately imperfect so the learner must act).
 function applyStageEnter(s){
   if(!s||!s.enter) return;
+  _modeCandidate=null; _btCandidate=null;   // clear any pending previews
   Object.keys(s.enter).forEach(function(k){
     if(k==='mode') ventMode=s.enter[k];
     else if(k==='breathType') breathType=s.enter[k];
@@ -3545,6 +3614,7 @@ function loadScenario(s){
   var su=s.setup;
   ventMode=su.mode;
   breathType=su.bt;
+  _modeCandidate=null; _btCandidate=null; deselect();   // clear any pending previews from the prior case
   var keys=['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'];
   keys.forEach(function(k){ if(su[k]!==undefined) vals[k].v=su[k]; });
   enforceITLimit();
