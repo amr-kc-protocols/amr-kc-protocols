@@ -6,12 +6,15 @@
 <title>Ventilator Simulator — AMR KC</title>
 <style>
 :root{
-  --panel:#f1eee6;--case:#e7e3d7;--lcd-bg:#181008;--lcd-green:#ff4a28;
-  --lcd-dim:#e0885a;--knob:#cfc3e6;--knob-hi:#e6def4;--knob-ind:#20265c;
+  --panel:#f1eee6;--case:#e7e3d7;--lcd-bg:#181008;--lcd-green:#ff3038;
+  --lcd-dim:#e06a72;--knob:#cfc3e6;--knob-hi:#e6def4;--knob-ind:#20265c;
+  /* LTV LED palette (matched to the physical unit): yellow-green control
+     digits, red alarm digits, red dot-matrix display window */
+  --led-grn:#d9f229;--led-grn-dim:#4f5e1c;--led-grn-unit:#8f9f30;--led-alm:#ff4455;
   --alarm:#d92d20;--blue:#1d4ed8;--orange:#c2410c;--purple:#cfc3e6;--purple-dark:#4c4c94;--green:#15803d;
   --text:#20265c;--sub:#5a608c;--border:#b9b3c9;
   --btn-face:linear-gradient(180deg,#e6def4,#c9bce2);--btn-edge:#9a8cc4;
-  --led-red:#ff4a28;--led-amber:#ffb020;--win:linear-gradient(180deg,#241812,#170e08);
+  --led-red:#ff3038;--led-amber:#ffb020;--win:linear-gradient(180deg,#241812,#170e08);
   --mono:'Courier New',Courier,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -39,22 +42,23 @@ html,body{min-height:100%;background:#cfccc3;font-family:var(--sans);color:var(-
 .press-bar{display:flex;gap:2px;background:var(--win);border:2px solid #0d0805;border-radius:6px;
   padding:4px;height:28px;box-shadow:inset 0 2px 6px rgba(0,0,0,0.8)}
 .pseg{flex:1;border-radius:1px;background:#2c1a10;transition:background 0.05s}
-.pseg.lit{background:var(--led-amber);box-shadow:0 0 4px rgba(255,176,32,0.55)}
-.pseg.lit.hi{background:var(--led-red);box-shadow:0 0 4px rgba(255,74,40,0.55)}
+.pseg.lit{background:var(--led-grn);box-shadow:0 0 4px rgba(217,242,41,0.55)}
+.pseg.lit.hi{background:var(--led-grn);box-shadow:0 0 6px rgba(217,242,41,0.8)}
 .press-scale{display:flex;justify-content:space-between;font-size:8px;color:var(--sub);
   font-weight:600;padding:3px 2px 10px;font-family:var(--mono)}
 .pip-row{display:flex;gap:12px;align-items:stretch}
 .pip-window{flex:1;background:var(--win);border:2px solid #0d0805;border-radius:8px;
   padding:8px 14px;display:flex;align-items:baseline;gap:10px;box-shadow:inset 0 2px 8px rgba(0,0,0,0.8)}
-.pip-window-lbl{font-family:var(--mono);font-size:12px;color:#ff9a5c;font-weight:700;letter-spacing:0.1em}
+.pip-window-lbl{font-family:var(--mono);font-size:12px;color:#ff6b73;font-weight:700;letter-spacing:0.1em}
 .waveform-pip{font-family:var(--mono);font-size:42px;font-weight:700;color:var(--led-red);
   letter-spacing:0.04em;line-height:1;text-shadow:0 0 10px rgba(255,74,40,0.5)}
-.waveform-pip-lbl{font-family:var(--mono);font-size:11px;color:#ff9a5c}
+.waveform-pip-lbl{font-family:var(--mono);font-size:11px;color:#ff6b73}
 .led-list{display:flex;flex-direction:column;justify-content:center;gap:5px}
 .led-item{display:flex;align-items:center;gap:7px;font-size:9.5px;color:var(--text);font-weight:600;white-space:nowrap}
 .led-dot{width:16px;height:6px;border-radius:2px;background:#b9b3a4;
   box-shadow:inset 0 1px 1px rgba(0,0,0,0.25);flex-shrink:0;transition:background 0.1s}
-.led-dot.on{background:var(--led-amber);box-shadow:0 0 5px rgba(255,176,32,0.7)}
+.led-dot.on{background:var(--led-grn);box-shadow:0 0 5px rgba(217,242,41,0.7)}
+.led-dot.on.chg{background:#ff96a0;box-shadow:0 0 5px rgba(255,120,135,0.75)}  /* Charge Status lights pink, like the unit */
 canvas#pip-canvas{display:none}
 
 /* ── LCD ── */
@@ -62,14 +66,14 @@ canvas#pip-canvas{display:none}
   border:2px solid #0d0805;box-shadow:inset 0 3px 10px rgba(0,0,0,0.6);display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
 .lcd-mode-row{display:flex;align-items:flex-start;justify-content:space-between;grid-column:1;padding-bottom:0;border-bottom:none}
 .lcd-mode-main{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--lcd-green);letter-spacing:0.05em;line-height:1;text-shadow:0 0 8px rgba(255,74,40,0.4)}
-.lcd-mode-sub{font-family:var(--mono);font-size:9px;color:#e0885a;margin-top:2px}
-.lcd-ie{font-family:var(--mono);font-size:15px;font-weight:700;color:#ff9a5c;text-align:right;grid-column:2;justify-self:end;text-shadow:0 0 6px rgba(255,120,60,0.35)}
+.lcd-mode-sub{font-family:var(--mono);font-size:9px;color:#e06a72;margin-top:2px}
+.lcd-ie{font-family:var(--mono);font-size:15px;font-weight:700;color:#ff6b73;text-align:right;grid-column:2;justify-self:end;text-shadow:0 0 6px rgba(255,120,60,0.35)}
 .lcd-ie-lbl{font-size:8px;color:var(--lcd-dim);letter-spacing:0.1em;margin-bottom:2px}
 .lcd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;grid-column:1/-1}
 .lcd-cell{background:#120a06;border-radius:4px;padding:6px 6px;border:1px solid #241208;transition:opacity 0.2s}
 .lcd-lbl{font-family:var(--mono);font-size:7px;color:var(--lcd-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1px}
 .lcd-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--lcd-green);line-height:1}
-.lcd-unit{font-size:7px;color:#e0885a}
+.lcd-unit{font-size:7px;color:#e06a72}
 .lcd-cell.na{opacity:0.25}
 
 /* ── SECTION LABEL — LTV header bars ── */
@@ -115,7 +119,7 @@ canvas#pip-canvas{display:none}
 .knob-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .knob-val-num{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--led-red);line-height:1;
   text-shadow:0 0 8px rgba(255,74,40,0.55)}
-.knob-val-unit{font-family:var(--mono);font-size:9px;color:#b0522f;margin-top:1px}
+.knob-val-unit{font-family:var(--mono);font-size:9px;color:#8f9f30;margin-top:1px}
 .ctrl-wrap.dim .knob-val{display:none}
 .dim-lock{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:22px;color:#7a5a3a}
 .ctrl-wrap.dim .dim-lock{display:flex}
@@ -140,7 +144,7 @@ canvas#pip-canvas{display:none}
 .peep-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .peep-val-num{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--led-red);line-height:1;
   text-shadow:0 0 8px rgba(255,74,40,0.55)}
-.peep-val-unit{font-family:var(--mono);font-size:9px;color:#b0522f;margin-top:1px}
+.peep-val-unit{font-family:var(--mono);font-size:9px;color:#8f9f30;margin-top:1px}
 .peep-info{flex:1}
 .peep-lbl{font-size:13px;font-weight:700;color:var(--text);letter-spacing:0.05em;margin-bottom:4px}
 .peep-sub{font-size:11px;color:var(--sub);line-height:1.5}
@@ -158,7 +162,7 @@ canvas#pip-canvas{display:none}
 .alarm-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .alarm-val-num{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--led-red);line-height:1;
   text-shadow:0 0 8px rgba(255,74,40,0.55)}
-.alarm-val-unit{font-family:var(--mono);font-size:9px;color:#b0522f;margin-top:1px}
+.alarm-val-unit{font-family:var(--mono);font-size:9px;color:#8f9f30;margin-top:1px}
 .alarm-lbl{order:-1;font-size:11px;font-weight:700;color:var(--text);letter-spacing:0.02em;text-align:center;
   line-height:1.25;min-height:28px;display:flex;align-items:flex-end;justify-content:center}
 .alarm-adj{width:100%;display:flex;gap:6px}
@@ -590,10 +594,10 @@ canvas#pip-canvas{display:none}
 .scan-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
 .scan-mode-main{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--lcd-green);
   letter-spacing:0.05em;line-height:1;text-shadow:0 0 8px rgba(255,74,40,0.4)}
-.scan-mode-sub{font-family:var(--mono);font-size:9px;color:#e0885a;margin-top:3px;letter-spacing:0.04em}
+.scan-mode-sub{font-family:var(--mono);font-size:9px;color:#e06a72;margin-top:3px;letter-spacing:0.04em}
 .scan-ie{font-family:var(--mono);text-align:right;flex-shrink:0}
 .scan-ie-lbl{font-size:8px;color:var(--lcd-dim);letter-spacing:0.1em;margin-bottom:2px}
-.scan-ie-val{font-size:15px;font-weight:700;color:#ff9a5c;text-shadow:0 0 6px rgba(255,120,60,0.35)}
+.scan-ie-val{font-size:15px;font-weight:700;color:#ff6b73;text-shadow:0 0 6px rgba(255,120,60,0.35)}
 /* the scrolling monitored-data / message line */
 .scan-window{background:#0a0603;border:1px solid #241208;border-radius:6px;
   padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -602,16 +606,16 @@ canvas#pip-canvas{display:none}
 .scan-window.alarm{border-color:#d92d20;animation:scan-alarm-flash 0.7s steps(1) infinite}
 @keyframes scan-alarm-flash{0%,50%{background:#0a0603}50.01%,100%{background:#220a06}}
 .scan-line{display:flex;align-items:baseline;gap:9px;min-width:0}
-.scan-param{font-family:var(--mono);font-size:11px;font-weight:700;color:#ff9a5c;letter-spacing:0.12em;flex-shrink:0}
+.scan-param{font-family:var(--mono);font-size:11px;font-weight:700;color:#ff6b73;letter-spacing:0.12em;flex-shrink:0}
 .scan-value{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--lcd-green);line-height:1;
   text-shadow:0 0 8px rgba(255,74,40,0.4)}
-.scan-unit{font-family:var(--mono);font-size:10px;color:#e0885a}
+.scan-unit{font-family:var(--mono);font-size:10px;color:#e06a72}
 .scan-window.alarm .scan-value,.scan-window.alarm .scan-param{color:#ff5a3c}
 .scan-window.msg .scan-value{font-size:20px;letter-spacing:0.06em}
 /* the little scan-position dots + HALT/SCAN state chip */
 .scan-state{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 .scan-chip{font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:0.12em;
-  padding:2px 6px;border-radius:4px;border:1px solid #3a1e0e;color:#e0885a;background:#150c06}
+  padding:2px 6px;border-radius:4px;border:1px solid #3a1e0e;color:#e06a72;background:#150c06}
 .scan-chip.halt{color:#ffb020;border-color:#6a4410}
 .scan-dots{display:flex;gap:3px}
 .scan-dot{width:5px;height:5px;border-radius:50%;background:#3a1e0e}
@@ -637,11 +641,11 @@ canvas#pip-canvas{display:none}
 .led-opt-lamp{width:100%;max-width:34px;height:6px;border-radius:3px;background:#b9b3a4;
   box-shadow:inset 0 1px 1px rgba(0,0,0,0.25);transition:all 0.15s}
 .led-opt-lbl{font-size:9px;font-weight:700;color:var(--sub);letter-spacing:0.03em;text-align:center;line-height:1.15}
-.led-opt.on .led-opt-lamp{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+.led-opt.on .led-opt-lamp{background:var(--led-grn);box-shadow:0 0 6px var(--led-grn)}
 .led-opt.on .led-opt-lbl{color:var(--text)}
 .led-opt.flash .led-opt-lamp{animation:led-flash 0.5s steps(1) infinite}
 .led-opt.flash .led-opt-lbl{color:var(--purple-dark)}
-@keyframes led-flash{0%,50%{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+@keyframes led-flash{0%,50%{background:var(--led-grn);box-shadow:0 0 6px var(--led-grn)}
   50.01%,100%{background:#b9b3a4;box-shadow:inset 0 1px 1px rgba(0,0,0,0.25)}}
 .led-opt.disabled{opacity:0.3}
 
@@ -653,22 +657,26 @@ canvas#pip-canvas{display:none}
 .ctrl2-win{height:50px;border-radius:8px;background:var(--win);border:2px solid #0d0805;position:relative;
   box-shadow:inset 0 2px 8px rgba(0,0,0,0.8),0 1px 0 rgba(255,255,255,0.5);
   display:flex;align-items:center;justify-content:center;flex-direction:column;transition:all 0.15s;opacity:0.55}
-.ctrl2-num{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--led-red);line-height:1;
-  text-shadow:0 0 8px rgba(255,74,40,0.55)}
-.ctrl2-unit{font-family:var(--mono);font-size:8px;color:#b0522f;margin-top:1px}
+.ctrl2-num{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--led-grn);line-height:1;
+  text-shadow:0 0 8px rgba(217,242,41,0.5)}
+.ctrl2-unit{font-family:var(--mono);font-size:8px;color:#8f9f30;margin-top:1px}
 /* selected control: window bright + ring; all others dimmed (mirrors real device) */
-.ctrl2.selected .ctrl2-win{opacity:1;border-color:#ffb020;box-shadow:inset 0 2px 8px rgba(0,0,0,0.8),0 0 0 2px rgba(255,176,32,0.7),0 0 12px rgba(255,176,32,0.4)}
+.ctrl2.selected .ctrl2-win{opacity:1;border-color:#d9f229;box-shadow:inset 0 2px 8px rgba(0,0,0,0.8),0 0 0 2px rgba(217,242,41,0.7),0 0 12px rgba(217,242,41,0.4)}
 .ctrl2.selected .ctrl2-lbl{color:var(--purple-dark)}
 /* when ANY control is selected, non-selected active windows read a touch dimmer */
 .panel.has-selection .ctrl2:not(.selected) .ctrl2-win{opacity:0.4}
 /* inactive-in-this-mode control */
 .ctrl2.dim{opacity:0.5}
 .ctrl2.dim .ctrl2-win{opacity:0.28}
-.ctrl2.dim .ctrl2-num{color:#7a5a3a}
+.ctrl2.dim .ctrl2-num{color:var(--led-grn-dim);text-shadow:none}
 .ctrl2-lock{position:absolute;inset:0 0 auto 0;top:32px;display:none;align-items:center;justify-content:center;font-size:16px;color:#7a5a3a}
+/* Alarm-limit windows read in red on the physical unit */
+#cw-hipres .ctrl2-num,#cw-lowpres .ctrl2-num,#cw-lowmv .ctrl2-num,#cw-apnea .ctrl2-num{
+  color:var(--led-alm);text-shadow:0 0 8px rgba(255,68,85,0.5)}
+#cw-hipres .ctrl2-unit,#cw-lowpres .ctrl2-unit,#cw-lowmv .ctrl2-unit,#cw-apnea .ctrl2-unit{color:#b04a55}
 .ctrl2.dim .ctrl2-lock{display:flex}
 /* dashes shown when a control reads "off/---" (e.g. CPAP rate) */
-.ctrl2-num.dashes{color:#b0522f;letter-spacing:0.1em}
+.ctrl2-num.dashes{color:#8f9f30;letter-spacing:0.1em}
 /* game-lock reuse */
 .ctrl2.game-locked{opacity:0.16;pointer-events:none!important}
 .ctrl2.game-locked .ctrl2-win{opacity:0.2}
@@ -686,9 +694,9 @@ canvas#pip-canvas{display:none}
 .deck-btn:active{transform:scale(0.96);box-shadow:inset 0 1px 3px rgba(0,0,0,0.25)}
 .deck-btn .lamp{display:inline-block;width:16px;height:4px;border-radius:2px;background:rgba(32,38,92,0.18);
   margin-top:4px;transition:all 0.15s}
-.deck-btn.on .lamp{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+.deck-btn.on .lamp{background:var(--led-grn);box-shadow:0 0 6px var(--led-grn)}
 .deck-btn.locked{border-color:var(--purple-dark);background:linear-gradient(180deg,#5c5cae,#42427e);color:#fff}
-.deck-btn.locked .lamp{background:var(--led-amber);box-shadow:0 0 6px var(--led-amber)}
+.deck-btn.locked .lamp{background:var(--led-grn);box-shadow:0 0 6px var(--led-grn)}
 /* Set Value knob */
 .knob-block{display:flex;flex-direction:column;align-items:center;gap:5px;justify-self:center}
 .knob-title{font-size:9px;font-weight:700;letter-spacing:0.14em;color:var(--sub);text-transform:uppercase}
@@ -723,7 +731,7 @@ canvas#pip-canvas{display:none}
   align-items:center;justify-content:center;gap:8px}
 .boot-lcd-line{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--lcd-green);
   letter-spacing:0.08em;text-shadow:0 0 8px rgba(255,74,40,0.4)}
-.boot-lcd-sub{font-family:var(--mono);font-size:10px;color:#e0885a;letter-spacing:0.06em}
+.boot-lcd-sub{font-family:var(--mono);font-size:10px;color:#e06a72;letter-spacing:0.06em}
 .boot-bar{width:100%;height:8px;background:#120a06;border-radius:4px;overflow:hidden;margin-top:4px}
 .boot-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#c2410c,#ffb020);border-radius:4px;transition:width 0.2s linear}
 .boot-title{font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--purple-dark);text-transform:uppercase;margin-bottom:6px}
@@ -866,7 +874,7 @@ canvas#pip-canvas{display:none}
       <div class="led-list">
         <div class="led-item"><span class="led-dot" id="led-patient"></span>Patient Effort</div>
         <div class="led-item"><span class="led-dot on"></span>External Power</div>
-        <div class="led-item"><span class="led-dot on"></span>Charge Status</div>
+        <div class="led-item"><span class="led-dot on chg"></span>Charge Status</div>
         <div class="led-item"><span class="led-dot on"></span>Battery Level</div>
       </div>
     </div>
