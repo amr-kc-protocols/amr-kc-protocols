@@ -385,6 +385,15 @@ canvas#pip-canvas{display:none}
 .lvl-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);
   color:var(--border);font-size:20px;transition:color 0.18s;line-height:1}
 .lvl-card:hover .lvl-arrow{color:var(--blue)}
+.lvl-badge-free{background:#efeaf9;color:var(--purple-dark);border:1px solid var(--purple-dark)}
+.lvl-card-free:hover,.lvl-card-free:active{border-color:var(--purple-dark);background:#f4f1fb}
+.lvl-card-free:hover .lvl-arrow{color:var(--purple-dark)}
+/* Test Lung live plausibility chips */
+.tl-badge{color:var(--purple-dark);background:#efeaf9;border:1px solid var(--purple-dark)}
+.tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.tl-chip{border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;background:#fff}
+.tl-chip-k{font-size:8px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;margin-bottom:2px}
+.tl-chip-v{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1.1}
 
 /* Scenario mission card elements */
 .scen-back-btn{font-size:9px;color:var(--sub);background:none;border:none;cursor:pointer;
@@ -1155,6 +1164,30 @@ function enforceITLimit(){
   }
 }
 
+// ── DELIVERABLE PEAK-FLOW ENVELOPE (Vt ÷ IT physics) ──────────
+// In volume mandatory modes the LTV must push the set Tidal Volume in over
+// the set Inspiratory Time, so peak flow = Vt ÷ IT. The blower has a real
+// ceiling (~100 L/min); a huge volume over a tiny IT is physically
+// impossible. Enforce it like the device does — clamp and say why.
+var MAX_PEAK_FLOW=100;   // L/min
+function volumeMandatory(){ return breathType==='volume' && ventMode!=='cpap' && ventMode!=='nppv'; }
+function peakFlowLPM(){ return volumeMandatory()? (vals.vt.v*0.06/vals.it.v) : null; }
+function enforcePeakFlow(changedKey){
+  if(!volumeMandatory()) return false;
+  if(vals.vt.v*0.06/vals.it.v <= MAX_PEAK_FLOW+0.01) return false;
+  if(changedKey==='it'){
+    // raising flow by shortening IT — hold IT at the shortest deliverable
+    var minIT=Math.ceil((vals.vt.v*0.06/MAX_PEAK_FLOW)*10)/10;
+    minIT=Math.min(vals.it.max,minIT);
+    if(minIT>vals.it.v){ vals.it.v=minIT; updateKnob('it'); scanMessage('MAX FLOW — IT HELD',1400); return true; }
+  }
+  // otherwise cap Tidal Volume to what the flow ceiling allows at this IT
+  var capV=Math.floor((MAX_PEAK_FLOW*vals.it.v/0.06)/vals.vt.step)*vals.vt.step;
+  capV=Math.max(vals.vt.min,capV);
+  if(capV<vals.vt.v){ vals.vt.v=capV; updateKnob('vt'); scanMessage('MAX FLOW — Vt CAPPED',1400); return true; }
+  return false;
+}
+
 function adj(key,delta){
   var c=vals[key];
   // For IT, enforce limit before clamping so we always use the live max
@@ -1162,6 +1195,7 @@ function adj(key,delta){
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
     enforceITLimit();
+    enforcePeakFlow('rate');   // a higher rate can force IT down → cap Vt if flow now exceeds the blower
     // Snap simTime to start of next new cycle to prevent phase-jump glitch
     var newCycleMs=60000/vals.rate.v;
     simTime=Math.ceil(simTime/newCycleMs)*newCycleMs;
@@ -1170,6 +1204,11 @@ function adj(key,delta){
     enforceITLimit(); // update max first
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
+    enforcePeakFlow('it');     // shortening IT past the flow ceiling is held
+  } else if(key==='vt'){
+    c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
+    updateKnob(key);
+    enforcePeakFlow('vt');     // raising Vt past the flow ceiling is capped
   } else {
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
@@ -1268,7 +1307,7 @@ var CONTROL_SHORT={rate:'Breath Rate',vt:'Tidal Volume',pc:'Pres. Control',it:'I
 // ── DEVICE POWER STATE ────────────────────────────────────────
 var deviceState='standby';   // 'standby' | 'run' (POST/query handled by overlay)
 (function(){ var p=new URLSearchParams(location.search);
-  if(p.get('scenario')||p.get('level')) deviceState='run'; })();   // academy deep-links boot straight to run
+  if(p.get('scenario')||p.get('level')||p.get('free')!==null||p.get('mode')) deviceState='run'; })();   // deep-links boot straight to run
 function deviceRunning(){ return deviceState==='run'; }
 function applyStandbyVisual(){
   var panel=document.querySelector('.panel');
@@ -2568,6 +2607,7 @@ var STAGE_DEFS=[
 
 // ── LEVEL SYSTEM ──────────────────────────────────────────────
 var gameLevel=0;     // 0=selecting, 1=tutorial, 2=clinical, 3=advanced
+var freeMode=false;  // Test Lung free-play mode
 var scenarioIdx=0;   // which scenario within L2 or L3
 var scenarioDiagnosed=false; // problem-solving format: has the clinician diagnosed the case?
 var _autoTimer=null; // auto-progress countdown handle
@@ -3086,6 +3126,7 @@ function curScenario(){
 function curTask(){ return gameLevel<=1 ? curStage() : curScenario(); }
 
 function gameDone(){
+  if(freeMode) return false;          // Test Lung never "completes"
   if(gameLevel===1) return gameStage>=STAGE_DEFS.length;
   if(gameLevel>=2){
     var sc=SCENARIO_LEVELS[gameLevel]; return scenarioIdx>=(sc?sc.length:0);
@@ -3094,16 +3135,19 @@ function gameDone(){
 }
 
 function isControlUnlocked(key){
+  if(freeMode)     return true;       // Test Lung: everything free
   if(gameLevel>=2) return true;       // L2/L3: all controls free
   if(gameDone())   return true;
   return curStage().available.indexOf(key)>=0;
 }
 function isModeUnlocked(m){
+  if(freeMode)     return true;
   if(gameLevel>=2) return true;
   if(gameDone())   return true;
   return curStage().availModes.indexOf(m)>=0;
 }
 function isBTUnlocked(bt){
+  if(freeMode)     return true;
   if(gameLevel>=2) return true;
   if(gameDone())   return true;
   return curStage().availBT.indexOf(bt)>=0;
@@ -3252,10 +3296,52 @@ function renderSolveBody(task){
        :'<button class="mission-cta visible wait">Dial the setting to reach the goal…</button>');
 }
 
+// ── FREE PLAY · TEST LUNG readout ─────────────────────────────
+function _tlChip(label,val,status){
+  var col = status==='good'?'var(--green)':(status==='warn'?'var(--orange)':'var(--sub)');
+  var bg  = status==='good'?'#eafbf1':(status==='warn'?'#fdf0e7':'#ffffff');
+  return '<div class="tl-chip" style="border-color:'+col+';background:'+bg+'">'
+    +'<div class="tl-chip-k">'+label+'</div>'
+    +'<div class="tl-chip-v" style="color:'+col+'">'+val+'</div></div>';
+}
+function renderTestLung(bar){
+  var spont=(ventMode==='cpap'||ventMode==='nppv');
+  // I:E ratio
+  var ieTxt,ieStat;
+  if(spont){ ieTxt='SPONT'; ieStat='neutral'; }
+  else { var e=ieExpRatio(); if(e===null){ieTxt='—';ieStat='neutral';}
+    else { ieTxt='1 : '+e.toFixed(1); ieStat=(e>=1)?'good':'warn'; } }   // inverse (E<1) flags amber
+  // Peak inspiratory flow (Vt ÷ IT)
+  var pf=peakFlowLPM(),pfTxt,pfStat;
+  if(pf===null){ pfTxt='—'; pfStat='neutral'; }
+  else { pfTxt=Math.round(pf)+' L/min'; pfStat=(pf>=10&&pf<=MAX_PEAK_FLOW)?'good':'warn'; }
+  // Minute volume
+  var mv=estMinuteVolume(), mvStat=(mv>=4&&mv<=12)?'good':'warn';
+  // Pressures
+  var d=(typeof calcPplat==='function')?calcPplat():null, pTxt,pStat,pLbl;
+  if(d){ pLbl='PIP / Pplat'; pTxt=d.pip+' / '+d.pplat; pStat=(d.pplat<=30)?'good':'warn'; }
+  else if(spont){ pLbl=(ventMode==='nppv')?'IPAP / EPAP':'CPAP'; pTxt=(ventMode==='nppv')?((vals.peep.v+vals.ps.v)+' / '+vals.peep.v):(vals.peep.v+''); pStat='neutral'; }
+  else { pLbl='PIP (est)'; pTxt=(vals.peep.v+vals.pc.v)+''; pStat=((vals.peep.v+vals.pc.v)<=35)?'good':'warn'; }
+  bar.innerHTML=
+     '<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
+    +'<div class="scen-header"><div class="mission-stage">Free Play · Test Lung</div>'
+    +'<span class="scen-badge tl-badge">SANDBOX</span></div>'
+    +'<div class="scen-text">Dial any settings you like — the vent enforces only what it can physically deliver. Inspiratory time is capped by the rate (so exhalation is never squeezed out), and tidal volume is capped by the peak flow the blower can produce.</div>'
+    +'<div class="tl-grid">'
+      +_tlChip('I:E', ieTxt, ieStat)
+      +_tlChip('Peak Flow', pfTxt, pfStat)
+      +_tlChip('Min. Vol.', mv.toFixed(1)+' L/min', mvStat)
+      +_tlChip(pLbl, pTxt+(d||spont?'':' cmH₂O'), pStat)
+    +'</div>';
+}
+
 // ── MISSION CARD RENDER ───────────────────────────────────────
 function renderMissionCard(){
   var bar=document.getElementById('mission-bar');
   if(!bar) return;
+
+  // ── FREE PLAY · TEST LUNG ─────────────────────────────────
+  if(freeMode){ bar.style.display=''; renderTestLung(bar); return; }
 
   // ── LEVEL 0: no level selected yet — hide the bar entirely ──
   if(gameLevel===0){
@@ -3649,8 +3735,26 @@ function loadScenario(s){
   showIntro(s);              // prime the clinician before they reach the vent
 }
 
+// ── FREE PLAY · TEST LUNG ─────────────────────────────────────
+function startFree(){
+  freeMode=true; gameLevel=4; academyMode=false; scenarioDiagnosed=false;
+  var ov=document.getElementById('lvlsel-overlay'); if(ov) ov.classList.add('hidden');
+  if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
+  ventMode='ac'; breathType='volume';
+  vals.rate.v=14; vals.vt.v=500; vals.it.v=1.0; vals.peep.v=5; vals.fio2.v=40;
+  vals.pc.v=15; vals.ps.v=10; vals.sens.v=3; vals.hipres.v=40; vals.lowpres.v=10; vals.lowmv.v=3; vals.apnea.v=20;
+  enforceITLimit();
+  _modeCandidate=null; _btCandidate=null; deselect();
+  ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(updateKnob);
+  simTime=0; pressureHistory=[];
+  updateUI();
+  var bar=document.getElementById('mission-bar');
+  if(bar){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){ window.scrollTo(0,0); } }
+}
+
 // ── LEVEL MANAGEMENT ──────────────────────────────────────────
 function startLevel(n){
+  freeMode=false;
   gameLevel=n;
   // Entering a level implies a running vent — covers the header LEVELS
   // shortcut taken while the device is still in Standby.
@@ -3687,6 +3791,7 @@ function openLevelSelect(){
   if(typeof deselect==='function') deselect();
   var ov=document.getElementById('lvlsel-overlay');
   if(ov) ov.classList.remove('hidden');
+  freeMode=false;
   gameLevel=0;
   renderMissionCard();
 }
@@ -3699,6 +3804,7 @@ function initGameEntry(){
   var params=new URLSearchParams(window.location.search);
   var sid=params.get('scenario');
   if(sid && ACADEMY_SCENARIOS[sid]){ startAcademyScenario(sid); return; }   // deep-link: already booted to run
+  if(params.get('free')!==null || params.get('mode')==='free' || params.get('mode')==='testlung'){ startFree(); return; }
   var lvl=parseInt(params.get('level'),10);
   if(lvl===1||lvl===2||lvl===3){ startLevel(lvl); return; }                 // deep-link: already booted to run
   // Plain load: leave the device in Standby. The learner powers it up with
@@ -3955,7 +4061,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
 <div class="lvlsel-overlay hidden" id="lvlsel-overlay">
   <div class="lvlsel-inner">
     <div class="lvlsel-title">Ventilator Simulator</div>
-    <div class="lvlsel-sub">Choose a difficulty level</div>
+    <div class="lvlsel-sub">Choose a level, or free-play the Test Lung</div>
     <div class="lvl-card" onclick="startLevel(1)">
       <div class="lvl-card-top">
         <div class="lvl-name">Level 1 — Tutorial</div>
@@ -3978,6 +4084,14 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
         <span class="lvl-badge lvl-badge-3">Advanced</span>
       </div>
       <div class="lvl-desc">6 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
+      <span class="lvl-arrow">›</span>
+    </div>
+    <div class="lvl-card lvl-card-free" onclick="startFree()">
+      <div class="lvl-card-top">
+        <div class="lvl-name">Free Play — Test Lung</div>
+        <span class="lvl-badge lvl-badge-free">Sandbox</span>
+      </div>
+      <div class="lvl-desc">No missions. Dial any settings you want; the vent enforces only what it can physically deliver (I:E capped by rate, tidal volume capped by peak flow). Live plausibility readout.</div>
       <span class="lvl-arrow">›</span>
     </div>
   </div>
