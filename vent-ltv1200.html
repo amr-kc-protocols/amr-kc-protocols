@@ -1072,19 +1072,20 @@ var breathType = 'volume';
 var ventMode   = 'ac';  // ac | simv | cpap | nppv
 
 // Ranges mirror the Pulmonetic/CareFusion LTV 1200 control limits.
+// Ranges match the documented LTV® 1200 operating spec.
 var vals = {
-  rate:   {v:12,  min:1,   max:80,  step:1},    // breaths/min
-  vt:     {v:500, min:50,  max:2000,step:25},   // mL
-  pc:     {v:15,  min:1,   max:99,  step:1},    // cmH₂O above PEEP
-  it:     {v:1.0, min:0.3, max:9.9, step:0.1},  // s (also capped by I:E 4:1)
-  ps:     {v:10,  min:0,   max:60,  step:1},    // cmH₂O above PEEP (0 = OFF)
-  fio2:   {v:40,  min:21,  max:100, step:5},    // %
-  sens:   {v:3,   min:1,   max:9,   step:1},    // L/min flow trigger
-  peep:   {v:0,   min:0,   max:20,  step:1},    // cmH₂O
-  hipres: {v:40,  min:10,  max:100, step:5},    // cmH₂O
-  lowpres:{v:10,  min:0,   max:60,  step:1},    // cmH₂O (0 = OFF)
-  lowmv:  {v:3,   min:0,   max:99,  step:1},    // L/min (0 = OFF)
-  apnea:  {v:20,  min:10,  max:60,  step:5},    // s
+  rate:   {v:12,  min:1,   max:80,  step:1},    // breaths/min (1–80)
+  vt:     {v:500, min:50,  max:2000,step:10},   // mL (50–2000, 10 mL steps)
+  pc:     {v:15,  min:1,   max:99,  step:1},    // cmH₂O above PEEP (1–99)
+  it:     {v:1.0, min:0.3, max:9.9, step:0.1},  // s (0.3–9.9, also capped by I:E 4:1)
+  ps:     {v:10,  min:0,   max:60,  step:1},    // cmH₂O above PEEP (OFF, 1–60)
+  fio2:   {v:40,  min:21,  max:100, step:5},    // % (21–100)
+  sens:   {v:3,   min:1,   max:9,   step:1},    // L/min flow trigger (1–9)
+  peep:   {v:0,   min:0,   max:20,  step:1},    // cmH₂O (0–20)
+  hipres: {v:40,  min:5,   max:100, step:5},    // cmH₂O (5–100)
+  lowpres:{v:10,  min:0,   max:99,  step:1},    // cmH₂O (OFF, 1–99)
+  lowmv:  {v:3,   min:0,   max:99,  step:1},    // L/min (OFF, 0.1–99)
+  apnea:  {v:20,  min:10,  max:60,  step:5},    // s (10–60)
 };
 
 // ── ACTIVE CONTROL LOGIC ──────────────────────────────────────
@@ -1179,12 +1180,12 @@ function enforcePeakFlow(changedKey){
     // raising flow by shortening IT — hold IT at the shortest deliverable
     var minIT=Math.ceil((vals.vt.v*0.06/MAX_PEAK_FLOW)*10)/10;
     minIT=Math.min(vals.it.max,minIT);
-    if(minIT>vals.it.v){ vals.it.v=minIT; updateKnob('it'); scanMessage('MAX FLOW — IT HELD',1400); return true; }
+    if(minIT>vals.it.v){ vals.it.v=minIT; updateKnob('it'); scanMessage('MAX FLOW '+MAX_PEAK_FLOW+' L/min — IT HELD',1500); if(typeof sfxDenied==='function')sfxDenied(); return true; }
   }
   // otherwise cap Tidal Volume to what the flow ceiling allows at this IT
   var capV=Math.floor((MAX_PEAK_FLOW*vals.it.v/0.06)/vals.vt.step)*vals.vt.step;
   capV=Math.max(vals.vt.min,capV);
-  if(capV<vals.vt.v){ vals.vt.v=capV; updateKnob('vt'); scanMessage('MAX FLOW — Vt CAPPED',1400); return true; }
+  if(capV<vals.vt.v){ vals.vt.v=capV; updateKnob('vt'); scanMessage('MAX FLOW '+MAX_PEAK_FLOW+' L/min — Vt CAPPED',1500); if(typeof sfxDenied==='function')sfxDenied(); return true; }
   return false;
 }
 
@@ -1192,9 +1193,11 @@ function adj(key,delta){
   var c=vals[key];
   // For IT, enforce limit before clamping so we always use the live max
   if(key==='rate'){
+    var itBefore=vals.it.v;
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
     enforceITLimit();
+    if(vals.it.v<itBefore-0.001){ scanMessage('I:E LIMIT — INSP TIME '+vals.it.v.toFixed(1)+'s',1500); if(typeof sfxDenied==='function')sfxDenied(); }
     enforcePeakFlow('rate');   // a higher rate can force IT down → cap Vt if flow now exceeds the blower
     // Snap simTime to start of next new cycle to prevent phase-jump glitch
     var newCycleMs=60000/vals.rate.v;
@@ -1202,8 +1205,10 @@ function adj(key,delta){
     pressureHistory=[];
   } else if(key==='it'){
     enforceITLimit(); // update max first
+    var wantIT=Math.round((c.v+delta)*10)/10;
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
+    if(delta>0 && wantIT>c.v+0.001){ scanMessage('I:E LIMIT — MAX INSP TIME '+c.v.toFixed(1)+'s',1500); if(typeof sfxDenied==='function')sfxDenied(); }
     enforcePeakFlow('it');     // shortening IT past the flow ceiling is held
   } else if(key==='vt'){
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
@@ -3885,6 +3890,15 @@ function sfxWrong(){
   var ac=getAC(); var t=ac.currentTime+0.02;
   playNote(233,0.22,t,      0.18,'sawtooth');
   playNote(175,0.30,t+0.18, 0.18,'sawtooth');
+}
+
+// "Setting refused" — the vent physically can't deliver this (flow/IT limit).
+// A short two-tone denial buzz, distinct from the knob tick and the alarms.
+function sfxDenied(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime+0.01;
+  playNote(320,0.09,t,      0.16,'square');
+  playNote(200,0.13,t+0.09, 0.16,'square');
 }
 
 // Stage unlock — 5-note ascending fanfare
