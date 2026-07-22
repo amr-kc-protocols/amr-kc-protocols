@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Ventilator Simulator — AMR KC</title>
 <style>
 :root{
@@ -825,6 +825,20 @@ canvas#pip-canvas{display:none}
   .knob-hub{inset:22px}
   .deck{gap:5px;padding:8px}
   .deck-btn{font-size:7.5px;padding:7px 3px}
+}
+
+/* Keyboard focus — a clear ring for tab/switch users, only on keyboard nav */
+:focus-visible{outline:3px solid #4aa3ff;outline-offset:2px;border-radius:6px}
+
+/* Honor the OS "reduce motion" setting: keep the pressure bar/values (JS-driven)
+   but stop decorative pulsing, boot animation, and drawer slide. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.001ms !important;
+    scroll-behavior:auto !important;
+  }
 }
 </style>
 </head>
@@ -2464,6 +2478,12 @@ function closeDrawer(){
 var ty0=0;
 document.getElementById('drawer').addEventListener('touchstart',function(e){ty0=e.touches[0].clientY;},{passive:true});
 document.getElementById('drawer').addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-ty0>60)closeDrawer();},{passive:true});
+// Escape closes an open teaching drawer (keyboard users have no swipe/backdrop tap).
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape') return;
+  var dr=document.getElementById('drawer');
+  if(dr&&dr.classList.contains('open')){ closeDrawer(); e.preventDefault(); }
+});
 
 // ══════════════════════════════════════════════════════════════
 // GAME / TUTORIAL LAYER
