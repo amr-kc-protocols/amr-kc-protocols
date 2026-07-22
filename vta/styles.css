@@ -1244,3 +1244,25 @@ select.cert-input { cursor: pointer; }
 }
 .callout-list li:first-child { margin-top: 0; }
 .callout-list li:last-child { margin-bottom: 0; }
+
+/* ---------- Accessibility ---------- */
+/* Visible keyboard focus ring for tab/switch navigation. Only shows on keyboard
+   use, so it never interferes with mouse/touch. Blue reads on both the light
+   cards and the dark capstone/completed panels. */
+:focus-visible {
+  outline: 3px solid #2f6fed;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.cert-input:focus-visible { outline-offset: 0; }
+
+/* Honor the OS "reduce motion" setting: drop the fade-ins, card hovers, and
+   progress-bar sweeps for users who are sensitive to motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
