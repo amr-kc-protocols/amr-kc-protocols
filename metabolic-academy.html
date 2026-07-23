@@ -915,16 +915,215 @@ var MODULES = [
 
   {
     id: 6,
-    available: false,
+    available: true,
     title: "Endocrine Crises",
-    desc: "Thyroid storm, myxedema coma, and adrenal (Addisonian) crisis — recognizing the great mimics and the time-critical hormone replacement each demands."
+    desc: "Thyroid storm, myxedema coma, and adrenal (Addisonian) crisis — recognizing the great mimics and the time-critical hormone replacement each demands.",
+    objective: "Recognize the three endocrine emergencies that masquerade as other diagnoses — thyroid storm, myxedema coma, and adrenal crisis — and deliver the time-critical, hormone-based treatment each requires, including the sequencing rule that prevents a fatal error.",
+    content: [
+      { h:"1", t:"The emergencies that hide in plain sight", html:
+        "<p>Endocrine crises are dangerous less because they are hard to treat than because they are hard to <em>think of</em>. Each one presents wearing the costume of a more common diagnosis — sepsis, heart failure, a primary psychiatric or neurologic event — and the endocrine cause is missed until someone deliberately considers it. The three that matter in critical-care transport are the thyroid at both extremes (storm and myxedema coma) and the adrenal gland at empty (adrenal crisis).</p>"+
+        "<p>Two threads run through all three. First, they are frequently <strong>precipitated by a stressor</strong> — an infection, a surgery, a myocardial infarction, trauma, or an abrupt medication change — layered on top of an underlying gland problem. Second, the definitive treatment is <strong>replacing or opposing a hormone</strong>, and you generally start that treatment on <em>clinical suspicion</em>, before any confirmatory lab returns, because the confirmatory tests take longer than the patient can wait. Treating early on suspicion is not sloppy here — it is the standard of care.</p>"
+      },
+      { h:"2", t:"Thyroid storm: the metabolic fire", html:
+        "<p>Thyroid storm is decompensated, life-threatening hyperthyroidism — the accelerator jammed to the floor. It is not defined by how high the thyroid labs are (which overlap with ordinary hyperthyroidism) but by <strong>end-organ dysfunction</strong> across three systems. Look for the triad and you will recognize it:</p>"+
+        "<ul>"+
+        "<li><strong>Fever</strong> — often high, out of proportion to any infection.</li>"+
+        "<li><strong>Cardiovascular overdrive</strong> — marked tachycardia, frequently <em>atrial fibrillation with rapid ventricular response</em>, and high-output heart failure.</li>"+
+        "<li><strong>CNS and GI disturbance</strong> — agitation, delirium, or coma; and nausea, vomiting, diarrhea, and often jaundice.</li>"+
+        "</ul>"+
+        "<p>It is precipitated by infection, surgery, trauma, iodine load (including contrast), or abrupt withdrawal of antithyroid drugs. Untreated, the hyperthermia and cardiovascular collapse are lethal. The transport picture is a hot, wildly tachycardic, agitated patient who can look septic — with the tell being a known or suspected thyroid history and the disproportionate hyperadrenergic state.</p>"
+      },
+      { h:"3", t:"Treating storm — and the one-hour ordering rule", html:
+        "<p>The treatment attacks the fire at several points at once, and one detail of the <em>order</em> is genuinely tested and genuinely matters. The components:</p>"+
+        "<ul>"+
+        "<li><strong>Beta-blockade</strong> (propranolol is favored) — controls the heart rate and the adrenergic storm, and at high doses blunts peripheral conversion of T4 to the more active T3. This is the symptomatic cornerstone.</li>"+
+        "<li><strong>A thionamide</strong> (propylthiouracil or methimazole) — blocks new thyroid hormone synthesis. PTU has the added effect of reducing T4-to-T3 conversion.</li>"+
+        "<li><strong>Iodine</strong> — blocks the <em>release</em> of pre-formed hormone. But it must be given <strong>at least one hour AFTER the thionamide.</strong></li>"+
+        "<li><strong>Steroids</strong> (hydrocortisone) — reduce T4-to-T3 conversion and cover a possible relative adrenal insufficiency.</li>"+
+        "<li><strong>Supportive care</strong> — aggressive cooling, fluids, and treating the precipitant.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor · sequencing</span> Give the thionamide FIRST, then iodine at least an hour later. Iodine given first would supply fresh substrate that the unblocked gland could build into <em>more</em> hormone (the Jod-Basedow phenomenon). Block synthesis, then block release.</div>"+
+        "<p>One more caution: avoid aspirin for the fever — salicylates displace thyroid hormone from its binding protein and can worsen the storm (a link back to Module 8's salicylate story). Use acetaminophen and active cooling instead.</p>"
+      },
+      { h:"4", t:"Myxedema coma: the metabolic standstill", html:
+        "<p>At the opposite pole is <strong>myxedema coma</strong> — severe, decompensated <em>hypo</em>thyroidism, the body's metabolism slowed nearly to a stop. Despite the name, a true coma is not required; the hallmark is <em>altered mental status plus hypothermia</em> in a hypothyroid patient. It is a disease of the elderly, often in winter, and it too is usually tipped over by a stressor — infection, cold exposure, a sedating drug, or a missed thyroid dose.</p>"+
+        "<p>The picture is the mirror image of storm — everything is slow and cold:</p>"+
+        "<ul>"+
+        "<li><strong>Hypothermia</strong> — often profound, and sometimes without shivering.</li>"+
+        "<li><strong>Altered mental status</strong> — lethargy, obtundation, coma.</li>"+
+        "<li><strong>Hypoventilation</strong> — CO₂ retention and respiratory failure from a depressed respiratory drive.</li>"+
+        "<li><strong>Bradycardia and hypotension</strong>, and characteristically <strong>hyponatremia</strong> and <strong>hypoglycemia.</strong></li>"+
+        "</ul>"+
+        "<p>The high mortality comes from the respiratory failure and cardiovascular collapse. On transport, the combination of an obtunded, hypothermic, bradycardic, hyponatremic elderly patient who is retaining CO₂ should put myxedema on the list — especially with a thyroidectomy scar or a history of hypothyroidism.</p>"
+      },
+      { h:"5", t:"Treating myxedema — and the steroid-first rule", html:
+        "<p>Treatment is thyroid hormone replacement (IV levothyroxine, sometimes with T3), plus supportive care: careful rewarming, ventilatory support for the CO₂ retention, cautious correction of the hyponatremia (Module 2's slow-correction rule applies), and dextrose for hypoglycemia. But there is a sequencing rule here as consequential as the one in thyroid storm:</p>"+
+        "<div class='keybox'><span class='kt'>Anchor · steroids first</span> Give <strong>hydrocortisone before thyroid hormone</strong> in suspected myxedema coma. Many of these patients have coexisting adrenal insufficiency, and giving thyroid hormone first accelerates cortisol metabolism — which can precipitate an acute adrenal crisis on top of the myxedema. Cover the adrenal gland first, then replace thyroid hormone.</div>"+
+        "<p>That single rule — <em>steroids before thyroid replacement</em> — is the myxedema counterpart to <em>thionamide before iodine</em> in storm. Both exist because giving the obvious drug first, without the setup step, can kill the patient. It also foreshadows the gland this module closes on.</p>"
+      },
+      { h:"6", t:"Adrenal crisis: the empty gland", html:
+        "<p>Adrenal (Addisonian) crisis is acute cortisol insufficiency, and it is the most likely of the three to appear abruptly in a previously stable patient. Cortisol is the hormone that lets the body <em>respond to stress</em> — it maintains vascular tone, supports blood glucose, and permits catecholamines to work. Take it away during a stressor and the cardiovascular system loses its ability to compensate.</p>"+
+        "<p>The defining, and most important, feature is <strong>hypotension and shock that does not respond to fluids or to vasopressors.</strong> That refractoriness is the clue: a patient in distributive-looking shock who will not come up on norepinephrine, without another good explanation, should make you think of an empty adrenal gland. The accompanying labs are characteristic:</p>"+
+        "<ul>"+
+        "<li><strong>Hyponatremia and hyperkalemia</strong> — the fingerprint of the missing mineralocorticoid (aldosterone) in primary adrenal failure.</li>"+
+        "<li><strong>Hypoglycemia</strong> — cortisol supports gluconeogenesis.</li>"+
+        "<li>Nonspecific but common: nausea, vomiting, abdominal pain, weakness, and fever.</li>"+
+        "</ul>"+
+        "<p>Who is at risk? The patient with known adrenal insufficiency (Addison's) under a new stress; the patient on <strong>chronic steroids whose steroids were stopped or not stress-dosed</strong> (by far the most common cause in developed settings — suppressed adrenals that can't ramp up); pituitary disease; and bilateral adrenal hemorrhage.</p>"
+      },
+      { h:"7", t:"Treating adrenal crisis — steroids that cannot wait", html:
+        "<p>The treatment is immediate and simple, and it is the reason this diagnosis is so satisfying to catch: <strong>stress-dose hydrocortisone</strong> (a common regimen is 100 mg IV), given the moment you suspect it, together with aggressive isotonic fluids and correction of the hypoglycemia. The response can be dramatic — the fluid- and pressor-refractory shock reverses once cortisol is on board.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — treat first, confirm later</span>"+
+        "<p>In suspected adrenal crisis, the standard is to administer stress-dose glucocorticoids <em>immediately</em> on clinical suspicion rather than waiting for cortisol-level confirmation, because the delay is dangerous and the treatment is low-risk. If diagnostic certainty is needed, <strong>dexamethasone</strong> can be used initially — it treats the crisis without interfering with a subsequent cortisol assay or ACTH stimulation test — but treatment is never withheld to obtain the test. Empiric hydrocortisone in undifferentiated refractory shock is a recognized, low-harm intervention.</p>"+
+        "<div class='grade'>Quality: moderate (strong physiologic rationale and consensus guidelines; the harm of withholding is well established).</div></div>"+
+        "<p>For the transport clinician, the practical rule writes itself: shock that stays down despite adequate fluid and escalating vasopressors, especially in a patient on or recently off chronic steroids, is adrenal crisis until proven otherwise — and the trial of stress-dose steroids is both diagnostic and therapeutic.</p>"
+      },
+      { h:"8", t:"The endocrine-crisis anchor", html:
+        "<p>These three are easy to hold together once you see them as one family — a gland pushed past compensation by a stressor, wearing another disease's clothes, and treated by opposing or replacing a hormone on suspicion.</p>"+
+        "<ul>"+
+        "<li><strong>Thyroid storm</strong> — hot, fast, agitated; treat with beta-blocker + thionamide, then iodine an hour later, plus steroids and cooling. <em>Thionamide before iodine.</em></li>"+
+        "<li><strong>Myxedema coma</strong> — cold, slow, obtunded, hyponatremic, retaining CO₂; treat with thyroid hormone and support. <em>Hydrocortisone before thyroid hormone.</em></li>"+
+        "<li><strong>Adrenal crisis</strong> — fluid- and pressor-refractory shock, hyponatremia + hyperkalemia + hypoglycemia; treat with immediate stress-dose hydrocortisone and fluids. <em>Treat on suspicion; dexamethasone if you must preserve the diagnostic workup.</em></li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The recurring lesson is <em>order of operations</em>: block synthesis before release (storm), cover the adrenal before replacing thyroid (myxedema), and give cortisol before you have proof (adrenal crisis). Consider these diagnoses precisely when a septic-looking or shock patient isn't behaving the way the obvious diagnosis should.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Thyroid storm is diagnosed primarily by:",
+        opts:["The absolute level of thyroid hormone","End-organ dysfunction (fever, cardiovascular, CNS/GI)","A single elevated TSH","The presence of a goiter"], ans:1,
+        expl:"Storm is defined clinically by end-organ decompensation — high fever, tachyarrhythmia/high-output failure, and CNS/GI disturbance — not by how high the labs are, which overlap with uncomplicated hyperthyroidism." },
+      { q:"In treating thyroid storm, why must iodine be given at least an hour AFTER a thionamide (e.g., PTU)?",
+        opts:["Iodine deactivates the thionamide","Iodine given first can be used as substrate to make more hormone","They cannot be given on the same day","Iodine must be given intravenously first"], ans:1,
+        expl:"Iodine blocks hormone release, but if given before synthesis is blocked it supplies substrate the gland can build into more hormone (Jod-Basedow). Block synthesis with the thionamide first, then block release with iodine." },
+      { q:"Which antipyretic should be AVOIDED in thyroid storm?",
+        opts:["Acetaminophen","Aspirin (salicylates)","Active external cooling","Ibuprofen only"], ans:1,
+        expl:"Salicylates displace thyroid hormone from its binding protein, raising free hormone and worsening the storm. Use acetaminophen and active cooling instead." },
+      { q:"The hallmark presentation of myxedema coma is:",
+        opts:["Fever and tachycardia","Altered mental status with hypothermia in a hypothyroid patient","Hypertension and agitation","Hyperglycemia and hypernatremia"], ans:1,
+        expl:"Myxedema coma is decompensated hypothyroidism — altered mental status plus hypothermia, typically with bradycardia, hypoventilation/CO₂ retention, hyponatremia, and hypoglycemia. It is the metabolic mirror of thyroid storm." },
+      { q:"In suspected myxedema coma, hydrocortisone should be given:",
+        opts:["Only if the patient fails to improve","Before thyroid hormone replacement","Never — steroids worsen hypothyroidism","After the patient is rewarmed"], ans:1,
+        expl:"Give hydrocortisone before thyroid hormone. Coexisting adrenal insufficiency is common, and replacing thyroid hormone first accelerates cortisol metabolism, potentially precipitating an adrenal crisis." },
+      { q:"The most characteristic cardiovascular feature of adrenal (Addisonian) crisis is:",
+        opts:["Hypertensive emergency","Hypotension/shock refractory to fluids and vasopressors","Bradycardia responsive to atropine","A short QT interval"], ans:1,
+        expl:"Cortisol permits catecholamines to work and maintains vascular tone. Its absence produces shock that does not respond to fluids or pressors — the key clue to an adrenal cause of undifferentiated shock." },
+      { q:"Which lab pattern is characteristic of primary adrenal crisis?",
+        opts:["Hypernatremia and hypokalemia","Hyponatremia, hyperkalemia, and hypoglycemia","Hypercalcemia and hyperglycemia","Hypophosphatemia and alkalosis"], ans:1,
+        expl:"The missing mineralocorticoid produces hyponatremia and hyperkalemia, and cortisol deficiency causes hypoglycemia — the classic triad in primary adrenal crisis." },
+      { q:"The most common cause of adrenal crisis in developed settings is:",
+        opts:["Bilateral adrenal hemorrhage","Abrupt withdrawal of, or failure to stress-dose, chronic steroids","Primary adrenal tumor","Iodine exposure"], ans:1,
+        expl:"Chronic exogenous steroids suppress the adrenal axis; stopping them or failing to stress-dose during illness leaves adrenals unable to ramp up cortisol, precipitating crisis. It is far more common than adrenal hemorrhage or tumor." },
+      { q:"When immediate treatment of suspected adrenal crisis is needed but you want to preserve a diagnostic cortisol workup, the preferred steroid is:",
+        opts:["Hydrocortisone","Dexamethasone","Prednisone","Fludrocortisone"], ans:1,
+        expl:"Dexamethasone treats the crisis without cross-reacting in the cortisol assay, so an ACTH-stimulation test can still be performed. Regardless, treatment is never withheld to obtain the test." },
+      { q:"A unifying principle across these endocrine emergencies is that definitive treatment should be:",
+        opts:["Delayed until confirmatory labs return","Started on clinical suspicion, before confirmatory results","Limited to supportive care in transport","Withheld unless the precipitant is known"], ans:1,
+        expl:"Confirmatory endocrine testing takes longer than the patient can safely wait, and the hormone-based treatments are relatively low-risk. Storm, myxedema, and adrenal crisis are all treated empirically on clinical suspicion." }
+    ]
   },
 
   {
     id: 7,
-    available: false,
+    available: true,
     title: "The Common Lab Panel in Transport",
-    desc: "Reading the sheet at the bedside — CBC, BMP/CMP, LFTs, lactate, BUN/creatinine and AKI, and the coagulation panel — as decision tools, not trivia."
+    desc: "Reading the sheet at the bedside — CBC, BMP/CMP, LFTs, lactate, BUN/creatinine and AKI, and the coagulation panel — as decision tools, not trivia.",
+    objective: "Read the routine lab panels a sending facility hands you — CBC, BMP/CMP, renal indices, LFTs, lactate, and coagulation studies — as transport decision tools: what each value changes about your management and monitoring en route.",
+    content: [
+      { h:"1", t:"Labs as decisions, not trivia", html:
+        "<p>At handoff you are usually given a sheet of results, and the skill that matters is not reciting reference ranges — it is asking, of each abnormal value, <em>what does this change about the next two hours?</em> A lab that doesn't alter your monitoring, your interventions, or your destination is context; a lab that does is a decision. This module walks the common panels through that lens.</p>"+
+        "<p>Two habits frame everything. First, read <strong>trends over snapshots</strong> whenever you can — a creatinine of 2.0 that was 1.0 this morning is a different patient than a creatinine of 2.0 that has been 2.0 for a year. Ask for the priors. Second, <strong>tie every value back to the modules you have already built</strong>: the electrolytes to Modules 2–4, the bicarbonate to the acid–base read of Module 1, the glucose to Module 5. The panel is not new material so much as those principles arriving on one page.</p>"
+      },
+      { h:"2", t:"The CBC: three lines, three questions", html:
+        "<p>The complete blood count is really three separate stories on one line. Read each as a question.</p>"+
+        "<ul>"+
+        "<li><strong>Hemoglobin / hematocrit</strong> — <em>is there enough oxygen-carrying capacity, and is it stable?</em> Recall Module 1's hemodynamics link: oxygen delivery depends on hemoglobin. In a bleeding patient the single number matters less than the trend and the rate of change — an acute bleed can kill at a hemoglobin that a chronic anemic tolerates. A falling serial hemoglobin during transport is a red flag that outranks any one value. Restrictive transfusion (threshold near 7 g/dL) is the norm for stable patients; active hemorrhage is resuscitated by the clinical picture, not a number.</li>"+
+        "<li><strong>White blood cell count</strong> — <em>is there infection or stress?</em> Elevation suggests infection or inflammation, but stress, steroids, and catecholamines all raise it too. A very <em>low</em> WBC (neutropenia) flips the concern entirely: that patient is immunocompromised, a fever is an emergency, and they may need protective precautions.</li>"+
+        "<li><strong>Platelets</strong> — <em>can this patient clot?</em> This is the CBC line that most directly changes procedural risk. Thrombocytopenia raises bleeding risk for line placement and is a piece of the coagulation picture in section 7.</li>"+
+        "</ul>"
+      },
+      { h:"3", t:"The BMP: the electrolyte panel you already know", html:
+        "<p>The basic metabolic panel is largely a review of Modules 1–5 arriving together — sodium, potassium, chloride, bicarbonate, BUN, creatinine, and glucose. Read it as a set, because the values talk to each other:</p>"+
+        "<ul>"+
+        "<li><strong>Sodium</strong> → the water/tonicity read of Module 2; correct it for glucose before reacting.</li>"+
+        "<li><strong>Potassium</strong> → the Module 3 emergency; pair a high or low value with the ECG.</li>"+
+        "<li><strong>Bicarbonate (CO₂)</strong> → the metabolic side of the Module 1 acid–base read; a low value flags a metabolic acidosis and should prompt an <em>anion gap</em> (Na − Cl − HCO₃) right there on the panel.</li>"+
+        "<li><strong>Glucose</strong> → Module 5, and always worth a fingerstick to confirm a critical value.</li>"+
+        "</ul>"+
+        "<p>The comprehensive metabolic panel (CMP) adds the liver tests and calcium/protein of the sections below. The mental move on any BMP is to <em>calculate the gap</em> and <em>scan the potassium</em> first — those two are the results most likely to change what you do in the next hour.</p>"
+      },
+      { h:"4", t:"Renal function: BUN, creatinine, and the AKI question", html:
+        "<p>Creatinine is the workhorse marker of kidney function, and the transport-relevant question is usually <em>acute or chronic?</em> — because an acute kidney injury (AKI) reframes drug dosing, fluid decisions, and the urgency of the destination. As in the CBC, the <strong>trend is everything</strong>: a rising creatinine is an active injury; a stable elevation is baseline chronic kidney disease.</p>"+
+        "<p>The BUN-to-creatinine ratio adds a clue to the <em>type</em> of injury. A disproportionately high BUN relative to creatinine (a ratio above ~20:1) points toward a <strong>pre-renal</strong> cause — volume depletion, poor renal perfusion — the patient whose kidneys are fine but starved of flow, and who often responds to fluids. A GI bleed also raises the BUN as absorbed blood is metabolized.</p>"+
+        "<p>Two management consequences you carry en route. First, <strong>renal dosing</strong>: impaired clearance prolongs many drugs — including the insulin of Module 5 (watch for delayed hypoglycemia) and numerous antibiotics and sedatives. Second, the renal-failure patient is the one from Module 3 who cannot excrete a potassium load and from Module 4 who cannot excrete magnesium or phosphate — their whole electrolyte picture is more fragile, and dialysis may be the actual destination.</p>"
+      },
+      { h:"5", t:"Lactate: the perfusion gauge", html:
+        "<p>Of all the chemistry values, lactate is the one that most directly reports <em>how the tissues are doing</em>, and it ties straight back to the oxygen-delivery physiology of the Hemodynamics academy. Lactate rises when tissue oxygen demand outstrips supply and cells shift to anaerobic metabolism — so an elevated lactate is a marker of <strong>global hypoperfusion</strong> (shock, sepsis, ischemia) and a recognized marker of severity.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> A normal blood pressure with a rising lactate is an ominous combination — it means perfusion is failing despite an adequate-looking pressure (the 'compensated shock' idea from hemodynamics). Trust the lactate over the reassuring vital sign.</div>"+
+        "<p>The most useful way to use lactate on transport is as a <strong>trend</strong>. Lactate <em>clearance</em> — a falling level in response to resuscitation — is a favorable sign, while a rising or persistently high lactate signals ongoing hypoperfusion and a patient who is not being adequately resuscitated. Two caveats keep you honest: not every elevated lactate is hypoperfusion (high-dose beta-agonists such as the albuterol of Module 3, seizures, metformin, and liver failure raise it by other mechanisms), and a lactate drawn from a long-held tourniquet can read falsely high. Interpret it with the clinical picture, but never wave it away.</p>"
+      },
+      { h:"6", t:"Liver function tests: pattern over number", html:
+        "<p>The 'liver function tests' are worth a moment because their name misleads — most of them measure liver <em>injury</em>, not function, and the pattern matters more than any single height.</p>"+
+        "<ul>"+
+        "<li><strong>AST and ALT (transaminases)</strong> — enzymes released when hepatocytes are damaged. A <em>hepatocellular</em> pattern (transaminases up out of proportion) points to the liver cells themselves — ischemia ('shock liver'), toxins, viral hepatitis.</li>"+
+        "<li><strong>Alkaline phosphatase and bilirubin</strong> — a <em>cholestatic</em> pattern (these up out of proportion) points to obstruction or the biliary system.</li>"+
+        "<li><strong>The true function markers</strong> are elsewhere: the <strong>INR</strong> (the liver makes clotting factors) and <strong>albumin</strong> (the liver makes it, and it takes weeks to fall — so a low albumin implies chronic disease). Recall from Module 1 and Module 4 that a low albumin also changes how you read the anion gap and the calcium.</li>"+
+        "</ul>"+
+        "<p>For transport, the LFTs rarely change the immediate intervention, but they shape your expectations: the patient with liver failure will have a coagulopathy (next section), altered drug metabolism, a tendency to hypoglycemia, and — through elevated ammonia — encephalopathy as a cause of altered mental status.</p>"
+      },
+      { h:"7", t:"Coagulation studies: can this patient clot?", html:
+        "<p>The coagulation panel answers a question that directly governs bleeding risk and procedural safety, and its pieces each point somewhere specific:</p>"+
+        "<ul>"+
+        "<li><strong>INR / PT</strong> — the extrinsic pathway; prolonged by warfarin, by liver disease, and by vitamin K deficiency. It is the number that tells you whether a warfarin patient is anticoagulated and by how much.</li>"+
+        "<li><strong>aPTT</strong> — the intrinsic pathway; prolonged by unfractionated heparin (and used to monitor a heparin drip).</li>"+
+        "<li><strong>Platelets</strong> (from the CBC) and <strong>fibrinogen</strong> — the clot's building blocks; fibrinogen falls early in major hemorrhage and in DIC and is a key transfusion target in trauma.</li>"+
+        "</ul>"+
+        "<p>Two transport realities make this panel matter. First, a great many of your patients are <strong>anticoagulated</strong> — and a bleeding patient on warfarin, heparin, or a direct oral anticoagulant may need a specific reversal agent (vitamin K and factor concentrate, protamine, or a targeted DOAC reversal drug), which changes both treatment and destination. Second, the massively transfused trauma patient develops a <strong>consumptive coagulopathy</strong>, and this panel — with the ionized calcium of Module 4 and the temperature and pH of the 'lethal diamond' — is how you track it. A rising INR and falling fibrinogen and platelets in a bleeding patient is coagulopathy declaring itself.</p>"
+      },
+      { h:"8", t:"Reading the whole sheet — the transport anchor", html:
+        "<p>Put the panels together the way you actually meet them: a stack of results at the bedside, minutes before you move. A workable scan, in order of what most often changes the next hour:</p>"+
+        "<ul>"+
+        "<li><strong>Potassium and the ECG</strong> — the fastest killer on the sheet (Module 3).</li>"+
+        "<li><strong>Bicarbonate → anion gap → glucose</strong> — is there a metabolic acidosis, and is it DKA, lactate, or a toxin (Modules 1, 5, 8)?</li>"+
+        "<li><strong>Lactate trend</strong> — is this patient being adequately perfused, whatever the pressure says?</li>"+
+        "<li><strong>Hemoglobin trend and coagulation</strong> — is this patient bleeding, and can they clot?</li>"+
+        "<li><strong>Creatinine trend</strong> — acute or chronic, and does it change my drug dosing and destination?</li>"+
+        "</ul>"+
+        "<p>Everything else is context that refines the picture. Ask for priors so you are reading trends, confirm any critical value that seems out of step with the patient in front of you, and let the labs point you toward the module that governs the fix rather than treating each number in isolation.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Read the sheet as decisions: potassium/ECG, gap/glucose, lactate trend, hemoglobin and coagulation, creatinine trend. Trends beat snapshots, a lactate outranks a reassuring blood pressure, and every abnormal value should either change your plan or be consciously set aside.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The most useful framing for interpreting a transport lab value is:",
+        opts:["Memorizing the reference range","Asking what it changes about the next few hours of management","Recording it for the chart","Comparing it to population averages"], ans:1,
+        expl:"A lab matters when it alters your monitoring, interventions, or destination. Read each abnormal value as a decision, and favor trends over single snapshots by asking for priors." },
+      { q:"In a patient with an acute GI bleed, the single most concerning hemoglobin finding is:",
+        opts:["An isolated value of 9 g/dL","A falling trend on serial measurements","A value of 11 g/dL","Any value above 7 g/dL"], ans:1,
+        expl:"In acute hemorrhage the trend and rate of change outrank any single value — an acute bleed can be lethal at a hemoglobin a chronically anemic patient tolerates. A falling serial hemoglobin is a major red flag." },
+      { q:"On a BMP showing a low bicarbonate, the immediate next step is to:",
+        opts:["Give bicarbonate","Calculate the anion gap","Ignore it if the pH is unknown","Repeat the entire panel"], ans:1,
+        expl:"A low bicarbonate flags a metabolic acidosis; calculating the anion gap (Na − Cl − HCO₃) right off the panel begins to sort high-gap (lactate, ketones, toxins) from normal-gap causes — the Module 1 read applied to the sheet." },
+      { q:"A BUN-to-creatinine ratio greater than about 20:1 suggests which type of kidney injury?",
+        opts:["Intrinsic (acute tubular necrosis)","Post-renal obstruction","Pre-renal (volume depletion / poor perfusion)","Chronic kidney disease only"], ans:2,
+        expl:"A disproportionately high BUN relative to creatinine points to a pre-renal cause — volume depletion or poor renal perfusion — where the kidneys are structurally fine but under-perfused and often fluid-responsive. A GI bleed also raises the BUN." },
+      { q:"A patient has a normal blood pressure but a lactate that is rising on serial draws. This indicates:",
+        opts:["Adequate perfusion — the pressure is fine","Ongoing tissue hypoperfusion despite a reassuring pressure","A definite laboratory error","Resolving shock"], ans:1,
+        expl:"A rising lactate with a normal pressure is compensated shock — perfusion is failing even though the blood pressure looks adequate. Trust the lactate trend; lactate clearance would indicate successful resuscitation." },
+      { q:"Which value is a true marker of the liver's synthetic FUNCTION rather than hepatocyte injury?",
+        opts:["ALT","AST","Alkaline phosphatase","INR"], ans:3,
+        expl:"The transaminases (ALT/AST) and alkaline phosphatase mark injury/cholestasis, not function. The INR (clotting factors) and albumin reflect true synthetic function — the liver makes both." },
+      { q:"A prolonged aPTT is most characteristically associated with:",
+        opts:["Warfarin therapy","Unfractionated heparin therapy","Aspirin therapy","Vitamin K excess"], ans:1,
+        expl:"The aPTT tracks the intrinsic pathway and is used to monitor unfractionated heparin. Warfarin and liver disease prolong the INR/PT (extrinsic pathway)." },
+      { q:"In a bleeding trauma patient, which coagulation component falls early and is a key transfusion target?",
+        opts:["Fibrinogen","Alkaline phosphatase","BUN","Bicarbonate"], ans:0,
+        expl:"Fibrinogen falls early in major hemorrhage and DIC and is a key transfusion target. Tracking a rising INR with falling fibrinogen and platelets in a bleeding patient shows consumptive coagulopathy declaring itself." },
+      { q:"A very LOW white blood cell count (neutropenia) should prompt you to:",
+        opts:["Relax about infection risk","Treat a fever as an emergency and consider protective precautions","Assume a lab error","Withhold all antibiotics"], ans:1,
+        expl:"Neutropenia means the patient is immunocompromised; a fever in that setting is an emergency (neutropenic fever) and the patient may need protective isolation — the opposite of the reassurance a high WBC might prompt." },
+      { q:"When scanning a stack of transport labs, which value most often demands the fastest action?",
+        opts:["Albumin","Alkaline phosphatase","Potassium (with the ECG)","Total protein"], ans:2,
+        expl:"Potassium — read alongside the ECG — is the fastest killer on the sheet (Module 3). A workable scan prioritizes potassium/ECG, then the gap/glucose, lactate trend, hemoglobin/coagulation, and creatinine trend." }
+    ]
   },
 
   {
