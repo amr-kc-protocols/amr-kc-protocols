@@ -713,16 +713,204 @@ var MODULES = [
 
   {
     id: 4,
-    available: false,
+    available: true,
     title: "Calcium · Magnesium · Phosphate",
-    desc: "The 'forgotten' electrolytes — hypocalcemia after massive transfusion, magnesium and torsades, phosphate and the refeeding trap, and safe repletion."
+    desc: "The 'forgotten' electrolytes — hypocalcemia after massive transfusion, magnesium and torsades, phosphate and the refeeding trap, and safe repletion.",
+    objective: "Recognize and manage disorders of calcium, magnesium, and phosphate — read ionized versus total calcium, treat citrate-induced hypocalcemia in massive transfusion, use magnesium for torsades and eclampsia, and anticipate the refeeding trap.",
+    content: [
+      { h:"1", t:"The trio the resuscitation forgets", html:
+        "<p>Sodium and potassium get the attention, but calcium, magnesium, and phosphate quietly run the machinery of every excitable cell and every unit of energy the body spends. They are the electrolytes a busy resuscitation forgets to check — and each one has a transport scenario where forgetting it kills the patient.</p>"+
+        "<p>Start with a measurement trap unique to calcium. About half the calcium in the blood is bound to albumin and biologically inert; only the <strong>ionized (free) fraction</strong> is physiologically active. So a <em>total</em> calcium can read low simply because albumin is low, without any true deficiency. Correct it, or better, measure the ionized level directly:</p>"+
+        "<div class='formula'>corrected Ca = measured Ca + <span class='fk'>0.8</span> × (4 − albumin)<br>&nbsp;&nbsp;or measure <span class='fk'>ionized Ca</span> directly (normal ≈ 1.1–1.3 mmol/L)</div>"+
+        "<p>In the critically ill — shifting albumin, changing pH, transfusion — the correction formula is unreliable, and the ionized calcium on a blood gas is the number to trust. Acidosis frees calcium off albumin (raising ionized Ca); alkalosis binds it (dropping ionized Ca), which is why a hyperventilating patient can develop perioral tingling and cramping with a normal total calcium.</p>"
+      },
+      { h:"2", t:"Hypocalcemia: the irritable membrane", html:
+        "<p>Low ionized calcium makes nerves and muscle hyperexcitable — the opposite of the stabilizing role calcium played in Module 3's hyperkalemia. The signs run from subtle to lethal:</p>"+
+        "<ul>"+
+        "<li><strong>Neuromuscular irritability</strong> — perioral and fingertip paresthesias, cramps, and frank tetany. <em>Chvostek's sign</em> (facial twitch on tapping the facial nerve) and <em>Trousseau's sign</em> (carpal spasm when a BP cuff is inflated) are the classic bedside tells.</li>"+
+        "<li><strong>QT prolongation</strong> — the cardiac signature, setting up for ventricular arrhythmias.</li>"+
+        "<li><strong>Seizures, laryngospasm, and hypotension</strong> — at the severe end, including a myocardium that contracts poorly because calcium is the coupling ion for contraction.</li>"+
+        "</ul>"+
+        "<p>The causes worth carrying in your head: <strong>citrate from massive transfusion</strong> (the next section, and the one that matters most in transport), acute pancreatitis, rhabdomyolysis and tumor lysis (phosphate binds calcium), post-thyroidectomy or post-parathyroidectomy hypoparathyroidism, and — critically — <strong>hypomagnesemia</strong>, which both impairs PTH release and blunts its effect, so a low calcium won't correct until the magnesium is fixed. Treat symptomatic hypocalcemia with IV calcium: <em>gluconate</em> for a peripheral line, <em>chloride</em> (three times the elemental calcium) through a secure central line when you need a fast, potent effect.</p>"
+      },
+      { h:"3", t:"Citrate, massive transfusion, and the lethal diamond", html:
+        "<p>This is the calcium scenario that defines critical-care transport. Banked blood is anticoagulated with <strong>citrate</strong>, which works by chelating calcium. Transfuse slowly and the liver clears the citrate without trouble. But transfuse <em>fast</em> — massive transfusion, the trauma or GI-bleed patient getting unit after unit — and the citrate load outpaces hepatic clearance, binds the patient's own ionized calcium, and drives it down precisely when the patient can least afford it.</p>"+
+        "<p>Ionized hypocalcemia in this setting is doubly dangerous: calcium is an essential cofactor in the clotting cascade, so a low ionized calcium <em>worsens the coagulopathy</em> you are transfusing to fix, and it simultaneously drops cardiac contractility and vascular tone, deepening the hypotension. Modern trauma teaching folds hypocalcemia into the classic 'lethal triad' of acidosis, hypothermia, and coagulopathy — making it a <strong>lethal diamond.</strong></p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — calcium in massive transfusion</span>"+
+        "<p>Ionized hypocalcemia is common early in massive transfusion and is independently associated with increased mortality, more transfusion, and worse coagulopathy in trauma cohorts. Damage-control resuscitation protocols now routinely include empiric calcium repletion and monitoring of ionized calcium during massive transfusion. The evidence is observational rather than from large randomized trials, but it is consistent and mechanistically strong.</p>"+
+        "<div class='grade'>Quality: moderate (consistent observational data; guideline-endorsed in trauma resuscitation).</div></div>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> If you are transfusing blood fast, you are dropping the patient's ionized calcium. Monitor it and replace calcium empirically during massive transfusion — the coagulopathy and the hypotension both depend on it.</div>"
+      },
+      { h:"4", t:"Hypercalcemia: stones, bones, groans, and moans", html:
+        "<p>The opposite derangement is less common in transport but worth recognizing, because severe hypercalcemia is its own emergency. Over 90% of cases trace to two causes: <strong>malignancy</strong> (the acute, sicker presentations) and <strong>primary hyperparathyroidism</strong> (the chronic, milder ones). The symptom mnemonic captures the multisystem picture — <em>stones</em> (kidney stones), <em>bones</em> (bone pain), <em>groans</em> (abdominal pain, constipation, nausea), and <em>psychiatric moans</em> (lethargy, confusion, ultimately coma).</p>"+
+        "<p>On the monitor, hypercalcemia <strong>shortens the QT</strong> — the mirror of hypocalcemia. It also drives a profound osmotic diuresis, so these patients are markedly volume-depleted, and the cornerstone of treatment is <strong>aggressive isotonic fluid resuscitation</strong> to restore volume and promote calcium excretion. Definitive lowering (bisphosphonates, calcitonin, treating the underlying cause) unfolds over hours to days and is largely a destination-hospital problem; your transport job is volume and monitoring. Avoid the old reflex of loop diuretics up front — they are reserved for volume overload, not first-line.</p>"
+      },
+      { h:"5", t:"Magnesium: the cofactor behind the other electrolytes", html:
+        "<p>Magnesium is the quiet regulator standing behind potassium and calcium both. It is a cofactor for the enzymes that keep potassium inside cells and for PTH secretion and action — which is why, as you saw in Module 3 and again above, <strong>refractory hypokalemia and refractory hypocalcemia are so often really hypomagnesemia in disguise.</strong> Replace magnesium, and the other two finally correct.</p>"+
+        "<p>Hypomagnesemia travels with the same company as low potassium: chronic alcoholism, loop and thiazide diuretics, GI losses, and prolonged proton-pump-inhibitor use. Its own signature is neuromuscular irritability and, most importantly, <strong>arrhythmia</strong> — magnesium deficiency prolongs the QT and is a direct substrate for torsades de pointes.</p>"+
+        "<p>That arrhythmic link makes magnesium a therapy as well as a lab value. Its two headline uses:</p>"+
+        "<ul>"+
+        "<li><strong>Torsades de pointes</strong> — IV magnesium (typically 1–2 g) is the first-line treatment, whether or not the serum magnesium is low, because it stabilizes the myocardium in that specific polymorphic VT.</li>"+
+        "<li><strong>Eclampsia / severe pre-eclampsia</strong> — magnesium is the drug of choice for seizure prevention and treatment (not a conventional anticonvulsant), given as a loading dose followed by an infusion.</li>"+
+        "</ul>"
+      },
+      { h:"6", t:"Hypermagnesemia and the transport OB patient", html:
+        "<p>You will meet high magnesium mainly in two settings, and one of them is a transport staple: the <strong>pre-eclamptic patient on a magnesium infusion</strong>, and the patient in <strong>renal failure</strong> (the kidney is the sole route of magnesium excretion). Because we deliberately infuse magnesium in obstetrics, iatrogenic hypermagnesemia is a real and recognizable transport emergency.</p>"+
+        "<p>The toxicity progresses in a predictable order as the level climbs, and the earliest reliable sign is one you can check with a reflex hammer:</p>"+
+        "<ul>"+
+        "<li><strong>Loss of deep tendon reflexes</strong> — the sentinel finding; reflexes disappear before anything more dangerous does.</li>"+
+        "<li><strong>Respiratory depression</strong> — as neuromuscular transmission fails.</li>"+
+        "<li><strong>Bradycardia, hypotension, and ultimately cardiac arrest.</strong></li>"+
+        "</ul>"+
+        "<p>This is why a magnesium infusion is monitored by serial reflex checks: <em>if the reflexes are present, the diaphragm is safe.</em> When reflexes vanish or respirations depress, stop the infusion and give the antidote — <strong>IV calcium</strong>, which directly antagonizes magnesium at the membrane. Calcium for magnesium toxicity mirrors calcium for hyperkalemia: the same stabilizing ion buying the same kind of time.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> On a magnesium drip, deep tendon reflexes are your live monitor. Reflexes gone or breathing depressed → stop the magnesium and give IV calcium. Suspect hypermagnesemia in any renal-failure patient with weakness and bradycardia.</div>"
+      },
+      { h:"7", t:"Phosphate and the refeeding trap", html:
+        "<p>Phosphate is easy to ignore because its symptoms are vague — until you understand that phosphate is the backbone of <strong>ATP</strong> (the cell's energy currency) and of <strong>2,3-DPG</strong> (which lets hemoglobin release oxygen to tissue). A severely low phosphate is, quite literally, an energy failure: diffuse muscle weakness including the diaphragm (respiratory failure and failure to wean the ventilator), hemolysis, rhabdomyolysis, altered mental status, and cardiac dysfunction.</p>"+
+        "<p>The scenario to recognize is <strong>refeeding syndrome</strong>, and it is a genuine transport-relevant killer. Take a chronically malnourished patient — alcoholism, anorexia, prolonged starvation — whose body has run down its phosphate, potassium, and magnesium stores while burning fat. Now reintroduce nutrition (a carbohydrate load, IV dextrose, tube feeds). The surge of insulin that follows drives glucose <em>and phosphate, potassium, and magnesium</em> rapidly into cells, and the serum levels of all three crash together. The result can be sudden respiratory failure, arrhythmia, and death, days into what looked like appropriate feeding.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — feed the at-risk patient slowly</span>"+
+        "<p>In malnourished and high-risk patients, aggressive refeeding precipitates falls in phosphate, potassium, and magnesium and is associated with cardiac and respiratory complications. Guidelines recommend identifying at-risk patients, starting nutrition cautiously, supplementing thiamine, and replacing electrolytes <em>before and during</em> refeeding. The practical transport point: a hypophosphatemic, chronically malnourished patient who just started nutrition is at risk, and the phosphate/potassium/magnesium should be watched and replaced.</p>"+
+        "<div class='grade'>Quality: moderate (consistent observational and physiologic data; strongly guideline-endorsed).</div></div>"+
+        "<p>The opposite, <strong>hyperphosphatemia</strong>, shows up in renal failure and in massive cell breakdown — <em>tumor lysis syndrome</em> and rhabdomyolysis — where the released phosphate binds calcium and drives the hypocalcemia of section 2. Its management is treating the cause and, ultimately, dialysis.</p>"
+      },
+      { h:"8", t:"The forgotten-electrolyte anchor", html:
+        "<p>Three habits keep this trio from being the thing that surprises you.</p>"+
+        "<p><strong>In massive transfusion, think calcium.</strong> Fast blood means citrate means falling ionized calcium — which worsens both the bleeding and the shock. Monitor ionized calcium off the blood gas and replace it empirically; it is as much a part of damage-control resuscitation as the blood itself.</p>"+
+        "<p><strong>When potassium or calcium won't correct, think magnesium</strong> — and remember magnesium's two therapeutic jobs, torsades and eclampsia, plus its toxicity, monitored at the bedside by deep tendon reflexes with IV calcium as the antidote.</p>"+
+        "<p><strong>In the malnourished patient who is now being fed, think phosphate</strong> — and potassium and magnesium alongside it — because refeeding drives all three into cells at once. Across the whole trio, trust the <em>ionized</em> calcium over the total, correct for albumin when you can't, and treat the patient's rhythm and symptoms rather than a single number in isolation.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Calcium in massive transfusion; magnesium behind refractory K and Ca and as the treatment for torsades and eclampsia; phosphate in refeeding. The forgotten electrolytes are only dangerous when they are forgotten.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Which fraction of serum calcium is physiologically active?",
+        opts:["The albumin-bound fraction","The ionized (free) fraction","The total calcium","The citrate-bound fraction"], ans:1,
+        expl:"Only ionized (free) calcium is biologically active; roughly half the total is bound to albumin and inert. A low albumin lowers total calcium without a true deficiency — measure the ionized level or correct for albumin." },
+      { q:"A trauma patient receiving rapid massive transfusion develops worsening coagulopathy and hypotension. Which electrolyte derangement is a key contributor?",
+        opts:["Hyperkalemia","Ionized hypocalcemia from citrate","Hypermagnesemia","Hyperphosphatemia"], ans:1,
+        expl:"Banked blood is citrated; rapid transfusion overwhelms hepatic citrate clearance, chelating ionized calcium. Low ionized calcium worsens coagulopathy (calcium is a clotting cofactor) and drops contractility and vascular tone — the 'lethal diamond.'" },
+      { q:"Trousseau's and Chvostek's signs are bedside indicators of:",
+        opts:["Hypercalcemia","Hypocalcemia","Hypermagnesemia","Hyperphosphatemia"], ans:1,
+        expl:"Both signs reflect the neuromuscular irritability of hypocalcemia — carpal spasm with cuff inflation (Trousseau) and a facial twitch on tapping the facial nerve (Chvostek). Hypocalcemia also prolongs the QT." },
+      { q:"The cornerstone of initial treatment for severe hypercalcemia is:",
+        opts:["A loop diuretic first-line","Aggressive isotonic fluid resuscitation","IV calcium","Immediate dialysis for all patients"], ans:1,
+        expl:"Hypercalcemia causes an osmotic diuresis and profound volume depletion; isotonic fluids restore volume and promote calcium excretion. Loop diuretics are reserved for volume overload, not first-line; definitive lowering takes hours to days." },
+      { q:"A patient's hypokalemia and hypocalcemia both fail to correct with repletion. The most likely underlying problem is:",
+        opts:["Hypomagnesemia","Hyperphosphatemia","Metabolic alkalosis","Hypernatremia"], ans:0,
+        expl:"Magnesium is a cofactor for keeping potassium in cells and for PTH secretion and action. Low magnesium makes both hypokalemia and hypocalcemia refractory until the magnesium is replaced." },
+      { q:"The first-line treatment for torsades de pointes is:",
+        opts:["IV calcium","IV magnesium","IV potassium","IV phosphate"], ans:1,
+        expl:"IV magnesium (typically 1–2 g) is first-line for torsades, given whether or not the serum magnesium is low, because it stabilizes the myocardium in this polymorphic VT." },
+      { q:"In a pre-eclamptic patient on a magnesium infusion, the earliest reliable sign of magnesium toxicity is:",
+        opts:["Respiratory depression","Cardiac arrest","Loss of deep tendon reflexes","Hypertension"], ans:2,
+        expl:"Deep tendon reflexes disappear before respiratory depression and cardiac effects — so serial reflex checks are the bedside monitor. If reflexes are present, the diaphragm is still safe; if they vanish, stop the magnesium." },
+      { q:"The antidote for symptomatic hypermagnesemia (e.g., respiratory depression on a magnesium drip) is:",
+        opts:["IV calcium","IV potassium","Naloxone","Sodium bicarbonate"], ans:0,
+        expl:"IV calcium directly antagonizes magnesium at the membrane — mirroring its role in hyperkalemia. Stop the magnesium infusion and give calcium; support ventilation as needed." },
+      { q:"Phosphate is essential for ATP and for 2,3-DPG. A severely low phosphate can therefore cause:",
+        opts:["Short QT interval","Diaphragmatic weakness and respiratory failure","Hypertensive crisis","Metabolic alkalosis"], ans:1,
+        expl:"Phosphate depletion is an energy failure — diffuse muscle weakness including the diaphragm (respiratory failure, failure to wean), plus hemolysis, rhabdomyolysis, and cardiac dysfunction." },
+      { q:"A chronically malnourished patient with alcoholism is started on IV dextrose and tube feeds, then develops falling phosphate, potassium, and magnesium with respiratory failure. This is:",
+        opts:["Refeeding syndrome","Tumor lysis syndrome","Diabetic ketoacidosis","Hyperosmolar hyperglycemic state"], ans:0,
+        expl:"Refeeding syndrome: reintroduced nutrition triggers an insulin surge that drives phosphate, potassium, and magnesium into cells, crashing all three. Feed at-risk patients cautiously, give thiamine, and replace electrolytes before and during refeeding." }
+    ]
   },
 
   {
     id: 5,
-    available: false,
+    available: true,
     title: "Glucose Emergencies — DKA & HHS",
-    desc: "Pathophysiology of DKA vs HHS, the fluid–insulin–potassium sequence, closing the anion gap, cerebral edema, and transport management of the insulin drip."
+    desc: "Pathophysiology of DKA vs HHS, the fluid–insulin–potassium sequence, closing the anion gap, cerebral edema, and transport management of the insulin drip.",
+    objective: "Distinguish DKA from HHS, sequence the fluid–potassium–insulin resuscitation correctly, recognize that the anion gap (not the glucose) is the endpoint in DKA, and manage an insulin infusion and the risk of cerebral edema in transport.",
+    content: [
+      { h:"1", t:"Two faces of the same hormone failure", html:
+        "<p>Diabetic ketoacidosis (DKA) and the hyperosmolar hyperglycemic state (HHS) sit at two ends of one spectrum: not enough working insulin. What separates them is <em>how much</em> insulin is missing and <em>how fast</em> the crisis builds.</p>"+
+        "<p><strong>DKA</strong> is a near-total insulin deficiency, classically in type 1 diabetes. With no insulin to let cells use glucose, the body switches to burning fat, and the byproduct is <strong>ketoacids</strong> — a high-anion-gap metabolic acidosis (the 'D' in MUDPILES from Module 1). It builds over hours to a day and the patient is often relatively young.</p>"+
+        "<p><strong>HHS</strong> is a <em>relative</em> insulin deficiency, classically in older type 2 diabetics. There is just enough insulin to suppress ketone formation, so there is little or no acidosis — but not enough to control glucose, which climbs to extraordinary levels and drags the serum osmolality up with it. It builds over days, and the dominant problem is profound dehydration and a hyperosmolar, obtunded patient.</p>"+
+        "<div class='formula'><span class='fk'>DKA</span>: glucose &gt;250 · pH &lt;7.3 · HCO₃ &lt;18 · ketones ⊕ · gap ↑<br><span class='fk'>HHS</span>: glucose often &gt;600 · pH &gt;7.3 · osm &gt;320 · minimal ketones</div>"+
+        "<p>HHS carries the higher mortality of the two, largely because of the age and comorbidity of its patients and the depth of the dehydration. Overlap exists — some patients have features of both — but the framing holds: <em>DKA is an acid problem, HHS is an osmolality-and-water problem.</em></p>"
+      },
+      { h:"2", t:"Why both patients are profoundly dry", html:
+        "<p>Whatever the ketone story, both crises share one engine: <strong>osmotic diuresis</strong>. Once blood glucose exceeds the kidney's reabsorption threshold (~180 mg/dL), glucose spills into the urine and drags water and electrolytes with it. Hour after hour, the patient urinates away liters of fluid and large amounts of sodium, potassium, phosphate, and magnesium.</p>"+
+        "<p>The numbers are staggering and worth internalizing, because they drive the entire treatment. A DKA patient typically arrives <strong>6–9 liters</strong> down; an HHS patient, building more slowly and to higher glucose, is often <strong>even more dehydrated</strong> — 8–12 liters or more. This is why the single most important early intervention in both is not insulin — it is <strong>fluid</strong>. The dehydration also explains the total-body potassium depletion that makes the next section so important.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> DKA and HHS are, first, states of massive volume depletion. The osmotic diuresis has emptied the tank of water and electrolytes. Fluid resuscitation comes before — and does much of the work of — glucose control.</div>"
+      },
+      { h:"3", t:"Step 1 — fluids first", html:
+        "<p>Resuscitation begins with isotonic crystalloid to refill the intravascular space and restore perfusion. Fluid alone accomplishes a great deal before a drop of insulin is given: it dilutes the glucose, improves renal perfusion so the kidneys can excrete more of it, and lowers the counter-regulatory hormone surge. It is common to see the glucose fall substantially on fluids alone.</p>"+
+        "<p>After the initial resuscitation, the choice of fluid is guided by the <em>corrected</em> sodium (recall the glucose correction from Module 2 — every 100 mg/dL of glucose above 100 masks about 1.6 mEq/L of sodium). If the corrected sodium is high or normal, transition toward a hypotonic fluid (½-normal saline) to address the free-water deficit; if it is low, stay with isotonic. The pace is brisk but not reckless — especially in HHS and in children, where over-rapid fluid shifts carry the cerebral-edema risk discussed below.</p>"+
+        "<p>On transport you are frequently continuing a resuscitation someone else started. Know what has already been given, what the corrected sodium is doing, and whether the patient is now adequately perfused — the answers steer both the rate and the tonicity of what runs next.</p>"
+      },
+      { h:"4", t:"Step 2 — check potassium before you start insulin", html:
+        "<p>This is the step that separates a safe resuscitation from a lethal one, and it is the most tested concept in the whole topic. In both DKA and HHS, <strong>total-body potassium is severely depleted</strong> — bled out through the osmotic diuresis over hours. Yet the <em>serum</em> potassium often reads normal or even high, because acidosis and insulin deficiency have driven potassium out of cells and into the serum. The lab value is masking a profound deficit.</p>"+
+        "<p>Now consider what insulin does (Module 3): it drives potassium <em>into</em> cells. Start insulin on a patient whose serum potassium is already at the low end, and you can precipitate a sudden, fatal <strong>hypokalemia</strong> — flooding the true deficit into view all at once. Hence the rule that governs the order of operations:</p>"+
+        "<div class='formula'>K &lt; <span class='fk'>3.3</span> → <span class='fk'>hold insulin</span>, replace potassium first<br>K <span class='fk'>3.3 – 5.3</span> → give insulin <em>and</em> add potassium to fluids<br>K &gt; <span class='fk'>5.3</span> → start insulin, hold K, recheck</div>"+
+        "<p>The precise thresholds vary by protocol, but the principle is universal and non-negotiable: <em>never start an insulin infusion in a hypokalemic DKA/HHS patient.</em> Fix the potassium first. Because insulin and fluids both move potassium, it must be rechecked frequently throughout the resuscitation — hourly to every two hours — and this monitoring continues in transport.</p>"
+      },
+      { h:"5", t:"Step 3 — the insulin infusion", html:
+        "<p>Only after fluids are running and the potassium is safe does insulin begin, as a <strong>continuous IV infusion</strong> of regular insulin, typically around <strong>0.1 unit/kg/hr</strong>. The goal is not to crash the glucose — it is a steady, controlled decline of roughly <strong>50–75 mg/dL per hour.</strong> If the glucose is falling too fast, the drip is turned down; too slow, and it is turned up.</p>"+
+        "<p>Note what insulin is actually <em>for</em> in DKA. Its job is less about the glucose than about switching off ketogenesis — turning the metabolic machinery back from burning fat to burning glucose, which is what closes the acid gap. That reframing sets up the two most important nuances, in the next sections.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — the bolus is optional</span>"+
+        "<p>The traditional initial insulin bolus adds little. Randomized and comparative data show that starting a weight-based continuous infusion <em>without</em> an up-front bolus achieves equivalent rates of glucose decline and gap closure, and many modern protocols omit the bolus — particularly in children, where it may add to cerebral-edema risk. The infusion, run steadily, is what matters.</p>"+
+        "<div class='grade'>Quality: moderate (randomized and comparative studies supporting no-bolus infusion protocols).</div></div>"
+      },
+      { h:"6", t:"The gap, not the glucose, is the endpoint in DKA", html:
+        "<p>Here is the error that reopens a resolving DKA and the single most important concept in its management. The glucose normalizes <em>hours before</em> the ketoacidosis resolves. If you stop the insulin when the glucose hits 200, you switch ketogenesis back on and the gap reopens — the patient is again making acid. But you also cannot keep running insulin against a normal glucose without causing hypoglycemia.</p>"+
+        "<p>The resolution of this bind is elegant and is the defining move of DKA care: when the glucose falls to about <strong>200–250 mg/dL, add dextrose</strong> (switch to a D5-containing fluid) and <strong>keep the insulin running</strong> at a rate sufficient to keep suppressing ketones. You are now feeding the patient glucose <em>so that</em> you can continue the insulin that is closing the gap. Insulin continues until the <strong>anion gap has closed</strong> and the ketoacidosis has cleared — <em>not</em> until the glucose is normal.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> In DKA, the endpoint is a closed anion gap, not a normal glucose. When glucose reaches ~200–250, add dextrose and continue the insulin infusion. Stopping insulin early — because the sugar looks fine — reopens the gap. (HHS, with little acidosis, is instead driven by osmolality and mental-status recovery.)</div>"
+      },
+      { h:"7", t:"Cerebral edema — the feared pediatric complication", html:
+        "<p>Cerebral edema is the complication that makes pediatric DKA so frightening. It is uncommon but often catastrophic, and it strikes children far more than adults. The mechanism is incompletely understood but relates to the brain's osmotic adaptation to the hyperglycemic, hyperosmolar state and the fluid and osmolar shifts that occur during treatment — which is part of why over-rapid fluid administration, over-rapid osmolality correction, and up-front insulin boluses are all approached cautiously in children.</p>"+
+        "<p>The danger sign is a patient who is <em>deteriorating during treatment</em> when the numbers are improving. Watch for a new or worsening headache, a decline in mental status or increasing lethargy, and — ominously — the Cushing-type pattern of <strong>bradycardia with rising blood pressure</strong>, along with recurrent vomiting or new neurologic deficits. It typically appears several hours into therapy, not at presentation.</p>"+
+        "<p>Recognition is the transport skill: if a DKA patient (especially a child) declines neurologically as their glucose and acidosis are getting better, treat it as cerebral edema until proven otherwise — support the airway, and definitive management is hyperosmolar therapy (hypertonic saline or mannitol) at the receiving center. Do not attribute a falling mental status to 'improvement.'</p>"
+      },
+      { h:"8", t:"Bicarbonate, and the transport anchor", html:
+        "<p>One reflex to unlearn: <strong>do not give bicarbonate for the acidosis of DKA.</strong> It is tempting — the pH is low — but the acid is being generated by ketones that the insulin infusion will clear, and bicarbonate does not improve outcomes.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — skip the bicarb</span>"+
+        "<p>Studies of bicarbonate in DKA show no improvement in the rate of acidosis resolution or in outcomes, and there are real potential harms: paradoxical CNS acidosis, worsened hypokalemia (the last thing this patient needs), and — in children — an association with cerebral edema. Guidelines reserve any consideration of bicarbonate for extreme acidemia (pH below ~6.9), and even there the benefit is unproven. For the transport clinician: treat the ketoacidosis with fluids, insulin, and potassium — not bicarbonate.</p>"+
+        "<div class='grade'>Quality: moderate–high (multiple studies show no benefit; guideline-endorsed against routine use).</div></div>"+
+        "<p>Pulling the module together into transport practice:</p>"+
+        "<ul>"+
+        "<li><strong>Fluids first</strong> — both patients are 6–12+ liters down; volume does much of the early work.</li>"+
+        "<li><strong>Potassium before insulin</strong> — never start insulin if K &lt; 3.3; recheck K hourly.</li>"+
+        "<li><strong>Insulin as a steady infusion</strong> — aim for a 50–75 mg/dL/hr fall, not a crash; the bolus is optional.</li>"+
+        "<li><strong>Add dextrose at ~200–250 and keep insulin running</strong> until the gap closes — the gap, not the glucose, is the DKA endpoint.</li>"+
+        "<li><strong>Watch for cerebral edema</strong>, especially in children who decline while their labs improve.</li>"+
+        "<li><strong>No bicarbonate</strong> for routine DKA.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The order is fluids → potassium check → insulin. The DKA endpoint is a closed anion gap, reached by adding dextrose and continuing insulin — not by stopping when the glucose looks normal.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The feature that most distinguishes DKA from HHS is:",
+        opts:["HHS has a significant ketoacidosis; DKA does not","DKA has a high-anion-gap ketoacidosis; HHS has minimal ketones and higher osmolality","HHS occurs mainly in type 1 diabetics","DKA glucose is always higher than HHS glucose"], ans:1,
+        expl:"DKA is a near-total insulin deficiency producing a high-gap ketoacidosis; HHS is a relative deficiency with enough insulin to suppress ketones but extreme hyperglycemia and hyperosmolality. HHS glucose is typically the higher of the two." },
+      { q:"Both DKA and HHS share which underlying process that drives profound dehydration?",
+        opts:["Excessive insulin secretion","Osmotic diuresis from glucosuria","Renal tubular acidosis","Bicarbonate wasting"], ans:1,
+        expl:"Glucose above the renal threshold spills into urine and drags water and electrolytes with it — an osmotic diuresis that leaves DKA patients 6–9 L down and HHS patients often even more depleted." },
+      { q:"The FIRST priority in managing a patient with DKA or HHS is:",
+        opts:["An immediate insulin bolus","Isotonic fluid resuscitation","Sodium bicarbonate","A potassium bolus"], ans:1,
+        expl:"These are states of massive volume depletion. Fluids come first — they restore perfusion, dilute the glucose, improve renal excretion, and lower counter-regulatory hormones, often dropping the glucose substantially before insulin is even started." },
+      { q:"In DKA, the serum potassium is often normal or high, yet total-body potassium is:",
+        opts:["Also high","Severely depleted","Exactly normal","Irrelevant to management"], ans:1,
+        expl:"The osmotic diuresis depletes total-body potassium, but acidosis and insulin deficiency shift potassium out of cells, masking the deficit in the serum value. Insulin will drive it back into cells and unmask the true deficit." },
+      { q:"An insulin infusion should be HELD, and potassium replaced first, when the serum potassium is:",
+        opts:["Below 3.3 mEq/L","Between 3.3 and 5.3 mEq/L","Above 5.3 mEq/L","Any value above 4.0"], ans:0,
+        expl:"If K < 3.3, starting insulin (which drives potassium into cells) can precipitate fatal hypokalemia. Replace potassium first. Between 3.3–5.3, give insulin with potassium added to fluids; above 5.3, start insulin and hold potassium." },
+      { q:"The target rate of glucose decline on an insulin infusion in DKA is approximately:",
+        opts:["150–200 mg/dL per hour","50–75 mg/dL per hour","As fast as possible","10 mg/dL per hour"], ans:1,
+        expl:"A controlled fall of ~50–75 mg/dL per hour is the goal — not a crash. Too-rapid correction contributes to complications; titrate the infusion up or down to stay in this range." },
+      { q:"When the glucose falls to about 200–250 mg/dL in DKA, the correct action is:",
+        opts:["Stop the insulin infusion","Add dextrose to the fluids and continue the insulin infusion","Give a bicarbonate bolus","Double the insulin rate"], ans:1,
+        expl:"The ketoacidosis resolves hours after the glucose normalizes. Add dextrose (D5) and keep insulin running to keep suppressing ketones until the anion gap closes — stopping insulin early reopens the gap." },
+      { q:"The endpoint that signals resolution of DKA is:",
+        opts:["A normal blood glucose","A closed anion gap / cleared ketoacidosis","A potassium above 4.0","A normal serum sodium"], ans:1,
+        expl:"Glucose normalizes well before the acidosis clears. Insulin continues until the anion gap closes and ketoacidosis resolves — the gap, not the glucose, is the DKA endpoint." },
+      { q:"A child with DKA develops a worsening headache, rising blood pressure, and bradycardia several hours into treatment as the labs improve. This suggests:",
+        opts:["Hypoglycemia","Cerebral edema","Resolution of the DKA","Hyperkalemia"], ans:1,
+        expl:"Neurologic deterioration during treatment — headache, declining mental status, and a Cushing pattern of bradycardia with hypertension — signals cerebral edema, the feared pediatric complication. Do not mistake a declining mental status for improvement." },
+      { q:"Regarding sodium bicarbonate in routine DKA, current evidence indicates it:",
+        opts:["Speeds resolution and should be given routinely","Does not improve outcomes and carries potential harms","Is the treatment of choice for the acidosis","Prevents cerebral edema"], ans:1,
+        expl:"Bicarbonate does not improve the rate of acidosis resolution or outcomes and risks paradoxical CNS acidosis, worsened hypokalemia, and (in children) cerebral edema. The ketoacidosis is treated with fluids, insulin, and potassium — not bicarbonate." }
+    ]
   },
 
   {
