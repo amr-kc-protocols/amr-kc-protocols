@@ -2209,6 +2209,21 @@ function renderNav() {
       onclick: () => item.id === "course" ? Nav.exitToCourse() : Nav.go(item.id)
     }, item.label));
   });
+
+  // Practice pill — jumps straight to this module's LTV 1200 simulator mission
+  // from any view in the module. Opens in a new tab so the student never loses
+  // their place mid-lesson, quiz, or scenario.
+  const modDef = MODULES.find(mm => mm.id === modId);
+  if (modDef && (modDef.practiceScenario || modDef.practiceLevel)) {
+    const href = modDef.practiceScenario
+      ? `../vent-ltv1200.html?scenario=${modDef.practiceScenario}`
+      : `../vent-ltv1200.html?level=${modDef.practiceLevel}`;
+    nav.appendChild(el("a", {
+      class: "nav-pill practice",
+      href, target: "_blank", rel: "noopener",
+      title: "Open this module's simulator mission in a new tab"
+    }, "🫁 Practice"));
+  }
 }
 
 // ---------- COURSE HUB ----------
