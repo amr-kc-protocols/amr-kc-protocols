@@ -3086,9 +3086,9 @@ function renderExamResults() {
 }
 
 // Deterministic, human-readable certificate ID.
-function makeCertId(name, emp, ts) {
+function makeCertId(name, ts) {
   let h = 0;
-  const s = name + "|" + emp + "|" + ts;
+  const s = name + "|" + ts;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
   const yr = new Date(ts).getFullYear();
   return "VTA-" + yr + "-" + h.toString(36).toUpperCase().padStart(6, "0").slice(-6);
@@ -3105,7 +3105,6 @@ function logCertification(cert) {
       submittedAt: now.toISOString(),
       name: cert.name,
       credential: cert.credential,
-      employeeNo: cert.employeeNo,
       scoreRaw: cert.score + "/" + cert.total,
       scorePercent: pct + "%",
       passStatus: cert.score >= FINAL_EXAM.passScore ? "PASS" : "FAIL",
@@ -3127,24 +3126,20 @@ function renderCertForm() {
     ...["EMT", "AEMT", "Paramedic", "RN", "RT", "Other"].map(c =>
       el("option", { value: c, selected: (existing && existing.credential === c) ? true : null }, c))
   );
-  const empInput = el("input", { class: "cert-input", type: "text", id: "cert-emp",
-    placeholder: "e.g. 100482", autocomplete: "off", value: existing ? existing.employeeNo : "" });
   const status = el("p", { class: "cert-form-status" }, "");
 
   function submit() {
     const name = nameInput.value.trim();
     const cred = credSelect.value;
-    const emp = empInput.value.trim();
     status.className = "cert-form-status";
     if (!name) { status.textContent = "Enter your full name."; status.classList.add("err"); return; }
     if (!cred) { status.textContent = "Select your credential level."; status.classList.add("err"); return; }
-    if (!emp)  { status.textContent = "Enter your employee number."; status.classList.add("err"); return; }
     const r = Store.state.examResults || { score: FINAL_EXAM.passScore, total: FINAL_EXAM.questions.length };
     const issuedAt = Date.now();
     const cert = {
-      name, credential: cred, employeeNo: emp,
+      name, credential: cred,
       score: r.score, total: r.total, issuedAt,
-      certId: makeCertId(name, emp, issuedAt)
+      certId: makeCertId(name, issuedAt)
     };
     Store.setCertificate(cert);
     logCertification(cert);
@@ -3160,8 +3155,6 @@ function renderCertForm() {
     nameInput,
     el("label", { class: "cert-label", for: "cert-cred" }, "Credential level"),
     credSelect,
-    el("label", { class: "cert-label", for: "cert-emp" }, "Employee number"),
-    empInput,
     status,
     el("div", { class: "button-row" },
       el("button", { class: "btn btn-ghost", type: "button", onclick: () => Nav.exitToCourse() }, "Cancel"),
@@ -3188,7 +3181,7 @@ function renderCertificate() {
       el("p", { class: "cert-heading" }, "Certificate of Completion"),
       el("p", { class: "cert-presented" }, "This is to certify that"),
       el("p", { class: "cert-name" }, c.name),
-      el("p", { class: "cert-cred" }, c.credential + "  ·  Employee #" + c.employeeNo),
+      el("p", { class: "cert-cred" }, c.credential),
       el("p", { class: "cert-statement" },
         "has successfully completed all nine modules of the Ventilator Training Academy and passed the Final Certification Exam covering ventilator physiology, recognition of respiratory failure, lung-protective ventilation, and transport management of the mechanically ventilated patient."),
       el("p", { class: "cert-score" }, `Final Exam Score — ${c.score} / ${c.total} (${pct}%)`),
