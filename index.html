@@ -362,6 +362,9 @@ cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-col
   color:var(--teal2);background:var(--aemt-bg);border:1px solid #cfe0f7;border-radius:999px;
   padding:3px 8px;white-space:nowrap}
 .cc-arr{color:var(--gray);font-size:20px}
+.cc-prep.cc-home{margin:10px 12px 12px}
+.cc-pill.cert{color:var(--emt);background:var(--emt-bg);border-color:#bfe3cf}
+.cc-pill.start{color:var(--gray);background:var(--dim);border-color:var(--border)}
 
 /* ── VENTILATOR 3000 GAME CARD ────────────────────────────────────── */
 .game-card{position:relative;display:block;margin:8px 12px 10px;padding:18px 18px 16px;
@@ -830,6 +833,18 @@ function getHemoStats(){
   }catch(e){ return null; }
 }
 
+function getMetabStats(){
+  try{
+    var raw = localStorage.getItem('metab_academy_v1');
+    if(!raw) return null;
+    var s = JSON.parse(raw);
+    var modules = s.modules || {};
+    var total = 8, done = 0;
+    for(var i=1;i<=total;i++){ if(modules[i] && modules[i].passed) done++; }
+    return { done: done, total: total, certificate: !!s.finalPassed };
+  }catch(e){ return null; }
+}
+
 function renderHome(){
   var c = $('lv');
   var profile = getProfile();
@@ -854,6 +869,7 @@ function renderHome(){
   var d5 = getDaily5Stats();
   var vta = getVtaStats();
   var hemo = getHemoStats();
+  var metab = getMetabStats();
   h += '<div class="stat-strip">';
   if(d5.streak){
     h += '<a class="stat-tile" href="quiz-daily5.html">';
@@ -866,42 +882,30 @@ function renderHome(){
     h += '<div class="stat-tile-val">Start your streak</div>';
     h += '<div class="stat-tile-lbl">Daily 5 questions</div></div></a>';
   }
-  if(vta && vta.certificate){
-    h += '<a class="stat-tile" href="vta/academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Certified</div>';
-    h += '<div class="stat-tile-lbl">Ventilator Academy</div></div></a>';
-  } else if(vta && vta.done > 0){
-    h += '<a class="stat-tile" href="vta/academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">'+vta.done+'/'+vta.total+' modules</div>';
-    h += '<div class="stat-tile-lbl">Ventilator Academy</div></div></a>';
-  } else {
-    h += '<a class="stat-tile empty" href="vta/academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Start the course</div>';
-    h += '<div class="stat-tile-lbl">Ventilator Academy</div></div></a>';
-  }
-  if(hemo && hemo.certificate){
-    h += '<a class="stat-tile" href="hemodynamics-academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Certified</div>';
-    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
-  } else if(hemo && hemo.done > 0){
-    h += '<a class="stat-tile" href="hemodynamics-academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">'+hemo.done+'/'+hemo.total+' modules</div>';
-    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
-  } else {
-    h += '<a class="stat-tile empty" href="hemodynamics-academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Start the course</div>';
-    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
-  }
   h += '<a class="stat-tile" href="imagetrend-job-aid.html">';
   h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div><div>';
   h += '<div class="stat-tile-val">Charting Help</div>';
   h += '<div class="stat-tile-lbl">ImageTrend Job Aid</div></div></a>';
+  h += '</div>';
+
+  // Critical Care Prep showcase — the three academies with live progress
+  function ccPill(s){
+    if(s && s.certificate) return '<span class="cc-pill cert">✓ Certified</span>';
+    if(s && s.done > 0)     return '<span class="cc-pill">'+s.done+'/'+s.total+' modules</span>';
+    return '<span class="cc-pill start">Start</span>';
+  }
+  h += '<div class="cc-prep cc-home">';
+  h += '<div class="cc-banner">';
+  h += '<div class="cc-eyebrow">&#x25C6; CRITICAL CARE ACADEMY</div>';
+  h += '<div class="cc-title">Critical Care Prep</div>';
+  h += '<div class="cc-tag">Three courses for FP-C &amp; critical-care transport &mdash; pick up where you left off.</div>';
+  h += '<svg class="cc-wave" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 H58 l4 -7 l4 12 l4 -5 H138 l4 -7 l4 12 l4 -5 H218 l4 -7 l4 12 l4 -5 H300"/></svg>';
+  h += '</div>';
+  h += '<div class="cc-track">';
+  h += '<a class="cc-card" href="vta/academy.html"><div class="cc-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div><div class="cc-body"><div class="cc-name">Ventilator Academy</div><div class="cc-sub">Modes, waveforms &amp; troubleshooting</div></div><div class="cc-meta">'+ccPill(vta)+'<span class="cc-arr">&#x203A;</span></div></a>';
+  h += '<a class="cc-card" href="hemodynamics-academy.html"><div class="cc-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div class="cc-body"><div class="cc-name">Hemodynamics Academy</div><div class="cc-sub">Pressors, arterial lines &amp; MCS</div></div><div class="cc-meta">'+ccPill(hemo)+'<span class="cc-arr">&#x203A;</span></div></a>';
+  h += '<a class="cc-card" href="metabolic-academy.html"><div class="cc-ico"><svg class="icon"><use href="#i-droplet"></use></svg></div><div class="cc-body"><div class="cc-name">Metabolic &amp; Lab Data</div><div class="cc-sub">Acid&#x2013;base, electrolytes &amp; gases</div></div><div class="cc-meta">'+ccPill(metab)+'<span class="cc-arr">&#x203A;</span></div></a>';
+  h += '</div>';
   h += '</div>';
 
   h += '<div class="qa-grid">';
