@@ -362,9 +362,18 @@ cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-col
   color:var(--teal2);background:var(--aemt-bg);border:1px solid #cfe0f7;border-radius:999px;
   padding:3px 8px;white-space:nowrap}
 .cc-arr{color:var(--gray);font-size:20px}
-.cc-prep.cc-home{margin:10px 12px 12px}
-.cc-pill.cert{color:var(--emt);background:var(--emt-bg);border-color:#bfe3cf}
-.cc-pill.start{color:var(--gray);background:var(--dim);border-color:var(--border)}
+
+/* ── HOME BRAND TILES (blue = prep, purple = game) ────────────────── */
+.stat-tile.tile-blue{background:linear-gradient(135deg,#173a68 0%,#1b63c4 100%);border-color:transparent;
+  box-shadow:0 4px 14px rgba(27,99,196,0.22)}
+.stat-tile.tile-purple{background:linear-gradient(135deg,#6d28d9 0%,#c026d3 100%);border-color:transparent;
+  box-shadow:0 4px 14px rgba(124,58,237,0.24)}
+.stat-tile.tile-blue .stat-tile-ico,.stat-tile.tile-purple .stat-tile-ico,
+.stat-tile.tile-blue .stat-tile-val,.stat-tile.tile-purple .stat-tile-val{color:#fff}
+.stat-tile.tile-blue .stat-tile-lbl{color:#dbe8fb}
+.stat-tile.tile-purple .stat-tile-lbl{color:#f2e6ff}
+.stat-tile.tile-blue:active,.stat-tile.tile-blue:hover,
+.stat-tile.tile-purple:active,.stat-tile.tile-purple:hover{border-color:transparent;filter:brightness(1.06)}
 
 /* ── VENTILATOR 3000 GAME CARD ────────────────────────────────────── */
 .game-card{position:relative;display:block;margin:8px 12px 10px;padding:18px 18px 16px;
@@ -871,6 +880,15 @@ function renderHome(){
   var hemo = getHemoStats();
   var metab = getMetabStats();
   h += '<div class="stat-strip">';
+  var ccDone = (vta&&vta.certificate?1:0)+(hemo&&hemo.certificate?1:0)+(metab&&metab.certificate?1:0);
+  h += '<a class="stat-tile tile-blue" data-goto="more">';
+  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
+  h += '<div class="stat-tile-val">Critical Care Prep</div>';
+  h += '<div class="stat-tile-lbl">'+(ccDone>0 ? ccDone+' of 3 certified' : '3-course FP-C track')+'</div></div></a>';
+  h += '<a class="stat-tile tile-purple" href="vent-ltv1200.html">';
+  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div><div>';
+  h += '<div class="stat-tile-val">Ventilator 3000</div>';
+  h += '<div class="stat-tile-lbl">The Game</div></div></a>';
   if(d5.streak){
     h += '<a class="stat-tile" href="quiz-daily5.html">';
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
@@ -886,26 +904,6 @@ function renderHome(){
   h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div><div>';
   h += '<div class="stat-tile-val">Charting Help</div>';
   h += '<div class="stat-tile-lbl">ImageTrend Job Aid</div></div></a>';
-  h += '</div>';
-
-  // Critical Care Prep showcase — the three academies with live progress
-  function ccPill(s){
-    if(s && s.certificate) return '<span class="cc-pill cert">✓ Certified</span>';
-    if(s && s.done > 0)     return '<span class="cc-pill">'+s.done+'/'+s.total+' modules</span>';
-    return '<span class="cc-pill start">Start</span>';
-  }
-  h += '<div class="cc-prep cc-home">';
-  h += '<div class="cc-banner">';
-  h += '<div class="cc-eyebrow">&#x25C6; CRITICAL CARE ACADEMY</div>';
-  h += '<div class="cc-title">Critical Care Prep</div>';
-  h += '<div class="cc-tag">Three courses for FP-C &amp; critical-care transport &mdash; pick up where you left off.</div>';
-  h += '<svg class="cc-wave" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 H58 l4 -7 l4 12 l4 -5 H138 l4 -7 l4 12 l4 -5 H218 l4 -7 l4 12 l4 -5 H300"/></svg>';
-  h += '</div>';
-  h += '<div class="cc-track">';
-  h += '<a class="cc-card" href="vta/academy.html"><div class="cc-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div><div class="cc-body"><div class="cc-name">Ventilator Academy</div><div class="cc-sub">Modes, waveforms &amp; troubleshooting</div></div><div class="cc-meta">'+ccPill(vta)+'<span class="cc-arr">&#x203A;</span></div></a>';
-  h += '<a class="cc-card" href="hemodynamics-academy.html"><div class="cc-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div class="cc-body"><div class="cc-name">Hemodynamics Academy</div><div class="cc-sub">Pressors, arterial lines &amp; MCS</div></div><div class="cc-meta">'+ccPill(hemo)+'<span class="cc-arr">&#x203A;</span></div></a>';
-  h += '<a class="cc-card" href="metabolic-academy.html"><div class="cc-ico"><svg class="icon"><use href="#i-droplet"></use></svg></div><div class="cc-body"><div class="cc-name">Metabolic &amp; Lab Data</div><div class="cc-sub">Acid&#x2013;base, electrolytes &amp; gases</div></div><div class="cc-meta">'+ccPill(metab)+'<span class="cc-arr">&#x203A;</span></div></a>';
-  h += '</div>';
   h += '</div>';
 
   h += '<div class="qa-grid">';
