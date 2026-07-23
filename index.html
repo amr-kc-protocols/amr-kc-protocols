@@ -331,6 +331,37 @@ cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-col
 .more-card-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:3px}
 .more-card-sub{font-size:12px;color:var(--gray);line-height:1.45}
 .more-card-arr{color:var(--gray);font-size:20px;flex-shrink:0}
+
+/* ── CRITICAL CARE PREP TRACK ─────────────────────────────────────── */
+.cc-prep{margin:14px 12px 10px;border-radius:16px;overflow:hidden;
+  border:1px solid var(--border);box-shadow:0 8px 26px rgba(23,58,104,0.13)}
+.cc-banner{position:relative;overflow:hidden;padding:18px 18px 13px;
+  background:linear-gradient(135deg,#173a68 0%,#1b63c4 100%);color:#fff}
+.cc-banner::after{content:"";position:absolute;top:-45%;right:-12%;width:230px;height:230px;
+  background:radial-gradient(circle,rgba(255,255,255,0.17),rgba(255,255,255,0) 70%);pointer-events:none}
+.cc-eyebrow{position:relative;z-index:1;font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:0.16em;text-transform:uppercase;color:#bcd6f7}
+.cc-title{position:relative;z-index:1;font-size:23px;font-weight:800;letter-spacing:-0.02em;
+  margin:5px 0 2px;line-height:1.1}
+.cc-tag{position:relative;z-index:1;font-size:12.5px;color:#dbe8fb;font-weight:500}
+.cc-wave{position:relative;z-index:1;display:block;width:100%;height:20px;margin:8px 0 -2px}
+.cc-wave path{fill:none;stroke:rgba(255,255,255,0.7);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.cc-track{background:var(--surface)}
+.cc-card{display:flex;align-items:center;gap:13px;padding:13px 16px;
+  border-top:1px solid var(--border);text-decoration:none;color:var(--white);
+  -webkit-tap-highlight-color:transparent;transition:background 0.15s}
+.cc-card:first-child{border-top:none}
+.cc-card:active,.cc-card:hover{background:var(--dim)}
+.cc-ico{flex-shrink:0;width:38px;height:38px;border-radius:10px;font-size:20px;
+  display:flex;align-items:center;justify-content:center;background:var(--aemt-bg);color:var(--teal2)}
+.cc-body{flex:1;min-width:0}
+.cc-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:2px}
+.cc-sub{font-size:12px;color:var(--gray);line-height:1.4}
+.cc-meta{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.cc-pill{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:0.03em;
+  color:var(--teal2);background:var(--aemt-bg);border:1px solid #cfe0f7;border-radius:999px;
+  padding:3px 8px;white-space:nowrap}
+.cc-arr{color:var(--gray);font-size:20px}
 .sub-back{display:inline-flex;align-items:center;gap:5px;margin:12px 14px 4px;
 padding:7px 12px;background:var(--dim);border:1px solid var(--border);border-radius:7px;
 font-size:13px;font-weight:600;color:var(--teal2);cursor:pointer;font-family:var(--sans)}
@@ -2167,6 +2198,32 @@ function renderMore(){
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
 
+    '<div class="cc-prep">',
+    '  <div class="cc-banner">',
+    '    <div class="cc-eyebrow">&#x25C6; CRITICAL CARE ACADEMY</div>',
+    '    <div class="cc-title">Critical Care Prep</div>',
+    '    <div class="cc-tag">A three-course track for FP-C &amp; critical-care transport readiness</div>',
+    '    <svg class="cc-wave" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 H58 l4 -7 l4 12 l4 -5 H138 l4 -7 l4 12 l4 -5 H218 l4 -7 l4 12 l4 -5 H300"/></svg>',
+    '  </div>',
+    '  <div class="cc-track">',
+    '    <a class="cc-card" href="vta/academy.html">',
+    '      <div class="cc-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div>',
+    '      <div class="cc-body"><div class="cc-name">Ventilator Academy</div><div class="cc-sub">Lessons, knowledge checks &amp; scenarios</div></div>',
+    '      <div class="cc-meta"><span class="cc-pill">9 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
+    '    </a>',
+    '    <a class="cc-card" href="hemodynamics-academy.html">',
+    '      <div class="cc-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
+    '      <div class="cc-body"><div class="cc-name">Hemodynamics Academy</div><div class="cc-sub">Pressors, arterial lines &amp; MCS devices</div></div>',
+    '      <div class="cc-meta"><span class="cc-pill">8 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
+    '    </a>',
+    '    <a class="cc-card" href="metabolic-academy.html">',
+    '      <div class="cc-ico"><svg class="icon"><use href="#i-droplet"></use></svg></div>',
+    '      <div class="cc-body"><div class="cc-name">Metabolic &amp; Lab Data Academy</div><div class="cc-sub">Acid&#x2013;base, electrolytes &amp; blood-gas reads</div></div>',
+    '      <div class="cc-meta"><span class="cc-pill">8 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
+    '    </a>',
+    '  </div>',
+    '</div>',
+
     '<div class="sec">STUDY &amp; CE</div>',
     '<a class="more-card" href="quiz-daily5.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-calendar"></use></svg></div>',
@@ -2197,30 +2254,6 @@ function renderMore(){
     '  <div class="more-card-info">',
     '    <div class="more-card-title">PALS 2025 Quiz</div>',
     '    <div class="more-card-sub">Pediatric advanced life support — explains every answer</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card" href="vta/academy.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Ventilator Academy</div>',
-    '    <div class="more-card-sub">9-module course \u2014 lessons, knowledge checks &amp; scenarios</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card" href="hemodynamics-academy.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Hemodynamics Academy</div>',
-    '    <div class="more-card-sub">8-module course \u2014 pressors, arterial lines &amp; MCS devices</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card" href="metabolic-academy.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-droplet"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Metabolic &amp; Lab Data Academy</div>',
-    '    <div class="more-card-sub">8-module course \u2014 acid\u2013base, electrolytes &amp; blood-gas reads</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
