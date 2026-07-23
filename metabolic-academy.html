@@ -1128,9 +1128,110 @@ var MODULES = [
 
   {
     id: 8,
-    available: false,
+    available: true,
     title: "Toxic-Metabolic & the Osmolar Gap",
-    desc: "Toxic alcohols (methanol, ethylene glycol), the osmolar gap, salicylate poisoning, and a structured workup of the unexplained high-anion-gap acidosis."
+    desc: "Toxic alcohols (methanol, ethylene glycol), the osmolar gap, salicylate poisoning, and a structured workup of the unexplained high-anion-gap acidosis.",
+    objective: "Work up the unexplained high-anion-gap acidosis, calculate and interpret the osmolar gap, recognize and initiate treatment for toxic-alcohol and salicylate poisoning, and know which of these patients is racing toward dialysis.",
+    content: [
+      { h:"1", t:"The capstone: an acid you can't name", html:
+        "<p>This module closes the loop opened in Module 1. You have a patient with a <strong>high-anion-gap metabolic acidosis</strong>, but the two common culprits are absent — the lactate is not high enough to explain it, and the glucose and ketones say it isn't DKA. That unexplained gap is a clinical alarm, because the remaining causes on the MUDPILES list are the toxins, and several of them kill in hours while being fully treatable if caught early.</p>"+
+        "<p>Two calculated 'gaps' are the detective tools here, and it is worth being precise about which is which. The <strong>anion gap</strong> (Module 1) detects an unmeasured <em>anion</em> — the acid's conjugate base. The <strong>osmolar gap</strong> (this module) detects an unmeasured <em>osmole</em> — an uncharged small molecule adding to the blood's particle count. Toxic alcohols show up on <em>both</em>, and they do so at different times, which turns out to be the key to not missing them.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> An unexplained high-anion-gap acidosis — gap up, but lactate and ketones don't account for it — is a toxic ingestion until proven otherwise. Reach for the osmolar gap and the toxin history immediately; the clock is short.</div>"
+      },
+      { h:"2", t:"The osmolar gap, and the trap of a normal one", html:
+        "<p>The osmolar gap is the difference between the osmolality the lab <em>measures</em> directly and the osmolality you <em>calculate</em> from the usual solutes. Recall the calculated osmolality from Module 2:</p>"+
+        "<div class='formula'>calc Osm = (2 × Na) + (glucose/18) + (BUN/2.8) [+ ethanol/3.7]<br><span class='fk'>Osmolar gap</span> = measured Osm − calculated Osm &nbsp; (normal &lt; ~10)</div>"+
+        "<p>If the measured value is substantially higher than the calculation predicts, some <em>unmeasured</em> osmole is present — an extra small molecule the formula doesn't account for. Methanol, ethylene glycol, and their fellow small alcohols (including isopropyl alcohol) all raise the osmolar gap. Ethanol raises it too, and is the single most common cause of an elevated osmolar gap — so include an ethanol level (or add its term to the calculation) before you pin an elevated gap on something exotic.</p>"+
+        "<p>Now the trap that catches clinicians, and it hinges on timing. Early after ingestion, the <em>parent alcohol</em> is intact — the osmolar gap is high but the anion gap is still normal, because no acid has formed yet. As the liver metabolizes the alcohol into its toxic acid, the picture flips: the osmolar gap <em>falls</em> back toward normal as the parent molecule disappears, while the anion gap <em>climbs</em> as the acid accumulates.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor · the gaps cross over</span> A <em>normal</em> osmolar gap does not rule out toxic-alcohol poisoning — a late-presenting patient may have already converted the alcohol to acid, leaving a high anion gap and a normal osmolar gap. The two gaps trade places over time. Use the history and the anion gap, not a reassuring osmolar gap, to exclude the diagnosis.</div>"
+      },
+      { h:"3", t:"Methanol and ethylene glycol: the parents are harmless, the children are not", html:
+        "<p>The defining principle of toxic-alcohol poisoning is that <strong>the alcohol you drink is relatively benign; the acid your liver makes from it is what blinds and kills you.</strong> Both methanol and ethylene glycol are metabolized by the enzyme <em>alcohol dehydrogenase</em> into toxic acids — and that enzyme is the treatment target in the next section.</p>"+
+        "<ul>"+
+        "<li><strong>Methanol</strong> (windshield washer fluid, moonshine, some solvents) → metabolized to <strong>formic acid</strong>, which is directly toxic to the <em>retina and optic nerve</em>. The classic history is an anion-gap acidosis with <strong>visual disturbance</strong> — blurred vision, 'looking at a snowstorm,' or blindness. It can also injure the basal ganglia.</li>"+
+        "<li><strong>Ethylene glycol</strong> (automotive antifreeze) → metabolized to glycolic and ultimately <strong>oxalic acid</strong>. The oxalate binds calcium (a link back to Module 4's hypocalcemia) and precipitates as <strong>calcium oxalate crystals in the kidneys</strong>, causing acute kidney injury. Look for an anion-gap acidosis with <strong>renal failure</strong> and hypocalcemia; urine may fluoresce under a Wood's lamp if the antifreeze contained fluorescein, and calcium oxalate crystals may appear in the urine.</li>"+
+        "</ul>"+
+        "<p>Both begin, in the first hours, looking like a patient who is simply intoxicated — sometimes with a high osmolar gap and little else. The acidosis, the visual or renal injury, and the rising anion gap develop as metabolism proceeds. That latent interval is exactly why a history of ingestion, or an unexplained osmolar/anion gap, must trigger treatment <em>before</em> the toxic metabolites have done their damage.</p>"
+      },
+      { h:"4", t:"Treating toxic alcohols: block the enzyme, then clear the toxin", html:
+        "<p>Because the toxicity comes from metabolism, the treatment is to <strong>stop the metabolism</strong> — block alcohol dehydrogenase so the parent alcohol is excreted intact instead of being converted to acid.</p>"+
+        "<ul>"+
+        "<li><strong>Fomepizole</strong> is the modern antidote — a direct, potent inhibitor of alcohol dehydrogenase, easy to dose and without the intoxication of the alternative. It is first-line where available.</li>"+
+        "<li><strong>Ethanol</strong> is the classic alternative: alcohol dehydrogenase prefers ethanol as a substrate, so an ethanol infusion competitively 'occupies' the enzyme and spares the toxic alcohol from conversion. It works, but it is harder to titrate and sedates the patient — a reasonable bridge when fomepizole isn't available.</li>"+
+        "<li><strong>Hemodialysis</strong> removes both the parent alcohol and the toxic acids and corrects the acidosis — definitive therapy for significant poisonings, severe acidosis, or end-organ injury (visual symptoms, renal failure).</li>"+
+        "<li><strong>Cofactors</strong> steer metabolism toward non-toxic products — folate/folinic acid for methanol, and thiamine and pyridoxine for ethylene glycol.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check — treat on suspicion, transport toward dialysis</span>"+
+        "<p>In suspected toxic-alcohol poisoning, guidelines support starting an alcohol-dehydrogenase blocker <em>empirically</em> — on a suggestive history, an osmolar gap, or an unexplained anion-gap acidosis — rather than waiting for a confirmatory level, which is often unavailable for hours to days. Fomepizole is preferred over ethanol for ease and safety of dosing. Because significant ingestions frequently need hemodialysis, the transport implication is direct: these patients are often being moved <em>to a dialysis-capable center</em>, and the enzyme blocker is the bridge that buys time en route.</p>"+
+        "<div class='grade'>Quality: moderate (consensus guidelines and pharmacologic rationale; ethical constraints preclude large randomized trials).</div></div>"
+      },
+      { h:"5", t:"Salicylate poisoning: the mixed-picture toxin", html:
+        "<p>Salicylate (aspirin) overdose is the other must-know toxic-metabolic emergency, and it is distinctive because it deranges acid–base in <em>two directions at once</em> — a pattern that, once seen, is almost pathognomonic.</p>"+
+        "<p>Salicylate does two things simultaneously. It <strong>directly stimulates the respiratory center</strong>, driving hyperventilation and a <em>primary respiratory alkalosis</em>. And it <strong>uncouples oxidative phosphorylation and generates organic acids</strong>, producing a <em>primary high-anion-gap metabolic acidosis</em>. The result is the classic <strong>mixed respiratory alkalosis and metabolic acidosis</strong> — apply the Module 1 compensation rules and you will find the numbers don't fit a single disorder, because there are two primary processes stacked.</p>"+
+        "<p>The clinical picture supports the lab pattern: <strong>tinnitus</strong> (ringing ears — an early, characteristic clue), tachypnea and hyperpnea, nausea and vomiting, fever/diaphoresis, and in severe poisoning altered mental status, seizures, and non-cardiogenic pulmonary edema. Adults classically show the mixed disorder; young children can slip more quickly into a predominant metabolic acidosis, which is more ominous.</p>"
+      },
+      { h:"6", t:"Treating salicylate: keep it out of the brain", html:
+        "<p>The governing principle of salicylate treatment is a pH one: salicylate crosses into tissues — especially the <strong>brain</strong> — in its un-ionized (protonated) form, and acidemia drives it there. So the entire strategy is to <em>alkalinize</em> and to prevent the pH from falling.</p>"+
+        "<ul>"+
+        "<li><strong>Serum and urinary alkalinization with sodium bicarbonate</strong> is the cornerstone. Raising the serum pH keeps salicylate ionized in the blood and out of the brain; raising the urine pH 'ion-traps' it in the tubule and enhances renal elimination. (Note the irony against Module 5: bicarbonate is wrong for DKA but central here.)</li>"+
+        "<li><strong>Replace potassium</strong> — you cannot alkalinize the urine while the patient is hypokalemic, because the kidney will exchange potassium for hydrogen and reabsorb hydrogen instead. Module 3 made flesh.</li>"+
+        "<li><strong>Hemodialysis</strong> for severe poisoning — high levels, altered mental status, seizures, pulmonary edema, renal failure, or a pH that can't be controlled.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor · the intubation trap</span> Be extremely cautious about intubating a salicylate-poisoned patient. Their frantic hyperventilation is a compensatory lifeline holding the serum pH up; sedation and a ventilator that fails to match that enormous minute ventilation will let the pH crash, flooding salicylate into the brain and precipitating arrest. If you must intubate, match the pre-intubation minute ventilation aggressively and keep the patient alkalotic.</div>"
+      },
+      { h:"7", t:"A structured workup of the unexplained gap", html:
+        "<p>Bring the whole academy to bear on the patient from section 1 — high anion gap, no obvious cause. A disciplined sequence:</p>"+
+        "<ul>"+
+        "<li><strong>Confirm and size the gap</strong> — anion gap corrected for albumin (Module 1). Is it real and is it big?</li>"+
+        "<li><strong>Check the common causes first</strong> — a <em>lactate</em> (sepsis, shock, ischemia) and <em>glucose/ketones</em> (DKA). Most unexplained gaps are actually one of these, hiding.</li>"+
+        "<li><strong>Consider uremia</strong> — a <em>creatinine</em>; advanced renal failure is the 'U' in MUDPILES.</li>"+
+        "<li><strong>Reach for the toxins</strong> — an <em>osmolar gap</em> and an <em>ethanol level</em> for the toxic alcohols, a <em>salicylate level</em> and the acid–base pattern for aspirin. Remember the osmolar gap can already be normal in a late toxic-alcohol presentation.</li>"+
+        "<li><strong>Take the history seriously</strong> — the bottle at the scene, the co-ingestion, the intent. Toxicology is often solved by the story, not the lab.</li>"+
+        "</ul>"+
+        "<p>And when the workup points to a toxin, remember the recurring destination theme: the toxic alcohols and severe salicylate poisoning are frequently <strong>dialysis cases</strong>, so recognizing them early often means recognizing that this patient needs to be moving toward a center that can dialyze — with the enzyme blocker or the bicarbonate infusion running as the bridge.</p>"
+      },
+      { h:"8", t:"The toxic-metabolic anchor, and the course close", html:
+        "<p>The through-line of this final module: an unexplained high-anion-gap acidosis is a diagnosis waiting to be made, the osmolar gap and the history are how you make it, and the treatments — blocking an enzyme, alkalinizing the blood, and dialysis — are time-sensitive but highly effective when started early.</p>"+
+        "<ul>"+
+        "<li><strong>Toxic alcohols</strong> — the parent is benign, the metabolite is toxic; methanol takes the eyes, ethylene glycol takes the kidneys. Block alcohol dehydrogenase (fomepizole), give cofactors, and transport toward dialysis. A normal osmolar gap doesn't clear the diagnosis late in the course.</li>"+
+        "<li><strong>Salicylates</strong> — a mixed respiratory alkalosis and metabolic acidosis with tinnitus; alkalinize with bicarbonate, replace potassium, and beware the intubation trap.</li>"+
+        "</ul>"+
+        "<p>This closes the Metabolic &amp; Lab Data academy. Step back and see the arc: you learned to read the blood gas (Module 1), to manage the water and the electrolytes that gas reflects (Modules 2–4), to handle the glucose and hormonal emergencies that derange them (Modules 5–6), to read the whole lab sheet as decisions (Module 7), and finally to unmask the toxins that hide inside an unexplained gap (Module 8). The unifying skill was never memorizing values — it was letting the numbers point you to the mechanism, and letting the mechanism point you to the fix.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Unexplained high-gap acidosis → work the gap: lactate and ketones first, then uremia, then the osmolar gap and toxin history. Toxic alcohols: block the enzyme, head for dialysis. Salicylates: alkalinize, replace potassium, and protect the airway strategy. When you're ready, the final examination draws from all eight modules.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The osmolar gap detects the presence of:",
+        opts:["An unmeasured anion (the acid's conjugate base)","An unmeasured osmole (an extra small uncharged molecule)","Elevated lactate","A respiratory disorder"], ans:1,
+        expl:"The osmolar gap (measured minus calculated osmolality) reveals an unmeasured osmole such as a toxic alcohol or ethanol. The anion gap, by contrast, detects an unmeasured anion. Toxic alcohols raise both — at different times." },
+      { q:"A patient presents late after a toxic-alcohol ingestion with a high anion gap but a NORMAL osmolar gap. This is because:",
+        opts:["Toxic alcohols never raise the osmolar gap","The parent alcohol has been metabolized to acid — the osmolar gap fell as the anion gap rose","The lab made an error","It excludes toxic-alcohol poisoning"], ans:1,
+        expl:"The two gaps trade places over time: early, the intact parent alcohol raises the osmolar gap with a normal anion gap; late, it has been converted to acid, so the osmolar gap normalizes while the anion gap climbs. A normal osmolar gap does not exclude the diagnosis." },
+      { q:"Methanol poisoning is classically associated with which end-organ injury?",
+        opts:["Acute kidney injury from oxalate crystals","Visual disturbance / blindness from formic acid","Hepatic failure","Pulmonary fibrosis"], ans:1,
+        expl:"Methanol is metabolized to formic acid, which is toxic to the retina and optic nerve — the classic anion-gap acidosis with visual disturbance ('snowstorm') or blindness. Oxalate-induced renal injury is ethylene glycol." },
+      { q:"Ethylene glycol's toxic metabolite (oxalic acid) causes injury primarily by:",
+        opts:["Blinding the optic nerve","Precipitating as calcium oxalate crystals in the kidneys, with hypocalcemia","Uncoupling oxidative phosphorylation","Directly stimulating the respiratory center"], ans:1,
+        expl:"Oxalate binds calcium and precipitates as calcium oxalate crystals in the kidneys, causing acute kidney injury and hypocalcemia. Methanol causes the visual injury; salicylate uncouples oxidative phosphorylation." },
+      { q:"The primary treatment strategy for toxic-alcohol poisoning is to:",
+        opts:["Give sodium bicarbonate to neutralize the alcohol","Block alcohol dehydrogenase (e.g., fomepizole) to prevent conversion to toxic acid","Force diuresis with a loop diuretic","Administer activated charcoal alone"], ans:1,
+        expl:"The parent alcohol is relatively benign; the liver makes the toxic acid via alcohol dehydrogenase. Blocking that enzyme (fomepizole, or ethanol as a competitor) spares the toxic conversion; hemodialysis clears significant ingestions." },
+      { q:"The classic acid–base picture of salicylate poisoning in an adult is:",
+        opts:["A pure metabolic alkalosis","A pure respiratory acidosis","A mixed respiratory alkalosis and high-anion-gap metabolic acidosis","A normal-gap metabolic acidosis"], ans:2,
+        expl:"Salicylate stimulates the respiratory center (respiratory alkalosis) while uncoupling oxidative phosphorylation and generating acids (high-gap metabolic acidosis) — two primary disorders at once. Tinnitus is an early clinical clue." },
+      { q:"The cornerstone of treating salicylate poisoning is:",
+        opts:["Acidifying the serum and urine","Serum and urinary alkalinization with sodium bicarbonate","Withholding all fluids","Inducing hypoventilation"], ans:1,
+        expl:"Alkalinization keeps salicylate ionized in the blood (out of the brain) and 'ion-traps' it in the urine for elimination. Potassium must be replaced, since the kidney cannot alkalinize the urine while hypokalemic." },
+      { q:"Why is intubating a severely salicylate-poisoned patient especially dangerous?",
+        opts:["Salicylate paralyzes the diaphragm","Their compensatory hyperventilation holds the pH up; failing to match it lets the pH crash and floods salicylate into the brain","Intubation causes hyperkalemia","The endotracheal tube absorbs salicylate"], ans:1,
+        expl:"The frantic hyperventilation is a lifeline maintaining serum pH. Sedation and a ventilator that under-matches that huge minute ventilation let the pH fall, driving salicylate into the brain — precipitating deterioration or arrest." },
+      { q:"An elevated osmolar gap is MOST COMMONLY caused by:",
+        opts:["Methanol","Ethylene glycol","Ethanol","Salicylate"], ans:2,
+        expl:"Ethanol is by far the most common cause of an elevated osmolar gap. Check an ethanol level (or add its term to the calculated osmolality) before attributing an elevated gap to a more exotic toxic alcohol." },
+      { q:"In the structured workup of an unexplained high-anion-gap acidosis, which should be checked FIRST?",
+        opts:["Lactate and glucose/ketones","A methanol level","A Wood's lamp exam of the urine","Serum osmolality only"], ans:0,
+        expl:"Most 'unexplained' gaps are actually lactic acidosis or ketoacidosis hiding — check a lactate and glucose/ketones first, then consider uremia, then reach for the osmolar gap and toxin history. Toxicology is often solved by the story as much as the labs." }
+    ]
   }
 ];
 
