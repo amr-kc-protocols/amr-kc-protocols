@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AMR KC Academy">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-193.png">
+<title>Metabolic &amp; Lab Data Academy &#x2014; AMR KC</title>
+<!--
+  Metabolic Emergencies & Lab Data for Critical Care Transport — AMR Kansas City
+  =============================================================================
+  Self-contained training academy. Plain HTML/CSS/JS, no external deps,
+  works offline. Progress persists in localStorage. Sibling of the
+  Hemodynamics and Ventilator academies and shares the same engine.
+
+  ARCHITECTURE
+  - MODULES[] is the single source of truth. To add a module later, append
+    an object with { available:true, content, quiz }. The lock/progression
+    logic and UI pick it up automatically. Modules 4–8 currently ship as
+    available:false placeholders (they show a "content in development" state
+    and hold the final exam locked until they are built).
+  - Progression: Module N unlocks when Module N-1's quiz is passed (>=80%).
+  - Final exam unlocks when every module quiz is passed. Pass = >=85%.
+  - Certificate captures the learner name and prints clean via print CSS.
+
+  STATE (localStorage key: metab_academy_v1)
+    { learnerName, modules:{ id:{read,passed,best} }, finalPassed, completedAt }
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --navy:#173A68;        /* brand dark — primary buttons, headings accent */
+  --ink:#152238;          /* headings / body text */
+  --ink-2:#66707C;        /* subtext */
+  --blue:#1B63C4;         /* accent — links, labels, pills */
+  --blue-dk:#154C8C;       /* deeper blue for inline emphasis */
+  --blue-soft:#EAF1FD;    /* tinted surface */
+  --blue-line:#BFD6F5;    /* tinted border */
+  --paper:#FFFFFF;
+  --card:#F4F6F9;          /* light tile */
+  --card-2:#F1F4F8;
+  --rule:#E2E6EC;
+  --rule-2:#D3DAE3;
+  --green:#15803D;         /* passed / correct */
+  --green-soft:#EAFBF1;
+  --green-line:#BFE3D0;
+  --red:#DC2626;           /* wrong / fail (functional only) */
+  --red-soft:#FDECEC;
+  --red-line:#F3C6C6;
+  --amber:#A1590B;
+  --amber-soft:#FEF3E2;
+  --amber-line:#E7C48A;
+  --lock:#9AA5B1;
+  --mono:'IBM Plex Sans', sans-serif;
+  --sans:'IBM Plex Sans', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --maxw: 760px;
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:0 20px; }
+
+/* ── Back to Field Guide ─────────────────────────────────────────── */
+.backlink{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--blue); text-decoration:none; opacity:.85; margin:14px 0 0;
+}
+.backlink:active{ opacity:.6; }
+
+/* ── Header (field-guide light chrome) ──────────────────────────── */
+header.mon{
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  position:relative; overflow:hidden;
+}
+.mon-inner{ max-width:var(--maxw); margin:0 auto; padding:0 20px 2px; position:relative; z-index:2; }
+.brandrow{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; }
+.brand{
+  font-family:var(--sans); font-weight:800; letter-spacing:.11em;
+  font-size:11px; color:var(--navy); text-transform:uppercase;
+}
+.brand b{ color:var(--blue); }
+.status-chip{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.04em;
+  color:var(--ink-2); border:1px solid var(--rule); background:var(--card-2);
+  border-radius:999px; padding:4px 10px; white-space:nowrap;
+}
+h1.course{
+  font-family:var(--sans); font-weight:800; letter-spacing:-.02em;
+  font-size:27px; line-height:1.1; margin:12px 0 2px; color:var(--ink);
+}
+.course-sub{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); margin:0 0 12px; font-weight:500; }
+.wave-strip{ height:56px; position:relative; margin:0 -20px; }
+svg.wave{ display:block; width:100%; height:56px; }
+.wave path.trace{
+  fill:none; stroke:var(--blue); stroke-width:2.2;
+  stroke-linejoin:round; stroke-linecap:round;
+  filter:drop-shadow(0 0 3px rgba(27,99,196,.30));
+}
+@keyframes sweep{ to{ stroke-dashoffset:0; } }
+.wave path.anim{ stroke-dasharray:2600; stroke-dashoffset:2600; animation:sweep 7s linear infinite; }
+.ticker{
+  display:flex; gap:22px; padding:6px 20px 12px; margin:0 -20px;
+  font-family:var(--sans);
+}
+.tk{ display:flex; flex-direction:column; }
+.tk .lab{ font-size:9.5px; letter-spacing:.12em; color:var(--lock); text-transform:uppercase; font-weight:700; }
+.tk .val{ font-size:15px; color:var(--ink); font-weight:700; font-family:var(--mono); }
+.tk .val.red{ color:var(--lock); }
+.tk .val.grn{ color:var(--green); }
+.progbar{ height:6px; background:var(--rule); overflow:hidden; margin:0 -20px 0; }
+.progbar > i{ display:block; height:100%; width:0%; background:var(--blue); transition:width .5s ease; }
+
+.storagewarn{
+  background:var(--amber-soft); border-bottom:1px solid var(--amber-line);
+  color:var(--amber); font-family:var(--sans); font-size:12.5px; font-weight:600;
+  text-align:center; padding:8px 20px;
+}
+
+/* ── Home: module list ─────────────────────────────────────────── */
+main{ padding:24px 0 60px; }
+.eyebrow{
+  font-family:var(--sans); font-weight:800; letter-spacing:.13em;
+  font-size:11px; text-transform:uppercase; color:var(--blue); margin:0 0 14px;
+}
+.modlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+.modcard{
+  display:flex; gap:14px; align-items:stretch;
+  background:var(--card); border:1px solid transparent; border-radius:16px;
+  padding:15px 16px 15px 0; overflow:hidden; position:relative;
+  transition:background .18s, box-shadow .18s, transform .06s;
+}
+.modcard .num{
+  font-family:var(--mono); font-weight:700; font-size:14px;
+  width:54px; min-width:54px; display:flex; align-items:center; justify-content:center;
+  color:var(--lock); border-right:1px solid var(--rule-2);
+}
+.modcard .body{ flex:1; min-width:0; }
+.modcard .mtitle{ font-family:var(--sans); font-weight:700; font-size:16.5px; letter-spacing:-.01em; color:var(--ink); margin:1px 0 3px; }
+.modcard .mdesc{ font-family:var(--sans); font-size:13px; color:var(--ink-2); line-height:1.45; margin:0; }
+.modcard .foot{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+.pill{ font-family:var(--sans); font-weight:600; font-size:11px; letter-spacing:.02em; padding:3px 9px; border-radius:999px; border:1px solid; }
+.pill.locked{ color:var(--lock); border-color:var(--rule-2); background:var(--paper); }
+.pill.ready{ color:var(--blue); border-color:var(--blue-line); background:var(--blue-soft); }
+.pill.passed{ color:var(--green); border-color:var(--green-line); background:var(--green-soft); }
+.pill.soon{ color:var(--amber); border-color:var(--amber-line); background:var(--amber-soft); }
+.go{ margin-left:auto; font-family:var(--sans); font-weight:700; font-size:13.5px; color:var(--blue); }
+
+.modcard.open{ cursor:pointer; background:var(--card); }
+.modcard.open:hover{ box-shadow:0 6px 20px rgba(23,58,104,.08); }
+.modcard.open:active{ transform:translateY(1px); }
+.modcard.open .num{ color:var(--blue); }
+.modcard.passed .num{ color:var(--green); }
+.modcard.locked{ opacity:.78; }
+.lockglyph{ width:13px; height:13px; vertical-align:-2px; margin-right:2px; }
+
+.finalcard{ margin-top:20px; border:1.5px dashed var(--rule-2); background:var(--card-2); }
+.finalcard.ready{ border:1.5px solid var(--blue); background:var(--blue-soft); }
+.finalcard .num{ color:var(--blue); border-right-color:var(--rule-2); }
+
+/* ── Reader view ───────────────────────────────────────────────── */
+.back{ display:inline-flex; align-items:center; gap:6px; background:none; border:none;
+  font-family:var(--sans); font-weight:600; font-size:14px; color:var(--blue); cursor:pointer; padding:6px 0; margin-bottom:6px; }
+.rd-num{ font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:var(--blue); font-weight:700; }
+h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.02em; font-size:25px; line-height:1.14; margin:4px 0 4px; color:var(--ink); }
+.rd-obj{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--blue); padding:8px 0 8px 13px; margin:14px 0 22px; background:linear-gradient(90deg,var(--blue-soft),transparent); border-radius:0 8px 8px 0; }
+.content h3{ font-family:var(--sans); font-weight:800; font-size:17px; letter-spacing:-.01em; color:var(--ink); margin:30px 0 8px; }
+.content h3 .h3n{ font-family:var(--mono); color:var(--blue); font-weight:700; font-size:13px; margin-right:9px; }
+.content p{ margin:12px 0; font-size:15px; }
+.content ul{ margin:12px 0; padding-left:22px; }
+.content li{ margin:6px 0; font-size:15px; }
+.content strong{ color:var(--ink); font-weight:700; }
+.content em{ color:var(--blue-dk); font-style:normal; font-weight:600; }
+.formula{
+  font-family:var(--mono); font-size:14px; line-height:1.7; color:var(--navy);
+  background:var(--blue-soft); border:1px solid var(--blue-line); border-left:4px solid var(--blue);
+  border-radius:10px; padding:12px 14px; margin:16px 0; overflow-x:auto;
+}
+.formula .fk{ color:var(--blue-dk); font-weight:700; }
+.evidence{
+  border:1px solid var(--rule); border-left:4px solid var(--blue);
+  background:var(--card-2); border-radius:10px; padding:13px 15px; margin:18px 0;
+}
+.evidence .etag{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:#fff; background:var(--blue); display:inline-block; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+.evidence p{ margin:6px 0 0; font-size:14.5px; }
+.evidence .grade{ font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:9px; padding-top:8px; border-top:1px solid var(--rule); }
+.keybox{ background:var(--green-soft); border:1px solid var(--green-line); border-radius:10px; padding:13px 15px; margin:18px 0; }
+.keybox .kt{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--green); display:block; margin-bottom:5px; }
+
+.cta{ display:block; width:100%; text-align:center; border:none; border-radius:13px; cursor:pointer;
+  font-family:var(--sans); font-weight:700; font-size:15.5px; letter-spacing:0; padding:15px; }
+.cta.primary{ background:var(--navy); color:#fff; box-shadow:0 4px 14px rgba(23,58,104,.26); }
+.cta.primary:active{ background:var(--ink); }
+.cta.teal{ background:var(--blue); color:#fff; box-shadow:0 4px 14px rgba(27,99,196,.22); }
+.cta.teal:active{ background:#144A93; }
+.cta.ghost{ background:var(--paper); color:var(--ink); border:1.5px solid var(--rule-2); box-shadow:none; }
+.cta[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+.cta-wrap{ margin:28px 0 4px; }
+.readnote{ font-family:var(--sans); font-size:12.5px; color:var(--ink-2); text-align:center; margin:9px 0 0; }
+
+/* ── Quiz view ─────────────────────────────────────────────────── */
+.qmeta{ font-family:var(--mono); font-size:11.5px; letter-spacing:.03em; color:var(--ink-2); margin:2px 0 18px; }
+.q{ background:var(--card); border:1px solid transparent; border-radius:16px; padding:16px 17px; margin:0 0 14px; }
+.q .qnum{ font-family:var(--mono); font-size:11px; color:var(--blue); font-weight:700; letter-spacing:.05em; }
+.q .qtext{ font-family:var(--sans); font-weight:600; font-size:15.5px; line-height:1.42; margin:6px 0 12px; color:var(--ink); }
+.opt{ display:block; width:100%; text-align:left; font-family:var(--sans); font-size:14.5px; line-height:1.4;
+  background:var(--paper); border:1.5px solid var(--rule); border-radius:11px; padding:12px 14px; margin:8px 0; cursor:pointer; color:var(--ink); transition:border-color .12s, background .12s; }
+.opt:hover{ border-color:var(--rule-2); }
+.opt .ol{ font-family:var(--mono); font-weight:700; color:var(--blue); margin-right:9px; }
+.opt.sel{ border-color:var(--blue); background:var(--blue-soft); }
+.opt.correct{ border-color:var(--green); background:var(--green-soft); }
+.opt.wrong{ border-color:var(--red); background:var(--red-soft); }
+.opt.correct .ol{ color:var(--green); }
+.opt.wrong .ol{ color:var(--red); }
+.expl{ font-family:var(--sans); font-size:13.5px; line-height:1.5; color:var(--ink-2); margin:11px 2px 0; padding-left:12px; border-left:2px solid var(--rule-2); }
+.expl b{ color:var(--ink); }
+.locked-opts .opt{ cursor:default; }
+
+.result{ border-radius:16px; padding:20px; margin:4px 0 18px; text-align:center; font-family:var(--sans); }
+.result.pass{ background:var(--green-soft); border:1.5px solid var(--green-line); }
+.result.fail{ background:var(--red-soft); border:1.5px solid var(--red-line); }
+.result .big{ font-size:32px; font-weight:800; letter-spacing:-.02em; }
+.result.pass .big{ color:var(--green); }
+.result.fail .big{ color:var(--red); }
+.result .rmsg{ font-size:14px; color:var(--ink-2); margin-top:4px; }
+
+/* ── Name capture ──────────────────────────────────────────────── */
+.namebox{ background:var(--card); border:1px solid transparent; border-radius:16px; padding:16px 17px; margin:0 0 20px; }
+.namebox label{ font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:block; margin-bottom:8px; }
+.namebox input{ width:100%; font-family:var(--sans); font-size:16px; padding:12px 13px; border:1.5px solid var(--rule-2); border-radius:11px; background:var(--paper); color:var(--ink); }
+.namebox input:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }
+
+/* ── Certificate ───────────────────────────────────────────────── */
+.cert{
+  background:#fff; border:1px solid var(--rule); border-radius:14px;
+  padding:34px 30px; margin:6px 0 18px; text-align:center; position:relative; overflow:hidden;
+  box-shadow:0 10px 34px rgba(23,58,104,.10);
+}
+.cert::before{ content:""; position:absolute; inset:10px; border:2px solid var(--blue); border-radius:8px; pointer-events:none; opacity:.35; }
+.cert::after{ content:""; position:absolute; inset:15px; border:1px solid var(--navy); border-radius:6px; pointer-events:none; opacity:.22; }
+.cert .c-brand{ font-family:var(--sans); font-weight:800; letter-spacing:.14em; font-size:12px; text-transform:uppercase; color:var(--navy); }
+.cert .c-brand b{ color:var(--blue); }
+.cert .c-kicker{ font-family:var(--sans); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-2); font-weight:700; margin:20px 0 6px; }
+.cert .c-course{ font-family:var(--sans); font-size:22px; font-weight:800; letter-spacing:-.01em; color:var(--ink); line-height:1.2; margin:0 auto; max-width:440px; }
+.cert .c-of{ font-family:var(--sans); font-size:12.5px; color:var(--ink-2); margin:22px 0 6px; }
+.cert .c-name{ font-family:var(--sans); font-size:30px; font-weight:800; letter-spacing:-.01em; color:var(--navy); border-bottom:2px solid var(--blue); display:inline-block; padding:0 26px 6px; margin:0 0 4px; }
+.cert .c-body{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); max-width:440px; margin:16px auto 22px; line-height:1.55; }
+.cert .c-wave{ height:24px; margin:6px auto 20px; opacity:.85; }
+.cert .c-wave svg{ height:24px; width:220px; }
+.cert .c-meta{ display:flex; justify-content:space-around; gap:14px; margin-top:14px; flex-wrap:wrap; }
+.cert .c-cell{ text-align:center; }
+.cert .c-cell .cl{ font-family:var(--sans); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--lock); font-weight:700; }
+.cert .c-cell .cv{ font-family:var(--mono); font-size:13px; color:var(--ink); font-weight:600; border-top:1px solid var(--rule); padding-top:5px; margin-top:5px; min-width:120px; }
+
+footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0; text-align:center; }
+.reset{ background:none; border:none; font-family:var(--mono); font-size:11px; color:var(--lock); cursor:pointer; text-decoration:underline; }
+
+.hidden{ display:none !important; }
+
+@media (max-width:480px){
+  body{ font-size:15.5px; }
+  h1.course{ font-size:23px; }
+  .cert{ padding:26px 18px; }
+  .cert .c-name{ font-size:25px; padding:0 14px 6px; }
+  .cert .c-course{ font-size:19px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .wave path.anim{ animation:none; stroke-dashoffset:0; }
+  .progbar > i{ transition:none; }
+}
+
+@media print{
+  body{ background:#fff; }
+  header.mon, main > *:not(#view-cert), .back, .cta-wrap, footer.adm, .print-hide{ display:none !important; }
+  #view-cert{ display:block !important; }
+  main{ padding:0; }
+  .wrap{ max-width:none; padding:0; }
+  .cert{ box-shadow:none; border:none; margin:0; }
+  @page{ size:landscape; margin:14mm; }
+}
+</style>
+</head>
+<body>
+
+<header class="mon">
+  <div class="mon-inner">
+    <a class="backlink print-hide" href="index.html">&#x2190; Field Guide</a>
+    <div class="brandrow">
+      <div class="brand">AMR Kansas City &middot; Clinical Education <b>&#x25c6;</b></div>
+      <div class="status-chip" id="statusChip">SESSION &middot; READY</div>
+    </div>
+    <h1 class="course">Metabolic &amp; Lab Data</h1>
+    <p class="course-sub">Emergencies &amp; Bedside Interpretation for Critical Care Transport</p>
+  </div>
+  <div class="wave-strip">
+    <svg class="wave" id="waveSvg" viewBox="0 0 1200 64" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trace anim" id="wavePath" d=""></path>
+    </svg>
+  </div>
+  <div class="ticker">
+    <div class="tk"><span class="lab">Modules</span><span class="val" id="tkMods">0 / 8</span></div>
+    <div class="tk"><span class="lab">Progress</span><span class="val grn" id="tkPct">0%</span></div>
+    <div class="tk"><span class="lab">Final Exam</span><span class="val red" id="tkFinal">Locked</span></div>
+  </div>
+  <div class="progbar"><i id="progFill"></i></div>
+</header>
+
+<div class="storagewarn hidden print-hide" id="storageWarn">Your device isn't saving progress (private browsing or storage is full) — quiz results and your certificate may not persist after you close this page.</div>
+
+<main>
+  <div class="wrap">
+
+    <!-- ===== HOME ===== -->
+    <section id="view-home">
+      <div class="namebox print-hide">
+        <label for="nameInput">Learner name (appears on your certificate)</label>
+        <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
+      </div>
+      <p class="eyebrow">Course Modules &middot; Sequential</p>
+      <ul class="modlist" id="modList"></ul>
+      <div id="finalSlot"></div>
+      <footer class="adm">
+        <button class="reset" id="resetBtn">Reset my progress</button>
+      </footer>
+    </section>
+
+    <!-- ===== READER ===== -->
+    <section id="view-reader" class="hidden">
+      <button class="back" id="readerBack">&#x2039; All modules</button>
+      <div class="rd-num" id="rdNum"></div>
+      <h2 class="rd-title" id="rdTitle"></h2>
+      <div class="rd-obj" id="rdObj"></div>
+      <div class="content" id="rdContent"></div>
+      <div class="cta-wrap">
+        <button class="cta primary" id="toQuizBtn">Start the quiz &#x203a;</button>
+        <p class="readnote" id="readNote"></p>
+      </div>
+    </section>
+
+    <!-- ===== QUIZ ===== -->
+    <section id="view-quiz" class="hidden">
+      <button class="back" id="quizBack">&#x2039; Back to module</button>
+      <div class="rd-num" id="qzNum"></div>
+      <h2 class="rd-title" id="qzTitle"></h2>
+      <div class="qmeta" id="qzMeta"></div>
+      <div id="resultSlot"></div>
+      <div id="quizForm"></div>
+      <div class="cta-wrap" id="quizActions"></div>
+    </section>
+
+    <!-- ===== CERTIFICATE ===== -->
+    <section id="view-cert" class="hidden">
+      <button class="back print-hide" id="certBack">&#x2039; All modules</button>
+      <div class="cert" id="certCard"></div>
+      <div class="cta-wrap print-hide">
+        <button class="cta teal" id="printBtn">Print / save certificate</button>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+"use strict";
+/* ============================================================================
+   DATA — content model
+   ==========================================================================*/
+var PASS_MODULE = 80;   // %
+var PASS_FINAL  = 85;   // %
+
+var MODULES = [
+  {
+    id: 1,
+    available: true,
+    title: "Acid–Base & ABG Interpretation",
+    desc: "A five-step read of any blood gas: acidemia vs alkalemia, the primary disorder, compensation, the anion gap, and mixed disorders.",
+    objective: "Interpret an arterial or venous blood gas systematically — classify the primary acid–base disorder, judge whether compensation is appropriate, calculate and apply the anion gap, and recognize when more than one process is present.",
+    content: [
+      { h:"1", t:"Three numbers, one question", html:
+        "<p>A blood gas looks intimidating because it hands you a wall of numbers, but acid–base interpretation only ever asks one question: <em>is the blood too acidic or too alkaline, and what is driving it?</em> Everything else is bookkeeping. Three values carry the whole story:</p>"+
+        "<div class='formula'><span class='fk'>pH</span> 7.35 – 7.45 &nbsp;·&nbsp; <span class='fk'>PaCO₂</span> 35 – 45 mmHg &nbsp;·&nbsp; <span class='fk'>HCO₃⁻</span> 22 – 26 mEq/L</div>"+
+        "<p>The logic runs on a simple physiologic pairing. <strong>CO₂ is an acid</strong> — the lungs control it, and it moves fast (minutes). <strong>Bicarbonate is a base</strong> — the kidneys control it, and it moves slowly (hours to days). The pH is just the running balance between them. When the pH drifts, exactly one of those two is the culprit and the other is trying to rescue it.</p>"+
+        "<p>Hold the directions in your head, because they are the entire test. An acid load — either <em>more CO₂</em> or <em>less bicarbonate</em> — drives pH <strong>down</strong> (acidemia). A base load — <em>less CO₂</em> or <em>more bicarbonate</em> — drives pH <strong>up</strong> (alkalemia). That is the whole grammar of the language; the five steps below just apply it in order.</p>"
+      },
+      { h:"2", t:"Step 1–2: acidemia or alkalemia, and who did it", html:
+        "<p><strong>Step 1 — read the pH.</strong> Below 7.35 is acidemia; above 7.45 is alkalemia. Even a pH of 7.40 in a sick patient can hide two opposing processes cancelling out, but start with the raw number.</p>"+
+        "<p><strong>Step 2 — find the primary driver.</strong> Look at the CO₂ and the bicarbonate and ask which one moved in the direction that <em>explains</em> the pH.</p>"+
+        "<ul>"+
+        "<li>Acidemia + high CO₂ (&gt;45) → <strong>respiratory acidosis</strong> (hypoventilation).</li>"+
+        "<li>Acidemia + low HCO₃ (&lt;22) → <strong>metabolic acidosis</strong>.</li>"+
+        "<li>Alkalemia + low CO₂ (&lt;35) → <strong>respiratory alkalosis</strong> (hyperventilation).</li>"+
+        "<li>Alkalemia + high HCO₃ (&gt;26) → <strong>metabolic alkalosis</strong>.</li>"+
+        "</ul>"+
+        "<p>The tell is the direction of travel. In a <em>respiratory</em> problem the pH and the CO₂ move in <strong>opposite</strong> directions (CO₂ up, pH down). In a <em>metabolic</em> problem the pH and the bicarbonate move in the <strong>same</strong> direction (HCO₃ down, pH down). That single rule sorts respiratory from metabolic every time.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> pH and CO₂ moving opposite ways = respiratory. pH and HCO₃ moving the same way = metabolic. Name the primary disorder before you touch anything else.</div>"
+      },
+      { h:"3", t:"Step 3: is the compensation appropriate?", html:
+        "<p>The body never fixes an acid–base problem outright — it <em>buffers</em> it. A metabolic acidosis makes you breathe faster to blow off CO₂; a respiratory acidosis makes the kidneys retain bicarbonate over a day or two. Compensation nudges the pH back toward normal but, by a rule you can lean on, <strong>never overshoots and never fully normalizes the pH</strong>. If the pH has crossed to the other side of 7.40 from where the primary disorder should put it, a second primary disorder is hiding.</p>"+
+        "<p>For a metabolic acidosis you can predict the expected respiratory response precisely with Winter's formula, then compare it to the measured CO₂:</p>"+
+        "<div class='formula'>expected <span class='fk'>PaCO₂</span> = (1.5 × HCO₃⁻) + 8 &nbsp;±&nbsp;2</div>"+
+        "<ul>"+
+        "<li>Measured CO₂ <strong>matches</strong> the prediction → appropriate respiratory compensation.</li>"+
+        "<li>Measured CO₂ <strong>higher</strong> than predicted → the patient isn't blowing off enough; a concurrent <strong>respiratory acidosis</strong> (they are tiring). This is the number that tells you a DKA patient is heading for intubation.</li>"+
+        "<li>Measured CO₂ <strong>lower</strong> than predicted → a concurrent <strong>respiratory alkalosis</strong>.</li>"+
+        "</ul>"+
+        "<p>A metabolic-acidosis patient with a 'normal' CO₂ of 40 is not reassuring — Winter's may have predicted a CO₂ of 24, and a 40 means they are failing to compensate and fatiguing fast.</p>"
+      },
+      { h:"4", t:"Step 4: the anion gap", html:
+        "<p>Once you know there's a metabolic acidosis — or even if you don't — calculate the anion gap on every gas. It is the single most useful downstream calculation in medicine, and it costs nothing but arithmetic.</p>"+
+        "<div class='formula'><span class='fk'>Anion Gap</span> = Na⁺ − (Cl⁻ + HCO₃⁻)<br>&nbsp;&nbsp;normal ≈ 8 – 12 mEq/L (lab-dependent)</div>"+
+        "<p>The gap represents the unmeasured anions in serum — mostly albumin, with a smaller contribution from phosphate, sulfate, and organic acids. When an acid like lactate or a ketoacid pours into the blood, it consumes bicarbonate and leaves its own unmeasured anion behind, so the <strong>gap widens</strong>. A high anion gap is a fingerprint that an <em>unmeasured acid</em> is present.</p>"+
+        "<p>One correction you must not skip in the critically ill: albumin is the dominant unmeasured anion, so a low albumin lowers the baseline gap and can mask a real acidosis. Add roughly <strong>2.5 mEq/L to the gap for every 1 g/dL that albumin sits below 4</strong>. A septic patient with an albumin of 2 and a 'normal' gap of 11 actually has a corrected gap near 16.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — correct the gap</span>"+
+        "<p>Hypoalbuminemia is nearly universal in critical illness, and an uncorrected anion gap systematically underestimates the true gap in these patients. The albumin correction (≈2.5 mEq/L per 1 g/dL below normal) restores its sensitivity for detecting an organic acidosis (Figge and colleagues; corroborated in ICU cohorts).</p>"+
+        "<div class='grade'>Quality: moderate (physiologic derivation validated in observational critical-care data).</div></div>"
+      },
+      { h:"5", t:"Naming the acid: MUDPILES and the non-gap causes", html:
+        "<p>Split the metabolic acidoses by the gap, because the differential and the treatment diverge sharply.</p>"+
+        "<p><strong>High anion-gap metabolic acidosis (HAGMA)</strong> — an unmeasured acid is being added. The classic mnemonic is <em>MUDPILES</em>:</p>"+
+        "<ul>"+
+        "<li><strong>M</strong>ethanol · <strong>U</strong>remia · <strong>D</strong>iabetic (and other) ketoacidosis</li>"+
+        "<li><strong>P</strong>ropylene glycol · <strong>I</strong>ron/<strong>I</strong>soniazid · <strong>L</strong>actic acidosis</li>"+
+        "<li><strong>E</strong>thylene glycol · <strong>S</strong>alicylates</li>"+
+        "</ul>"+
+        "<p>In transport, the overwhelming majority of HAGMA you will meet is <strong>lactate</strong> (sepsis, shock, ischemia) or <strong>ketoacidosis</strong> (DKA, alcoholic, starvation). The toxic alcohols and salicylates are rarer but lethal, and they are the subject of Module 8.</p>"+
+        "<p><strong>Normal anion-gap metabolic acidosis (NAGMA)</strong> — bicarbonate is being lost directly (not consumed by an acid), and chloride rises to fill the electrical space, so the gap stays normal. It is therefore also called <em>hyperchloremic</em> acidosis. The two big buckets are <strong>GI losses</strong> (diarrhea, high-output ostomy) and <strong>renal losses</strong> (renal tubular acidosis). A large-volume normal-saline resuscitation can itself produce a mild hyperchloremic NAGMA — worth recognizing so you don't chase a phantom.</p>"
+      },
+      { h:"6", t:"Step 5: the delta-gap and stacked disorders", html:
+        "<p>The most advanced move, and a favorite of both the sick patient and the exam, is detecting a <em>second</em> metabolic process hiding behind a high-gap acidosis. The logic: when an organic acid raises the gap, it should consume bicarbonate roughly one-for-one. So the rise in the gap should <em>match</em> the fall in bicarbonate.</p>"+
+        "<div class='formula'>Δgap = (measured AG − 12) &nbsp;vs&nbsp; Δbicarb = (24 − measured HCO₃⁻)</div>"+
+        "<ul>"+
+        "<li>Gap rose <strong>more</strong> than bicarb fell → a concurrent <strong>metabolic alkalosis</strong> propping up the bicarbonate (e.g., the DKA patient who has also been vomiting).</li>"+
+        "<li>Gap rose <strong>less</strong> than bicarb fell → a concurrent <strong>normal-gap acidosis</strong> stacked on top of the high-gap one.</li>"+
+        "</ul>"+
+        "<p>You do not need to compute this on every routine gas, but when the numbers feel internally inconsistent — a big gap with a bicarbonate that seems too high, or vice versa — the delta-delta is what exposes the second process.</p>"
+      },
+      { h:"7", t:"Base excess, and when a venous gas will do", html:
+        "<p><strong>Base excess</strong> (or its inverse, the base deficit) is the single number the analyzer computes to summarize the metabolic side of the ledger: how much acid or base you would have to add to a liter of blood to return the pH to 7.40 at a normal CO₂. A base deficit more negative than about −4 signals a significant metabolic acidosis, and in trauma a worsening base deficit tracks with the depth of shock and the need for blood. It is a fast gestalt of the metabolic burden without doing the full five-step read.</p>"+
+        "<p>Do you always need an <em>arterial</em> stick? Often not. For the acid–base and ventilation question — as opposed to precise oxygenation — a venous blood gas answers most of what you need, and it spares the patient an arterial puncture.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — VBG vs ABG</span>"+
+        "<p>Venous and arterial values agree closely enough for clinical acid–base decisions: venous pH runs about 0.03–0.04 lower than arterial, and venous bicarbonate tracks within roughly 1–2 mEq/L. The weak link is CO₂ — venous PCO₂ is a less reliable stand-in for arterial PaCO₂, so if a precise CO₂ or true oxygenation matters (e.g., titrating a ventilator, assessing hypoxemia), get the arterial sample (Kelly and colleagues; multiple emergency-medicine comparisons).</p>"+
+        "<div class='grade'>Quality: moderate–high for pH/HCO₃ agreement; venous PCO₂ is the recognized limitation.</div></div>"
+      },
+      { h:"8", t:"Putting it together at the bedside", html:
+        "<p>Run the same five steps on every gas and it becomes automatic:</p>"+
+        "<ul>"+
+        "<li><strong>1.</strong> pH — acidemia or alkalemia?</li>"+
+        "<li><strong>2.</strong> CO₂ and HCO₃ — respiratory or metabolic primary?</li>"+
+        "<li><strong>3.</strong> Compensation appropriate? (Winter's for a metabolic acidosis.)</li>"+
+        "<li><strong>4.</strong> Anion gap — corrected for albumin.</li>"+
+        "<li><strong>5.</strong> If the gap is up, delta-delta for a stacked disorder.</li>"+
+        "</ul>"+
+        "<p>Worked example. A DKA patient: pH 7.10, PaCO₂ 22, HCO₃ 7, Na 138, Cl 100, albumin 4. Step 1: acidemic. Step 2: low bicarb with same-direction pH → metabolic acidosis. Step 3: Winter's predicts a CO₂ of (1.5×7)+8 = 18.5 ± 2, so ~16–21; the measured 22 is right at the upper edge — compensating, but with essentially no reserve left, so watch the airway closely. Step 4: gap = 138 − (100+7) = <strong>31</strong>, a wide HAGMA, and with a normal albumin no correction needed. Step 5: Δgap = 19, Δbicarb = 17 — roughly equal, so a pure single high-gap acidosis. The read: severe DKA, appropriately but maximally compensated, no second metabolic process.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The gas doesn't diagnose the patient — it points you at the mechanism. A wide gap means <em>go find the acid</em>: check a lactate, a glucose and ketones, a renal panel, and a story for toxins. The five-step read tells you where to look.</div>"
+      }
+    ],
+    quiz: [
+      { q:"A blood gas shows pH 7.28, PaCO₂ 30 mmHg, HCO₃⁻ 14 mEq/L. What is the primary disorder?",
+        opts:["Respiratory acidosis","Metabolic acidosis","Respiratory alkalosis","Metabolic alkalosis"], ans:1,
+        expl:"The pH is acidemic and the bicarbonate is low and moving the same direction as the pH — that pairing is a metabolic acidosis. The low CO₂ is appropriate respiratory compensation, not the primary problem." },
+      { q:"In a purely respiratory acid–base disorder, the pH and the PaCO₂:",
+        opts:["Move in the same direction","Move in opposite directions","Are always both normal","Are unrelated"], ans:1,
+        expl:"Respiratory disorders move pH and CO₂ in opposite directions (CO₂ up → pH down). Metabolic disorders move pH and HCO₃ in the same direction. That single rule separates respiratory from metabolic." },
+      { q:"A patient has a metabolic acidosis with HCO₃⁻ of 10. Using Winter's formula, the expected PaCO₂ is approximately:",
+        opts:["40 mmHg","33 mmHg","23 mmHg","15 mmHg"], ans:2,
+        expl:"Winter's: expected PaCO₂ = (1.5 × 10) + 8 = 23 (± 2). A measured CO₂ well above 23 would indicate a superimposed respiratory acidosis — the patient failing to compensate." },
+      { q:"The anion gap is calculated as:",
+        opts:["Na⁺ + K⁺ − Cl⁻","Na⁺ − (Cl⁻ + HCO₃⁻)","(Cl⁻ + HCO₃⁻) − Na⁺","Na⁺ − Cl⁻"], ans:1,
+        expl:"Anion gap = Na⁺ − (Cl⁻ + HCO₃⁻), normally about 8–12 mEq/L. It estimates the unmeasured anions and widens when an organic acid (lactate, ketoacids, toxins) is present." },
+      { q:"A septic patient has an albumin of 2.0 g/dL and a calculated anion gap of 11. The corrected anion gap is closest to:",
+        opts:["11 (no correction needed)","13","16","21"], ans:2,
+        expl:"Add ~2.5 mEq/L per 1 g/dL of albumin below 4. Albumin is 2 g/dL below normal, so add ~5: 11 + 5 ≈ 16. Uncorrected, the low albumin masks a real high-gap acidosis." },
+      { q:"Which is a cause of a HIGH anion-gap metabolic acidosis?",
+        opts:["Diarrhea","Renal tubular acidosis","Lactic acidosis","Large-volume normal saline"], ans:2,
+        expl:"Lactic acidosis is a classic HAGMA (the 'L' in MUDPILES). Diarrhea, RTA, and saline-induced hyperchloremia all cause a NORMAL-gap (hyperchloremic) acidosis." },
+      { q:"A normal anion-gap metabolic acidosis is also called:",
+        opts:["Hyperchloremic acidosis","Ketoacidosis","Lactic acidosis","Uremic acidosis"], ans:0,
+        expl:"In NAGMA, bicarbonate is lost directly and chloride rises to fill the electrical space, keeping the gap normal — hence 'hyperchloremic.' The main causes are GI (diarrhea) and renal (RTA) losses." },
+      { q:"In a high-gap acidosis, the Δgap rose noticeably MORE than the bicarbonate fell (Δbicarb). This suggests:",
+        opts:["A pure high-gap acidosis","A concurrent metabolic alkalosis","A concurrent respiratory acidosis","Laboratory error is certain"], ans:1,
+        expl:"If the gap climbed more than bicarbonate dropped, a second process is holding the bicarbonate up — a superimposed metabolic alkalosis (e.g., the DKA patient who has also been vomiting)." },
+      { q:"Compared with an arterial gas, a venous blood gas is LEAST reliable for estimating which value?",
+        opts:["pH","Bicarbonate","PCO₂","Base excess"], ans:2,
+        expl:"Venous pH and HCO₃ track arterial values closely, but venous PCO₂ is the weak link. If a precise CO₂ or true oxygenation matters (e.g., ventilator titration), obtain an arterial sample." },
+      { q:"A DKA patient's blood gas shows an appropriately low but 'normal-looking' PaCO₂ of 40 when Winter's formula predicted ~24. The best interpretation is:",
+        opts:["Reassuring — the CO₂ is normal","The patient is compensating perfectly","A superimposed respiratory acidosis — the patient is tiring","A metabolic alkalosis is present"], ans:2,
+        expl:"A CO₂ well above the Winter's prediction in a metabolic acidosis means the patient is failing to blow off enough CO₂ — a superimposed respiratory acidosis from fatigue. It is a warning that the airway may be next." }
+    ]
+  },
+
+  {
+    id: 2,
+    available: true,
+    title: "Sodium & Water",
+    desc: "Sodium as a water problem: tonicity, the hypo- and hypernatremia workup, safe correction limits, osmotic demyelination, and diabetes insipidus.",
+    objective: "Relate the serum sodium to whole-body water and tonicity, work up hypo- and hypernatremia by volume status, and correct each safely without triggering osmotic demyelination or cerebral edema.",
+    content: [
+      { h:"1", t:"Sodium is a water problem, not a salt problem", html:
+        "<p>The single most useful reframe in electrolytes: the serum sodium tells you almost nothing about how much <em>sodium</em> is in the body, and almost everything about how much <em>water</em> is. Sodium is a concentration — salt divided by water — and in the vast majority of patients it is the denominator, water, that has moved.</p>"+
+        "<p>A low sodium usually means too much water diluting a normal amount of salt. A high sodium usually means too little water concentrating it. This is why the reflexive instinct — 'sodium is low, give salt' — is so often exactly wrong. The question is not <em>how much salt</em> but <em>how much water, and where is it going.</em></p>"+
+        "<p>Sodium matters because it sets the <strong>tonicity</strong> of the blood — the osmotic pull that decides whether water moves into or out of cells, and the cells that care most are neurons. Serum osmolality is dominated by sodium:</p>"+
+        "<div class='formula'>calc <span class='fk'>Osm</span> = (2 × Na⁺) + (glucose / 18) + (BUN / 2.8)<br>&nbsp;&nbsp;normal ≈ 275 – 295 mOsm/kg</div>"+
+        "<p>Because sodium is doubled and dwarfs the other terms, sodium <em>is</em> tonicity for practical purposes — with two exceptions (glucose and exogenous osmoles) that Module 8 revisits through the osmolar gap.</p>"
+      },
+      { h:"2", t:"Hyponatremia: work it up by tonicity, then volume", html:
+        "<p>Hyponatremia (Na &lt; 135) is the most common electrolyte abnormality in the hospital, and the workup is a two-step sort. <strong>First, confirm it is truly hypotonic.</strong> A high glucose or infused mannitol pulls water into the vascular space and dilutes sodium without lowering tonicity — a true but non-dangerous <em>translocational</em> hyponatremia. Correct the measured sodium for glucose before you act:</p>"+
+        "<div class='formula'>add <span class='fk'>~1.6 mEq/L</span> to Na for every <span class='fk'>100 mg/dL</span> glucose above 100</div>"+
+        "<p>A DKA patient with a sodium of 130 and a glucose of 700 has a corrected sodium near 140 — they are not hyponatremic at all, and 'treating' the number would be a mistake. (Older texts use 1.6; some use 2.4 at very high glucose — either flags the concept.) Severe hyperlipidemia or paraproteins can also cause a lab artifact, <em>pseudohyponatremia</em>, with a normal measured osmolality.</p>"+
+        "<p><strong>Second, once it is truly hypotonic, sort by volume status:</strong></p>"+
+        "<ul>"+
+        "<li><strong>Hypovolemic</strong> — water and salt both lost, salt more replaced by free water (diuretics, GI losses, third-spacing). Dry mucous membranes, flat neck veins.</li>"+
+        "<li><strong>Euvolemic</strong> — SIADH is the archetype (pain, nausea, CNS or lung pathology, drugs). Water retained without edema.</li>"+
+        "<li><strong>Hypervolemic</strong> — heart failure, cirrhosis, renal failure. Total-body water is up even more than salt; edema is present.</li>"+
+        "</ul>"+
+        "<p>The bedside volume exam plus the story usually narrows it, and it changes the fix: the hypovolemic patient needs isotonic volume, the SIADH patient needs water restriction, the hypervolemic patient needs water and salt removal.</p>"
+      },
+      { h:"3", t:"When hyponatremia is an emergency", html:
+        "<p>Symptoms track the <em>rate</em> of the fall more than the absolute number. A sodium of 120 that developed over weeks may be nearly asymptomatic because the brain has had time to extrude osmoles and shrink back to size. The same 120 dropping over hours floods neurons with water and causes <strong>cerebral edema</strong> — headache, confusion, vomiting, and at the severe end seizures, obtundation, and brainstem herniation.</p>"+
+        "<p>Severe symptomatic hyponatremia — seizing, deeply obtunded, or posturing — is one of the few true sodium emergencies, and it is treated with <strong>hypertonic (3%) saline</strong>, not with slow fluids. The modern approach is small, defined boluses aimed at a quick, modest bump to pull water out of brain cells and break the crisis:</p>"+
+        "<div class='formula'>3% saline: <span class='fk'>100–150 mL</span> bolus, may repeat ×1–2<br>goal: raise Na ~<span class='fk'>4–6 mEq/L</span> to abort symptoms</div>"+
+        "<p>That initial 4–6 mEq/L is usually enough to stop a seizure; you are not trying to normalize the sodium in the truck, only to buy brain room. Everything after that is governed by the correction limit in the next section.</p>"
+      },
+      { h:"4", t:"The correction limit and osmotic demyelination", html:
+        "<p>Here is the rule that makes hyponatremia dangerous to <em>treat</em> as well as to have. When sodium has been low for more than about 48 hours, brain cells adapt by expelling their own osmoles. Raise the serum sodium too fast and water is suddenly yanked out of those now-solute-depleted cells, shearing the myelin sheaths of the pons and beyond. This is <strong>osmotic demyelination syndrome (ODS)</strong>, historically called central pontine myelinolysis — a catastrophic, often permanent injury (dysarthria, quadriparesis, 'locked-in' states) that appears days after the correction.</p>"+
+        "<div class='formula'>correction limit: ≤ <span class='fk'>8 mEq/L</span> per 24 h<br>(≤ 6 in the highest-risk patients)</div>"+
+        "<p>Higher-risk patients — where you stay at the conservative end — include chronic alcoholism, malnutrition, advanced liver disease, hypokalemia, and a starting sodium below 105. Note the cruel asymmetry of the disease: the emergency (cerebral edema) comes from correcting <em>too slowly</em> in a crashing patient, and ODS comes from correcting <em>too fast</em>. You need enough to break a seizure, then a firm ceiling on the 24-hour total.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — go slow, and re-lower if needed</span>"+
+        "<p>Observational and case data consistently link overcorrection (&gt;8–10 mEq/L in 24 h) to ODS, and guidelines endorse a ≤8 mEq/L daily limit, lower in high-risk patients. If sodium is rising too fast — often because the underlying cause resolves and the kidney dumps free water (an autocorrecting brisk aquaresis) — the recognized rescue is to <em>re-lower</em> the sodium with free water (D5W) and/or desmopressin. On transport, the practical danger is an aggressive drip outrunning the limit.</p>"+
+        "<div class='grade'>Quality: moderate (consistent observational data and strong physiologic mechanism; guideline-endorsed).</div></div>"
+      },
+      { h:"5", t:"Hypernatremia is always a water-deficit state", html:
+        "<p>Flip the frame. Hypernatremia (Na &gt; 145) means the blood is too concentrated — there is not enough water for the salt. It is therefore, almost by definition, a <strong>free-water deficit</strong>. And there is an important clue baked into who gets it: a thirsty person with an intact thirst mechanism and access to water essentially cannot become hypernatremic — they drink. So hypernatremia is a disease of people who <em>can't get to water or can't sense they need it</em>: the intubated, the very old, infants, the neurologically impaired, and anyone with a driving water loss they can't keep up with.</p>"+
+        "<p>The causes sort into water losses outpacing intake:</p>"+
+        "<ul>"+
+        "<li><strong>Pure water loss</strong> — diabetes insipidus (see below), insensible/respiratory losses, fever.</li>"+
+        "<li><strong>Hypotonic fluid loss</strong> — osmotic diuresis (hyperglycemia, mannitol, high-protein tube feeds), GI losses, diuretics.</li>"+
+        "<li><strong>Rarely, sodium gain</strong> — hypertonic saline or bicarbonate administration, salt ingestion.</li>"+
+        "</ul>"+
+        "<p>Symptoms are again neurologic — lethargy, irritability, weakness, and with severe or rapid rises, seizures and intracranial bleeding from a shrinking brain tearing its bridging veins.</p>"
+      },
+      { h:"6", t:"Correcting hypernatremia — and the mirror-image trap", html:
+        "<p>Estimate how much water is missing with the free-water deficit, then replace it — but, exactly mirroring hyponatremia, <em>slowly.</em></p>"+
+        "<div class='formula'><span class='fk'>Free-water deficit</span> = TBW × [(Na / 140) − 1]<br>TBW ≈ 0.6 × wt(kg) (men) · 0.5 × wt (women)</div>"+
+        "<p>The trap: a brain that has been hypernatremic for more than a day has generated intracellular osmoles to defend its volume. Pour water in too fast and those cells swell — <strong>cerebral edema</strong>, the same feared endpoint from the opposite direction. So the correction ceiling for chronic hypernatremia is likewise gentle:</p>"+
+        "<div class='formula'>lower Na by ≤ <span class='fk'>10 mEq/L</span> per 24 h (chronic)</div>"+
+        "<p>Replace with hypotonic fluid — oral or enteral free water when possible, or IV D5W or ½-normal saline — and recheck the sodium frequently. One caveat for the crashing patient: if hypernatremia coexists with overt <em>hypovolemic shock</em>, restore perfusion first with isotonic fluid, then turn to the free-water deficit. Perfusion beats the number.</p>"
+      },
+      { h:"7", t:"Diabetes insipidus: a water-handling failure", html:
+        "<p>Diabetes insipidus (DI) is worth its own footing because it is a common driver of transport hypernatremia and it is frequently misread. DI has nothing to do with glucose — it is a failure to <em>concentrate urine</em>, producing large volumes of dilute urine and, if the patient can't drink to keep up, a rising sodium.</p>"+
+        "<ul>"+
+        "<li><strong>Central DI</strong> — the pituitary fails to release antidiuretic hormone (ADH/vasopressin). Common after neurosurgery, traumatic brain injury, or in brain death. It <em>responds</em> to desmopressin (DDAVP).</li>"+
+        "<li><strong>Nephrogenic DI</strong> — the kidney doesn't respond to ADH (lithium, chronic hypercalcemia, hypokalemia). It does <em>not</em> respond to DDAVP; treatment addresses the cause.</li>"+
+        "</ul>"+
+        "<p>The transport picture that should trigger the thought: a neuro patient with copious, dilute urine and a climbing sodium. The management is to keep pace with the massive free-water losses and, in central DI, replace the missing hormone with DDAVP. Watch the urine output like a hemodynamic vital sign — it can be liters per hour and will dehydrate a patient fast.</p>"
+      },
+      { h:"8", t:"The sodium anchor for transport", html:
+        "<p>Two ideas carry almost every sodium decision you will make in the back of a truck or aircraft.</p>"+
+        "<p>First, <strong>chronicity dictates speed.</strong> An abnormal sodium that developed slowly must be corrected slowly, in either direction — because the brain has adapted, and undoing that adaptation too fast is what injures it (ODS when going up, cerebral edema when coming down). The only license to move quickly is an acute, severely symptomatic derangement, and even then you make a small, defined move to break symptoms and then hold the line.</p>"+
+        "<p>Second, <strong>on transport your job is usually to hold the line, not to fix the number.</strong> The most common real-world harm is an inherited drip quietly overcorrecting over a two-hour flight. Know the running rate, do the arithmetic on where it will put the sodium by the time you land, recheck when you can, and be ready to slow the correction — or, if it is outrunning the limit, to add free water. Faithful, bounded correction beats an aggressive one every time.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Sodium is water. Correct chronic derangements by ≤8 mEq/L (Na up) or ≤10 mEq/L (Na down) per 24 h. Reserve fast moves — 3% saline in small boluses — for the actively seizing or obtunded patient, and only to abort symptoms.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The serum sodium concentration is primarily a reflection of:",
+        opts:["Total-body sodium content","Whole-body water balance and tonicity","Dietary salt intake over the past week","Renal sodium reabsorption alone"], ans:1,
+        expl:"Sodium is a concentration — salt divided by water — and it is almost always the water (the denominator) that has moved. A low sodium usually means too much water; a high sodium, too little." },
+      { q:"A DKA patient has a measured sodium of 128 and a glucose of 700 mg/dL. The corrected sodium is approximately:",
+        opts:["118 — profound hyponatremia","128 — true hyponatremia","138 — essentially normal","150 — hypernatremia"], ans:2,
+        expl:"Add ~1.6 mEq/L per 100 mg/dL of glucose above 100. Glucose is ~600 above normal → add ~9–10: 128 + 10 ≈ 138. The hyponatremia is translocational (dilutional), not true — treating the number would be an error." },
+      { q:"Which condition classically causes EUVOLEMIC hypotonic hyponatremia?",
+        opts:["Congestive heart failure","SIADH","Diuretic use with GI losses","Cirrhosis"], ans:1,
+        expl:"SIADH is the archetypal euvolemic hyponatremia — water is retained without edema. Heart failure and cirrhosis are hypervolemic; diuretics with GI losses are hypovolemic." },
+      { q:"A patient is actively seizing from an acute severe hyponatremia. The appropriate initial treatment is:",
+        opts:["A 1-liter bolus of normal saline","A 100–150 mL bolus of 3% hypertonic saline","Fluid restriction only","Rapid correction to a normal sodium of 140"], ans:1,
+        expl:"Severe symptomatic hyponatremia is treated with small boluses of 3% saline (100–150 mL) to raise the sodium ~4–6 mEq/L and abort the seizure — not to normalize it, and not with isotonic fluid." },
+      { q:"Correcting a chronic hyponatremia too rapidly risks which complication?",
+        opts:["Cerebral edema","Osmotic demyelination syndrome","Diabetes insipidus","Hyperchloremic acidosis"], ans:1,
+        expl:"Overly fast correction of chronic hyponatremia yanks water out of adapted brain cells, causing osmotic demyelination syndrome (central pontine myelinolysis) — a delayed, often permanent injury. Limit correction to ≤8 mEq/L per 24 h." },
+      { q:"Which patient is at HIGHEST risk for osmotic demyelination with overcorrection?",
+        opts:["A well-nourished patient with a sodium of 132","A malnourished patient with alcoholism and a sodium of 108","A patient with acute hyponatremia over 6 hours","A hypernatremic patient being corrected"], ans:1,
+        expl:"Chronic alcoholism, malnutrition, hypokalemia, liver disease, and a very low starting sodium all raise ODS risk — stay at the conservative correction limit (≤6 mEq/L/24h). Acute (<48 h) hyponatremia carries much lower ODS risk." },
+      { q:"Hypernatremia is fundamentally a state of:",
+        opts:["Excess total-body sodium","A free-water deficit","Bicarbonate loss","Excess antidiuretic hormone"], ans:1,
+        expl:"Hypernatremia means too little water for the salt — a free-water deficit. It occurs in those who can't access or sense thirst (intubated, elderly, neuro-impaired) or who have large ongoing water losses." },
+      { q:"When correcting a CHRONIC hypernatremia, lowering the sodium too quickly risks:",
+        opts:["Osmotic demyelination","Cerebral edema","Metabolic alkalosis","Central diabetes insipidus"], ans:1,
+        expl:"A brain adapted to chronic hypernatremia holds intracellular osmoles; rapid water replacement causes cells to swell — cerebral edema. Lower the sodium by no more than ~10 mEq/L per 24 h." },
+      { q:"A post-neurosurgical patient produces 6 liters of dilute urine and the sodium is climbing. The urine concentrates appropriately after desmopressin (DDAVP). This is:",
+        opts:["Nephrogenic diabetes insipidus","Central diabetes insipidus","SIADH","Osmotic diuresis from hyperglycemia"], ans:1,
+        expl:"Central DI is a failure of ADH release (common after neurosurgery, TBI, brain death) and it responds to DDAVP. Nephrogenic DI does not respond to DDAVP; SIADH causes water retention, not dilute diuresis." },
+      { q:"A hypernatremic patient is also in overt hypovolemic shock. The correct priority is:",
+        opts:["Correct the free-water deficit first with D5W","Restore perfusion with isotonic fluid first, then address the water deficit","Give 3% saline","Withhold all fluids until the sodium is known"], ans:1,
+        expl:"Perfusion beats the number. Restore intravascular volume with isotonic fluid to treat shock first, then turn to the free-water deficit and correct the sodium at the safe rate." }
+    ]
+  },
+
+  {
+    id: 3,
+    available: true,
+    title: "Potassium",
+    desc: "The ECG signature of hyper- and hypokalemia, the stabilize–shift–eliminate framework, safe repletion, and why refractory hypokalemia is a magnesium problem.",
+    objective: "Recognize the ECG progression of hyper- and hypokalemia, apply the stabilize–shift–eliminate framework to hyperkalemia, replete potassium safely, and know why magnesium must accompany refractory repletion.",
+    content: [
+      { h:"1", t:"Why a tiny number is so lethal", html:
+        "<p>Potassium runs on a knife-edge. The entire normal serum range is <strong>3.5–5.0 mEq/L</strong> — a window barely 1.5 wide — and yet 98% of the body's potassium sits <em>inside</em> cells. That steep gradient across the cell membrane is what sets the resting membrane potential of every excitable cell, and the heart is the one that kills you when it drifts.</p>"+
+        "<p>Because the serum holds so little of the total, small shifts in that number reflect large or dangerous forces, and they translate directly into the cardiac conduction system. This is the core reason potassium disorders are managed with a cardiac monitor running: the number on the chemistry panel is a lagging indicator, and the <strong>ECG is the real-time readout of how much danger the myocardium is actually in.</strong> A potassium of 7.0 with a normal ECG and a potassium of 6.2 with a sine wave are not the same emergency — treat the ECG.</p>"
+      },
+      { h:"2", t:"The ECG progression of hyperkalemia", html:
+        "<p>Hyperkalemia rewrites the ECG in a fairly reliable sequence as it climbs. You will rarely get the level and the tracing at the same instant, so learning the progression lets you estimate severity from the monitor alone:</p>"+
+        "<ul>"+
+        "<li><strong>Peaked T waves</strong> — the earliest sign; tall, narrow, symmetric, 'tented' T waves (often ~5.5–6.5).</li>"+
+        "<li><strong>P-wave flattening and PR prolongation</strong> — the atria go quiet as conduction slows (~6.5–7.5).</li>"+
+        "<li><strong>QRS widening</strong> — the ventricular complex smears out as the level rises (~7.5–8.5).</li>"+
+        "<li><strong>Sine wave</strong> — the widened QRS merges with the T wave into a rolling sinusoid — a pre-arrest rhythm.</li>"+
+        "<li><strong>Ventricular fibrillation or asystole.</strong></li>"+
+        "</ul>"+
+        "<p>These levels are approximate and vary between patients — the <em>trend</em> and the presence of any of these changes matter more than the exact cutoff. Any QRS widening or a sine wave is a 'treat now, ask questions later' finding. And beware the patient in whom hyperkalemia presents as a bradycardia or a new wide-complex rhythm of unclear cause: in the dialysis patient or the crush-injury patient, <em>hyperkalemia is on the top of that list.</em></p>"
+      },
+      { h:"3", t:"Step 1 — stabilize the membrane with calcium", html:
+        "<p>The treatment of dangerous hyperkalemia is a three-step framework, and the steps do different jobs. The first is to protect the heart <em>immediately</em>, before you have lowered the potassium at all.</p>"+
+        "<p><strong>Calcium</strong> raises the threshold potential of the cardiac membrane, restoring the gap between resting and threshold that hyperkalemia had eroded. It is cardioprotective within minutes, and it is the first drug in any hyperkalemia with ECG changes.</p>"+
+        "<div class='formula'>calcium <span class='fk'>gluconate</span> 1–3 g IV &nbsp;—or—&nbsp; calcium <span class='fk'>chloride</span> ~1 g<br>onset minutes · lasts ~30–60 min · <span class='fk'>does not lower K</span></div>"+
+        "<p>Two points that matter. Calcium <em>chloride</em> contains roughly three times the elemental calcium of an equal volume of gluconate, so it works when you need a fast, potent effect through a secure line — but it is caustic and best given centrally; <em>gluconate</em> is gentler for a peripheral IV. And the crucial conceptual point: calcium <strong>buys time, it does not treat the problem.</strong> The potassium is still high; you have only made the heart temporarily tolerant of it. Its brief duration means you must move immediately to the next steps.</p>"
+      },
+      { h:"4", t:"Step 2 — shift potassium into cells", html:
+        "<p>With the membrane stabilized, drive potassium out of the serum and into cells. These agents lower the number within minutes to an hour, but — like calcium — they are <em>temporary</em>: the potassium is still in the body and will leak back out.</p>"+
+        "<ul>"+
+        "<li><strong>Insulin + glucose</strong> — the workhorse. Insulin drives potassium intracellularly; give glucose with it to prevent hypoglycemia (e.g., 10 units regular insulin with 25 g dextrose). Onset ~15 min, lasts a few hours.</li>"+
+        "<li><strong>Nebulized beta-agonist (albuterol)</strong> — high-dose albuterol shifts potassium and is additive to insulin. Convenient because it needs no IV, but tachycardia limits it in some patients.</li>"+
+        "<li><strong>Sodium bicarbonate</strong> — modest and slow; genuinely useful mainly when a metabolic acidosis is also present. Not a reliable stand-alone shifter.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check — watch the glucose</span>"+
+        "<p>Insulin-induced hypoglycemia is the most common and under-appreciated complication of hyperkalemia treatment, occurring in a substantial minority of patients — especially those with renal failure (who clear insulin slowly), low body weight, or a low baseline glucose. Give adequate dextrose with the insulin and <em>recheck the glucose</em> for several hours, including on transport. Reduced-insulin protocols lower the risk in high-risk patients.</p>"+
+        "<div class='grade'>Quality: moderate–high (consistent observational data across multiple cohorts).</div></div>"
+      },
+      { h:"5", t:"Step 3 — eliminate potassium from the body", html:
+        "<p>Stabilizing and shifting keep the patient alive across the next hour, but only <em>elimination</em> actually removes potassium. This is the step that fixes the problem, and it is the slowest.</p>"+
+        "<ul>"+
+        "<li><strong>Dialysis</strong> — the definitive therapy, and the endpoint for the anuric or dialysis-dependent patient. If your hyperkalemic patient makes no urine, everything else is a bridge to this. On transport, the mission is often precisely to get that patient to a dialysis-capable center.</li>"+
+        "<li><strong>Loop diuretics</strong> — increase urinary potassium loss, but only in a patient who still makes urine.</li>"+
+        "<li><strong>GI cation binders</strong> — newer agents (patiromer, sodium zirconium cyclosilicate) bind potassium in the gut; slow onset, more useful subacutely. Older sodium polystyrene sulfonate works slowly and carries a rare risk of intestinal necrosis — it is not an emergency drug.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Stabilize (calcium) → shift (insulin/glucose, albuterol) → eliminate (dialysis, diuretics, binders). Only the last step removes potassium; the first two buy the time to get there. In the anuric patient, plan for dialysis from the outset.</div>"
+      },
+      { h:"6", t:"Hypokalemia: the other end of the same danger", html:
+        "<p>Low potassium (&lt; 3.5) is just as arrhythmogenic and, in transport patients, extremely common — driven by diuretics, GI losses (vomiting, diarrhea, NG suction), and intracellular shifts. The ECG signature is roughly the mirror of hyperkalemia's early changes:</p>"+
+        "<ul>"+
+        "<li><strong>Flattened T waves</strong> and <strong>ST-segment depression.</strong></li>"+
+        "<li><strong>Prominent U waves</strong> — an extra bump after the T wave, the classic hypokalemia tell.</li>"+
+        "<li><strong>QT prolongation</strong> (really QU), setting up for <strong>torsades de pointes</strong> and other ventricular arrhythmias.</li>"+
+        "</ul>"+
+        "<p>The stakes are highest in two groups. In a patient on <strong>digoxin</strong>, hypokalemia dramatically potentiates digoxin toxicity and its arrhythmias. And in anyone with cardiac ischemia or on QT-prolonging drugs, a low potassium is a ready substrate for malignant ventricular rhythms. Keep potassium comfortably above 4.0 in the cardiac patient.</p>"
+      },
+      { h:"7", t:"Repletion done safely — and the magnesium key", html:
+        "<p>Replacing potassium is not urgent-fast the way lowering it can be, and pushing it carelessly is dangerous: concentrated IV potassium is caustic to veins and a bolus can itself cause a fatal arrhythmia. <strong>IV potassium is never IV-push.</strong> It is infused, and the rate is capped:</p>"+
+        "<div class='formula'>peripheral IV: typically ≤ <span class='fk'>10 mEq/hr</span> (burns the vein faster)<br>central line, monitored: up to ~<span class='fk'>10–20 mEq/hr</span></div>"+
+        "<p>Faster central rates demand continuous ECG monitoring. Oral repletion is safer and faster-absorbed than most people assume and is preferred whenever the patient can take it. Roughly, every 10 mEq of potassium raises the serum by about 0.1 mEq/L — but this is only a guide, because most of what you give redistributes into cells.</p>"+
+        "<p>Now the point that trips up experienced clinicians: <strong>refractory hypokalemia is usually a magnesium problem.</strong> Magnesium is a cofactor that keeps potassium inside the cell; when magnesium is low, the kidney wastes potassium no matter how much you replace, and the potassium simply will not come up. Coexisting hypomagnesemia is common in exactly the same patients (diuretics, alcoholism, GI losses).</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — replace the magnesium</span>"+
+        "<p>Hypomagnesemia promotes renal potassium wasting and renders hypokalemia refractory to potassium repletion until the magnesium is corrected. The practical rule, well supported physiologically and clinically, is to <em>check and replace magnesium whenever you are treating a stubborn hypokalemia</em> — otherwise the potassium chases its tail. The same magnesium deficiency independently predisposes to torsades.</p>"+
+        "<div class='grade'>Quality: moderate (strong mechanism, consistent clinical observation).</div></div>"
+      },
+      { h:"8", t:"The potassium anchor for transport", html:
+        "<p>Everything in this module reduces to a few transport habits.</p>"+
+        "<p><strong>Let the ECG lead.</strong> The serum level is a snapshot from a lab draw that may be minutes to hours old; the monitor is live. Treat any hyperkalemia with peaked T waves that are widening the QRS as an emergency regardless of the reported number, and remember that hyperkalemia is a first-line explanation for an unexplained bradycardia or wide-complex rhythm in the dialysis or crush patient.</p>"+
+        "<p><strong>Remember what each drug actually does.</strong> If you gave calcium and the T waves settled, do not relax — the potassium is unchanged and the calcium will wear off in half an hour. The shift agents are also temporary. Until the patient has urinated the potassium out or been dialyzed, the danger is only postponed, which is exactly why so many hyperkalemia transports are races to a dialysis center.</p>"+
+        "<p><strong>Replete gently, and never push it.</strong> IV potassium is a controlled infusion with a rate cap and a monitor, and stubborn hypokalemia means you also need to give magnesium. Keep the cardiac patient's potassium above 4.0, and watch the glucose for hours after you give insulin.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Hyperkalemia: stabilize–shift–eliminate, and let the ECG — not the lab value — set the urgency. Hypokalemia: replete by controlled infusion (never push), keep cardiac patients &gt;4.0, and replace magnesium or the potassium won't rise.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The earliest characteristic ECG change of hyperkalemia is:",
+        opts:["A widened QRS complex","Peaked (tented) T waves","A sine-wave pattern","Prominent U waves"], ans:1,
+        expl:"Peaked, narrow, symmetric T waves are the earliest sign. As potassium climbs, the P waves flatten, the PR and QRS prolong, and finally a sine wave and arrest — but tented T waves come first." },
+      { q:"In a patient with hyperkalemia and ECG changes, the FIRST drug to give is:",
+        opts:["Insulin and glucose","Nebulized albuterol","IV calcium","Sodium polystyrene sulfonate"], ans:2,
+        expl:"Calcium stabilizes the cardiac membrane within minutes and is cardioprotective. It is given first in any hyperkalemia with ECG changes — even though it does not lower the potassium itself." },
+      { q:"What is the key limitation of giving IV calcium in hyperkalemia?",
+        opts:["It rapidly lowers the serum potassium too far","It stabilizes the myocardium but does not lower potassium, and is short-lived","It causes hypoglycemia","It only works in patients on dialysis"], ans:1,
+        expl:"Calcium buys time — it raises the membrane threshold for ~30–60 minutes but leaves the potassium untouched. You must immediately move to shifting and elimination therapies." },
+      { q:"When treating hyperkalemia with insulin, glucose is co-administered primarily to:",
+        opts:["Enhance the potassium-shifting effect","Prevent insulin-induced hypoglycemia","Speed potassium elimination","Stabilize the cardiac membrane"], ans:1,
+        expl:"Insulin drives potassium into cells; dextrose is given with it to prevent hypoglycemia — the most common complication, especially in renal failure. Recheck the glucose for several hours, including during transport." },
+      { q:"Which therapy actually REMOVES potassium from the body rather than shifting it?",
+        opts:["IV calcium","Insulin and glucose","Nebulized albuterol","Dialysis"], ans:3,
+        expl:"Only elimination therapies (dialysis, loop diuretics in a urinating patient, GI binders) remove potassium. Calcium stabilizes; insulin and albuterol shift potassium into cells temporarily." },
+      { q:"A dialysis-dependent (anuric) patient has severe hyperkalemia. The definitive treatment is:",
+        opts:["Loop diuretics","Dialysis","Repeated albuterol","Oral potassium binders alone"], ans:1,
+        expl:"With no urine output, diuretics can't work and shifting is only a bridge. Dialysis is definitive, and transport is often specifically to reach a dialysis-capable center." },
+      { q:"Which ECG finding is characteristic of HYPOkalemia?",
+        opts:["Peaked T waves","Prominent U waves","A shortened QT interval","A sine-wave pattern"], ans:1,
+        expl:"Hypokalemia flattens T waves, depresses the ST segment, and produces prominent U waves with QT/QU prolongation — a substrate for torsades. Peaked T waves and sine waves are hyperkalemia." },
+      { q:"IV potassium repletion should be administered by:",
+        opts:["Rapid IV push for severe deficits","A controlled infusion with a capped rate, never IV push","Intramuscular injection","Subcutaneous injection"], ans:1,
+        expl:"Concentrated IV potassium is caustic and a bolus can be fatal — it is always a controlled infusion (roughly ≤10 mEq/hr peripherally; up to 10–20 mEq/hr centrally with monitoring). Never IV push." },
+      { q:"A patient's hypokalemia will not correct despite repeated potassium repletion. The most likely reason is:",
+        opts:["Coexisting hypomagnesemia","Coexisting hypernatremia","Excess dietary potassium","An overdose of calcium"], ans:0,
+        expl:"Low magnesium promotes renal potassium wasting and makes hypokalemia refractory. Check and replace magnesium whenever potassium won't come up — otherwise repletion chases its tail." },
+      { q:"Why is hypokalemia especially dangerous in a patient taking digoxin?",
+        opts:["It inactivates digoxin","It markedly potentiates digoxin toxicity and its arrhythmias","It raises the digoxin clearance","It has no interaction with digoxin"], ans:1,
+        expl:"Hypokalemia potentiates digoxin binding and dramatically increases the risk of digoxin-toxic arrhythmias. Keep potassium comfortably above 4.0 in patients on digoxin or with cardiac ischemia." }
+    ]
+  },
+
+  {
+    id: 4,
+    available: true,
+    title: "Calcium · Magnesium · Phosphate",
+    desc: "The 'forgotten' electrolytes — hypocalcemia after massive transfusion, magnesium and torsades, phosphate and the refeeding trap, and safe repletion.",
+    objective: "Recognize and manage disorders of calcium, magnesium, and phosphate — read ionized versus total calcium, treat citrate-induced hypocalcemia in massive transfusion, use magnesium for torsades and eclampsia, and anticipate the refeeding trap.",
+    content: [
+      { h:"1", t:"The trio the resuscitation forgets", html:
+        "<p>Sodium and potassium get the attention, but calcium, magnesium, and phosphate quietly run the machinery of every excitable cell and every unit of energy the body spends. They are the electrolytes a busy resuscitation forgets to check — and each one has a transport scenario where forgetting it kills the patient.</p>"+
+        "<p>Start with a measurement trap unique to calcium. About half the calcium in the blood is bound to albumin and biologically inert; only the <strong>ionized (free) fraction</strong> is physiologically active. So a <em>total</em> calcium can read low simply because albumin is low, without any true deficiency. Correct it, or better, measure the ionized level directly:</p>"+
+        "<div class='formula'>corrected Ca = measured Ca + <span class='fk'>0.8</span> × (4 − albumin)<br>&nbsp;&nbsp;or measure <span class='fk'>ionized Ca</span> directly (normal ≈ 1.1–1.3 mmol/L)</div>"+
+        "<p>In the critically ill — shifting albumin, changing pH, transfusion — the correction formula is unreliable, and the ionized calcium on a blood gas is the number to trust. Acidosis frees calcium off albumin (raising ionized Ca); alkalosis binds it (dropping ionized Ca), which is why a hyperventilating patient can develop perioral tingling and cramping with a normal total calcium.</p>"
+      },
+      { h:"2", t:"Hypocalcemia: the irritable membrane", html:
+        "<p>Low ionized calcium makes nerves and muscle hyperexcitable — the opposite of the stabilizing role calcium played in Module 3's hyperkalemia. The signs run from subtle to lethal:</p>"+
+        "<ul>"+
+        "<li><strong>Neuromuscular irritability</strong> — perioral and fingertip paresthesias, cramps, and frank tetany. <em>Chvostek's sign</em> (facial twitch on tapping the facial nerve) and <em>Trousseau's sign</em> (carpal spasm when a BP cuff is inflated) are the classic bedside tells.</li>"+
+        "<li><strong>QT prolongation</strong> — the cardiac signature, setting up for ventricular arrhythmias.</li>"+
+        "<li><strong>Seizures, laryngospasm, and hypotension</strong> — at the severe end, including a myocardium that contracts poorly because calcium is the coupling ion for contraction.</li>"+
+        "</ul>"+
+        "<p>The causes worth carrying in your head: <strong>citrate from massive transfusion</strong> (the next section, and the one that matters most in transport), acute pancreatitis, rhabdomyolysis and tumor lysis (phosphate binds calcium), post-thyroidectomy or post-parathyroidectomy hypoparathyroidism, and — critically — <strong>hypomagnesemia</strong>, which both impairs PTH release and blunts its effect, so a low calcium won't correct until the magnesium is fixed. Treat symptomatic hypocalcemia with IV calcium: <em>gluconate</em> for a peripheral line, <em>chloride</em> (three times the elemental calcium) through a secure central line when you need a fast, potent effect.</p>"
+      },
+      { h:"3", t:"Citrate, massive transfusion, and the lethal diamond", html:
+        "<p>This is the calcium scenario that defines critical-care transport. Banked blood is anticoagulated with <strong>citrate</strong>, which works by chelating calcium. Transfuse slowly and the liver clears the citrate without trouble. But transfuse <em>fast</em> — massive transfusion, the trauma or GI-bleed patient getting unit after unit — and the citrate load outpaces hepatic clearance, binds the patient's own ionized calcium, and drives it down precisely when the patient can least afford it.</p>"+
+        "<p>Ionized hypocalcemia in this setting is doubly dangerous: calcium is an essential cofactor in the clotting cascade, so a low ionized calcium <em>worsens the coagulopathy</em> you are transfusing to fix, and it simultaneously drops cardiac contractility and vascular tone, deepening the hypotension. Modern trauma teaching folds hypocalcemia into the classic 'lethal triad' of acidosis, hypothermia, and coagulopathy — making it a <strong>lethal diamond.</strong></p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — calcium in massive transfusion</span>"+
+        "<p>Ionized hypocalcemia is common early in massive transfusion and is independently associated with increased mortality, more transfusion, and worse coagulopathy in trauma cohorts. Damage-control resuscitation protocols now routinely include empiric calcium repletion and monitoring of ionized calcium during massive transfusion. The evidence is observational rather than from large randomized trials, but it is consistent and mechanistically strong.</p>"+
+        "<div class='grade'>Quality: moderate (consistent observational data; guideline-endorsed in trauma resuscitation).</div></div>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> If you are transfusing blood fast, you are dropping the patient's ionized calcium. Monitor it and replace calcium empirically during massive transfusion — the coagulopathy and the hypotension both depend on it.</div>"
+      },
+      { h:"4", t:"Hypercalcemia: stones, bones, groans, and moans", html:
+        "<p>The opposite derangement is less common in transport but worth recognizing, because severe hypercalcemia is its own emergency. Over 90% of cases trace to two causes: <strong>malignancy</strong> (the acute, sicker presentations) and <strong>primary hyperparathyroidism</strong> (the chronic, milder ones). The symptom mnemonic captures the multisystem picture — <em>stones</em> (kidney stones), <em>bones</em> (bone pain), <em>groans</em> (abdominal pain, constipation, nausea), and <em>psychiatric moans</em> (lethargy, confusion, ultimately coma).</p>"+
+        "<p>On the monitor, hypercalcemia <strong>shortens the QT</strong> — the mirror of hypocalcemia. It also drives a profound osmotic diuresis, so these patients are markedly volume-depleted, and the cornerstone of treatment is <strong>aggressive isotonic fluid resuscitation</strong> to restore volume and promote calcium excretion. Definitive lowering (bisphosphonates, calcitonin, treating the underlying cause) unfolds over hours to days and is largely a destination-hospital problem; your transport job is volume and monitoring. Avoid the old reflex of loop diuretics up front — they are reserved for volume overload, not first-line.</p>"
+      },
+      { h:"5", t:"Magnesium: the cofactor behind the other electrolytes", html:
+        "<p>Magnesium is the quiet regulator standing behind potassium and calcium both. It is a cofactor for the enzymes that keep potassium inside cells and for PTH secretion and action — which is why, as you saw in Module 3 and again above, <strong>refractory hypokalemia and refractory hypocalcemia are so often really hypomagnesemia in disguise.</strong> Replace magnesium, and the other two finally correct.</p>"+
+        "<p>Hypomagnesemia travels with the same company as low potassium: chronic alcoholism, loop and thiazide diuretics, GI losses, and prolonged proton-pump-inhibitor use. Its own signature is neuromuscular irritability and, most importantly, <strong>arrhythmia</strong> — magnesium deficiency prolongs the QT and is a direct substrate for torsades de pointes.</p>"+
+        "<p>That arrhythmic link makes magnesium a therapy as well as a lab value. Its two headline uses:</p>"+
+        "<ul>"+
+        "<li><strong>Torsades de pointes</strong> — IV magnesium (typically 1–2 g) is the first-line treatment, whether or not the serum magnesium is low, because it stabilizes the myocardium in that specific polymorphic VT.</li>"+
+        "<li><strong>Eclampsia / severe pre-eclampsia</strong> — magnesium is the drug of choice for seizure prevention and treatment (not a conventional anticonvulsant), given as a loading dose followed by an infusion.</li>"+
+        "</ul>"
+      },
+      { h:"6", t:"Hypermagnesemia and the transport OB patient", html:
+        "<p>You will meet high magnesium mainly in two settings, and one of them is a transport staple: the <strong>pre-eclamptic patient on a magnesium infusion</strong>, and the patient in <strong>renal failure</strong> (the kidney is the sole route of magnesium excretion). Because we deliberately infuse magnesium in obstetrics, iatrogenic hypermagnesemia is a real and recognizable transport emergency.</p>"+
+        "<p>The toxicity progresses in a predictable order as the level climbs, and the earliest reliable sign is one you can check with a reflex hammer:</p>"+
+        "<ul>"+
+        "<li><strong>Loss of deep tendon reflexes</strong> — the sentinel finding; reflexes disappear before anything more dangerous does.</li>"+
+        "<li><strong>Respiratory depression</strong> — as neuromuscular transmission fails.</li>"+
+        "<li><strong>Bradycardia, hypotension, and ultimately cardiac arrest.</strong></li>"+
+        "</ul>"+
+        "<p>This is why a magnesium infusion is monitored by serial reflex checks: <em>if the reflexes are present, the diaphragm is safe.</em> When reflexes vanish or respirations depress, stop the infusion and give the antidote — <strong>IV calcium</strong>, which directly antagonizes magnesium at the membrane. Calcium for magnesium toxicity mirrors calcium for hyperkalemia: the same stabilizing ion buying the same kind of time.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> On a magnesium drip, deep tendon reflexes are your live monitor. Reflexes gone or breathing depressed → stop the magnesium and give IV calcium. Suspect hypermagnesemia in any renal-failure patient with weakness and bradycardia.</div>"
+      },
+      { h:"7", t:"Phosphate and the refeeding trap", html:
+        "<p>Phosphate is easy to ignore because its symptoms are vague — until you understand that phosphate is the backbone of <strong>ATP</strong> (the cell's energy currency) and of <strong>2,3-DPG</strong> (which lets hemoglobin release oxygen to tissue). A severely low phosphate is, quite literally, an energy failure: diffuse muscle weakness including the diaphragm (respiratory failure and failure to wean the ventilator), hemolysis, rhabdomyolysis, altered mental status, and cardiac dysfunction.</p>"+
+        "<p>The scenario to recognize is <strong>refeeding syndrome</strong>, and it is a genuine transport-relevant killer. Take a chronically malnourished patient — alcoholism, anorexia, prolonged starvation — whose body has run down its phosphate, potassium, and magnesium stores while burning fat. Now reintroduce nutrition (a carbohydrate load, IV dextrose, tube feeds). The surge of insulin that follows drives glucose <em>and phosphate, potassium, and magnesium</em> rapidly into cells, and the serum levels of all three crash together. The result can be sudden respiratory failure, arrhythmia, and death, days into what looked like appropriate feeding.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — feed the at-risk patient slowly</span>"+
+        "<p>In malnourished and high-risk patients, aggressive refeeding precipitates falls in phosphate, potassium, and magnesium and is associated with cardiac and respiratory complications. Guidelines recommend identifying at-risk patients, starting nutrition cautiously, supplementing thiamine, and replacing electrolytes <em>before and during</em> refeeding. The practical transport point: a hypophosphatemic, chronically malnourished patient who just started nutrition is at risk, and the phosphate/potassium/magnesium should be watched and replaced.</p>"+
+        "<div class='grade'>Quality: moderate (consistent observational and physiologic data; strongly guideline-endorsed).</div></div>"+
+        "<p>The opposite, <strong>hyperphosphatemia</strong>, shows up in renal failure and in massive cell breakdown — <em>tumor lysis syndrome</em> and rhabdomyolysis — where the released phosphate binds calcium and drives the hypocalcemia of section 2. Its management is treating the cause and, ultimately, dialysis.</p>"
+      },
+      { h:"8", t:"The forgotten-electrolyte anchor", html:
+        "<p>Three habits keep this trio from being the thing that surprises you.</p>"+
+        "<p><strong>In massive transfusion, think calcium.</strong> Fast blood means citrate means falling ionized calcium — which worsens both the bleeding and the shock. Monitor ionized calcium off the blood gas and replace it empirically; it is as much a part of damage-control resuscitation as the blood itself.</p>"+
+        "<p><strong>When potassium or calcium won't correct, think magnesium</strong> — and remember magnesium's two therapeutic jobs, torsades and eclampsia, plus its toxicity, monitored at the bedside by deep tendon reflexes with IV calcium as the antidote.</p>"+
+        "<p><strong>In the malnourished patient who is now being fed, think phosphate</strong> — and potassium and magnesium alongside it — because refeeding drives all three into cells at once. Across the whole trio, trust the <em>ionized</em> calcium over the total, correct for albumin when you can't, and treat the patient's rhythm and symptoms rather than a single number in isolation.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Calcium in massive transfusion; magnesium behind refractory K and Ca and as the treatment for torsades and eclampsia; phosphate in refeeding. The forgotten electrolytes are only dangerous when they are forgotten.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Which fraction of serum calcium is physiologically active?",
+        opts:["The albumin-bound fraction","The ionized (free) fraction","The total calcium","The citrate-bound fraction"], ans:1,
+        expl:"Only ionized (free) calcium is biologically active; roughly half the total is bound to albumin and inert. A low albumin lowers total calcium without a true deficiency — measure the ionized level or correct for albumin." },
+      { q:"A trauma patient receiving rapid massive transfusion develops worsening coagulopathy and hypotension. Which electrolyte derangement is a key contributor?",
+        opts:["Hyperkalemia","Ionized hypocalcemia from citrate","Hypermagnesemia","Hyperphosphatemia"], ans:1,
+        expl:"Banked blood is citrated; rapid transfusion overwhelms hepatic citrate clearance, chelating ionized calcium. Low ionized calcium worsens coagulopathy (calcium is a clotting cofactor) and drops contractility and vascular tone — the 'lethal diamond.'" },
+      { q:"Trousseau's and Chvostek's signs are bedside indicators of:",
+        opts:["Hypercalcemia","Hypocalcemia","Hypermagnesemia","Hyperphosphatemia"], ans:1,
+        expl:"Both signs reflect the neuromuscular irritability of hypocalcemia — carpal spasm with cuff inflation (Trousseau) and a facial twitch on tapping the facial nerve (Chvostek). Hypocalcemia also prolongs the QT." },
+      { q:"The cornerstone of initial treatment for severe hypercalcemia is:",
+        opts:["A loop diuretic first-line","Aggressive isotonic fluid resuscitation","IV calcium","Immediate dialysis for all patients"], ans:1,
+        expl:"Hypercalcemia causes an osmotic diuresis and profound volume depletion; isotonic fluids restore volume and promote calcium excretion. Loop diuretics are reserved for volume overload, not first-line; definitive lowering takes hours to days." },
+      { q:"A patient's hypokalemia and hypocalcemia both fail to correct with repletion. The most likely underlying problem is:",
+        opts:["Hypomagnesemia","Hyperphosphatemia","Metabolic alkalosis","Hypernatremia"], ans:0,
+        expl:"Magnesium is a cofactor for keeping potassium in cells and for PTH secretion and action. Low magnesium makes both hypokalemia and hypocalcemia refractory until the magnesium is replaced." },
+      { q:"The first-line treatment for torsades de pointes is:",
+        opts:["IV calcium","IV magnesium","IV potassium","IV phosphate"], ans:1,
+        expl:"IV magnesium (typically 1–2 g) is first-line for torsades, given whether or not the serum magnesium is low, because it stabilizes the myocardium in this polymorphic VT." },
+      { q:"In a pre-eclamptic patient on a magnesium infusion, the earliest reliable sign of magnesium toxicity is:",
+        opts:["Respiratory depression","Cardiac arrest","Loss of deep tendon reflexes","Hypertension"], ans:2,
+        expl:"Deep tendon reflexes disappear before respiratory depression and cardiac effects — so serial reflex checks are the bedside monitor. If reflexes are present, the diaphragm is still safe; if they vanish, stop the magnesium." },
+      { q:"The antidote for symptomatic hypermagnesemia (e.g., respiratory depression on a magnesium drip) is:",
+        opts:["IV calcium","IV potassium","Naloxone","Sodium bicarbonate"], ans:0,
+        expl:"IV calcium directly antagonizes magnesium at the membrane — mirroring its role in hyperkalemia. Stop the magnesium infusion and give calcium; support ventilation as needed." },
+      { q:"Phosphate is essential for ATP and for 2,3-DPG. A severely low phosphate can therefore cause:",
+        opts:["Short QT interval","Diaphragmatic weakness and respiratory failure","Hypertensive crisis","Metabolic alkalosis"], ans:1,
+        expl:"Phosphate depletion is an energy failure — diffuse muscle weakness including the diaphragm (respiratory failure, failure to wean), plus hemolysis, rhabdomyolysis, and cardiac dysfunction." },
+      { q:"A chronically malnourished patient with alcoholism is started on IV dextrose and tube feeds, then develops falling phosphate, potassium, and magnesium with respiratory failure. This is:",
+        opts:["Refeeding syndrome","Tumor lysis syndrome","Diabetic ketoacidosis","Hyperosmolar hyperglycemic state"], ans:0,
+        expl:"Refeeding syndrome: reintroduced nutrition triggers an insulin surge that drives phosphate, potassium, and magnesium into cells, crashing all three. Feed at-risk patients cautiously, give thiamine, and replace electrolytes before and during refeeding." }
+    ]
+  },
+
+  {
+    id: 5,
+    available: true,
+    title: "Glucose Emergencies — DKA & HHS",
+    desc: "Pathophysiology of DKA vs HHS, the fluid–insulin–potassium sequence, closing the anion gap, cerebral edema, and transport management of the insulin drip.",
+    objective: "Distinguish DKA from HHS, sequence the fluid–potassium–insulin resuscitation correctly, recognize that the anion gap (not the glucose) is the endpoint in DKA, and manage an insulin infusion and the risk of cerebral edema in transport.",
+    content: [
+      { h:"1", t:"Two faces of the same hormone failure", html:
+        "<p>Diabetic ketoacidosis (DKA) and the hyperosmolar hyperglycemic state (HHS) sit at two ends of one spectrum: not enough working insulin. What separates them is <em>how much</em> insulin is missing and <em>how fast</em> the crisis builds.</p>"+
+        "<p><strong>DKA</strong> is a near-total insulin deficiency, classically in type 1 diabetes. With no insulin to let cells use glucose, the body switches to burning fat, and the byproduct is <strong>ketoacids</strong> — a high-anion-gap metabolic acidosis (the 'D' in MUDPILES from Module 1). It builds over hours to a day and the patient is often relatively young.</p>"+
+        "<p><strong>HHS</strong> is a <em>relative</em> insulin deficiency, classically in older type 2 diabetics. There is just enough insulin to suppress ketone formation, so there is little or no acidosis — but not enough to control glucose, which climbs to extraordinary levels and drags the serum osmolality up with it. It builds over days, and the dominant problem is profound dehydration and a hyperosmolar, obtunded patient.</p>"+
+        "<div class='formula'><span class='fk'>DKA</span>: glucose &gt;250 · pH &lt;7.3 · HCO₃ &lt;18 · ketones ⊕ · gap ↑<br><span class='fk'>HHS</span>: glucose often &gt;600 · pH &gt;7.3 · osm &gt;320 · minimal ketones</div>"+
+        "<p>HHS carries the higher mortality of the two, largely because of the age and comorbidity of its patients and the depth of the dehydration. Overlap exists — some patients have features of both — but the framing holds: <em>DKA is an acid problem, HHS is an osmolality-and-water problem.</em></p>"
+      },
+      { h:"2", t:"Why both patients are profoundly dry", html:
+        "<p>Whatever the ketone story, both crises share one engine: <strong>osmotic diuresis</strong>. Once blood glucose exceeds the kidney's reabsorption threshold (~180 mg/dL), glucose spills into the urine and drags water and electrolytes with it. Hour after hour, the patient urinates away liters of fluid and large amounts of sodium, potassium, phosphate, and magnesium.</p>"+
+        "<p>The numbers are staggering and worth internalizing, because they drive the entire treatment. A DKA patient typically arrives <strong>6–9 liters</strong> down; an HHS patient, building more slowly and to higher glucose, is often <strong>even more dehydrated</strong> — 8–12 liters or more. This is why the single most important early intervention in both is not insulin — it is <strong>fluid</strong>. The dehydration also explains the total-body potassium depletion that makes the next section so important.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> DKA and HHS are, first, states of massive volume depletion. The osmotic diuresis has emptied the tank of water and electrolytes. Fluid resuscitation comes before — and does much of the work of — glucose control.</div>"
+      },
+      { h:"3", t:"Step 1 — fluids first", html:
+        "<p>Resuscitation begins with isotonic crystalloid to refill the intravascular space and restore perfusion. Fluid alone accomplishes a great deal before a drop of insulin is given: it dilutes the glucose, improves renal perfusion so the kidneys can excrete more of it, and lowers the counter-regulatory hormone surge. It is common to see the glucose fall substantially on fluids alone.</p>"+
+        "<p>After the initial resuscitation, the choice of fluid is guided by the <em>corrected</em> sodium (recall the glucose correction from Module 2 — every 100 mg/dL of glucose above 100 masks about 1.6 mEq/L of sodium). If the corrected sodium is high or normal, transition toward a hypotonic fluid (½-normal saline) to address the free-water deficit; if it is low, stay with isotonic. The pace is brisk but not reckless — especially in HHS and in children, where over-rapid fluid shifts carry the cerebral-edema risk discussed below.</p>"+
+        "<p>On transport you are frequently continuing a resuscitation someone else started. Know what has already been given, what the corrected sodium is doing, and whether the patient is now adequately perfused — the answers steer both the rate and the tonicity of what runs next.</p>"
+      },
+      { h:"4", t:"Step 2 — check potassium before you start insulin", html:
+        "<p>This is the step that separates a safe resuscitation from a lethal one, and it is the most tested concept in the whole topic. In both DKA and HHS, <strong>total-body potassium is severely depleted</strong> — bled out through the osmotic diuresis over hours. Yet the <em>serum</em> potassium often reads normal or even high, because acidosis and insulin deficiency have driven potassium out of cells and into the serum. The lab value is masking a profound deficit.</p>"+
+        "<p>Now consider what insulin does (Module 3): it drives potassium <em>into</em> cells. Start insulin on a patient whose serum potassium is already at the low end, and you can precipitate a sudden, fatal <strong>hypokalemia</strong> — flooding the true deficit into view all at once. Hence the rule that governs the order of operations:</p>"+
+        "<div class='formula'>K &lt; <span class='fk'>3.3</span> → <span class='fk'>hold insulin</span>, replace potassium first<br>K <span class='fk'>3.3 – 5.3</span> → give insulin <em>and</em> add potassium to fluids<br>K &gt; <span class='fk'>5.3</span> → start insulin, hold K, recheck</div>"+
+        "<p>The precise thresholds vary by protocol, but the principle is universal and non-negotiable: <em>never start an insulin infusion in a hypokalemic DKA/HHS patient.</em> Fix the potassium first. Because insulin and fluids both move potassium, it must be rechecked frequently throughout the resuscitation — hourly to every two hours — and this monitoring continues in transport.</p>"
+      },
+      { h:"5", t:"Step 3 — the insulin infusion", html:
+        "<p>Only after fluids are running and the potassium is safe does insulin begin, as a <strong>continuous IV infusion</strong> of regular insulin, typically around <strong>0.1 unit/kg/hr</strong>. The goal is not to crash the glucose — it is a steady, controlled decline of roughly <strong>50–75 mg/dL per hour.</strong> If the glucose is falling too fast, the drip is turned down; too slow, and it is turned up.</p>"+
+        "<p>Note what insulin is actually <em>for</em> in DKA. Its job is less about the glucose than about switching off ketogenesis — turning the metabolic machinery back from burning fat to burning glucose, which is what closes the acid gap. That reframing sets up the two most important nuances, in the next sections.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — the bolus is optional</span>"+
+        "<p>The traditional initial insulin bolus adds little. Randomized and comparative data show that starting a weight-based continuous infusion <em>without</em> an up-front bolus achieves equivalent rates of glucose decline and gap closure, and many modern protocols omit the bolus — particularly in children, where it may add to cerebral-edema risk. The infusion, run steadily, is what matters.</p>"+
+        "<div class='grade'>Quality: moderate (randomized and comparative studies supporting no-bolus infusion protocols).</div></div>"
+      },
+      { h:"6", t:"The gap, not the glucose, is the endpoint in DKA", html:
+        "<p>Here is the error that reopens a resolving DKA and the single most important concept in its management. The glucose normalizes <em>hours before</em> the ketoacidosis resolves. If you stop the insulin when the glucose hits 200, you switch ketogenesis back on and the gap reopens — the patient is again making acid. But you also cannot keep running insulin against a normal glucose without causing hypoglycemia.</p>"+
+        "<p>The resolution of this bind is elegant and is the defining move of DKA care: when the glucose falls to about <strong>200–250 mg/dL, add dextrose</strong> (switch to a D5-containing fluid) and <strong>keep the insulin running</strong> at a rate sufficient to keep suppressing ketones. You are now feeding the patient glucose <em>so that</em> you can continue the insulin that is closing the gap. Insulin continues until the <strong>anion gap has closed</strong> and the ketoacidosis has cleared — <em>not</em> until the glucose is normal.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> In DKA, the endpoint is a closed anion gap, not a normal glucose. When glucose reaches ~200–250, add dextrose and continue the insulin infusion. Stopping insulin early — because the sugar looks fine — reopens the gap. (HHS, with little acidosis, is instead driven by osmolality and mental-status recovery.)</div>"
+      },
+      { h:"7", t:"Cerebral edema — the feared pediatric complication", html:
+        "<p>Cerebral edema is the complication that makes pediatric DKA so frightening. It is uncommon but often catastrophic, and it strikes children far more than adults. The mechanism is incompletely understood but relates to the brain's osmotic adaptation to the hyperglycemic, hyperosmolar state and the fluid and osmolar shifts that occur during treatment — which is part of why over-rapid fluid administration, over-rapid osmolality correction, and up-front insulin boluses are all approached cautiously in children.</p>"+
+        "<p>The danger sign is a patient who is <em>deteriorating during treatment</em> when the numbers are improving. Watch for a new or worsening headache, a decline in mental status or increasing lethargy, and — ominously — the Cushing-type pattern of <strong>bradycardia with rising blood pressure</strong>, along with recurrent vomiting or new neurologic deficits. It typically appears several hours into therapy, not at presentation.</p>"+
+        "<p>Recognition is the transport skill: if a DKA patient (especially a child) declines neurologically as their glucose and acidosis are getting better, treat it as cerebral edema until proven otherwise — support the airway, and definitive management is hyperosmolar therapy (hypertonic saline or mannitol) at the receiving center. Do not attribute a falling mental status to 'improvement.'</p>"
+      },
+      { h:"8", t:"Bicarbonate, and the transport anchor", html:
+        "<p>One reflex to unlearn: <strong>do not give bicarbonate for the acidosis of DKA.</strong> It is tempting — the pH is low — but the acid is being generated by ketones that the insulin infusion will clear, and bicarbonate does not improve outcomes.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — skip the bicarb</span>"+
+        "<p>Studies of bicarbonate in DKA show no improvement in the rate of acidosis resolution or in outcomes, and there are real potential harms: paradoxical CNS acidosis, worsened hypokalemia (the last thing this patient needs), and — in children — an association with cerebral edema. Guidelines reserve any consideration of bicarbonate for extreme acidemia (pH below ~6.9), and even there the benefit is unproven. For the transport clinician: treat the ketoacidosis with fluids, insulin, and potassium — not bicarbonate.</p>"+
+        "<div class='grade'>Quality: moderate–high (multiple studies show no benefit; guideline-endorsed against routine use).</div></div>"+
+        "<p>Pulling the module together into transport practice:</p>"+
+        "<ul>"+
+        "<li><strong>Fluids first</strong> — both patients are 6–12+ liters down; volume does much of the early work.</li>"+
+        "<li><strong>Potassium before insulin</strong> — never start insulin if K &lt; 3.3; recheck K hourly.</li>"+
+        "<li><strong>Insulin as a steady infusion</strong> — aim for a 50–75 mg/dL/hr fall, not a crash; the bolus is optional.</li>"+
+        "<li><strong>Add dextrose at ~200–250 and keep insulin running</strong> until the gap closes — the gap, not the glucose, is the DKA endpoint.</li>"+
+        "<li><strong>Watch for cerebral edema</strong>, especially in children who decline while their labs improve.</li>"+
+        "<li><strong>No bicarbonate</strong> for routine DKA.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The order is fluids → potassium check → insulin. The DKA endpoint is a closed anion gap, reached by adding dextrose and continuing insulin — not by stopping when the glucose looks normal.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The feature that most distinguishes DKA from HHS is:",
+        opts:["HHS has a significant ketoacidosis; DKA does not","DKA has a high-anion-gap ketoacidosis; HHS has minimal ketones and higher osmolality","HHS occurs mainly in type 1 diabetics","DKA glucose is always higher than HHS glucose"], ans:1,
+        expl:"DKA is a near-total insulin deficiency producing a high-gap ketoacidosis; HHS is a relative deficiency with enough insulin to suppress ketones but extreme hyperglycemia and hyperosmolality. HHS glucose is typically the higher of the two." },
+      { q:"Both DKA and HHS share which underlying process that drives profound dehydration?",
+        opts:["Excessive insulin secretion","Osmotic diuresis from glucosuria","Renal tubular acidosis","Bicarbonate wasting"], ans:1,
+        expl:"Glucose above the renal threshold spills into urine and drags water and electrolytes with it — an osmotic diuresis that leaves DKA patients 6–9 L down and HHS patients often even more depleted." },
+      { q:"The FIRST priority in managing a patient with DKA or HHS is:",
+        opts:["An immediate insulin bolus","Isotonic fluid resuscitation","Sodium bicarbonate","A potassium bolus"], ans:1,
+        expl:"These are states of massive volume depletion. Fluids come first — they restore perfusion, dilute the glucose, improve renal excretion, and lower counter-regulatory hormones, often dropping the glucose substantially before insulin is even started." },
+      { q:"In DKA, the serum potassium is often normal or high, yet total-body potassium is:",
+        opts:["Also high","Severely depleted","Exactly normal","Irrelevant to management"], ans:1,
+        expl:"The osmotic diuresis depletes total-body potassium, but acidosis and insulin deficiency shift potassium out of cells, masking the deficit in the serum value. Insulin will drive it back into cells and unmask the true deficit." },
+      { q:"An insulin infusion should be HELD, and potassium replaced first, when the serum potassium is:",
+        opts:["Below 3.3 mEq/L","Between 3.3 and 5.3 mEq/L","Above 5.3 mEq/L","Any value above 4.0"], ans:0,
+        expl:"If K < 3.3, starting insulin (which drives potassium into cells) can precipitate fatal hypokalemia. Replace potassium first. Between 3.3–5.3, give insulin with potassium added to fluids; above 5.3, start insulin and hold potassium." },
+      { q:"The target rate of glucose decline on an insulin infusion in DKA is approximately:",
+        opts:["150–200 mg/dL per hour","50–75 mg/dL per hour","As fast as possible","10 mg/dL per hour"], ans:1,
+        expl:"A controlled fall of ~50–75 mg/dL per hour is the goal — not a crash. Too-rapid correction contributes to complications; titrate the infusion up or down to stay in this range." },
+      { q:"When the glucose falls to about 200–250 mg/dL in DKA, the correct action is:",
+        opts:["Stop the insulin infusion","Add dextrose to the fluids and continue the insulin infusion","Give a bicarbonate bolus","Double the insulin rate"], ans:1,
+        expl:"The ketoacidosis resolves hours after the glucose normalizes. Add dextrose (D5) and keep insulin running to keep suppressing ketones until the anion gap closes — stopping insulin early reopens the gap." },
+      { q:"The endpoint that signals resolution of DKA is:",
+        opts:["A normal blood glucose","A closed anion gap / cleared ketoacidosis","A potassium above 4.0","A normal serum sodium"], ans:1,
+        expl:"Glucose normalizes well before the acidosis clears. Insulin continues until the anion gap closes and ketoacidosis resolves — the gap, not the glucose, is the DKA endpoint." },
+      { q:"A child with DKA develops a worsening headache, rising blood pressure, and bradycardia several hours into treatment as the labs improve. This suggests:",
+        opts:["Hypoglycemia","Cerebral edema","Resolution of the DKA","Hyperkalemia"], ans:1,
+        expl:"Neurologic deterioration during treatment — headache, declining mental status, and a Cushing pattern of bradycardia with hypertension — signals cerebral edema, the feared pediatric complication. Do not mistake a declining mental status for improvement." },
+      { q:"Regarding sodium bicarbonate in routine DKA, current evidence indicates it:",
+        opts:["Speeds resolution and should be given routinely","Does not improve outcomes and carries potential harms","Is the treatment of choice for the acidosis","Prevents cerebral edema"], ans:1,
+        expl:"Bicarbonate does not improve the rate of acidosis resolution or outcomes and risks paradoxical CNS acidosis, worsened hypokalemia, and (in children) cerebral edema. The ketoacidosis is treated with fluids, insulin, and potassium — not bicarbonate." }
+    ]
+  },
+
+  {
+    id: 6,
+    available: true,
+    title: "Endocrine Crises",
+    desc: "Thyroid storm, myxedema coma, and adrenal (Addisonian) crisis — recognizing the great mimics and the time-critical hormone replacement each demands.",
+    objective: "Recognize the three endocrine emergencies that masquerade as other diagnoses — thyroid storm, myxedema coma, and adrenal crisis — and deliver the time-critical, hormone-based treatment each requires, including the sequencing rule that prevents a fatal error.",
+    content: [
+      { h:"1", t:"The emergencies that hide in plain sight", html:
+        "<p>Endocrine crises are dangerous less because they are hard to treat than because they are hard to <em>think of</em>. Each one presents wearing the costume of a more common diagnosis — sepsis, heart failure, a primary psychiatric or neurologic event — and the endocrine cause is missed until someone deliberately considers it. The three that matter in critical-care transport are the thyroid at both extremes (storm and myxedema coma) and the adrenal gland at empty (adrenal crisis).</p>"+
+        "<p>Two threads run through all three. First, they are frequently <strong>precipitated by a stressor</strong> — an infection, a surgery, a myocardial infarction, trauma, or an abrupt medication change — layered on top of an underlying gland problem. Second, the definitive treatment is <strong>replacing or opposing a hormone</strong>, and you generally start that treatment on <em>clinical suspicion</em>, before any confirmatory lab returns, because the confirmatory tests take longer than the patient can wait. Treating early on suspicion is not sloppy here — it is the standard of care.</p>"
+      },
+      { h:"2", t:"Thyroid storm: the metabolic fire", html:
+        "<p>Thyroid storm is decompensated, life-threatening hyperthyroidism — the accelerator jammed to the floor. It is not defined by how high the thyroid labs are (which overlap with ordinary hyperthyroidism) but by <strong>end-organ dysfunction</strong> across three systems. Look for the triad and you will recognize it:</p>"+
+        "<ul>"+
+        "<li><strong>Fever</strong> — often high, out of proportion to any infection.</li>"+
+        "<li><strong>Cardiovascular overdrive</strong> — marked tachycardia, frequently <em>atrial fibrillation with rapid ventricular response</em>, and high-output heart failure.</li>"+
+        "<li><strong>CNS and GI disturbance</strong> — agitation, delirium, or coma; and nausea, vomiting, diarrhea, and often jaundice.</li>"+
+        "</ul>"+
+        "<p>It is precipitated by infection, surgery, trauma, iodine load (including contrast), or abrupt withdrawal of antithyroid drugs. Untreated, the hyperthermia and cardiovascular collapse are lethal. The transport picture is a hot, wildly tachycardic, agitated patient who can look septic — with the tell being a known or suspected thyroid history and the disproportionate hyperadrenergic state.</p>"
+      },
+      { h:"3", t:"Treating storm — and the one-hour ordering rule", html:
+        "<p>The treatment attacks the fire at several points at once, and one detail of the <em>order</em> is genuinely tested and genuinely matters. The components:</p>"+
+        "<ul>"+
+        "<li><strong>Beta-blockade</strong> (propranolol is favored) — controls the heart rate and the adrenergic storm, and at high doses blunts peripheral conversion of T4 to the more active T3. This is the symptomatic cornerstone.</li>"+
+        "<li><strong>A thionamide</strong> (propylthiouracil or methimazole) — blocks new thyroid hormone synthesis. PTU has the added effect of reducing T4-to-T3 conversion.</li>"+
+        "<li><strong>Iodine</strong> — blocks the <em>release</em> of pre-formed hormone. But it must be given <strong>at least one hour AFTER the thionamide.</strong></li>"+
+        "<li><strong>Steroids</strong> (hydrocortisone) — reduce T4-to-T3 conversion and cover a possible relative adrenal insufficiency.</li>"+
+        "<li><strong>Supportive care</strong> — aggressive cooling, fluids, and treating the precipitant.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor · sequencing</span> Give the thionamide FIRST, then iodine at least an hour later. Iodine given first would supply fresh substrate that the unblocked gland could build into <em>more</em> hormone (the Jod-Basedow phenomenon). Block synthesis, then block release.</div>"+
+        "<p>One more caution: avoid aspirin for the fever — salicylates displace thyroid hormone from its binding protein and can worsen the storm (a link back to Module 8's salicylate story). Use acetaminophen and active cooling instead.</p>"
+      },
+      { h:"4", t:"Myxedema coma: the metabolic standstill", html:
+        "<p>At the opposite pole is <strong>myxedema coma</strong> — severe, decompensated <em>hypo</em>thyroidism, the body's metabolism slowed nearly to a stop. Despite the name, a true coma is not required; the hallmark is <em>altered mental status plus hypothermia</em> in a hypothyroid patient. It is a disease of the elderly, often in winter, and it too is usually tipped over by a stressor — infection, cold exposure, a sedating drug, or a missed thyroid dose.</p>"+
+        "<p>The picture is the mirror image of storm — everything is slow and cold:</p>"+
+        "<ul>"+
+        "<li><strong>Hypothermia</strong> — often profound, and sometimes without shivering.</li>"+
+        "<li><strong>Altered mental status</strong> — lethargy, obtundation, coma.</li>"+
+        "<li><strong>Hypoventilation</strong> — CO₂ retention and respiratory failure from a depressed respiratory drive.</li>"+
+        "<li><strong>Bradycardia and hypotension</strong>, and characteristically <strong>hyponatremia</strong> and <strong>hypoglycemia.</strong></li>"+
+        "</ul>"+
+        "<p>The high mortality comes from the respiratory failure and cardiovascular collapse. On transport, the combination of an obtunded, hypothermic, bradycardic, hyponatremic elderly patient who is retaining CO₂ should put myxedema on the list — especially with a thyroidectomy scar or a history of hypothyroidism.</p>"
+      },
+      { h:"5", t:"Treating myxedema — and the steroid-first rule", html:
+        "<p>Treatment is thyroid hormone replacement (IV levothyroxine, sometimes with T3), plus supportive care: careful rewarming, ventilatory support for the CO₂ retention, cautious correction of the hyponatremia (Module 2's slow-correction rule applies), and dextrose for hypoglycemia. But there is a sequencing rule here as consequential as the one in thyroid storm:</p>"+
+        "<div class='keybox'><span class='kt'>Anchor · steroids first</span> Give <strong>hydrocortisone before thyroid hormone</strong> in suspected myxedema coma. Many of these patients have coexisting adrenal insufficiency, and giving thyroid hormone first accelerates cortisol metabolism — which can precipitate an acute adrenal crisis on top of the myxedema. Cover the adrenal gland first, then replace thyroid hormone.</div>"+
+        "<p>That single rule — <em>steroids before thyroid replacement</em> — is the myxedema counterpart to <em>thionamide before iodine</em> in storm. Both exist because giving the obvious drug first, without the setup step, can kill the patient. It also foreshadows the gland this module closes on.</p>"
+      },
+      { h:"6", t:"Adrenal crisis: the empty gland", html:
+        "<p>Adrenal (Addisonian) crisis is acute cortisol insufficiency, and it is the most likely of the three to appear abruptly in a previously stable patient. Cortisol is the hormone that lets the body <em>respond to stress</em> — it maintains vascular tone, supports blood glucose, and permits catecholamines to work. Take it away during a stressor and the cardiovascular system loses its ability to compensate.</p>"+
+        "<p>The defining, and most important, feature is <strong>hypotension and shock that does not respond to fluids or to vasopressors.</strong> That refractoriness is the clue: a patient in distributive-looking shock who will not come up on norepinephrine, without another good explanation, should make you think of an empty adrenal gland. The accompanying labs are characteristic:</p>"+
+        "<ul>"+
+        "<li><strong>Hyponatremia and hyperkalemia</strong> — the fingerprint of the missing mineralocorticoid (aldosterone) in primary adrenal failure.</li>"+
+        "<li><strong>Hypoglycemia</strong> — cortisol supports gluconeogenesis.</li>"+
+        "<li>Nonspecific but common: nausea, vomiting, abdominal pain, weakness, and fever.</li>"+
+        "</ul>"+
+        "<p>Who is at risk? The patient with known adrenal insufficiency (Addison's) under a new stress; the patient on <strong>chronic steroids whose steroids were stopped or not stress-dosed</strong> (by far the most common cause in developed settings — suppressed adrenals that can't ramp up); pituitary disease; and bilateral adrenal hemorrhage.</p>"
+      },
+      { h:"7", t:"Treating adrenal crisis — steroids that cannot wait", html:
+        "<p>The treatment is immediate and simple, and it is the reason this diagnosis is so satisfying to catch: <strong>stress-dose hydrocortisone</strong> (a common regimen is 100 mg IV), given the moment you suspect it, together with aggressive isotonic fluids and correction of the hypoglycemia. The response can be dramatic — the fluid- and pressor-refractory shock reverses once cortisol is on board.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — treat first, confirm later</span>"+
+        "<p>In suspected adrenal crisis, the standard is to administer stress-dose glucocorticoids <em>immediately</em> on clinical suspicion rather than waiting for cortisol-level confirmation, because the delay is dangerous and the treatment is low-risk. If diagnostic certainty is needed, <strong>dexamethasone</strong> can be used initially — it treats the crisis without interfering with a subsequent cortisol assay or ACTH stimulation test — but treatment is never withheld to obtain the test. Empiric hydrocortisone in undifferentiated refractory shock is a recognized, low-harm intervention.</p>"+
+        "<div class='grade'>Quality: moderate (strong physiologic rationale and consensus guidelines; the harm of withholding is well established).</div></div>"+
+        "<p>For the transport clinician, the practical rule writes itself: shock that stays down despite adequate fluid and escalating vasopressors, especially in a patient on or recently off chronic steroids, is adrenal crisis until proven otherwise — and the trial of stress-dose steroids is both diagnostic and therapeutic.</p>"
+      },
+      { h:"8", t:"The endocrine-crisis anchor", html:
+        "<p>These three are easy to hold together once you see them as one family — a gland pushed past compensation by a stressor, wearing another disease's clothes, and treated by opposing or replacing a hormone on suspicion.</p>"+
+        "<ul>"+
+        "<li><strong>Thyroid storm</strong> — hot, fast, agitated; treat with beta-blocker + thionamide, then iodine an hour later, plus steroids and cooling. <em>Thionamide before iodine.</em></li>"+
+        "<li><strong>Myxedema coma</strong> — cold, slow, obtunded, hyponatremic, retaining CO₂; treat with thyroid hormone and support. <em>Hydrocortisone before thyroid hormone.</em></li>"+
+        "<li><strong>Adrenal crisis</strong> — fluid- and pressor-refractory shock, hyponatremia + hyperkalemia + hypoglycemia; treat with immediate stress-dose hydrocortisone and fluids. <em>Treat on suspicion; dexamethasone if you must preserve the diagnostic workup.</em></li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The recurring lesson is <em>order of operations</em>: block synthesis before release (storm), cover the adrenal before replacing thyroid (myxedema), and give cortisol before you have proof (adrenal crisis). Consider these diagnoses precisely when a septic-looking or shock patient isn't behaving the way the obvious diagnosis should.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Thyroid storm is diagnosed primarily by:",
+        opts:["The absolute level of thyroid hormone","End-organ dysfunction (fever, cardiovascular, CNS/GI)","A single elevated TSH","The presence of a goiter"], ans:1,
+        expl:"Storm is defined clinically by end-organ decompensation — high fever, tachyarrhythmia/high-output failure, and CNS/GI disturbance — not by how high the labs are, which overlap with uncomplicated hyperthyroidism." },
+      { q:"In treating thyroid storm, why must iodine be given at least an hour AFTER a thionamide (e.g., PTU)?",
+        opts:["Iodine deactivates the thionamide","Iodine given first can be used as substrate to make more hormone","They cannot be given on the same day","Iodine must be given intravenously first"], ans:1,
+        expl:"Iodine blocks hormone release, but if given before synthesis is blocked it supplies substrate the gland can build into more hormone (Jod-Basedow). Block synthesis with the thionamide first, then block release with iodine." },
+      { q:"Which antipyretic should be AVOIDED in thyroid storm?",
+        opts:["Acetaminophen","Aspirin (salicylates)","Active external cooling","Ibuprofen only"], ans:1,
+        expl:"Salicylates displace thyroid hormone from its binding protein, raising free hormone and worsening the storm. Use acetaminophen and active cooling instead." },
+      { q:"The hallmark presentation of myxedema coma is:",
+        opts:["Fever and tachycardia","Altered mental status with hypothermia in a hypothyroid patient","Hypertension and agitation","Hyperglycemia and hypernatremia"], ans:1,
+        expl:"Myxedema coma is decompensated hypothyroidism — altered mental status plus hypothermia, typically with bradycardia, hypoventilation/CO₂ retention, hyponatremia, and hypoglycemia. It is the metabolic mirror of thyroid storm." },
+      { q:"In suspected myxedema coma, hydrocortisone should be given:",
+        opts:["Only if the patient fails to improve","Before thyroid hormone replacement","Never — steroids worsen hypothyroidism","After the patient is rewarmed"], ans:1,
+        expl:"Give hydrocortisone before thyroid hormone. Coexisting adrenal insufficiency is common, and replacing thyroid hormone first accelerates cortisol metabolism, potentially precipitating an adrenal crisis." },
+      { q:"The most characteristic cardiovascular feature of adrenal (Addisonian) crisis is:",
+        opts:["Hypertensive emergency","Hypotension/shock refractory to fluids and vasopressors","Bradycardia responsive to atropine","A short QT interval"], ans:1,
+        expl:"Cortisol permits catecholamines to work and maintains vascular tone. Its absence produces shock that does not respond to fluids or pressors — the key clue to an adrenal cause of undifferentiated shock." },
+      { q:"Which lab pattern is characteristic of primary adrenal crisis?",
+        opts:["Hypernatremia and hypokalemia","Hyponatremia, hyperkalemia, and hypoglycemia","Hypercalcemia and hyperglycemia","Hypophosphatemia and alkalosis"], ans:1,
+        expl:"The missing mineralocorticoid produces hyponatremia and hyperkalemia, and cortisol deficiency causes hypoglycemia — the classic triad in primary adrenal crisis." },
+      { q:"The most common cause of adrenal crisis in developed settings is:",
+        opts:["Bilateral adrenal hemorrhage","Abrupt withdrawal of, or failure to stress-dose, chronic steroids","Primary adrenal tumor","Iodine exposure"], ans:1,
+        expl:"Chronic exogenous steroids suppress the adrenal axis; stopping them or failing to stress-dose during illness leaves adrenals unable to ramp up cortisol, precipitating crisis. It is far more common than adrenal hemorrhage or tumor." },
+      { q:"When immediate treatment of suspected adrenal crisis is needed but you want to preserve a diagnostic cortisol workup, the preferred steroid is:",
+        opts:["Hydrocortisone","Dexamethasone","Prednisone","Fludrocortisone"], ans:1,
+        expl:"Dexamethasone treats the crisis without cross-reacting in the cortisol assay, so an ACTH-stimulation test can still be performed. Regardless, treatment is never withheld to obtain the test." },
+      { q:"A unifying principle across these endocrine emergencies is that definitive treatment should be:",
+        opts:["Delayed until confirmatory labs return","Started on clinical suspicion, before confirmatory results","Limited to supportive care in transport","Withheld unless the precipitant is known"], ans:1,
+        expl:"Confirmatory endocrine testing takes longer than the patient can safely wait, and the hormone-based treatments are relatively low-risk. Storm, myxedema, and adrenal crisis are all treated empirically on clinical suspicion." }
+    ]
+  },
+
+  {
+    id: 7,
+    available: true,
+    title: "The Common Lab Panel in Transport",
+    desc: "Reading the sheet at the bedside — CBC, BMP/CMP, LFTs, lactate, BUN/creatinine and AKI, and the coagulation panel — as decision tools, not trivia.",
+    objective: "Read the routine lab panels a sending facility hands you — CBC, BMP/CMP, renal indices, LFTs, lactate, and coagulation studies — as transport decision tools: what each value changes about your management and monitoring en route.",
+    content: [
+      { h:"1", t:"Labs as decisions, not trivia", html:
+        "<p>At handoff you are usually given a sheet of results, and the skill that matters is not reciting reference ranges — it is asking, of each abnormal value, <em>what does this change about the next two hours?</em> A lab that doesn't alter your monitoring, your interventions, or your destination is context; a lab that does is a decision. This module walks the common panels through that lens.</p>"+
+        "<p>Two habits frame everything. First, read <strong>trends over snapshots</strong> whenever you can — a creatinine of 2.0 that was 1.0 this morning is a different patient than a creatinine of 2.0 that has been 2.0 for a year. Ask for the priors. Second, <strong>tie every value back to the modules you have already built</strong>: the electrolytes to Modules 2–4, the bicarbonate to the acid–base read of Module 1, the glucose to Module 5. The panel is not new material so much as those principles arriving on one page.</p>"
+      },
+      { h:"2", t:"The CBC: three lines, three questions", html:
+        "<p>The complete blood count is really three separate stories on one line. Read each as a question.</p>"+
+        "<ul>"+
+        "<li><strong>Hemoglobin / hematocrit</strong> — <em>is there enough oxygen-carrying capacity, and is it stable?</em> Recall Module 1's hemodynamics link: oxygen delivery depends on hemoglobin. In a bleeding patient the single number matters less than the trend and the rate of change — an acute bleed can kill at a hemoglobin that a chronic anemic tolerates. A falling serial hemoglobin during transport is a red flag that outranks any one value. Restrictive transfusion (threshold near 7 g/dL) is the norm for stable patients; active hemorrhage is resuscitated by the clinical picture, not a number.</li>"+
+        "<li><strong>White blood cell count</strong> — <em>is there infection or stress?</em> Elevation suggests infection or inflammation, but stress, steroids, and catecholamines all raise it too. A very <em>low</em> WBC (neutropenia) flips the concern entirely: that patient is immunocompromised, a fever is an emergency, and they may need protective precautions.</li>"+
+        "<li><strong>Platelets</strong> — <em>can this patient clot?</em> This is the CBC line that most directly changes procedural risk. Thrombocytopenia raises bleeding risk for line placement and is a piece of the coagulation picture in section 7.</li>"+
+        "</ul>"
+      },
+      { h:"3", t:"The BMP: the electrolyte panel you already know", html:
+        "<p>The basic metabolic panel is largely a review of Modules 1–5 arriving together — sodium, potassium, chloride, bicarbonate, BUN, creatinine, and glucose. Read it as a set, because the values talk to each other:</p>"+
+        "<ul>"+
+        "<li><strong>Sodium</strong> → the water/tonicity read of Module 2; correct it for glucose before reacting.</li>"+
+        "<li><strong>Potassium</strong> → the Module 3 emergency; pair a high or low value with the ECG.</li>"+
+        "<li><strong>Bicarbonate (CO₂)</strong> → the metabolic side of the Module 1 acid–base read; a low value flags a metabolic acidosis and should prompt an <em>anion gap</em> (Na − Cl − HCO₃) right there on the panel.</li>"+
+        "<li><strong>Glucose</strong> → Module 5, and always worth a fingerstick to confirm a critical value.</li>"+
+        "</ul>"+
+        "<p>The comprehensive metabolic panel (CMP) adds the liver tests and calcium/protein of the sections below. The mental move on any BMP is to <em>calculate the gap</em> and <em>scan the potassium</em> first — those two are the results most likely to change what you do in the next hour.</p>"
+      },
+      { h:"4", t:"Renal function: BUN, creatinine, and the AKI question", html:
+        "<p>Creatinine is the workhorse marker of kidney function, and the transport-relevant question is usually <em>acute or chronic?</em> — because an acute kidney injury (AKI) reframes drug dosing, fluid decisions, and the urgency of the destination. As in the CBC, the <strong>trend is everything</strong>: a rising creatinine is an active injury; a stable elevation is baseline chronic kidney disease.</p>"+
+        "<p>The BUN-to-creatinine ratio adds a clue to the <em>type</em> of injury. A disproportionately high BUN relative to creatinine (a ratio above ~20:1) points toward a <strong>pre-renal</strong> cause — volume depletion, poor renal perfusion — the patient whose kidneys are fine but starved of flow, and who often responds to fluids. A GI bleed also raises the BUN as absorbed blood is metabolized.</p>"+
+        "<p>Two management consequences you carry en route. First, <strong>renal dosing</strong>: impaired clearance prolongs many drugs — including the insulin of Module 5 (watch for delayed hypoglycemia) and numerous antibiotics and sedatives. Second, the renal-failure patient is the one from Module 3 who cannot excrete a potassium load and from Module 4 who cannot excrete magnesium or phosphate — their whole electrolyte picture is more fragile, and dialysis may be the actual destination.</p>"
+      },
+      { h:"5", t:"Lactate: the perfusion gauge", html:
+        "<p>Of all the chemistry values, lactate is the one that most directly reports <em>how the tissues are doing</em>, and it ties straight back to the oxygen-delivery physiology of the Hemodynamics academy. Lactate rises when tissue oxygen demand outstrips supply and cells shift to anaerobic metabolism — so an elevated lactate is a marker of <strong>global hypoperfusion</strong> (shock, sepsis, ischemia) and a recognized marker of severity.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> A normal blood pressure with a rising lactate is an ominous combination — it means perfusion is failing despite an adequate-looking pressure (the 'compensated shock' idea from hemodynamics). Trust the lactate over the reassuring vital sign.</div>"+
+        "<p>The most useful way to use lactate on transport is as a <strong>trend</strong>. Lactate <em>clearance</em> — a falling level in response to resuscitation — is a favorable sign, while a rising or persistently high lactate signals ongoing hypoperfusion and a patient who is not being adequately resuscitated. Two caveats keep you honest: not every elevated lactate is hypoperfusion (high-dose beta-agonists such as the albuterol of Module 3, seizures, metformin, and liver failure raise it by other mechanisms), and a lactate drawn from a long-held tourniquet can read falsely high. Interpret it with the clinical picture, but never wave it away.</p>"
+      },
+      { h:"6", t:"Liver function tests: pattern over number", html:
+        "<p>The 'liver function tests' are worth a moment because their name misleads — most of them measure liver <em>injury</em>, not function, and the pattern matters more than any single height.</p>"+
+        "<ul>"+
+        "<li><strong>AST and ALT (transaminases)</strong> — enzymes released when hepatocytes are damaged. A <em>hepatocellular</em> pattern (transaminases up out of proportion) points to the liver cells themselves — ischemia ('shock liver'), toxins, viral hepatitis.</li>"+
+        "<li><strong>Alkaline phosphatase and bilirubin</strong> — a <em>cholestatic</em> pattern (these up out of proportion) points to obstruction or the biliary system.</li>"+
+        "<li><strong>The true function markers</strong> are elsewhere: the <strong>INR</strong> (the liver makes clotting factors) and <strong>albumin</strong> (the liver makes it, and it takes weeks to fall — so a low albumin implies chronic disease). Recall from Module 1 and Module 4 that a low albumin also changes how you read the anion gap and the calcium.</li>"+
+        "</ul>"+
+        "<p>For transport, the LFTs rarely change the immediate intervention, but they shape your expectations: the patient with liver failure will have a coagulopathy (next section), altered drug metabolism, a tendency to hypoglycemia, and — through elevated ammonia — encephalopathy as a cause of altered mental status.</p>"
+      },
+      { h:"7", t:"Coagulation studies: can this patient clot?", html:
+        "<p>The coagulation panel answers a question that directly governs bleeding risk and procedural safety, and its pieces each point somewhere specific:</p>"+
+        "<ul>"+
+        "<li><strong>INR / PT</strong> — the extrinsic pathway; prolonged by warfarin, by liver disease, and by vitamin K deficiency. It is the number that tells you whether a warfarin patient is anticoagulated and by how much.</li>"+
+        "<li><strong>aPTT</strong> — the intrinsic pathway; prolonged by unfractionated heparin (and used to monitor a heparin drip).</li>"+
+        "<li><strong>Platelets</strong> (from the CBC) and <strong>fibrinogen</strong> — the clot's building blocks; fibrinogen falls early in major hemorrhage and in DIC and is a key transfusion target in trauma.</li>"+
+        "</ul>"+
+        "<p>Two transport realities make this panel matter. First, a great many of your patients are <strong>anticoagulated</strong> — and a bleeding patient on warfarin, heparin, or a direct oral anticoagulant may need a specific reversal agent (vitamin K and factor concentrate, protamine, or a targeted DOAC reversal drug), which changes both treatment and destination. Second, the massively transfused trauma patient develops a <strong>consumptive coagulopathy</strong>, and this panel — with the ionized calcium of Module 4 and the temperature and pH of the 'lethal diamond' — is how you track it. A rising INR and falling fibrinogen and platelets in a bleeding patient is coagulopathy declaring itself.</p>"
+      },
+      { h:"8", t:"Reading the whole sheet — the transport anchor", html:
+        "<p>Put the panels together the way you actually meet them: a stack of results at the bedside, minutes before you move. A workable scan, in order of what most often changes the next hour:</p>"+
+        "<ul>"+
+        "<li><strong>Potassium and the ECG</strong> — the fastest killer on the sheet (Module 3).</li>"+
+        "<li><strong>Bicarbonate → anion gap → glucose</strong> — is there a metabolic acidosis, and is it DKA, lactate, or a toxin (Modules 1, 5, 8)?</li>"+
+        "<li><strong>Lactate trend</strong> — is this patient being adequately perfused, whatever the pressure says?</li>"+
+        "<li><strong>Hemoglobin trend and coagulation</strong> — is this patient bleeding, and can they clot?</li>"+
+        "<li><strong>Creatinine trend</strong> — acute or chronic, and does it change my drug dosing and destination?</li>"+
+        "</ul>"+
+        "<p>Everything else is context that refines the picture. Ask for priors so you are reading trends, confirm any critical value that seems out of step with the patient in front of you, and let the labs point you toward the module that governs the fix rather than treating each number in isolation.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Read the sheet as decisions: potassium/ECG, gap/glucose, lactate trend, hemoglobin and coagulation, creatinine trend. Trends beat snapshots, a lactate outranks a reassuring blood pressure, and every abnormal value should either change your plan or be consciously set aside.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The most useful framing for interpreting a transport lab value is:",
+        opts:["Memorizing the reference range","Asking what it changes about the next few hours of management","Recording it for the chart","Comparing it to population averages"], ans:1,
+        expl:"A lab matters when it alters your monitoring, interventions, or destination. Read each abnormal value as a decision, and favor trends over single snapshots by asking for priors." },
+      { q:"In a patient with an acute GI bleed, the single most concerning hemoglobin finding is:",
+        opts:["An isolated value of 9 g/dL","A falling trend on serial measurements","A value of 11 g/dL","Any value above 7 g/dL"], ans:1,
+        expl:"In acute hemorrhage the trend and rate of change outrank any single value — an acute bleed can be lethal at a hemoglobin a chronically anemic patient tolerates. A falling serial hemoglobin is a major red flag." },
+      { q:"On a BMP showing a low bicarbonate, the immediate next step is to:",
+        opts:["Give bicarbonate","Calculate the anion gap","Ignore it if the pH is unknown","Repeat the entire panel"], ans:1,
+        expl:"A low bicarbonate flags a metabolic acidosis; calculating the anion gap (Na − Cl − HCO₃) right off the panel begins to sort high-gap (lactate, ketones, toxins) from normal-gap causes — the Module 1 read applied to the sheet." },
+      { q:"A BUN-to-creatinine ratio greater than about 20:1 suggests which type of kidney injury?",
+        opts:["Intrinsic (acute tubular necrosis)","Post-renal obstruction","Pre-renal (volume depletion / poor perfusion)","Chronic kidney disease only"], ans:2,
+        expl:"A disproportionately high BUN relative to creatinine points to a pre-renal cause — volume depletion or poor renal perfusion — where the kidneys are structurally fine but under-perfused and often fluid-responsive. A GI bleed also raises the BUN." },
+      { q:"A patient has a normal blood pressure but a lactate that is rising on serial draws. This indicates:",
+        opts:["Adequate perfusion — the pressure is fine","Ongoing tissue hypoperfusion despite a reassuring pressure","A definite laboratory error","Resolving shock"], ans:1,
+        expl:"A rising lactate with a normal pressure is compensated shock — perfusion is failing even though the blood pressure looks adequate. Trust the lactate trend; lactate clearance would indicate successful resuscitation." },
+      { q:"Which value is a true marker of the liver's synthetic FUNCTION rather than hepatocyte injury?",
+        opts:["ALT","AST","Alkaline phosphatase","INR"], ans:3,
+        expl:"The transaminases (ALT/AST) and alkaline phosphatase mark injury/cholestasis, not function. The INR (clotting factors) and albumin reflect true synthetic function — the liver makes both." },
+      { q:"A prolonged aPTT is most characteristically associated with:",
+        opts:["Warfarin therapy","Unfractionated heparin therapy","Aspirin therapy","Vitamin K excess"], ans:1,
+        expl:"The aPTT tracks the intrinsic pathway and is used to monitor unfractionated heparin. Warfarin and liver disease prolong the INR/PT (extrinsic pathway)." },
+      { q:"In a bleeding trauma patient, which coagulation component falls early and is a key transfusion target?",
+        opts:["Fibrinogen","Alkaline phosphatase","BUN","Bicarbonate"], ans:0,
+        expl:"Fibrinogen falls early in major hemorrhage and DIC and is a key transfusion target. Tracking a rising INR with falling fibrinogen and platelets in a bleeding patient shows consumptive coagulopathy declaring itself." },
+      { q:"A very LOW white blood cell count (neutropenia) should prompt you to:",
+        opts:["Relax about infection risk","Treat a fever as an emergency and consider protective precautions","Assume a lab error","Withhold all antibiotics"], ans:1,
+        expl:"Neutropenia means the patient is immunocompromised; a fever in that setting is an emergency (neutropenic fever) and the patient may need protective isolation — the opposite of the reassurance a high WBC might prompt." },
+      { q:"When scanning a stack of transport labs, which value most often demands the fastest action?",
+        opts:["Albumin","Alkaline phosphatase","Potassium (with the ECG)","Total protein"], ans:2,
+        expl:"Potassium — read alongside the ECG — is the fastest killer on the sheet (Module 3). A workable scan prioritizes potassium/ECG, then the gap/glucose, lactate trend, hemoglobin/coagulation, and creatinine trend." }
+    ]
+  },
+
+  {
+    id: 8,
+    available: true,
+    title: "Toxic-Metabolic & the Osmolar Gap",
+    desc: "Toxic alcohols (methanol, ethylene glycol), the osmolar gap, salicylate poisoning, and a structured workup of the unexplained high-anion-gap acidosis.",
+    objective: "Work up the unexplained high-anion-gap acidosis, calculate and interpret the osmolar gap, recognize and initiate treatment for toxic-alcohol and salicylate poisoning, and know which of these patients is racing toward dialysis.",
+    content: [
+      { h:"1", t:"The capstone: an acid you can't name", html:
+        "<p>This module closes the loop opened in Module 1. You have a patient with a <strong>high-anion-gap metabolic acidosis</strong>, but the two common culprits are absent — the lactate is not high enough to explain it, and the glucose and ketones say it isn't DKA. That unexplained gap is a clinical alarm, because the remaining causes on the MUDPILES list are the toxins, and several of them kill in hours while being fully treatable if caught early.</p>"+
+        "<p>Two calculated 'gaps' are the detective tools here, and it is worth being precise about which is which. The <strong>anion gap</strong> (Module 1) detects an unmeasured <em>anion</em> — the acid's conjugate base. The <strong>osmolar gap</strong> (this module) detects an unmeasured <em>osmole</em> — an uncharged small molecule adding to the blood's particle count. Toxic alcohols show up on <em>both</em>, and they do so at different times, which turns out to be the key to not missing them.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> An unexplained high-anion-gap acidosis — gap up, but lactate and ketones don't account for it — is a toxic ingestion until proven otherwise. Reach for the osmolar gap and the toxin history immediately; the clock is short.</div>"
+      },
+      { h:"2", t:"The osmolar gap, and the trap of a normal one", html:
+        "<p>The osmolar gap is the difference between the osmolality the lab <em>measures</em> directly and the osmolality you <em>calculate</em> from the usual solutes. Recall the calculated osmolality from Module 2:</p>"+
+        "<div class='formula'>calc Osm = (2 × Na) + (glucose/18) + (BUN/2.8) [+ ethanol/3.7]<br><span class='fk'>Osmolar gap</span> = measured Osm − calculated Osm &nbsp; (normal &lt; ~10)</div>"+
+        "<p>If the measured value is substantially higher than the calculation predicts, some <em>unmeasured</em> osmole is present — an extra small molecule the formula doesn't account for. Methanol, ethylene glycol, and their fellow small alcohols (including isopropyl alcohol) all raise the osmolar gap. Ethanol raises it too, and is the single most common cause of an elevated osmolar gap — so include an ethanol level (or add its term to the calculation) before you pin an elevated gap on something exotic.</p>"+
+        "<p>Now the trap that catches clinicians, and it hinges on timing. Early after ingestion, the <em>parent alcohol</em> is intact — the osmolar gap is high but the anion gap is still normal, because no acid has formed yet. As the liver metabolizes the alcohol into its toxic acid, the picture flips: the osmolar gap <em>falls</em> back toward normal as the parent molecule disappears, while the anion gap <em>climbs</em> as the acid accumulates.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor · the gaps cross over</span> A <em>normal</em> osmolar gap does not rule out toxic-alcohol poisoning — a late-presenting patient may have already converted the alcohol to acid, leaving a high anion gap and a normal osmolar gap. The two gaps trade places over time. Use the history and the anion gap, not a reassuring osmolar gap, to exclude the diagnosis.</div>"
+      },
+      { h:"3", t:"Methanol and ethylene glycol: the parents are harmless, the children are not", html:
+        "<p>The defining principle of toxic-alcohol poisoning is that <strong>the alcohol you drink is relatively benign; the acid your liver makes from it is what blinds and kills you.</strong> Both methanol and ethylene glycol are metabolized by the enzyme <em>alcohol dehydrogenase</em> into toxic acids — and that enzyme is the treatment target in the next section.</p>"+
+        "<ul>"+
+        "<li><strong>Methanol</strong> (windshield washer fluid, moonshine, some solvents) → metabolized to <strong>formic acid</strong>, which is directly toxic to the <em>retina and optic nerve</em>. The classic history is an anion-gap acidosis with <strong>visual disturbance</strong> — blurred vision, 'looking at a snowstorm,' or blindness. It can also injure the basal ganglia.</li>"+
+        "<li><strong>Ethylene glycol</strong> (automotive antifreeze) → metabolized to glycolic and ultimately <strong>oxalic acid</strong>. The oxalate binds calcium (a link back to Module 4's hypocalcemia) and precipitates as <strong>calcium oxalate crystals in the kidneys</strong>, causing acute kidney injury. Look for an anion-gap acidosis with <strong>renal failure</strong> and hypocalcemia; urine may fluoresce under a Wood's lamp if the antifreeze contained fluorescein, and calcium oxalate crystals may appear in the urine.</li>"+
+        "</ul>"+
+        "<p>Both begin, in the first hours, looking like a patient who is simply intoxicated — sometimes with a high osmolar gap and little else. The acidosis, the visual or renal injury, and the rising anion gap develop as metabolism proceeds. That latent interval is exactly why a history of ingestion, or an unexplained osmolar/anion gap, must trigger treatment <em>before</em> the toxic metabolites have done their damage.</p>"
+      },
+      { h:"4", t:"Treating toxic alcohols: block the enzyme, then clear the toxin", html:
+        "<p>Because the toxicity comes from metabolism, the treatment is to <strong>stop the metabolism</strong> — block alcohol dehydrogenase so the parent alcohol is excreted intact instead of being converted to acid.</p>"+
+        "<ul>"+
+        "<li><strong>Fomepizole</strong> is the modern antidote — a direct, potent inhibitor of alcohol dehydrogenase, easy to dose and without the intoxication of the alternative. It is first-line where available.</li>"+
+        "<li><strong>Ethanol</strong> is the classic alternative: alcohol dehydrogenase prefers ethanol as a substrate, so an ethanol infusion competitively 'occupies' the enzyme and spares the toxic alcohol from conversion. It works, but it is harder to titrate and sedates the patient — a reasonable bridge when fomepizole isn't available.</li>"+
+        "<li><strong>Hemodialysis</strong> removes both the parent alcohol and the toxic acids and corrects the acidosis — definitive therapy for significant poisonings, severe acidosis, or end-organ injury (visual symptoms, renal failure).</li>"+
+        "<li><strong>Cofactors</strong> steer metabolism toward non-toxic products — folate/folinic acid for methanol, and thiamine and pyridoxine for ethylene glycol.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check — treat on suspicion, transport toward dialysis</span>"+
+        "<p>In suspected toxic-alcohol poisoning, guidelines support starting an alcohol-dehydrogenase blocker <em>empirically</em> — on a suggestive history, an osmolar gap, or an unexplained anion-gap acidosis — rather than waiting for a confirmatory level, which is often unavailable for hours to days. Fomepizole is preferred over ethanol for ease and safety of dosing. Because significant ingestions frequently need hemodialysis, the transport implication is direct: these patients are often being moved <em>to a dialysis-capable center</em>, and the enzyme blocker is the bridge that buys time en route.</p>"+
+        "<div class='grade'>Quality: moderate (consensus guidelines and pharmacologic rationale; ethical constraints preclude large randomized trials).</div></div>"
+      },
+      { h:"5", t:"Salicylate poisoning: the mixed-picture toxin", html:
+        "<p>Salicylate (aspirin) overdose is the other must-know toxic-metabolic emergency, and it is distinctive because it deranges acid–base in <em>two directions at once</em> — a pattern that, once seen, is almost pathognomonic.</p>"+
+        "<p>Salicylate does two things simultaneously. It <strong>directly stimulates the respiratory center</strong>, driving hyperventilation and a <em>primary respiratory alkalosis</em>. And it <strong>uncouples oxidative phosphorylation and generates organic acids</strong>, producing a <em>primary high-anion-gap metabolic acidosis</em>. The result is the classic <strong>mixed respiratory alkalosis and metabolic acidosis</strong> — apply the Module 1 compensation rules and you will find the numbers don't fit a single disorder, because there are two primary processes stacked.</p>"+
+        "<p>The clinical picture supports the lab pattern: <strong>tinnitus</strong> (ringing ears — an early, characteristic clue), tachypnea and hyperpnea, nausea and vomiting, fever/diaphoresis, and in severe poisoning altered mental status, seizures, and non-cardiogenic pulmonary edema. Adults classically show the mixed disorder; young children can slip more quickly into a predominant metabolic acidosis, which is more ominous.</p>"
+      },
+      { h:"6", t:"Treating salicylate: keep it out of the brain", html:
+        "<p>The governing principle of salicylate treatment is a pH one: salicylate crosses into tissues — especially the <strong>brain</strong> — in its un-ionized (protonated) form, and acidemia drives it there. So the entire strategy is to <em>alkalinize</em> and to prevent the pH from falling.</p>"+
+        "<ul>"+
+        "<li><strong>Serum and urinary alkalinization with sodium bicarbonate</strong> is the cornerstone. Raising the serum pH keeps salicylate ionized in the blood and out of the brain; raising the urine pH 'ion-traps' it in the tubule and enhances renal elimination. (Note the irony against Module 5: bicarbonate is wrong for DKA but central here.)</li>"+
+        "<li><strong>Replace potassium</strong> — you cannot alkalinize the urine while the patient is hypokalemic, because the kidney will exchange potassium for hydrogen and reabsorb hydrogen instead. Module 3 made flesh.</li>"+
+        "<li><strong>Hemodialysis</strong> for severe poisoning — high levels, altered mental status, seizures, pulmonary edema, renal failure, or a pH that can't be controlled.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor · the intubation trap</span> Be extremely cautious about intubating a salicylate-poisoned patient. Their frantic hyperventilation is a compensatory lifeline holding the serum pH up; sedation and a ventilator that fails to match that enormous minute ventilation will let the pH crash, flooding salicylate into the brain and precipitating arrest. If you must intubate, match the pre-intubation minute ventilation aggressively and keep the patient alkalotic.</div>"
+      },
+      { h:"7", t:"A structured workup of the unexplained gap", html:
+        "<p>Bring the whole academy to bear on the patient from section 1 — high anion gap, no obvious cause. A disciplined sequence:</p>"+
+        "<ul>"+
+        "<li><strong>Confirm and size the gap</strong> — anion gap corrected for albumin (Module 1). Is it real and is it big?</li>"+
+        "<li><strong>Check the common causes first</strong> — a <em>lactate</em> (sepsis, shock, ischemia) and <em>glucose/ketones</em> (DKA). Most unexplained gaps are actually one of these, hiding.</li>"+
+        "<li><strong>Consider uremia</strong> — a <em>creatinine</em>; advanced renal failure is the 'U' in MUDPILES.</li>"+
+        "<li><strong>Reach for the toxins</strong> — an <em>osmolar gap</em> and an <em>ethanol level</em> for the toxic alcohols, a <em>salicylate level</em> and the acid–base pattern for aspirin. Remember the osmolar gap can already be normal in a late toxic-alcohol presentation.</li>"+
+        "<li><strong>Take the history seriously</strong> — the bottle at the scene, the co-ingestion, the intent. Toxicology is often solved by the story, not the lab.</li>"+
+        "</ul>"+
+        "<p>And when the workup points to a toxin, remember the recurring destination theme: the toxic alcohols and severe salicylate poisoning are frequently <strong>dialysis cases</strong>, so recognizing them early often means recognizing that this patient needs to be moving toward a center that can dialyze — with the enzyme blocker or the bicarbonate infusion running as the bridge.</p>"
+      },
+      { h:"8", t:"The toxic-metabolic anchor, and the course close", html:
+        "<p>The through-line of this final module: an unexplained high-anion-gap acidosis is a diagnosis waiting to be made, the osmolar gap and the history are how you make it, and the treatments — blocking an enzyme, alkalinizing the blood, and dialysis — are time-sensitive but highly effective when started early.</p>"+
+        "<ul>"+
+        "<li><strong>Toxic alcohols</strong> — the parent is benign, the metabolite is toxic; methanol takes the eyes, ethylene glycol takes the kidneys. Block alcohol dehydrogenase (fomepizole), give cofactors, and transport toward dialysis. A normal osmolar gap doesn't clear the diagnosis late in the course.</li>"+
+        "<li><strong>Salicylates</strong> — a mixed respiratory alkalosis and metabolic acidosis with tinnitus; alkalinize with bicarbonate, replace potassium, and beware the intubation trap.</li>"+
+        "</ul>"+
+        "<p>This closes the Metabolic &amp; Lab Data academy. Step back and see the arc: you learned to read the blood gas (Module 1), to manage the water and the electrolytes that gas reflects (Modules 2–4), to handle the glucose and hormonal emergencies that derange them (Modules 5–6), to read the whole lab sheet as decisions (Module 7), and finally to unmask the toxins that hide inside an unexplained gap (Module 8). The unifying skill was never memorizing values — it was letting the numbers point you to the mechanism, and letting the mechanism point you to the fix.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Unexplained high-gap acidosis → work the gap: lactate and ketones first, then uremia, then the osmolar gap and toxin history. Toxic alcohols: block the enzyme, head for dialysis. Salicylates: alkalinize, replace potassium, and protect the airway strategy. When you're ready, the final examination draws from all eight modules.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The osmolar gap detects the presence of:",
+        opts:["An unmeasured anion (the acid's conjugate base)","An unmeasured osmole (an extra small uncharged molecule)","Elevated lactate","A respiratory disorder"], ans:1,
+        expl:"The osmolar gap (measured minus calculated osmolality) reveals an unmeasured osmole such as a toxic alcohol or ethanol. The anion gap, by contrast, detects an unmeasured anion. Toxic alcohols raise both — at different times." },
+      { q:"A patient presents late after a toxic-alcohol ingestion with a high anion gap but a NORMAL osmolar gap. This is because:",
+        opts:["Toxic alcohols never raise the osmolar gap","The parent alcohol has been metabolized to acid — the osmolar gap fell as the anion gap rose","The lab made an error","It excludes toxic-alcohol poisoning"], ans:1,
+        expl:"The two gaps trade places over time: early, the intact parent alcohol raises the osmolar gap with a normal anion gap; late, it has been converted to acid, so the osmolar gap normalizes while the anion gap climbs. A normal osmolar gap does not exclude the diagnosis." },
+      { q:"Methanol poisoning is classically associated with which end-organ injury?",
+        opts:["Acute kidney injury from oxalate crystals","Visual disturbance / blindness from formic acid","Hepatic failure","Pulmonary fibrosis"], ans:1,
+        expl:"Methanol is metabolized to formic acid, which is toxic to the retina and optic nerve — the classic anion-gap acidosis with visual disturbance ('snowstorm') or blindness. Oxalate-induced renal injury is ethylene glycol." },
+      { q:"Ethylene glycol's toxic metabolite (oxalic acid) causes injury primarily by:",
+        opts:["Blinding the optic nerve","Precipitating as calcium oxalate crystals in the kidneys, with hypocalcemia","Uncoupling oxidative phosphorylation","Directly stimulating the respiratory center"], ans:1,
+        expl:"Oxalate binds calcium and precipitates as calcium oxalate crystals in the kidneys, causing acute kidney injury and hypocalcemia. Methanol causes the visual injury; salicylate uncouples oxidative phosphorylation." },
+      { q:"The primary treatment strategy for toxic-alcohol poisoning is to:",
+        opts:["Give sodium bicarbonate to neutralize the alcohol","Block alcohol dehydrogenase (e.g., fomepizole) to prevent conversion to toxic acid","Force diuresis with a loop diuretic","Administer activated charcoal alone"], ans:1,
+        expl:"The parent alcohol is relatively benign; the liver makes the toxic acid via alcohol dehydrogenase. Blocking that enzyme (fomepizole, or ethanol as a competitor) spares the toxic conversion; hemodialysis clears significant ingestions." },
+      { q:"The classic acid–base picture of salicylate poisoning in an adult is:",
+        opts:["A pure metabolic alkalosis","A pure respiratory acidosis","A mixed respiratory alkalosis and high-anion-gap metabolic acidosis","A normal-gap metabolic acidosis"], ans:2,
+        expl:"Salicylate stimulates the respiratory center (respiratory alkalosis) while uncoupling oxidative phosphorylation and generating acids (high-gap metabolic acidosis) — two primary disorders at once. Tinnitus is an early clinical clue." },
+      { q:"The cornerstone of treating salicylate poisoning is:",
+        opts:["Acidifying the serum and urine","Serum and urinary alkalinization with sodium bicarbonate","Withholding all fluids","Inducing hypoventilation"], ans:1,
+        expl:"Alkalinization keeps salicylate ionized in the blood (out of the brain) and 'ion-traps' it in the urine for elimination. Potassium must be replaced, since the kidney cannot alkalinize the urine while hypokalemic." },
+      { q:"Why is intubating a severely salicylate-poisoned patient especially dangerous?",
+        opts:["Salicylate paralyzes the diaphragm","Their compensatory hyperventilation holds the pH up; failing to match it lets the pH crash and floods salicylate into the brain","Intubation causes hyperkalemia","The endotracheal tube absorbs salicylate"], ans:1,
+        expl:"The frantic hyperventilation is a lifeline maintaining serum pH. Sedation and a ventilator that under-matches that huge minute ventilation let the pH fall, driving salicylate into the brain — precipitating deterioration or arrest." },
+      { q:"An elevated osmolar gap is MOST COMMONLY caused by:",
+        opts:["Methanol","Ethylene glycol","Ethanol","Salicylate"], ans:2,
+        expl:"Ethanol is by far the most common cause of an elevated osmolar gap. Check an ethanol level (or add its term to the calculated osmolality) before attributing an elevated gap to a more exotic toxic alcohol." },
+      { q:"In the structured workup of an unexplained high-anion-gap acidosis, which should be checked FIRST?",
+        opts:["Lactate and glucose/ketones","A methanol level","A Wood's lamp exam of the urine","Serum osmolality only"], ans:0,
+        expl:"Most 'unexplained' gaps are actually lactic acidosis or ketoacidosis hiding — check a lactate and glucose/ketones first, then consider uremia, then reach for the osmolar gap and toxin history. Toxicology is often solved by the story as much as the labs." }
+    ]
+  }
+];
+
+/* ============================================================================
+   STATE
+   ==========================================================================*/
+var LS_KEY = "metab_academy_v1";
+var state = loadState();
+
+function blankState(){
+  var m = {};
+  MODULES.forEach(function(mod){ m[mod.id] = { read:false, passed:false, best:0 }; });
+  return { learnerName:"", modules:m, finalPassed:false, finalBest:0, completedAt:null };
+}
+function loadState(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(!raw) return blankState();
+    var s = JSON.parse(raw);
+    var base = blankState();
+    base.learnerName = s.learnerName || "";
+    base.finalPassed = !!s.finalPassed;
+    base.finalBest = s.finalBest || 0;
+    base.completedAt = s.completedAt || null;
+    MODULES.forEach(function(mod){
+      if(s.modules && s.modules[mod.id]) base.modules[mod.id] = {
+        read:!!s.modules[mod.id].read, passed:!!s.modules[mod.id].passed, best:s.modules[mod.id].best||0 };
+    });
+    return base;
+  }catch(e){ return blankState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){
+    var w = document.getElementById("storageWarn");
+    if(w) w.classList.remove("hidden");
+  }
+}
+
+/* progression helpers */
+function isUnlocked(modId){
+  if(modId === 1) return true;
+  return !!(state.modules[modId-1] && state.modules[modId-1].passed);
+}
+function allModulesPassed(){
+  return MODULES.every(function(m){ return state.modules[m.id] && state.modules[m.id].passed; });
+}
+function passedCount(){
+  return MODULES.filter(function(m){ return state.modules[m.id] && state.modules[m.id].passed; }).length;
+}
+function getModule(id){ for(var i=0;i<MODULES.length;i++){ if(MODULES[i].id===id) return MODULES[i]; } return null; }
+
+/* ============================================================================
+   WAVEFORM (header signature) — tile arterial beats into an SVG path
+   ==========================================================================*/
+function buildWave(){
+  var beatW = 150, n = 9, baseY = 46, path = "M 0 "+baseY;
+  for(var i=0;i<n;i++){
+    var x = i*beatW;
+    // baseline drift into upstroke, sharp systolic peak, dicrotic notch, runoff
+    path += " L "+(x+18)+" "+baseY;
+    path += " C "+(x+24)+" "+baseY+" "+(x+30)+" 8 "+(x+40)+" 8";      // steep systolic upstroke to peak
+    path += " C "+(x+50)+" 8 "+(x+56)+" 24 "+(x+64)+" 27";            // decline
+    path += " L "+(x+72)+" 30";                                        // toward notch
+    path += " C "+(x+76)+" 33 "+(x+78)+" 20 "+(x+86)+" 20";           // dicrotic notch + wave
+    path += " C "+(x+96)+" 20 "+(x+104)+" 36 "+(x+118)+" "+(baseY-3); // diastolic runoff
+    path += " L "+(x+beatW)+" "+baseY;
+  }
+  document.getElementById("wavePath").setAttribute("d", path);
+}
+function certWavePath(){
+  var beatW=55, n=4, baseY=18, path="M 0 "+baseY;
+  for(var i=0;i<n;i++){ var x=i*beatW;
+    path+=" L "+(x+8)+" "+baseY+" C "+(x+11)+" "+baseY+" "+(x+13)+" 3 "+(x+18)+" 3";
+    path+=" C "+(x+22)+" 3 "+(x+25)+" 11 "+(x+29)+" 12 L "+(x+33)+" 13";
+    path+=" C "+(x+35)+" 15 "+(x+36)+" 9 "+(x+40)+" 9 C "+(x+45)+" 9 "+(x+49)+" 16 "+(x+beatW)+" "+baseY;
+  }
+  return path;
+}
+
+/* ============================================================================
+   VIEWS
+   ==========================================================================*/
+var views = ["home","reader","quiz","cert"];
+function show(v){
+  views.forEach(function(name){
+    document.getElementById("view-"+name).classList.toggle("hidden", name!==v);
+  });
+  window.scrollTo(0,0);
+}
+
+function updateHeader(){
+  var pc = passedCount(), pct = Math.round((pc/MODULES.length)*100);
+  document.getElementById("tkMods").textContent = pc + " / " + MODULES.length;
+  document.getElementById("tkPct").textContent = pct + "%";
+  document.getElementById("progFill").style.width = pct + "%";
+  var fin = document.getElementById("tkFinal");
+  if(state.finalPassed){ fin.textContent="Complete"; fin.className="val grn"; }
+  else if(allModulesPassed()){ fin.textContent="Ready"; fin.className="val grn"; }
+  else { fin.textContent="Locked"; fin.className="val red"; }
+  document.getElementById("statusChip").textContent =
+    state.learnerName ? ("SESSION · "+state.learnerName.toUpperCase().slice(0,22)) : "SESSION · READY";
+}
+
+function renderHome(){
+  updateHeader();
+  var list = document.getElementById("modList");
+  list.innerHTML = "";
+  MODULES.forEach(function(mod){
+    var st = state.modules[mod.id];
+    var unlocked = isUnlocked(mod.id);
+    var openable = unlocked && mod.available;
+    var li = document.createElement("li");
+    li.className = "modcard " + (st.passed ? "passed " : "") + (openable ? "open " : "locked ");
+    var pill, go="";
+    if(st.passed){ pill = "<span class='pill passed'>✓ Passed · "+st.best+"%</span>"; go="<span class='go'>Review ›</span>"; }
+    else if(openable){ pill = "<span class='pill ready'>Ready</span>"; go="<span class='go'>Start ›</span>"; }
+    else if(unlocked && !mod.available){ pill = "<span class='pill soon'>Content in development</span>"; }
+    else { pill = "<span class='pill locked'>"+lockSvg()+"Locked</span>"; }
+    li.innerHTML =
+      "<div class='num'>"+pad2(mod.id)+"</div>"+
+      "<div class='body'>"+
+        "<div class='mtitle'>"+mod.title+"</div>"+
+        "<p class='mdesc'>"+mod.desc+"</p>"+
+        "<div class='foot'>"+pill+go+"</div>"+
+      "</div>";
+    if(openable) li.addEventListener("click", function(){ openReader(mod.id); });
+    list.appendChild(li);
+  });
+
+  // final exam slot
+  var slot = document.getElementById("finalSlot");
+  var ready = allModulesPassed();
+  slot.innerHTML =
+    "<div class='modcard finalcard "+(ready?"open ready":"locked")+"' id='finalCard'>"+
+      "<div class='num'>⚑</div>"+
+      "<div class='body'>"+
+        "<div class='mtitle'>Final Examination</div>"+
+        "<p class='mdesc'>Comprehensive exam across all modules. Pass at "+PASS_FINAL+"% to earn your certificate.</p>"+
+        "<div class='foot'>"+
+          (state.finalPassed
+            ? "<span class='pill passed'>✓ Passed</span><span class='go'>View certificate ›</span>"
+            : ready ? "<span class='pill ready'>Unlocked</span><span class='go'>Begin ›</span>"
+                    : "<span class='pill locked'>"+lockSvg()+"Complete all modules</span>")+
+        "</div>"+
+      "</div>"+
+    "</div>";
+  var fc = document.getElementById("finalCard");
+  if(state.finalPassed) fc.addEventListener("click", function(){ renderCertificate(); show("cert"); });
+  else if(ready) fc.addEventListener("click", startFinal);
+
+  show("home");
+}
+
+/* ---- Reader ---- */
+var currentModId = null, scrolledEnough = false;
+function openReader(id){
+  var mod = getModule(id);
+  if(!mod || !mod.available) return;
+  currentModId = id;
+  document.getElementById("rdNum").textContent = "MODULE "+pad2(id);
+  document.getElementById("rdTitle").textContent = mod.title;
+  document.getElementById("rdObj").innerHTML = "<strong>Objective.</strong> "+mod.objective;
+  var c = document.getElementById("rdContent"), html="";
+  mod.content.forEach(function(sec){
+    html += "<h3><span class='h3n'>"+sec.h+"</span>"+sec.t+"</h3>"+sec.html;
+  });
+  c.innerHTML = html;
+
+  // gate the quiz button until the reader is scrolled through (honest "must read")
+  var btn = document.getElementById("toQuizBtn");
+  var note = document.getElementById("readNote");
+  var alreadyRead = state.modules[id].read || state.modules[id].passed;
+  scrolledEnough = alreadyRead;
+  btn.disabled = !alreadyRead;
+  note.textContent = alreadyRead ? "" : "Scroll through the full module to unlock the quiz.";
+  show("reader");
+  // content may already fit the viewport with nothing to scroll — check once after layout settles
+  // instead of waiting on a 'scroll' event that would then never fire
+  if(!alreadyRead) requestAnimationFrame(function(){ requestAnimationFrame(onReaderScroll); });
+}
+function onReaderScroll(){
+  if(scrolledEnough) return;
+  var sec = document.getElementById("view-reader");
+  if(sec.classList.contains("hidden")) return;
+  var doc = document.documentElement;
+  var reachedBottom = (window.innerHeight + window.scrollY) >= (doc.scrollHeight - 120);
+  if(reachedBottom){
+    scrolledEnough = true;
+    if(currentModId){ state.modules[currentModId].read = true; saveState(); }
+    document.getElementById("toQuizBtn").disabled = false;
+    document.getElementById("readNote").textContent = "Module read — quiz unlocked.";
+  }
+}
+
+/* ---- Quiz (modules) ---- */
+var activeQuiz = null;     // {questions, isFinal, modId, answers[], submitted}
+function startModuleQuiz(id){
+  var mod = getModule(id);
+  activeQuiz = { questions:mod.quiz, isFinal:false, modId:id, answers:new Array(mod.quiz.length).fill(-1), submitted:false, title:mod.title, num:"MODULE "+pad2(id) };
+  renderQuiz();
+}
+var FINAL_PER_MODULE = 4;   // questions sampled from each module's bank for the final exam
+function shuffled(arr){
+  var a = arr.slice();
+  for(var i=a.length-1; i>0; i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function startFinal(){
+  var pool = [];
+  MODULES.forEach(function(m){
+    if(!m.quiz) return;
+    pool = pool.concat(shuffled(m.quiz).slice(0, FINAL_PER_MODULE));
+  });
+  pool = shuffled(pool);
+  activeQuiz = { questions:pool, isFinal:true, modId:null, answers:new Array(pool.length).fill(-1), submitted:false, title:"Final Examination", num:"FINAL EXAM" };
+  renderQuiz();
+}
+function renderQuiz(){
+  var q = activeQuiz;
+  document.getElementById("qzNum").textContent = q.num;
+  document.getElementById("qzTitle").textContent = q.submitted ? q.title+" — Results" : q.title;
+  var need = q.isFinal ? PASS_FINAL : PASS_MODULE;
+  document.getElementById("qzMeta").textContent =
+    q.questions.length+" questions · pass at "+need+"% · "+Math.ceil(q.questions.length*need/100)+" correct needed";
+
+  var form = document.getElementById("quizForm"); form.innerHTML="";
+  q.questions.forEach(function(item, qi){
+    var box = document.createElement("div"); box.className="q"+(q.submitted?" locked-opts":"");
+    var opts = "";
+    item.opts.forEach(function(o, oi){
+      var cls="opt";
+      if(q.submitted){
+        if(oi===item.ans) cls+=" correct";
+        else if(q.answers[qi]===oi) cls+=" wrong";
+      } else if(q.answers[qi]===oi){ cls+=" sel"; }
+      opts += "<button class='"+cls+"' data-q='"+qi+"' data-o='"+oi+"'>"+
+                "<span class='ol'>"+String.fromCharCode(65+oi)+"</span>"+o+"</button>";
+    });
+    var expl = q.submitted ? "<div class='expl'><b>Why:</b> "+item.expl+"</div>" : "";
+    box.innerHTML = "<div class='qnum'>Q"+(qi+1)+" / "+q.questions.length+"</div>"+
+                    "<div class='qtext'>"+item.q+"</div>"+opts+expl;
+    form.appendChild(box);
+  });
+  if(!q.submitted){
+    form.querySelectorAll(".opt").forEach(function(b){
+      b.addEventListener("click", function(){
+        var qi=+b.dataset.q, oi=+b.dataset.o;
+        activeQuiz.answers[qi]=oi;
+        // update just this question's selected option in place — a full renderQuiz()
+        // here would rebuild every question and reset scroll position on every tap
+        form.children[qi].querySelectorAll(".opt").forEach(function(ob){
+          ob.classList.toggle("sel", +ob.dataset.o === oi);
+        });
+        renderQuizActions();
+      });
+    });
+  }
+
+  document.getElementById("resultSlot").innerHTML = "";
+  if(!q.submitted){
+    renderQuizActions();
+  } else {
+    var correct = scoreQuiz();
+    var pct = Math.round(correct/q.questions.length*100);
+    var passed = pct >= need;
+    document.getElementById("resultSlot").innerHTML =
+      "<div class='result "+(passed?"pass":"fail")+"'>"+
+        "<div class='big'>"+pct+"%</div>"+
+        "<div class='rmsg'>"+correct+" of "+q.questions.length+" correct · "+
+        (passed? "Passed — "+ (q.isFinal?"course complete":"next module unlocked") : "Need "+need+"% to pass")+"</div>"+
+      "</div>";
+    var actions = document.getElementById("quizActions");
+    if(passed){
+      if(q.isFinal){
+        actions.innerHTML = "<button class='cta teal' id='toCert'>View your certificate ›</button>";
+        document.getElementById("toCert").addEventListener("click", function(){ renderCertificate(); show("cert"); });
+      } else {
+        actions.innerHTML = "<button class='cta teal' id='backHome'>Back to modules ›</button>";
+        document.getElementById("backHome").addEventListener("click", function(){ renderHome(); });
+      }
+    } else {
+      actions.innerHTML = "<button class='cta primary' id='retry'>Retake quiz</button>"+
+                          "<button class='cta ghost' id='reread' style='margin-top:10px'>Re-read the module</button>";
+      document.getElementById("retry").addEventListener("click", function(){
+        if(q.isFinal) startFinal(); else startModuleQuiz(q.modId);
+      });
+      document.getElementById("reread").addEventListener("click", function(){
+        if(q.isFinal){ renderHome(); } else { openReader(q.modId); }
+      });
+    }
+  }
+  show("quiz");
+}
+// builds just the submit button / "N of M answered" panel, for the unsubmitted quiz state —
+// called on every answer tap without touching the question list or scroll position
+function renderQuizActions(){
+  var q = activeQuiz;
+  var actions = document.getElementById("quizActions");
+  var answered = q.answers.filter(function(a){return a>=0;}).length;
+  actions.innerHTML = "<button class='cta primary' id='submitQuiz'"+(answered<q.questions.length?" disabled":"")+">Submit answers</button>"+
+    "<p class='readnote'>"+answered+" of "+q.questions.length+" answered</p>";
+  var sb=document.getElementById("submitQuiz");
+  if(sb) sb.addEventListener("click", submitQuiz);
+}
+function scoreQuiz(){
+  var c=0; activeQuiz.questions.forEach(function(item,i){ if(activeQuiz.answers[i]===item.ans) c++; }); return c;
+}
+function submitQuiz(){
+  activeQuiz.submitted = true;
+  var correct = scoreQuiz();
+  var pct = Math.round(correct/activeQuiz.questions.length*100);
+  var need = activeQuiz.isFinal ? PASS_FINAL : PASS_MODULE;
+  var passed = pct >= need;
+  if(activeQuiz.isFinal){
+    if(pct > state.finalBest) state.finalBest = pct;
+    if(passed){ state.finalPassed=true; state.completedAt = new Date().toISOString(); }
+  } else {
+    var m = state.modules[activeQuiz.modId];
+    if(pct > m.best) m.best = pct;
+    if(passed) m.passed = true;
+  }
+  saveState();
+  updateHeader();
+  renderQuiz();
+}
+
+/* ---- Certificate ---- */
+function renderCertificate(){
+  var name = (state.learnerName||"").trim() || "—";
+  var dt = state.completedAt ? new Date(state.completedAt) : new Date();
+  var dstr = dt.toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
+  var moduleCount = MODULES.length;
+  var scoreLine = state.finalBest ? (state.finalBest+"%") : "Passed";
+  document.getElementById("certCard").innerHTML =
+    "<div class='c-brand'>AMR Kansas City <b>◆</b> Clinical Education</div>"+
+    "<div class='c-wave'><svg viewBox='0 0 220 26' preserveAspectRatio='none'><path d='"+certWavePath()+"' fill='none' stroke='#1B63C4' stroke-width='1.6'/></svg></div>"+
+    "<div class='c-kicker'>Certificate of Completion</div>"+
+    "<div class='c-of'>This certifies that</div>"+
+    "<div class='c-name'>"+escapeHtml(name)+"</div>"+
+    "<div class='c-of'>has successfully completed</div>"+
+    "<div class='c-course'>Metabolic Emergencies &amp; Lab Data for Critical Care Transport</div>"+
+    "<div class='c-body'>A comprehensive "+moduleCount+"-module program covering acid–base and blood-gas interpretation, sodium and water disorders, potassium and the other electrolytes, glucose and endocrine emergencies, transport lab-data interpretation, and toxic-metabolic acidosis, with a final examination passed at "+PASS_FINAL+"% or above.</div>"+
+    "<div class='c-meta'>"+
+      "<div class='c-cell'><div class='cl'>Date completed</div><div class='cv'>"+dstr+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Final exam score</div><div class='cv'>"+scoreLine+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Medical Director</div><div class='cv'>A. Deshmukh, MD</div></div>"+
+      "<div class='c-cell'><div class='cl'>Clinical Education</div><div class='cv'>AMR KC</div></div>"+
+    "</div>";
+}
+
+/* ============================================================================
+   UTIL
+   ==========================================================================*/
+function pad2(n){ return (n<10?"0":"")+n; }
+function lockSvg(){ return "<svg class='lockglyph' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2'><rect x='4.5' y='10.5' width='15' height='10' rx='2'/><path d='M8 10.5V7a4 4 0 0 1 8 0v3.5'/></svg>"; }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+
+/* ============================================================================
+   WIRING
+   ==========================================================================*/
+document.getElementById("readerBack").addEventListener("click", renderHome);
+document.getElementById("quizBack").addEventListener("click", function(){
+  if(activeQuiz && !activeQuiz.isFinal && activeQuiz.modId) openReader(activeQuiz.modId);
+  else renderHome();
+});
+document.getElementById("certBack").addEventListener("click", renderHome);
+document.getElementById("toQuizBtn").addEventListener("click", function(){
+  if(currentModId) startModuleQuiz(currentModId);
+});
+document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
+
+var nameInput = document.getElementById("nameInput");
+nameInput.value = state.learnerName || "";
+nameInput.addEventListener("input", function(){
+  state.learnerName = nameInput.value; saveState(); updateHeader();
+});
+
+document.getElementById("resetBtn").addEventListener("click", function(){
+  if(confirm("Reset all progress and your name? This clears every module and the final exam on this device.")){
+    state = blankState(); saveState(); nameInput.value=""; renderHome();
+  }
+});
+
+window.addEventListener("scroll", onReaderScroll, { passive:true });
+
+/* init */
+buildWave();
+renderHome();
+</script>
+</body>
+</html>
