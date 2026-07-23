@@ -17,6 +17,8 @@ const MODULES = [
   title: "Pulmonary Anatomy & Physiology",
   blurb: "The foundational hour. Learn how a healthy breath works — then use that to read every vent for the rest of the course.",
   estMin: 45,
+  practiceLevel: 1,
+  practiceNote: "Meet the LTV 1200 hands-on — the Level 1 tutorial builds every control from scratch and drills the two-knob model.",
 
   lessons: [
     {
