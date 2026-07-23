@@ -362,6 +362,34 @@ cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-col
   color:var(--teal2);background:var(--aemt-bg);border:1px solid #cfe0f7;border-radius:999px;
   padding:3px 8px;white-space:nowrap}
 .cc-arr{color:var(--gray);font-size:20px}
+
+/* ── VENTILATOR 3000 GAME CARD ────────────────────────────────────── */
+.game-card{position:relative;display:block;margin:8px 12px 10px;padding:18px 18px 16px;
+  border-radius:16px;overflow:hidden;text-decoration:none;color:#fff;
+  background:linear-gradient(135deg,#5b21b6 0%,#7c3aed 42%,#c026d3 100%);
+  box-shadow:0 10px 28px rgba(124,58,237,0.34);-webkit-tap-highlight-color:transparent;
+  transition:transform 0.06s,box-shadow 0.18s}
+.game-card:active{transform:translateY(1px)}
+.game-card:hover{box-shadow:0 12px 32px rgba(124,58,237,0.42)}
+.game-card::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(130px 130px at 88% 10%,rgba(255,255,255,0.24),rgba(255,255,255,0) 70%)}
+.game-dials{position:absolute;top:14px;right:14px;display:flex;gap:9px;pointer-events:none}
+.game-dial{width:30px;height:30px}
+.game-dial circle{fill:none;stroke:rgba(255,255,255,0.5);stroke-width:2}
+.game-dial line{stroke:#fff;stroke-width:2.4;stroke-linecap:round}
+.game-dial .tick{stroke:rgba(255,255,255,0.4);stroke-width:1.5}
+.game-badge{position:relative;z-index:1;display:inline-block;font-family:var(--mono);font-size:9.5px;
+  font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:#f5e9ff;
+  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.32);border-radius:999px;padding:4px 10px}
+.game-title{position:relative;z-index:1;font-size:25px;font-weight:800;letter-spacing:-0.02em;
+  margin:11px 0 3px;line-height:1.05;text-shadow:0 2px 10px rgba(0,0,0,0.18)}
+.game-title .g3k{color:#f7d9ff}
+.game-sub{position:relative;z-index:1;font-size:13px;color:#f0e6ff;font-weight:500;max-width:80%;line-height:1.45}
+.game-play{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;margin-top:15px;
+  font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:0.04em;color:#6d28d9;
+  background:#fff;border-radius:999px;padding:8px 15px 8px 11px;box-shadow:0 4px 12px rgba(0,0,0,0.18)}
+.game-play-ico{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;
+  border-radius:50%;background:#c026d3;color:#fff;font-size:8px;line-height:1;padding-left:2px}
 .sub-back{display:inline-flex;align-items:center;gap:5px;margin:12px 14px 4px;
 padding:7px 12px;background:var(--dim);border:1px solid var(--border);border-radius:7px;
 font-size:13px;font-weight:600;color:var(--teal2);cursor:pointer;font-family:var(--sans)}
@@ -2197,6 +2225,14 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
+    '<a class="more-card" href="organ-transport.html">',
+    '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Organ Transport</div>',
+    '    <div class="more-card-sub">Familiarization training — the 3 mission types, your role &amp; charting</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</a>',
 
     '<div class="cc-prep">',
     '  <div class="cc-banner">',
@@ -2241,27 +2277,11 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="quiz-impella-ecmo.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Impella &amp; ECMO CE</div>',
-    '    <div class="more-card-sub">10-question CE quiz with certificate</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
     '<a class="more-card" href="quiz-pals.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">PALS 2025 Quiz</div>',
     '    <div class="more-card-sub">Pediatric advanced life support — explains every answer</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card" href="organ-transport.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Organ Transport</div>',
-    '    <div class="more-card-sub">Familiarization training \u2014 the 3 mission types, your role &amp; charting</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
@@ -2283,13 +2303,16 @@ function renderMore(){
     '</a>',
 
     '<div class="sec">INTERACTIVE TOOLS</div>',
-    '<a class="more-card" href="vent-ltv1200.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">VenTilaTor 3000 THE GAME </div>',
-    '    <div class="more-card-sub">Tap any knob to learn its function</div>',
+    '<a class="game-card" href="vent-ltv1200.html">',
+    '  <div class="game-dials">',
+    '    <svg class="game-dial" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11"/><line class="tick" x1="15" y1="2" x2="15" y2="5"/><line class="tick" x1="28" y1="15" x2="25" y2="15"/><line x1="15" y1="15" x2="8" y2="9"/></svg>',
+    '    <svg class="game-dial" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11"/><line class="tick" x1="15" y1="2" x2="15" y2="5"/><line class="tick" x1="28" y1="15" x2="25" y2="15"/><line x1="15" y1="15" x2="15" y2="5"/></svg>',
+    '    <svg class="game-dial" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11"/><line class="tick" x1="15" y1="2" x2="15" y2="5"/><line class="tick" x1="2" y1="15" x2="5" y2="15"/><line x1="15" y1="15" x2="22" y2="10"/></svg>',
     '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
+    '  <div class="game-badge">&#x25C6; Interactive Trainer &middot; The Game</div>',
+    '  <div class="game-title">Ventilator <span class="g3k">3000</span></div>',
+    '  <div class="game-sub">Tap any knob to learn what it does &mdash; a hands-on LTV-1200 vent trainer.</div>',
+    '  <div class="game-play"><span class="game-play-ico">&#x25B6;</span> Play now</div>',
     '</a>',
 
     '<div class="sec">FORMS &amp; ADMIN</div>',
