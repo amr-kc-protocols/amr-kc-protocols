@@ -1438,18 +1438,11 @@ const MODULES = [
       id: "agents", kicker: "8.3 · Agents", title: "EMS Sedation/Analgesia Toolbox",
       body: [
         "Fentanyl 1–2 mcg/kg IV, redose 0.5–1 mcg/kg q15–20 min. Analgesia first. Watch chest wall rigidity at high doses pushed rapidly.",
-        "Ketamine 1–2 mg/kg IV induction; 0.5–1 mg/kg redose. PREFERRED in shock — sympathetic effect supports BP. KETASED (Jabre 2009): equivalent to etomidate, safer in shock. Modern evidence: acceptable in TBI. On AMR KC this is a Paramedic, intubated-adults-only sedation agent — NOT a field induction drug (see the AMR KC box).",
+        "Ketamine 1–2 mg/kg IV induction; 0.5–1 mg/kg redose. PREFERRED in shock — sympathetic effect supports BP. KETASED (Jabre 2009): equivalent to etomidate, safer in shock. Modern evidence: acceptable in TBI. Scope varies by service — some carry it only for ongoing sedation of already-intubated patients rather than as a field induction agent; know your local protocol.",
         "Midazolam 0.05–0.1 mg/kg IV q5–10 min. Sedation + amnesia. Synergistic respiratory depression with opioids. Reversible with flumazenil.",
-        "Propofol 5–50 mcg/kg/min infusion (per service formulary). Drops BP. PRIS (propofol-related infusion syndrome): metabolic acidosis, rhabdomyolysis, cardiac arrhythmia at > 4 mg/kg/hr or > 48 hr infusions. Not carried on AMR KC — a hospital-supplied infusion you may monitor, not initiate.",
-        "Etomidate 0.3 mg/kg IV induction. Clean hemodynamics but causes adrenal suppression — many EMS prefer ketamine in shock RSI. Not in the AMR KC formulary."
-      ],
-      kc: { title: "On the truck vs hospital-supplied", body: [
-        "Fentanyl — 25–100 mcg slow IV/IO push (repeat 25–50; max 200). AEMT+.",
-        "Midazolam — 2–5 mg for seizure (AEMT+). Behavioral sedation & any infusion: Paramedic only.",
-        "Ketamine — Paramedic only, intubated adults only: 0.5–1 mg/kg IV or 1 mg/kg/hr. NOT for induction, peds, or behavioral use.",
-        "Propofol & etomidate — NOT carried. Propofol = hospital drip you may monitor; etomidate is out of scope.",
-        "Naloxone — keep it ready any time you give an opioid."
-      ] }
+        "Propofol 5–50 mcg/kg/min infusion (per service formulary). Drops BP. PRIS (propofol-related infusion syndrome): metabolic acidosis, rhabdomyolysis, cardiac arrhythmia at > 4 mg/kg/hr or > 48 hr infusions. Often not carried on EMS units — typically a hospital-supplied infusion you may monitor, not initiate.",
+        "Etomidate 0.3 mg/kg IV induction. Clean hemodynamics but causes adrenal suppression — many EMS prefer ketamine in shock RSI. Not carried by many EMS services."
+      ]
     },
     {
       id: "pressors", kicker: "8.4 · Push-Dose Pressors", title: "Ready BEFORE You Push Induction",
@@ -1459,14 +1452,7 @@ const MODULES = [
         "Push-dose phenylephrine — alternative when avoiding tachycardia. Mix 10 mg into 100 mL NS = 100 mcg/mL. Dose 50–200 mcg IV q1–5 min. Pure α-agonist; reflex bradycardia possible.",
         "Label every syringe clearly. Document every push. Move to a continuous infusion as soon as practical — norepinephrine is the first-line infused vasopressor for most shock states (Surviving Sepsis 2021), started at 0.05–0.1 mcg/kg/min and titrated to MAP ≥ 65, and it can run peripherally through a good IV for transport. Push-dose pressors are a bridge to that infusion."
       ],
-      evidence: { title: "Post-intubation hypotension", body: "Heffner 2012: incidence ~25% in EMS RSI. Higher in shock states. Always have push-dose pressors prepared before pushing the induction agent." },
-      kc: { title: "Push-dose and infusion scope", body: [
-        "Push-dose epinephrine — the ONLY carried push-dose pressor. Paramedic only.",
-        "KC prep: 1 mL of 1:10,000 into a 10 mL syringe, fill to 10 mL with NS = 10 mcg/mL. Give 1–2 mL (10–20 mcg) q1–2 min.",
-        "Push-dose phenylephrine — NOT carried.",
-        "Norepinephrine — carried infusion vasopressor (Paramedic only). Titrate to MAP ≥ 65; check site q15 min.",
-        "AEMTs may not start or titrate any pressor infusion."
-      ] }
+      evidence: { title: "Post-intubation hypotension", body: "Heffner 2012: incidence ~25% in EMS RSI. Higher in shock states. Always have push-dose pressors prepared before pushing the induction agent." }
     },
     {
       id: "pitfalls", kicker: "8.5 · Pitfalls", title: "What Goes Wrong",
@@ -1478,65 +1464,7 @@ const MODULES = [
         "Mixing too many agents. Stick with one analgesic + one sedative for transport."
       ]
     },
-    {
-      id: "kc-formulary", kicker: "8.6 · AMR KC Formulary", title: "What You Carry — and Who Can Give It",
-      body: [
-        "Section III of the 2026 protocols (effective May 15 2026, Dr. Deshmukh) sets exactly what rides on the truck and who may give it. Know your scope before you reach for a drug. The tag after each drug is the lowest level that can give it: All = any provider · AEMT+ = AEMT or Paramedic · PM = Paramedic only.",
-        "Analgesia & sedation:",
-        ["Fentanyl — 25–100 mcg IV/IO/IN/IM, max 200 (AEMT+)",
-         "Midazolam — 2–5 mg for seizure (AEMT+); behavioral sedation & infusions are PM only",
-         "Ketamine — Paramedic only, intubated adults only",
-         "Ondansetron — 4 mg antiemetic (AEMT+)",
-         "Naloxone — all levels, titrate to breathing"],
-        "Hemodynamics:",
-        ["Norepinephrine infusion — PM only, titrate to MAP ≥ 65",
-         "Push-dose epinephrine — PM only, 10–20 mcg",
-         "Epi 1:10,000 IV/IO for arrest — AEMT+",
-         "Epi 1:1,000 IM for anaphylaxis — all levels, 0.3–0.5 mg",
-         "NS bolus 250–500 mL — AEMT+ (EMT may maintain a line only)"],
-        "Cardiac & other:",
-        ["Adenosine, Magnesium, Sodium bicarb, NTG infusion — PM",
-         "Amiodarone, Lidocaine, NTG SL, Dextrose 10%, Diphenhydramine — AEMT+",
-         "Atropine — PM for bradycardia; AEMT DuoDote for nerve agents",
-         "Aspirin, Albuterol, Ipratropium — all levels"],
-        "The rule that matters most: AEMTs give IV-push and IO meds on their list but may NOT start or titrate ANY infusion. Sedation infusions, push-dose pressors, ketamine, and norepinephrine are Paramedic-only. When in doubt, call DMO."
-      ],
-      kc: { title: "Who's the designated agent", body: [
-        "Opioid → Fentanyl (AEMT)",
-        "Antiemetic → Ondansetron (AEMT)",
-        "Benzo → Midazolam (seizure use for AEMT)",
-        "Dissociative → Ketamine (intubated adults, Paramedic only)",
-        "These come from KBEMS class authorization + Medical Director standing orders — AMR KC policy, not generic EMS."
-      ] }
-    },
-    {
-      id: "kc-infusions", kicker: "8.7 · Hospital Infusions", title: "What You Monitor on a Transfer",
-      body: [
-        "On IFT you continue drips the sending hospital started (Section IV) — verify, monitor, and keep them running safely. You do not start them. Paramedics titrate ONLY with explicit sending-physician parameters; otherwise hold the rate and call DMO.",
-        "Pressors & BP drips you'll see:",
-        ["Vasopressors: norepinephrine (first-line), epi, dopamine, phenylephrine, dobutamine, milrinone",
-         "Vasopressin — fixed rate, do NOT titrate",
-         "Nicardipine / clevidipine — BP control in neuro emergencies"],
-        "Sedation, analgesia & paralysis:",
-        ["Propofol — drops BP (BP q5 min; check the milky line)",
-         "Dexmedetomidine — watch for bradycardia",
-         "Midazolam, fentanyl, ketamine, hydromorphone infusions",
-         "Paralyzed patient = deeply sedated AND analgesed (the iron rule still applies)"],
-        "Cardiac, endocrine, antibiotics, blood:",
-        ["Heparin / anticoagulants — do not adjust without orders",
-         "Diltiazem / esmolol — rate control",
-         "Insulin — glucose q30 min",
-         "KCl — pump only, NEVER bolus",
-         "3% hypertonic saline — DMO to change"],
-        "Any infusion or transfusion reaction: stop it, run NS, ABCs, anaphylaxis protocol if indicated, notify DMO and the receiving facility.",
-        "Before every departure: confirm drug, concentration, ordered rate, current pump rate, line trace + label, access patency, volume for the trip plus a buffer, and a pump-failure backup. Dual-verify and document."
-      ],
-      kc: { title: "AEMT infusion boundary", body: [
-        "AEMT may monitor a drip ONLY if it matches their scope: NS, fentanyl analgesia (non-sedated), ondansetron, amiodarone, lidocaine, dextrose, KCl / antibiotic add-mixtures, naloxone.",
-        "ANY sedation, vasopressor, paralytic, insulin, heparin, or blood product = Paramedic transport.",
-        "Unauthorized drip running? The AEMT cannot depart — call dispatch for a Paramedic."
-      ] }
-    }
+
   ],
 
   quiz: {
@@ -1549,16 +1477,16 @@ const MODULES = [
         rationale: "Awareness with paralysis is documented as a sentinel safety event. Always pair long-acting paralytics with analgesia AND sedation. The patient is awake, terrified, and unable to move." },
       { q: "Push-dose epinephrine is mixed as:",
         choices: ["1 mg into 10 mL NS = 100 mcg/mL", "1 mg into 100 mL NS = 10 mcg/mL", "10 mg into 100 mL NS = 100 mcg/mL", "0.1 mg into 100 mL NS"], answer: 1,
-        rationale: "Standard push-dose epi: 1 mg of 1:10,000 epi into 100 mL NS = 10 mcg/mL. Dose 5–20 mcg IV (typically 10 mcg = 1 mL) every 1–5 min. AMR KC standing order uses the 10 mL-syringe prep (1 mL of 1:10,000 into 10 mL NS = 10 mcg/mL), 10–20 mcg every 1–2 min, Paramedic only." },
+        rationale: "Standard push-dose epi: 1 mg of 1:10,000 epi into 100 mL NS = 10 mcg/mL. Dose 5–20 mcg IV (typically 10 mcg = 1 mL) every 1–5 min. A common bedside alternative is the 10 mL-syringe prep (1 mL of 1:10,000 into 10 mL NS = 10 mcg/mL). Follow your local protocol for dosing and scope." },
       { q: "Push-dose phenylephrine is prepared as:",
         choices: ["1 mg into 100 mL NS = 10 mcg/mL", "100 mg into 100 mL NS = 1000 mcg/mL", "10 mg into 1000 mL NS = 10 mcg/mL", "10 mg into 100 mL NS = 100 mcg/mL"], answer: 3,
-        rationale: "Push-dose phenylephrine: 10 mg into 100 mL NS = 100 mcg/mL. Dose 50–200 mcg IV every 1–5 min. Pure α-agonist; reflex bradycardia possible. Note: push-dose phenylephrine is NOT on the AMR KC truck — KC carries push-dose epinephrine only." },
+        rationale: "Push-dose phenylephrine: 10 mg into 100 mL NS = 100 mcg/mL. Dose 50–200 mcg IV every 1–5 min. Pure α-agonist; reflex bradycardia possible. Note: many EMS services carry push-dose epinephrine only — check what your service stocks." },
       { q: "Post-intubation hypotension incidence in EMS RSI is approximately (Heffner 2012):",
         choices: ["~5%", "~50%", "~25%", "~75%"], answer: 2,
         rationale: "Approximately 25% of EMS RSI patients develop post-intubation hypotension. Push-dose pressors should be prepared BEFORE pushing the induction agent." },
       { q: "Which agent is generally preferred for RSI induction in a septic shock patient?",
         choices: ["Midazolam", "Ketamine", "Propofol", "Etomidate alone"], answer: 1,
-        rationale: "Ketamine preserves or augments sympathetic tone — preferred in shock. KETASED (Jabre 2009) showed ketamine equivalent to etomidate without the adrenal suppression. Etomidate's adrenal suppression is debated in septic shock. On AMR KC, ketamine is restricted to ongoing sedation of already-intubated adults (Paramedic only) — it is not a field induction agent in this service." },
+        rationale: "Ketamine preserves or augments sympathetic tone — preferred in shock. KETASED (Jabre 2009) showed ketamine equivalent to etomidate without the adrenal suppression. Etomidate's adrenal suppression is debated in septic shock. Note: some services restrict ketamine to ongoing sedation of already-intubated patients rather than field induction — know your local scope." },
       { q: "PRIS (propofol-related infusion syndrome) is most associated with:",
         choices: ["Single induction dose of propofol", "Infusion rates > 4 mg/kg/hr or duration > 48 hr", "Patients receiving fentanyl simultaneously", "Patients on ketamine"], answer: 1,
         rationale: "PRIS occurs at high doses or prolonged infusions: > 4 mg/kg/hr or > 48 hr. Metabolic acidosis, rhabdomyolysis, cardiac arrhythmia — potentially fatal." },
@@ -2559,7 +2487,7 @@ function renderLessons() {
       el("span", { class: "callout-label" }, `Evidence · ${lesson.evidence.title}`),
       lesson.evidence.body),
     lesson.kc && el("aside", { class: "callout callout-kc" },
-      el("span", { class: "callout-label" }, `AMR Kansas City Formulary · ${lesson.kc.title}`),
+      el("span", { class: "callout-label" }, `Formulary · ${lesson.kc.title}`),
       Array.isArray(lesson.kc.body)
         ? el("ul", { class: "callout-list" }, ...lesson.kc.body.map(li => el("li", null, li)))
         : lesson.kc.body)
@@ -3282,8 +3210,8 @@ function renderCertificate() {
       el("div", { class: "cert-foot" },
         el("div", { class: "cert-sig" },
           el("span", { class: "cert-sig-line" }),
-          el("span", { class: "cert-sig-name" }, "Ameet Deshmukh, MD"),
-          el("span", { class: "cert-sig-role" }, "Medical Director · AMR Kansas City")
+          el("span", { class: "cert-sig-name" }, "Jordan Hunter Jones"),
+          el("span", { class: "cert-sig-role" }, "Course Director · Ventilator Training Academy")
         ),
         el("div", { class: "cert-sig" },
           el("span", { class: "cert-sig-line" }),
