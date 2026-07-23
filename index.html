@@ -51,18 +51,18 @@
 </script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{
   --bg:#ffffff;--surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
   --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
   --emt:#15803d;--aemt:#1d4ed8;--pm:#6d28d9;
   --danger:#dc2626;--danger-bg:#fdecec;--warn:#a1590b;
   --emt-bg:#eafbf1;--aemt-bg:#eaf1fd;--pm-bg:#f3ecfd;--info-bg:#eaf4fc;--warn-bg:#fef3e2;
-  --mono:'IBM Plex Sans','IBM Plex Mono',sans-serif;--sans:'IBM Plex Sans',sans-serif;
+  --mono:'Inter',-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--sans:'Inter',-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg)}
-body{font-family:var(--sans);color:var(--white);min-height:100vh;line-height:1.5}
+body{font-family:var(--sans);color:var(--white);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 /* LOADING */
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
@@ -362,6 +362,19 @@ cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-col
   color:var(--teal2);background:var(--aemt-bg);border:1px solid #cfe0f7;border-radius:999px;
   padding:3px 8px;white-space:nowrap}
 .cc-arr{color:var(--gray);font-size:20px}
+
+/* ── HOME BRAND TILES (blue = prep, purple = game) ────────────────── */
+.stat-tile.tile-blue,.stat-tile.tile-purple{padding:17px 15px;gap:13px;border-radius:14px}
+.stat-tile.tile-blue{background:linear-gradient(135deg,#173a68 0%,#1b63c4 100%);border-color:transparent;
+  box-shadow:0 6px 18px rgba(27,99,196,0.26)}
+.stat-tile.tile-purple{background:linear-gradient(135deg,#6d28d9 0%,#c026d3 100%);border-color:transparent;
+  box-shadow:0 6px 18px rgba(124,58,237,0.28)}
+.stat-tile.tile-blue .stat-tile-ico,.stat-tile.tile-purple .stat-tile-ico{color:#fff;font-size:23px;width:30px}
+.stat-tile.tile-blue .stat-tile-val,.stat-tile.tile-purple .stat-tile-val{color:#fff;font-size:15.5px;font-weight:700;letter-spacing:-0.01em}
+.stat-tile.tile-blue .stat-tile-lbl{color:#dbe8fb;font-size:11.5px}
+.stat-tile.tile-purple .stat-tile-lbl{color:#f2e6ff;font-size:11.5px}
+.stat-tile.tile-blue:active,.stat-tile.tile-blue:hover,
+.stat-tile.tile-purple:active,.stat-tile.tile-purple:hover{border-color:transparent;filter:brightness(1.06)}
 
 /* ── VENTILATOR 3000 GAME CARD ────────────────────────────────────── */
 .game-card{position:relative;display:block;margin:8px 12px 10px;padding:18px 18px 16px;
@@ -830,6 +843,18 @@ function getHemoStats(){
   }catch(e){ return null; }
 }
 
+function getMetabStats(){
+  try{
+    var raw = localStorage.getItem('metab_academy_v1');
+    if(!raw) return null;
+    var s = JSON.parse(raw);
+    var modules = s.modules || {};
+    var total = 8, done = 0;
+    for(var i=1;i<=total;i++){ if(modules[i] && modules[i].passed) done++; }
+    return { done: done, total: total, certificate: !!s.finalPassed };
+  }catch(e){ return null; }
+}
+
 function renderHome(){
   var c = $('lv');
   var profile = getProfile();
@@ -854,7 +879,17 @@ function renderHome(){
   var d5 = getDaily5Stats();
   var vta = getVtaStats();
   var hemo = getHemoStats();
+  var metab = getMetabStats();
   h += '<div class="stat-strip">';
+  var ccDone = (vta&&vta.certificate?1:0)+(hemo&&hemo.certificate?1:0)+(metab&&metab.certificate?1:0);
+  h += '<a class="stat-tile tile-blue" data-goto="more">';
+  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
+  h += '<div class="stat-tile-val">Critical Care Prep</div>';
+  h += '<div class="stat-tile-lbl">'+(ccDone>0 ? ccDone+' of 3 certified' : '3-course FP-C track')+'</div></div></a>';
+  h += '<a class="stat-tile tile-purple" href="vent-ltv1200.html">';
+  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div><div>';
+  h += '<div class="stat-tile-val">Ventilator 3000</div>';
+  h += '<div class="stat-tile-lbl">The Game</div></div></a>';
   if(d5.streak){
     h += '<a class="stat-tile" href="quiz-daily5.html">';
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
@@ -865,38 +900,6 @@ function renderHome(){
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
     h += '<div class="stat-tile-val">Start your streak</div>';
     h += '<div class="stat-tile-lbl">Daily 5 questions</div></div></a>';
-  }
-  if(vta && vta.certificate){
-    h += '<a class="stat-tile" href="vta/academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Certified</div>';
-    h += '<div class="stat-tile-lbl">Ventilator Academy</div></div></a>';
-  } else if(vta && vta.done > 0){
-    h += '<a class="stat-tile" href="vta/academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">'+vta.done+'/'+vta.total+' modules</div>';
-    h += '<div class="stat-tile-lbl">Ventilator Academy</div></div></a>';
-  } else {
-    h += '<a class="stat-tile empty" href="vta/academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Start the course</div>';
-    h += '<div class="stat-tile-lbl">Ventilator Academy</div></div></a>';
-  }
-  if(hemo && hemo.certificate){
-    h += '<a class="stat-tile" href="hemodynamics-academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Certified</div>';
-    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
-  } else if(hemo && hemo.done > 0){
-    h += '<a class="stat-tile" href="hemodynamics-academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">'+hemo.done+'/'+hemo.total+' modules</div>';
-    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
-  } else {
-    h += '<a class="stat-tile empty" href="hemodynamics-academy.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Start the course</div>';
-    h += '<div class="stat-tile-lbl">Hemodynamics Academy</div></div></a>';
   }
   h += '<a class="stat-tile" href="imagetrend-job-aid.html">';
   h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div><div>';
