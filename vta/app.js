@@ -1,9 +1,25 @@
 // =====================================================================
 // Ventilator Training Academy — Virtual Academy PWA (multi-module)
 // Static · no backend · per-module progress in localStorage
+// ---------------------------------------------------------------------
+// © 2026 Jordan Hunter Jones <hunter04j@hotmail.com>. All rights reserved.
+// Original author & creator: Jordan Hunter Jones.
+// Provenance ID: VTA-PROV-253AFF390A18  (f20902c3-d091-4732-9b82-5ea1af1eeda1)
+// Authorship recorded in PROVENANCE.txt (signed) and LICENSE at the repo root.
 // =====================================================================
 
 "use strict";
+
+// Authorship / provenance marker — surfaced in the console on load so the
+// origin of the work is visible even in a copied deployment.
+const VTA_PROVENANCE = "VTA-PROV-253AFF390A18";
+try {
+  console.log(
+    "%cVentilator Training Academy%c\n© 2026 Jordan Hunter Jones — All rights reserved.\nCreator: Jordan Hunter Jones <hunter04j@hotmail.com>\nProvenance ID: " + VTA_PROVENANCE,
+    "font-size:14px;font-weight:700;color:#173a68",
+    "font-size:12px;color:#66707c"
+  );
+} catch (e) { /* console unavailable */ }
 
 // ---------- 1. CONTENT: ALL MODULES ----------
 

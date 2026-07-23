@@ -1,0 +1,34 @@
+PROVENANCE & AUTHORSHIP MANIFEST
+================================
+
+Work:            Ventilator Training Academy + LTV 1200 Ventilator Simulator
+Author/Creator:  Jordan Hunter Jones <hunter04j@hotmail.com>
+Copyright:       (c) 2026 Jordan Hunter Jones. All rights reserved.
+Provenance ID:   VTA-PROV-253AFF390A18
+UUID:            f20902c3-d091-4732-9b82-5ea1af1eeda1
+Signed (UTC):    2026-07-23T00:48:52.703Z
+Git commit ref:  9448d1948ed7e9966c95a76945d5123e04875497 (parent of the commit that introduces this manifest)
+Signature alg:   Ed25519 over SHA-256 file digests
+
+COVERED FILES (SHA-256)
+-----------------------
+2e480faca25d16b805b932fb8c648ab64ef51553cfb7f98b07648a7f80593f59  vent-ltv1200.html  (252246 bytes)
+26fbd7850fd23d22ae2cee27611e1e7e9356cce85e875072335d73c325b1513c  vta/academy.html  (4458 bytes)
+a8de53488ba0eb45def61860130b9f7eb608f77d2a6a470e9699422a980fa21a  vta/app.js  (238255 bytes)
+c13dc7d156a909bb6c3d6608b6b236e48f794ae21282173ab93a1797d1a8b555  vta/manifest.json  (1010 bytes)
+35dfbae2d3094156d4b79f0560d5ff9d7f6cb427e5a297ef0a3796ae8dc904d2  vta/styles.css  (29177 bytes)
+7036c0afdb3cc79fe6753815c5945783e0a0551107a7593f92f7e733572857fa  vta/sw.js  (1264 bytes)
+
+HOW TO VERIFY
+-------------
+1) Integrity — recompute each digest and compare to the list above:
+     shasum -a 256 vent-ltv1200.html vta/academy.html vta/app.js vta/manifest.json vta/styles.css vta/sw.js
+2) Signature — verify PROVENANCE.sig over this file with the public key:
+     openssl pkeyutl -verify -pubin -inkey PROVENANCE.pub.pem \
+       -rawin -in PROVENANCE.txt -sigfile PROVENANCE.sig.bin
+   (PROVENANCE.sig holds the same signature base64-encoded; PROVENANCE.pub
+    holds the base64 SPKI public key. Only the holder of the matching
+    private key — Jordan Hunter Jones — could have produced this signature.)
+
+The authoritative record of authorship is this signed manifest together with
+the timestamped version-control history of the repository.

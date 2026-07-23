@@ -1,11 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  LTV 1200 Ventilator Simulator (Ventilator Training Academy)
+  © 2026 Jordan Hunter Jones <hunter04j@hotmail.com>. All rights reserved.
+  Original author & creator: Jordan Hunter Jones.
+  Provenance ID: VTA-PROV-253AFF390A18  (f20902c3-d091-4732-9b82-5ea1af1eeda1)
+  Authorship is recorded in PROVENANCE.txt (signed) and LICENSE at the repo root.
+  If you find this notice in a deployment not published by Jordan Hunter Jones,
+  the work was reproduced without authorization.
+-->
+<html lang="en" data-author="Jordan Hunter Jones" data-provenance="VTA-PROV-253AFF390A18">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="author" content="Jordan Hunter Jones">
+<meta name="copyright" content="© 2026 Jordan Hunter Jones. All rights reserved.">
+<link rel="author" href="mailto:hunter04j@hotmail.com">
+<link rel="author" type="text/plain" href="humans.txt">
 <title>Ventilator Simulator — AMR KC</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LTV 1200 Ventilator Simulator",
+  "applicationCategory": "EducationalApplication",
+  "description": "Interactive Pulmonetic LTV 1200 transport-ventilator simulator for EMS ventilator training.",
+  "creator": { "@type": "Person", "name": "Jordan Hunter Jones", "email": "hunter04j@hotmail.com" },
+  "author": { "@type": "Person", "name": "Jordan Hunter Jones", "email": "hunter04j@hotmail.com" },
+  "copyrightHolder": { "@type": "Person", "name": "Jordan Hunter Jones" },
+  "copyrightYear": 2026,
+  "copyrightNotice": "© 2026 Jordan Hunter Jones. All rights reserved.",
+  "dateCreated": "2026-07-23",
+  "identifier": "VTA-PROV-253AFF390A18"
+}
+</script>
 <style>
+/* LTV 1200 Ventilator Simulator
+   © 2026 Jordan Hunter Jones <hunter04j@hotmail.com>. All rights reserved.
+   Original author & creator: Jordan Hunter Jones. Provenance: VTA-PROV-253AFF390A18 */
 :root{
+  --provenance:"VTA-PROV-253AFF390A18 · © 2026 Jordan Hunter Jones · All rights reserved";
   --panel:#f1eee6;--case:#e7e3d7;--lcd-bg:#181008;--lcd-green:#ff3038;
   --lcd-dim:#e06a72;--knob:#cfc3e6;--knob-hi:#e6def4;--knob-ind:#20265c;
   /* LTV LED palette (matched to the physical unit): yellow-green control
@@ -843,6 +876,8 @@ canvas#pip-canvas{display:none}
 </style>
 </head>
 <body>
+<!-- Provenance marker — VTA-PROV-253AFF390A18 · © 2026 Jordan Hunter Jones -->
+<div hidden aria-hidden="true" data-provenance="VTA-PROV-253AFF390A18" data-author="Jordan Hunter Jones" data-copyright="© 2026 Jordan Hunter Jones. All rights reserved."></div>
 
 <div class="hdr">
   <div class="hdr-left">
@@ -1050,6 +1085,7 @@ canvas#pip-canvas{display:none}
   </div>
 
   <div class="standby-hint">⏻ Ventilator in Standby — press <strong>On / Standby</strong> to power up.</div>
+  <div class="sim-credit" style="text-align:center;font-size:10px;color:var(--sub);opacity:0.7;margin-top:8px">Created by Jordan Hunter Jones · © 2026 · All rights reserved</div>
 
 </div></div></div>
 
@@ -1081,6 +1117,18 @@ canvas#pip-canvas{display:none}
 </div>
 
 <script>
+// LTV 1200 Ventilator Simulator
+// © 2026 Jordan Hunter Jones <hunter04j@hotmail.com>. All rights reserved.
+// Original author & creator: Jordan Hunter Jones. Provenance: VTA-PROV-253AFF390A18
+// Authorship recorded in PROVENANCE.txt (signed) and LICENSE at the repo root.
+try {
+  console.log(
+    "%cLTV 1200 Ventilator Simulator%c\n© 2026 Jordan Hunter Jones — All rights reserved.\nCreator: Jordan Hunter Jones <hunter04j@hotmail.com>\nProvenance ID: VTA-PROV-253AFF390A18",
+    "font-size:14px;font-weight:700;color:#173a68",
+    "font-size:12px;color:#66707c"
+  );
+} catch (e) { /* console unavailable */ }
+
 // ── STATE ─────────────────────────────────────────────────────
 var breathType = 'volume';
 var ventMode   = 'ac';  // ac | simv | cpap | nppv
