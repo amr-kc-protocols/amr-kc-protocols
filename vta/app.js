@@ -3195,7 +3195,7 @@ function renderCertificate() {
       el("div", { class: "cert-foot" },
         el("div", { class: "cert-sig" },
           el("span", { class: "cert-sig-line" }),
-          el("span", { class: "cert-sig-name" }, "Jordan Hunter Jones"),
+          el("span", { class: "cert-sig-name" }, "Jordan Hunter Jones, NRP"),
           el("span", { class: "cert-sig-role" }, "Course Director · Ventilator Training Academy")
         ),
         el("div", { class: "cert-sig" },
