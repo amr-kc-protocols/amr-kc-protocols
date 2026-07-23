@@ -2222,7 +2222,7 @@ function renderCourseHub() {
     );
   });
 
-  mount(el("div", null, hero, grid, buildSimulatorCard(), buildCapstoneCard(), buildResourcesCard()));
+  mount(el("div", null, hero, grid, buildSimulatorCard(), buildCapstoneCard()));
 }
 
 // Every hands-on simulator mission, in course order — the Practice Lab index.
@@ -2253,21 +2253,6 @@ function buildSimulatorCard() {
   return el("div", { class: "resources practice-lab" },
     el("p", { class: "resources-kicker" }, "Practice Lab · LTV 1200 Simulator"),
     el("div", { class: "practice-list" }, ...rows)
-  );
-}
-
-// Course resources — link to the full written Provider Manual.
-function buildResourcesCard() {
-  return el("div", { class: "resources" },
-    el("p", { class: "resources-kicker" }, "Course Resources"),
-    el("a", { class: "resource-link", href: "Provider_Manual.docx", target: "_blank", rel: "noopener", download: "VTA_Provider_Manual.docx" },
-      el("span", { class: "resource-ico" }, "📘"),
-      el("span", { class: "resource-text" },
-        el("span", { class: "resource-title" }, "Provider Manual"),
-        el("span", { class: "resource-sub" }, "The full written reference for the academy (.docx)")
-      ),
-      el("span", { class: "resource-arr" }, "↓")
-    )
   );
 }
 
