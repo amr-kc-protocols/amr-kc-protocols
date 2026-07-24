@@ -280,6 +280,43 @@ h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.025em; f
 .cl-note{ font-size:13px; color:var(--ink-2); line-height:1.5; margin-top:7px; }
 .cl-out.warn .cl-note{ color:#9A3412; }
 
+/* dose calculator */
+.dc-seg{ display:flex; gap:7px; margin-top:11px; }
+.dc-seg button{ flex:1; font-family:var(--sans); font-weight:700; font-size:12.5px; padding:9px 8px;
+  border:1.5px solid var(--rule-2); background:var(--paper); color:var(--ink-2); border-radius:10px; cursor:pointer; }
+.dc-seg button.on{ background:var(--grad); color:#fff; border-color:transparent; }
+.dc-tbl{ margin-top:13px; border:1.5px solid var(--rule); border-radius:11px; overflow:hidden; }
+.dc-r{ display:grid; grid-template-columns:1fr auto; gap:10px; align-items:baseline;
+  padding:10px 12px; border-bottom:1px solid var(--rule); }
+.dc-r:last-child{ border-bottom:none; }
+.dc-r.hd{ background:var(--card-2); font-family:var(--sans); font-weight:800; font-size:10px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); }
+.dc-nm{ font-size:14px; font-weight:600; color:var(--ink); }
+.dc-nm small{ display:block; font-size:11.5px; color:var(--ink-2); font-weight:500; margin-top:1px; }
+.dc-v{ font-family:var(--mono); font-weight:800; font-size:16px; color:var(--acc-dk); white-space:nowrap; }
+.dc-r.shock .dc-v{ color:var(--hot); }
+.dc-foot{ font-size:12px; color:var(--ink-2); line-height:1.5; margin-top:10px; }
+
+/* comparison */
+.cmp{ border:1.5px solid var(--rule); border-radius:12px; overflow:hidden; }
+.cmp-hd{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--rule); }
+.cmp-hd > div{ background:var(--card-2); padding:9px 11px; font-family:var(--sans); font-weight:800;
+  font-size:13px; color:var(--ink); text-align:center; }
+.cmp-hd > div:first-child{ color:var(--acc-dk); }
+.cmp-hd > div:last-child{ color:var(--acc2); }
+.cmp-row{ border-top:1px solid var(--rule); cursor:pointer; transition:background .14s; }
+.cmp-row:hover{ background:var(--card); }
+.cmp-lbl{ font-family:var(--sans); font-weight:800; font-size:9.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--lock); padding:8px 11px 0; display:flex; align-items:center; gap:6px; }
+.cmp-lbl::after{ content:"tap"; font-size:8.5px; letter-spacing:.06em; color:var(--acc); opacity:.75; }
+.cmp-row.on .cmp-lbl::after{ content:""; }
+.cmp-cells{ display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:4px 11px 10px; }
+.cmp-cells > div{ font-size:13px; line-height:1.45; color:var(--ink); }
+.cmp-take{ display:none; font-size:12.5px; line-height:1.5; color:var(--acc-dk); background:var(--acc-soft);
+  border-top:1px solid var(--acc-line); padding:9px 11px; }
+.cmp-row.on .cmp-take{ display:block; }
+.cmp-take b{ color:var(--ink); }
+
 /* branch scenario */
 .br-stem{ font-size:14.5px; line-height:1.55; color:var(--ink); margin:0 0 12px; }
 .br-stem b{ color:var(--acc-dk); }
@@ -543,6 +580,33 @@ function wShockIndex(){
     "</div>"+
     "<div class='cl-out'><span class='cl-lbl'>Shock index</span><div class='cl-big'>&mdash;</div>"+
     "<p class='cl-note'>Enter both values to calculate.</p></div></div>";
+}
+function wDoseCalc(){
+  return "<div class='iw' data-w='calc' data-calc='dose' data-mode='normal'>"+
+    "<div class='iw-h'><span class='iw-tag'>Calculator</span><span class='iw-t'>RSI Dose Calculator</span></div>"+
+    "<p class='iw-sub'>A teaching aid, not a protocol. Enter a weight, then compare standard dosing against the reduced induction dosing a shocked patient needs.</p>"+
+    "<div class='cl-row'><div class='cl-f'><label for='dc-wt'>Weight</label>"+
+      "<input id='dc-wt' type='number' inputmode='decimal' min='1' max='250' step='any' placeholder='kg'></div></div>"+
+    "<div class='dc-seg'>"+
+      "<button type='button' data-mode='normal' class='on'>Normal perfusion</button>"+
+      "<button type='button' data-mode='shock'>Shock / hypotension</button>"+
+    "</div>"+
+    "<div class='dc-tbl'><div class='dc-r hd'><div>Agent</div><div>Dose</div></div>"+
+      "<div class='dc-out'></div></div>"+
+    "<p class='dc-foot'>Always confirm against your service's standing orders. Doses shown are common adult ranges for rapid sequence intubation.</p></div>";
+}
+function wCompare(title, sub, colA, colB, rows){
+  // rows = [label, valueA, valueB, takeaway]
+  var h = "<div class='iw' data-w='compare'><div class='iw-h'><span class='iw-tag'>Compare</span>"+
+          "<span class='iw-t'>"+title+"</span></div>";
+  if(sub) h += "<p class='iw-sub'>"+sub+"</p>";
+  h += "<div class='cmp'><div class='cmp-hd'><div>"+colA+"</div><div>"+colB+"</div></div>";
+  rows.forEach(function(r){
+    h += "<div class='cmp-row'><div class='cmp-lbl'>"+r[0]+"</div>"+
+         "<div class='cmp-cells'><div>"+r[1]+"</div><div>"+r[2]+"</div></div>"+
+         "<div class='cmp-take'><b>Bottom line.</b> "+r[3]+"</div></div>";
+  });
+  return h + "</div></div>";
 }
 function wBranch(title, stem, opts){
   // opts = [label, kind(good|meh|bad), feedback]
@@ -915,12 +979,235 @@ var MODULES = [
     ]
   },
 
-  { id:4, available:false, title:"Induction Agents",
-    desc:"Etomidate, ketamine, propofol and midazolam — choosing and dosing the drug that takes the patient under, and what each one does to the blood pressure.",
-    objective:"", content:[], quiz:[] },
-  { id:5, available:false, title:"Neuromuscular Blockade",
-    desc:"Succinylcholine versus rocuronium — onset, duration, the contraindication list that actually matters, and why the choice is rarely about speed.",
-    objective:"", content:[], quiz:[] },
+  {
+    id: 4,
+    available: true,
+    title: "Induction Agents",
+    desc: "Etomidate, ketamine, propofol and midazolam — choosing and dosing the drug that takes the patient under, and what each one does to the blood pressure.",
+    objective: "Compare the four induction agents by onset, duration and hemodynamic effect; choose an appropriate agent for the shocked, bronchospastic, head-injured and seizing patient; and explain why induction doses must be reduced in shock while paralytic doses are not.",
+    content: [
+      { h:"1", t:"What an induction agent is for", html:
+        "<p>The induction agent has one job: to take the patient from awake to deeply unconscious within seconds, so that laryngoscopy is neither felt nor remembered. It does <em>not</em> relax the muscles — that is the paralytic's job, and Module 5 takes it up. Confusing the two roles is the origin of the worst complication in this whole subject, which we will come to at the end of the next module.</p>"+
+        "<p>Every available agent achieves unconsciousness reliably. They differ almost entirely in <strong>what they do to the blood pressure</strong>, and that is what should drive your choice. In a well-perfused patient the difference is academic. In the patient from Module 3 — the one running on catecholamines with a shock index of 1.5 — it is the difference between an uneventful intubation and an arrest.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Choose the induction agent by its hemodynamic profile and the patient's physiology, not by habit. Then reduce the dose for shock.</div>"
+      },
+      { h:"2", t:"The four agents at a glance", html:
+        wRe("The induction agents","Tap each for dose, onset, and the hemodynamic catch.",[
+          ["E","Etomidate","<strong>0.3 mg/kg IV</strong> (halve it in shock). Onset 15&ndash;45 seconds, duration roughly 3&ndash;12 minutes. The most hemodynamically neutral agent available — it neither vasodilates nor depresses contractility meaningfully, which is why it became the default emergency induction agent. Causes myoclonus, which is not a seizure. Its controversy is adrenal suppression (section 4)."],
+          ["K","Ketamine","<strong>1&ndash;2 mg/kg IV</strong> (reduce to 0.5&ndash;1 mg/kg in shock). Onset 45&ndash;60 seconds, duration 10&ndash;20 minutes. A dissociative NMDA antagonist. Indirectly sympathomimetic, so it usually maintains or raises blood pressure — but it is also a <em>direct</em> myocardial depressant, which matters enormously in the catecholamine-depleted patient (section 3). Bronchodilates, which makes it attractive in asthma."],
+          ["P","Propofol","<strong>1.5&ndash;2.5 mg/kg IV</strong>. Onset 15&ndash;45 seconds, duration 5&ndash;10 minutes. Excellent, smooth induction — and a potent vasodilator with negative inotropy. It reliably drops the blood pressure, which is fine in the well patient and dangerous in the sick one. Anticonvulsant and antiemetic."],
+          ["M","Midazolam","<strong>0.1&ndash;0.3 mg/kg IV</strong>. Onset 2&ndash;5 minutes — far too slow for reliable RSI — with dose-dependent hypotension. It is a poor induction agent, and its real-world failure mode is that clinicians reach for a familiar sedative dose (2&ndash;5 mg) that is nowhere near an induction dose, leaving the patient paralyzed and aware."]
+        ])+
+        "<p>Two of these dominate emergency practice: <strong>etomidate</strong> and <strong>ketamine</strong>. Propofol has a role in the stable patient and in status epilepticus. Midazolam is best thought of as an agent you may have to use rather than one you would choose.</p>"
+      },
+      { h:"3", t:"Ketamine's hidden trap", html:
+        "<p>Ketamine has a reputation as the safe choice in shock, and that reputation is mostly deserved — but the mechanism behind it contains a trap worth understanding properly.</p>"+
+        "<p>Ketamine raises blood pressure <em>indirectly</em>: it inhibits catecholamine reuptake, so circulating adrenaline and noradrenaline act for longer. That is borrowed power, not its own. Ketamine's direct effect on cardiac muscle is <strong>negative inotropy</strong> — it weakens contraction.</p>"+
+        "<p>In a patient with catecholamine reserve, the indirect sympathomimetic effect dominates and the pressure holds or rises. In a patient who has been in shock for hours and is already maximally catecholamine-stimulated, there is no reserve left to potentiate — so the direct myocardial depression is unopposed, and the pressure can fall precipitously. This is why the profoundly shocked patient can arrest on the agent chosen specifically to protect them.</p>"+
+        "<div class='dangerbox'><span class='dt'>The lesson</span> Ketamine is a good choice in shock, but it is not a substitute for resuscitation. Reduce the dose, and have the vasopressor in your hand — exactly as Module 3 required. No induction agent is hemodynamically free in a patient with no reserve.</div>"+
+        wPick("Reason it through","A patient has been in septic shock for six hours, is maximally vasoconstricted, and is on a noradrenaline infusion. Why might a full 2 mg/kg dose of ketamine drop their blood pressure?",
+          ["Ketamine is a direct vasodilator like propofol","Their catecholamine reserve is exhausted, so ketamine's direct myocardial depression is unopposed",
+           "Ketamine is inactivated by noradrenaline","Ketamine always lowers blood pressure"],1,
+          "<b>The reserve is gone.</b> Ketamine raises pressure indirectly by potentiating the patient's own circulating catecholamines. In a maximally stimulated patient there is nothing left to potentiate, so its direct negative inotropic effect is unmasked. Reduce the dose and support the pressure.")
+      },
+      { h:"4", t:"The etomidate question", html:
+        "<p>A single induction dose of etomidate inhibits 11-beta-hydroxylase and measurably suppresses cortisol production for up to about 24 hours. That biochemical fact is not in dispute. What has been argued about for two decades is whether it causes patients harm.</p>"+
+        "<p>The concern is sharpest in sepsis, where adrenal function is already stressed. Some observational studies and meta-analyses have reported a mortality signal in septic and critically ill patients; others, and several randomized comparisons against ketamine, have found no significant difference in mortality. The honest summary is that the evidence is genuinely mixed and the effect, if real, is modest.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check &mdash; single-dose etomidate</span>"+
+        "<p>Etomidate reliably causes transient adrenal suppression after a single induction dose. Randomized comparisons with ketamine for emergency intubation have generally shown similar intubating conditions and no clear mortality difference, while some meta-analyses of critically ill and septic populations have suggested increased mortality with etomidate. Practice has drifted toward ketamine in septic shock at many services, but etomidate remains widely used and defensible, particularly where hemodynamic neutrality is the priority.</p>"+
+        "<div class='grade'>Quality: conflicting. Consistent biochemical effect; contested patient-important outcomes.</div></div>"+
+        "<p>What this means practically: do not agonize at the bedside. Both agents are reasonable. If your service carries both and the patient is in septic shock, ketamine is the more common contemporary choice — but a reduced dose of etomidate in a profoundly shocked patient is not an error, and hemodynamic neutrality has real value.</p>"
+      },
+      { h:"5", t:"Matching agent to patient", html:
+        wRe("Which agent, and why","Tap each clinical picture.",[
+          ["1","Septic / hemorrhagic shock","Ketamine at a <strong>reduced</strong> dose (0.5&ndash;1 mg/kg), or etomidate halved to 0.15 mg/kg. Avoid propofol. Whichever you choose, the vasopressor should be in your hand — the agent choice is a smaller lever than the resuscitation."],
+          ["2","Severe asthma / bronchospasm","Ketamine, for its bronchodilating effect. This is the one situation where an induction agent also treats the disease."],
+          ["3","Head injury","Either etomidate or ketamine. The old teaching that ketamine dangerously raises intracranial pressure has not held up; contemporary evidence suggests it does not meaningfully raise ICP and, by supporting mean arterial pressure, it helps maintain cerebral perfusion pressure. Avoiding hypotension matters far more in TBI than the choice between these two."],
+          ["4","Status epilepticus","Propofol or midazolam, both of which are anticonvulsant — provided the blood pressure tolerates it. Remember that paralysis stops the visible convulsion without stopping the seizure in the brain."],
+          ["5","Stable, well-perfused patient","Any of them. This is the patient in whom the choice genuinely does not matter much — which is why habits formed on stable patients transfer so badly to sick ones."]
+        ])+
+        "<div class='keybox'><span class='kt'>Anchor</span> In traumatic brain injury, hypotension is far more damaging than any theoretical ICP effect of ketamine. Protect the pressure.</div>"
+      },
+      { h:"6", t:"Dose reduction — and what not to reduce", html:
+        "<p>Here is the single most practical rule in this module, and one of the most commonly got wrong:</p>"+
+        "<div class='formula'>In shock: <span class='fk'>reduce the induction agent</span> &mdash; often by half.<br>In shock: <span class='fk'>do NOT reduce the paralytic</span> &mdash; give the full dose.</div>"+
+        "<p>The reasoning is different for each. Shocked patients have a contracted volume of distribution and reduced clearance, and they depend on sympathetic tone that induction agents blunt — so a standard induction dose is effectively an overdose. But a shocked patient also has a slow circulation, which <em>delays</em> the onset of the paralytic. Cutting the paralytic dose in a low-flow state produces slow, incomplete relaxation, poor intubating conditions, and more attempts — the opposite of what a fragile patient needs.</p>"+
+        wDoseCalc()+
+        "<p>Enter a weight and toggle between the two states. Notice what changes and what does not: the induction agents drop, propofol becomes an agent to avoid, and both paralytics hold steady.</p>"
+      },
+      { h:"7", t:"The pressor goes in first", html:
+        "<p>Module 3 said to have the vasopressor drawn up. This module says when to use it — and the answer is often <em>before</em> the induction agent rather than after.</p>"+
+        "<p>Waiting to treat post-induction hypotension means you are chasing a pressure that has already fallen in a patient whose coronary perfusion depends on it. In the profoundly shocked, starting a noradrenaline infusion or giving push-dose vasopressor <em>ahead of</em> induction is increasingly standard: you accept a slightly higher pressure going in, so the inevitable drop lands somewhere survivable.</p>"+
+        "<p>Push-dose epinephrine is the common prehospital tool: typically 10&ndash;20 mcg IV every 1&ndash;2 minutes, prepared by drawing 1 mL of 1:10,000 epinephrine into a 10 mL syringe and filling to 10 mL with saline, giving 10 mcg/mL. Confirm the preparation against your own protocol — concentration errors with push-dose pressors are a recognized source of harm.</p>"+
+        "<div class='dangerbox'><span class='dt'>Sequence matters</span> A pressor given after the pressure has collapsed is rescue. A pressor running before induction is prevention. In the patient with a shock index above 0.9, prefer prevention.</div>"
+      },
+      { h:"8", t:"Putting it together", html:
+        wBranch("Decision point","A 47-year-old with a severe asthma exacerbation: exhausted, single-word speech, silent chest, SpO&#8322; 88% despite continuous nebulizers and magnesium, rising CO&#8322;, and now becoming drowsy. HR 132, BP 104/68. You have committed to intubating. <b>Which induction agent, and at what dose?</b>",[
+          ["Ketamine 1.5 mg/kg — it bronchodilates","good","<span class='fbk'>Correct</span>Ketamine is the agent of choice here: it produces reliable induction <i>and</i> bronchodilates, treating the disease while it takes the patient under. The blood pressure is adequate and the heart rate reflects both the illness and the beta-agonists, so a near-standard dose is reasonable — though with an exhausted, hypercapnic patient it is still sensible to stay at the lower end and have a pressor available. Anticipate breath stacking after intubation: low rate, long expiratory time."],
+          ["Propofol 2 mg/kg — smooth induction","bad","<span class='fbk'>Poor choice</span>Propofol is a potent vasodilator with negative inotropy, and this patient is about to face the added insult of positive-pressure ventilation with severe air trapping — which will drop venous return further. Combining propofol's hypotension with dynamic hyperinflation is a recognized route to peri-intubation collapse. Propofol also offers no bronchodilation."],
+          ["Midazolam 5 mg — familiar and safe","bad","<span class='fbk'>Two errors</span>First, 5 mg is a sedative dose, not an induction dose (which would be roughly 0.1–0.3 mg/kg — several times higher). Second, midazolam's onset of 2–5 minutes is far too slow for RSI. This is the classic setup for a patient who is paralyzed but inadequately anaesthetized — and aware."],
+          ["Etomidate 0.3 mg/kg","meh","<span class='fbk'>Reasonable, not optimal</span>Etomidate would induce this patient safely and hemodynamically neutrally — it is a defensible choice and not an error. But it is a missed opportunity: ketamine achieves the same induction while also bronchodilating, which is exactly what this patient's disease needs. When an agent can treat the pathology as well as induce, take it."]
+        ])+
+        "<p>Carry three things forward. The agents differ chiefly in what they do to the blood pressure. Ketamine's protection is borrowed from the patient's own catecholamines, so it fails in those who have none left. And in shock you reduce the induction agent but never the paralytic — which is exactly where Module 5 begins.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Etomidate for hemodynamic neutrality, ketamine when bronchodilation helps or catecholamine support is wanted, propofol only in the well-perfused, and midazolam only when nothing else exists — at a true induction dose.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The standard induction dose of etomidate is:",
+        opts:["0.1 mg/kg","0.3 mg/kg","1.5 mg/kg","3 mg/kg"], ans:1,
+        expl:"Etomidate is dosed at 0.3 mg/kg IV, halved to roughly 0.15 mg/kg in shock. Its onset is 15–45 seconds with a duration of about 3–12 minutes." },
+      { q:"Ketamine usually supports blood pressure because it:",
+        opts:["Directly strengthens myocardial contraction","Inhibits catecholamine reuptake, potentiating the patient's own catecholamines","Causes direct arterial vasoconstriction","Blocks vagal tone"], ans:1,
+        expl:"Ketamine's pressor effect is indirect — it potentiates circulating catecholamines. Its direct myocardial effect is negative inotropy, which is why it can drop the pressure in a catecholamine-depleted patient." },
+      { q:"In a patient with prolonged septic shock on high-dose noradrenaline, a full dose of ketamine may cause hypotension because:",
+        opts:["Ketamine antagonizes noradrenaline","There is no catecholamine reserve left to potentiate, unmasking direct myocardial depression","Ketamine is renally cleared","Sepsis increases ketamine metabolism"], ans:1,
+        expl:"With catecholamine reserve exhausted, the indirect sympathomimetic effect cannot manifest and ketamine's direct negative inotropy is unopposed. Reduce the dose and support the pressure." },
+      { q:"Which induction agent is most likely to cause significant hypotension in a shocked patient?",
+        opts:["Etomidate","Ketamine","Propofol","All are equally neutral"], ans:2,
+        expl:"Propofol is a potent vasodilator with negative inotropy and reliably lowers blood pressure. It is a good agent in the well-perfused patient and a poor one in shock." },
+      { q:"Regarding single-dose etomidate and adrenal suppression, the accurate statement is:",
+        opts:["It has been definitively shown to increase mortality in all patients","It reliably suppresses cortisol, but patient-important outcomes remain contested","It causes no measurable adrenal effect","It is absolutely contraindicated in sepsis"], ans:1,
+        expl:"Adrenal suppression after a single dose is a consistent biochemical finding. Whether it causes harm is genuinely contested — some meta-analyses suggest a mortality signal in sepsis, while randomized comparisons with ketamine have generally found no clear difference." },
+      { q:"For a patient with severe bronchospasm requiring intubation, the induction agent with an added therapeutic benefit is:",
+        opts:["Etomidate","Ketamine","Propofol","Midazolam"], ans:1,
+        expl:"Ketamine bronchodilates, so it treats the underlying pathology while inducing. That dual action makes it the preferred agent in severe asthma." },
+      { q:"Current thinking on ketamine in traumatic brain injury is that:",
+        opts:["It is contraindicated because it dangerously raises ICP","It does not meaningfully raise ICP, and supporting MAP protects cerebral perfusion","It should only be used with a paralytic","It reliably lowers cerebral perfusion pressure"], ans:1,
+        expl:"The historical concern about ICP has not held up. By supporting mean arterial pressure, ketamine helps maintain cerebral perfusion pressure — and in TBI, avoiding hypotension matters far more than the choice between ketamine and etomidate." },
+      { q:"In a hypotensive patient, induction agent doses and paralytic doses should be:",
+        opts:["Both reduced","Both increased","Induction reduced, paralytic given at full dose","Induction at full dose, paralytic reduced"], ans:2,
+        expl:"Shocked patients are highly sensitive to induction agents, so those doses are reduced — often halved. But a low-flow state delays paralytic onset, so cutting the paralytic produces slow, incomplete relaxation and more attempts. Give the paralytic in full." },
+      { q:"The most common real-world failure with midazolam as an induction agent is:",
+        opts:["It causes malignant hyperthermia","A familiar sedative dose is given instead of a true induction dose, risking awareness","It has too rapid an onset","It causes bronchospasm"], ans:1,
+        expl:"Clinicians reach for a familiar 2–5 mg sedative dose, far below the roughly 0.1–0.3 mg/kg induction dose. Combined with its slow 2–5 minute onset, this leaves a paralyzed patient who is inadequately anaesthetized and potentially aware." },
+      { q:"In a patient with a shock index above 0.9 requiring intubation, vasopressor support is best:",
+        opts:["Started only if the pressure falls after induction","Started before or at induction, to prevent rather than rescue the drop","Avoided entirely until the tube is confirmed","Replaced by a fluid bolus alone"], ans:1,
+        expl:"Chasing a pressure that has already collapsed is rescue. Running a vasopressor before induction is prevention — you accept a higher pressure going in so the inevitable drop lands somewhere survivable." }
+    ]
+  },
+  {
+    id: 5,
+    available: true,
+    title: "Neuromuscular Blockade",
+    desc: "Succinylcholine versus rocuronium — onset, duration, the contraindication list that actually matters, and why the choice is rarely about speed.",
+    objective: "Contrast depolarizing and non-depolarizing blockade; dose succinylcholine and rocuronium correctly for RSI; apply the succinylcholine contraindications, particularly the timing of receptor up-regulation; refute the 'it will wear off' rescue fallacy; and prevent awareness with paralysis.",
+    content: [
+      { h:"1", t:"Why paralyze at all", html:
+        "<p>A neuromuscular blocker does not sedate, does not relieve pain, and does not make the patient unconscious. It does exactly one thing: it stops skeletal muscle from contracting. Understanding that narrowly is the foundation of using it safely.</p>"+
+        "<p>What paralysis buys you is <strong>intubating conditions</strong> — a relaxed jaw, open vocal cords that are not closing on the tube, no coughing, no bucking, no vomiting. The evidence is consistent that a paralytic improves first-pass success and reduces airway trauma compared with sedation alone, and first-pass success is what protects the patient from the hypoxia and hemodynamic damage of repeated attempts.</p>"+
+        "<p>What it costs you is the patient's entire respiratory effort and every protective reflex, for as long as the drug lasts. That is the promise from Module 2 made chemical: you have removed their ability to breathe, and you must now substitute for it.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Paralysis produces the best intubating conditions and the highest first-pass success — at the price of the patient's own ventilation. It is the reason the difficult-airway assessment in Module 2 comes before the drugs, not after.</div>"
+      },
+      { h:"2", t:"Two mechanisms", html:
+        "<p>The two drugs you will use work in opposite ways at the same receptor, and nearly every practical difference between them follows from that.</p>"+
+        "<p><strong>Succinylcholine</strong> is a <em>depolarizing</em> blocker. It resembles acetylcholine closely enough to bind its receptor and switch the muscle on — but unlike acetylcholine it is not cleared quickly from the junction, so the muscle depolarizes and then stays depolarized, unable to reset and fire again. That initial mass activation is what produces the visible <strong>fasciculations</strong>, and the persistent depolarization is what drives potassium out of muscle cells into the blood.</p>"+
+        "<p><strong>Rocuronium</strong> is a <em>non-depolarizing</em> blocker. It occupies the receptor competitively and simply blocks acetylcholine from reaching it. Nothing is switched on, so there are no fasciculations and no potassium shift. Blockade ends when the drug diffuses away, which takes considerably longer.</p>"+
+        "<div class='formula'>Depolarizing (<span class='fk'>succinylcholine</span>) &mdash; switches the receptor ON and holds it there &rarr; fasciculations, potassium release, short duration<br>Non-depolarizing (<span class='fk'>rocuronium</span>) &mdash; competitively BLOCKS the receptor &rarr; no fasciculations, no potassium shift, long duration</div>"
+      },
+      { h:"3", t:"Side by side", html:
+        wCompare("Succinylcholine vs rocuronium","Tap any row for the practical takeaway.","Succinylcholine","Rocuronium",[
+          ["Dose (RSI)","1.5 mg/kg IV<br>(2 mg/kg in small children; 3&ndash;4 mg/kg IM if no IV)","1.2 mg/kg IV<br>— note this is double the routine 0.6 mg/kg intubating dose",
+           "The commonest rocuronium error is giving 0.6 mg/kg for an RSI. At that dose onset is too slow. RSI requires <b>1.2 mg/kg</b>."],
+          ["Onset","45&ndash;60 seconds","45&ndash;60 seconds at the full 1.2 mg/kg dose",
+           "At proper RSI dosing the onset times are effectively equivalent. Speed is <b>not</b> a reason to choose succinylcholine."],
+          ["Duration","6&ndash;10 minutes","45&ndash;70 minutes or longer",
+           "This is the real difference between them — and it cuts both ways. Short duration sounds safer but creates the fallacy in section 5; long duration mandates prompt sedation (section 7)."],
+          ["Fasciculations","Yes","No",
+           "Fasciculations are a marker of the depolarizing mechanism, and the same mechanism drives the potassium release that produces every serious succinylcholine contraindication."],
+          ["Potassium","Raises serum K⁺ by roughly 0.5&ndash;1.0 mEq/L; far more in up-regulated patients","No effect",
+           "In a patient with receptor up-regulation the rise can be large enough to cause cardiac arrest. When in doubt about potassium, rocuronium is the safe answer."],
+          ["Contraindications","A real list — see section 4","Essentially none beyond true allergy",
+           "Rocuronium's lack of contraindications is its strongest practical argument. It is never the drug that causes a hyperkalemic arrest."],
+          ["Reversal","None (wait it out)","Sugammadex 16 mg/kg for immediate reversal of an RSI dose",
+           "Sugammadex genuinely reverses rocuronium within minutes — but it is rarely carried prehospital. Do not plan a rescue around a drug you do not have."]
+        ])+
+        "<p>Read the onset row again, because it overturns the most common reason people give for choosing succinylcholine. At a proper RSI dose of 1.2 mg/kg, rocuronium works just as fast. The choice is therefore about duration, contraindications, and what you intend to do afterwards.</p>"
+      },
+      { h:"4", t:"When succinylcholine is dangerous", html:
+        "<p>Succinylcholine's contraindications share one mechanism. When a muscle loses its nerve supply, is burned, or is crushed, it responds by <strong>up-regulating acetylcholine receptors</strong> — spreading them across the whole muscle membrane instead of concentrating them at the junction. Give succinylcholine to that muscle and you depolarize an enormous receptor population at once, dumping a potentially lethal load of potassium into the circulation.</p>"+
+        "<p>The critical insight is <em>timing</em>. Up-regulation takes time to develop — roughly 24 to 72 hours after the injury. So succinylcholine is generally safe in the acutely burned or crushed patient you are called to at the scene, and dangerous in that same patient several days later. Prehospital and transport crews meet both.</p>"+
+        wRe("Succinylcholine contraindications","Tap each.",[
+          ["1","Burns &gt; ~24&ndash;72 hours old","Receptor up-regulation develops over days. Acutely burned patients are generally safe; the risk climbs after roughly 24–72 hours and persists for months. Interfacility transfers are exactly where this bites."],
+          ["2","Crush injury / rhabdomyolysis","Damaged muscle both up-regulates receptors and already leaks potassium. Same timing principle as burns."],
+          ["3","Denervation &amp; neuromuscular disease","Stroke with dense paralysis, spinal cord injury, multiple sclerosis, muscular dystrophy, ALS. Chronically denervated muscle is densely up-regulated. Muscular dystrophy in children has caused hyperkalemic arrest, sometimes in undiagnosed patients."],
+          ["4","Known or suspected hyperkalemia","Renal failure is <em>not</em> itself a contraindication — dialysis patients with a normal potassium tolerate succinylcholine. The contraindication is a potassium that is already high, whatever the cause."],
+          ["5","Malignant hyperthermia history","Personal or family history. Succinylcholine is a triggering agent; rocuronium is not."]
+        ])+
+        "<div class='dangerbox'><span class='dt'>The practical shortcut</span> If you find yourself weighing whether a patient's potassium or receptor status is safe, that hesitation is itself the answer: give rocuronium. It has none of these risks, and at 1.2 mg/kg it works just as fast.</div>"
+      },
+      { h:"5", t:"\"It'll wear off\" — the fallacy", html:
+        "<p>The most persistent argument for succinylcholine is that if intubation fails, its short duration means the patient will resume breathing. It sounds like a safety net. It is not one, for two reasons.</p>"+
+        "<p><strong>The timing does not work.</strong> Succinylcholine lasts 6&ndash;10 minutes to full recovery of respiratory effort. A patient you cannot intubate <em>and</em> cannot oxygenate will suffer critical desaturation in a small fraction of that — often 1 to 3 minutes, and faster still in the shocked, obese, or already-hypoxic patient who needed intubating. You will have arrested before the drug wears off.</p>"+
+        "<p><strong>The patient who was apneic stays apneic.</strong> Recovering neuromuscular function does not restore respiratory drive to someone who was obtunded, poisoned, or exhausted before you started. You get a patient who can breathe but will not.</p>"+
+        "<div class='dangerbox'><span class='dt'>What actually rescues</span> Not the drug wearing off, but the plan from Module 2: bag-mask ventilation, a supraglottic device, and — if those fail — the front of the neck. Choosing succinylcholine for its offset is planning to be rescued by pharmacology instead of by a procedure.</div>"+
+        wPick("Test the reasoning","You cannot intubate and cannot oxygenate a patient given succinylcholine 90 seconds ago. What is the correct action?",
+          ["Wait for the succinylcholine to wear off","Give a second dose of succinylcholine",
+           "Proceed through the rescue algorithm — BVM, supraglottic device, then surgical airway","Give the reversal agent"],2,
+          "<b>Proceed through the rescue algorithm.</b> Waiting is fatal — the patient will arrest from hypoxia several minutes before the drug wears off. Succinylcholine has no reversal agent, and a second dose changes nothing about oxygenation. The rescue is procedural, not pharmacological.")
+      },
+      { h:"6", t:"Choosing between them", html:
+        wOrder("Choosing the paralytic","Tap the questions in the order you should ask them.",[
+          "Any succinylcholine contraindication?",
+          "Is a difficult airway predicted?",
+          "Will they need prolonged paralysis?",
+          "Do I have sugammadex available?"
+        ])+
+        "<p>The first question usually settles it. Any contraindication, or any real uncertainty, sends you to rocuronium.</p>"+
+        "<p>The second question is subtler and is where practice has shifted. It used to be argued that a predicted difficult airway favoured succinylcholine so the patient could resume breathing — but section 5 dismantles that. The contemporary position is that if you have decided to paralyze at all, prolonged relaxation gives you calm, still, optimal conditions for the rescue steps you may need; and if the airway is so difficult that you are relying on the patient breathing again, you should be keeping them breathing from the start with an awake technique, not paralyzing and hoping.</p>"+
+        "<p>The third question matters in transport: a patient going to a ventilator for a long journey will need ongoing paralysis or deep sedation anyway, so rocuronium's duration is a feature rather than a cost.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Rocuronium at 1.2 mg/kg is the default for most emergency and transport RSI: equivalent onset, no contraindications, and a duration that suits a patient who is going onto a ventilator anyway. Succinylcholine remains reasonable where a short duration is genuinely wanted and no contraindication exists.</div>"
+      },
+      { h:"7", t:"Awareness with paralysis", html:
+        "<p>This is the complication that most deserves your attention, because it is common, entirely preventable, and profoundly harmful.</p>"+
+        "<p>Look at the numbers from Module 4 against this one. Etomidate lasts 3&ndash;12 minutes. Ketamine lasts 10&ndash;20. Rocuronium at RSI dose lasts 45&ndash;70 minutes or more. The paralytic <strong>substantially outlasts every induction agent</strong>. Unless you give further sedation, there is a long window in which the patient is awake, in pain from the tube, aware of their surroundings — and completely unable to move, blink, or signal.</p>"+
+        "<p>Patients who experience this describe it as among the worst experiences of their lives, and it is associated with lasting post-traumatic symptoms. It is also invisible: a paralyzed patient cannot show you distress. Tachycardia, hypertension, or lacrimation may be the only clues, and in a shocked patient even those may be absent.</p>"+
+        "<div class='dangerbox'><span class='dt'>The rule</span> Post-intubation sedation and analgesia are started <strong>immediately</strong> after the tube is confirmed — not when the patient begins to move, because they cannot move. Plan the infusion before you push the paralytic, so nothing depends on remembering during a busy post-intubation period.</div>"+
+        "<p>Module 7 covers the sedation and analgesia regimens in detail. For now, treat it as an inseparable part of giving a paralytic: if you are prepared to paralyze, you must be prepared to sedate.</p>"
+      },
+      { h:"8", t:"Putting it together", html:
+        wBranch("Decision point","You are transferring a 34-year-old, 80 kg, four days after extensive flame burns to the torso and both arms. He has become progressively more hypoxic with worsening secretions and now requires intubation. He has good IV access and a normal blood pressure. <b>Which paralytic, and at what dose?</b>",[
+          ["Succinylcholine 120 mg (1.5 mg/kg) — fastest onset","bad","<span class='fbk'>Dangerous</span>This is the exact scenario succinylcholine's contraindication exists for. Four days post-burn is well past the roughly 24–72 hour window for acetylcholine receptor up-regulation, and giving succinylcholine to densely up-regulated muscle can release enough potassium to cause cardiac arrest. Note also that it would have been acceptable on day one — the timing is what matters, and interfacility transfers are precisely where this is missed."],
+          ["Rocuronium 96 mg (1.2 mg/kg)","good","<span class='fbk'>Correct</span>Rocuronium carries none of the hyperkalemia risk, and at 1.2 mg/kg its onset matches succinylcholine's, so nothing is lost. 1.2 × 80 = 96 mg. Its 45–70 minute duration suits a patient heading onto a ventilator for a transfer — but it makes immediate post-intubation sedation and analgesia mandatory, since it will far outlast the induction agent."],
+          ["Rocuronium 48 mg (0.6 mg/kg)","meh","<span class='fbk'>Right drug, wrong dose</span>Rocuronium is correct, but 0.6 mg/kg is the routine intubating dose, not the RSI dose. At 0.6 mg/kg onset is meaningfully slower, which means laryngoscopy on an incompletely relaxed patient, poorer conditions, and a higher chance of a failed first attempt. For RSI give the full 1.2 mg/kg — here, 96 mg."],
+          ["No paralytic — sedation alone is safer in burns","bad","<span class='fbk'>Worse conditions</span>Sedation-only intubation produces poorer intubating conditions, lower first-pass success, and more airway trauma. In a burn patient with an airway that is deteriorating and may become progressively harder, a failed first attempt is precisely what you cannot afford. The concern about burns applies to <i>succinylcholine specifically</i>, not to paralysis in general."]
+        ])+
+        "<p>Three things to carry forward. Rocuronium at 1.2 mg/kg matches succinylcholine's onset, so speed is not a reason to choose succinylcholine. Every serious succinylcholine contraindication comes from receptor up-regulation, which takes 24&ndash;72 hours to develop. And a paralytic outlasts every induction agent &mdash; so sedation is not an afterthought, it is part of the decision to paralyze.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> If you are prepared to paralyze, you must be prepared to ventilate, to rescue procedurally, and to sedate immediately. The drug is the easy part.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The RSI dose of rocuronium is:",
+        opts:["0.3 mg/kg","0.6 mg/kg","1.2 mg/kg","2 mg/kg"], ans:2,
+        expl:"RSI requires 1.2 mg/kg — double the routine 0.6 mg/kg intubating dose. At the full RSI dose, onset is 45–60 seconds, equivalent to succinylcholine. Giving 0.6 mg/kg for an RSI is a common and consequential error." },
+      { q:"Fasciculations after succinylcholine occur because it:",
+        opts:["Competitively blocks acetylcholine receptors","Binds and activates the receptor, then holds the muscle depolarized","Releases calcium from the sarcoplasmic reticulum","Inhibits acetylcholinesterase"], ans:1,
+        expl:"Succinylcholine is a depolarizing blocker: it activates the receptor (causing the initial mass contraction seen as fasciculations) and then keeps the membrane depolarized so the muscle cannot fire again. That same mechanism drives potassium efflux." },
+      { q:"Succinylcholine is contraindicated in a burn patient:",
+        opts:["Immediately after the burn","After roughly 24–72 hours, once receptor up-regulation develops","Only if the burns exceed 50% body surface area","At no point — burns are not a contraindication"], ans:1,
+        expl:"Up-regulation of extrajunctional acetylcholine receptors takes about 24–72 hours to develop and then persists for months. Acutely burned patients are generally safe; the risk appears days later — which is exactly when interfacility transfers occur." },
+      { q:"Which is NOT by itself a contraindication to succinylcholine?",
+        opts:["Chronic renal failure with a normal potassium","Muscular dystrophy","Spinal cord injury three weeks ago","Family history of malignant hyperthermia"], ans:0,
+        expl:"Renal failure alone is not a contraindication — dialysis patients with a normal potassium tolerate succinylcholine. The contraindication is an already-elevated potassium, or conditions causing receptor up-regulation such as denervation and muscular dystrophy." },
+      { q:"The claim that succinylcholine is safer because 'it will wear off' is flawed because:",
+        opts:["Succinylcholine actually lasts longer than rocuronium","Critical desaturation occurs in 1–3 minutes, well before the 6–10 minute offset","Succinylcholine has a reversal agent","It only wears off if the patient is ventilated"], ans:1,
+        expl:"A patient who cannot be intubated or oxygenated will desaturate critically within a few minutes — long before succinylcholine's 6–10 minute offset. And a patient apneic from their underlying illness will not resume breathing anyway. The rescue is procedural, not pharmacological." },
+      { q:"Sugammadex reverses:",
+        opts:["Succinylcholine","Rocuronium","Both equally","Neither"], ans:1,
+        expl:"Sugammadex encapsulates rocuronium (16 mg/kg reverses an RSI dose within minutes). Succinylcholine has no reversal agent. Sugammadex is rarely carried prehospital, so rescue planning should not depend on it." },
+      { q:"Compared with sedation alone, adding a neuromuscular blocker for intubation:",
+        opts:["Reduces first-pass success","Improves intubating conditions and first-pass success","Has no effect on success rates","Increases airway trauma"], ans:1,
+        expl:"Paralysis produces a relaxed jaw, open cords, and no coughing or bucking — consistently improving first-pass success and reducing airway trauma. First-pass success is what protects the patient from repeated-attempt hypoxia and hemodynamic injury." },
+      { q:"Awareness with paralysis occurs primarily because:",
+        opts:["Induction agents are always underdosed","The paralytic outlasts every induction agent","Paralytics have intrinsic stimulant effects","Patients metabolize sedatives faster after intubation"], ans:1,
+        expl:"Rocuronium at RSI dose lasts 45–70+ minutes while etomidate lasts 3–12 and ketamine 10–20. Without prompt post-intubation sedation the patient is awake and unable to signal — and a paralyzed patient cannot show distress." },
+      { q:"Post-intubation sedation and analgesia should be started:",
+        opts:["Immediately after tube confirmation","When the patient begins to move or cough","Only if the transport exceeds 30 minutes","After the first set of vital signs"], ans:0,
+        expl:"Waiting for movement is meaningless in a paralyzed patient — they cannot move. Sedation is started immediately after tube confirmation, and ideally planned before the paralytic is given so nothing depends on remembering later." },
+      { q:"A 90 kg patient requires RSI with rocuronium. The correct dose is:",
+        opts:["54 mg","108 mg","135 mg","180 mg"], ans:1,
+        expl:"1.2 mg/kg × 90 kg = 108 mg. (54 mg would be the routine 0.6 mg/kg intubating dose — too slow in onset for RSI.)" }
+    ]
+  },
   { id:6, available:false, title:"The Sequence & First-Pass Success",
     desc:"The seven Ps, positioning, laryngoscopy technique, the bougie, and confirming the tube — engineering the best possible first attempt.",
     objective:"", content:[], quiz:[] },
@@ -1097,6 +1384,8 @@ function openReader(id){
     html += "<h3><span class='h3n'>"+sec.h+"</span>"+sec.t+"</h3>"+sec.html;
   });
   c.innerHTML = html;
+  // give interactive widgets their initial paint (the dose table is empty until rendered)
+  c.querySelectorAll("[data-calc='dose']").forEach(renderDoseCalc);
 
   // gate the quiz button until the reader is scrolled through (honest "must read")
   var btn = document.getElementById("toQuizBtn");
@@ -1184,6 +1473,21 @@ function onReaderScroll(){
       return;
     }
 
+    /* ---- comparison rows ---- */
+    var cr = t.closest(".cmp-row");
+    if(cr && root.contains(cr)){ cr.classList.toggle("on"); return; }
+
+    /* ---- dose calculator mode toggle ---- */
+    var seg = t.closest(".dc-seg button");
+    if(seg && root.contains(seg)){
+      var cb = seg.closest("[data-calc='dose']");
+      if(!cb) return;
+      cb.dataset.mode = seg.dataset.mode;
+      cb.querySelectorAll(".dc-seg button").forEach(function(x){ x.classList.toggle("on", x === seg); });
+      renderDoseCalc(cb);
+      return;
+    }
+
     /* ---- branch scenario ---- */
     var bo = t.closest(".br-o");
     if(bo && root.contains(bo)){
@@ -1207,6 +1511,7 @@ function onReaderScroll(){
   root.addEventListener("input", function(e){
     var box = e.target.closest("[data-w='calc']");
     if(!box || !root.contains(box)) return;
+    if(box.dataset.calc === "dose"){ renderDoseCalc(box); return; }
     if(box.dataset.calc !== "si") return;
     var hr  = parseFloat((box.querySelector("#si-hr")||{}).value);
     var sbp = parseFloat((box.querySelector("#si-sbp")||{}).value);
@@ -1235,6 +1540,39 @@ function onReaderScroll(){
     }
   });
 })();
+
+/* ---- Dose calculator rendering (used by the widget engine) ---- */
+function fmtDose(mg){
+  if(mg >= 100) return Math.round(mg);
+  if(mg >= 10)  return Math.round(mg*10)/10;
+  return Math.round(mg*100)/100;
+}
+function renderDoseCalc(box){
+  var out = box.querySelector(".dc-out");
+  if(!out) return;
+  var wt = parseFloat((box.querySelector("#dc-wt")||{}).value);
+  var shock = box.dataset.mode === "shock";
+  if(!wt || wt <= 0 || wt > 250){
+    out.innerHTML = "<div class='dc-r'><div class='dc-nm'>Enter a weight to calculate<small>Doses appear here.</small></div><div class='dc-v'>&mdash;</div></div>";
+    return;
+  }
+  var rows = [
+    { nm:"Etomidate", sub:shock ? "0.15 mg/kg &mdash; halved" : "0.3 mg/kg",
+      val:fmtDose(wt*(shock?0.15:0.3))+" mg" },
+    { nm:"Ketamine", sub:shock ? "0.5&ndash;1 mg/kg &mdash; reduced" : "1&ndash;2 mg/kg",
+      val:shock ? (fmtDose(wt*0.5)+"&ndash;"+fmtDose(wt*1)+" mg") : (fmtDose(wt*1)+"&ndash;"+fmtDose(wt*2)+" mg") },
+    { nm:"Propofol", sub:shock ? "avoid in shock" : "1.5&ndash;2.5 mg/kg",
+      val:shock ? "avoid" : (fmtDose(wt*1.5)+"&ndash;"+fmtDose(wt*2.5)+" mg"), warn:shock },
+    { nm:"Succinylcholine", sub:"1.5 mg/kg &mdash; not reduced",
+      val:fmtDose(wt*1.5)+" mg" },
+    { nm:"Rocuronium", sub:"1.2 mg/kg &mdash; not reduced",
+      val:fmtDose(wt*1.2)+" mg" }
+  ];
+  out.innerHTML = rows.map(function(r){
+    return "<div class='dc-r"+(r.warn?" shock":"")+"'><div class='dc-nm'>"+r.nm+"<small>"+r.sub+"</small></div>"+
+           "<div class='dc-v'>"+r.val+"</div></div>";
+  }).join("");
+}
 
 /* ---- Quiz (modules) ---- */
 var activeQuiz = null;     // {questions, isFinal, modId, answers[], submitted}
