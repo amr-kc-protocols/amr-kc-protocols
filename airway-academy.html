@@ -202,9 +202,29 @@ h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.025em; f
   border:1px solid var(--acc2-line); border-left:4px solid var(--acc2);
   background:var(--acc2-soft); border-radius:10px; padding:13px 15px; margin:18px 0;
 }
-.evidence .etag{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:#fff; background:var(--acc2); display:inline-block; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+.evidence .etag{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:#fff; background:var(--acc2); display:inline-block; padding:3px 9px; border-radius:999px; }
 .evidence p{ margin:6px 0 0; font-size:14.5px; }
 .evidence .grade{ font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:9px; padding-top:8px; border-top:1px solid var(--acc2-line); }
+.ev-hd{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:7px; }
+.ev-t{ font-family:var(--sans); font-weight:800; font-size:14px; color:var(--ink); margin-bottom:2px; }
+.ev-tier{ font-family:var(--sans); font-weight:800; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 9px; border-radius:999px; border:1px solid; }
+.ev-tier::before{ content:"evidence: "; opacity:.72; }
+.ev-strong  .ev-tier{ color:#065F46; background:var(--green-soft); border-color:var(--green-line); }
+.ev-moderate .ev-tier{ color:var(--acc-dk); background:var(--acc-soft); border-color:var(--acc-line); }
+.ev-limited .ev-tier{ color:var(--amber); background:var(--amber-soft); border-color:var(--amber-line); }
+.ev-contested .ev-tier{ color:#9A3412; background:var(--hot-soft); border-color:var(--hot-line); }
+.evidence.ev-strong{ border-left-color:var(--green); }
+.evidence.ev-moderate{ border-left-color:var(--acc); }
+.evidence.ev-limited{ border-left-color:var(--amber); }
+.evidence.ev-contested{ border-left-color:var(--hot); }
+/* evidence legend on the home view */
+.evlegend{ background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:13px 15px; margin:0 0 20px; }
+.evlegend h4{ font-family:var(--sans); font-weight:800; font-size:12px; margin:0 0 4px; color:var(--ink); }
+.evlegend p{ font-size:12.5px; color:var(--ink-2); line-height:1.5; margin:0 0 9px; }
+.evlegend ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.evlegend li{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--ink-2); line-height:1.45; }
+.evlegend .ev-tier{ flex:0 0 auto; }
 .keybox{ background:var(--green-soft); border:1px solid var(--green-line); border-radius:10px; padding:13px 15px; margin:18px 0; }
 .keybox .kt{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--green); display:block; margin-bottom:5px; }
 .dangerbox{ background:var(--hot-soft); border:1px solid var(--hot-line); border-left:4px solid var(--hot); border-radius:10px; padding:13px 15px; margin:18px 0; }
@@ -505,6 +525,16 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
         <label for="nameInput">Learner name (appears on your certificate)</label>
         <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
       </div>
+      <div class="evlegend print-hide">
+        <h4>How the evidence is graded</h4>
+        <p>Claims in this course carry an evidence-strength badge, so you can see how firm the ground is. Weak evidence is labelled as weak &mdash; and occasionally still supports a strong recommendation, which is said explicitly where it applies.</p>
+        <ul>
+          <li class="ev-strong"><span class="ev-tier">Strong</span><span>Large or consistent randomized evidence, or an aligned guideline position.</span></li>
+          <li class="ev-moderate"><span class="ev-tier">Moderate</span><span>Reasonable evidence with real limitations &mdash; single trials, or consistent observational data.</span></li>
+          <li class="ev-limited"><span class="ev-tier">Limited</span><span>Case reports, mechanism, or consensus only. Treat conclusions cautiously.</span></li>
+          <li class="ev-contested"><span class="ev-tier">Contested</span><span>Good-quality studies that disagree. Reasonable clinicians differ.</span></li>
+        </ul>
+      </div>
       <p class="eyebrow">Course Modules &middot; Sequential</p>
       <ul class="modlist" id="modList"></ul>
       <div id="finalSlot"></div>
@@ -622,6 +652,14 @@ function wShockIndex(){
     "<div class='cl-out'><span class='cl-lbl'>Shock index</span><div class='cl-big'>&mdash;</div>"+
     "<p class='cl-note'>Enter both values to calculate.</p></div></div>";
 }
+function wEv(tier, title, body, note){
+  // tier: "Strong" | "Moderate" | "Limited" | "Contested"
+  return "<div class='evidence ev-"+tier.toLowerCase()+"'>"+
+    "<div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>"+tier+"</span></div>"+
+    "<div class='ev-t'>"+title+"</div>"+
+    "<p>"+body+"</p>"+
+    "<div class='grade'>"+note+"</div></div>";
+}
 function wCheck(title, sub, items){
   // interactive checklist: items = [label, detail]
   var h = "<div class='iw' data-w='check' data-n='"+items.length+"'>"+
@@ -725,9 +763,9 @@ var MODULES = [
         "<li><strong>Fixing the cause</strong> — naloxone for the opioid overdose, a nebulizer and magnesium for bronchospasm, glucose for hypoglycemia. Each of these has spared many patients an unnecessary tube.</li>"+
         "</ul>"+
         "<p>The discipline is to ask, every time: <em>is there a reversible cause I can treat in the next five minutes that removes the indication entirely?</em></p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — NIV in acute respiratory failure</span>"+
-        "<p>Non-invasive ventilation reduces the need for intubation and lowers mortality in acute cardiogenic pulmonary edema and in COPD exacerbation with hypercapnic acidosis; these are its strongest indications. Its benefit is far less established in undifferentiated hypoxemic failure and in asthma, where it may still help but requires close monitoring and a low threshold to escalate. NIV is not a reason to delay a tube in a patient who is failing it.</p>"+
-        "<div class='grade'>Quality: high for cardiogenic pulmonary edema and COPD; low to moderate elsewhere.</div></div>"
+        wEv("Strong","NIV in acute respiratory failure",
+          "Non-invasive ventilation reduces the need for intubation and lowers mortality in acute cardiogenic pulmonary edema and in COPD exacerbation with hypercapnic acidosis; these are its strongest indications. Its benefit is far less established in undifferentiated hypoxemic failure and in asthma, where it may still help but requires close monitoring and a low threshold to escalate. NIV is not a reason to delay a tube in a patient who is failing it.",
+          "Quality: high for cardiogenic pulmonary edema and COPD; low to moderate elsewhere.")
       },
       { h:"5", t:"Three ways to take an airway", html:
         "<p>Deciding to intubate is not one decision but two: <em>whether</em>, and then <em>how</em>. Broadly there are three approaches, and choosing the wrong one is a common route to a disaster.</p>"+
@@ -742,9 +780,9 @@ var MODULES = [
         "<p>Rapid sequence intubation means giving a <strong>potent induction agent and a rapid-onset neuromuscular blocker in quick succession</strong>, then intubating without bag-mask ventilation in between. Two ideas are doing the work in that sentence.</p>"+
         "<p>First, the drugs are given together rather than titrated, so the patient passes from awake to fully relaxed in seconds rather than minutes. Second, the traditional teaching omits bagging in order to avoid inflating the stomach and provoking regurgitation — the patient is assumed to have a full stomach and no protection against aspiration.</p>"+
         "<p>That second point has softened with evidence. Gentle bag-mask ventilation between induction and laryngoscopy reduces hypoxemia without a demonstrated increase in aspiration, and in a patient with poor oxygen reserve it may be the right call. The modern position is that <em>routine</em> bagging is unnecessary, but bagging a desaturating patient is correct — hypoxemia is the more immediate killer.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — bagging during the apneic period</span>"+
-        "<p>In a randomized trial of critically ill adults undergoing intubation (Casey et al., <i>NEJM</i> 2019), bag-mask ventilation between induction and laryngoscopy produced significantly higher oxygen saturations and fewer episodes of severe hypoxemia, with no significant increase in operator-reported aspiration. The trial excluded patients felt to be at especially high aspiration risk.</p>"+
-        "<div class='grade'>Quality: moderate to high (single well-conducted RCT in an ICU population).</div></div>"
+        wEv("Moderate","Bagging during the apneic period",
+          "In a randomized trial of critically ill adults undergoing intubation (Casey et al., <i>NEJM</i> 2019), bag-mask ventilation between induction and laryngoscopy produced significantly higher oxygen saturations and fewer episodes of severe hypoxemia, with no significant increase in operator-reported aspiration. The trial excluded patients felt to be at especially high aspiration risk.",
+          "Quality: moderate to high (single well-conducted RCT in an ICU population).")
       },
       { h:"7", t:"Weighing it at the bedside", html:
         "<p>Put the pieces together into a single mental checklist you can run in under a minute:</p>"+
@@ -855,9 +893,9 @@ var MODULES = [
         "<p><strong>RODS</strong> — difficult extraglottic device: <em>R</em>estricted mouth opening (you must be able to insert the device), <em>O</em>bstruction at or below the larynx (a supraglottic device cannot bypass an obstruction below it), <em>D</em>istorted anatomy (the device seats blindly and needs normal architecture), and <em>S</em>tiff lungs (a supraglottic seal leaks at the high pressures stiff lungs require).</p>"+
         "<p><strong>SMART</strong> — difficult cricothyrotomy: <em>S</em>urgery or scarring over the neck, <em>M</em>ass (hematoma, tumor, abscess, goitre), <em>A</em>ccess or anatomy problems (obesity, a short thick neck, an impalpable membrane), <em>R</em>adiation change (fibrosed, distorted tissue planes), and <em>T</em>umor.</p>"+
         "<p>SMART deserves a moment of respect. The surgical airway is the bottom of every difficult-airway algorithm — it is the plan that must not fail. Identifying and, ideally, <strong>marking the cricothyroid membrane before you induce</strong> on any patient with a predicted difficult airway is one of the highest-value things you can do in the preparation phase. Finding landmarks on a hypoxic, moving, blood-covered neck is a different task from finding them on a calm one.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — identifying the cricothyroid membrane</span>"+
-        "<p>Clinicians locate the cricothyroid membrane by palpation unreliably, and accuracy falls substantially in female patients and in obesity — studies have reported correct identification in only a minority of such patients. Difficult-airway guidelines therefore recommend identifying and marking the membrane in advance when difficulty is anticipated, with ultrasound where available and time permits.</p>"+
-        "<div class='grade'>Quality: moderate (consistent observational and simulation data).</div></div>"
+        wEv("Moderate","Identifying the cricothyroid membrane",
+          "Clinicians locate the cricothyroid membrane by palpation unreliably, and accuracy falls substantially in female patients and in obesity — studies have reported correct identification in only a minority of such patients. Difficult-airway guidelines therefore recommend identifying and marking the membrane in advance when difficulty is anticipated, with ultrasound where available and time permits.",
+          "Quality: moderate (consistent observational and simulation data).")
       },
       { h:"6", t:"Grading what you actually see", html:
         "<p>Prediction happens before; grading happens during. The <strong>Cormack–Lehane</strong> classification describes the best view obtained at laryngoscopy, and it gives you and the receiving team a shared language.</p>"+
@@ -955,9 +993,9 @@ var MODULES = [
         "<li><strong>Add PEEP for shunt.</strong> If hypoxemia is driven by collapsed or flooded alveoli — pneumonia, pulmonary edema, ARDS — a plain non-rebreather cannot fix it because the blood is bypassing unventilated lung. Non-invasive positive pressure (CPAP/BiPAP) or a BVM with a PEEP valve recruits that lung and is the only thing that will meaningfully raise the saturation.</li>"+
         "<li><strong>Apneic oxygenation.</strong> Nasal cannula at 15 L/min left in place <em>through</em> the apneic period and laryngoscopy. Oxygen continues to diffuse into the alveoli even without respiratory effort, provided the airway is open.</li>"+
         "</ul>"+
-        "<div class='evidence'><span class='etag'>Evidence check — apneic oxygenation</span>"+
-        "<p>The physiology is sound and observational and prehospital data have suggested benefit, but randomized evidence is mixed: the FELLOW trial in critically ill ICU patients found no significant difference in lowest oxygen saturation, while other trials and meta-analyses have found reductions in desaturation, particularly in emergency-department and elective settings. Given negligible cost and risk, it remains widely recommended — but it is an adjunct to good preoxygenation, not a substitute for it.</p>"+
-        "<div class='grade'>Quality: moderate but conflicting; low risk of harm.</div></div>"+
+        wEv("Contested","Apneic oxygenation",
+          "The physiology is sound and observational and prehospital data have suggested benefit, but randomized evidence is mixed: the FELLOW trial in critically ill ICU patients found no significant difference in lowest oxygen saturation, while other trials and meta-analyses have found reductions in desaturation, particularly in emergency-department and elective settings. Given negligible cost and risk, it remains widely recommended — but it is an adjunct to good preoxygenation, not a substitute for it.",
+          "Quality: moderate but conflicting; low risk of harm.")+
         wPick("Choose the strategy","A patient with severe pneumonia has a SpO&#8322; of 86% on a non-rebreather at 15 L/min. The saturation has not moved in ten minutes. What will most improve their preoxygenation?",
           ["Increase the non-rebreather to a flush rate","Add positive pressure — CPAP/BiPAP or a BVM with a PEEP valve",
            "Add a nasal cannula at 6 L/min","Proceed immediately — this is as good as it will get"],1,
@@ -966,6 +1004,9 @@ var MODULES = [
       { h:"4", t:"Fix the blood pressure first", html:
         "<p>Of the three HOP killers, hypotension is the one most often left uncorrected — partly because a compensating patient can look deceptively acceptable. A narrow pulse pressure, cool peripheries, and a heart rate in the 120s is a patient running on catecholamines, and induction takes those catecholamines away.</p>"+
         "<p>The <strong>shock index</strong> — heart rate divided by systolic blood pressure — is a quick way to expose that compensation. A normal value is around 0.5–0.7. Values approaching or exceeding <strong>0.8–0.9</strong> have been repeatedly associated with post-intubation hypotension and peri-intubation arrest, and they are often abnormal while the blood pressure alone still looks reassuring.</p>"+
+        wEv("Limited","Shock index as a predictor",
+          "Multiple observational cohorts have found that a pre-intubation shock index above roughly 0.8&ndash;0.9 is associated with post-intubation hypotension and cardiovascular collapse. These are retrospective analyses with varying thresholds and definitions, and no trial has shown that acting on the shock index specifically improves outcomes. Treat it as a useful, fast flag that prompts you to look harder &mdash; not as a validated decision rule with a hard cut-off.",
+          "Quality: limited. Retrospective observational data with inconsistent thresholds; no interventional evidence.")+
         wShockIndex()+
         "<p>What to do when the index is high: give volume if the patient is fluid-responsive, have <strong>push-dose vasopressor drawn up and in your hand</strong> before you induce, consider starting a vasopressor infusion beforehand in the profoundly shocked, and choose your induction agent and dose accordingly — a hypotensive patient needs a substantially reduced induction dose, whichever agent you use. Module 4 takes up the agents in detail.</p>"+
         "<div class='keybox'><span class='kt'>Anchor</span> The pressure you have before induction is the best it is going to be. If it is marginal now, it will be worse in ninety seconds — so treat it first, and have the vasopressor in your hand rather than in the bag.</div>"
@@ -1077,9 +1118,9 @@ var MODULES = [
       { h:"4", t:"The etomidate question", html:
         "<p>A single induction dose of etomidate inhibits 11-beta-hydroxylase and measurably suppresses cortisol production for up to about 24 hours. That biochemical fact is not in dispute. What has been argued about for two decades is whether it causes patients harm.</p>"+
         "<p>The concern is sharpest in sepsis, where adrenal function is already stressed. Some observational studies and meta-analyses have reported a mortality signal in septic and critically ill patients; others, and several randomized comparisons against ketamine, have found no significant difference in mortality. The honest summary is that the evidence is genuinely mixed and the effect, if real, is modest.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check &mdash; single-dose etomidate</span>"+
-        "<p>Etomidate reliably causes transient adrenal suppression after a single induction dose. Randomized comparisons with ketamine for emergency intubation have generally shown similar intubating conditions and no clear mortality difference, while some meta-analyses of critically ill and septic populations have suggested increased mortality with etomidate. Practice has drifted toward ketamine in septic shock at many services, but etomidate remains widely used and defensible, particularly where hemodynamic neutrality is the priority.</p>"+
-        "<div class='grade'>Quality: conflicting. Consistent biochemical effect; contested patient-important outcomes.</div></div>"+
+        wEv("Contested","Single-dose etomidate",
+          "Etomidate reliably causes transient adrenal suppression after a single induction dose. Randomized comparisons with ketamine for emergency intubation have generally shown similar intubating conditions and no clear mortality difference, while some meta-analyses of critically ill and septic populations have suggested increased mortality with etomidate. Practice has drifted toward ketamine in septic shock at many services, but etomidate remains widely used and defensible, particularly where hemodynamic neutrality is the priority.",
+          "Quality: conflicting. Consistent biochemical effect; contested patient-important outcomes.")+
         "<p>What this means practically: do not agonize at the bedside. Both agents are reasonable. If your service carries both and the patient is in septic shock, ketamine is the more common contemporary choice — but a reduced dose of etomidate in a profoundly shocked patient is not an error, and hemodynamic neutrality has real value.</p>"
       },
       { h:"5", t:"Matching agent to patient", html:
@@ -1090,6 +1131,9 @@ var MODULES = [
           ["4","Status epilepticus","Propofol or midazolam, both of which are anticonvulsant — provided the blood pressure tolerates it. Remember that paralysis stops the visible convulsion without stopping the seizure in the brain."],
           ["5","Stable, well-perfused patient","Any of them. This is the patient in whom the choice genuinely does not matter much — which is why habits formed on stable patients transfer so badly to sick ones."]
         ])+
+        wEv("Moderate","Ketamine and intracranial pressure",
+          "The long-standing teaching that ketamine is contraindicated in head injury derived from small, methodologically weak studies from the 1970s in patients with obstructive hydrocephalus, many of them unventilated. Systematic reviews of subsequent work in sedated, ventilated patients have not found a clinically meaningful rise in intracranial pressure, and cerebral perfusion pressure is often better maintained because mean arterial pressure is supported. The evidence base is still modest in size, but it points consistently away from the original concern.",
+          "Quality: moderate. Consistent systematic-review findings overturning weak historical data; individual studies remain small.")+
         "<div class='keybox'><span class='kt'>Anchor</span> In traumatic brain injury, hypotension is far more damaging than any theoretical ICP effect of ketamine. Protect the pressure.</div>"
       },
       { h:"6", t:"Dose reduction — and what not to reduce", html:
@@ -1159,6 +1203,9 @@ var MODULES = [
       { h:"1", t:"Why paralyze at all", html:
         "<p>A neuromuscular blocker does not sedate, does not relieve pain, and does not make the patient unconscious. It does exactly one thing: it stops skeletal muscle from contracting. Understanding that narrowly is the foundation of using it safely.</p>"+
         "<p>What paralysis buys you is <strong>intubating conditions</strong> — a relaxed jaw, open vocal cords that are not closing on the tube, no coughing, no bucking, no vomiting. The evidence is consistent that a paralytic improves first-pass success and reduces airway trauma compared with sedation alone, and first-pass success is what protects the patient from the hypoxia and hemodynamic damage of repeated attempts.</p>"+
+        wEv("Moderate","Paralysis and first-pass success",
+          "Large emergency-department and prehospital registry analyses consistently report higher first-pass success and fewer airway complications when a neuromuscular blocker is used, compared with sedation-only intubation. The data are observational rather than randomized — clinicians choose sedation-only for reasons that themselves predict difficulty — but the direction is consistent across settings and the physiologic rationale is straightforward.",
+          "Quality: moderate. Consistent large observational data; no randomized comparison, and confounding by indication is likely.")+
         "<p>What it costs you is the patient's entire respiratory effort and every protective reflex, for as long as the drug lasts. That is the promise from Module 2 made chemical: you have removed their ability to breathe, and you must now substitute for it.</p>"+
         "<div class='keybox'><span class='kt'>Anchor</span> Paralysis produces the best intubating conditions and the highest first-pass success — at the price of the patient's own ventilation. It is the reason the difficult-airway assessment in Module 2 comes before the drugs, not after.</div>"
       },
@@ -1197,6 +1244,9 @@ var MODULES = [
           ["4","Known or suspected hyperkalemia","Renal failure is <em>not</em> itself a contraindication — dialysis patients with a normal potassium tolerate succinylcholine. The contraindication is a potassium that is already high, whatever the cause."],
           ["5","Malignant hyperthermia history","Personal or family history. Succinylcholine is a triggering agent; rocuronium is not."]
         ])+
+        wEv("Limited","Succinylcholine-induced hyperkalemic arrest",
+          "This is a case where weak evidence still supports a strong recommendation, and it is worth understanding why. The evidence is almost entirely case reports, case series and animal or mechanistic work &mdash; there is no randomized trial, and there never will be one, because deliberately giving succinylcholine to a patient you suspect is up-regulated would be unethical. The receptor biology is well established, the reported events are catastrophic and often fatal, and a completely safe alternative exists. Low-quality evidence plus a severe, irreversible harm plus a free alternative is exactly the situation where a cautious rule is correct.",
+          "Quality: limited (case reports and mechanistic data only) &mdash; but the recommendation to avoid it is strong, because the harm is catastrophic and rocuronium carries no such risk.")+
         "<div class='dangerbox'><span class='dt'>The practical shortcut</span> If you find yourself weighing whether a patient's potassium or receptor status is safe, that hesitation is itself the answer: give rocuronium. It has none of these risks, and at 1.2 mg/kg it works just as fast.</div>"
       },
       { h:"5", t:"\"It'll wear off\" — the fallacy", html:
@@ -1282,9 +1332,9 @@ var MODULES = [
       { h:"1", t:"Why the first attempt is the whole game", html:
         "<p>Everything in this course has been building toward one number: the proportion of intubations achieved on the <strong>first attempt</strong>. It matters more than any other process measure in airway management, because complications do not rise gently with repeated attempts — they climb steeply.</p>"+
         "<p>With each successive laryngoscopy the patient spends longer apneic, the airway becomes more traumatized, oedematous and bloody, and the view for the next attempt gets worse. Studies of emergency intubation consistently show that severe hypoxemia, aspiration, bradycardia and cardiac arrest become dramatically more common once you go beyond two attempts — not proportionally more common, but several-fold.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check &mdash; attempts and complications</span>"+
-        "<p>Observational work in emergency and critical care intubation has repeatedly found that adverse-event rates rise sharply with the number of laryngoscopy attempts, with a marked inflection after the second. Mort's widely cited series reported severe hypoxemia, regurgitation, aspiration, bradycardia and cardiac arrest all substantially more frequent when more than two attempts were required. The causal direction is mixed — difficult airways both cause more attempts and are independently riskier — but the practical conclusion is not controversial: optimize the first attempt, and change something before repeating.</p>"+
-        "<div class='grade'>Quality: moderate (consistent observational data; confounding by indication).</div></div>"+
+        wEv("Moderate","Attempts and complications",
+          "Observational work in emergency and critical care intubation has repeatedly found that adverse-event rates rise sharply with the number of laryngoscopy attempts, with a marked inflection after the second. Mort's widely cited series reported severe hypoxemia, regurgitation, aspiration, bradycardia and cardiac arrest all substantially more frequent when more than two attempts were required. The causal direction is mixed — difficult airways both cause more attempts and are independently riskier — but the practical conclusion is not controversial: optimize the first attempt, and change something before repeating.",
+          "Quality: moderate (consistent observational data; confounding by indication).")+
         "<div class='keybox'><span class='kt'>Anchor</span> Treat the first attempt as the best attempt you will get. Everything after it happens on a more hypoxic patient with a worse view.</div>"
       },
       { h:"2", t:"The seven Ps", html:
@@ -1333,10 +1383,16 @@ var MODULES = [
         "<li><strong>External laryngeal manipulation.</strong> Your own right hand on the thyroid cartilage, moving it until the view improves, then have an assistant hold exactly there. This is done by the person looking, which is what makes it different from blind cricoid pressure.</li>"+
         "<li><strong>Use the bougie early</strong>, not as a last resort. In a grade III view — epiglottis only — the bougie is the intended tool: pass it under the epiglottis, feel for tracheal clicks or hold-up, then rail the tube over it.</li>"+
         "</ul>"+
-        "<div class='evidence'><span class='etag'>Evidence check &mdash; bougie and video laryngoscopy</span>"+
-        "<p>The BEAM trial (Driver et al., <i>JAMA</i> 2018) found higher first-pass success with routine bougie use in a single-centre emergency department, particularly in patients with difficult airway characteristics; the larger multicentre BOUGIE trial (2021) found no significant overall difference, so the honest position is that the bougie clearly helps in poor views and may not change much in easy ones. For video laryngoscopy, the DEVICE trial (2023) found significantly higher first-pass success with video compared with direct laryngoscopy among critically ill adults. Skill with both devices remains the operator-level variable that matters most.</p>"+
-        "<div class='grade'>Quality: moderate to high (multiple randomized trials, some conflicting for the bougie).</div></div>"+
-        "<p>Cricoid pressure, once mandatory, is no longer routinely recommended: it has not been shown to reliably prevent aspiration and it frequently worsens the laryngeal view. If it is applied and the view is poor, take it off.</p>"
+        wEv("Moderate","Video laryngoscopy",
+          "The DEVICE trial (Prekker et al., <i>NEJM</i> 2023) found significantly higher first-pass success with video laryngoscopy compared with direct laryngoscopy among critically ill adults undergoing tracheal intubation — a large, multicentre randomized result. Earlier evidence was more mixed, and operator familiarity with the specific device remains an important effect modifier, so this is graded moderate rather than strong.",
+          "Quality: moderate. One large multicentre RCT with consistent direction; device- and operator-dependent.")+
+        wEv("Contested","Routine bougie use",
+          "The BEAM trial (Driver et al., <i>JAMA</i> 2018) found higher first-pass success with routine bougie use in a single-centre emergency department, particularly in patients with difficult airway characteristics. The larger multicentre BOUGIE trial (Driver et al., <i>JAMA</i> 2021) found no significant overall difference. Read together, the honest position is that the bougie clearly helps in poor views — which is what it is for — and may add little in easy ones. Nothing in either trial argues against having it immediately to hand.",
+          "Quality: contested. Two randomized trials disagreeing on routine use; benefit in difficult views is the more consistent finding.")+
+        "<p>Cricoid pressure, once mandatory, is no longer routinely recommended: it has not been shown to reliably prevent aspiration and it frequently worsens the laryngeal view. If it is applied and the view is poor, take it off.</p>"+
+        wEv("Moderate","Cricoid pressure",
+          "The IRIS trial (Birenbaum et al., <i>JAMA Surgery</i> 2019) randomized over 3,000 patients and failed to demonstrate non-inferiority of a sham manoeuvre, but did not show a clear protective benefit either; observational and imaging work consistently shows cricoid pressure can distort the airway and degrade the laryngeal view. Guidelines have moved from mandating it to permitting its removal whenever it impedes laryngoscopy.",
+          "Quality: moderate. One large RCT with an inconclusive primary result, plus consistent evidence of harm to the view.")
       },
       { h:"6", t:"Placement with proof", html:
         "<p>An unrecognized oesophageal intubation is fatal and entirely preventable. Every traditional confirmation sign is unreliable on its own: chest rise occurs with oesophageal ventilation, breath sounds are misleading in a noisy ambulance, tube misting happens in the oesophagus, and a bag that feels right feels right either way.</p>"+
@@ -1428,6 +1484,9 @@ var MODULES = [
         "<p>Set the ventilator deliberately rather than accepting defaults. Five numbers matter at the outset.</p>"+
         "<p><strong>Tidal volume: 6&ndash;8 mL/kg of predicted body weight.</strong> The critical word is <em>predicted</em> — calculated from height and sex, not from what the patient weighs. Lung size tracks height; a 150 kg patient does not have larger lungs than a 75 kg patient of the same height. Dosing tidal volume off actual weight is a common and injurious error that delivers grossly excessive volumes.</p>"+
         "<div class='formula'>Predicted body weight (kg)<br>&nbsp;&nbsp;Men: <span class='fk'>50 + 2.3 &times; (height in inches &minus; 60)</span><br>&nbsp;&nbsp;Women: <span class='fk'>45.5 + 2.3 &times; (height in inches &minus; 60)</span><br>Tidal volume = <span class='fk'>6&ndash;8 mL/kg PBW</span> &mdash; use 6 mL/kg where lung injury is suspected</div>"+
+        wEv("Strong","Low tidal volume ventilation",
+          "The ARDSNet trial (<i>NEJM</i> 2000) randomized 861 patients with ARDS to 6 mL/kg versus 12 mL/kg of predicted body weight and was stopped early for a mortality benefit &mdash; 31% versus 40%. This is among the most robust findings in critical care, and subsequent work supports extending a lung-protective approach to ventilated patients without ARDS, where the evidence is good but less definitive. Note that the trial dosed volume on <i>predicted</i> body weight throughout, which is why the distinction matters so much.",
+          "Quality: strong for ARDS (large RCT stopped early for mortality benefit); moderate for the non-ARDS ventilated patient.")+
         "<p><strong>Rate: usually 12&ndash;16</strong> — but Module 3's rule overrides it. A patient who was compensating for a metabolic acidosis at a respiratory rate of 40 needs a matched minute ventilation, not a default of 12.</p>"+
         "<p><strong>PEEP: start around 5 cmH&#8322;O</strong>, higher where hypoxemia is driven by shunt (pneumonia, oedema, ARDS), lower or cautious in obstructive disease with air trapping.</p>"+
         "<p><strong>FiO&#8322;: start at 100%, then titrate down</strong> to the lowest that maintains a saturation of roughly 92&ndash;96%. Leaving everyone on 100% indefinitely is not benign.</p>"+
@@ -1476,9 +1535,9 @@ var MODULES = [
         "<p><strong>Severe metabolic acidosis.</strong> Match or exceed the pre-intubation minute ventilation, as Module 3 required. Watch EtCO&#8322; and accept a low value — you are deliberately hyperventilating to protect the pH.</p>"+
         "<p><strong>Obstructive disease (asthma, COPD).</strong> Low rate (often 8&ndash;10), long expiratory time, modest tidal volume, and tolerance of a higher CO&#8322; — <em>permissive hypercapnia</em> — rather than chasing a normal number and causing breath stacking.</p>"+
         "<p><strong>Traumatic brain injury.</strong> Target a normal EtCO&#8322; of roughly 35&ndash;40 mmHg; do not routinely hyperventilate. Prophylactic hyperventilation causes cerebral vasoconstriction and worsens ischaemia, and is reserved as a brief temporizing measure for signs of active herniation. Above all, protect the blood pressure and the oxygenation — hypotension and hypoxia are the two strongest predictors of poor outcome in TBI.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check &mdash; hyperventilation in TBI</span>"+
-        "<p>Routine or prophylactic hyperventilation after traumatic brain injury is associated with worse outcomes, because hypocapnia causes cerebral vasoconstriction and reduces cerebral blood flow to already-vulnerable tissue. Guidelines recommend normocapnia as the default, with brief hyperventilation reserved for acute neurological deterioration suggesting herniation while other measures are instituted. Prehospital data also show that inadvertent hyperventilation after intubation is common and is associated with worse outcomes.</p>"+
-        "<div class='grade'>Quality: moderate to high (consistent guideline position supported by physiologic and observational data).</div></div>"
+        wEv("Strong","Hyperventilation in TBI",
+          "Routine or prophylactic hyperventilation after traumatic brain injury is associated with worse outcomes, because hypocapnia causes cerebral vasoconstriction and reduces cerebral blood flow to already-vulnerable tissue. Guidelines recommend normocapnia as the default, with brief hyperventilation reserved for acute neurological deterioration suggesting herniation while other measures are instituted. Prehospital data also show that inadvertent hyperventilation after intubation is common and is associated with worse outcomes.",
+          "Quality: moderate to high (consistent guideline position supported by physiologic and observational data).")
       },
       { h:"8", t:"Putting it together", html:
         wBranch("Decision point","You intubated a severe asthmatic eight minutes ago and placed them on a rate of 16. The blood pressure has fallen from 118/70 to 74/48, peak airway pressures are climbing, and the SpO&#8322; is drifting down. Breath sounds are present but very quiet bilaterally. <b>What is your first action?</b>",[
@@ -1599,9 +1658,9 @@ var MODULES = [
         "<li>Slide a <strong>bougie</strong> alongside the blade into the trachea, directed caudally.</li>"+
         "<li>Rail a <strong>size 6.0 cuffed tube</strong> over the bougie, inflate the cuff, and confirm with waveform capnography.</li>"+
         "</ul>"+
-        "<div class='evidence'><span class='etag'>Evidence check &mdash; surgical vs needle cricothyrotomy</span>"+
-        "<p>Difficult-airway guidelines, including the Difficult Airway Society's, recommend a scalpel-based surgical technique over needle cricothyrotomy with jet ventilation in adults, reflecting consistently higher success rates and fewer complications. The dominant determinant of outcome is not the technique itself but the delay before starting it — the procedure is most often performed too late rather than performed badly.</p>"+
-        "<div class='grade'>Quality: moderate (guideline consensus supported by registry and simulation data).</div></div>"+
+        wEv("Moderate","Surgical vs needle cricothyrotomy",
+          "Difficult-airway guidelines, including the Difficult Airway Society's, recommend a scalpel-based surgical technique over needle cricothyrotomy with jet ventilation in adults, reflecting consistently higher success rates and fewer complications. The dominant determinant of outcome is not the technique itself but the delay before starting it — the procedure is most often performed too late rather than performed badly.",
+          "Quality: moderate (guideline consensus supported by registry and simulation data).")+
         "<p>Note the payoff from Module 2: in any predicted difficult airway you were told to identify and <strong>mark the cricothyroid membrane before inducing</strong>. This is why. Finding landmarks on a still, calm neck takes seconds; finding them on a moving, hypoxic, blood-covered one costs minutes you will not have.</p>"
       },
       { h:"6", t:"Children are different", html:
