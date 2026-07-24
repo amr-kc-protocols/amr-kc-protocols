@@ -501,13 +501,25 @@ display:flex;align-items:center;justify-content:center;color:var(--ac,var(--teal
 .qa-sub{font-size:11px;color:var(--gray);line-height:1.4}
 
 /* ── Subtle per-tile accents (quieter than the top brand tiles) ──── */
-.ac-blue{--ac:#1b63c4;--acb:#e9f1fd}
-.ac-teal{--ac:#0e7490;--acb:#e1f1f4}
-.ac-violet{--ac:#6d28d9;--acb:#f1e9fd}
-.ac-green{--ac:#15803d;--acb:#e7f7ee}
-.ac-amber{--ac:#a1590b;--acb:#fbf0db}
-.ac-rose{--ac:#be123c;--acb:#fbe9ed}
+.ac-red{--ac:#dc2626;--acb:#fdecec}
+.ac-orange{--ac:#ea580c;--acb:#fdeee1}
+.ac-amber{--ac:#b45309;--acb:#fcefd8}
+.ac-yellow{--ac:#a16207;--acb:#f9f1d6}
+.ac-lime{--ac:#4d7c0f;--acb:#eef6dd}
+.ac-green{--ac:#15803d;--acb:#e4f6ea}
+.ac-emerald{--ac:#047857;--acb:#dbf3ec}
+.ac-teal{--ac:#0d9488;--acb:#dcf2ef}
+.ac-cyan{--ac:#0891b2;--acb:#def2f7}
+.ac-sky{--ac:#0284c7;--acb:#e0f0fa}
+.ac-blue{--ac:#1d4ed8;--acb:#e6edfc}
+.ac-indigo{--ac:#4f46e5;--acb:#e9e8fc}
+.ac-violet{--ac:#7c3aed;--acb:#f0e8fd}
+.ac-purple{--ac:#9333ea;--acb:#f4e8fd}
+.ac-fuchsia{--ac:#c026d3;--acb:#f9e6fb}
+.ac-pink{--ac:#db2777;--acb:#fce8f0}
+.ac-rose{--ac:#e11d48;--acb:#fde7ec}
 .ac-slate{--ac:#475569;--acb:#eceff3}
+.ac-stone{--ac:#78716c;--acb:#efedec}
 .stat-tile.ac-chip .stat-tile-ico{width:30px;height:30px;border-radius:8px;
 background:var(--acb);color:var(--ac);font-size:16px}
 .stat-tile.ac-chip:active,.stat-tile.ac-chip:hover{border-color:var(--ac)}
@@ -669,11 +681,11 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
 </div>
 
 <nav id="nav" aria-label="Main navigation">
-  <button class="nb ac-rose" data-tab="calc" aria-label="Dose calculator" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-syringe"></use></svg></span>Doses</button>
-  <button class="nb ac-teal" data-tab="hosp" aria-label="Hospital medications" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-droplet"></use></svg></span>Hosp Meds</button>
+  <button class="nb ac-red" data-tab="calc" aria-label="Dose calculator" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-syringe"></use></svg></span>Doses</button>
+  <button class="nb ac-cyan" data-tab="hosp" aria-label="Hospital medications" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-droplet"></use></svg></span>Hosp Meds</button>
   <button class="nb ac-violet" data-tab="formulary" aria-label="Drug formulary" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-pill"></use></svg></span>Formulary</button>
   <button class="nb nb-home on" data-tab="home" aria-label="Home dashboard" aria-pressed="true"><span class="nb-home-circle" aria-hidden="true"><svg class="icon"><use href="#i-home"></use></svg></span><span>Home</span></button>
-  <button class="nb ac-blue" data-tab="vent" aria-label="Ventilator management" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-lungs"></use></svg></span>Ventilator</button>
+  <button class="nb ac-sky" data-tab="vent" aria-label="Ventilator management" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-lungs"></use></svg></span>Ventilator</button>
   <button class="nb ac-amber" data-tab="pcs" aria-label="PCS and door codes" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-key"></use></svg></span>PCS/Doors</button>
   <button class="nb ac-slate" data-tab="more" aria-label="More tools and resources" aria-pressed="false"><span class="nb-ic" aria-hidden="true"><svg class="icon"><use href="#i-dots"></use></svg></span>More</button>
 </nav>
@@ -919,12 +931,12 @@ function renderHome(){
   h += '<div class="stat-tile-val">Ventilator 3000</div>';
   h += '<div class="stat-tile-lbl">The Game</div></div></a>';
   if(d5.streak){
-    h += '<a class="stat-tile ac-chip ac-amber" href="quiz-daily5.html">';
+    h += '<a class="stat-tile ac-chip ac-orange" href="quiz-daily5.html">';
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
     h += '<div class="stat-tile-val">'+d5.streak+'-day streak</div>';
     h += '<div class="stat-tile-lbl">Daily 5 &middot; '+(d5.totalDone||0)+' completed</div></div></a>';
   } else {
-    h += '<a class="stat-tile empty ac-chip ac-amber" href="quiz-daily5.html">';
+    h += '<a class="stat-tile empty ac-chip ac-orange" href="quiz-daily5.html">';
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
     h += '<div class="stat-tile-val">Start your streak</div>';
     h += '<div class="stat-tile-lbl">Daily 5 questions</div></div></a>';
@@ -936,10 +948,10 @@ function renderHome(){
   h += '</div>';
 
   h += '<div class="qa-grid">';
-  [['calc','i-syringe','Doses','Weight-based dose calculator','ac-rose'],
-   ['hosp','i-droplet','Hosp Meds','Hospital-supplied infusions','ac-teal'],
+  [['calc','i-syringe','Doses','Weight-based dose calculator','ac-red'],
+   ['hosp','i-droplet','Hosp Meds','Hospital-supplied infusions','ac-cyan'],
    ['formulary','i-pill','Formulary','AMR KC carried medications','ac-violet'],
-   ['vent','i-lungs','Ventilator','IBW, tidal volume &amp; troubleshooting','ac-blue'],
+   ['vent','i-lungs','Ventilator','IBW, tidal volume &amp; troubleshooting','ac-sky'],
    ['pcs','i-key','PCS / Doors','Facility access codes','ac-amber'],
    ['more','i-dots','More','Study tools, forms &amp; resources','ac-slate'],
   ].forEach(function(t){
@@ -2240,7 +2252,7 @@ function renderMore(){
     '<div class="more-hub">',
 
     '<div class="sec">FIELD REFERENCE</div>',
-    '<a class="more-card ac-blue" href="ift-call-guide.html">',
+    '<a class="more-card ac-teal" href="ift-call-guide.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-ambulance"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">IFT Call Guide</div>',
@@ -2256,7 +2268,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card ac-rose" href="organ-transport.html">',
+    '<a class="more-card ac-emerald" href="organ-transport.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Organ Transport</div>',
@@ -2297,7 +2309,7 @@ function renderMore(){
     '</div>',
 
     '<div class="sec">STUDY &amp; CE</div>',
-    '<a class="more-card ac-amber" href="quiz-daily5.html">',
+    '<a class="more-card ac-orange" href="quiz-daily5.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-calendar"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Daily 5</div>',
@@ -2305,7 +2317,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card ac-teal" href="quiz-rhythms.html">',
+    '<a class="more-card ac-pink" href="quiz-rhythms.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Rhythm Strip ID</div>',
@@ -2321,7 +2333,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card ac-violet" href="flashcards.html">',
+    '<a class="more-card ac-purple" href="flashcards.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-cards"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Drug Flashcards</div>',
@@ -2329,7 +2341,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card ac-blue" href="acls-2025-flashcards.html">',
+    '<a class="more-card ac-indigo" href="acls-2025-flashcards.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">ACLS Flashcards</div>',
@@ -2352,7 +2364,7 @@ function renderMore(){
     '</a>',
 
     '<div class="sec">FORMS &amp; ADMIN</div>',
-    '<a class="more-card ac-violet" href="kansas-class-builder.html">',
+    '<a class="more-card ac-lime" href="kansas-class-builder.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-cap"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Kansas Class Builder</div>',
@@ -2360,7 +2372,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<div class="more-card ac-slate" data-goto="forms">',
+    '<div class="more-card ac-stone" data-goto="forms">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Caregiver Signature Form</div>',
@@ -2368,7 +2380,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</div>',
-    '<a class="more-card ac-green" href="immunization-forms.html">',
+    '<a class="more-card ac-yellow" href="immunization-forms.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Health &amp; Immunization Forms</div>',
@@ -2376,7 +2388,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card ac-amber" href="orientation-exit-survey.html">',
+    '<a class="more-card ac-fuchsia" href="orientation-exit-survey.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-edit"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">New Hire Survey</div>',
