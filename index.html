@@ -326,7 +326,10 @@ border-bottom:1px solid var(--border);
 cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-color:transparent}
 .more-card:last-of-type{border-bottom:none}
 .more-card:active,.more-card:hover{background:var(--dim)}
-.more-card-ico{font-size:21px;flex-shrink:0;width:30px;text-align:center;color:var(--teal2)}
+.more-card-ico{flex-shrink:0;width:36px;height:36px;border-radius:9px;font-size:18px;
+display:flex;align-items:center;justify-content:center;
+background:var(--acb,var(--dim));color:var(--ac,var(--teal2))}
+.more-card-ico:has(img){background:none;border-radius:0}
 .more-card-info{flex:1;min-width:0}
 .more-card-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:3px}
 .more-card-sub{font-size:12px;color:var(--gray);line-height:1.45}
@@ -2237,7 +2240,7 @@ function renderMore(){
     '<div class="more-hub">',
 
     '<div class="sec">FIELD REFERENCE</div>',
-    '<a class="more-card" href="ift-call-guide.html">',
+    '<a class="more-card ac-blue" href="ift-call-guide.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-ambulance"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">IFT Call Guide</div>',
@@ -2245,7 +2248,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="imagetrend-job-aid.html">',
+    '<a class="more-card ac-green" href="imagetrend-job-aid.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">ImageTrend Job Aid</div>',
@@ -2253,7 +2256,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="organ-transport.html">',
+    '<a class="more-card ac-rose" href="organ-transport.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Organ Transport</div>',
@@ -2294,7 +2297,7 @@ function renderMore(){
     '</div>',
 
     '<div class="sec">STUDY &amp; CE</div>',
-    '<a class="more-card" href="quiz-daily5.html">',
+    '<a class="more-card ac-amber" href="quiz-daily5.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-calendar"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Daily 5</div>',
@@ -2302,7 +2305,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="quiz-rhythms.html">',
+    '<a class="more-card ac-teal" href="quiz-rhythms.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Rhythm Strip ID</div>',
@@ -2310,7 +2313,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="quiz-pals.html">',
+    '<a class="more-card ac-rose" href="quiz-pals.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">PALS 2025 Quiz</div>',
@@ -2318,7 +2321,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="flashcards.html">',
+    '<a class="more-card ac-violet" href="flashcards.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-cards"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Drug Flashcards</div>',
@@ -2326,7 +2329,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="acls-2025-flashcards.html">',
+    '<a class="more-card ac-blue" href="acls-2025-flashcards.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">ACLS Flashcards</div>',
@@ -2349,7 +2352,7 @@ function renderMore(){
     '</a>',
 
     '<div class="sec">FORMS &amp; ADMIN</div>',
-    '<a class="more-card" href="kansas-class-builder.html">',
+    '<a class="more-card ac-violet" href="kansas-class-builder.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-cap"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Kansas Class Builder</div>',
@@ -2357,7 +2360,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<div class="more-card" data-goto="forms">',
+    '<div class="more-card ac-slate" data-goto="forms">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Caregiver Signature Form</div>',
@@ -2365,7 +2368,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</div>',
-    '<a class="more-card" href="immunization-forms.html">',
+    '<a class="more-card ac-green" href="immunization-forms.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Health &amp; Immunization Forms</div>',
@@ -2373,7 +2376,7 @@ function renderMore(){
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',
-    '<a class="more-card" href="orientation-exit-survey.html">',
+    '<a class="more-card ac-amber" href="orientation-exit-survey.html">',
     '  <div class="more-card-ico"><svg class="icon"><use href="#i-edit"></use></svg></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">New Hire Survey</div>',
