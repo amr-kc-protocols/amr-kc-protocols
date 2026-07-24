@@ -317,6 +317,47 @@ h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.025em; f
 .cmp-row.on .cmp-take{ display:block; }
 .cmp-take b{ color:var(--ink); }
 
+/* checklist */
+.ck-list{ display:flex; flex-direction:column; gap:6px; }
+.ck-it{ display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left; cursor:pointer;
+  background:var(--paper); border:1.5px solid var(--rule); border-radius:10px; padding:10px 12px;
+  font-family:var(--sans); font-size:13.5px; line-height:1.45; color:var(--ink); transition:border-color .13s, background .13s; }
+.ck-it:hover{ border-color:var(--rule-2); }
+.ck-box{ flex:0 0 auto; width:18px; height:18px; border:2px solid var(--rule-2); border-radius:5px;
+  margin-top:1px; position:relative; transition:background .13s, border-color .13s; }
+.ck-it.on{ border-color:var(--green-line); background:var(--green-soft); }
+.ck-it.on .ck-box{ background:var(--green); border-color:var(--green); }
+.ck-it.on .ck-box::after{ content:""; position:absolute; left:5px; top:1px; width:5px; height:10px;
+  border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(45deg); }
+.ck-it small{ display:block; color:var(--ink-2); font-size:12px; margin-top:2px; }
+.ck-prog{ margin-top:11px; font-family:var(--sans); font-weight:700; font-size:12.5px; color:var(--ink-2); }
+.ck-prog.done{ color:var(--green); }
+
+/* algorithm walker */
+.ag-stage{ border:1.5px solid var(--acc-line); background:var(--acc-soft); border-radius:11px; padding:13px 14px; }
+.ag-step{ font-family:var(--sans); font-weight:800; font-size:9.5px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--acc); margin-bottom:5px; }
+.ag-stem{ font-size:14.5px; line-height:1.5; color:var(--ink); margin:0 0 11px; font-weight:600; }
+.ag-o{ display:block; width:100%; text-align:left; font-family:var(--sans); font-size:13.5px; line-height:1.4;
+  background:var(--paper); border:1.5px solid var(--rule-2); border-radius:10px; padding:10px 12px; margin:6px 0;
+  cursor:pointer; color:var(--ink); }
+.ag-o:hover{ border-color:var(--acc); }
+.ag-fb{ display:none; font-size:13px; line-height:1.55; margin-top:11px; padding:11px 13px; border-radius:10px; }
+.ag-fb.on{ display:block; }
+.ag-fb.good{ background:var(--green-soft); border:1px solid var(--green-line); color:#065F46; }
+.ag-fb.bad{ background:var(--hot-soft); border:1px solid var(--hot-line); color:#9A3412; }
+.ag-fb .fbk{ font-weight:800; display:block; margin-bottom:3px; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; }
+.ag-next{ margin-top:11px; }
+.ag-next button{ width:100%; font-family:var(--sans); font-weight:800; font-size:14px; padding:11px;
+  border:none; border-radius:10px; background:var(--grad); color:#fff; cursor:pointer; }
+.ag-trail{ margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
+.ag-crumb{ font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--ink-2);
+  background:var(--card-2); border:1px solid var(--rule); border-radius:999px; padding:3px 9px; }
+.ag-end{ font-family:var(--sans); font-weight:800; font-size:14px; text-align:center; padding:12px;
+  border-radius:10px; background:var(--grad); color:#fff; margin-top:11px; }
+.ag-restart{ background:none; border:none; font-family:var(--mono); font-size:11px; color:var(--acc);
+  text-decoration:underline; cursor:pointer; margin-top:9px; padding:0; }
+
 /* branch scenario */
 .br-stem{ font-size:14.5px; line-height:1.55; color:var(--ink); margin:0 0 12px; }
 .br-stem b{ color:var(--acc-dk); }
@@ -580,6 +621,29 @@ function wShockIndex(){
     "</div>"+
     "<div class='cl-out'><span class='cl-lbl'>Shock index</span><div class='cl-big'>&mdash;</div>"+
     "<p class='cl-note'>Enter both values to calculate.</p></div></div>";
+}
+function wCheck(title, sub, items){
+  // interactive checklist: items = [label, detail]
+  var h = "<div class='iw' data-w='check' data-n='"+items.length+"'>"+
+          "<div class='iw-h'><span class='iw-tag'>Checklist</span><span class='iw-t'>"+title+"</span></div>";
+  if(sub) h += "<p class='iw-sub'>"+sub+"</p>";
+  h += "<div class='ck-list'>";
+  items.forEach(function(it){
+    h += "<button type='button' class='ck-it'><span class='ck-box'></span><span>"+it[0]+
+         (it[1] ? "<small>"+it[1]+"</small>" : "")+"</span></button>";
+  });
+  return h + "</div><div class='ck-prog'>0 of "+items.length+" complete</div></div>";
+}
+function wAlgo(title, sub, startId, nodes){
+  // multi-step algorithm walker. nodes = { id: { step, stem, opts:[[label,nextIdOrNull,kind,feedback]], end } }
+  var json = JSON.stringify(nodes).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  var h = "<div class='iw' data-w='algo' data-start='"+startId+"' data-cur='"+startId+"'>"+
+          "<div class='iw-h'><span class='iw-tag'>Walk the algorithm</span><span class='iw-t'>"+title+"</span></div>";
+  if(sub) h += "<p class='iw-sub'>"+sub+"</p>";
+  h += "<div class='ag-trail'></div><div class='ag-stage'></div>"+
+       "<button type='button' class='ag-restart hidden'>Start over</button>"+
+       "<div class='ag-data hidden'>"+json+"</div></div>";
+  return h;
 }
 function wDoseCalc(){
   return "<div class='iw' data-w='calc' data-calc='dose' data-mode='normal'>"+
@@ -1208,15 +1272,394 @@ var MODULES = [
         expl:"1.2 mg/kg × 90 kg = 108 mg. (54 mg would be the routine 0.6 mg/kg intubating dose — too slow in onset for RSI.)" }
     ]
   },
-  { id:6, available:false, title:"The Sequence & First-Pass Success",
-    desc:"The seven Ps, positioning, laryngoscopy technique, the bougie, and confirming the tube — engineering the best possible first attempt.",
-    objective:"", content:[], quiz:[] },
-  { id:7, available:false, title:"Post-Intubation Care",
-    desc:"The first ten minutes after the tube: sedation and analgesia, initial ventilator settings, and managing post-intubation hypotension.",
-    objective:"", content:[], quiz:[] },
-  { id:8, available:false, title:"The Failed Airway",
-    desc:"Declaring failure early, the rescue algorithm, cannot-intubate-cannot-oxygenate, and surgical cricothyrotomy.",
-    objective:"", content:[], quiz:[] }
+  {
+    id: 6,
+    available: true,
+    title: "The Sequence & First-Pass Success",
+    desc: "The seven Ps, positioning, laryngoscopy technique, the bougie, and confirming the tube — engineering the best possible first attempt.",
+    objective: "Run the RSI sequence as an ordered, rehearsed procedure; position the patient to align the airway axes; describe laryngoscopy technique and the role of the bougie and video laryngoscopy; confirm tube placement with waveform capnography; and explain why first-pass success is the outcome that matters most.",
+    content: [
+      { h:"1", t:"Why the first attempt is the whole game", html:
+        "<p>Everything in this course has been building toward one number: the proportion of intubations achieved on the <strong>first attempt</strong>. It matters more than any other process measure in airway management, because complications do not rise gently with repeated attempts — they climb steeply.</p>"+
+        "<p>With each successive laryngoscopy the patient spends longer apneic, the airway becomes more traumatized, oedematous and bloody, and the view for the next attempt gets worse. Studies of emergency intubation consistently show that severe hypoxemia, aspiration, bradycardia and cardiac arrest become dramatically more common once you go beyond two attempts — not proportionally more common, but several-fold.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check &mdash; attempts and complications</span>"+
+        "<p>Observational work in emergency and critical care intubation has repeatedly found that adverse-event rates rise sharply with the number of laryngoscopy attempts, with a marked inflection after the second. Mort's widely cited series reported severe hypoxemia, regurgitation, aspiration, bradycardia and cardiac arrest all substantially more frequent when more than two attempts were required. The causal direction is mixed — difficult airways both cause more attempts and are independently riskier — but the practical conclusion is not controversial: optimize the first attempt, and change something before repeating.</p>"+
+        "<div class='grade'>Quality: moderate (consistent observational data; confounding by indication).</div></div>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Treat the first attempt as the best attempt you will get. Everything after it happens on a more hypoxic patient with a worse view.</div>"
+      },
+      { h:"2", t:"The seven Ps", html:
+        "<p>The classical scaffold for the sequence. Older versions list <em>pretreatment</em> in the third slot — a set of adjunct drugs (lidocaine, fentanyl, atropine, defasciculating doses) that have largely fallen out of routine use for want of evidence. Contemporary teaching replaces it with <strong>physiologic optimization</strong>, which is Module 3's work.</p>"+
+        wRe("The seven Ps","Tap each.",[
+          ["1","Preparation","Equipment, drugs, suction, monitoring, people, and a spoken plan. Section 3 turns this into a checklist."],
+          ["2","Preoxygenation","Module 3: high-FiO₂ source, head up, PEEP for shunt, apneic-oxygenation cannula. Begins earliest because it takes the longest."],
+          ["3","Physiologic optimization","Module 3 again: fix the pressure, respect the acidosis. This is where the old 'pretreatment' step went."],
+          ["4","Paralysis with induction","Modules 4 and 5: the induction agent and the paralytic pushed in quick succession, doses adjusted for shock."],
+          ["5","Positioning","Section 4. Free, fast, and the single most under-used determinant of a good view."],
+          ["6","Placement with proof","Section 6. The tube goes in — and 'proof' means waveform capnography, not an opinion."],
+          ["7","Post-intubation management","Module 7: sedation first, then the ventilator, then the hunt for hypotension."]
+        ])+
+        "<p>The value of the list is not the mnemonic; it is that the steps are <em>ordered</em> and each one is completed before the next begins. Most airway disasters are not caused by poor laryngoscopy. They are caused by skipping a step.</p>"
+      },
+      { h:"3", t:"Preparation — the checklist", html:
+        "<p>Work through this before any drug is drawn. In a transport environment, where you may be alone in a moving vehicle with no one to fetch what you forgot, it matters more than it does in a resus room.</p>"+
+        wCheck("Pre-induction checklist","Tap each item as you confirm it. All eight before you induce.",[
+          ["Suction on, tested, within reach","Rigid catheter under the pillow or beside the head — not in a bag."],
+          ["Oxygen: preox source + apneic cannula","High-FiO₂ source running; nasal cannula at 15 L/min ready to stay on through the attempt."],
+          ["Two laryngoscopes, checked","Light tested. Video device if carried, plus a direct blade as backup."],
+          ["Tube +/- one size smaller, cuff tested","Bougie or stylet loaded and immediately to hand — not in the kit."],
+          ["Rescue devices out of the packet","Supraglottic airway sized and open. Scalpel accessible if difficulty is predicted."],
+          ["Drugs drawn, labelled, dosed for this patient","Induction agent and paralytic in labelled syringes; vasopressor drawn up."],
+          ["Monitoring: SpO₂, ECG, BP cycling, capnography ready","Waveform capnography connected and working <em>before</em> the tube goes in."],
+          ["Plan A/B/C stated out loud","Everyone hears the plan and the failure plan before any drug is pushed."]
+        ])+
+        "<p>The last item is the one most often skipped and the one that changes team behaviour most. Saying \"Plan A is video laryngoscopy with a bougie; Plan B is a second look with repositioning; Plan C is the i-gel; Plan D is the front of the neck\" means that when Plan A fails, nobody has to be told what happens next.</p>"
+      },
+      { h:"4", t:"Positioning — the free win", html:
+        "<p>Positioning costs nothing, takes fifteen seconds, and improves the view more reliably than any equipment upgrade. It is skipped constantly.</p>"+
+        "<p>The goal is to align the three axes — oral, pharyngeal and laryngeal — so there is a straight line of sight from the teeth to the cords. The classic <strong>sniffing position</strong> achieves this by flexing the lower cervical spine (a pillow or pad under the occiput, not under the shoulders) while extending the head at the atlanto-occipital joint.</p>"+
+        "<p>The reliable external landmark is <strong>ear-to-sternal-notch</strong>: viewed from the side, the external auditory meatus should sit level with the sternal notch. In the obese patient that alignment requires substantial <strong>ramping</strong> — building up shoulders, neck and head with blankets or a dedicated ramp until the landmark is met. Simply putting a pillow under an obese patient's head worsens things by flexing the neck further.</p>"+
+        "<div class='formula'>Target: <span class='fk'>external auditory meatus level with the sternal notch</span><br>Lean patient &mdash; pad under the occiput<br>Obese patient &mdash; ramp shoulders, neck and head together<br>Suspected C-spine injury &mdash; manual in-line stabilization; expect a worse view</div>"+
+        "<p>Head-up positioning of roughly 20&ndash;30&deg; helps twice over: it improves the laryngeal view and, from Module 3, it increases functional residual capacity and delays desaturation. Unless the patient must be flat, tilt the whole stretcher.</p>"+
+        wPick("Position the patient","A 145 kg patient requires intubation. Which positioning approach is correct?",
+          ["A pillow under the head only","Ramp the shoulders, neck and head until the ear is level with the sternal notch",
+           "Completely flat with no padding","Trendelenburg to bring the larynx forward"],1,
+          "<b>Ramp them.</b> In obesity the chest and shoulders sit high, so a head pillow alone flexes the neck and worsens the view. Building a ramp under shoulders, neck and head until the external auditory meatus reaches the level of the sternal notch restores axis alignment — and the head-up angle also improves preoxygenation.")
+      },
+      { h:"5", t:"Laryngoscopy, the bougie, and video", html:
+        "<p>A few technique points that consistently separate a grade I view from a grade III.</p>"+
+        "<ul>"+
+        "<li><strong>Take your time on the way in.</strong> Advance the blade deliberately, identifying structures as you go — tongue, uvula, epiglottis — rather than inserting deep and withdrawing hopefully. Getting lost usually means the blade went too far and the whole larynx is behind it.</li>"+
+        "<li><strong>Lift along the handle's axis</strong>, up and away toward the far corner of the ceiling. Do not lever back against the upper teeth — it damages them and rotates the view away from the glottis.</li>"+
+        "<li><strong>External laryngeal manipulation.</strong> Your own right hand on the thyroid cartilage, moving it until the view improves, then have an assistant hold exactly there. This is done by the person looking, which is what makes it different from blind cricoid pressure.</li>"+
+        "<li><strong>Use the bougie early</strong>, not as a last resort. In a grade III view — epiglottis only — the bougie is the intended tool: pass it under the epiglottis, feel for tracheal clicks or hold-up, then rail the tube over it.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check &mdash; bougie and video laryngoscopy</span>"+
+        "<p>The BEAM trial (Driver et al., <i>JAMA</i> 2018) found higher first-pass success with routine bougie use in a single-centre emergency department, particularly in patients with difficult airway characteristics; the larger multicentre BOUGIE trial (2021) found no significant overall difference, so the honest position is that the bougie clearly helps in poor views and may not change much in easy ones. For video laryngoscopy, the DEVICE trial (2023) found significantly higher first-pass success with video compared with direct laryngoscopy among critically ill adults. Skill with both devices remains the operator-level variable that matters most.</p>"+
+        "<div class='grade'>Quality: moderate to high (multiple randomized trials, some conflicting for the bougie).</div></div>"+
+        "<p>Cricoid pressure, once mandatory, is no longer routinely recommended: it has not been shown to reliably prevent aspiration and it frequently worsens the laryngeal view. If it is applied and the view is poor, take it off.</p>"
+      },
+      { h:"6", t:"Placement with proof", html:
+        "<p>An unrecognized oesophageal intubation is fatal and entirely preventable. Every traditional confirmation sign is unreliable on its own: chest rise occurs with oesophageal ventilation, breath sounds are misleading in a noisy ambulance, tube misting happens in the oesophagus, and a bag that feels right feels right either way.</p>"+
+        "<p><strong>Waveform capnography is the standard.</strong> A sustained, characteristic square waveform persisting over six breaths confirms tracheal placement. A flat trace means oesophageal until proven otherwise — with one important caveat: in cardiac arrest with no pulmonary blood flow, EtCO&#8322; may be very low or absent despite correct placement, so a flat trace in arrest requires visual or device-based confirmation rather than automatic tube removal.</p>"+
+        "<div class='formula'>Confirm: <span class='fk'>sustained waveform capnography over 6 breaths</span><br>Then: bilateral breath sounds &middot; absent epigastric sounds &middot; chest rise<br>Then: depth at the teeth &mdash; roughly <span class='fk'>21 cm</span> (women) / <span class='fk'>23 cm</span> (men); paediatric &asymp; tube size &times; 3<br>Then: secure the tube, and <span class='fk'>re-confirm after every move</span></div>"+
+        "<p>That last line is a transport-specific discipline. Tubes migrate when a patient is log-rolled, lifted onto a stretcher, loaded into a vehicle, or moved from trolley to bed. Re-check the waveform and the depth marking after every single one of those events.</p>"+
+        "<div class='dangerbox'><span class='dt'>Non-negotiable</span> No waveform, no confidence. If capnography does not confirm the tube and you cannot immediately explain why, take the tube out and ventilate by bag-mask while you reassess.</div>"
+      },
+      { h:"7", t:"Knowing when to stop", html:
+        "<p>Optimizing the first attempt only helps if you also recognize when an attempt has failed. Two rules keep operators out of the commonest trap — task fixation, where a clinician persists with a laryngoscope while the saturation falls.</p>"+
+        "<p><strong>Rule one: the saturation ends the attempt, not your progress.</strong> Set a threshold before you start — commonly a SpO&#8322; of 90% falling — and when it is reached, come out and re-oxygenate. Nothing you see at 78% will be worth what it costs.</p>"+
+        "<p><strong>Rule two: change something between attempts.</strong> Repeating an identical attempt is the definition of wasted apnea. Change the operator, the device, the blade, the position, add a bougie, add external laryngeal manipulation, or suction better. If you cannot name what will be different, the next attempt should not happen.</p>"+
+        "<p>Most services cap laryngoscopy at <strong>three attempts</strong> in total before declaring a failed airway and moving to the rescue sequence — and that cap should be spoken aloud in the plan so the whole team is counting.</p>"+
+        wOrder("Between attempt one and two","Tap what you do, in order, after a failed first look.",[
+          "Stop and re-oxygenate to baseline",
+          "Name what will be different",
+          "Reposition or change device/operator",
+          "Attempt again with the change in place"
+        ])
+      },
+      { h:"8", t:"Putting it together", html:
+        wBranch("Decision point","You are on your first laryngoscopy attempt. You can see the epiglottis but no glottic opening — a grade III view. The SpO&#8322; has fallen from 99% to 91% and is still dropping. <b>What do you do?</b>",[
+          ["Come out, re-oxygenate, then change something before the second look","good","<span class='fbk'>Correct</span>You have hit both stop rules at once: the saturation is falling through your threshold, and a grade III view will not improve by staring at it. Withdraw, bag the patient back up to baseline, then make a specific change — a bougie (which is precisely the tool for a grade III), external laryngeal manipulation, better positioning, or a different operator or device. Then attempt again."],
+          ["Persist — the view may improve with more lifting force","bad","<span class='fbk'>Task fixation</span>This is the single commonest and most dangerous error in airway management. Increasing lifting force on a grade III view rarely converts it, while the saturation keeps falling. Patients are harmed by hypoxia during prolonged attempts far more often than by the failure to intubate itself. Come out."],
+          ["Pass the tube blindly behind the epiglottis","bad","<span class='fbk'>Unacceptable</span>Blind tube passage risks oesophageal intubation and airway trauma that will make every subsequent attempt worse. If you are working with an epiglottis-only view, the correct instrument is a <i>bougie</i> — passed under the epiglottis with tactile confirmation from tracheal clicks or hold-up — not the tube itself."],
+          ["Have an assistant apply cricoid pressure to improve the view","meh","<span class='fbk'>Wrong direction</span>Cricoid pressure is no longer routinely recommended, has not been shown to reliably prevent aspiration, and frequently <i>worsens</i> the laryngeal view — if it were already applied here, removing it might help. What you want instead is external laryngeal manipulation: <i>you</i> move the thyroid cartilage with your own right hand until the view improves, then an assistant holds it there."]
+        ])+
+        "<p>Three things to carry. The first attempt is the best attempt, so spend your preparation there. Positioning is free and routinely skipped. And proof of placement means a sustained capnography waveform — re-checked after every move.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Optimize attempt one, cap the attempts, change something every time, and let the saturation — not your progress — decide when a look is over.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Complications during emergency intubation rise most sharply:",
+        opts:["After the first attempt","After the second attempt","Only after five attempts","Independently of the number of attempts"], ans:1,
+        expl:"Observational data consistently show a marked inflection after two attempts, with severe hypoxemia, aspiration, bradycardia and arrest becoming several-fold more common. Optimize the first attempt and change something before repeating." },
+      { q:"In contemporary teaching, the old 'pretreatment' step of the seven Ps has largely been replaced by:",
+        opts:["Paralysis","Physiologic optimization","Post-intubation management","Cricoid pressure"], ans:1,
+        expl:"Routine pretreatment drugs (lidocaine, atropine, defasciculating doses) lack supporting evidence. The slot is now occupied by physiologic optimization — correcting the HOP killers from Module 3." },
+      { q:"The reliable external landmark for correct intubating position is:",
+        opts:["Chin parallel to the ceiling","External auditory meatus level with the sternal notch","Shoulders flat on the bed","Neck maximally extended"], ans:1,
+        expl:"Ear-to-sternal-notch alignment indicates the oral, pharyngeal and laryngeal axes are aligned. In obesity this requires ramping the shoulders, neck and head — not simply a pillow under the head." },
+      { q:"Placing only a pillow under the head of a morbidly obese patient:",
+        opts:["Achieves optimal alignment","Worsens the view by flexing the neck further","Is equivalent to ramping","Is required before ramping"], ans:1,
+        expl:"In obesity the chest and shoulders sit high, so a head pillow alone flexes the neck and degrades the view. Ramping builds up shoulders, neck and head together until the ear reaches the sternal notch." },
+      { q:"External laryngeal manipulation differs from cricoid pressure because:",
+        opts:["It is applied to the cricoid ring","It is performed by the person looking, who moves the cartilage until the view improves","It is applied before induction","It prevents aspiration"], ans:1,
+        expl:"The laryngoscopist uses their own right hand to move the thyroid cartilage until the view improves, then an assistant holds that exact position. Cricoid pressure is applied blindly and often worsens the view." },
+      { q:"In a Cormack–Lehane grade III view, the appropriate tool is:",
+        opts:["Blind passage of the tube behind the epiglottis","A bougie passed under the epiglottis with tactile confirmation","Increased lifting force","Immediate cricothyrotomy"], ans:1,
+        expl:"Grade III — epiglottis only — is exactly what the bougie is for. Pass it under the epiglottis, feel for tracheal clicks or hold-up, then rail the tube over it. Blind tube passage risks oesophageal intubation and trauma." },
+      { q:"The standard for confirming tracheal tube placement is:",
+        opts:["Bilateral breath sounds","Chest rise and tube misting","Sustained waveform capnography over six breaths","The feel of the bag"], ans:2,
+        expl:"Every traditional sign is unreliable alone — misting, chest rise and bag feel all occur with oesophageal placement. A sustained characteristic waveform over six breaths is the standard." },
+      { q:"A flat capnography trace in a patient in cardiac arrest:",
+        opts:["Always means oesophageal intubation — remove the tube immediately","May occur with correct placement due to absent pulmonary blood flow, so requires other confirmation","Confirms tracheal placement","Indicates equipment failure only"], ans:1,
+        expl:"With no pulmonary blood flow, EtCO₂ may be very low or absent despite a correctly placed tube. In arrest, confirm visually or with another device rather than automatically removing the tube." },
+      { q:"Regarding cricoid pressure, current guidance is that it:",
+        opts:["Must be applied in every RSI","Is no longer routinely recommended and frequently worsens the laryngeal view","Reliably prevents aspiration","Should replace external laryngeal manipulation"], ans:1,
+        expl:"Cricoid pressure has not been shown to reliably prevent aspiration and often degrades the view. If it is applied and the view is poor, remove it." },
+      { q:"Before making a second laryngoscopy attempt, the essential requirement is:",
+        opts:["Waiting a full five minutes","Being able to name what will be different this time","Giving a second dose of paralytic","Switching to a smaller tube"], ans:1,
+        expl:"Repeating an identical attempt wastes apneic time on an increasingly hypoxic patient. Change the operator, device, position, or add a bougie or external laryngeal manipulation — and re-oxygenate to baseline first." }
+    ]
+  },
+  {
+    id: 7,
+    available: true,
+    title: "Post-Intubation Care",
+    desc: "The first ten minutes after the tube: sedation and analgesia, initial ventilator settings, and managing post-intubation hypotension.",
+    objective: "Start sedation and analgesia immediately and appropriately; set initial lung-protective ventilator settings using predicted body weight; troubleshoot the crashing intubated patient with DOPES; and identify and treat the causes of post-intubation hypotension.",
+    content: [
+      { h:"1", t:"The tube is not the finish line", html:
+        "<p>There is a moment, immediately after the waveform confirms the tube, when the room relaxes. That moment is where a surprising share of harm happens — because the patient has just been given a set of powerful drugs, had their respiratory mechanics inverted, and lost every ability to tell you anything is wrong.</p>"+
+        "<p>Three things now need to happen quickly and in this order: <strong>sedate and treat pain</strong>, <strong>set the ventilator deliberately</strong>, and <strong>hunt for the hypotension that is probably coming</strong>. In a transport setting you also have to do all of it before moving the patient, because movement is when tubes migrate and lines pull.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The most dangerous ten minutes of an intubation often come after the tube is confirmed, not before.</div>"
+      },
+      { h:"2", t:"Sedation and analgesia — immediately", html:
+        "<p>Module 5 laid out the arithmetic: rocuronium at RSI dose lasts 45&ndash;70 minutes or more, while etomidate lasts 3&ndash;12 and ketamine 10&ndash;20. The paralytic outlives the anaesthetic every time. Unless you act, there is a window in which the patient is awake, in pain, and unable to move or signal.</p>"+
+        "<p>Two principles govern what you give.</p>"+
+        "<p><strong>Analgesia first.</strong> An endotracheal tube is genuinely painful, and so are the injuries most of these patients have. An <em>analgesia-first</em> approach — an opioid such as fentanyl as the foundation, with a sedative added to reach the desired depth — treats the actual problem and typically requires less total sedative than a sedative-only strategy. Sedating a patient in pain without treating the pain is both ineffective and cruel.</p>"+
+        "<p><strong>Depth is a target, not a maximum.</strong> Aim for a calm, comfortable, tube-tolerant patient rather than the deepest possible sedation. In transport this typically means a light-to-moderate depth (roughly RASS &minus;2 to &minus;3), deep enough to prevent awareness and coughing on the tube, light enough to avoid unnecessary hypotension.</p>"+
+        "<div class='dangerbox'><span class='dt'>The trap to avoid</span> Never use additional <em>paralytic</em> to settle a patient who appears to be fighting the ventilator. Movement is a signal that sedation is inadequate. Paralysis removes the signal without touching the cause, producing a patient who is fully aware, in pain, and now silenced.</div>"+
+        wPick("Recognize the error","Thirty minutes after RSI with rocuronium, an intubated patient begins coughing on the tube, and their heart rate and blood pressure climb. What is the correct response?",
+          ["Give another dose of rocuronium","Deepen sedation and analgesia — the paralytic is wearing off and they are becoming aware",
+           "Increase the ventilator rate","Nothing — this is expected and needs no action"],1,
+          "<b>Deepen sedation and analgesia.</b> Coughing, tachycardia and hypertension as a paralytic wears off are the classic signs of an under-sedated, increasingly aware patient — and they may be the only signs available. Re-paralyzing removes the evidence while leaving the patient awake and in pain. Treat the pain and the sedation depth.")
+      },
+      { h:"3", t:"Initial ventilator settings", html:
+        "<p>Set the ventilator deliberately rather than accepting defaults. Five numbers matter at the outset.</p>"+
+        "<p><strong>Tidal volume: 6&ndash;8 mL/kg of predicted body weight.</strong> The critical word is <em>predicted</em> — calculated from height and sex, not from what the patient weighs. Lung size tracks height; a 150 kg patient does not have larger lungs than a 75 kg patient of the same height. Dosing tidal volume off actual weight is a common and injurious error that delivers grossly excessive volumes.</p>"+
+        "<div class='formula'>Predicted body weight (kg)<br>&nbsp;&nbsp;Men: <span class='fk'>50 + 2.3 &times; (height in inches &minus; 60)</span><br>&nbsp;&nbsp;Women: <span class='fk'>45.5 + 2.3 &times; (height in inches &minus; 60)</span><br>Tidal volume = <span class='fk'>6&ndash;8 mL/kg PBW</span> &mdash; use 6 mL/kg where lung injury is suspected</div>"+
+        "<p><strong>Rate: usually 12&ndash;16</strong> — but Module 3's rule overrides it. A patient who was compensating for a metabolic acidosis at a respiratory rate of 40 needs a matched minute ventilation, not a default of 12.</p>"+
+        "<p><strong>PEEP: start around 5 cmH&#8322;O</strong>, higher where hypoxemia is driven by shunt (pneumonia, oedema, ARDS), lower or cautious in obstructive disease with air trapping.</p>"+
+        "<p><strong>FiO&#8322;: start at 100%, then titrate down</strong> to the lowest that maintains a saturation of roughly 92&ndash;96%. Leaving everyone on 100% indefinitely is not benign.</p>"+
+        "<p><strong>Watch the plateau pressure</strong>, keeping it under about 30 cmH&#8322;O. A rising plateau means the lung is being overdistended.</p>"
+      },
+      { h:"4", t:"Post-intubation hypotension", html:
+        "<p>From Module 3: roughly a quarter of emergency intubations are followed by hypotension. It is expected, and it has four common causes that you can work through quickly.</p>"+
+        wRe("Why the pressure dropped","Tap each cause.",[
+          ["1","The drugs","Induction agents vasodilate and blunt sympathetic tone; the effect peaks in the first few minutes. This is the commonest cause and the one you should have anticipated with the vasopressor from Module 4."],
+          ["2","Positive pressure","Switching from negative to positive intrathoracic pressure reduces venous return and therefore preload. It hits the volume-depleted patient hardest — which is most emergency intubations."],
+          ["3","Breath stacking / auto-PEEP","In obstructive disease, incomplete exhalation traps air, intrathoracic pressure climbs progressively, and venous return falls until the patient becomes profoundly hypotensive. Suspect it in any asthmatic or COPD patient who deteriorates after intubation."],
+          ["4","Tension pneumothorax","Positive pressure can convert a small or occult pneumothorax into a tension. Suspect it with hypotension plus rising airway pressures, unilateral absent breath sounds, and distended neck veins."]
+        ])+
+        "<p>The distinction between causes two and three matters, because the treatment for breath stacking is counter-intuitive: <strong>disconnect the patient from the circuit</strong> and allow a prolonged exhalation, sometimes with gentle chest compression. If the pressure recovers over the following seconds, you have both diagnosed and treated it. Then reduce the rate and lengthen expiratory time.</p>"+
+        "<div class='dangerbox'><span class='dt'>The obstructive patient</span> After intubating a severe asthmatic, set a low rate and a long expiratory time deliberately from the start. Ventilating them at a normal rate is the fastest route to breath stacking and hemodynamic collapse.</div>"
+      },
+      { h:"5", t:"DOPES — the crashing intubated patient", html:
+        "<p>When an intubated patient deteriorates suddenly — desaturation, hypotension, rising pressures, an alarming ventilator — work a fixed mnemonic rather than improvising. Disconnect from the ventilator and hand-ventilate while you do it: that alone separates patient problems from equipment problems.</p>"+
+        wRe("D-O-P-E-S","Tap each letter.",[
+          ["D","Displacement","The tube has moved — into a mainstem bronchus, into the oesophagus, or out entirely. Check the waveform, the depth marking, and breath sounds. Movement is the usual trigger, which is why you re-confirm after every transfer."],
+          ["O","Obstruction","Secretions, blood, a mucus plug, or the patient biting the tube. Pass a suction catheter — if it will not pass, you have found the problem."],
+          ["P","Pneumothorax","Especially tension, and especially under positive pressure. Hypotension plus rising airway pressures plus unilateral absent breath sounds. Decompress."],
+          ["E","Equipment","Disconnection, oxygen source failure, ventilator malfunction, a deflated cuff. Hand-ventilating with a bag immediately tests this whole category."],
+          ["S","Stacking","Breath stacking with auto-PEEP in obstructive disease. Disconnect, allow full exhalation, then reduce rate and lengthen expiratory time."]
+        ])+
+        wOrder("The crashing intubated patient","Tap the actions in the order you should take them.",[
+          "Disconnect from the ventilator",
+          "Hand-ventilate on 100% oxygen",
+          "Work through D-O-P-E-S",
+          "Treat the cause you find"
+        ])
+      },
+      { h:"6", t:"Securing, positioning, and the transport package", html:
+        "<p>Before the patient moves anywhere, finish the package properly.</p>"+
+        "<ul>"+
+        "<li><strong>Secure the tube and record the depth.</strong> Note the centimetre marking at the teeth or lip and document it. That number is what lets anyone later detect migration.</li>"+
+        "<li><strong>Head up about 30&deg;</strong> unless contraindicated. It improves respiratory mechanics and reduces aspiration risk.</li>"+
+        "<li><strong>Decompress the stomach</strong> with a gastric tube where appropriate — particularly after any bag-mask ventilation, which inflates the stomach and splints the diaphragm.</li>"+
+        "<li><strong>Re-confirm after every move.</strong> Waveform and depth marking checked after each log-roll, lift, load and transfer. This is the single highest-yield habit in transport airway care.</li>"+
+        "<li><strong>Plan for the journey.</strong> Enough sedation and analgesia for the whole transport plus a margin, oxygen calculated with a reserve, and a bag-valve mask within arm's reach — not stowed.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Document the tube depth, then re-check the waveform and that number after every single patient movement. Migration is silent until it is catastrophic.</div>"
+      },
+      { h:"7", t:"Special situations", html:
+        "<p>Three patient types need their settings adjusted away from the defaults immediately.</p>"+
+        "<p><strong>Severe metabolic acidosis.</strong> Match or exceed the pre-intubation minute ventilation, as Module 3 required. Watch EtCO&#8322; and accept a low value — you are deliberately hyperventilating to protect the pH.</p>"+
+        "<p><strong>Obstructive disease (asthma, COPD).</strong> Low rate (often 8&ndash;10), long expiratory time, modest tidal volume, and tolerance of a higher CO&#8322; — <em>permissive hypercapnia</em> — rather than chasing a normal number and causing breath stacking.</p>"+
+        "<p><strong>Traumatic brain injury.</strong> Target a normal EtCO&#8322; of roughly 35&ndash;40 mmHg; do not routinely hyperventilate. Prophylactic hyperventilation causes cerebral vasoconstriction and worsens ischaemia, and is reserved as a brief temporizing measure for signs of active herniation. Above all, protect the blood pressure and the oxygenation — hypotension and hypoxia are the two strongest predictors of poor outcome in TBI.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check &mdash; hyperventilation in TBI</span>"+
+        "<p>Routine or prophylactic hyperventilation after traumatic brain injury is associated with worse outcomes, because hypocapnia causes cerebral vasoconstriction and reduces cerebral blood flow to already-vulnerable tissue. Guidelines recommend normocapnia as the default, with brief hyperventilation reserved for acute neurological deterioration suggesting herniation while other measures are instituted. Prehospital data also show that inadvertent hyperventilation after intubation is common and is associated with worse outcomes.</p>"+
+        "<div class='grade'>Quality: moderate to high (consistent guideline position supported by physiologic and observational data).</div></div>"
+      },
+      { h:"8", t:"Putting it together", html:
+        wBranch("Decision point","You intubated a severe asthmatic eight minutes ago and placed them on a rate of 16. The blood pressure has fallen from 118/70 to 74/48, peak airway pressures are climbing, and the SpO&#8322; is drifting down. Breath sounds are present but very quiet bilaterally. <b>What is your first action?</b>",[
+          ["Disconnect from the ventilator and allow a prolonged exhalation","good","<span class='fbk'>Correct</span>This is breath stacking with auto-PEEP — the classic post-intubation collapse in obstructive disease, and a rate of 16 in a severe asthmatic is the setup for it. Disconnecting allows trapped air to escape; if the pressure recovers over the next several seconds you have both diagnosed and treated it. Then resume at a much lower rate with a long expiratory time and accept permissive hypercapnia."],
+          ["Give a fluid bolus and start a vasopressor","meh","<span class='fbk'>Treating the symptom</span>The hypotension is real and these may eventually be needed, but they do not address the mechanism. As long as air keeps trapping, intrathoracic pressure will keep rising and venous return will keep falling — you will be chasing a pressure that has an ongoing mechanical cause. Disconnect first; it takes seconds and is both diagnostic and therapeutic."],
+          ["Increase the ventilator rate to improve the falling saturation","bad","<span class='fbk'>Makes it worse</span>This is the intuitive move and exactly the wrong one. A higher rate shortens expiratory time, traps more air, raises intrathoracic pressure further, and accelerates the collapse. In obstructive disease, when things deteriorate you slow down, you do not speed up."],
+          ["Perform immediate bilateral needle decompression","bad","<span class='fbk'>Too far, too fast</span>Tension pneumothorax is a legitimate item on the DOPES list and does present with hypotension and rising pressures — but here breath sounds are present and equal, and the picture fits breath stacking in a patient whose settings made it likely. Disconnecting takes seconds and will distinguish the two: if the pressure recovers, it was stacking. Reserve decompression for when the evidence points there."]
+        ])+
+        "<p>Carry three things. Sedation and analgesia start immediately, because the paralytic outlasts the anaesthetic and a paralyzed patient cannot tell you anything. Tidal volume comes from <em>predicted</em> body weight, calculated from height. And when an intubated patient crashes, disconnect, hand-ventilate, and work DOPES rather than improvising.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Sedate first, set the ventilator deliberately, expect the hypotension, and re-confirm the tube after every move.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Post-intubation sedation should be guided by which principle?",
+        opts:["Sedative alone, at the deepest tolerated dose","Analgesia first, with a sedative added to reach the target depth","Paralytic titrated to comfort","No sedation until the patient moves"], ans:1,
+        expl:"An endotracheal tube is painful. An analgesia-first approach — an opioid foundation with a sedative added — treats the actual problem and usually requires less total sedative than a sedative-only strategy." },
+      { q:"An intubated patient begins coughing and becomes hypertensive as the paralytic wears off. The correct action is to:",
+        opts:["Give more paralytic","Deepen sedation and analgesia","Increase the ventilator rate","Take no action"], ans:1,
+        expl:"These are signs of an under-sedated, increasingly aware patient — and may be the only signs available. Re-paralyzing removes the evidence while leaving the patient awake and in pain." },
+      { q:"Tidal volume should be calculated from:",
+        opts:["Actual body weight","Predicted body weight, derived from height and sex","Ideal weight estimated by appearance","Body mass index"], ans:1,
+        expl:"Lung size tracks height, not mass. A 150 kg patient does not have larger lungs than a 75 kg patient of the same height, so dosing volume off actual weight delivers grossly excessive tidal volumes." },
+      { q:"A recommended initial tidal volume range is:",
+        opts:["4–5 mL/kg PBW","6–8 mL/kg PBW","10–12 mL/kg PBW","15 mL/kg PBW"], ans:1,
+        expl:"6–8 mL/kg of predicted body weight is the lung-protective starting range, using 6 mL/kg where lung injury is suspected, with plateau pressure kept below about 30 cmH₂O." },
+      { q:"In DOPES, the 'S' stands for:",
+        opts:["Suction","Stacking (breath stacking / auto-PEEP)","Sedation","Saturation"], ans:1,
+        expl:"Breath stacking with auto-PEEP occurs when incomplete exhalation traps air, raising intrathoracic pressure and reducing venous return until the patient becomes profoundly hypotensive." },
+      { q:"The immediate treatment for suspected breath stacking is to:",
+        opts:["Increase the ventilator rate","Disconnect from the circuit and allow prolonged exhalation","Give a fluid bolus","Increase PEEP"], ans:1,
+        expl:"Disconnecting lets trapped air escape; recovery of the blood pressure over the following seconds is both diagnostic and therapeutic. Then reduce the rate and lengthen expiratory time." },
+      { q:"When an intubated patient deteriorates suddenly, the first step is to:",
+        opts:["Increase the FiO₂ on the ventilator","Disconnect and hand-ventilate on 100% oxygen while working DOPES","Give a fluid bolus","Extubate immediately"], ans:1,
+        expl:"Hand-ventilating separates patient problems from equipment problems immediately and gives you direct feedback on compliance while you work through Displacement, Obstruction, Pneumothorax, Equipment and Stacking." },
+      { q:"Ventilating a severe asthmatic after intubation requires:",
+        opts:["A high rate to normalize CO₂","A low rate with long expiratory time, accepting permissive hypercapnia","Maximal PEEP","A large tidal volume"], ans:1,
+        expl:"Chasing a normal CO₂ with a fast rate shortens expiratory time and causes breath stacking. Set a low rate (often 8–10), a long expiratory time, and tolerate a higher CO₂." },
+      { q:"Regarding hyperventilation after traumatic brain injury:",
+        opts:["It should be applied routinely to reduce ICP","Normocapnia is the default; brief hyperventilation is reserved for signs of active herniation","It has no effect on cerebral blood flow","It should target an EtCO₂ below 25 mmHg"], ans:1,
+        expl:"Prophylactic hyperventilation causes cerebral vasoconstriction and worsens ischaemia. Target roughly 35–40 mmHg, reserving brief hyperventilation for acute deterioration suggesting herniation." },
+      { q:"After every patient movement during transport you should:",
+        opts:["Increase sedation","Re-confirm the capnography waveform and the tube depth marking","Change the ventilator circuit","Recalculate the tidal volume"], ans:1,
+        expl:"Tubes migrate during log-rolls, lifts, loading and transfers. Re-checking the waveform and the documented depth marking after each movement is the highest-yield habit in transport airway care." }
+    ]
+  },
+  {
+    id: 8,
+    available: true,
+    title: "The Failed Airway",
+    desc: "Declaring failure early, the rescue algorithm, cannot-intubate-cannot-oxygenate, and surgical cricothyrotomy.",
+    objective: "Define the failed airway and the CICO emergency; declare failure early and out loud; work the rescue sequence in order; perform a scalpel–bougie–tube cricothyrotomy; and recognize the human factors that cause fatal delay.",
+    content: [
+      { h:"1", t:"Two different emergencies", html:
+        "<p>The words matter here, because they carry different urgencies and different actions.</p>"+
+        "<p>A <strong>failed airway</strong> means you have been unable to intubate — typically after three attempts, or after two by the same operator with nothing left to change. It is a serious problem, but if you can oxygenate the patient by bag-mask or supraglottic device, you have time. Time to think, time to call for help, time to choose a different route.</p>"+
+        "<p><strong>Cannot intubate, cannot oxygenate</strong> — CICO — means you cannot get oxygen into the patient by <em>any</em> means. This is the true airway emergency, measured in seconds, and it has exactly one answer: an incision in the front of the neck. There is no other treatment and no additional attempt that will help.</p>"+
+        "<div class='formula'>Failed intubation, <span class='fk'>oxygenation adequate</span> &rarr; you have time. Rescue, reassess, get help.<br>Failed intubation, <span class='fk'>oxygenation failing</span> &rarr; CICO. Front of neck access, now.</div>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The question is never \"can I get the tube in?\" It is \"is oxygen reaching the lungs?\" That question decides which emergency you are in.</div>"
+      },
+      { h:"2", t:"Declaring it — out loud", html:
+        "<p>The commonest cause of death in a difficult airway is not the anatomy. It is <strong>delay</strong> — the operator who keeps trying, each attempt feeling like it is nearly there, while the saturation falls. This has a name in human-factors literature: task fixation, or loss of situational awareness. It is not a knowledge failure and it does not respect seniority; experienced clinicians are, if anything, more prone to it because they are used to succeeding.</p>"+
+        "<p>The countermeasure is to make failure a <em>declared</em>, spoken event rather than a private judgement. Saying out loud <strong>\"This is a failed airway. We are moving to plan C\"</strong> does three things at once: it breaks your own fixation, it tells the team to stop assisting the current plan and start preparing the next, and it starts a shared clock.</p>"+
+        "<p>Two supporting habits make it work. Assign someone to <strong>call the saturation aloud</strong>, so the number reaches you without you having to look. And set the attempt limit in your pre-induction plan, so the third attempt is a pre-agreed boundary rather than a judgement call made while hypoxic and stressed.</p>"+
+        "<div class='dangerbox'><span class='dt'>The core truth</span> Patients do not die because a tube was not passed. They die because oxygen stopped reaching them while somebody kept trying to pass it.</div>"+
+        wPick("Human factors","Which single measure most reliably prevents fatal delay in a failed airway?",
+          ["Having more advanced equipment available","Declaring the failed airway out loud and moving to the next plan",
+           "Attempting laryngoscopy more quickly","Assigning the most senior clinician to all attempts"],1,
+          "<b>Declaring it out loud.</b> Task fixation is the mechanism of most airway deaths, and it affects experienced clinicians too. Verbalizing failure breaks your own fixation, redirects the team to the next plan, and starts a shared clock. Equipment and seniority help, but neither addresses the psychology of persisting too long.")
+      },
+      { h:"3", t:"The rescue sequence", html:
+        "<p>When intubation has failed, work through the remaining routes in order of speed and reversibility. Every step is an attempt to answer the only question that matters: is oxygen reaching the lungs?</p>"+
+        wRe("The rescue steps","Tap each.",[
+          ["1","Optimize bag-mask ventilation","Not a token attempt — a properly optimized one. Two-person technique with a two-handed jaw thrust and seal, an oral <em>and</em> nasal airway in place, head-up positioning, and a PEEP valve. A BVM that failed with one hand and no adjuncts has not actually failed."],
+          ["2","Supraglottic airway","An i-gel or LMA. Fast, requires no view, and frequently succeeds where laryngoscopy failed. Remember RODS from Module 2 — it will not bypass an obstruction at or below the larynx."],
+          ["3","One optimized further attempt","Only if oxygenation has been restored and something meaningful can change — a different operator, device, or position. If oxygenation is failing, skip this entirely."],
+          ["4","Front of neck access","The scalpel. Not a defeat and not a last resort to be delayed — the definitive treatment for CICO, and the only one."]
+        ])+
+        "<p>Notice that steps one and two both restore <em>oxygenation</em> without achieving intubation. That is the point. A patient sitting comfortably on a supraglottic device with a good waveform is not in an emergency any more, and may reasonably be transported that way. Intubation was never the goal; oxygenation was.</p>"
+      },
+      { h:"4", t:"Walking the algorithm", html:
+        "<p>Work through a real failure with the decisions made in sequence. Choose at each step; a wrong turn will let you try again.</p>"+
+        wAlgo("Failed airway walkthrough","A 58-year-old in respiratory failure. Your first laryngoscopy attempt gave a grade III view and the SpO₂ has fallen from 96% to 88%.","a1",{
+          a1:{ step:"Step 1 — the first failure", stem:"You have withdrawn from a failed first attempt. SpO₂ is 88% and falling. What is your immediate priority?",
+            opts:[
+              ["Re-oxygenate with an optimized two-person bag-mask","a2","good","Correct — oxygenation always comes before another look. Two-person technique, adjuncts in, PEEP valve on. Get the saturation back up before you decide anything else."],
+              ["Immediately reattempt laryngoscopy with the same setup",null,"bad","No. Repeating an identical attempt on a desaturating patient wastes the apneic time you do not have. Re-oxygenate first, then change something."],
+              ["Proceed directly to cricothyrotomy",null,"bad","Far too early. You have not yet tried to oxygenate by bag-mask, and the patient is at 88% — not a CICO situation. The scalpel is for when oxygenation has failed by every other route."]
+            ]},
+          a2:{ step:"Step 2 — bag-mask response", stem:"With two-person BVM, adjuncts and a PEEP valve, the SpO₂ climbs back to 97%. You now have time. What next?",
+            opts:[
+              ["One further optimized attempt — change operator, add a bougie, reposition","a3","good","Correct. Oxygenation is restored, so you have bought time for exactly one more well-considered attempt — provided something meaningful is different. A bougie is the right tool for the grade III view you had."],
+              ["Keep bagging and transport without further attempts",null,"bad","Defensible in some settings, but premature here. You have restored oxygenation and have a specific, named change available (a bougie for a grade III view). Prolonged bag-mask ventilation over a transport carries its own risks — gastric insufflation and aspiration."],
+              ["Declare a failed airway and cut the neck",null,"bad","No. The patient is at 97% and oxygenating well. Front of neck access is the treatment for a patient you cannot oxygenate — this patient you demonstrably can."]
+            ]},
+          a3:{ step:"Step 3 — the second failure", stem:"The second attempt with a bougie also fails, and this time the saturation falls faster — 84% and dropping. You resume bag-mask ventilation, but now the chest barely moves and the saturation continues to fall through 70%. What is happening, and what do you do?",
+            opts:[
+              ["This is CICO — place a supraglottic airway immediately as the last non-surgical step","a4","good","Correct. Bag-mask ventilation is now failing, so you are approaching CICO. A supraglottic device is fast, needs no view, and is the final step before the neck. Prepare for cricothyrotomy at the same time — do not wait for the device to fail before you start setting up."],
+              ["Attempt laryngoscopy a third time",null,"bad","No. You cannot oxygenate. Another laryngoscopy does not put oxygen into the lungs, and this patient has none to spare at 70%. The path now runs through rescue oxygenation to the neck."],
+              ["Give more paralytic to improve conditions",null,"bad","The patient is already paralyzed and the problem is not muscle tone — it is that oxygen is not reaching the lungs. More paralytic changes nothing and costs seconds you do not have."]
+            ]},
+          a4:{ step:"Step 4 — CICO declared", stem:"The supraglottic airway is in but produces no waveform and no chest rise. SpO₂ is 58%. This is a true cannot-intubate-cannot-oxygenate emergency. What now?",
+            opts:[
+              ["Front of neck access — scalpel, bougie, tube","a5","good","Correct, and without further delay. Every non-surgical route has been tried and failed. This is the one treatment for CICO, and the outcome now depends almost entirely on how quickly it is started."],
+              ["Try a different size supraglottic airway",null,"bad","At 58% and falling, there is no time for another device trial. Repeated attempts at a route that has already failed is precisely the fixation that kills these patients."],
+              ["Wait for the paralytic to wear off",null,"bad","Fatal. Rocuronium lasts 45–70 minutes and the patient will arrest within a minute or two. Module 5 dealt with this fallacy directly."]
+            ]},
+          a5:{ step:"Outcome", stem:"You extend the neck, stabilize the larynx with your left hand, make a vertical skin incision, palpate the cricothyroid membrane, and make a transverse stab through it. A bougie passes into the trachea, a 6.0 cuffed tube rails over it, and the capnograph shows a waveform. The saturation begins to climb.",
+            end:"Airway secured — oxygenation restored" }
+        })+
+        "<p>The lesson embedded in that sequence: every good decision was driven by the oxygen saturation, not by the desire to place a tube.</p>"
+      },
+      { h:"5", t:"Cricothyrotomy — the technique", html:
+        "<p>The widely taught approach is <strong>scalpel&ndash;bougie&ndash;tube</strong>, chosen for being fast, using minimal equipment, and being reliable under stress. Needle techniques with jet ventilation have largely fallen out of favour for adults because of high failure rates and barotrauma.</p>"+
+        "<p><strong>The sequence.</strong> Extend the neck if it is safe to do so. Stand on the patient's left if right-handed. Stabilize the larynx with your left hand and keep it there throughout — losing the larynx is the commonest reason the procedure fails.</p>"+
+        "<ul>"+
+        "<li><strong>If you can palpate the membrane:</strong> make a transverse stab through it with a size 10 scalpel, rotate the blade so it lies along the trachea, and hold it there.</li>"+
+        "<li><strong>If you cannot palpate it</strong> (obesity, oedema, a short neck): make a <em>vertical</em> incision through the skin in the midline, several centimetres long, then use your finger to bluntly dissect down and palpate the membrane directly. Then make the transverse stab.</li>"+
+        "<li>Slide a <strong>bougie</strong> alongside the blade into the trachea, directed caudally.</li>"+
+        "<li>Rail a <strong>size 6.0 cuffed tube</strong> over the bougie, inflate the cuff, and confirm with waveform capnography.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check &mdash; surgical vs needle cricothyrotomy</span>"+
+        "<p>Difficult-airway guidelines, including the Difficult Airway Society's, recommend a scalpel-based surgical technique over needle cricothyrotomy with jet ventilation in adults, reflecting consistently higher success rates and fewer complications. The dominant determinant of outcome is not the technique itself but the delay before starting it — the procedure is most often performed too late rather than performed badly.</p>"+
+        "<div class='grade'>Quality: moderate (guideline consensus supported by registry and simulation data).</div></div>"+
+        "<p>Note the payoff from Module 2: in any predicted difficult airway you were told to identify and <strong>mark the cricothyroid membrane before inducing</strong>. This is why. Finding landmarks on a still, calm neck takes seconds; finding them on a moving, hypoxic, blood-covered one costs minutes you will not have.</p>"
+      },
+      { h:"6", t:"Children are different", html:
+        "<p>Surgical cricothyrotomy is <strong>not</strong> recommended in small children, generally taken as under about 10 to 12 years old. Their cricothyroid membrane is tiny, sits high, and is difficult to identify; the larynx is soft and easily damaged; and the complication rate is high.</p>"+
+        "<p>Two things work in your favour instead. Paediatric CICO from the causes seen in adults is genuinely rare, and children respond much better to well-performed basic airway management — a correctly sized oral airway, good positioning, and a properly performed two-person bag-mask technique with a jaw thrust will oxygenate the overwhelming majority.</p>"+
+        "<p>Where a surgical airway is unavoidable in a small child, needle cricothyrotomy with a cannula and a low-pressure oxygen source is the fallback, accepting that it provides oxygenation rather than ventilation and buys time only. Know your own service's protocol and the age threshold it sets.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> In small children, escalate basic airway skill before escalating to a blade. Two-person BVM with adjuncts and good positioning is the highest-yield paediatric rescue.</div>"
+      },
+      { h:"7", t:"Afterwards", html:
+        "<p>A failed airway does not end when oxygen is restored.</p>"+
+        "<p><strong>Clinically:</strong> a surgical airway is a temporary, insecure airway. Secure it carefully, confirm with capnography, ventilate gently, and hand over explicitly — including that it is a cricothyrotomy, when it was placed, and what tube size is in. The receiving team needs to plan a definitive airway.</p>"+
+        "<p><strong>Documentation:</strong> record what was attempted, in what order, by whom, with what devices, the views obtained, and what worked. This is not administrative — it is the clinical information that protects the patient at their next airway encounter. A documented \"grade IV view, two operators, rescued with i-gel, cricothyrotomy required\" changes how the next team prepares.</p>"+
+        "<p><strong>For the team:</strong> a difficult or failed airway is a high-stress event, and a brief structured debrief afterwards improves both future performance and crew wellbeing. Focus on the system and the sequence, not on individual blame — the operator who could not intubate a genuinely difficult airway did not fail.</p>"
+      },
+      { h:"8", t:"Putting it together", html:
+        wBranch("Decision point","You are alone with a paramedic partner in the back of a moving ambulance. Two intubation attempts have failed. Bag-mask ventilation is producing only minimal chest rise despite adjuncts and two-person technique, a supraglottic airway has been placed with no waveform, and the SpO&#8322; is 62% and falling. <b>What do you do?</b>",[
+          ["Perform a surgical cricothyrotomy now","good","<span class='fbk'>Correct</span>This is unambiguous CICO: intubation has failed, bag-mask ventilation is failing, and the rescue device is not working. Front of neck access is the only remaining treatment, and outcome depends almost entirely on how fast it begins. Stop the vehicle if you can, stabilize the larynx, and cut. Hesitation here is what kills these patients."],
+          ["Stop the ambulance and make a third intubation attempt","bad","<span class='fbk'>Fatal delay</span>Stopping the vehicle is sensible; a third laryngoscopy is not. At 62% and falling, the patient has seconds of reserve, and another look does not put oxygen into the lungs. Two attempts plus a failed supraglottic device with failing bag-mask ventilation is the definition of CICO."],
+          ["Continue bag-mask ventilation and drive faster to the hospital","bad","<span class='fbk'>Will not work</span>Bag-mask ventilation is already failing — that is precisely why this is CICO. Transporting a patient who is not being oxygenated means arriving with a hypoxic arrest. The treatment cannot be deferred to the hospital; it has to happen here."],
+          ["Reverse the paralytic and let the patient wake up","meh","<span class='fbk'>Not available in time</span>Sugammadex would reverse rocuronium, but it is rarely carried prehospital, and even immediate reversal does not restore respiratory drive fast enough at 62%. Module 5 covered why offset is never the rescue plan. The rescue is procedural."]
+        ])+
+        "<p>This is the last module, and the whole course converges here. Module 1 asked whether the airway needed taking. Module 2 asked how hard it would be. Module 3 made the patient survivable. Modules 4 and 5 chose the drugs. Module 6 engineered the first attempt. Module 7 handled the aftermath. And this module exists for the times all of that is not enough — where the only thing that saves the patient is recognizing early that oxygen has stopped reaching them, saying so out loud, and acting.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Failed intubation with adequate oxygenation buys time. Failed oxygenation buys none. Declare it, move through the rescue sequence, and reach the front of the neck before the patient arrests — not after.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The defining feature of a CICO emergency is that:",
+        opts:["Three intubation attempts have failed","Oxygen cannot be delivered by any means","The view was grade IV","A supraglottic device was required"], ans:1,
+        expl:"A failed airway means you cannot intubate; if you can still oxygenate, you have time. CICO means oxygenation has failed by every route — that is the true emergency, and it has one treatment." },
+      { q:"The commonest cause of death in a difficult airway is:",
+        opts:["Inadequate equipment","Delay from task fixation — persisting while the patient desaturates","Oesophageal intubation","Aspiration"], ans:1,
+        expl:"Patients die because oxygen stopped reaching them while somebody kept trying to pass a tube. Task fixation affects experienced clinicians too, which is why declaring failure out loud is the countermeasure." },
+      { q:"Before deciding bag-mask ventilation has failed, you must have:",
+        opts:["Attempted it for at least five minutes","Used two-person technique with oral and nasal airways, good positioning, and a PEEP valve","Given a second dose of paralytic","Attempted laryngoscopy three times"], ans:1,
+        expl:"A BVM attempted one-handed without adjuncts has not genuinely failed. Optimization means two-person technique with a two-handed jaw thrust and seal, both airway adjuncts, head-up positioning, and a PEEP valve." },
+      { q:"A patient who cannot be intubated but is oxygenating well on a supraglottic airway:",
+        opts:["Requires immediate cricothyrotomy","Is no longer in an immediate emergency and may reasonably be transported that way","Must have the device removed","Should have the paralytic reversed"], ans:1,
+        expl:"Oxygenation, not intubation, was always the goal. A patient with a good waveform on a supraglottic device has time — for reassessment, for help, and for a considered plan." },
+      { q:"The recommended adult surgical airway technique is:",
+        opts:["Needle cricothyrotomy with jet ventilation","Scalpel–bougie–tube cricothyrotomy","Percutaneous tracheostomy","Retrograde intubation"], ans:1,
+        expl:"Guidelines recommend a scalpel-based technique in adults for its higher success rate and fewer complications. Needle techniques with jet ventilation have largely fallen out of favour for adults." },
+      { q:"If the cricothyroid membrane cannot be palpated, the correct first incision is:",
+        opts:["A transverse skin incision","A vertical midline skin incision, then blunt dissection to palpate the membrane","A stab directly where you estimate the membrane to be","No incision — abandon the procedure"], ans:1,
+        expl:"When landmarks are impalpable, a vertical midline skin incision several centimetres long allows finger dissection down to identify the membrane directly, after which the transverse stab is made." },
+      { q:"During cricothyrotomy, the commonest reason the procedure fails is:",
+        opts:["Using the wrong tube size","Losing control of the larynx","Cutting too deeply","Failing to extend the neck"], ans:1,
+        expl:"The non-dominant hand must stabilize the larynx throughout. Once the larynx is lost, landmarks disappear in a bleeding field — which is why the stabilizing hand stays put for the whole procedure." },
+      { q:"Surgical cricothyrotomy in a child under about 10–12 years is:",
+        opts:["The preferred rescue technique","Not recommended — escalate basic airway management instead","Identical to the adult technique","Indicated after one failed attempt"], ans:1,
+        expl:"The paediatric cricothyroid membrane is tiny, high and hard to identify, with a high complication rate. Children respond much better to optimized two-person bag-mask ventilation with adjuncts and good positioning." },
+      { q:"Marking the cricothyroid membrane before induction is most valuable because:",
+        opts:["It is required for documentation","Landmarks are far harder to find on a moving, hypoxic, blood-covered neck","It reduces the need for a surgical airway","It speeds up laryngoscopy"], ans:1,
+        expl:"Identification by palpation is already unreliable (Module 2), and it becomes dramatically harder under emergency conditions. Marking it on a calm patient takes seconds and saves minutes you will not have." },
+      { q:"Declaring 'this is a failed airway' out loud primarily serves to:",
+        opts:["Satisfy documentation requirements","Break task fixation, redirect the team to the next plan, and start a shared clock","Transfer responsibility to another clinician","Signal the patient is unsalvageable"], ans:1,
+        expl:"Verbalizing failure interrupts the operator's own fixation, tells the team to stop assisting the current plan and prepare the next, and establishes a shared sense of elapsed time." }
+    ]
+  }
 ];
 
 var LS_KEY = "airway_academy_v1";
@@ -1384,8 +1827,9 @@ function openReader(id){
     html += "<h3><span class='h3n'>"+sec.h+"</span>"+sec.t+"</h3>"+sec.html;
   });
   c.innerHTML = html;
-  // give interactive widgets their initial paint (the dose table is empty until rendered)
+  // give interactive widgets their initial paint (empty until first rendered)
   c.querySelectorAll("[data-calc='dose']").forEach(renderDoseCalc);
+  c.querySelectorAll("[data-w='algo']").forEach(renderAlgo);
 
   // gate the quiz button until the reader is scrolled through (honest "must read")
   var btn = document.getElementById("toQuizBtn");
@@ -1473,6 +1917,44 @@ function onReaderScroll(){
       return;
     }
 
+    /* ---- checklist ---- */
+    var ck = t.closest(".ck-it");
+    if(ck && root.contains(ck)){
+      ck.classList.toggle("on");
+      var cbox = ck.closest("[data-w='check']");
+      if(cbox){
+        var total = parseInt(cbox.dataset.n,10);
+        var done = cbox.querySelectorAll(".ck-it.on").length;
+        var pr = cbox.querySelector(".ck-prog");
+        if(pr){
+          pr.textContent = done === total ? ("✓ All "+total+" complete — you are ready to induce.")
+                                          : (done+" of "+total+" complete");
+          pr.classList.toggle("done", done === total);
+        }
+      }
+      return;
+    }
+
+    /* ---- algorithm walker ---- */
+    var ao = t.closest(".ag-o");
+    if(ao && root.contains(ao)){
+      var abox = ao.closest("[data-w='algo']");
+      if(abox) algoChoose(abox, ao);
+      return;
+    }
+    var anext = t.closest(".ag-next button");
+    if(anext && root.contains(anext)){
+      var abox2 = anext.closest("[data-w='algo']");
+      if(abox2){ abox2.dataset.cur = anext.dataset.next; renderAlgo(abox2); }
+      return;
+    }
+    var ares = t.closest(".ag-restart");
+    if(ares && root.contains(ares)){
+      var abox3 = ares.closest("[data-w='algo']");
+      if(abox3){ abox3.dataset.cur = abox3.dataset.start; abox3.dataset.trail = ""; renderAlgo(abox3); }
+      return;
+    }
+
     /* ---- comparison rows ---- */
     var cr = t.closest(".cmp-row");
     if(cr && root.contains(cr)){ cr.classList.toggle("on"); return; }
@@ -1540,6 +2022,68 @@ function onReaderScroll(){
     }
   });
 })();
+
+/* ---- Algorithm walker (used by the widget engine) ---- */
+function algoData(box){
+  var d = box.querySelector(".ag-data");
+  if(!d) return null;
+  try{ return JSON.parse(d.textContent); }catch(e){ return null; }
+}
+function renderAlgo(box){
+  var nodes = algoData(box);
+  if(!nodes) return;
+  var node = nodes[box.dataset.cur];
+  var stage = box.querySelector(".ag-stage");
+  if(!node || !stage) return;
+  var h = "<div class='ag-step'>"+(node.step || "Step")+"</div>"+
+          "<p class='ag-stem'>"+node.stem+"</p>";
+  if(node.end){
+    h += "<div class='ag-end'>"+node.end+"</div>";
+  } else {
+    (node.opts||[]).forEach(function(o,i){
+      h += "<button type='button' class='ag-o' data-i='"+i+"'>"+o[0]+"</button>";
+    });
+    h += "<div class='ag-fb'></div><div class='ag-next'></div>";
+  }
+  stage.innerHTML = h;
+  // breadcrumb trail
+  var trail = (box.dataset.trail || "").split("|").filter(Boolean);
+  var tw = box.querySelector(".ag-trail");
+  if(tw) tw.innerHTML = trail.map(function(c){ return "<span class='ag-crumb'>"+c+"</span>"; }).join("");
+  var rs = box.querySelector(".ag-restart");
+  if(rs) rs.classList.toggle("hidden", trail.length === 0);
+}
+function algoChoose(box, btn){
+  var nodes = algoData(box);
+  if(!nodes) return;
+  var node = nodes[box.dataset.cur];
+  if(!node) return;
+  var opt = (node.opts||[])[parseInt(btn.dataset.i,10)];
+  if(!opt) return;
+  var kind = opt[2] || "good";
+  var fb = box.querySelector(".ag-fb");
+  if(fb){
+    fb.innerHTML = "<span class='fbk'>"+(kind==="good"?"Correct":"Reconsider")+"</span>"+(opt[3]||"");
+    fb.className = "ag-fb on "+kind;
+  }
+  box.querySelectorAll(".ag-o").forEach(function(b){ b.disabled = true; b.style.opacity = b===btn ? "1" : ".45"; });
+  var nxt = box.querySelector(".ag-next");
+  if(kind !== "good"){
+    // wrong turn: let them try again rather than advancing
+    if(nxt) nxt.innerHTML = "<button type='button' data-next='"+box.dataset.cur+"'>Try this step again</button>";
+    return;
+  }
+  var trail = (box.dataset.trail || "").split("|").filter(Boolean);
+  trail.push(opt[0].replace(/<[^>]*>/g,"").slice(0,26));
+  box.dataset.trail = trail.join("|");
+  if(opt[1] && nodes[opt[1]]){
+    if(nxt) nxt.innerHTML = "<button type='button' data-next='"+opt[1]+"'>Next step &rsaquo;</button>";
+  } else {
+    if(nxt) nxt.innerHTML = "";
+    var rs = box.querySelector(".ag-restart");
+    if(rs) rs.classList.remove("hidden");
+  }
+}
 
 /* ---- Dose calculator rendering (used by the widget engine) ---- */
 function fmtDose(mg){
