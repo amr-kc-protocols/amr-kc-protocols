@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AMR KC Academy">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-193.png">
+<title>Neonatal Resuscitation Academy &#x2014; AMR KC</title>
+<!--
+  Neonatal Resuscitation & Stabilization for Critical Care Transport — AMR Kansas City
+  ===================================================================================
+  Self-contained training academy. Plain HTML/CSS/JS, no external deps,
+  works offline. Progress persists in localStorage. Sibling of the
+  Ventilator, Hemodynamics, and Metabolic academies and shares the same engine.
+  Clinical backbone: NRP (Neonatal Resuscitation Program, 8th ed.) and S.T.A.B.L.E.
+
+  ARCHITECTURE
+  - MODULES[] is the single source of truth. To add a module later, append
+    an object with { available:true, content, quiz }. The lock/progression
+    logic and UI pick it up automatically. Modules 4–8 currently ship as
+    available:false placeholders (they show a "content in development" state
+    and hold the final exam locked until they are built).
+  - Progression: Module N unlocks when Module N-1's quiz is passed (>=80%).
+  - Final exam unlocks when every module quiz is passed. Pass = >=85%.
+  - Certificate captures the learner name and prints clean via print CSS.
+
+  STATE (localStorage key: neonate_academy_v1)
+    { learnerName, modules:{ id:{read,passed,best} }, finalPassed, completedAt }
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{
+  --navy:#173A68;        /* brand dark — primary buttons, headings accent */
+  --ink:#152238;          /* headings / body text */
+  --ink-2:#66707C;        /* subtext */
+  --blue:#1B63C4;         /* accent — links, labels, pills */
+  --blue-dk:#154C8C;       /* deeper blue for inline emphasis */
+  --blue-soft:#EAF1FD;    /* tinted surface */
+  --blue-line:#BFD6F5;    /* tinted border */
+  --paper:#FFFFFF;
+  --card:#F4F6F9;          /* light tile */
+  --card-2:#F1F4F8;
+  --rule:#E2E6EC;
+  --rule-2:#D3DAE3;
+  --green:#15803D;         /* passed / correct */
+  --green-soft:#EAFBF1;
+  --green-line:#BFE3D0;
+  --red:#DC2626;           /* wrong / fail (functional only) */
+  --red-soft:#FDECEC;
+  --red-line:#F3C6C6;
+  --amber:#A1590B;
+  --amber-soft:#FEF3E2;
+  --amber-line:#E7C48A;
+  --lock:#9AA5B1;
+  --mono:'Inter', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sans:'Inter', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --maxw: 760px;
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:0 20px; }
+
+/* ── Back to Field Guide ─────────────────────────────────────────── */
+.backlink{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--blue); text-decoration:none; opacity:.85; margin:14px 0 0;
+}
+.backlink:active{ opacity:.6; }
+
+/* ── Header (field-guide light chrome) ──────────────────────────── */
+header.mon{
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  position:relative; overflow:hidden;
+}
+.mon-inner{ max-width:var(--maxw); margin:0 auto; padding:0 20px 2px; position:relative; z-index:2; }
+.brandrow{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; }
+.brand{
+  font-family:var(--sans); font-weight:800; letter-spacing:.11em;
+  font-size:11px; color:var(--navy); text-transform:uppercase;
+}
+.brand b{ color:var(--blue); }
+.status-chip{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.04em;
+  color:var(--ink-2); border:1px solid var(--rule); background:var(--card-2);
+  border-radius:999px; padding:4px 10px; white-space:nowrap;
+}
+h1.course{
+  font-family:var(--sans); font-weight:800; letter-spacing:-.02em;
+  font-size:27px; line-height:1.1; margin:12px 0 2px; color:var(--ink);
+}
+.course-sub{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); margin:0 0 12px; font-weight:500; }
+.wave-strip{ height:56px; position:relative; margin:0 -20px; }
+svg.wave{ display:block; width:100%; height:56px; }
+.wave path.trace{
+  fill:none; stroke:var(--blue); stroke-width:2.2;
+  stroke-linejoin:round; stroke-linecap:round;
+  filter:drop-shadow(0 0 3px rgba(27,99,196,.30));
+}
+@keyframes sweep{ to{ stroke-dashoffset:0; } }
+.wave path.anim{ stroke-dasharray:2600; stroke-dashoffset:2600; animation:sweep 7s linear infinite; }
+.ticker{
+  display:flex; gap:22px; padding:6px 20px 12px; margin:0 -20px;
+  font-family:var(--sans);
+}
+.tk{ display:flex; flex-direction:column; }
+.tk .lab{ font-size:9.5px; letter-spacing:.12em; color:var(--lock); text-transform:uppercase; font-weight:700; }
+.tk .val{ font-size:15px; color:var(--ink); font-weight:700; font-family:var(--mono); }
+.tk .val.red{ color:var(--lock); }
+.tk .val.grn{ color:var(--green); }
+.progbar{ height:6px; background:var(--rule); overflow:hidden; margin:0 -20px 0; }
+.progbar > i{ display:block; height:100%; width:0%; background:var(--blue); transition:width .5s ease; }
+
+.storagewarn{
+  background:var(--amber-soft); border-bottom:1px solid var(--amber-line);
+  color:var(--amber); font-family:var(--sans); font-size:12.5px; font-weight:600;
+  text-align:center; padding:8px 20px;
+}
+
+/* ── Home: module list ─────────────────────────────────────────── */
+main{ padding:24px 0 60px; }
+.eyebrow{
+  font-family:var(--sans); font-weight:800; letter-spacing:.13em;
+  font-size:11px; text-transform:uppercase; color:var(--blue); margin:0 0 14px;
+}
+.modlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+.modcard{
+  display:flex; gap:14px; align-items:stretch;
+  background:var(--card); border:1px solid transparent; border-radius:16px;
+  padding:15px 16px 15px 0; overflow:hidden; position:relative;
+  transition:background .18s, box-shadow .18s, transform .06s;
+}
+.modcard .num{
+  font-family:var(--mono); font-weight:700; font-size:14px;
+  width:54px; min-width:54px; display:flex; align-items:center; justify-content:center;
+  color:var(--lock); border-right:1px solid var(--rule-2);
+}
+.modcard .body{ flex:1; min-width:0; }
+.modcard .mtitle{ font-family:var(--sans); font-weight:700; font-size:16.5px; letter-spacing:-.01em; color:var(--ink); margin:1px 0 3px; }
+.modcard .mdesc{ font-family:var(--sans); font-size:13px; color:var(--ink-2); line-height:1.45; margin:0; }
+.modcard .foot{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+.pill{ font-family:var(--sans); font-weight:600; font-size:11px; letter-spacing:.02em; padding:3px 9px; border-radius:999px; border:1px solid; }
+.pill.locked{ color:var(--lock); border-color:var(--rule-2); background:var(--paper); }
+.pill.ready{ color:var(--blue); border-color:var(--blue-line); background:var(--blue-soft); }
+.pill.passed{ color:var(--green); border-color:var(--green-line); background:var(--green-soft); }
+.pill.soon{ color:var(--amber); border-color:var(--amber-line); background:var(--amber-soft); }
+.go{ margin-left:auto; font-family:var(--sans); font-weight:700; font-size:13.5px; color:var(--blue); }
+
+.modcard.open{ cursor:pointer; background:var(--card); }
+.modcard.open:hover{ box-shadow:0 6px 20px rgba(23,58,104,.08); }
+.modcard.open:active{ transform:translateY(1px); }
+.modcard.open .num{ color:var(--blue); }
+.modcard.passed .num{ color:var(--green); }
+.modcard.locked{ opacity:.78; }
+.lockglyph{ width:13px; height:13px; vertical-align:-2px; margin-right:2px; }
+
+.finalcard{ margin-top:20px; border:1.5px dashed var(--rule-2); background:var(--card-2); }
+.finalcard.ready{ border:1.5px solid var(--blue); background:var(--blue-soft); }
+.finalcard .num{ color:var(--blue); border-right-color:var(--rule-2); }
+
+/* ── Reader view ───────────────────────────────────────────────── */
+.back{ display:inline-flex; align-items:center; gap:6px; background:none; border:none;
+  font-family:var(--sans); font-weight:600; font-size:14px; color:var(--blue); cursor:pointer; padding:6px 0; margin-bottom:6px; }
+.rd-num{ font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:var(--blue); font-weight:700; }
+h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.02em; font-size:25px; line-height:1.14; margin:4px 0 4px; color:var(--ink); }
+.rd-obj{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--blue); padding:8px 0 8px 13px; margin:14px 0 22px; background:linear-gradient(90deg,var(--blue-soft),transparent); border-radius:0 8px 8px 0; }
+.content h3{ font-family:var(--sans); font-weight:800; font-size:17px; letter-spacing:-.01em; color:var(--ink); margin:30px 0 8px; }
+.content h3 .h3n{ font-family:var(--mono); color:var(--blue); font-weight:700; font-size:13px; margin-right:9px; }
+.content p{ margin:12px 0; font-size:15px; }
+.content ul{ margin:12px 0; padding-left:22px; }
+.content li{ margin:6px 0; font-size:15px; }
+.content strong{ color:var(--ink); font-weight:700; }
+.content em{ color:var(--blue-dk); font-style:normal; font-weight:600; }
+.formula{
+  font-family:var(--mono); font-size:14px; line-height:1.7; color:var(--navy);
+  background:var(--blue-soft); border:1px solid var(--blue-line); border-left:4px solid var(--blue);
+  border-radius:10px; padding:12px 14px; margin:16px 0; overflow-x:auto;
+}
+.formula .fk{ color:var(--blue-dk); font-weight:700; }
+.evidence{
+  border:1px solid var(--rule); border-left:4px solid var(--blue);
+  background:var(--card-2); border-radius:10px; padding:13px 15px; margin:18px 0;
+}
+.evidence .etag{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:#fff; background:var(--blue); display:inline-block; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
+.evidence p{ margin:6px 0 0; font-size:14.5px; }
+.evidence .grade{ font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:9px; padding-top:8px; border-top:1px solid var(--rule); }
+.keybox{ background:var(--green-soft); border:1px solid var(--green-line); border-radius:10px; padding:13px 15px; margin:18px 0; }
+.keybox .kt{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--green); display:block; margin-bottom:5px; }
+
+.cta{ display:block; width:100%; text-align:center; border:none; border-radius:13px; cursor:pointer;
+  font-family:var(--sans); font-weight:700; font-size:15.5px; letter-spacing:0; padding:15px; }
+.cta.primary{ background:var(--navy); color:#fff; box-shadow:0 4px 14px rgba(23,58,104,.26); }
+.cta.primary:active{ background:var(--ink); }
+.cta.teal{ background:var(--blue); color:#fff; box-shadow:0 4px 14px rgba(27,99,196,.22); }
+.cta.teal:active{ background:#144A93; }
+.cta.ghost{ background:var(--paper); color:var(--ink); border:1.5px solid var(--rule-2); box-shadow:none; }
+.cta[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+.cta-wrap{ margin:28px 0 4px; }
+.readnote{ font-family:var(--sans); font-size:12.5px; color:var(--ink-2); text-align:center; margin:9px 0 0; }
+
+/* ── Quiz view ─────────────────────────────────────────────────── */
+.qmeta{ font-family:var(--mono); font-size:11.5px; letter-spacing:.03em; color:var(--ink-2); margin:2px 0 18px; }
+.q{ background:var(--card); border:1px solid transparent; border-radius:16px; padding:16px 17px; margin:0 0 14px; }
+.q .qnum{ font-family:var(--mono); font-size:11px; color:var(--blue); font-weight:700; letter-spacing:.05em; }
+.q .qtext{ font-family:var(--sans); font-weight:600; font-size:15.5px; line-height:1.42; margin:6px 0 12px; color:var(--ink); }
+.opt{ display:block; width:100%; text-align:left; font-family:var(--sans); font-size:14.5px; line-height:1.4;
+  background:var(--paper); border:1.5px solid var(--rule); border-radius:11px; padding:12px 14px; margin:8px 0; cursor:pointer; color:var(--ink); transition:border-color .12s, background .12s; }
+.opt:hover{ border-color:var(--rule-2); }
+.opt .ol{ font-family:var(--mono); font-weight:700; color:var(--blue); margin-right:9px; }
+.opt.sel{ border-color:var(--blue); background:var(--blue-soft); }
+.opt.correct{ border-color:var(--green); background:var(--green-soft); }
+.opt.wrong{ border-color:var(--red); background:var(--red-soft); }
+.opt.correct .ol{ color:var(--green); }
+.opt.wrong .ol{ color:var(--red); }
+.expl{ font-family:var(--sans); font-size:13.5px; line-height:1.5; color:var(--ink-2); margin:11px 2px 0; padding-left:12px; border-left:2px solid var(--rule-2); }
+.expl b{ color:var(--ink); }
+.locked-opts .opt{ cursor:default; }
+
+.result{ border-radius:16px; padding:20px; margin:4px 0 18px; text-align:center; font-family:var(--sans); }
+.result.pass{ background:var(--green-soft); border:1.5px solid var(--green-line); }
+.result.fail{ background:var(--red-soft); border:1.5px solid var(--red-line); }
+.result .big{ font-size:32px; font-weight:800; letter-spacing:-.02em; }
+.result.pass .big{ color:var(--green); }
+.result.fail .big{ color:var(--red); }
+.result .rmsg{ font-size:14px; color:var(--ink-2); margin-top:4px; }
+
+/* ── Name capture ──────────────────────────────────────────────── */
+.namebox{ background:var(--card); border:1px solid transparent; border-radius:16px; padding:16px 17px; margin:0 0 20px; }
+.namebox label{ font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:block; margin-bottom:8px; }
+.namebox input{ width:100%; font-family:var(--sans); font-size:16px; padding:12px 13px; border:1.5px solid var(--rule-2); border-radius:11px; background:var(--paper); color:var(--ink); }
+.namebox input:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }
+
+/* ── Certificate ───────────────────────────────────────────────── */
+.cert{
+  background:#fff; border:1px solid var(--rule); border-radius:14px;
+  padding:34px 30px; margin:6px 0 18px; text-align:center; position:relative; overflow:hidden;
+  box-shadow:0 10px 34px rgba(23,58,104,.10);
+}
+.cert::before{ content:""; position:absolute; inset:10px; border:2px solid var(--blue); border-radius:8px; pointer-events:none; opacity:.35; }
+.cert::after{ content:""; position:absolute; inset:15px; border:1px solid var(--navy); border-radius:6px; pointer-events:none; opacity:.22; }
+.cert .c-brand{ font-family:var(--sans); font-weight:800; letter-spacing:.14em; font-size:12px; text-transform:uppercase; color:var(--navy); }
+.cert .c-brand b{ color:var(--blue); }
+.cert .c-kicker{ font-family:var(--sans); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-2); font-weight:700; margin:20px 0 6px; }
+.cert .c-course{ font-family:var(--sans); font-size:22px; font-weight:800; letter-spacing:-.01em; color:var(--ink); line-height:1.2; margin:0 auto; max-width:440px; }
+.cert .c-of{ font-family:var(--sans); font-size:12.5px; color:var(--ink-2); margin:22px 0 6px; }
+.cert .c-name{ font-family:var(--sans); font-size:30px; font-weight:800; letter-spacing:-.01em; color:var(--navy); border-bottom:2px solid var(--blue); display:inline-block; padding:0 26px 6px; margin:0 0 4px; }
+.cert .c-body{ font-family:var(--sans); font-size:13.5px; color:var(--ink-2); max-width:440px; margin:16px auto 22px; line-height:1.55; }
+.cert .c-wave{ height:24px; margin:6px auto 20px; opacity:.85; }
+.cert .c-wave svg{ height:24px; width:220px; }
+.cert .c-meta{ display:flex; justify-content:space-around; gap:14px; margin-top:14px; flex-wrap:wrap; }
+.cert .c-cell{ text-align:center; }
+.cert .c-cell .cl{ font-family:var(--sans); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--lock); font-weight:700; }
+.cert .c-cell .cv{ font-family:var(--mono); font-size:13px; color:var(--ink); font-weight:600; border-top:1px solid var(--rule); padding-top:5px; margin-top:5px; min-width:120px; }
+
+footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0; text-align:center; }
+.reset{ background:none; border:none; font-family:var(--mono); font-size:11px; color:var(--lock); cursor:pointer; text-decoration:underline; }
+
+.hidden{ display:none !important; }
+
+@media (max-width:480px){
+  body{ font-size:15.5px; }
+  h1.course{ font-size:23px; }
+  .cert{ padding:26px 18px; }
+  .cert .c-name{ font-size:25px; padding:0 14px 6px; }
+  .cert .c-course{ font-size:19px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .wave path.anim{ animation:none; stroke-dashoffset:0; }
+  .progbar > i{ transition:none; }
+}
+
+@media print{
+  body{ background:#fff; }
+  header.mon, main > *:not(#view-cert), .back, .cta-wrap, footer.adm, .print-hide{ display:none !important; }
+  #view-cert{ display:block !important; }
+  main{ padding:0; }
+  .wrap{ max-width:none; padding:0; }
+  .cert{ box-shadow:none; border:none; margin:0; }
+  @page{ size:landscape; margin:14mm; }
+}
+</style>
+</head>
+<body>
+
+<header class="mon">
+  <div class="mon-inner">
+    <a class="backlink print-hide" href="index.html">&#x2190; Field Guide</a>
+    <div class="brandrow">
+      <div class="brand">AMR Kansas City &middot; Clinical Education <b>&#x25c6;</b></div>
+      <div class="status-chip" id="statusChip">SESSION &middot; READY</div>
+    </div>
+    <h1 class="course">Neonatal Resuscitation</h1>
+    <p class="course-sub">Delivery-Room Resuscitation &amp; Stabilization for Critical Care Transport</p>
+  </div>
+  <div class="wave-strip">
+    <svg class="wave" id="waveSvg" viewBox="0 0 1200 64" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trace anim" id="wavePath" d=""></path>
+    </svg>
+  </div>
+  <div class="ticker">
+    <div class="tk"><span class="lab">Modules</span><span class="val" id="tkMods">0 / 8</span></div>
+    <div class="tk"><span class="lab">Progress</span><span class="val grn" id="tkPct">0%</span></div>
+    <div class="tk"><span class="lab">Final Exam</span><span class="val red" id="tkFinal">Locked</span></div>
+  </div>
+  <div class="progbar"><i id="progFill"></i></div>
+</header>
+
+<div class="storagewarn hidden print-hide" id="storageWarn">Your device isn't saving progress (private browsing or storage is full) — quiz results and your certificate may not persist after you close this page.</div>
+
+<main>
+  <div class="wrap">
+
+    <!-- ===== HOME ===== -->
+    <section id="view-home">
+      <div class="namebox print-hide">
+        <label for="nameInput">Learner name (appears on your certificate)</label>
+        <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
+      </div>
+      <p class="eyebrow">Course Modules &middot; Sequential</p>
+      <ul class="modlist" id="modList"></ul>
+      <div id="finalSlot"></div>
+      <footer class="adm">
+        <button class="reset" id="resetBtn">Reset my progress</button>
+      </footer>
+    </section>
+
+    <!-- ===== READER ===== -->
+    <section id="view-reader" class="hidden">
+      <button class="back" id="readerBack">&#x2039; All modules</button>
+      <div class="rd-num" id="rdNum"></div>
+      <h2 class="rd-title" id="rdTitle"></h2>
+      <div class="rd-obj" id="rdObj"></div>
+      <div class="content" id="rdContent"></div>
+      <div class="cta-wrap">
+        <button class="cta primary" id="toQuizBtn">Start the quiz &#x203a;</button>
+        <p class="readnote" id="readNote"></p>
+      </div>
+    </section>
+
+    <!-- ===== QUIZ ===== -->
+    <section id="view-quiz" class="hidden">
+      <button class="back" id="quizBack">&#x2039; Back to module</button>
+      <div class="rd-num" id="qzNum"></div>
+      <h2 class="rd-title" id="qzTitle"></h2>
+      <div class="qmeta" id="qzMeta"></div>
+      <div id="resultSlot"></div>
+      <div id="quizForm"></div>
+      <div class="cta-wrap" id="quizActions"></div>
+    </section>
+
+    <!-- ===== CERTIFICATE ===== -->
+    <section id="view-cert" class="hidden">
+      <button class="back print-hide" id="certBack">&#x2039; All modules</button>
+      <div class="cert" id="certCard"></div>
+      <div class="cta-wrap print-hide">
+        <button class="cta teal" id="printBtn">Print / save certificate</button>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+"use strict";
+/* ============================================================================
+   DATA — content model
+   ==========================================================================*/
+var PASS_MODULE = 80;   // %
+var PASS_FINAL  = 85;   // %
+
+var MODULES = [
+  {
+    id: 1,
+    available: true,
+    title: "Transition & the Golden Minute",
+    desc: "How the newborn switches from placental to lung breathing, the three-question rapid assessment, the initial steps, and why the first 60 seconds decide the outcome.",
+    objective: "Explain the fetal-to-neonatal transition, perform the initial rapid assessment and initial steps, recognize why heart rate is the master vital sign, and understand the Golden Minute — establishing effective ventilation within the first 60 seconds.",
+    content: [
+      { h:"1", t:"What you are actually resuscitating", html:
+        "<p>Start with the reassuring math. The large majority of newborns need nothing but warmth, drying, and a moment to find their own rhythm — about <strong>85% breathe and cry on their own</strong>. Roughly <strong>10% need some help</strong> (usually stimulation and a little support), and only about <strong>1% require extensive resuscitation</strong>. Your job is to be ready for that 1% every single time, because you cannot predict which delivery it will be.</p>"+
+        "<p>And here is the single most important idea in the entire course, the one every later module orbits: the compromised newborn almost never has a primary heart problem. The newborn heart is young and strong — it fails <em>secondarily</em>, because the lungs are still full of fluid and not being ventilated, so the heart is starved of oxygen. Fix the lungs and the heart recovers. That reframes everything: neonatal resuscitation is, overwhelmingly, a <strong>ventilation problem</strong>, not a cardiac one. The adult mindset — compressions and epinephrine first — is exactly backward here.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> In the newborn, the airway and lungs are the whole game. When a newborn is in trouble, the answer is almost always to open and ventilate the lungs — not to reach first for compressions or drugs.</div>"
+      },
+      { h:"2", t:"The fetal-to-neonatal transition", html:
+        "<p>In the womb the lungs do no breathing — they are fluid-filled and the placenta handles all gas exchange. Because the fetal lungs are useless for oxygen, the circulation is deliberately built to <em>bypass</em> them: high pulmonary vascular resistance pushes blood away from the lungs, through two shunts — the <strong>foramen ovale</strong> (right atrium to left atrium) and the <strong>ductus arteriosus</strong> (pulmonary artery to aorta).</p>"+
+        "<p>At birth, that whole arrangement must reverse within minutes. Three linked events drive it:</p>"+
+        "<ul>"+
+        "<li><strong>The first breaths clear lung fluid</strong> and inflate the alveoli, establishing a functional residual capacity — air that stays behind after each breath to keep the lungs open.</li>"+
+        "<li><strong>Oxygen and lung expansion drop the pulmonary vascular resistance</strong>, so blood rushes into the newly opened lungs for gas exchange.</li>"+
+        "<li><strong>The shunts close.</strong> Rising oxygen and falling pulmonary pressures functionally close the ductus arteriosus and the foramen ovale, separating the circulation into the adult pattern.</li>"+
+        "</ul>"+
+        "<p>Notice that the trigger for the entire cascade is <em>air moving into the lungs</em>. That is why ventilation is the master key: it is not just treating hypoxia, it is switching on the transition itself.</p>"
+      },
+      { h:"3", t:"Why a newborn fails: apnea", html:
+        "<p>When a newborn is stressed by hypoxia, the breathing response follows a predictable and clinically crucial pattern. First comes a period of rapid breathing, then <strong>primary apnea</strong> — breathing stops, but the infant will still resume breathing in response to stimulation. If hypoxia continues, the infant gasps, then enters <strong>secondary apnea</strong> — and here stimulation no longer works; only assisted ventilation will restart breathing.</p>"+
+        "<p>The problem at the bedside is that <em>primary and secondary apnea look identical</em> — an apneic newborn either way. You cannot know how long the infant has been down or which stage they are in. This produces the single most important safety rule of the initial assessment:</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Treat any apneic or gasping newborn as if it is in secondary apnea. Give a brief trial of stimulation, but do not linger — if there is no prompt response, move to positive-pressure ventilation. Gasping is not breathing; it is a sign the infant needs PPV now.</div>"
+      },
+      { h:"4", t:"The three questions", html:
+        "<p>Every resuscitation begins with a rapid, almost instantaneous assessment framed as three yes/no questions asked the moment the baby is born:</p>"+
+        "<div class='formula'>1. <span class='fk'>Term</span> gestation?<br>2. Good <span class='fk'>tone</span>?<br>3. <span class='fk'>Breathing</span> or crying?</div>"+
+        "<p>If the answer to all three is <strong>yes</strong>, this is a vigorous newborn who needs no intervention: they can stay skin-to-skin with the mother while you provide routine care — ongoing warmth, drying, and observation. Delayed cord clamping (Module 3) fits here.</p>"+
+        "<p>If the answer to <strong>any</strong> of the three is no — preterm, floppy, or not breathing — the infant goes to the radiant warmer for the initial steps. Those three questions, answered in the first few seconds, are the fork in the road that sends a baby either to the mother's chest or to the resuscitation table.</p>"
+      },
+      { h:"5", t:"The initial steps — the first ~30 seconds", html:
+        "<p>For the newborn who needs help, the initial steps are a rapid, near-simultaneous bundle delivered at the radiant warmer, classically remembered as <strong>warm, dry, stimulate, position</strong>:</p>"+
+        "<ul>"+
+        "<li><strong>Warm</strong> — under a preheated radiant warmer; thermal control is not optional (Module 7 shows how much it matters).</li>"+
+        "<li><strong>Dry</strong> and remove the wet linens — wet skin loses heat fast, and drying is itself a stimulus.</li>"+
+        "<li><strong>Stimulate</strong> — rub the back or trunk, or flick the soles of the feet. Brief and purposeful; this is your test for primary apnea.</li>"+
+        "<li><strong>Position the airway</strong> — the head in a neutral 'sniffing' position, neither flexed nor hyperextended, to open the airway.</li>"+
+        "</ul>"+
+        "<p>Suctioning is <em>not</em> routine. Clear the mouth and nose (mouth before nose) only if there are obvious secretions <em>and</em> the airway appears obstructed, because aggressive pharyngeal suctioning can trigger a vagal bradycardia and apnea — doing harm in the name of tidiness.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — don't over-suction</span>"+
+        "<p>Routine suctioning of the vigorous newborn provides no benefit and can cause reflex bradycardia and mucosal injury. Guidelines reserve suctioning for infants with a clinically obstructed airway or those who require PPV and are not ventilating well. Less is more.</p>"+
+        "<div class='grade'>Quality: moderate (consensus guideline supported by physiologic and observational data).</div></div>"
+      },
+      { h:"6", t:"Heart rate: the master vital sign", html:
+        "<p>Once the initial steps are done — about 30 seconds in — you evaluate two things: <strong>respirations</strong> and, above all, <strong>heart rate</strong>. In neonatal resuscitation the heart rate is the single most important indicator of the newborn's status and of whether your interventions are working. Everything you do is judged by what it does to the heart rate.</p>"+
+        "<p>Assess it by auscultating the precordium with a stethoscope, or better in a resuscitation by applying <strong>ECG leads</strong>, which give a fast, reliable, continuous rate when pulse oximetry may lag or fail in a poorly perfused newborn. A common quick method is to listen for 6 seconds and multiply by 10. The two thresholds that drive the whole algorithm are simple:</p>"+
+        "<div class='formula'>HR &lt; <span class='fk'>100</span> bpm &rarr; the trigger for assisted ventilation (PPV)<br>HR &lt; <span class='fk'>60</span> bpm &rarr; the trigger for chest compressions (after effective PPV)</div>"+
+        "<p>Commit those two numbers to memory now; Modules 2 and 4 are built entirely around them.</p>"
+      },
+      { h:"7", t:"The Golden Minute", html:
+        "<p>The initial steps, the evaluation, and — if needed — the <em>start</em> of ventilation are all meant to happen within the first <strong>60 seconds</strong> of life. This is the <strong>Golden Minute</strong>, and it exists because of everything in section 1: the compromised newborn is oxygen-starved from unventilated lungs, and the fastest route to recovery is to get air moving before hypoxic injury deepens.</p>"+
+        "<p>Concretely: if, at the end of the initial steps, the infant is <strong>apneic or gasping, or the heart rate is below 100</strong>, you should be <em>beginning positive-pressure ventilation</em> by the end of that first minute. The Golden Minute is not a stopwatch you obsess over — it is a discipline that keeps you from getting stuck drying and stimulating a baby who actually needs the one intervention that will save them: ventilation.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Within the first 60 seconds: complete the initial steps, evaluate breathing and heart rate, and if the baby is apneic/gasping or the HR is under 100, start PPV. Do not let stimulation become a substitute for ventilation.</div>"
+      },
+      { h:"8", t:"The NRP algorithm at a glance", html:
+        "<p>Every module in this course is one branch of a single decision tree. Hold the whole shape in your head now, and the details will hang on it:</p>"+
+        "<ul>"+
+        "<li><strong>Birth</strong> &rarr; the three questions. Vigorous &rarr; stay with mother.</li>"+
+        "<li><strong>Needs help</strong> &rarr; initial steps (warm, dry, stimulate, position) &middot; ~30 sec.</li>"+
+        "<li><strong>Apnea/gasping or HR &lt; 100</strong> &rarr; <strong>PPV</strong> — the cornerstone (Module 2), with oxygen titrated to SpO₂ targets (Module 3).</li>"+
+        "<li><strong>HR &lt; 60 despite effective PPV</strong> &rarr; add <strong>chest compressions</strong>, 3:1 with ventilation (Module 4), and secure an advanced airway.</li>"+
+        "<li><strong>HR &lt; 60 despite compressions + ventilation</strong> &rarr; <strong>epinephrine</strong> and consider volume (Module 5).</li>"+
+        "</ul>"+
+        "<p>Read the tree from the top down and notice the priority order it encodes: ventilation before compressions, compressions before drugs. It is the mirror image of adult ACLS, and for a physiologic reason — the newborn's problem starts in the lungs. Keep this frame as you move into Module 2, where you learn to deliver the one intervention the whole algorithm is built to reach quickly.</p>"
+      }
+    ],
+    quiz: [
+      { q:"Approximately what percentage of newborns require extensive resuscitation at birth?",
+        opts:["About 1%","About 10%","About 25%","About 50%"], ans:0,
+        expl:"Roughly 85% of newborns transition on their own, about 10% need some assistance (often just stimulation/support), and only about 1% require extensive resuscitation. You must be prepared for that 1% at every delivery." },
+      { q:"In the newborn, cardiac compromise (bradycardia/arrest) is most often caused by:",
+        opts:["A primary cardiac arrhythmia","Hypoxia from unventilated, fluid-filled lungs","Hypovolemia","Congenital heart disease"], ans:1,
+        expl:"The newborn heart usually fails secondarily to hypoxia because the lungs are still fluid-filled and not being ventilated. This is why ventilation — not compressions or drugs — is the priority intervention." },
+      { q:"What is the trigger for the fetal-to-neonatal circulatory transition?",
+        opts:["Clamping the umbilical cord","Air entering and expanding the lungs","The first heartbeat","Administration of oxygen"], ans:1,
+        expl:"Air entering the lungs establishes functional residual capacity and drops pulmonary vascular resistance, which increases pulmonary blood flow and closes the fetal shunts. Ventilation drives the entire transition." },
+      { q:"An apneic newborn does not respond to brief stimulation. This should be treated as:",
+        opts:["Primary apnea — continue stimulating","Secondary apnea — begin positive-pressure ventilation","Normal periodic breathing","A reason to start chest compressions immediately"], ans:1,
+        expl:"Primary and secondary apnea look identical, so any apneic or gasping newborn that doesn't respond promptly to stimulation is treated as secondary apnea and needs PPV. Gasping is not effective breathing." },
+      { q:"The three initial rapid-assessment questions at birth are term gestation, good tone, and:",
+        opts:["Pink color?","Breathing or crying?","Heart rate over 100?","Cord pulsating?"], ans:1,
+        expl:"The three questions are: term gestation? good tone? breathing or crying? If all are 'yes,' the newborn is vigorous and can stay with the mother; if any is 'no,' the infant goes to the warmer for the initial steps." },
+      { q:"Which is TRUE about suctioning during the initial steps?",
+        opts:["Every newborn should be deeply suctioned","Suction only for an obstructed airway or ineffective ventilation, because aggressive suctioning can cause bradycardia","Suction the nose before the mouth","Suctioning is required before drying"], ans:1,
+        expl:"Routine suctioning is not recommended; aggressive pharyngeal suctioning can trigger vagal bradycardia and apnea. Clear the mouth then nose only if secretions are obstructing the airway or PPV is ineffective." },
+      { q:"The single most important indicator of a newborn's status and of the effectiveness of resuscitation is:",
+        opts:["Color","Heart rate","Muscle tone","Capillary refill"], ans:1,
+        expl:"Heart rate is the master vital sign in neonatal resuscitation — every intervention is judged by its effect on the heart rate. ECG leads give the fastest, most reliable continuous rate in a compromised newborn." },
+      { q:"A newborn has completed the initial steps and has a heart rate of 80 bpm. The indicated next step is:",
+        opts:["Begin chest compressions","Begin positive-pressure ventilation","Give epinephrine","Continue drying and stimulating only"], ans:1,
+        expl:"A heart rate below 100 (or apnea/gasping) after the initial steps is the trigger for PPV. Compressions are reserved for HR below 60 despite effective ventilation; drying/stimulation alone is not enough here." },
+      { q:"The 'Golden Minute' refers to:",
+        opts:["The time allowed to clamp the cord","Establishing effective ventilation within the first 60 seconds when indicated","The window to give epinephrine","The time to achieve a normal SpO₂"], ans:1,
+        expl:"The Golden Minute is the goal of completing the initial steps, evaluating, and — when indicated — beginning PPV within the first 60 seconds of life, because prompt ventilation is what reverses the newborn's hypoxic decline." },
+      { q:"Compared with adult cardiac arrest management, the neonatal resuscitation sequence prioritizes:",
+        opts:["Chest compressions and epinephrine first","Ventilation first, then compressions, then drugs","Defibrillation as the first step","Immediate volume resuscitation"], ans:1,
+        expl:"Because the newborn's problem originates in the lungs, the sequence is ventilation → compressions → drugs — the reverse emphasis of adult ACLS. Effective ventilation resolves the great majority of neonatal compromise." }
+    ]
+  },
+
+  {
+    id: 2,
+    available: true,
+    title: "Ventilation — the Cornerstone",
+    desc: "Positive-pressure ventilation: when to start, the correct rate and pressure, judging effectiveness by heart rate, and the MR SOPA corrective sequence when the chest won't move.",
+    objective: "Recognize the indications for PPV, deliver it at the correct rate and pressure, use heart rate as the primary measure of effectiveness, perform the MR SOPA corrective steps, and distinguish the infant who needs PPV from the one who needs CPAP.",
+    content: [
+      { h:"1", t:"Why ventilation is the whole ballgame", html:
+        "<p>If you remember one sentence from this academy, make it this: <strong>ventilation of the lungs is the single most important and most effective step in neonatal resuscitation.</strong> Module 1 explained why — the newborn in trouble is hypoxic from fluid-filled, unventilated lungs, and the heart is failing secondarily. Moving air into those lungs reverses the hypoxia, drops the pulmonary vascular resistance, and the heart rate climbs on its own.</p>"+
+        "<p>This is why the great majority of newborns who need help need <em>only</em> effective PPV — no compressions, no drugs. It is also why, whenever a resuscitation is going badly, the first question is never 'what drug is missing?' but <strong>'is the ventilation actually working?'</strong> Get the ventilation right and most problems dissolve; get it wrong and nothing downstream will save the baby.</p>"
+      },
+      { h:"2", t:"When to start PPV", html:
+        "<p>The indications for positive-pressure ventilation, after the initial steps, are precise and few:</p>"+
+        "<ul>"+
+        "<li><strong>Apnea or gasping</strong>, or</li>"+
+        "<li><strong>Heart rate below 100 bpm</strong>,</li>"+
+        "</ul>"+
+        "<p>despite a brief trial of warming, drying, stimulation, and airway positioning. Either finding alone is enough. Note the heart-rate threshold: a newborn who is breathing but has a heart rate of 90 still needs PPV, because the low rate signals that ventilation is inadequate. Do not wait for the infant to look worse.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Apnea, gasping, or HR &lt; 100 after the initial steps = begin PPV. This is the intervention the Golden Minute is racing toward, and hesitating over it is the most common and most costly error in neonatal resuscitation.</div>"
+      },
+      { h:"3", t:"How to deliver PPV — rate and pressure", html:
+        "<p>Two numbers define good PPV, both easy to remember and easy to get wrong under stress.</p>"+
+        "<p><strong>Rate: 40–60 breaths per minute.</strong> A useful cadence is to say aloud, 'breathe, two, three, breathe, two, three,' squeezing on 'breathe.' Too slow underventilates; too fast doesn't allow exhalation and causes gas trapping.</p>"+
+        "<div class='formula'>PPV rate <span class='fk'>40–60</span>/min &middot; initial PIP ~<span class='fk'>20–25</span> cmH₂O (term) &middot; PEEP ~<span class='fk'>5</span> cmH₂O</div>"+
+        "<p><strong>Pressure: enough to move the chest, and no more.</strong> An initial inflating pressure around 20–25 cmH₂O is typical for a term infant, but the real gauge is the response, not the manometer. The first breaths of life may need a slightly higher opening pressure to overcome the fluid-filled lung, but escalating pressure blindly can injure a preterm lung. A small amount of positive end-expiratory pressure (~5 cmH₂O) helps keep the alveoli open between breaths.</p>"
+      },
+      { h:"4", t:"The one sign that matters: a rising heart rate", html:
+        "<p>How do you know the ventilation is working? The answer is not the manometer, the chest rise, or the color — it is the <strong>heart rate</strong>. A rising heart rate is the primary indicator of effective positive-pressure ventilation. Everything else is secondary confirmation.</p>"+
+        "<p>So the rhythm of PPV is: ventilate, and after about <strong>15 seconds</strong> reassess the heart rate. If it is rising, the ventilation is effective — continue, and let the recovery unfold. If it is <em>not</em> rising, the ventilation is not effective, and you must fix it before doing anything else. Chest movement is your secondary check: if the chest is not rising with your breaths, air is not reaching the lungs, and that is the problem to solve — not a reason to jump to compressions.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The heart rate is the report card for ventilation. HR rising = it's working, keep going. HR not rising = the ventilation is failing; go to the corrective steps before you escalate.</div>"
+      },
+      { h:"5", t:"MR SOPA — the corrective steps", html:
+        "<p>When PPV is not producing a rising heart rate or visible chest movement, you do not push harder blindly and you do not skip ahead — you work a fixed troubleshooting sequence known by the mnemonic <strong>MR SOPA</strong>. It is ordered from the most common, least invasive fixes to the most definitive:</p>"+
+        "<ul>"+
+        "<li><strong>M — Mask</strong> adjust. Reseat the mask for a better seal (the number-one cause of ineffective PPV).</li>"+
+        "<li><strong>R — Reposition</strong> the head to the neutral sniffing position. <em>(Reassess after M and R.)</em></li>"+
+        "<li><strong>S — Suction</strong> the mouth and nose.</li>"+
+        "<li><strong>O — Open</strong> the mouth slightly. <em>(Reassess after S and O.)</em></li>"+
+        "<li><strong>P — Pressure</strong> increase, in steps, watching for chest rise.</li>"+
+        "<li><strong>A — Airway</strong> alternative: place an advanced airway (endotracheal tube or laryngeal mask).</li>"+
+        "</ul>"+
+        "<p>The sequence has natural reassessment pauses built in — after MR and after SO — so you confirm whether each fix worked before moving on. The overwhelming majority of ineffective ventilation is fixed in the first two letters: a better mask seal and a repositioned head.</p>"
+      },
+      { h:"6", t:"The devices — bag choices and the T-piece", html:
+        "<p>You will ventilate with one of three devices, and their differences matter under pressure:</p>"+
+        "<ul>"+
+        "<li><strong>Self-inflating bag</strong> — refills on its own without a gas source, so it is reliable and simple. But it cannot deliver free-flow oxygen or CPAP, does not provide PEEP without an add-on valve, and its pop-off valve limits peak pressure. Delivers a variable, operator-dependent breath.</li>"+
+        "<li><strong>Flow-inflating (anesthesia) bag</strong> — requires a compressed gas source and a good mask seal to stay inflated. It gives the operator a tactile 'feel' of lung compliance and can deliver PEEP and free-flow oxygen, but it takes skill.</li>"+
+        "<li><strong>T-piece resuscitator</strong> — you dial in a set peak inspiratory pressure and PEEP, and it delivers them consistently breath after breath by occluding a cap with your finger. Its consistency and reliable PEEP have made it the preferred device in many delivery rooms, especially for preterm infants.</li>"+
+        "</ul>"+
+        "<p>Whatever the device, the principles from sections 3–5 are identical: correct rate, pressure enough to move the chest, and the heart rate as your judge.</p>"
+      },
+      { h:"7", t:"CPAP: the breathing but laboring newborn", html:
+        "<p>Not every struggling newborn is apneic. Consider the infant who <em>is</em> breathing on their own and has a heart rate above 100, but is working hard — grunting, retracting, tachypneic, with a low SpO₂. This baby does not need you to breathe <em>for</em> them; they need help keeping their alveoli open. That is the role of <strong>CPAP</strong> — continuous positive airway pressure, typically around 5 cmH₂O.</p>"+
+        "<p>The distinction is clean and important: <em>apneic or HR &lt; 100 &rarr; PPV; spontaneously breathing with labored effort and HR &gt; 100 &rarr; consider CPAP.</em> CPAP is especially valuable in the <strong>preterm</strong> infant, where it can support the surfactant-deficient lung and often avoid intubation altogether.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — CPAP over routine intubation in preterm</span>"+
+        "<p>In preterm infants, starting with CPAP rather than routine intubation and mechanical ventilation reduces the need for intubation and surfactant and does not increase harm; large trials (e.g., COIN, SUPPORT) support a CPAP-first strategy for the spontaneously breathing preterm newborn. Gentle, non-invasive support protects the fragile preterm lung.</p>"+
+        "<div class='grade'>Quality: high (multiple randomized controlled trials).</div></div>"
+      },
+      { h:"8", t:"Gastric distension and the ventilation anchor", html:
+        "<p>One practical complication of prolonged mask PPV: air inevitably tracks into the stomach, and a distended stomach pushes up on the diaphragm and works against the very ventilation you are trying to deliver. For any PPV that continues beyond a few minutes, place an <strong>orogastric tube</strong> and leave it vented to decompress the stomach.</p>"+
+        "<p>Step back and hold the shape of this module, because it is the heart of neonatal resuscitation:</p>"+
+        "<ul>"+
+        "<li>Start PPV for apnea, gasping, or HR &lt; 100.</li>"+
+        "<li>Deliver it at 40–60/min with just enough pressure to move the chest.</li>"+
+        "<li>Judge it by the <strong>heart rate</strong>, reassessing at 15 seconds.</li>"+
+        "<li>If it isn't working, run <strong>MR SOPA</strong> — usually the mask seal or head position.</li>"+
+        "<li>Use CPAP for the laboring but breathing infant, not PPV.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Effective ventilation fixes almost everything in the newborn. Before you ever consider compressions or drugs, prove — with a rising heart rate — that air is truly reaching the lungs.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The single most important and effective step in neonatal resuscitation is:",
+        opts:["Chest compressions","Effective ventilation of the lungs","Epinephrine administration","Volume expansion"], ans:1,
+        expl:"Effective ventilation reverses the hypoxia driving neonatal compromise, drops pulmonary vascular resistance, and lets the heart rate recover on its own. Most newborns needing help need only effective PPV." },
+      { q:"Positive-pressure ventilation is indicated when, after the initial steps, the newborn is apneic/gasping OR has a heart rate below:",
+        opts:["60 bpm","80 bpm","100 bpm","120 bpm"], ans:2,
+        expl:"A heart rate under 100 (or apnea/gasping) after the initial steps is the trigger for PPV — even if the infant is making some respiratory effort, because the low rate signals inadequate ventilation." },
+      { q:"The correct rate for neonatal positive-pressure ventilation is:",
+        opts:["20–30 breaths/min","40–60 breaths/min","80–100 breaths/min","100–120 breaths/min"], ans:1,
+        expl:"PPV is delivered at 40–60 breaths per minute. A helpful cadence is 'breathe, two, three,' squeezing on 'breathe.' Too fast prevents exhalation and causes gas trapping." },
+      { q:"The primary indicator that positive-pressure ventilation is effective is:",
+        opts:["Improving color","A rising heart rate","A rising SpO₂","Return of muscle tone"], ans:1,
+        expl:"A rising heart rate is the primary indicator of effective PPV; chest movement is the secondary check. Reassess the heart rate after about 15 seconds of ventilation." },
+      { q:"PPV is not producing chest movement or a rising heart rate. The FIRST corrective actions in MR SOPA are:",
+        opts:["Increase pressure and place an ETT","Adjust the Mask seal and Reposition the head","Suction and open the mouth","Give epinephrine"], ans:1,
+        expl:"MR SOPA begins with M (mask readjust) and R (reposition head) — the most common and least invasive fixes — followed by a reassessment. A poor mask seal is the number-one cause of ineffective PPV." },
+      { q:"In the MR SOPA sequence, what does the 'A' stand for?",
+        opts:["Assess again","Administer oxygen","Airway alternative (endotracheal tube or laryngeal mask)","Auscultate"], ans:2,
+        expl:"'A' is airway alternative — placing an advanced airway (ETT or LMA) — the final and most definitive corrective step when mask, position, suction, open-mouth, and pressure have failed." },
+      { q:"Which device delivers a set inspiratory pressure and consistent PEEP breath-to-breath and is preferred in many delivery rooms?",
+        opts:["Self-inflating bag","T-piece resuscitator","Simple face mask","Nasal cannula"], ans:1,
+        expl:"The T-piece resuscitator delivers dialed-in PIP and PEEP consistently, which is why it is favored, especially for preterm infants. A self-inflating bag can't reliably provide PEEP or free-flow oxygen." },
+      { q:"A preterm infant is breathing spontaneously with a heart rate of 140 but is grunting and retracting with low saturations. The best initial support is:",
+        opts:["Positive-pressure ventilation","CPAP","Chest compressions","Immediate intubation and surfactant"], ans:1,
+        expl:"A spontaneously breathing infant with HR > 100 who is laboring needs help keeping alveoli open — CPAP (~5 cmH₂O) — not PPV. A CPAP-first strategy reduces intubation in preterm infants." },
+      { q:"During prolonged mask PPV, gastric distension should be managed by:",
+        opts:["Stopping ventilation","Placing a vented orogastric tube","Increasing the ventilation rate","Applying abdominal pressure"], ans:1,
+        expl:"Air tracks into the stomach during prolonged mask PPV; a distended stomach splints the diaphragm and impairs ventilation. Place a vented orogastric tube to decompress it." },
+      { q:"When neonatal resuscitation is going poorly, the first thing to verify is:",
+        opts:["Whether epinephrine has been given","Whether the ventilation is actually effective","Whether the umbilical line is placed","Whether the infant is warm enough"], ans:1,
+        expl:"Because ventilation is the cornerstone, the first question in any faltering resuscitation is whether air is truly reaching the lungs (a rising heart rate) — most failures trace to ineffective ventilation, not missing drugs." }
+    ]
+  },
+
+  {
+    id: 3,
+    available: true,
+    title: "Oxygen, SpO₂ Targets & Cord Management",
+    desc: "Oxygen as a titrated drug: the correct starting FiO₂, the minute-by-minute preductal SpO₂ targets, why the probe goes on the right hand, and delayed cord clamping.",
+    objective: "Choose the correct starting FiO₂, titrate oxygen to the minute-specific preductal SpO₂ targets, place and interpret a preductal pulse oximeter, and apply delayed cord clamping appropriately.",
+    content: [
+      { h:"1", t:"Oxygen is a drug — with a therapeutic window", html:
+        "<p>It is tempting to think more oxygen is always safer for a struggling newborn. It is not. Oxygen is a drug with real toxicity, and the newborn — especially the preterm — is uniquely vulnerable to it. Too <em>little</em> oxygen causes hypoxic injury; too <em>much</em> generates oxygen free radicals that damage the immature retina (retinopathy of prematurity), the lungs (chronic lung disease), and the brain. The goal is not maximal oxygen but the <strong>least oxygen needed</strong> to reach a normal, physiologic saturation for that minute of life.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Both hypoxia and hyperoxia harm the newborn. Titrate oxygen to a target, using a blender and pulse oximeter — never run wide-open oxygen and forget it, and never assume 'pink is the goal' in the first minutes of life.</div>"
+      },
+      { h:"2", t:"Where to start: the initial FiO₂", html:
+        "<p>The starting oxygen concentration depends on gestational age, and the modern answer surprises people used to cranking oxygen to 100%:</p>"+
+        "<ul>"+
+        "<li><strong>Term and late-preterm (≥ 35 weeks):</strong> start resuscitation in <strong>21% oxygen — room air.</strong></li>"+
+        "<li><strong>Preterm (&lt; 35 weeks):</strong> start in a low concentration, about <strong>21–30%</strong>, and titrate.</li>"+
+        "<li><strong>During chest compressions:</strong> increase to <strong>100% oxygen</strong> (Module 4), then wean once the heart rate recovers.</li>"+
+        "</ul>"+
+        "<p>From the starting point you titrate up or down with an oxygen <strong>blender</strong>, guided by the pulse oximeter, to stay within the target range for each minute of life.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — start with air, not 100%</span>"+
+        "<p>In term and late-preterm newborns, initiating resuscitation with room air rather than 100% oxygen is associated with lower mortality and less oxidative stress; meta-analyses of randomized trials (Saugstad and colleagues) support a 21% starting concentration, titrated up only as needed. Beginning at 100% oxygen offers no benefit and adds free-radical injury.</p>"+
+        "<div class='grade'>Quality: high (meta-analyses of randomized trials in term/late-preterm infants).</div></div>"
+      },
+      { h:"3", t:"The preductal SpO₂ target table", html:
+        "<p>Here is the fact that reframes newborn oxygenation: a healthy newborn is <strong>normally hypoxemic at birth</strong> and takes about ten minutes to climb to a normal saturation. In utero the fetus lived at a saturation in the 60s; it does not — and should not — jump to 95% in the first minute. Chasing an adult-normal saturation early means pouring in unnecessary, harmful oxygen.</p>"+
+        "<p>So NRP provides a table of expected <em>preductal</em> saturations by minute of life, and you titrate oxygen to keep the infant within these ranges:</p>"+
+        "<div class='formula'>1 min <span class='fk'>60–65%</span> &middot; 2 min <span class='fk'>65–70%</span> &middot; 3 min <span class='fk'>70–75%</span><br>4 min <span class='fk'>75–80%</span> &middot; 5 min <span class='fk'>80–85%</span> &middot; 10 min <span class='fk'>85–95%</span></div>"+
+        "<p>A rough memory aid: the target starts around 60% and climbs about 5% every minute for the first five minutes, reaching the mid-80s to mid-90s by ten minutes. A saturation of 75% at three minutes of life is not a crisis — it is exactly on target.</p>"
+      },
+      { h:"4", t:"Why the probe goes on the right hand", html:
+        "<p>Pulse oximeter placement in the newborn is not arbitrary, and the reason ties directly back to the fetal circulation of Module 1. The sensor goes on the <strong>right hand or wrist</strong>, because that limb is supplied by the arteries that branch off the aorta <em>before</em> the ductus arteriosus — it is <strong>preductal</strong>. Preductal blood is the blood heading to the brain and the coronary arteries, so a preductal saturation tells you how oxygenated the blood reaching the most important organs is.</p>"+
+        "<p>Because the ductus arteriosus can still be shunting deoxygenated blood into the descending aorta during transition, a post-ductal reading (foot, left hand) can read lower and misrepresent what the brain is receiving. That is why the target table above is explicitly a <em>preductal</em> table.</p>"+
+        "<p>One practical tip that saves precious seconds: <strong>apply the sensor to the baby first, then connect it to the monitor.</strong> Doing it in that order gives you a reliable signal faster in a low-perfusion newborn.</p>"
+      },
+      { h:"5", t:"Titrating to the target", html:
+        "<p>With the preductal probe reading and the minute-of-life table in front of you, oxygen management becomes a simple feedback loop: compare the current saturation to the target for this minute, and turn the blender up if the infant is below the range or down if above it. As the transition proceeds and saturations climb, you should be actively <strong>weaning</strong> the oxygen, not leaving it high.</p>"+
+        "<p>The discipline is to treat the number against its minute-specific target rather than against an adult reflex. A saturation of 68% at two minutes needs no more oxygen — it is in range. The same 68% at ten minutes is too low and needs attention. The table is the whole point: it converts 'is this baby oxygenated enough?' from a guess into a defined target.</p>"
+      },
+      { h:"6", t:"Delayed cord clamping", html:
+        "<p>Cord management is part of resuscitation, not a separate obstetric detail. For a <strong>vigorous newborn who does not need resuscitation</strong> — term or preterm — the recommendation is to <strong>delay clamping the umbilical cord for at least 30–60 seconds</strong> after birth. During that brief interval, blood continues to transfuse from the placenta to the infant, and the benefits are real:</p>"+
+        "<ul>"+
+        "<li>A smoother circulatory transition, with better-filled lungs and heart.</li>"+
+        "<li>A higher hematocrit and better iron stores for months afterward.</li>"+
+        "<li>In preterm infants specifically, <strong>less intraventricular hemorrhage and less necrotizing enterocolitis</strong>.</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check — delayed cord clamping</span>"+
+        "<p>Delaying cord clamping for vigorous infants improves iron stores and transitional hemodynamics, and in preterm infants reduces intraventricular hemorrhage, necrotizing enterocolitis, and the need for transfusion (Cochrane reviews). Umbilical-cord milking has been studied as a faster alternative but is used cautiously and generally avoided in the most preterm infants (&lt; 28 weeks) because of an IVH signal.</p>"+
+        "<div class='grade'>Quality: high for delayed clamping benefits (systematic reviews of randomized trials).</div></div>"
+      },
+      { h:"7", t:"When the baby needs resuscitation", html:
+        "<p>Delayed cord clamping is for the infant who is transitioning well. What about the newborn who is apneic, floppy, or bradycardic at birth — do you still wait 30–60 seconds with the cord intact?</p>"+
+        "<p>Here the priority from Module 1 governs: <strong>a newborn who needs resuscitation needs effective ventilation without delay</strong>, and you should not withhold that ventilation to complete a cord-clamping interval. If the infant clearly requires resuscitation, the cord is clamped and the baby is moved to the warmer so that PPV can begin. (Resuscitation with an intact cord is an area of active study, but it is not yet the routine standard, and effective ventilation always takes precedence over the incremental benefit of delayed clamping.)</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Delayed cord clamping for the vigorous newborn; prompt clamping and ventilation for the newborn who needs resuscitation. Never let a cord-timing goal delay the ventilation that a compromised baby needs.</div>"
+      },
+      { h:"8", t:"The oxygen and cord anchor", html:
+        "<p>Two disciplines carry this module, and both push against instinct.</p>"+
+        "<p>First, <strong>oxygen is titrated, not maximized.</strong> Start term infants in room air and preterm infants in a low concentration, put the pulse oximeter on the right hand for a preductal reading, and steer the blender to the minute-of-life SpO₂ table — which begins near 60% and climbs to the mid-90s only by ten minutes. Reserve 100% oxygen for chest compressions, and wean it as the heart rate recovers. The enemy is not only hypoxia but hyperoxia.</p>"+
+        "<p>Second, <strong>the cord is part of the resuscitation.</strong> Give the vigorous newborn 30–60 seconds of delayed clamping for its transitional and hematologic benefits, but never trade away the ventilation a compromised newborn needs in order to get it.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Least oxygen needed, titrated to a preductal SpO₂ target that starts around 60% and rises over ten minutes. Probe on the right hand. Delayed cord clamping for the vigorous; ventilation first for the compromised.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Why is oxygen treated as a drug to be titrated in the newborn?",
+        opts:["It is expensive","Both too little and too much oxygen cause harm","It only matters in preterm infants","Newborns cannot tolerate any oxygen"], ans:1,
+        expl:"Hypoxia injures tissue, but hyperoxia generates free radicals that damage the immature retina, lungs, and brain. The goal is the least oxygen needed to reach the minute-specific SpO₂ target." },
+      { q:"A term newborn requiring resuscitation should have oxygen started at:",
+        opts:["21% (room air)","40%","60%","100%"], ans:0,
+        expl:"Term and late-preterm (≥35 weeks) resuscitation starts in room air (21%), titrated up only as needed. Starting at 100% offers no benefit and increases oxidative injury; meta-analyses show lower mortality with an air start." },
+      { q:"According to the preductal SpO₂ targets, an acceptable saturation at 3 minutes of life is approximately:",
+        opts:["70–75%","85–90%","90–95%","95–100%"], ans:0,
+        expl:"The target at 3 minutes is about 70–75%. Newborns are normally hypoxemic at birth and climb over ~10 minutes; chasing an adult-normal saturation early delivers unnecessary, harmful oxygen." },
+      { q:"During chest compressions, the oxygen concentration should be:",
+        opts:["21%","Left unchanged","Increased to 100%","Decreased"], ans:2,
+        expl:"Oxygen is increased to 100% during chest compressions, then weaned once the heart rate recovers and the SpO₂ can again be titrated to target." },
+      { q:"The pulse oximeter is placed on the newborn's right hand because that location is:",
+        opts:["Postductal","Preductal — reflecting oxygenation of blood to the brain and heart","Easier to access","More comfortable"], ans:1,
+        expl:"The right hand is preductal (supplied before the ductus arteriosus), so it reflects the oxygenation of blood reaching the brain and coronaries. A postductal site can read falsely low during ductal shunting." },
+      { q:"To obtain a reliable pulse oximeter signal fastest in a newborn, you should:",
+        opts:["Connect the sensor to the monitor, then apply it to the baby","Apply the sensor to the baby first, then connect it to the monitor","Warm the sensor first","Use the left foot"], ans:1,
+        expl:"Applying the sensor to the baby before connecting it to the monitor yields a reliable signal faster in a low-perfusion newborn — a small step that saves precious seconds." },
+      { q:"Delayed cord clamping in a vigorous newborn is recommended for at least:",
+        opts:["5–10 seconds","30–60 seconds","3 minutes","10 minutes"], ans:1,
+        expl:"For a vigorous newborn (term or preterm) not needing resuscitation, delay cord clamping at least 30–60 seconds to allow placental transfusion, improving transitional circulation and iron stores." },
+      { q:"A key benefit of delayed cord clamping specifically in PRETERM infants is:",
+        opts:["Faster Apgar scoring","Reduced intraventricular hemorrhage and necrotizing enterocolitis","Higher initial oxygen saturation","Prevention of meconium aspiration"], ans:1,
+        expl:"In preterm infants, delayed cord clamping reduces intraventricular hemorrhage, necrotizing enterocolitis, and the need for transfusion, in addition to improving iron stores and transitional hemodynamics." },
+      { q:"A newborn is apneic and bradycardic at birth. Regarding the cord:",
+        opts:["Complete a full 60 seconds of delayed clamping before doing anything","Clamp the cord and move the infant to begin effective ventilation without delay","Never clamp the cord","Milk the cord five times regardless of gestation"], ans:1,
+        expl:"A newborn who needs resuscitation needs effective ventilation without delay. Do not withhold ventilation to complete a cord-clamping interval — clamp and move the infant so PPV can begin." },
+      { q:"A newborn's preductal SpO₂ is 68% at 2 minutes of life on room air, and the heart rate is 150 and rising. The appropriate action is:",
+        opts:["Increase oxygen to 100% immediately","Continue current management — the saturation is on target for this minute","Begin chest compressions","Begin CPAP"], ans:1,
+        expl:"At 2 minutes, a preductal SpO₂ of 65–70% is on target, and a rising heart rate of 150 indicates a healthy transition. No additional oxygen or intervention is needed — treat the number against its minute-specific target." }
+    ]
+  },
+
+  {
+    id: 4,
+    available: false,
+    title: "Chest Compressions",
+    desc: "The HR < 60 threshold after effective PPV, the 3:1 compression-to-ventilation ratio, two-thumb technique, coordination, and why the airway comes first."
+  },
+
+  {
+    id: 5,
+    available: false,
+    title: "Medications & Volume",
+    desc: "Epinephrine dose and route (UVC vs ETT), when it is indicated, volume expanders for the hypovolemic newborn, and glucose."
+  },
+
+  {
+    id: 6,
+    available: false,
+    title: "The Airway — Intubation, LMA & Meconium",
+    desc: "ETT sizing and depth, blade selection, confirming placement, the laryngeal mask as rescue, and the updated approach to the non-vigorous meconium-stained newborn."
+  },
+
+  {
+    id: 7,
+    available: false,
+    title: "Prematurity & Thermoregulation",
+    desc: "Preterm-specific risks, the polyethylene-wrap/hat thermal bundle, hypoglycemia, surfactant and gentle ventilation, and the vulnerable preterm brain."
+  },
+
+  {
+    id: 8,
+    available: false,
+    title: "Stabilization & Transport — S.T.A.B.L.E.",
+    desc: "Post-resuscitation care en route: the S.T.A.B.L.E. mnemonic, glucose and thermal management, prostaglandin for duct-dependent lesions, and transport logistics."
+  }
+];
+
+/* ============================================================================
+   STATE
+   ==========================================================================*/
+var LS_KEY = "neonate_academy_v1";
+var state = loadState();
+
+function blankState(){
+  var m = {};
+  MODULES.forEach(function(mod){ m[mod.id] = { read:false, passed:false, best:0 }; });
+  return { learnerName:"", modules:m, finalPassed:false, finalBest:0, completedAt:null };
+}
+function loadState(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(!raw) return blankState();
+    var s = JSON.parse(raw);
+    var base = blankState();
+    base.learnerName = s.learnerName || "";
+    base.finalPassed = !!s.finalPassed;
+    base.finalBest = s.finalBest || 0;
+    base.completedAt = s.completedAt || null;
+    MODULES.forEach(function(mod){
+      if(s.modules && s.modules[mod.id]) base.modules[mod.id] = {
+        read:!!s.modules[mod.id].read, passed:!!s.modules[mod.id].passed, best:s.modules[mod.id].best||0 };
+    });
+    return base;
+  }catch(e){ return blankState(); }
+}
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){
+    var w = document.getElementById("storageWarn");
+    if(w) w.classList.remove("hidden");
+  }
+}
+
+/* progression helpers */
+function isUnlocked(modId){
+  if(modId === 1) return true;
+  return !!(state.modules[modId-1] && state.modules[modId-1].passed);
+}
+function allModulesPassed(){
+  return MODULES.every(function(m){ return state.modules[m.id] && state.modules[m.id].passed; });
+}
+function passedCount(){
+  return MODULES.filter(function(m){ return state.modules[m.id] && state.modules[m.id].passed; }).length;
+}
+function getModule(id){ for(var i=0;i<MODULES.length;i++){ if(MODULES[i].id===id) return MODULES[i]; } return null; }
+
+/* ============================================================================
+   WAVEFORM (header signature) — tile arterial beats into an SVG path
+   ==========================================================================*/
+function buildWave(){
+  var beatW = 150, n = 9, baseY = 46, path = "M 0 "+baseY;
+  for(var i=0;i<n;i++){
+    var x = i*beatW;
+    // baseline drift into upstroke, sharp systolic peak, dicrotic notch, runoff
+    path += " L "+(x+18)+" "+baseY;
+    path += " C "+(x+24)+" "+baseY+" "+(x+30)+" 8 "+(x+40)+" 8";      // steep systolic upstroke to peak
+    path += " C "+(x+50)+" 8 "+(x+56)+" 24 "+(x+64)+" 27";            // decline
+    path += " L "+(x+72)+" 30";                                        // toward notch
+    path += " C "+(x+76)+" 33 "+(x+78)+" 20 "+(x+86)+" 20";           // dicrotic notch + wave
+    path += " C "+(x+96)+" 20 "+(x+104)+" 36 "+(x+118)+" "+(baseY-3); // diastolic runoff
+    path += " L "+(x+beatW)+" "+baseY;
+  }
+  document.getElementById("wavePath").setAttribute("d", path);
+}
+function certWavePath(){
+  var beatW=55, n=4, baseY=18, path="M 0 "+baseY;
+  for(var i=0;i<n;i++){ var x=i*beatW;
+    path+=" L "+(x+8)+" "+baseY+" C "+(x+11)+" "+baseY+" "+(x+13)+" 3 "+(x+18)+" 3";
+    path+=" C "+(x+22)+" 3 "+(x+25)+" 11 "+(x+29)+" 12 L "+(x+33)+" 13";
+    path+=" C "+(x+35)+" 15 "+(x+36)+" 9 "+(x+40)+" 9 C "+(x+45)+" 9 "+(x+49)+" 16 "+(x+beatW)+" "+baseY;
+  }
+  return path;
+}
+
+/* ============================================================================
+   VIEWS
+   ==========================================================================*/
+var views = ["home","reader","quiz","cert"];
+function show(v){
+  views.forEach(function(name){
+    document.getElementById("view-"+name).classList.toggle("hidden", name!==v);
+  });
+  window.scrollTo(0,0);
+}
+
+function updateHeader(){
+  var pc = passedCount(), pct = Math.round((pc/MODULES.length)*100);
+  document.getElementById("tkMods").textContent = pc + " / " + MODULES.length;
+  document.getElementById("tkPct").textContent = pct + "%";
+  document.getElementById("progFill").style.width = pct + "%";
+  var fin = document.getElementById("tkFinal");
+  if(state.finalPassed){ fin.textContent="Complete"; fin.className="val grn"; }
+  else if(allModulesPassed()){ fin.textContent="Ready"; fin.className="val grn"; }
+  else { fin.textContent="Locked"; fin.className="val red"; }
+  document.getElementById("statusChip").textContent =
+    state.learnerName ? ("SESSION · "+state.learnerName.toUpperCase().slice(0,22)) : "SESSION · READY";
+}
+
+function renderHome(){
+  updateHeader();
+  var list = document.getElementById("modList");
+  list.innerHTML = "";
+  MODULES.forEach(function(mod){
+    var st = state.modules[mod.id];
+    var unlocked = isUnlocked(mod.id);
+    var openable = unlocked && mod.available;
+    var li = document.createElement("li");
+    li.className = "modcard " + (st.passed ? "passed " : "") + (openable ? "open " : "locked ");
+    var pill, go="";
+    if(st.passed){ pill = "<span class='pill passed'>✓ Passed · "+st.best+"%</span>"; go="<span class='go'>Review ›</span>"; }
+    else if(openable){ pill = "<span class='pill ready'>Ready</span>"; go="<span class='go'>Start ›</span>"; }
+    else if(unlocked && !mod.available){ pill = "<span class='pill soon'>Content in development</span>"; }
+    else { pill = "<span class='pill locked'>"+lockSvg()+"Locked</span>"; }
+    li.innerHTML =
+      "<div class='num'>"+pad2(mod.id)+"</div>"+
+      "<div class='body'>"+
+        "<div class='mtitle'>"+mod.title+"</div>"+
+        "<p class='mdesc'>"+mod.desc+"</p>"+
+        "<div class='foot'>"+pill+go+"</div>"+
+      "</div>";
+    if(openable) li.addEventListener("click", function(){ openReader(mod.id); });
+    list.appendChild(li);
+  });
+
+  // final exam slot
+  var slot = document.getElementById("finalSlot");
+  var ready = allModulesPassed();
+  slot.innerHTML =
+    "<div class='modcard finalcard "+(ready?"open ready":"locked")+"' id='finalCard'>"+
+      "<div class='num'>⚑</div>"+
+      "<div class='body'>"+
+        "<div class='mtitle'>Final Examination</div>"+
+        "<p class='mdesc'>Comprehensive exam across all modules. Pass at "+PASS_FINAL+"% to earn your certificate.</p>"+
+        "<div class='foot'>"+
+          (state.finalPassed
+            ? "<span class='pill passed'>✓ Passed</span><span class='go'>View certificate ›</span>"
+            : ready ? "<span class='pill ready'>Unlocked</span><span class='go'>Begin ›</span>"
+                    : "<span class='pill locked'>"+lockSvg()+"Complete all modules</span>")+
+        "</div>"+
+      "</div>"+
+    "</div>";
+  var fc = document.getElementById("finalCard");
+  if(state.finalPassed) fc.addEventListener("click", function(){ renderCertificate(); show("cert"); });
+  else if(ready) fc.addEventListener("click", startFinal);
+
+  show("home");
+}
+
+/* ---- Reader ---- */
+var currentModId = null, scrolledEnough = false;
+function openReader(id){
+  var mod = getModule(id);
+  if(!mod || !mod.available) return;
+  currentModId = id;
+  document.getElementById("rdNum").textContent = "MODULE "+pad2(id);
+  document.getElementById("rdTitle").textContent = mod.title;
+  document.getElementById("rdObj").innerHTML = "<strong>Objective.</strong> "+mod.objective;
+  var c = document.getElementById("rdContent"), html="";
+  mod.content.forEach(function(sec){
+    html += "<h3><span class='h3n'>"+sec.h+"</span>"+sec.t+"</h3>"+sec.html;
+  });
+  c.innerHTML = html;
+
+  // gate the quiz button until the reader is scrolled through (honest "must read")
+  var btn = document.getElementById("toQuizBtn");
+  var note = document.getElementById("readNote");
+  var alreadyRead = state.modules[id].read || state.modules[id].passed;
+  scrolledEnough = alreadyRead;
+  btn.disabled = !alreadyRead;
+  note.textContent = alreadyRead ? "" : "Scroll through the full module to unlock the quiz.";
+  show("reader");
+  // content may already fit the viewport with nothing to scroll — check once after layout settles
+  // instead of waiting on a 'scroll' event that would then never fire
+  if(!alreadyRead) requestAnimationFrame(function(){ requestAnimationFrame(onReaderScroll); });
+}
+function onReaderScroll(){
+  if(scrolledEnough) return;
+  var sec = document.getElementById("view-reader");
+  if(sec.classList.contains("hidden")) return;
+  var doc = document.documentElement;
+  var reachedBottom = (window.innerHeight + window.scrollY) >= (doc.scrollHeight - 120);
+  if(reachedBottom){
+    scrolledEnough = true;
+    if(currentModId){ state.modules[currentModId].read = true; saveState(); }
+    document.getElementById("toQuizBtn").disabled = false;
+    document.getElementById("readNote").textContent = "Module read — quiz unlocked.";
+  }
+}
+
+/* ---- Quiz (modules) ---- */
+var activeQuiz = null;     // {questions, isFinal, modId, answers[], submitted}
+function startModuleQuiz(id){
+  var mod = getModule(id);
+  activeQuiz = { questions:mod.quiz, isFinal:false, modId:id, answers:new Array(mod.quiz.length).fill(-1), submitted:false, title:mod.title, num:"MODULE "+pad2(id) };
+  renderQuiz();
+}
+var FINAL_PER_MODULE = 4;   // questions sampled from each module's bank for the final exam
+function shuffled(arr){
+  var a = arr.slice();
+  for(var i=a.length-1; i>0; i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function startFinal(){
+  var pool = [];
+  MODULES.forEach(function(m){
+    if(!m.quiz) return;
+    pool = pool.concat(shuffled(m.quiz).slice(0, FINAL_PER_MODULE));
+  });
+  pool = shuffled(pool);
+  activeQuiz = { questions:pool, isFinal:true, modId:null, answers:new Array(pool.length).fill(-1), submitted:false, title:"Final Examination", num:"FINAL EXAM" };
+  renderQuiz();
+}
+function renderQuiz(){
+  var q = activeQuiz;
+  document.getElementById("qzNum").textContent = q.num;
+  document.getElementById("qzTitle").textContent = q.submitted ? q.title+" — Results" : q.title;
+  var need = q.isFinal ? PASS_FINAL : PASS_MODULE;
+  document.getElementById("qzMeta").textContent =
+    q.questions.length+" questions · pass at "+need+"% · "+Math.ceil(q.questions.length*need/100)+" correct needed";
+
+  var form = document.getElementById("quizForm"); form.innerHTML="";
+  q.questions.forEach(function(item, qi){
+    var box = document.createElement("div"); box.className="q"+(q.submitted?" locked-opts":"");
+    var opts = "";
+    item.opts.forEach(function(o, oi){
+      var cls="opt";
+      if(q.submitted){
+        if(oi===item.ans) cls+=" correct";
+        else if(q.answers[qi]===oi) cls+=" wrong";
+      } else if(q.answers[qi]===oi){ cls+=" sel"; }
+      opts += "<button class='"+cls+"' data-q='"+qi+"' data-o='"+oi+"'>"+
+                "<span class='ol'>"+String.fromCharCode(65+oi)+"</span>"+o+"</button>";
+    });
+    var expl = q.submitted ? "<div class='expl'><b>Why:</b> "+item.expl+"</div>" : "";
+    box.innerHTML = "<div class='qnum'>Q"+(qi+1)+" / "+q.questions.length+"</div>"+
+                    "<div class='qtext'>"+item.q+"</div>"+opts+expl;
+    form.appendChild(box);
+  });
+  if(!q.submitted){
+    form.querySelectorAll(".opt").forEach(function(b){
+      b.addEventListener("click", function(){
+        var qi=+b.dataset.q, oi=+b.dataset.o;
+        activeQuiz.answers[qi]=oi;
+        // update just this question's selected option in place — a full renderQuiz()
+        // here would rebuild every question and reset scroll position on every tap
+        form.children[qi].querySelectorAll(".opt").forEach(function(ob){
+          ob.classList.toggle("sel", +ob.dataset.o === oi);
+        });
+        renderQuizActions();
+      });
+    });
+  }
+
+  document.getElementById("resultSlot").innerHTML = "";
+  if(!q.submitted){
+    renderQuizActions();
+  } else {
+    var correct = scoreQuiz();
+    var pct = Math.round(correct/q.questions.length*100);
+    var passed = pct >= need;
+    document.getElementById("resultSlot").innerHTML =
+      "<div class='result "+(passed?"pass":"fail")+"'>"+
+        "<div class='big'>"+pct+"%</div>"+
+        "<div class='rmsg'>"+correct+" of "+q.questions.length+" correct · "+
+        (passed? "Passed — "+ (q.isFinal?"course complete":"next module unlocked") : "Need "+need+"% to pass")+"</div>"+
+      "</div>";
+    var actions = document.getElementById("quizActions");
+    if(passed){
+      if(q.isFinal){
+        actions.innerHTML = "<button class='cta teal' id='toCert'>View your certificate ›</button>";
+        document.getElementById("toCert").addEventListener("click", function(){ renderCertificate(); show("cert"); });
+      } else {
+        actions.innerHTML = "<button class='cta teal' id='backHome'>Back to modules ›</button>";
+        document.getElementById("backHome").addEventListener("click", function(){ renderHome(); });
+      }
+    } else {
+      actions.innerHTML = "<button class='cta primary' id='retry'>Retake quiz</button>"+
+                          "<button class='cta ghost' id='reread' style='margin-top:10px'>Re-read the module</button>";
+      document.getElementById("retry").addEventListener("click", function(){
+        if(q.isFinal) startFinal(); else startModuleQuiz(q.modId);
+      });
+      document.getElementById("reread").addEventListener("click", function(){
+        if(q.isFinal){ renderHome(); } else { openReader(q.modId); }
+      });
+    }
+  }
+  show("quiz");
+}
+// builds just the submit button / "N of M answered" panel, for the unsubmitted quiz state —
+// called on every answer tap without touching the question list or scroll position
+function renderQuizActions(){
+  var q = activeQuiz;
+  var actions = document.getElementById("quizActions");
+  var answered = q.answers.filter(function(a){return a>=0;}).length;
+  actions.innerHTML = "<button class='cta primary' id='submitQuiz'"+(answered<q.questions.length?" disabled":"")+">Submit answers</button>"+
+    "<p class='readnote'>"+answered+" of "+q.questions.length+" answered</p>";
+  var sb=document.getElementById("submitQuiz");
+  if(sb) sb.addEventListener("click", submitQuiz);
+}
+function scoreQuiz(){
+  var c=0; activeQuiz.questions.forEach(function(item,i){ if(activeQuiz.answers[i]===item.ans) c++; }); return c;
+}
+function submitQuiz(){
+  activeQuiz.submitted = true;
+  var correct = scoreQuiz();
+  var pct = Math.round(correct/activeQuiz.questions.length*100);
+  var need = activeQuiz.isFinal ? PASS_FINAL : PASS_MODULE;
+  var passed = pct >= need;
+  if(activeQuiz.isFinal){
+    if(pct > state.finalBest) state.finalBest = pct;
+    if(passed){ state.finalPassed=true; state.completedAt = new Date().toISOString(); }
+  } else {
+    var m = state.modules[activeQuiz.modId];
+    if(pct > m.best) m.best = pct;
+    if(passed) m.passed = true;
+  }
+  saveState();
+  updateHeader();
+  renderQuiz();
+}
+
+/* ---- Certificate ---- */
+function renderCertificate(){
+  var name = (state.learnerName||"").trim() || "—";
+  var dt = state.completedAt ? new Date(state.completedAt) : new Date();
+  var dstr = dt.toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
+  var moduleCount = MODULES.length;
+  var scoreLine = state.finalBest ? (state.finalBest+"%") : "Passed";
+  document.getElementById("certCard").innerHTML =
+    "<div class='c-brand'>AMR Kansas City <b>◆</b> Clinical Education</div>"+
+    "<div class='c-wave'><svg viewBox='0 0 220 26' preserveAspectRatio='none'><path d='"+certWavePath()+"' fill='none' stroke='#1B63C4' stroke-width='1.6'/></svg></div>"+
+    "<div class='c-kicker'>Certificate of Completion</div>"+
+    "<div class='c-of'>This certifies that</div>"+
+    "<div class='c-name'>"+escapeHtml(name)+"</div>"+
+    "<div class='c-of'>has successfully completed</div>"+
+    "<div class='c-course'>Neonatal Resuscitation &amp; Stabilization for Critical Care Transport</div>"+
+    "<div class='c-body'>A comprehensive "+moduleCount+"-module program aligned to the Neonatal Resuscitation Program (NRP) and S.T.A.B.L.E., covering neonatal transition, positive-pressure ventilation, oxygen and SpO₂ targets, chest compressions, resuscitation medications and volume, the neonatal airway, prematurity and thermoregulation, and post-resuscitation transport stabilization, with a final examination passed at "+PASS_FINAL+"% or above.</div>"+
+    "<div class='c-meta'>"+
+      "<div class='c-cell'><div class='cl'>Date completed</div><div class='cv'>"+dstr+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Final exam score</div><div class='cv'>"+scoreLine+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Medical Director</div><div class='cv'>A. Deshmukh, MD</div></div>"+
+      "<div class='c-cell'><div class='cl'>Clinical Education</div><div class='cv'>AMR KC</div></div>"+
+    "</div>";
+}
+
+/* ============================================================================
+   UTIL
+   ==========================================================================*/
+function pad2(n){ return (n<10?"0":"")+n; }
+function lockSvg(){ return "<svg class='lockglyph' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2'><rect x='4.5' y='10.5' width='15' height='10' rx='2'/><path d='M8 10.5V7a4 4 0 0 1 8 0v3.5'/></svg>"; }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+
+/* ============================================================================
+   WIRING
+   ==========================================================================*/
+document.getElementById("readerBack").addEventListener("click", renderHome);
+document.getElementById("quizBack").addEventListener("click", function(){
+  if(activeQuiz && !activeQuiz.isFinal && activeQuiz.modId) openReader(activeQuiz.modId);
+  else renderHome();
+});
+document.getElementById("certBack").addEventListener("click", renderHome);
+document.getElementById("toQuizBtn").addEventListener("click", function(){
+  if(currentModId) startModuleQuiz(currentModId);
+});
+document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
+
+var nameInput = document.getElementById("nameInput");
+nameInput.value = state.learnerName || "";
+nameInput.addEventListener("input", function(){
+  state.learnerName = nameInput.value; saveState(); updateHeader();
+});
+
+document.getElementById("resetBtn").addEventListener("click", function(){
+  if(confirm("Reset all progress and your name? This clears every module and the final exam on this device.")){
+    state = blankState(); saveState(); nameInput.value=""; renderHome();
+  }
+});
+
+window.addEventListener("scroll", onReaderScroll, { passive:true });
+
+/* init */
+buildWave();
+renderHome();
+</script>
+</body>
+</html>
