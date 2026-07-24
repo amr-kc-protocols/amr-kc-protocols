@@ -685,16 +685,198 @@ var MODULES = [
 
   {
     id: 4,
-    available: false,
+    available: true,
     title: "Chest Compressions",
-    desc: "The HR < 60 threshold after effective PPV, the 3:1 compression-to-ventilation ratio, two-thumb technique, coordination, and why the airway comes first."
+    desc: "The HR < 60 threshold after effective PPV, the 3:1 compression-to-ventilation ratio, two-thumb technique, coordination, and why the airway comes first.",
+    objective: "Recognize the narrow indication for chest compressions, ensure ventilation is effective first, deliver two-thumb compressions at the 3:1 ratio and correct depth, coordinate them with ventilation on 100% oxygen, and reassess at the right interval.",
+    content: [
+      { h:"1", t:"A rare step, and why", html:
+        "<p>Chest compressions occupy a strange place in neonatal resuscitation: they are dramatic, they are drilled, and they are <em>rarely needed</em>. The reason traces straight back to Module 2. Because the newborn's compromise is almost always a ventilation problem, effective positive-pressure ventilation resolves the great majority of bradycardia on its own. A heart that is still below 60 <em>after</em> the lungs have truly been ventilated is a heart whose coronary arteries have been starved of oxygen for long enough that the muscle can no longer pump — a much deeper level of trouble.</p>"+
+        "<p>So compressions are indicated in one specific circumstance: a <strong>heart rate below 60 bpm despite at least 30 seconds of effective PPV.</strong> Read that carefully. Not just PPV — <em>effective</em> PPV, with the chest visibly moving. The single most common error in neonatal resuscitation is starting compressions on a baby who was never actually being ventilated.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Compressions are for HR &lt; 60 despite 30 seconds of <em>effective</em> ventilation. If the chest wasn't moving, the problem is the ventilation, not the need for compressions — fix the airway first.</div>"
+      },
+      { h:"2", t:"Prove the ventilation before you compress", html:
+        "<p>Before the first compression, you owe the baby a check that ventilation is genuinely working, because compressions layered on top of unventilated lungs accomplish nothing — you would be circulating deoxygenated blood. Two things happen at this transition:</p>"+
+        "<ul>"+
+        "<li><strong>Secure the airway.</strong> This is the point at which an advanced airway — an endotracheal tube or laryngeal mask (Module 6) — is strongly preferred, so that ventilation is reliable and uninterrupted while compressions are underway and the chest is being jostled. Completing MR SOPA, including the airway step, is part of earning the right to compress.</li>"+
+        "<li><strong>Increase oxygen to 100%.</strong> Once compressions begin, the infant is sick enough that you maximize oxygen delivery; you will wean it back down once the heart rate recovers (Module 3).</li>"+
+        "</ul>"+
+        "<p>The mental checklist at this branch: chest moving? airway secure? oxygen at 100%? Only then do compressions add value.</p>"
+      },
+      { h:"3", t:"Technique — two thumbs, lower sternum", html:
+        "<p>There are two accepted hand techniques, but one is clearly better. The <strong>two-thumb encircling-hands technique</strong> — both thumbs on the sternum, hands wrapping the chest and supporting the back — is preferred because it generates higher blood pressure and better coronary perfusion and fatigues the rescuer less. The older <strong>two-finger technique</strong> (two fingertips on the sternum) is a fallback, useful mainly when a single rescuer needs access to the umbilicus for line placement.</p>"+
+        "<div class='formula'>Landmark: <span class='fk'>lower third of the sternum</span>, just below the internipple line<br>Depth: <span class='fk'>one-third</span> of the chest's anterior-posterior diameter</div>"+
+        "<p>Compress the lower third of the sternum — below the nipple line, above the xiphoid — to about one-third of the chest depth, and allow <strong>full recoil</strong> between compressions so the heart can refill. Thumbs stay on the chest between compressions.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — two thumbs beat two fingers</span>"+
+        "<p>The two-thumb encircling technique produces higher systolic and coronary perfusion pressures and less rescuer fatigue than the two-finger technique in manikin and physiologic studies, and it is the recommended method. Reserve two-finger compressions for situations where umbilical access is needed simultaneously.</p>"+
+        "<div class='grade'>Quality: moderate (consistent manikin and physiologic data).</div></div>"
+      },
+      { h:"4", t:"The 3:1 ratio", html:
+        "<p>Here is the number that makes neonatal CPR unique, and a favorite exam point. Neonatal compressions are delivered in a strict <strong>3:1 ratio</strong> — three compressions to one breath — producing, each minute:</p>"+
+        "<div class='formula'><span class='fk'>3</span> compressions : <span class='fk'>1</span> breath<br>= <span class='fk'>90</span> compressions + <span class='fk'>30</span> breaths = <span class='fk'>120</span> events per minute</div>"+
+        "<p>The cadence is spoken aloud to keep the team synchronized: <em>'one-and-two-and-three-and-breathe-and,'</em> compressing on each number and delivering the breath on 'breathe.' That rhythm yields three compressions and one ventilation roughly every two seconds.</p>"+
+        "<p>Why 3:1, when older children and adults use 15:2 or 30:2? Because the neonatal arrest is a <em>respiratory</em> arrest at heart: the priority is to keep ventilating heavily even while circulating blood, so the ratio is weighted far more toward breaths than any other age group. A crew that reflexively drops into an adult ratio is failing the newborn's core physiology.</p>"
+      },
+      { h:"5", t:"Coordination, not chaos", html:
+        "<p>Compressions and ventilations in the newborn are <strong>coordinated, not simultaneous</strong> — the compressor briefly pauses so the breath is not delivered against a compressing chest. This is a two-rescuer task by design: one at the head managing the airway and delivering the ventilations, one at the chest (or at the feet/side, thumbs on the sternum) compressing and counting the cadence aloud.</p>"+
+        "<p>Good compressions are as much about rhythm and teamwork as force: steady 120-events-per-minute cadence, full recoil each time, minimal interruptions, and clear verbal counting so the breath lands in its slot. The person compressing counts; the person ventilating listens for 'breathe.' Sloppy, uncoordinated compressions — breaths stacked on compressions, no recoil, ragged timing — deliver far less perfusion than the numbers suggest.</p>"
+      },
+      { h:"6", t:"Reassess at 60 seconds — not sooner", html:
+        "<p>Once well-coordinated compressions and ventilation are running, give them time to work before you reassess. Check the heart rate after about <strong>60 seconds</strong> of compressions — longer than the 15-second checks during PPV alone — because it takes time for coronary perfusion to be restored and the heart rate to respond, and because stopping to check too often interrupts the very compressions doing the work. A continuous ECG is invaluable here, letting you watch the rate without pausing.</p>"+
+        "<ul>"+
+        "<li><strong>HR ≥ 60:</strong> stop compressions and return to PPV alone (still at 40–60/min), then continue to reassess and wean oxygen as the infant recovers.</li>"+
+        "<li><strong>HR still &lt; 60:</strong> the resuscitation escalates — this is the trigger for <strong>epinephrine</strong> (Module 5) — but first, recheck everything about the ventilation and technique.</li>"+
+        "</ul>"
+      },
+      { h:"7", t:"When compressions 'aren't working'", html:
+        "<p>If 60 seconds of compressions have not brought the heart rate up, resist the urge to simply compress harder or reach reflexively for a drug. The overwhelmingly most common reason a neonatal resuscitation stalls at this stage is the same reason it stalls at every stage: <strong>the ventilation is not actually effective.</strong> Before and alongside giving epinephrine, run the checklist:</p>"+
+        "<ul>"+
+        "<li>Is the airway secure and correctly positioned — is the endotracheal tube in the trachea and not the esophagus or a mainstem bronchus?</li>"+
+        "<li>Is the chest genuinely moving with each breath?</li>"+
+        "<li>Is the oxygen at 100%?</li>"+
+        "<li>Is the compression depth adequate (one-third) with full recoil, and the 3:1 coordination clean?</li>"+
+        "<li>Could there be a mechanical cause — a pneumothorax, or an airway anomaly?</li>"+
+        "</ul>"+
+        "<p>Only with ventilation confirmed effective does epinephrine have a chance to work. The drug is not a substitute for the airway — it is an addition to a resuscitation that already has the airway right.</p>"
+      },
+      { h:"8", t:"The compression anchor", html:
+        "<p>Everything about neonatal compressions is downstream of one idea: they are the second-line answer to a problem whose first-line answer is ventilation.</p>"+
+        "<ul>"+
+        "<li><strong>Indication:</strong> HR &lt; 60 despite 30 seconds of <em>effective</em> PPV.</li>"+
+        "<li><strong>Setup:</strong> secure the airway (advanced airway preferred), oxygen to 100%.</li>"+
+        "<li><strong>Technique:</strong> two-thumb encircling, lower third of the sternum, one-third depth, full recoil.</li>"+
+        "<li><strong>Ratio:</strong> 3:1 — 90 compressions + 30 breaths = 120 events/min, counted aloud.</li>"+
+        "<li><strong>Reassess:</strong> at 60 seconds; HR ≥ 60 stop compressions, HR &lt; 60 give epinephrine and recheck ventilation.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Compressions never stand alone — they are always paired with vigorous ventilation on 100% oxygen. If the heart rate won't rise, the answer is far more often a fix to the airway than a harder squeeze or a faster drug.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Chest compressions in the newborn are indicated when the heart rate remains below:",
+        opts:["100 bpm despite the initial steps","60 bpm despite 30 seconds of effective PPV","80 bpm at any point","60 bpm before any ventilation"], ans:1,
+        expl:"Compressions begin only when the HR is below 60 despite 30 seconds of EFFECTIVE positive-pressure ventilation (chest moving). Most bradycardia resolves with ventilation alone; a persistent low rate means the coronary supply has failed." },
+      { q:"Before starting chest compressions, the most important thing to confirm is that:",
+        opts:["Epinephrine is drawn up","Ventilation is effective (the chest is moving), ideally via a secured airway","A UVC is placed","The Apgar score is recorded"], ans:1,
+        expl:"Compressions on unventilated lungs just circulate deoxygenated blood. Ensure effective ventilation first — this is where an advanced airway is preferred — and increase oxygen to 100%." },
+      { q:"During chest compressions, the oxygen concentration should be:",
+        opts:["21%","30%","Titrated to SpO₂","100%"], ans:3,
+        expl:"Oxygen is increased to 100% once chest compressions are underway, then weaned back down and titrated to the SpO₂ target once the heart rate recovers." },
+      { q:"The preferred chest compression technique in the newborn is:",
+        opts:["Two-finger technique","Two-thumb encircling-hands technique","Heel of one hand","Two-handed adult technique"], ans:1,
+        expl:"The two-thumb encircling technique generates higher blood pressure and coronary perfusion and causes less fatigue. Two-finger compressions are a fallback, mainly when umbilical access is needed simultaneously." },
+      { q:"The compression-to-ventilation ratio for neonatal CPR is:",
+        opts:["15:2","30:2","3:1","5:1"], ans:2,
+        expl:"Neonatal CPR uses a 3:1 ratio — 90 compressions plus 30 breaths = 120 events per minute — reflecting the respiratory basis of neonatal arrest, weighting heavily toward ventilation." },
+      { q:"With a 3:1 ratio, how many compressions and breaths are delivered per minute?",
+        opts:["120 compressions and 40 breaths","90 compressions and 30 breaths","60 compressions and 20 breaths","100 compressions and 10 breaths"], ans:1,
+        expl:"The 3:1 ratio delivers 90 compressions and 30 breaths each minute (120 total events), paced by the cadence 'one-and-two-and-three-and-breathe-and.'" },
+      { q:"Compressions should be delivered on the:",
+        opts:["Upper third of the sternum","Lower third of the sternum, to one-third of chest depth","Xiphoid process","Left side of the chest over the heart"], ans:1,
+        expl:"Compress the lower third of the sternum (below the internipple line, above the xiphoid) to about one-third of the chest's AP diameter, allowing full recoil between compressions." },
+      { q:"After starting well-coordinated compressions and ventilation, you should reassess the heart rate after about:",
+        opts:["15 seconds","30 seconds","60 seconds","3 minutes"], ans:2,
+        expl:"Reassess after ~60 seconds of compressions — longer than the 15-second PPV checks — because coronary perfusion and the heart rate need time to respond, and frequent pauses interrupt the compressions. A continuous ECG lets you watch without stopping." },
+      { q:"Compressions have run for 60 seconds and the heart rate is still 40. Besides preparing epinephrine, the priority is to:",
+        opts:["Compress much harder and faster","Recheck that ventilation is truly effective and the airway is correctly placed","Stop the resuscitation","Give a fluid bolus immediately"], ans:1,
+        expl:"The most common reason a resuscitation stalls here is ineffective ventilation. Confirm the airway is in the trachea, the chest is moving, oxygen is 100%, and technique is clean — epinephrine only works when ventilation is effective." },
+      { q:"Compared with adult CPR, neonatal compressions are distinctive in that they:",
+        opts:["Use a much higher compression rate","Are weighted heavily toward ventilation (3:1) because the arrest is respiratory","Do not require ventilation","Use continuous compressions without pauses"], ans:1,
+        expl:"Because neonatal arrest is fundamentally respiratory, the 3:1 ratio emphasizes ventilation far more than adult ratios (15:2, 30:2). Compressions are always coordinated with vigorous ventilation, never done alone." }
+    ]
   },
 
   {
     id: 5,
-    available: false,
+    available: true,
     title: "Medications & Volume",
-    desc: "Epinephrine dose and route (UVC vs ETT), when it is indicated, volume expanders for the hypovolemic newborn, and glucose."
+    desc: "Epinephrine dose and route (UVC vs ETT), when it is indicated, volume expanders for the hypovolemic newborn, and glucose.",
+    objective: "Know when epinephrine is indicated and give it at the correct dose and route (UVC preferred), recognize and treat the hypovolemic newborn with volume, and manage post-resuscitation glucose — while remembering that ventilation remains the foundation.",
+    content: [
+      { h:"1", t:"The last branch of the tree", html:
+        "<p>Medications are the final, least-traveled branch of the NRP algorithm, and it is worth being honest about how rarely you reach them. To arrive here, a newborn must have failed to respond to effective ventilation <em>and</em> to a full minute of coordinated chest compressions on 100% oxygen. Fewer than a fraction of a percent of all newborns get this far.</p>"+
+        "<p>That rarity carries a lesson. If you are reaching for epinephrine, the odds are high that something upstream is still wrong — most often the ventilation. Drugs do not rescue a resuscitation that has the airway wrong; they are an addition to one that already has the airway right. Keep the checklist from Module 4 running even as you give medications.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> You should almost never need drugs in a neonatal resuscitation. When you do, treat it as a prompt to re-verify effective ventilation — the medication and the airway work together, and the airway is usually the one that decides the outcome.</div>"
+      },
+      { h:"2", t:"Epinephrine — what it does and when", html:
+        "<p>Epinephrine is the only medication given for the resuscitation itself. Its job here is its <strong>alpha-adrenergic</strong> effect: it constricts the peripheral vasculature, which raises aortic diastolic pressure and drives blood into the coronary arteries — restoring perfusion to a heart muscle that has run out of oxygen. That coronary perfusion is what allows the heart to resume an effective rhythm.</p>"+
+        "<p>The indication is specific:</p>"+
+        "<div class='formula'>HR &lt; <span class='fk'>60</span> bpm despite effective PPV <span class='fk'>and</span> ~60 sec of coordinated chest compressions</div>"+
+        "<p>Both conditions must be met. Epinephrine is not a response to a low heart rate on its own — it is what you add when ventilation and compressions together have not restored a rate of 60.</p>"
+      },
+      { h:"3", t:"Epinephrine — dose and the route that matters", html:
+        "<p>The route is where errors happen, so anchor it firmly: <strong>the intravenous route is strongly preferred</strong>, and in the newborn that means the <strong>umbilical vein</strong> (a UVC). The concentration is <strong>0.1 mg/mL</strong> (the old '1:10,000').</p>"+
+        "<div class='formula'><span class='fk'>IV/UVC</span> (preferred): 0.01–0.03 mg/kg = 0.1–0.3 mL/kg of 0.1 mg/mL<br><span class='fk'>ETT</span> (bridge only): 0.05–0.1 mg/kg = 0.5–1 mL/kg<br>repeat every <span class='fk'>3–5 minutes</span> as needed</div>"+
+        "<p>Notice the endotracheal dose is <em>higher</em>. That is because absorption across the lung during a low-output resuscitation is poor and erratic, so more drug is needed to achieve an unreliable effect. The endotracheal route is a stopgap only — reasonable for the first dose while a UVC is being placed, but you should move to the IV route as fast as access allows, and never let the endotracheal route delay establishing a UVC.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — IV over ETT epinephrine</span>"+
+        "<p>Intravenous (umbilical venous) epinephrine produces more reliable drug delivery and a better heart-rate response than the endotracheal route, where absorption is inconsistent during low-output states. Guidelines prefer the IV route and reserve endotracheal dosing as a temporary measure while vascular access is obtained.</p>"+
+        "<div class='grade'>Quality: moderate (physiologic and observational data; consistent guideline preference).</div></div>"
+      },
+      { h:"4", t:"The umbilical vein: emergency access", html:
+        "<p>The umbilical vein is the newborn's emergency vascular highway — large, superficial, and reliably present in the fresh cord. In a delivery-room resuscitation an <strong>emergency umbilical venous catheter</strong> is placed just far enough to get blood return (a 'low-lying' UVC), rather than the carefully positioned line used for longer-term care, because speed is what matters. Epinephrine is given through it and followed by a saline flush to move the drug centrally.</p>"+
+        "<p>This is why the two-finger compression technique exists as a fallback (Module 4): it leaves the umbilicus accessible so one rescuer can place the UVC while compressions continue. The endotracheal epinephrine dose is the bridge that buys the minutes it takes to establish that umbilical access.</p>"
+      },
+      { h:"5", t:"When to think volume: the hypovolemic newborn", html:
+        "<p>Epinephrine addresses a hypoxic, poorly perfusing heart. But some newborns are failing to respond for a different reason — they have <em>lost volume</em> and the tank is empty. Volume expansion is indicated when a newborn is not responding to resuscitation <strong>and</strong> shows signs of hypovolemia or shock, especially with a history that explains blood loss:</p>"+
+        "<ul>"+
+        "<li><strong>Signs:</strong> persistent pallor despite oxygenation, weak or thready pulses, poor perfusion, and a heart rate that will not recover despite effective ventilation, compressions, and epinephrine.</li>"+
+        "<li><strong>History that raises the flag:</strong> placental abruption, a cord accident (avulsion, tight nuchal cord, cord prolapse), placenta previa, feto-maternal hemorrhage, or any large peripartum blood loss.</li>"+
+        "</ul>"+
+        "<p>Volume is not a routine part of resuscitation. Given to a newborn who is <em>not</em> hypovolemic, a fluid bolus can overload the circulation and, in the preterm, contribute to intraventricular hemorrhage. Reserve it for the baby whose story and exam point to blood or volume loss.</p>"
+      },
+      { h:"6", t:"Giving volume", html:
+        "<p>When volume is indicated, the agent and dose are simple:</p>"+
+        "<div class='formula'><span class='fk'>10 mL/kg</span> of isotonic crystalloid (normal saline) or O-negative blood<br>over <span class='fk'>5–10 minutes</span> · may repeat if the response is inadequate</div>"+
+        "<p>Normal saline is the usual first choice; when the problem is significant <em>blood</em> loss, O-negative packed red cells (or whole blood) replace what was lost. Give it through the umbilical venous catheter. The infusion is deliberately not a fast push — over 5 to 10 minutes, and more cautiously still in the preterm infant, because a rapid rise in intravascular pressure and volume is a risk factor for intraventricular hemorrhage in the fragile preterm brain (Module 7). Reassess after the bolus: an improving heart rate, stronger pulses, and better perfusion tell you the diagnosis was right and whether a second bolus is warranted.</p>"
+      },
+      { h:"7", t:"Glucose, and what NOT to give", html:
+        "<p>Two more points round out neonatal resuscitation pharmacology, and both correct common instincts.</p>"+
+        "<p><strong>Glucose matters afterward.</strong> A newborn who has been through a resuscitation has burned through its limited glycogen stores and is at high risk of <strong>hypoglycemia</strong> in the minutes and hours that follow — a hypoglycemia that can itself injure the brain. Glucose is not a resuscitation drug you push during compressions, but monitoring and treating blood glucose is a priority the moment the infant is stabilized, and it is the 'S' that opens the S.T.A.B.L.E. transport sequence in Module 8.</p>"+
+        "<p><strong>Naloxone is not part of delivery-room resuscitation.</strong> Even when maternal opioids may be contributing to a depressed, apneic newborn, the treatment is the same as for any apneic newborn — <em>effective ventilation</em> — not naloxone. Naloxone is not recommended as part of the initial resuscitation; giving it can precipitate seizures in the infant of an opioid-dependent mother and distracts from the intervention that actually works. Support the airway and ventilate.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The resuscitated newborn is at high risk of hypoglycemia — check and treat glucose early. Do not use naloxone in delivery-room resuscitation; an apneic newborn needs ventilation, whatever the cause.</div>"
+      },
+      { h:"8", t:"The medication anchor", html:
+        "<p>Pull the pharmacology together, and keep it framed by the airway that underlies all of it:</p>"+
+        "<ul>"+
+        "<li><strong>Epinephrine</strong> — for HR &lt; 60 despite effective PPV and coordinated compressions. <strong>0.01–0.03 mg/kg IV/UVC</strong> (0.1 mg/mL), repeated every 3–5 minutes; the higher <strong>0.05–0.1 mg/kg</strong> endotracheal dose is a bridge only while the UVC is placed.</li>"+
+        "<li><strong>Volume</strong> — for the hypovolemic newborn (poor perfusion + a blood-loss history): <strong>10 mL/kg</strong> normal saline or O-negative blood over 5–10 minutes, cautiously in preterm infants. Not routine.</li>"+
+        "<li><strong>Glucose</strong> — anticipate and treat post-resuscitation hypoglycemia.</li>"+
+        "<li><strong>Naloxone</strong> — not used in delivery-room resuscitation.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Reaching for drugs is a signal to re-verify the airway. Epinephrine restores coronary perfusion, volume refills an empty tank — but neither works unless the lungs are being effectively ventilated. Ventilation first, always.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Epinephrine is indicated in neonatal resuscitation when the heart rate remains below 60 despite:",
+        opts:["The initial steps alone","Effective PPV alone","Effective PPV AND about 60 seconds of coordinated chest compressions","Two doses of volume"], ans:2,
+        expl:"Epinephrine is the last branch — given only when the HR stays under 60 despite BOTH effective ventilation AND coordinated chest compressions on 100% oxygen. It is not a response to a low heart rate by itself." },
+      { q:"The preferred route for epinephrine in the newborn is:",
+        opts:["Endotracheal","Intravenous via the umbilical vein (UVC)","Intramuscular","Subcutaneous"], ans:1,
+        expl:"The IV route via a low-lying umbilical venous catheter is strongly preferred for reliable drug delivery. The endotracheal route has poor, erratic absorption and is only a bridge while access is obtained." },
+      { q:"The recommended IV/UVC dose of epinephrine (0.1 mg/mL) is:",
+        opts:["0.01–0.03 mg/kg","0.05–0.1 mg/kg","0.1–0.2 mg/kg","1 mg regardless of weight"], ans:0,
+        expl:"The IV/UVC dose is 0.01–0.03 mg/kg (0.1–0.3 mL/kg of 0.1 mg/mL), repeated every 3–5 minutes as needed. The endotracheal dose is higher (0.05–0.1 mg/kg) because lung absorption is unreliable." },
+      { q:"Why is the endotracheal epinephrine dose HIGHER than the IV dose?",
+        opts:["The lungs metabolize it faster","Absorption across the lung during low output is poor and erratic","It is safer at higher doses","ETT dosing is actually preferred"], ans:1,
+        expl:"Pulmonary absorption during a low-output resuscitation is poor and inconsistent, so a higher endotracheal dose is needed for an unreliable effect. The endotracheal route is only a stopgap until a UVC is placed." },
+      { q:"Volume expansion in a newborn is indicated when there is:",
+        opts:["Any heart rate below 100","No response to resuscitation with signs of hypovolemia or a history of blood loss","Routinely in every resuscitation","Isolated tachycardia"], ans:1,
+        expl:"Volume is for the hypovolemic newborn — poor perfusion, weak pulses, and a failure to respond, especially with a blood-loss history (abruption, cord accident, feto-maternal hemorrhage). It is not routine." },
+      { q:"The correct volume bolus for a hypovolemic newborn is:",
+        opts:["20 mL/kg rapidly","10 mL/kg of normal saline or O-negative blood over 5–10 minutes","5 mL/kg of D10","40 mL/kg over 1 hour"], ans:1,
+        expl:"Give 10 mL/kg of isotonic crystalloid (normal saline) or O-negative blood over 5–10 minutes, more cautiously in preterm infants. Reassess and repeat if the response is inadequate." },
+      { q:"Why is a volume bolus given slowly (over 5–10 min), especially in preterm infants?",
+        opts:["To avoid wasting fluid","A rapid rise in volume/pressure raises the risk of intraventricular hemorrhage","To allow time to draw labs","Preterm infants cannot absorb saline quickly"], ans:1,
+        expl:"A rapid increase in intravascular volume and pressure is a risk factor for intraventricular hemorrhage in the fragile preterm brain, so volume is infused over 5–10 minutes and even more cautiously in preterm infants." },
+      { q:"After a resuscitation, the newborn is at particular risk for:",
+        opts:["Hyperglycemia","Hypoglycemia","Hypernatremia","Hypercalcemia"], ans:1,
+        expl:"A resuscitated newborn has depleted its limited glycogen stores and is at high risk of hypoglycemia, which can itself injure the brain. Monitor and treat glucose early — it is the 'S' that opens S.T.A.B.L.E." },
+      { q:"For an apneic newborn whose mother received opioids, the correct treatment is:",
+        opts:["Naloxone as the first-line drug","Effective positive-pressure ventilation","Chest compressions","Immediate epinephrine"], ans:1,
+        expl:"An apneic newborn needs ventilation regardless of the cause. Naloxone is NOT recommended in delivery-room resuscitation — it can precipitate seizures in the infant of an opioid-dependent mother and distracts from effective ventilation." },
+      { q:"You are giving epinephrine and volume but the newborn still isn't responding. The most important thing to reconfirm is:",
+        opts:["The umbilical line depth","That ventilation is truly effective and the airway is correctly placed","The infant's weight","The room temperature"], ans:1,
+        expl:"Reaching for drugs is a prompt to re-verify the airway. Epinephrine and volume only work when the lungs are being effectively ventilated — ineffective ventilation is the most common reason a resuscitation fails to respond." }
+    ]
   },
 
   {
