@@ -491,11 +491,23 @@ fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linej
 .qa-tile{display:flex;flex-direction:column;gap:9px;background:var(--surface2);
 border:1px solid transparent;border-radius:12px;padding:14px 12px;cursor:pointer;
 text-align:left;transition:border-color 0.12s;font-family:var(--sans);width:100%}
-.qa-tile:active,.qa-tile:hover{border-color:var(--teal)}
-.qa-ico{width:30px;height:30px;border-radius:8px;background:var(--dim);
-display:flex;align-items:center;justify-content:center;color:var(--teal2);font-size:16px}
+.qa-tile:active,.qa-tile:hover{border-color:var(--ac,var(--teal))}
+.qa-ico{width:30px;height:30px;border-radius:8px;background:var(--acb,var(--dim));
+display:flex;align-items:center;justify-content:center;color:var(--ac,var(--teal2));font-size:16px}
 .qa-label{font-size:13px;font-weight:600;color:var(--white)}
 .qa-sub{font-size:11px;color:var(--gray);line-height:1.4}
+
+/* ── Subtle per-tile accents (quieter than the top brand tiles) ──── */
+.ac-blue{--ac:#1b63c4;--acb:#e9f1fd}
+.ac-teal{--ac:#0e7490;--acb:#e1f1f4}
+.ac-violet{--ac:#6d28d9;--acb:#f1e9fd}
+.ac-green{--ac:#15803d;--acb:#e7f7ee}
+.ac-amber{--ac:#a1590b;--acb:#fbf0db}
+.ac-rose{--ac:#be123c;--acb:#fbe9ed}
+.ac-slate{--ac:#475569;--acb:#eceff3}
+.stat-tile.ac-chip .stat-tile-ico{width:30px;height:30px;border-radius:8px;
+background:var(--acb);color:var(--ac);font-size:16px}
+.stat-tile.ac-chip:active,.stat-tile.ac-chip:hover{border-color:var(--ac)}
 .home-hero{padding:18px 16px 8px;text-align:center}
 .home-hero-title{font-size:17px;font-weight:700;color:var(--white);letter-spacing:-0.01em}
 .home-hero-sub{font-size:12px;color:var(--gray);margin-top:3px;letter-spacing:0.02em}
@@ -904,31 +916,31 @@ function renderHome(){
   h += '<div class="stat-tile-val">Ventilator 3000</div>';
   h += '<div class="stat-tile-lbl">The Game</div></div></a>';
   if(d5.streak){
-    h += '<a class="stat-tile" href="quiz-daily5.html">';
+    h += '<a class="stat-tile ac-chip ac-amber" href="quiz-daily5.html">';
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
     h += '<div class="stat-tile-val">'+d5.streak+'-day streak</div>';
     h += '<div class="stat-tile-lbl">Daily 5 &middot; '+(d5.totalDone||0)+' completed</div></div></a>';
   } else {
-    h += '<a class="stat-tile empty" href="quiz-daily5.html">';
+    h += '<a class="stat-tile empty ac-chip ac-amber" href="quiz-daily5.html">';
     h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
     h += '<div class="stat-tile-val">Start your streak</div>';
     h += '<div class="stat-tile-lbl">Daily 5 questions</div></div></a>';
   }
-  h += '<a class="stat-tile" href="imagetrend-job-aid.html">';
+  h += '<a class="stat-tile ac-chip ac-green" href="imagetrend-job-aid.html">';
   h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div><div>';
   h += '<div class="stat-tile-val">Charting Help</div>';
   h += '<div class="stat-tile-lbl">ImageTrend Job Aid</div></div></a>';
   h += '</div>';
 
   h += '<div class="qa-grid">';
-  [['calc','i-syringe','Doses','Weight-based dose calculator'],
-   ['hosp','i-droplet','Hosp Meds','Hospital-supplied infusions'],
-   ['formulary','i-pill','Formulary','AMR KC carried medications'],
-   ['vent','i-lungs','Ventilator','IBW, tidal volume &amp; troubleshooting'],
-   ['pcs','i-key','PCS / Doors','Facility access codes'],
-   ['more','i-dots','More','Study tools, forms &amp; resources'],
+  [['calc','i-syringe','Doses','Weight-based dose calculator','ac-rose'],
+   ['hosp','i-droplet','Hosp Meds','Hospital-supplied infusions','ac-teal'],
+   ['formulary','i-pill','Formulary','AMR KC carried medications','ac-violet'],
+   ['vent','i-lungs','Ventilator','IBW, tidal volume &amp; troubleshooting','ac-blue'],
+   ['pcs','i-key','PCS / Doors','Facility access codes','ac-amber'],
+   ['more','i-dots','More','Study tools, forms &amp; resources','ac-slate'],
   ].forEach(function(t){
-    h += '<button type="button" class="qa-tile" data-goto="'+t[0]+'">';
+    h += '<button type="button" class="qa-tile '+t[4]+'" data-goto="'+t[0]+'">';
     h += '<div class="qa-ico"><svg class="icon"><use href="#'+t[1]+'"></use></svg></div>';
     h += '<div class="qa-label">'+t[2]+'</div>';
     h += '<div class="qa-sub">'+t[3]+'</div></button>';
