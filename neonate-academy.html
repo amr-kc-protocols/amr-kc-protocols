@@ -881,16 +881,212 @@ var MODULES = [
 
   {
     id: 6,
-    available: false,
+    available: true,
     title: "The Airway — Intubation, LMA & Meconium",
-    desc: "ETT sizing and depth, blade selection, confirming placement, the laryngeal mask as rescue, and the updated approach to the non-vigorous meconium-stained newborn."
+    desc: "ETT sizing and depth, blade selection, confirming placement, the laryngeal mask as rescue, and the updated approach to the non-vigorous meconium-stained newborn.",
+    objective: "Select the correct endotracheal tube size and depth and laryngoscope blade, confirm tube placement reliably, use a laryngeal mask as a rescue airway, and apply the current (revised) management of the meconium-stained newborn.",
+    content: [
+      { h:"1", t:"When the airway becomes advanced", html:
+        "<p>Everything so far has rested on ventilation, and most of that ventilation is delivered by mask. But there are moments when a mask is not enough and the airway must be secured with a tube. The indications gather naturally from the earlier modules: <strong>ineffective or prolonged mask ventilation</strong> (the 'A' of MR SOPA), <strong>the need for chest compressions</strong> (an advanced airway makes ventilation reliable while the chest is compressed), <strong>endotracheal suctioning</strong> of an obstructed airway, and special situations such as a suspected diaphragmatic hernia or a very preterm infant needing surfactant.</p>"+
+        "<p>Intubation is a skill under pressure, and the honest truth is that a well-delivered mask ventilation saves more newborns than a hurried intubation attempt. So the airway ladder in this module is not a race to the tube — it is knowing how to place one correctly when the resuscitation genuinely calls for it, and having a rescue plan when you cannot.</p>"
+      },
+      { h:"2", t:"Sizing the tube and blade by weight", html:
+        "<p>Neonatal airway equipment is chosen by size, and the numbers are weight- and gestation-based. Commit the tube table to memory, because there is no time to look it up when a 1-kilogram infant is apneic:</p>"+
+        "<div class='formula'><span class='fk'>ETT (uncuffed)</span><br>&lt; 1 kg (&lt; 28 wk): <span class='fk'>2.5</span> &middot; 1–2 kg (28–34 wk): <span class='fk'>3.0</span><br>2–3 kg (34–38 wk): <span class='fk'>3.5</span> &middot; &gt; 3 kg (&gt; 38 wk): <span class='fk'>3.5–4.0</span></div>"+
+        "<p>The <strong>laryngoscope blade</strong> is straight (Miller), sized to gestation: a <strong>size 1</strong> for the term infant, a <strong>size 0</strong> for preterm, and a <strong>size 00</strong> for the extremely preterm. A straight blade is used because it lifts the floppy neonatal epiglottis directly, rather than sitting in the vallecula as a curved blade does in older patients.</p>"
+      },
+      { h:"3", t:"How deep? The insertion depth", html:
+        "<p>A tube in the trachea but too deep slides into the right mainstem bronchus and ventilates only one lung; too shallow and it slips out. Two reliable methods set the depth at the lip:</p>"+
+        "<div class='formula'>Depth at lip (cm) &asymp; <span class='fk'>weight (kg) + 6</span><br>&mdash; or use the <span class='fk'>nasal-tragus length</span> (NTL) + 1 cm</div>"+
+        "<p>The 'weight + 6' rule is the fast bedside estimate: a 3-kg infant is taped near 9 cm at the lip, a 2-kg near 8, a 1-kg near 7. The <strong>nasal-tragus length</strong> method — measuring from the base of the nasal septum to the tragus of the ear and adding 1 cm — is more accurate, especially at the extremes of size, and NRP favors a measured approach over the old weight-based rule when possible. Whichever you use, depth is an <em>estimate</em> to be confirmed, not a guarantee.</p>"
+      },
+      { h:"4", t:"Confirming the tube is in the trachea", html:
+        "<p>The most dangerous error in airway management is an unrecognized esophageal intubation — ventilating the stomach while the baby dies. Confirmation is therefore not optional, and the single best rapid confirmation is a piece of physiology you already know from Module 2: <strong>a rising heart rate</strong> with ventilation through the tube. But the objective confirmation that anchors it is the <strong>exhaled CO₂ detector</strong>:</p>"+
+        "<ul>"+
+        "<li><strong>Exhaled (end-tidal) CO₂ detection</strong> — a colorimetric detector that changes color (typically to yellow) when CO₂ is present confirms the tube is in the trachea. This is the primary objective confirmation of correct placement. (Caveat: in a truly pulseless newborn with no pulmonary blood flow, CO₂ may not be detected despite correct placement — so interpret it alongside the clinical picture.)</li>"+
+        "<li><strong>A prompt rise in heart rate</strong> and improving oxygen saturation.</li>"+
+        "<li><strong>Bilateral, equal breath sounds</strong> in the axillae, symmetric chest rise, and no air sounds over the stomach.</li>"+
+        "<li><strong>Mist</strong> in the tube on exhalation (supportive, not definitive).</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Confirm every tube: a color-changing CO₂ detector plus a rising heart rate is the fast, reliable combination. If the heart rate is not improving and the detector is not changing color, assume the tube is misplaced and act.</div>"
+      },
+      { h:"5", t:"The laryngeal mask — the rescue airway", html:
+        "<p>Intubation can fail, and some airways cannot be intubated at all. The <strong>laryngeal mask airway (LMA)</strong> is the neonatal rescue airway — a small supraglottic device that seats over the laryngeal opening and delivers effective positive-pressure ventilation without passing through the cords. It has earned a defined place in the algorithm:</p>"+
+        "<ul>"+
+        "<li>When <strong>mask ventilation is ineffective</strong> and <strong>intubation has failed or is not feasible</strong> — the classic 'cannot ventilate, cannot intubate' rescue.</li>"+
+        "<li>It is particularly valuable for airway anomalies where a mask seal is poor or the glottis is hard to visualize.</li>"+
+        "</ul>"+
+        "<p>Its limits matter too: standard neonatal LMAs are sized for infants roughly <strong>≥ 34 weeks / ≥ 2 kg</strong>, so they are not a solution for the tiniest preterm infants, and they do not allow reliable tracheal suctioning. But as a bridge that restores effective ventilation when the mask and the tube have both failed, the LMA can be lifesaving — and it belongs on every neonatal resuscitation cart.</p>"
+      },
+      { h:"6", t:"Meconium: the big change", html:
+        "<p>Meconium-stained amniotic fluid — the fetus has passed stool in utero — raises the fear of meconium aspiration, and for decades the teaching was aggressive: intubate and suction the trachea of any meconium-exposed newborn. <strong>That approach has been abandoned</strong>, and the change is one of the most heavily tested points in modern neonatal resuscitation.</p>"+
+        "<p>The management now turns entirely on whether the infant is <em>vigorous</em>:</p>"+
+        "<ul>"+
+        "<li><strong>Vigorous newborn</strong> (good tone, breathing/crying, HR &gt; 100) — no special airway management. Routine care; suction only if secretions obstruct the airway. This was always true.</li>"+
+        "<li><strong>Non-vigorous newborn</strong> (poor tone, apneic or not breathing) — the current guidance is <strong>NOT to perform routine intubation and tracheal suctioning.</strong> Instead, you do exactly what you would for any apneic newborn: begin the initial steps and, if still apneic or HR &lt; 100, <strong>start positive-pressure ventilation within the Golden Minute.</strong></li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> A non-vigorous meconium-stained newborn no longer gets routine tracheal intubation and suctioning. Ventilate. Do not delay the life-saving intervention — PPV — to perform a suctioning ritual that the evidence does not support.</div>"
+      },
+      { h:"7", t:"Why the meconium change makes sense", html:
+        "<p>The reversal was not arbitrary — it followed the evidence, and understanding why cements it. Routine tracheal suctioning of non-vigorous meconium-exposed newborns was found <em>not</em> to improve outcomes (it did not reduce meconium aspiration syndrome or mortality), while it <em>did</em> carry real harms: the procedure delayed the start of effective ventilation — the one intervention that helps — and the laryngoscopy and suctioning could themselves cause hypoxia, bradycardia, and airway injury.</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — routine meconium suctioning</span>"+
+        "<p>Trials and reviews found no benefit from routine intubation and tracheal suctioning of non-vigorous newborns with meconium-stained fluid compared with immediately starting resuscitation, and the delay it introduced was potentially harmful. Guidelines (NRP, ILCOR) now recommend against routine tracheal suctioning and prioritize prompt ventilation. Endotracheal suctioning is reserved for the specific case of a suspected airway obstruction that is preventing effective ventilation.</p>"+
+        "<div class='grade'>Quality: moderate (randomized and observational data supporting the guideline change).</div></div>"+
+        "<p>The through-line is the same physiology this whole course rests on: the meconium-exposed newborn who is in trouble is in trouble because of hypoxia, and the fix is ventilation — not a detour to clean the trachea while the clock runs.</p>"
+      },
+      { h:"8", t:"The airway anchor", html:
+        "<p>Bring the airway together as a ladder, climbed only as far as the resuscitation demands:</p>"+
+        "<ul>"+
+        "<li><strong>Mask PPV</strong> — the foundation; most newborns need nothing more.</li>"+
+        "<li><strong>Intubation</strong> — when mask ventilation is ineffective or prolonged, for compressions, or for special situations. Tube by weight (2.5 / 3.0 / 3.5 / 3.5–4.0), straight blade (size 1 / 0 / 00), depth by 'weight + 6' or nasal-tragus length + 1.</li>"+
+        "<li><strong>Confirm</strong> with a colorimetric CO₂ detector plus a rising heart rate — always.</li>"+
+        "<li><strong>Laryngeal mask</strong> — the rescue when you cannot ventilate and cannot intubate (≥ 34 wk / ≥ 2 kg).</li>"+
+        "<li><strong>Meconium</strong> — vigorous: routine care; non-vigorous: ventilate, do <em>not</em> routinely intubate to suction.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Securing the airway serves one master — effective ventilation. Choose the right tube and blade, prove the tube is tracheal, keep an LMA ready as rescue, and never let an airway procedure delay the ventilation a non-vigorous newborn needs.</div>"
+      }
+    ],
+    quiz: [
+      { q:"Which laryngoscope blade is used for a term newborn?",
+        opts:["Curved (Macintosh) size 2","Straight (Miller) size 1","Straight (Miller) size 00","Curved (Macintosh) size 1"], ans:1,
+        expl:"A straight (Miller) blade is used to directly lift the floppy neonatal epiglottis — size 1 for term, 0 for preterm, 00 for extremely preterm. Curved blades are for older patients." },
+      { q:"The correct endotracheal tube size for a term newborn over 3 kg is:",
+        opts:["2.5","3.0","3.5–4.0","4.5"], ans:2,
+        expl:"ETT sizes by weight: 2.5 for <1 kg, 3.0 for 1–2 kg, 3.5 for 2–3 kg, and 3.5–4.0 for >3 kg. All are uncuffed in the newborn." },
+      { q:"Using the 'weight + 6' rule, a 2-kg infant's ETT should be taped at approximately what depth at the lip?",
+        opts:["6 cm","8 cm","10 cm","12 cm"], ans:1,
+        expl:"Depth at the lip ≈ weight (kg) + 6, so a 2-kg infant is taped near 8 cm. The nasal-tragus-length method (NTL + 1 cm) is more accurate, especially at size extremes." },
+      { q:"The primary OBJECTIVE method to confirm an endotracheal tube is in the trachea is:",
+        opts:["Chest X-ray","An exhaled (end-tidal) CO₂ detector","Mist in the tube","Palpating the neck"], ans:1,
+        expl:"A colorimetric exhaled-CO₂ detector changing color confirms tracheal placement and is the primary objective confirmation, alongside a rising heart rate. (In a pulseless infant with no pulmonary flow, CO₂ may not register despite correct placement.)" },
+      { q:"An intubated newborn's heart rate is not improving and the CO₂ detector is not changing color. You should:",
+        opts:["Continue ventilating and reassess in 5 minutes","Assume the tube is misplaced and act (reposition or remove)","Give epinephrine down the tube","Increase the ventilation rate"], ans:1,
+        expl:"No color change plus no heart-rate rise strongly suggests esophageal or misplaced intubation — an unrecognized esophageal tube is lethal. Assume misplacement and correct it immediately." },
+      { q:"The laryngeal mask airway (LMA) in neonatal resuscitation is best described as:",
+        opts:["The first-line airway for all newborns","A rescue airway when mask ventilation is ineffective and intubation has failed or isn't feasible","A device for tracheal suctioning","Only for infants under 1 kg"], ans:1,
+        expl:"The LMA is the rescue airway for 'cannot ventilate, cannot intubate' situations. It is sized for infants ≥ ~34 weeks / ≥ 2 kg and does not allow reliable tracheal suctioning." },
+      { q:"A non-vigorous newborn is born through meconium-stained fluid, apneic with poor tone. The current recommended management is:",
+        opts:["Immediate routine intubation and tracheal suctioning","Begin the initial steps and start PPV if apneic or HR < 100","Deep bulb suctioning of the pharynx before any breaths","Chest compressions first"], ans:1,
+        expl:"Routine tracheal intubation/suctioning of the non-vigorous meconium-exposed newborn is no longer recommended. Treat as any apneic newborn: initial steps, then PPV within the Golden Minute. Ventilation is the priority." },
+      { q:"A VIGOROUS newborn (good tone, crying, HR 150) born through meconium-stained fluid should receive:",
+        opts:["Routine tracheal suctioning","Routine care, with suctioning only if the airway is obstructed","Prophylactic intubation","Immediate CPAP"], ans:1,
+        expl:"A vigorous meconium-exposed newborn needs only routine care; suction only if secretions obstruct the airway. Vigorous infants have never required special airway management." },
+      { q:"Routine tracheal suctioning of non-vigorous meconium-exposed newborns was abandoned because it:",
+        opts:["Was too expensive","Did not improve outcomes and delayed effective ventilation","Caused meconium aspiration","Required specialized equipment"], ans:1,
+        expl:"Evidence showed no reduction in meconium aspiration syndrome or mortality, while the procedure delayed the start of ventilation and could itself cause hypoxia and bradycardia — so guidelines prioritize prompt ventilation instead." },
+      { q:"A straight blade is preferred over a curved blade in the newborn because it:",
+        opts:["Is smaller and cheaper","Directly lifts the floppy neonatal epiglottis","Fits into the vallecula better","Reduces the risk of esophageal intubation"], ans:1,
+        expl:"The neonatal epiglottis is large and floppy; a straight (Miller) blade lifts it directly to expose the glottis, whereas a curved blade designed to sit in the vallecula does not reliably control it in a newborn." }
+    ]
   },
 
   {
     id: 7,
-    available: false,
+    available: true,
     title: "Prematurity & Thermoregulation",
-    desc: "Preterm-specific risks, the polyethylene-wrap/hat thermal bundle, hypoglycemia, surfactant and gentle ventilation, and the vulnerable preterm brain."
+    desc: "Preterm-specific risks, the polyethylene-wrap/hat thermal bundle, hypoglycemia, surfactant and gentle ventilation, and the vulnerable preterm brain.",
+    objective: "Explain why the preterm newborn is uniquely vulnerable, maintain normothermia with the thermal bundle, protect the fragile preterm lung and brain with gentle ventilation and controlled oxygen, and anticipate hypoglycemia.",
+    content: [
+      { h:"1", t:"Why the preterm newborn is different", html:
+        "<p>Everything you have learned applies to the preterm infant — but preterm physiology turns several dials to the danger zone at once, and the resuscitation must respect that. The preterm newborn arrives with a stack of vulnerabilities that all point the same direction:</p>"+
+        "<ul>"+
+        "<li><strong>Thin skin and a huge surface-area-to-mass ratio</strong> — they lose heat catastrophically fast.</li>"+
+        "<li><strong>Surfactant-deficient lungs</strong> — the alveoli want to collapse, so ventilation is both more necessary and more dangerous.</li>"+
+        "<li><strong>Fragile brain vasculature</strong> — the germinal matrix bleeds easily, making intraventricular hemorrhage a constant threat.</li>"+
+        "<li><strong>Immature antioxidant defenses</strong> — they are exquisitely sensitive to oxygen toxicity.</li>"+
+        "<li><strong>Minimal glycogen and fat stores</strong> — hypoglycemia and heat loss come quickly.</li>"+
+        "</ul>"+
+        "<p>The theme of preterm resuscitation is therefore <em>gentleness</em>: enough support to establish the transition, delivered carefully enough not to injure lungs, brain, or eyes in the process. The preterm infant punishes both too little and too much.</p>"
+      },
+      { h:"2", t:"Heat: the vital sign you can lose in minutes", html:
+        "<p>Thermoregulation is not a comfort measure — it is a resuscitation priority, and hypothermia is an independent predictor of newborn mortality, worst in the preterm. A cold newborn burns oxygen and glucose trying to generate heat, worsens acidosis, and slides toward the very instability you are fighting. The target is narrow and specific:</p>"+
+        "<div class='formula'>Target axillary temperature: <span class='fk'>36.5–37.5&deg;C</span> (97.7–99.5&deg;F)</div>"+
+        "<p>Note that hyper<em>thermia</em> is harmful too — an overheated newborn (often from an overzealous warmer) has worse outcomes — so the goal is a controlled normal temperature, not maximal warming. On transport, where a newborn can be exposed to cold ambulances, aircraft, and outside air, thermal control is one of the things most likely to deteriorate if you are not deliberate about it.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Temperature is a resuscitation vital sign. Aim for 36.5–37.5&deg;C — both hypothermia and hyperthermia worsen outcomes. In the preterm and in transport, heat is lost fast and must be actively defended.</div>"
+      },
+      { h:"3", t:"The thermal bundle", html:
+        "<p>For the term or late-preterm newborn, the initial steps handle thermal care: a preheated radiant warmer, prompt drying, and removal of wet linens, plus a hat and warm blankets. But drying is <em>not</em> enough for the very preterm infant, whose skin loses heat and water too fast — so a specific bundle is layered on:</p>"+
+        "<ul>"+
+        "<li><strong>Polyethylene plastic wrap or bag</strong> — for infants below about <strong>32 weeks (≤ ~1500 g)</strong>, place the infant, <em>without drying the body</em>, into a food-grade plastic wrap or bag up to the neck immediately at birth. The plastic traps heat and moisture against the skin.</li>"+
+        "<li><strong>A hat</strong> — the head is a large fraction of a preterm's surface area; cover it.</li>"+
+        "<li><strong>A radiant warmer</strong>, ideally with a <strong>servo-controlled</strong> skin probe that adjusts output to hold the target temperature.</li>"+
+        "<li><strong>A thermal mattress</strong> (exothermic gel pad) and a <strong>warm room</strong> (raise the delivery-room temperature for very preterm births).</li>"+
+        "</ul>"+
+        "<div class='evidence'><span class='etag'>Evidence check — plastic wrap in the very preterm</span>"+
+        "<p>Immediately placing very preterm infants (&lt; 32 weeks) in polyethylene wrap without drying, under a radiant warmer, significantly reduces admission hypothermia compared with drying and blankets alone, and normothermia on admission is associated with better survival. The bundle — wrap, hat, servo warmer, warm room — is standard practice.</p>"+
+        "<div class='grade'>Quality: high (randomized trials and consistent observational outcome data).</div></div>"
+      },
+      { h:"4", t:"The preterm lung: gentle from the first breath", html:
+        "<p>The surfactant-deficient preterm lung is a paradox: it desperately needs to be opened, yet it is easily torn by the very pressures that open it. Volutrauma and barotrauma from over-vigorous ventilation set off the inflammatory cascade that becomes chronic lung disease. So preterm ventilation is deliberately restrained:</p>"+
+        "<ul>"+
+        "<li><strong>Start with CPAP when possible.</strong> The preterm infant who is breathing spontaneously but laboring benefits from CPAP (~5 cmH₂O) to hold the alveoli open, and a CPAP-first strategy (Module 2) reduces intubation and its harms.</li>"+
+        "<li><strong>Use PEEP</strong> during any PPV, to keep the surfactant-poor alveoli from collapsing between breaths — the T-piece resuscitator's reliable PEEP is one reason it is favored in preterm resuscitation.</li>"+
+        "<li><strong>Use the least pressure that moves the chest</strong>, avoiding large tidal volumes.</li>"+
+        "<li><strong>Surfactant</strong> — replacement surfactant, given via the endotracheal tube, is a cornerstone of care for the surfactant-deficient preterm lung; a resuscitation team should anticipate its need in the very preterm.</li>"+
+        "</ul>"
+      },
+      { h:"5", t:"Oxygen and the preterm eye and brain", html:
+        "<p>Module 3 made the case that oxygen is a drug; in the preterm infant that case becomes urgent. Their immature antioxidant systems cannot mop up the free radicals that excess oxygen generates, and the consequences are specific and lifelong: <strong>retinopathy of prematurity</strong> (abnormal retinal vessel growth that can blind), <strong>chronic lung disease</strong>, and oxidative brain injury.</p>"+
+        "<p>The response is the same discipline, applied more strictly: start preterm resuscitation in a low oxygen concentration (about 21–30%), attach the preductal pulse oximeter, and titrate carefully to the minute-by-minute SpO₂ targets — neither letting the infant sit hypoxic nor overshooting into hyperoxia. The preterm infant is the patient in whom the phrase 'the least oxygen needed' is not a preference but a protection against blindness and lung disease.</p>"
+      },
+      { h:"6", t:"The fragile preterm brain", html:
+        "<p>The preterm brain carries a delicate network of vessels in the <strong>germinal matrix</strong> that rupture easily, producing <strong>intraventricular hemorrhage (IVH)</strong> — one of the most feared complications of prematurity, with consequences from mild to devastating. Much of what you do in a preterm resuscitation is, indirectly, IVH prevention, because the bleeding is provoked by swings in pressure and flow:</p>"+
+        "<ul>"+
+        "<li><strong>Avoid rapid swings in blood pressure and volume</strong> — this is exactly why volume boluses are given slowly in the preterm (Module 5).</li>"+
+        "<li><strong>Avoid wide swings in CO₂</strong> — both very low CO₂ (from over-ventilation) and very high CO₂ alter cerebral blood flow; gentle, steady ventilation protects the brain.</li>"+
+        "<li><strong>Avoid hypoxia, hyperoxia, and hypothermia</strong>, all of which stress the cerebral circulation.</li>"+
+        "<li><strong>Handle gently and keep the head midline</strong> where feasible, and use delayed cord clamping (Module 3), which itself reduces IVH.</li>"+
+        "</ul>"+
+        "<p>The unifying idea: the preterm brain wants <em>stability</em> — steady pressure, steady flow, steady gases, steady temperature. Every abrupt correction is a small insult to it.</p>"
+      },
+      { h:"7", t:"Hypoglycemia and fluid in the preterm", html:
+        "<p>The preterm infant is born with minimal glycogen and fat, so its glucose reserve is shallow and drains fast — faster still after the metabolic demand of a resuscitation or cold stress. <strong>Hypoglycemia</strong> is common and, because glucose is the brain's fuel, it is itself a cause of neurologic injury. The response is to <strong>monitor blood glucose early and treat it</strong>, maintaining a safe level with dextrose-containing fluids once the infant is stabilized — a task that carries straight into the transport stabilization of Module 8.</p>"+
+        "<p>Fluids in general are handled with the preterm's fragility in mind: dextrose to protect the brain's fuel supply, but volume given cautiously and slowly to protect against IVH. The recurring pattern holds — support what the preterm lacks, but never with an abruptness that injures.</p>"
+      },
+      { h:"8", t:"The prematurity anchor", html:
+        "<p>Preterm resuscitation is the same algorithm played with a lighter touch and a wider set of anticipated harms. Hold the bundle of protections together:</p>"+
+        "<ul>"+
+        "<li><strong>Thermal:</strong> normothermia 36.5–37.5&deg;C — plastic wrap without drying for &lt; 32 weeks, hat, servo warmer, warm room.</li>"+
+        "<li><strong>Lung:</strong> CPAP-first when possible, PEEP, least pressure that works, anticipate surfactant.</li>"+
+        "<li><strong>Oxygen:</strong> start low, titrate to preductal SpO₂ targets, guard against hyperoxia and its eye/lung injury.</li>"+
+        "<li><strong>Brain:</strong> steady pressure, flow, CO₂, and temperature; slow volume; gentle handling — to prevent IVH.</li>"+
+        "<li><strong>Glucose:</strong> anticipate and treat hypoglycemia.</li>"+
+        "</ul>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The preterm infant is injured by both too little and too much. Keep it warm, ventilate it gently with PEEP, give the least oxygen that hits the target, keep everything steady to spare the brain, and watch the glucose. Gentleness is the whole strategy.</div>"
+      }
+    ],
+    quiz: [
+      { q:"The target axillary temperature for a newborn after birth is:",
+        opts:["35.0–36.0°C","36.5–37.5°C","37.5–38.5°C","As high as the warmer allows"], ans:1,
+        expl:"Maintain 36.5–37.5°C. Both hypothermia and hyperthermia worsen outcomes, so the goal is a controlled normal temperature — not maximal warming. Hypothermia is an independent predictor of newborn mortality." },
+      { q:"For an infant born at less than 32 weeks, a key additional thermal measure is to:",
+        opts:["Dry vigorously and wrap in cotton blankets","Place the infant, without drying the body, in polyethylene plastic wrap","Give warmed IV fluids first","Delay all thermal care until the airway is secured"], ans:1,
+        expl:"Very preterm infants (<32 weeks) are placed in polyethylene wrap/bag WITHOUT drying the body, under a radiant warmer, with a hat and warm room. This bundle significantly reduces admission hypothermia." },
+      { q:"Which preterm vulnerability makes controlled oxygen especially critical?",
+        opts:["Excess surfactant","Immature antioxidant defenses, risking retinopathy of prematurity","A rapid metabolism","Thick, protective skin"], ans:1,
+        expl:"Preterm infants have immature antioxidant systems and are highly susceptible to oxygen free-radical injury — retinopathy of prematurity, chronic lung disease, and oxidative brain injury. Titrate to the least oxygen needed." },
+      { q:"Ventilation of the surfactant-deficient preterm lung should emphasize:",
+        opts:["High peak pressures to fully open the lung","Gentle ventilation with PEEP and the least pressure that moves the chest","No PEEP, to avoid barotrauma","Rapid rates over 80/min"], ans:1,
+        expl:"The preterm lung is easily injured by volu-/barotrauma. Use CPAP when possible, PEEP to prevent alveolar collapse, and the least pressure that moves the chest; anticipate surfactant. Gentleness prevents chronic lung disease." },
+      { q:"Intraventricular hemorrhage in the preterm arises from the fragile:",
+        opts:["Germinal matrix vasculature","Choroid plexus only","Dura mater","Spinal cord"], ans:0,
+        expl:"The germinal matrix carries delicate vessels that rupture easily, causing intraventricular hemorrhage. It is provoked by swings in pressure, flow, CO₂, and temperature — which is why preterm care emphasizes stability." },
+      { q:"Why are volume boluses given slowly in the preterm infant?",
+        opts:["To conserve fluid","A rapid rise in volume/pressure increases the risk of intraventricular hemorrhage","Preterm veins are too small","To allow time for lab results"], ans:1,
+        expl:"Rapid changes in intravascular volume and pressure can rupture the fragile germinal-matrix vessels and cause IVH, so volume is infused slowly (over 5–10 minutes) in preterm infants." },
+      { q:"The preterm newborn is at high risk of hypoglycemia primarily because of:",
+        opts:["Excess insulin production","Minimal glycogen and fat stores","Impaired glucose absorption","Maternal diabetes only"], ans:1,
+        expl:"Preterm infants are born with minimal glycogen and fat reserves, which drain quickly — especially after a resuscitation or cold stress. Because glucose fuels the brain, hypoglycemia must be monitored and treated early." },
+      { q:"A CPAP-first strategy is favored in the spontaneously breathing preterm infant because it:",
+        opts:["Eliminates the need for oxygen","Reduces the need for intubation and its associated lung injury","Warms the infant","Prevents all IVH"], ans:1,
+        expl:"CPAP holds the surfactant-poor alveoli open non-invasively and reduces the need for intubation and mechanical ventilation, protecting the fragile preterm lung from ventilator-associated injury." },
+      { q:"The unifying principle protecting the fragile preterm brain during resuscitation is to:",
+        opts:["Maximize blood pressure","Maintain stability of pressure, flow, CO₂, and temperature","Keep oxygen at 100%","Cool the infant deliberately"], ans:1,
+        expl:"The preterm brain is injured by abrupt swings; it wants steadiness — steady pressure, flow, CO₂, and temperature. Slow volume, gentle ventilation, controlled oxygen, and delayed cord clamping all reduce IVH." },
+      { q:"Hyperthermia in a newborn during resuscitation is:",
+        opts:["Beneficial and a goal of warming","Harmful and associated with worse outcomes","Only a concern in term infants","Impossible under a radiant warmer"], ans:1,
+        expl:"Overheating worsens outcomes, so the goal is controlled normothermia (36.5–37.5°C), not maximal warming. A servo-controlled warmer helps hold the target without overshooting into hyperthermia." }
+    ]
   },
 
   {
