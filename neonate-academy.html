@@ -1091,9 +1091,93 @@ var MODULES = [
 
   {
     id: 8,
-    available: false,
+    available: true,
     title: "Stabilization & Transport — S.T.A.B.L.E.",
-    desc: "Post-resuscitation care en route: the S.T.A.B.L.E. mnemonic, glucose and thermal management, prostaglandin for duct-dependent lesions, and transport logistics."
+    desc: "Post-resuscitation care en route: the S.T.A.B.L.E. mnemonic, glucose and thermal management, prostaglandin for duct-dependent lesions, and transport logistics.",
+    objective: "Apply the S.T.A.B.L.E. framework to the post-resuscitation newborn, manage glucose and temperature on transport, recognize the duct-dependent lesion that needs prostaglandin, and carry out a safe neonatal transfer.",
+    content: [
+      { h:"1", t:"After the resuscitation: the second job", html:
+        "<p>Resuscitation gets the newborn back; <em>stabilization</em> keeps it there. For a critical-care transport crew this second job is often the whole mission — you are frequently called not to the delivery itself but to move an already-resuscitated newborn from a community hospital to a NICU, and the hour you spend stabilizing and transporting is where that infant is won or lost. A newborn who was successfully resuscitated but then allowed to go cold, hypoglycemic, or under-ventilated in the back of a truck has not been helped.</p>"+
+        "<p>The organizing framework for this phase is the <strong>S.T.A.B.L.E. program</strong> — a structured, memorable checklist that makes sure nothing critical is dropped during stabilization and transport. It is the neonatal-transport counterpart to the resuscitation algorithm: six domains, each a letter, run in order and rechecked continuously.</p>"
+      },
+      { h:"2", t:"The S.T.A.B.L.E. framework", html:
+        "<p>Each letter is a domain of post-resuscitation care. Learn the expansion, because the mnemonic is the scaffold for the rest of this module:</p>"+
+        "<div class='formula'><span class='fk'>S</span> &mdash; Sugar (&amp; Safe care)<br><span class='fk'>T</span> &mdash; Temperature<br><span class='fk'>A</span> &mdash; Airway<br><span class='fk'>B</span> &mdash; Blood pressure<br><span class='fk'>L</span> &mdash; Lab work<br><span class='fk'>E</span> &mdash; Emotional support</div>"+
+        "<p>Notice that S.T.A.B.L.E. deliberately puts <strong>Sugar and Temperature first</strong> — the two things most easily lost and most quickly damaging in a small newborn, and the two most likely to deteriorate during transport if no one is watching. The letters are a sequence to work through and a loop to keep re-running as the transfer unfolds.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> S.T.A.B.L.E. — Sugar, Temperature, Airway, Blood pressure, Lab work, Emotional support. It is the checklist that carries a resuscitated newborn safely from the resuscitation room to the NICU.</div>"
+      },
+      { h:"3", t:"S — Sugar (and safe care)", html:
+        "<p>The 'S' comes first because hypoglycemia is common after a resuscitation (Modules 5 and 7) and, unmanaged, it injures the brain. The newborn's glycogen stores are shallow and were spent on the resuscitation, so glucose must be actively maintained:</p>"+
+        "<div class='formula'>Maintain blood glucose &gt; <span class='fk'>~45–50 mg/dL</span><br>Treat with IV dextrose (D10W) &mdash; do not rely on feeds in a sick newborn</div>"+
+        "<p>Check the glucose early and repeatedly, and treat low values with intravenous dextrose — typically D10W as a maintenance infusion, with a bolus for symptomatic or very low levels. A sick or preterm newborn being transported should generally not be fed enterally; its glucose is protected by the IV. 'Safe care' rounds out the letter: correct patient identification, gentle handling, infection precautions, and attention to the family — the groundwork that prevents secondary harm.</p>"
+      },
+      { h:"4", t:"T — Temperature", html:
+        "<p>Temperature carries directly over from Module 7, and it is the domain most at risk on transport, where a newborn faces cold hospital corridors, ambulances, aircraft, and outside air. The target is unchanged — a controlled <strong>36.5–37.5&deg;C</strong> — and both hypothermia and hyperthermia are harmful.</p>"+
+        "<p>On transport this means a warmed transport incubator, the plastic-wrap and hat bundle for the preterm, warmed surfaces, and vigilant temperature monitoring rather than a one-time check. There is a single, important exception to warming: an infant undergoing evaluation for <strong>hypoxic-ischemic encephalopathy</strong> may be a candidate for <em>therapeutic hypothermia</em>, in which cooling is deliberate and protective — but that is a specific, protocol-driven decision made with the receiving center, never an accidental cold newborn. Absent that, keep the infant normothermic.</p>"
+      },
+      { h:"5", t:"A — Airway, and B — Blood pressure", html:
+        "<p><strong>A &mdash; Airway.</strong> Confirm that whatever airway got the infant here is still working and will keep working through the jostling of transport. Reassess the work of breathing, the oxygen saturation against the age-appropriate target, and — if the infant is intubated — that the tube is secured, at the right depth, and confirmed (the CO₂ detector and breath sounds of Module 6). Have suction and the airway kit within arm's reach; a tube that dislodges in a moving ambulance is an emergency you must be positioned to fix instantly.</p>"+
+        "<p><strong>B &mdash; Blood pressure.</strong> Assess perfusion — heart rate, capillary refill, pulses, and blood pressure where available. Poor perfusion after resuscitation may reflect residual hypovolemia (revisit the volume of Module 5), sepsis, or cardiac dysfunction. Support perfusion with judicious volume for the hypovolemic infant and, when shock persists despite volume, the receiving neonatologist may direct inotropic support. The goal is adequate organ perfusion, assessed continuously, not a single number.</p>"
+      },
+      { h:"6", t:"L — Lab work, and E — Emotional support", html:
+        "<p><strong>L &mdash; Lab work.</strong> The labs that matter most in neonatal stabilization point at the threats you cannot see: a <strong>blood glucose</strong> (again — it is that important), a <strong>blood gas</strong> to gauge ventilation and acid-base status, and a <strong>complete blood count</strong>. Critically, S.T.A.B.L.E. emphasizes <strong>infection</strong> — sepsis is a great mimic in the newborn, can look exactly like other forms of distress, and is common enough that blood cultures are drawn and <strong>empiric antibiotics</strong> are frequently started early in a sick newborn rather than waiting for proof.</p>"+
+        "<p><strong>E &mdash; Emotional support.</strong> This letter is not filler. A neonatal transport is a family crisis: a mother who may still be recovering from delivery is being separated from a critically ill baby who is leaving in someone else's hands. Brief, honest communication, letting the parents see and touch the infant when possible, and providing information about where the baby is going are part of the standard of care — and a crew that handles this well is remembered long after the transport.</p>"
+      },
+      { h:"7", t:"The blue baby who won't improve: prostaglandin", html:
+        "<p>One specific scenario deserves its own footing, because missing it is fatal and recognizing it is lifesaving. Consider a newborn with persistent <strong>cyanosis or shock that does not respond to oxygen and ventilation</strong> — you are doing everything right and the infant stays blue, or collapses into shock in the first days of life. Think of a <strong>duct-dependent congenital heart lesion.</strong></p>"+
+        "<p>Some cardiac malformations survive in utero only because the ductus arteriosus is open, shunting blood around the defect. As the ductus naturally closes after birth (Module 1), the infant abruptly decompensates — turning profoundly cyanotic (duct-dependent pulmonary blood flow) or into shock with absent pulses (duct-dependent systemic blood flow). The treatment is to <strong>reopen and maintain the ductus with a prostaglandin (PGE₁) infusion</strong>:</p>"+
+        "<div class='evidence'><span class='etag'>Evidence check — PGE₁ for duct-dependent lesions</span>"+
+        "<p>Prostaglandin E₁ maintains ductal patency and is life-saving in duct-dependent congenital heart disease, restoring pulmonary or systemic blood flow until surgical or catheter intervention. A key transport caveat: PGE₁ can cause <strong>apnea</strong> (as well as hypotension and fever), so a newborn started on prostaglandin for transport often needs the airway secured or close apnea monitoring. The classic teaching is that a cyanotic newborn who does not improve with oxygen should raise suspicion of cardiac disease — the 'hyperoxia test' logic — and prompt consideration of PGE₁ in consultation with the receiving center.</p>"+
+        "<div class='grade'>Quality: high for efficacy (well-established standard of care); apnea is a recognized, expected effect.</div></div>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> A newborn who stays cyanotic or shocked despite good oxygenation and ventilation may have a duct-dependent heart lesion. PGE₁ keeps the duct open and is life-saving — but be ready for apnea and protect the airway on transport.</div>"
+      },
+      { h:"8", t:"The transport anchor, and the course close", html:
+        "<p>Neonatal transport is applied stabilization: you run S.T.A.B.L.E. before you leave, and you keep re-running it the entire way, because the moving, cold, cramped environment of an ambulance or aircraft erodes exactly the things a small newborn cannot spare.</p>"+
+        "<ul>"+
+        "<li><strong>S</strong>ugar &mdash; maintain glucose with IV dextrose; recheck often.</li>"+
+        "<li><strong>T</strong>emperature &mdash; defend 36.5–37.5&deg;C aggressively en route (unless a cooling protocol applies).</li>"+
+        "<li><strong>A</strong>irway &mdash; secure, confirmed, and reachable, with suction ready.</li>"+
+        "<li><strong>B</strong>lood pressure &mdash; perfusion supported and continuously reassessed.</li>"+
+        "<li><strong>L</strong>ab work &mdash; glucose, gas, CBC; treat presumed sepsis early.</li>"+
+        "<li><strong>E</strong>motional support &mdash; care for the family, not just the infant.</li>"+
+        "<li>And the special save: <strong>PGE₁</strong> for the duct-dependent 'blue baby' who won't pink up.</li>"+
+        "</ul>"+
+        "<p>Step back and see the whole arc of this academy. You learned that the newborn's crisis is almost always a <em>ventilation</em> problem and that the first minute belongs to opening the lungs (Modules 1–2); you learned to titrate oxygen and manage the cord (Module 3); to add compressions, drugs, and volume in the rare cases ventilation alone doesn't fix (Modules 4–5); to secure the airway and handle meconium (Module 6); to protect the fragile preterm (Module 7); and finally to stabilize and safely transport the newborn you saved (Module 8). One idea threads all eight: <strong>ventilate the lungs, keep the baby warm and sugared and stable, and be gentle</strong> — and most newborns will do the rest themselves.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Resuscitation revives; S.T.A.B.L.E. transport delivers. Sugar and temperature first, airway confirmed and reachable, perfusion supported, sepsis treated early, family cared for — and PGE₁ ready for the duct-dependent newborn. When you're ready, the final examination draws from all eight modules.</div>"
+      }
+    ],
+    quiz: [
+      { q:"What does the S.T.A.B.L.E. mnemonic stand for?",
+        opts:["Sugar, Temperature, Airway, Blood pressure, Lab work, Emotional support","Stabilize, Transport, Assess, Breathe, Listen, Evaluate","Sugar, Tone, Apnea, Breathing, Lungs, ECG","Safety, Timing, Airway, Blood, Labs, Exam"], ans:0,
+        expl:"S.T.A.B.L.E. = Sugar (& safe care), Temperature, Airway, Blood pressure, Lab work, Emotional support — the structured framework for post-resuscitation stabilization and neonatal transport." },
+      { q:"S.T.A.B.L.E. deliberately places which two domains first?",
+        opts:["Airway and Blood pressure","Sugar and Temperature","Lab work and Emotional support","Blood pressure and Lab work"], ans:1,
+        expl:"Sugar and Temperature lead because they are the most easily lost and most quickly damaging in a small newborn — and the most likely to deteriorate during transport if not actively managed." },
+      { q:"After resuscitation, blood glucose should generally be maintained above approximately:",
+        opts:["20 mg/dL","45–50 mg/dL","100 mg/dL","150 mg/dL"], ans:1,
+        expl:"Maintain glucose above ~45–50 mg/dL, treating with IV dextrose (D10W). A resuscitated newborn has depleted glycogen stores, and hypoglycemia injures the brain, so glucose is checked early and often." },
+      { q:"The target temperature during neonatal stabilization and transport is:",
+        opts:["35.0–36.0°C","36.5–37.5°C","38.0–39.0°C","As warm as possible"], ans:1,
+        expl:"Maintain 36.5–37.5°C — the same target as in resuscitation. The exception is protocol-driven therapeutic hypothermia for suspected hypoxic-ischemic encephalopathy, which is a deliberate, coordinated decision." },
+      { q:"Under the 'L' (Lab work) of S.T.A.B.L.E., which threat is especially emphasized in the sick newborn?",
+        opts:["Hyperkalemia","Infection/sepsis — often prompting early empiric antibiotics","Hypercalcemia","Thyroid disease"], ans:1,
+        expl:"Sepsis is a great mimic in the newborn and common enough that blood cultures are drawn and empiric antibiotics are frequently started early, alongside a glucose, blood gas, and CBC — rather than waiting for confirmation." },
+      { q:"A newborn remains deeply cyanotic despite effective oxygenation and ventilation. You should suspect:",
+        opts:["Simple transient tachypnea","A duct-dependent congenital heart lesion","Hypoglycemia","Meconium aspiration"], ans:1,
+        expl:"Cyanosis that does not improve with oxygen and ventilation suggests a duct-dependent congenital heart lesion. As the ductus closes, the infant decompensates — the basis of the 'hyperoxia test' logic pointing toward cardiac disease." },
+      { q:"The treatment that maintains ductal patency in a duct-dependent heart lesion is:",
+        opts:["Indomethacin","Prostaglandin E₁ (PGE₁)","Adenosine","Furosemide"], ans:1,
+        expl:"Prostaglandin E₁ reopens and maintains the ductus arteriosus, restoring pulmonary or systemic blood flow until definitive repair. (Indomethacin does the opposite — it closes a PDA.)" },
+      { q:"A critical transport caveat when starting a newborn on prostaglandin (PGE₁) is that it can cause:",
+        opts:["Hypertension","Apnea","Hyperglycemia","Bradycardia only"], ans:1,
+        expl:"PGE₁ commonly causes apnea (as well as hypotension and fever), so an infant started on it for transport often needs the airway secured or close apnea monitoring — plan for it before departure." },
+      { q:"During transport, why is airway management under the 'A' of S.T.A.B.L.E. especially critical?",
+        opts:["Airways rarely change once secured","A tube can dislodge in a moving vehicle, so it must be secured, confirmed, and immediately reachable","Suction is unnecessary after resuscitation","Oxygen targets no longer apply in transit"], ans:1,
+        expl:"The jostling of an ambulance or aircraft can dislodge a tube, so it must be secured, at the right depth, confirmed, and reachable with suction and airway kit at hand — a dislodgement in transit is an emergency you must be positioned to fix instantly." },
+      { q:"The single principle that threads through the entire neonatal resuscitation course is:",
+        opts:["Compressions and drugs are the priority","Ventilate the lungs, keep the baby warm/sugared/stable, and be gentle","Oxygen should always be 100%","Transport should be delayed until fully stable"], ans:1,
+        expl:"The newborn's crisis is almost always a ventilation problem; open the lungs, then keep the infant warm, glucose-supported, and stable with gentle handling. S.T.A.B.L.E. carries that stability through transport." }
+    ]
   }
 ];
 
