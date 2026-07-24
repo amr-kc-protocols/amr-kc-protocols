@@ -364,6 +364,7 @@ background:var(--acb,var(--dim));color:var(--ac,var(--teal2))}
 .cc-pill{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:0.03em;
   color:var(--teal2);background:var(--aemt-bg);border:1px solid #cfe0f7;border-radius:999px;
   padding:3px 8px;white-space:nowrap}
+.cc-pill-new{color:#0E7490;background:#E8FBFF;border-color:#A5E8F5}
 .cc-arr{color:var(--gray);font-size:20px}
 
 /* ── HOME BRAND TILES (blue = prep, purple = game) ────────────────── */
@@ -894,6 +895,18 @@ function getNeonateStats(){
   }catch(e){ return null; }
 }
 
+function getAirwayStats(){
+  try{
+    var raw = localStorage.getItem('airway_academy_v1');
+    if(!raw) return null;
+    var s = JSON.parse(raw);
+    var modules = s.modules || {};
+    var total = 8, done = 0;
+    for(var i=1;i<=total;i++){ if(modules[i] && modules[i].passed) done++; }
+    return { done: done, total: total, certificate: !!s.finalPassed };
+  }catch(e){ return null; }
+}
+
 function renderHome(){
   var c = $('lv');
   var profile = getProfile();
@@ -920,12 +933,13 @@ function renderHome(){
   var hemo = getHemoStats();
   var metab = getMetabStats();
   var neonate = getNeonateStats();
+  var airway = getAirwayStats();
   h += '<div class="stat-strip">';
-  var ccDone = (vta&&vta.certificate?1:0)+(hemo&&hemo.certificate?1:0)+(metab&&metab.certificate?1:0)+(neonate&&neonate.certificate?1:0);
+  var ccDone = (vta&&vta.certificate?1:0)+(hemo&&hemo.certificate?1:0)+(metab&&metab.certificate?1:0)+(neonate&&neonate.certificate?1:0)+(airway&&airway.certificate?1:0);
   h += '<a class="stat-tile tile-blue" data-goto="more">';
   h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
   h += '<div class="stat-tile-val">Critical Care Prep</div>';
-  h += '<div class="stat-tile-lbl">'+(ccDone>0 ? ccDone+' of 4 certified' : '4-course FP-C track')+'</div></div></a>';
+  h += '<div class="stat-tile-lbl">'+(ccDone>0 ? ccDone+' of 5 certified' : '5-course FP-C track')+'</div></div></a>';
   h += '<a class="stat-tile tile-purple" href="vent-ltv1200.html">';
   h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div><div>';
   h += '<div class="stat-tile-val">Ventilator 3000</div>';
@@ -2281,7 +2295,7 @@ function renderMore(){
     '  <div class="cc-banner">',
     '    <div class="cc-eyebrow">&#x25C6; CRITICAL CARE ACADEMY</div>',
     '    <div class="cc-title">Critical Care Prep</div>',
-    '    <div class="cc-tag">A four-course track for FP-C &amp; critical-care transport readiness</div>',
+    '    <div class="cc-tag">A five-course track for FP-C &amp; critical-care transport readiness</div>',
     '    <svg class="cc-wave" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 H58 l4 -7 l4 12 l4 -5 H138 l4 -7 l4 12 l4 -5 H218 l4 -7 l4 12 l4 -5 H300"/></svg>',
     '  </div>',
     '  <div class="cc-track">',
@@ -2304,6 +2318,11 @@ function renderMore(){
     '      <div class="cc-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
     '      <div class="cc-body"><div class="cc-name">Neonatal Resuscitation Academy</div><div class="cc-sub">NRP &amp; S.T.A.B.L.E. — the newborn in the first minutes</div></div>',
     '      <div class="cc-meta"><span class="cc-pill">8 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
+    '    </a>',
+    '    <a class="cc-card" href="airway-academy.html">',
+    '      <div class="cc-ico"><svg class="icon"><use href="#i-syringe"></use></svg></div>',
+    '      <div class="cc-body"><div class="cc-name">Airway &amp; RSI Academy</div><div class="cc-sub">Interactive &mdash; the decision, the difficult airway &amp; physiologic optimization</div></div>',
+    '      <div class="cc-meta"><span class="cc-pill cc-pill-new">3 OF 8</span><span class="cc-arr">&#x203A;</span></div>',
     '    </a>',
     '  </div>',
     '</div>',
