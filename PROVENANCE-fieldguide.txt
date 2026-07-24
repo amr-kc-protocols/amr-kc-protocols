@@ -1,0 +1,35 @@
+FIELD GUIDE — PROVENANCE & AUTHORSHIP MANIFEST
+==============================================
+
+STATUS: UNSIGNED DRAFT — sign locally with your private key.
+        Run ./sign-fieldguide.sh on your own machine. It fills the "Signed (UTC)"
+        and "Git commit ref" lines with live values, recomputes the digest, and
+        writes PROVENANCE-fieldguide.sig / .sig.bin. Never commit the private key
+        (.gitignore already excludes *PRIVATE-KEY.pem).
+
+Work:            AMR KC Field Guide — application software (index.html)
+Scope:           Application software only — design, front-end code, and user
+                 interface. Does NOT cover the AMR Kansas City protocol content,
+                 AMR branding, or Dr. Ameet Deshmukh's clinical standing orders.
+Author/Creator:  Jordan Hunter Jones <hunter04j@hotmail.com>
+Copyright:       (c) 2026 Jordan Hunter Jones. All rights reserved.
+Provenance ID:   FG-PROV-74EA77C4D8C5
+UUID:            5f83203a-3edc-47dc-9120-da874592e328
+Signed (UTC):    __FILL_AT_SIGNING__
+Git commit ref:  __FILL_AT_SIGNING__
+Signature alg:   Ed25519 over SHA-256 file digests
+
+COVERED FILES (SHA-256)
+-----------------------
+805105f551e07175217a0124292d913d2f4fb7be2bf31843a9b4944971bd7cd3  index.html  (207501 bytes)
+
+HOW TO VERIFY
+-------------
+1) Integrity — recompute the digest and compare to the line above:
+     shasum -a 256 index.html
+2) Signature — verify PROVENANCE-fieldguide.sig over this file with the public key:
+     openssl pkeyutl -verify -pubin -inkey PROVENANCE.pub.pem \
+       -rawin -in PROVENANCE-fieldguide.txt -sigfile PROVENANCE-fieldguide.sig.bin
+
+The authoritative record of authorship is this signed manifest together with the
+timestamped version-control history of the repository.
