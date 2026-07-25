@@ -194,6 +194,31 @@ h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.02em; fo
 .evidence p{ margin:6px 0 0; font-size:14.5px; }
 .evidence .grade{ font-family:var(--mono); font-size:11px; color:var(--ink-2); margin-top:9px; padding-top:8px; border-top:1px solid var(--rule); }
 .keybox{ background:var(--green-soft); border:1px solid var(--green-line); border-radius:10px; padding:13px 15px; margin:18px 0; }
+
+/* ── Plain-language additions ─────────────────────────────────────── */
+/* Analogy box — a concrete, everyday picture for an abstract idea */
+.analogy{ background:#FFF8E9; border:1px solid #F0D9A8; border-left:4px solid #C98A12;
+  border-radius:10px; padding:13px 15px; margin:18px 0; }
+.analogy .at{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em;
+  text-transform:uppercase; color:#9A6207; display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.analogy .at::before{ content:"◆"; font-size:9px; }
+.analogy p{ margin:6px 0 0; font-size:14.5px; line-height:1.6; }
+.analogy p:first-of-type{ margin-top:0; }
+.analogy b{ color:var(--ink); }
+
+/* Inline glossary — tap a term for a plain-English definition */
+.gl-wrap{ position:relative; display:inline; }
+.gl{ font-family:inherit; font-size:inherit; font-weight:600; color:var(--blue-dk);
+  background:var(--blue-soft); border:none; border-bottom:1.5px dotted var(--blue);
+  border-radius:3px; padding:0 2px; cursor:pointer; line-height:inherit; }
+.gl::after{ content:"?"; font-size:9px; vertical-align:super; font-weight:800; opacity:.7; margin-left:1px; }
+.gl-wrap.on .gl{ background:var(--blue); color:#fff; border-bottom-color:transparent; }
+.gl-wrap.on .gl::after{ opacity:.85; }
+.gl-pop{ display:none; }
+.gl-wrap.on .gl-pop{ display:block; margin:9px 0; padding:10px 13px; font-size:13.5px; line-height:1.55;
+  color:var(--ink); background:var(--blue-soft); border:1px solid var(--blue-line);
+  border-left:3px solid var(--blue); border-radius:0 9px 9px 0; }
+.gl-pop b{ color:var(--blue-dk); }
 .keybox .kt{ font-family:var(--sans); font-weight:800; font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--green); display:block; margin-bottom:5px; }
 
 .cta{ display:block; width:100%; text-align:center; border:none; border-radius:13px; cursor:pointer;
@@ -377,123 +402,163 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
 var PASS_MODULE = 80;   // %
 var PASS_FINAL  = 85;   // %
 
+/* ── Authoring helpers ────────────────────────────────────────────────
+   g()  inline glossary term — tap reveals a plain-English definition.
+        Written for a medic who last saw A&P years ago: no jargon inside
+        the definition itself.
+   an() analogy box — an everyday picture for an abstract idea.
+   ------------------------------------------------------------------ */
+function g(term, def){
+  return "<span class='gl-wrap'><button type='button' class='gl'>"+term+"</button>"+
+         "<span class='gl-pop'>"+def+"</span></span>";
+}
+function an(title, body){
+  return "<div class='analogy'><span class='at'>"+title+"</span>"+body+"</div>";
+}
+
 var MODULES = [
   {
     id: 1,
     available: true,
     title: "Acid–Base & ABG Interpretation",
-    desc: "A five-step read of any blood gas: acidemia vs alkalemia, the primary disorder, compensation, the anion gap, and mixed disorders.",
-    objective: "Interpret an arterial or venous blood gas systematically — classify the primary acid–base disorder, judge whether compensation is appropriate, calculate and apply the anion gap, and recognize when more than one process is present.",
+    desc: "How to read any blood gas in five steps — without needing to remember chemistry class.",
+    objective: "Read a blood gas the same way every time: decide if the blood is too acid or too alkaline, work out which system caused it, check whether the body is compensating properly, calculate the anion gap, and spot when more than one thing is going on.",
     content: [
-      { h:"1", t:"Three numbers, one question", html:
-        "<p>A blood gas looks intimidating because it hands you a wall of numbers, but acid–base interpretation only ever asks one question: <em>is the blood too acidic or too alkaline, and what is driving it?</em> Everything else is bookkeeping. Three values carry the whole story:</p>"+
-        "<div class='formula'><span class='fk'>pH</span> 7.35 – 7.45 &nbsp;·&nbsp; <span class='fk'>PaCO₂</span> 35 – 45 mmHg &nbsp;·&nbsp; <span class='fk'>HCO₃⁻</span> 22 – 26 mEq/L</div>"+
-        "<p>The logic runs on a simple physiologic pairing. <strong>CO₂ is an acid</strong> — the lungs control it, and it moves fast (minutes). <strong>Bicarbonate is a base</strong> — the kidneys control it, and it moves slowly (hours to days). The pH is just the running balance between them. When the pH drifts, exactly one of those two is the culprit and the other is trying to rescue it.</p>"+
-        "<p>Hold the directions in your head, because they are the entire test. An acid load — either <em>more CO₂</em> or <em>less bicarbonate</em> — drives pH <strong>down</strong> (acidemia). A base load — <em>less CO₂</em> or <em>more bicarbonate</em> — drives pH <strong>up</strong> (alkalemia). That is the whole grammar of the language; the five steps below just apply it in order.</p>"
+      { h:"1", t:"Only two things move the pH", html:
+        "<p>A blood gas looks intimidating because it hands you a wall of numbers. But it is only ever asking one question: <em>is this blood too acid or too alkaline, and what is causing it?</em> Everything else is arithmetic.</p>"+
+        "<p>Three numbers carry the whole story:</p>"+
+        "<div class='formula'><span class='fk'>pH</span> 7.35 – 7.45 &nbsp;·&nbsp; <span class='fk'>CO₂</span> 35 – 45 mmHg &nbsp;·&nbsp; <span class='fk'>HCO₃⁻</span> (bicarb) 22 – 26 mEq/L</div>"+
+        "<p>Here is the part worth memorizing, because everything else hangs off it. <strong>Carbon dioxide behaves like an acid, and the lungs control it.</strong> <strong>Bicarbonate behaves like a base — an antacid — and the kidneys control it.</strong> The pH is just the running score between those two.</p>"+
+        an("Think of it this way",
+          "<p>Your body makes acid all day long, the way an engine makes exhaust. <b>The lungs are the exhaust fan.</b> Breathe faster and you blow off more CO₂, so the blood gets less acid. Breathe slower and it builds up.</p>"+
+          "<p><b>Bicarbonate is the antacid in the cupboard.</b> The kidneys keep the supply stocked, but they are slow — they work over hours to days, not minutes. So when something goes wrong: the lungs respond in minutes, the kidneys respond in days.</p>")+
+        "<p>Now the directions, which are the entire test. More CO₂, or less bicarb, means <strong>more acid</strong> — the pH goes <strong>down</strong>. Less CO₂, or more bicarb, means <strong>more base</strong> — the pH goes <strong>up</strong>. That is it. The five steps below just apply that idea in order.</p>"+
+        "<p>Two words you will see constantly: "+g("acidemia","Blood that is actually too acid right now — the measured pH is below 7.35. The \"-emia\" ending just means \"in the blood.\"")+" means the blood is too acid, and "+g("alkalemia","Blood that is actually too alkaline right now — the measured pH is above 7.45.")+" means it is too alkaline.</p>"
       },
-      { h:"2", t:"Step 1–2: acidemia or alkalemia, and who did it", html:
-        "<p><strong>Step 1 — read the pH.</strong> Below 7.35 is acidemia; above 7.45 is alkalemia. Even a pH of 7.40 in a sick patient can hide two opposing processes cancelling out, but start with the raw number.</p>"+
-        "<p><strong>Step 2 — find the primary driver.</strong> Look at the CO₂ and the bicarbonate and ask which one moved in the direction that <em>explains</em> the pH.</p>"+
+      { h:"2", t:"Steps 1 and 2: which way, and who caused it", html:
+        "<p><strong>Step 1 — look at the pH.</strong> Below 7.35, the blood is too acid. Above 7.45, too alkaline. Simple as that. (A perfectly normal 7.40 in a very sick patient can hide two opposite problems cancelling out, but start with the raw number.)</p>"+
+        "<p><strong>Step 2 — work out who caused it.</strong> Look at the CO₂ and the bicarb, and ask which one moved in the direction that would <em>explain</em> the pH you are seeing.</p>"+
         "<ul>"+
-        "<li>Acidemia + high CO₂ (&gt;45) → <strong>respiratory acidosis</strong> (hypoventilation).</li>"+
-        "<li>Acidemia + low HCO₃ (&lt;22) → <strong>metabolic acidosis</strong>.</li>"+
-        "<li>Alkalemia + low CO₂ (&lt;35) → <strong>respiratory alkalosis</strong> (hyperventilation).</li>"+
-        "<li>Alkalemia + high HCO₃ (&gt;26) → <strong>metabolic alkalosis</strong>.</li>"+
+        "<li>Too acid + <strong>high CO₂</strong> → the lungs did it. Respiratory acidosis (not breathing enough).</li>"+
+        "<li>Too acid + <strong>low bicarb</strong> → the metabolism did it. Metabolic acidosis.</li>"+
+        "<li>Too alkaline + <strong>low CO₂</strong> → the lungs did it. Respiratory alkalosis (breathing too much).</li>"+
+        "<li>Too alkaline + <strong>high bicarb</strong> → metabolic alkalosis.</li>"+
         "</ul>"+
-        "<p>The tell is the direction of travel. In a <em>respiratory</em> problem the pH and the CO₂ move in <strong>opposite</strong> directions (CO₂ up, pH down). In a <em>metabolic</em> problem the pH and the bicarbonate move in the <strong>same</strong> direction (HCO₃ down, pH down). That single rule sorts respiratory from metabolic every time.</p>"+
-        "<div class='keybox'><span class='kt'>Anchor</span> pH and CO₂ moving opposite ways = respiratory. pH and HCO₃ moving the same way = metabolic. Name the primary disorder before you touch anything else.</div>"
+        an("The see-saw trick",
+          "<p>There is a shortcut that sorts lungs from metabolism every single time, and it is worth burning into memory.</p>"+
+          "<p><b>If the problem is the lungs, the pH and the CO₂ move in opposite directions</b> — like two ends of a see-saw. CO₂ goes up, pH goes down.</p>"+
+          "<p><b>If the problem is metabolic, the pH and the bicarb move the same direction</b> — they ride together. Bicarb falls, pH falls.</p>"+
+          "<p>Opposite ends = lungs. Same direction = metabolic.</p>")+
+        "<div class='keybox'><span class='kt'>Anchor</span> pH and CO₂ moving opposite ways means the lungs. pH and bicarb moving the same way means metabolic. Name the primary problem before you do anything else.</div>"
       },
-      { h:"3", t:"Step 3: is the compensation appropriate?", html:
-        "<p>The body never fixes an acid–base problem outright — it <em>buffers</em> it. A metabolic acidosis makes you breathe faster to blow off CO₂; a respiratory acidosis makes the kidneys retain bicarbonate over a day or two. Compensation nudges the pH back toward normal but, by a rule you can lean on, <strong>never overshoots and never fully normalizes the pH</strong>. If the pH has crossed to the other side of 7.40 from where the primary disorder should put it, a second primary disorder is hiding.</p>"+
-        "<p>For a metabolic acidosis you can predict the expected respiratory response precisely with Winter's formula, then compare it to the measured CO₂:</p>"+
-        "<div class='formula'>expected <span class='fk'>PaCO₂</span> = (1.5 × HCO₃⁻) + 8 &nbsp;±&nbsp;2</div>"+
+      { h:"3", t:"Step 3: is the body keeping up?", html:
+        "<p>The body never truly fixes an acid–base problem. It just tries to hold the line while the real problem stays there. When there is a metabolic acidosis, the patient breathes faster to blow off CO₂. When there is a respiratory acidosis, the kidneys hang onto bicarb over a day or two.</p>"+
+        an("Bailing the boat",
+          "<p>Compensation is <b>bailing water, not plugging the leak.</b> A patient in DKA is breathing 40 times a minute because they are bailing as fast as they can — the hole in the boat is still there.</p>"+
+          "<p>Two things follow from that picture, and both matter clinically. First, <b>bailing never gets ahead of the leak</b> — compensation pulls the pH back toward normal but never all the way, and never past it. So if the pH has crossed to the wrong side of 7.40, a second, separate problem is hiding. Second, <b>a tiring patient stops bailing</b> — and that is the moment things fall apart fast.</p>")+
+        "<p>For a metabolic acidosis you can predict exactly how hard the patient <em>should</em> be breathing, then compare it to what they are actually doing. That is Winter's formula:</p>"+
+        "<div class='formula'>expected <span class='fk'>CO₂</span> = (1.5 × bicarb) + 8 &nbsp;±&nbsp;2</div>"+
         "<ul>"+
-        "<li>Measured CO₂ <strong>matches</strong> the prediction → appropriate respiratory compensation.</li>"+
-        "<li>Measured CO₂ <strong>higher</strong> than predicted → the patient isn't blowing off enough; a concurrent <strong>respiratory acidosis</strong> (they are tiring). This is the number that tells you a DKA patient is heading for intubation.</li>"+
-        "<li>Measured CO₂ <strong>lower</strong> than predicted → a concurrent <strong>respiratory alkalosis</strong>.</li>"+
+        "<li>Measured CO₂ <strong>matches</strong> the prediction → they are compensating properly.</li>"+
+        "<li>Measured CO₂ is <strong>higher</strong> than predicted → they are not blowing off enough. <strong>They are getting tired.</strong> This is the number that warns you an airway may be coming.</li>"+
+        "<li>Measured CO₂ is <strong>lower</strong> than predicted → something is also making them over-breathe.</li>"+
         "</ul>"+
-        "<p>A metabolic-acidosis patient with a 'normal' CO₂ of 40 is not reassuring — Winter's may have predicted a CO₂ of 24, and a 40 means they are failing to compensate and fatiguing fast.</p>"
+        "<p>Here is why this matters more than it looks. A patient in a bad metabolic acidosis with a <em>normal</em> CO₂ of 40 is not reassuring — it is alarming. Winter's may have predicted a CO₂ of 24. A 40 means they have stopped bailing.</p>"
       },
       { h:"4", t:"Step 4: the anion gap", html:
-        "<p>Once you know there's a metabolic acidosis — or even if you don't — calculate the anion gap on every gas. It is the single most useful downstream calculation in medicine, and it costs nothing but arithmetic.</p>"+
-        "<div class='formula'><span class='fk'>Anion Gap</span> = Na⁺ − (Cl⁻ + HCO₃⁻)<br>&nbsp;&nbsp;normal ≈ 8 – 12 mEq/L (lab-dependent)</div>"+
-        "<p>The gap represents the unmeasured anions in serum — mostly albumin, with a smaller contribution from phosphate, sulfate, and organic acids. When an acid like lactate or a ketoacid pours into the blood, it consumes bicarbonate and leaves its own unmeasured anion behind, so the <strong>gap widens</strong>. A high anion gap is a fingerprint that an <em>unmeasured acid</em> is present.</p>"+
-        "<p>One correction you must not skip in the critically ill: albumin is the dominant unmeasured anion, so a low albumin lowers the baseline gap and can mask a real acidosis. Add roughly <strong>2.5 mEq/L to the gap for every 1 g/dL that albumin sits below 4</strong>. A septic patient with an albumin of 2 and a 'normal' gap of 11 actually has a corrected gap near 16.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — correct the gap</span>"+
-        "<p>Hypoalbuminemia is nearly universal in critical illness, and an uncorrected anion gap systematically underestimates the true gap in these patients. The albumin correction (≈2.5 mEq/L per 1 g/dL below normal) restores its sensitivity for detecting an organic acidosis (Figge and colleagues; corroborated in ICU cohorts).</p>"+
-        "<div class='grade'>Quality: moderate (physiologic derivation validated in observational critical-care data).</div></div>"
+        "<p>Calculate this on every gas, whether or not you think there is an acidosis. It costs nothing but arithmetic and it is the most useful number you will get all shift.</p>"+
+        "<div class='formula'><span class='fk'>Anion Gap</span> = Na⁺ − (Cl⁻ + HCO₃⁻)<br>&nbsp;&nbsp;normal ≈ 8 – 12 mEq/L</div>"+
+        "<p>Before the formula makes sense, one idea from chemistry class. Blood has to carry the same amount of positive and negative charge — it always balances out. Sodium is the big positive you measure. Chloride and bicarb are the big negatives you measure. But you do not measure <em>every</em> negative, so there is always a small leftover gap of about 8 to 12. That leftover is mostly "+g("albumin","The main protein in blood. It carries a slight negative charge, which is why it makes up most of the normal anion gap — and why a low albumin makes the gap look falsely small.")+".</p>"+
+        an("The till that will not balance",
+          "<p>Think of counting a cash drawer at the end of a shift. You know what should be there. You count what you can see. If the numbers do not add up, <b>you know money is missing before you know where it went.</b></p>"+
+          "<p>The anion gap works the same way. When an acid like lactate or a ketone floods into the blood, it uses up bicarb and leaves its own negative charge behind — one you do not measure. So the gap gets bigger. <b>A wide gap tells you an acid is in there before you know which acid it is.</b></p>")+
+        "<p><strong>One correction you must not skip.</strong> Because albumin makes up most of the normal gap, a patient with a low albumin — which is most sick, septic, and malnourished patients — will have a gap that looks falsely reassuring. Correct it:</p>"+
+        "<div class='formula'>corrected gap = measured gap + <span class='fk'>2.5 × (4.0 − albumin)</span></div>"+
+        "<p>A septic patient with an albumin of 2.0 and a gap of 11 looks normal. Correct it and the real gap is 16 — clearly raised. Skipping this step is one of the commonest ways a serious acidosis gets missed.</p>"
       },
-      { h:"5", t:"Naming the acid: MUDPILES and the non-gap causes", html:
-        "<p>Split the metabolic acidoses by the gap, because the differential and the treatment diverge sharply.</p>"+
-        "<p><strong>High anion-gap metabolic acidosis (HAGMA)</strong> — an unmeasured acid is being added. The classic mnemonic is <em>MUDPILES</em>:</p>"+
+      { h:"5", t:"Step 5: naming the acid", html:
+        "<p>Once you know the gap is wide, the question becomes <em>which</em> acid. In transport you will meet a short list far more often than the rest.</p>"+
+        "<p>The classic memory aid is <strong>MUDPILES</strong>, but do not let the letters distract you from the four that actually turn up:</p>"+
         "<ul>"+
-        "<li><strong>M</strong>ethanol · <strong>U</strong>remia · <strong>D</strong>iabetic (and other) ketoacidosis</li>"+
-        "<li><strong>P</strong>ropylene glycol · <strong>I</strong>ron/<strong>I</strong>soniazid · <strong>L</strong>actic acidosis</li>"+
-        "<li><strong>E</strong>thylene glycol · <strong>S</strong>alicylates</li>"+
+        "<li><strong>Lactate</strong> — by far the most common. Shock, sepsis, low blood flow to tissue, seizures. Any patient whose tissue is not getting enough oxygen makes lactate.</li>"+
+        "<li><strong>Ketones</strong> — diabetic ketoacidosis, starvation, alcoholic ketoacidosis.</li>"+
+        "<li><strong>Kidney failure</strong> — the kidneys stop clearing the acids the body makes normally.</li>"+
+        "<li><strong>Poisons</strong> — aspirin, antifreeze (ethylene glycol), methanol. Less common, but the ones you cannot afford to miss. Module 8 covers these.</li>"+
         "</ul>"+
-        "<p>In transport, the overwhelming majority of HAGMA you will meet is <strong>lactate</strong> (sepsis, shock, ischemia) or <strong>ketoacidosis</strong> (DKA, alcoholic, starvation). The toxic alcohols and salicylates are rarer but lethal, and they are the subject of Module 8.</p>"+
-        "<p><strong>Normal anion-gap metabolic acidosis (NAGMA)</strong> — bicarbonate is being lost directly (not consumed by an acid), and chloride rises to fill the electrical space, so the gap stays normal. It is therefore also called <em>hyperchloremic</em> acidosis. The two big buckets are <strong>GI losses</strong> (diarrhea, high-output ostomy) and <strong>renal losses</strong> (renal tubular acidosis). A large-volume normal-saline resuscitation can itself produce a mild hyperchloremic NAGMA — worth recognizing so you don't chase a phantom.</p>"
+        "<p>The full mnemonic: <strong>M</strong>ethanol, <strong>U</strong>remia (kidney failure), <strong>D</strong>KA, <strong>P</strong>ropylene glycol, <strong>I</strong>ron or <strong>I</strong>soniazid, <strong>L</strong>actate, <strong>E</strong>thylene glycol, <strong>S</strong>alicylates (aspirin).</p>"+
+        "<p><strong>When the gap is normal but the patient is still acidotic</strong>, the cause is almost always losing bicarb rather than gaining acid — most often severe diarrhoea, or a kidney that is leaking bicarb. In these the chloride rises to fill the space left behind, which is why it is sometimes called a hyperchloremic acidosis. Large volumes of normal saline do the same thing.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Wide gap means an acid was added — think lactate, ketones, kidney failure, poison. Normal gap means bicarb was lost — think diarrhoea, kidney leak, or a lot of saline.</div>"
       },
-      { h:"6", t:"Step 5: the delta-gap and stacked disorders", html:
-        "<p>The most advanced move, and a favorite of both the sick patient and the exam, is detecting a <em>second</em> metabolic process hiding behind a high-gap acidosis. The logic: when an organic acid raises the gap, it should consume bicarbonate roughly one-for-one. So the rise in the gap should <em>match</em> the fall in bicarbonate.</p>"+
-        "<div class='formula'>Δgap = (measured AG − 12) &nbsp;vs&nbsp; Δbicarb = (24 − measured HCO₃⁻)</div>"+
+      { h:"6", t:"When two things are happening at once", html:
+        "<p>This is the step people skip, and it is the one that catches the sick patient whose numbers look almost reasonable.</p>"+
+        "<p>The logic is simple bookkeeping. When one acid causes the whole problem, every unit of acid added should use up roughly one unit of bicarb. So <strong>the amount the gap rose should roughly match the amount the bicarb fell.</strong> When those two numbers do not match, something else is going on as well.</p>"+
+        an("A receipt that does not add up",
+          "<p>Say the gap rose by 15 but the bicarb only fell by 5. Ten units of bicarb are unaccounted for. <b>Something must have been propping the bicarb up</b> — a metabolic alkalosis hiding underneath, often from vomiting.</p>"+
+          "<p>Now the other way. The gap rose by 5 but the bicarb fell by 15. There is more bicarb missing than the gap explains, so <b>a second, normal-gap acidosis is also present</b> — diarrhoea, or a lot of saline.</p>")+
+        "<div class='formula'>Δgap ≈ Δbicarb &nbsp;→&nbsp; one process, adds up<br>Δgap <span class='fk'>&gt;</span> Δbicarb &nbsp;→&nbsp; also a metabolic <span class='fk'>alkalosis</span><br>Δgap <span class='fk'>&lt;</span> Δbicarb &nbsp;→&nbsp; also a normal-gap <span class='fk'>acidosis</span></div>"+
+        "<p>You do not need to do this on every patient. Do it when the numbers feel off — when a patient looks far sicker than their pH suggests, or when the story does not fit a single cause. A vomiting DKA patient is the classic: the ketones drive the gap up while the vomiting props the bicarb up, so the pH looks better than the patient is.</p>"
+      },
+      { h:"7", t:"Base excess, and when a venous gas is fine", html:
+        "<p><strong>Base excess</strong> is one number that answers \"how much acid or base is there, once you take breathing out of the equation?\" A base excess more negative than about −2 means a genuine metabolic acidosis. It is a quick sanity check on the work you already did, not a replacement for it.</p>"+
+        "<p><strong>Venous gases</strong> come up constantly, because drawing an arterial sample in a moving truck is unpleasant for everyone. The practical answer:</p>"+
         "<ul>"+
-        "<li>Gap rose <strong>more</strong> than bicarb fell → a concurrent <strong>metabolic alkalosis</strong> propping up the bicarbonate (e.g., the DKA patient who has also been vomiting).</li>"+
-        "<li>Gap rose <strong>less</strong> than bicarb fell → a concurrent <strong>normal-gap acidosis</strong> stacked on top of the high-gap one.</li>"+
+        "<li><strong>pH</strong> — venous runs about 0.03–0.05 lower than arterial. Close enough to use.</li>"+
+        "<li><strong>Bicarb</strong> — essentially the same. Use it.</li>"+
+        "<li><strong>CO₂</strong> — venous runs about 4–6 mmHg higher. Usable for trend, and good for ruling out a high CO₂ if the venous value is normal.</li>"+
+        "<li><strong>Oxygen</strong> — <strong>useless.</strong> A venous gas tells you nothing about how well the patient is oxygenating. Use the pulse oximeter for that.</li>"+
         "</ul>"+
-        "<p>You do not need to compute this on every routine gas, but when the numbers feel internally inconsistent — a big gap with a bicarbonate that seems too high, or vice versa — the delta-delta is what exposes the second process.</p>"
+        "<div class='keybox'><span class='kt'>Anchor</span> A venous gas answers acid–base questions perfectly well. It cannot answer oxygenation questions at all.</div>"
       },
-      { h:"7", t:"Base excess, and when a venous gas will do", html:
-        "<p><strong>Base excess</strong> (or its inverse, the base deficit) is the single number the analyzer computes to summarize the metabolic side of the ledger: how much acid or base you would have to add to a liter of blood to return the pH to 7.40 at a normal CO₂. A base deficit more negative than about −4 signals a significant metabolic acidosis, and in trauma a worsening base deficit tracks with the depth of shock and the need for blood. It is a fast gestalt of the metabolic burden without doing the full five-step read.</p>"+
-        "<p>Do you always need an <em>arterial</em> stick? Often not. For the acid–base and ventilation question — as opposed to precise oxygenation — a venous blood gas answers most of what you need, and it spares the patient an arterial puncture.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — VBG vs ABG</span>"+
-        "<p>Venous and arterial values agree closely enough for clinical acid–base decisions: venous pH runs about 0.03–0.04 lower than arterial, and venous bicarbonate tracks within roughly 1–2 mEq/L. The weak link is CO₂ — venous PCO₂ is a less reliable stand-in for arterial PaCO₂, so if a precise CO₂ or true oxygenation matters (e.g., titrating a ventilator, assessing hypoxemia), get the arterial sample (Kelly and colleagues; multiple emergency-medicine comparisons).</p>"+
-        "<div class='grade'>Quality: moderate–high for pH/HCO₃ agreement; venous PCO₂ is the recognized limitation.</div></div>"
-      },
-      { h:"8", t:"Putting it together at the bedside", html:
-        "<p>Run the same five steps on every gas and it becomes automatic:</p>"+
-        "<ul>"+
-        "<li><strong>1.</strong> pH — acidemia or alkalemia?</li>"+
-        "<li><strong>2.</strong> CO₂ and HCO₃ — respiratory or metabolic primary?</li>"+
-        "<li><strong>3.</strong> Compensation appropriate? (Winter's for a metabolic acidosis.)</li>"+
-        "<li><strong>4.</strong> Anion gap — corrected for albumin.</li>"+
-        "<li><strong>5.</strong> If the gap is up, delta-delta for a stacked disorder.</li>"+
-        "</ul>"+
-        "<p>Worked example. A DKA patient: pH 7.10, PaCO₂ 22, HCO₃ 7, Na 138, Cl 100, albumin 4. Step 1: acidemic. Step 2: low bicarb with same-direction pH → metabolic acidosis. Step 3: Winter's predicts a CO₂ of (1.5×7)+8 = 18.5 ± 2, so ~16–21; the measured 22 is right at the upper edge — compensating, but with essentially no reserve left, so watch the airway closely. Step 4: gap = 138 − (100+7) = <strong>31</strong>, a wide HAGMA, and with a normal albumin no correction needed. Step 5: Δgap = 19, Δbicarb = 17 — roughly equal, so a pure single high-gap acidosis. The read: severe DKA, appropriately but maximally compensated, no second metabolic process.</p>"+
-        "<div class='keybox'><span class='kt'>Anchor</span> The gas doesn't diagnose the patient — it points you at the mechanism. A wide gap means <em>go find the acid</em>: check a lactate, a glucose and ketones, a renal panel, and a story for toxins. The five-step read tells you where to look.</div>"
+      { h:"8", t:"Putting it together", html:
+        "<p>Five steps, same order, every time:</p>"+
+        "<div class='formula'>1. Read the <span class='fk'>pH</span> — too acid or too alkaline?<br>"+
+        "2. <span class='fk'>Who caused it</span> — lungs or metabolic?<br>"+
+        "3. Is the body <span class='fk'>keeping up</span>? (Winter's)<br>"+
+        "4. Calculate the <span class='fk'>anion gap</span> — and correct it for albumin<br>"+
+        "5. Do the numbers <span class='fk'>add up</span>, or is something else hiding?</div>"+
+        "<p>Work an example. A patient arrives with pH 7.28, CO₂ 30, bicarb 14, sodium 138, chloride 100, albumin 4.0.</p>"+
+        "<ol>"+
+        "<li>pH 7.28 — too acid.</li>"+
+        "<li>Bicarb is low at 14, and pH and bicarb moved the same direction. <strong>Metabolic acidosis.</strong></li>"+
+        "<li>Winter's predicts (1.5 × 14) + 8 = 29, give or take 2. Measured is 30. <strong>Compensating properly</strong> — they are still bailing.</li>"+
+        "<li>Gap = 138 − (100 + 14) = <strong>24. Wide.</strong> An acid has been added. Albumin is normal, so no correction needed.</li>"+
+        "<li>Gap rose about 12 above normal; bicarb fell about 10 below normal. Close enough — <strong>one process</strong>.</li>"+
+        "</ol>"+
+        "<p>Result: a straightforward wide-gap metabolic acidosis with appropriate compensation. Now go find the acid — check a lactate and a glucose, and look at the patient.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The gas never tells you the diagnosis. It tells you how sick the patient is and which direction to look. The patient tells you the rest.</div>"
       }
     ],
     quiz: [
-      { q:"A blood gas shows pH 7.28, PaCO₂ 30 mmHg, HCO₃⁻ 14 mEq/L. What is the primary disorder?",
+      { q:"A blood gas shows pH 7.28, CO₂ 30 mmHg, bicarb 14 mEq/L. What is the primary problem?",
         opts:["Respiratory acidosis","Metabolic acidosis","Respiratory alkalosis","Metabolic alkalosis"], ans:1,
-        expl:"The pH is acidemic and the bicarbonate is low and moving the same direction as the pH — that pairing is a metabolic acidosis. The low CO₂ is appropriate respiratory compensation, not the primary problem." },
-      { q:"In a purely respiratory acid–base disorder, the pH and the PaCO₂:",
-        opts:["Move in the same direction","Move in opposite directions","Are always both normal","Are unrelated"], ans:1,
-        expl:"Respiratory disorders move pH and CO₂ in opposite directions (CO₂ up → pH down). Metabolic disorders move pH and HCO₃ in the same direction. That single rule separates respiratory from metabolic." },
-      { q:"A patient has a metabolic acidosis with HCO₃⁻ of 10. Using Winter's formula, the expected PaCO₂ is approximately:",
-        opts:["40 mmHg","33 mmHg","23 mmHg","15 mmHg"], ans:2,
-        expl:"Winter's: expected PaCO₂ = (1.5 × 10) + 8 = 23 (± 2). A measured CO₂ well above 23 would indicate a superimposed respiratory acidosis — the patient failing to compensate." },
+        expl:"The pH is low (too acid) and the bicarb is low. pH and bicarb moved the same direction, which means metabolic. The low CO₂ is the patient breathing hard to compensate — not the cause." },
+      { q:"When the lungs are the cause of an acid–base problem, the pH and the CO₂:",
+        opts:["Move in the same direction","Move in opposite directions","Stay unchanged","Both rise"], ans:1,
+        expl:"Lungs move pH and CO₂ in opposite directions, like two ends of a see-saw — CO₂ up, pH down. Metabolic problems move pH and bicarb the same direction. That one rule sorts lungs from metabolic every time." },
+      { q:"A patient has a metabolic acidosis with a bicarb of 10. Using Winter's formula, roughly what CO₂ would you expect?",
+        opts:["Around 15","Around 23","Around 35","Around 45"], ans:1,
+        expl:"(1.5 × 10) + 8 = 23, give or take 2. If the measured CO₂ is much higher than this, the patient is not blowing off enough — they are tiring, and an airway may be coming." },
       { q:"The anion gap is calculated as:",
-        opts:["Na⁺ + K⁺ − Cl⁻","Na⁺ − (Cl⁻ + HCO₃⁻)","(Cl⁻ + HCO₃⁻) − Na⁺","Na⁺ − Cl⁻"], ans:1,
-        expl:"Anion gap = Na⁺ − (Cl⁻ + HCO₃⁻), normally about 8–12 mEq/L. It estimates the unmeasured anions and widens when an organic acid (lactate, ketoacids, toxins) is present." },
-      { q:"A septic patient has an albumin of 2.0 g/dL and a calculated anion gap of 11. The corrected anion gap is closest to:",
-        opts:["11 (no correction needed)","13","16","21"], ans:2,
-        expl:"Add ~2.5 mEq/L per 1 g/dL of albumin below 4. Albumin is 2 g/dL below normal, so add ~5: 11 + 5 ≈ 16. Uncorrected, the low albumin masks a real high-gap acidosis." },
-      { q:"Which is a cause of a HIGH anion-gap metabolic acidosis?",
-        opts:["Diarrhea","Renal tubular acidosis","Lactic acidosis","Large-volume normal saline"], ans:2,
-        expl:"Lactic acidosis is a classic HAGMA (the 'L' in MUDPILES). Diarrhea, RTA, and saline-induced hyperchloremia all cause a NORMAL-gap (hyperchloremic) acidosis." },
-      { q:"A normal anion-gap metabolic acidosis is also called:",
-        opts:["Hyperchloremic acidosis","Ketoacidosis","Lactic acidosis","Uremic acidosis"], ans:0,
-        expl:"In NAGMA, bicarbonate is lost directly and chloride rises to fill the electrical space, keeping the gap normal — hence 'hyperchloremic.' The main causes are GI (diarrhea) and renal (RTA) losses." },
-      { q:"In a high-gap acidosis, the Δgap rose noticeably MORE than the bicarbonate fell (Δbicarb). This suggests:",
-        opts:["A pure high-gap acidosis","A concurrent metabolic alkalosis","A concurrent respiratory acidosis","Laboratory error is certain"], ans:1,
-        expl:"If the gap climbed more than bicarbonate dropped, a second process is holding the bicarbonate up — a superimposed metabolic alkalosis (e.g., the DKA patient who has also been vomiting)." },
-      { q:"Compared with an arterial gas, a venous blood gas is LEAST reliable for estimating which value?",
-        opts:["pH","Bicarbonate","PCO₂","Base excess"], ans:2,
-        expl:"Venous pH and HCO₃ track arterial values closely, but venous PCO₂ is the weak link. If a precise CO₂ or true oxygenation matters (e.g., ventilator titration), obtain an arterial sample." },
-      { q:"A DKA patient's blood gas shows an appropriately low but 'normal-looking' PaCO₂ of 40 when Winter's formula predicted ~24. The best interpretation is:",
-        opts:["Reassuring — the CO₂ is normal","The patient is compensating perfectly","A superimposed respiratory acidosis — the patient is tiring","A metabolic alkalosis is present"], ans:2,
-        expl:"A CO₂ well above the Winter's prediction in a metabolic acidosis means the patient is failing to blow off enough CO₂ — a superimposed respiratory acidosis from fatigue. It is a warning that the airway may be next." }
+        opts:["Na − (Cl + bicarb)","Na + K − Cl","(Na + Cl) − bicarb","Cl − (Na + bicarb)"], ans:0,
+        expl:"Sodium minus chloride and bicarb together. It measures the negative charges you do not directly measure — normally about 8 to 12, mostly from albumin." },
+      { q:"A septic patient has an albumin of 2.0 g/dL and a calculated anion gap of 11. What is the corrected gap?",
+        opts:["11 — no correction needed","16","6","22"], ans:1,
+        expl:"11 + 2.5 × (4.0 − 2.0) = 11 + 5 = 16. Albumin makes up most of the normal gap, so a low albumin makes the gap look falsely reassuring. This is one of the commonest ways a serious acidosis gets missed." },
+      { q:"Which of these causes a WIDE anion-gap acidosis?",
+        opts:["Severe diarrhoea","Lactate from shock","Large volumes of normal saline","A kidney leaking bicarb"], ans:1,
+        expl:"A wide gap means an acid was added — lactate, ketones, kidney failure, or a poison. The other three lose bicarb rather than adding acid, which leaves the gap normal." },
+      { q:"An acidosis with a NORMAL anion gap usually means:",
+        opts:["An acid was added to the blood","Bicarb was lost — from the gut or the kidney","The patient is hyperventilating","The albumin is high"], ans:1,
+        expl:"Normal gap means no unmeasured acid appeared, so the bicarb must have been lost instead — most often severe diarrhoea, a leaky kidney, or a lot of saline. Chloride rises to take its place." },
+      { q:"The gap rose noticeably MORE than the bicarb fell. This suggests:",
+        opts:["A second, hidden metabolic alkalosis","A second normal-gap acidosis","A respiratory acidosis","Nothing — this is expected"], ans:0,
+        expl:"One acid should use up about one bicarb, so the two numbers should roughly match. If the bicarb is higher than the gap explains, something propped it up — a hidden metabolic alkalosis, classically from vomiting." },
+      { q:"Compared with an arterial gas, a venous gas is LEAST reliable for:",
+        opts:["pH","Bicarb","Oxygen","Sodium"], ans:2,
+        expl:"A venous gas is fine for pH, bicarb and (roughly) CO₂ — so it answers acid–base questions well. It tells you nothing useful about oxygenation; use the pulse oximeter for that." },
+      { q:"A DKA patient's gas shows a CO₂ of 40 when Winter's formula predicted 24. This means:",
+        opts:["The gas is normal","They are compensating perfectly","They are tiring — a respiratory acidosis on top","A metabolic alkalosis is present"], ans:2,
+        expl:"A 'normal-looking' CO₂ in a severe metabolic acidosis is alarming, not reassuring. They should be blowing off far more. It means they have stopped bailing — watch the airway closely." }
     ]
   },
 
@@ -501,105 +566,112 @@ var MODULES = [
     id: 2,
     available: true,
     title: "Sodium & Water",
-    desc: "Sodium as a water problem: tonicity, the hypo- and hypernatremia workup, safe correction limits, osmotic demyelination, and diabetes insipidus.",
-    objective: "Relate the serum sodium to whole-body water and tonicity, work up hypo- and hypernatremia by volume status, and correct each safely without triggering osmotic demyelination or cerebral edema.",
+    desc: "Why the sodium number is really telling you about water — and why fixing it too fast is more dangerous than leaving it alone.",
+    objective: "Read the sodium as a measure of body water rather than salt; correct it for a high glucose; recognize when low sodium is a true emergency; apply the correction speed limit and explain why it exists; and manage high sodium and diabetes insipidus.",
     content: [
       { h:"1", t:"Sodium is a water problem, not a salt problem", html:
-        "<p>The single most useful reframe in electrolytes: the serum sodium tells you almost nothing about how much <em>sodium</em> is in the body, and almost everything about how much <em>water</em> is. Sodium is a concentration — salt divided by water — and in the vast majority of patients it is the denominator, water, that has moved.</p>"+
-        "<p>A low sodium usually means too much water diluting a normal amount of salt. A high sodium usually means too little water concentrating it. This is why the reflexive instinct — 'sodium is low, give salt' — is so often exactly wrong. The question is not <em>how much salt</em> but <em>how much water, and where is it going.</em></p>"+
-        "<p>Sodium matters because it sets the <strong>tonicity</strong> of the blood — the osmotic pull that decides whether water moves into or out of cells, and the cells that care most are neurons. Serum osmolality is dominated by sodium:</p>"+
-        "<div class='formula'>calc <span class='fk'>Osm</span> = (2 × Na⁺) + (glucose / 18) + (BUN / 2.8)<br>&nbsp;&nbsp;normal ≈ 275 – 295 mOsm/kg</div>"+
-        "<p>Because sodium is doubled and dwarfs the other terms, sodium <em>is</em> tonicity for practical purposes — with two exceptions (glucose and exogenous osmoles) that Module 8 revisits through the osmolar gap.</p>"
+        "<p>This is the single idea that makes the whole module work, and it is the opposite of what the number looks like it is saying.</p>"+
+        "<p>A sodium level is a <strong>concentration</strong> — it measures how much sodium there is <em>per litre of water</em>. It does not measure how much salt is in the body. So when the sodium reads low, the usual reason is not that salt went missing. It is that <strong>too much water arrived and diluted it</strong>.</p>"+
+        an("The pitcher of sweet tea",
+          "<p>Imagine a pitcher of sweet tea. If you taste it and it is weak, the likely explanation is not that someone stole the sugar — it is that <b>someone added water.</b></p>"+
+          "<p>The sodium level works exactly like that taste test. It tells you the strength of the mix, not the amount of salt in the pitcher. <b>Low sodium usually means too much water. High sodium usually means not enough water.</b></p>"+
+          "<p>Once you read every sodium as a statement about water, the treatments stop seeming backwards. That is why a patient with low sodium is often treated by restricting fluid rather than by giving salt.</p>")+
+        "<p>One correction before you trust any sodium: <strong>a high glucose drags water out of cells and into the blood</strong>, which dilutes the sodium and makes it read falsely low. Every DKA and HHS patient has this. Correct it before you react:</p>"+
+        "<div class='formula'>corrected Na = measured Na + <span class='fk'>1.6</span> for every <span class='fk'>100 mg/dL</span> of glucose above 100</div>"+
+        "<p>A DKA patient with a sodium of 128 and a glucose of 700 is not truly hyponatremic. Glucose is 600 above 100, so add 1.6 × 6 ≈ 10. The real sodium is about <strong>138 — normal</strong>. Treating that 128 as a genuine problem would be a serious mistake.</p>"
       },
-      { h:"2", t:"Hyponatremia: work it up by tonicity, then volume", html:
-        "<p>Hyponatremia (Na &lt; 135) is the most common electrolyte abnormality in the hospital, and the workup is a two-step sort. <strong>First, confirm it is truly hypotonic.</strong> A high glucose or infused mannitol pulls water into the vascular space and dilutes sodium without lowering tonicity — a true but non-dangerous <em>translocational</em> hyponatremia. Correct the measured sodium for glucose before you act:</p>"+
-        "<div class='formula'>add <span class='fk'>~1.6 mEq/L</span> to Na for every <span class='fk'>100 mg/dL</span> glucose above 100</div>"+
-        "<p>A DKA patient with a sodium of 130 and a glucose of 700 has a corrected sodium near 140 — they are not hyponatremic at all, and 'treating' the number would be a mistake. (Older texts use 1.6; some use 2.4 at very high glucose — either flags the concept.) Severe hyperlipidemia or paraproteins can also cause a lab artifact, <em>pseudohyponatremia</em>, with a normal measured osmolality.</p>"+
-        "<p><strong>Second, once it is truly hypotonic, sort by volume status:</strong></p>"+
+      { h:"2", t:"Low sodium: how to sort it out", html:
+        "<p>Hyponatremia has a reputation for being complicated. Most of that comes from textbooks working through every rare cause. In transport you need two questions, in order.</p>"+
+        "<p><strong>Question 1 — is it real?</strong> Correct for glucose first, as above. A very high level of fats or proteins in the blood can also fool older lab methods.</p>"+
+        "<p><strong>Question 2 — how much fluid is in the tank?</strong> Look at the patient and decide which of three states they are in. This is what actually drives treatment.</p>"+
         "<ul>"+
-        "<li><strong>Hypovolemic</strong> — water and salt both lost, salt more replaced by free water (diuretics, GI losses, third-spacing). Dry mucous membranes, flat neck veins.</li>"+
-        "<li><strong>Euvolemic</strong> — SIADH is the archetype (pain, nausea, CNS or lung pathology, drugs). Water retained without edema.</li>"+
-        "<li><strong>Hypervolemic</strong> — heart failure, cirrhosis, renal failure. Total-body water is up even more than salt; edema is present.</li>"+
+        "<li><strong>Dry (low volume)</strong> — vomiting, diarrhoea, diuretics, bleeding. They lost both salt and water, then drank plain water to catch up. Dry mucous membranes, tachycardia, flat neck veins. <em>Treatment: give normal saline.</em></li>"+
+        "<li><strong>Normal volume</strong> — the classic is "+g("SIADH","Syndrome of inappropriate antidiuretic hormone. The body releases a hormone that tells the kidney to hold on to water when it should not. The result is a patient quietly drowning in their own retained water. Common with lung disease, brain injury, cancers, and many drugs.")+", where the body holds on to water it does not need. They look neither dry nor overloaded. <em>Treatment: restrict water. Saline can make this one worse.</em></li>"+
+        "<li><strong>Wet (overloaded)</strong> — heart failure, liver failure, kidney failure. Swollen legs, crackles, raised neck veins. The body has too much salt <em>and</em> even more water. <em>Treatment: restrict water and salt, and treat the underlying organ failure.</em></li>"+
         "</ul>"+
-        "<p>The bedside volume exam plus the story usually narrows it, and it changes the fix: the hypovolemic patient needs isotonic volume, the SIADH patient needs water restriction, the hypervolemic patient needs water and salt removal.</p>"
+        "<div class='keybox'><span class='kt'>Anchor</span> Dry patient with low sodium → saline. Normal or overloaded patient with low sodium → hold the fluid back. Giving saline to a SIADH or heart-failure patient can make the sodium worse, not better.</div>"
       },
-      { h:"3", t:"When hyponatremia is an emergency", html:
-        "<p>Symptoms track the <em>rate</em> of the fall more than the absolute number. A sodium of 120 that developed over weeks may be nearly asymptomatic because the brain has had time to extrude osmoles and shrink back to size. The same 120 dropping over hours floods neurons with water and causes <strong>cerebral edema</strong> — headache, confusion, vomiting, and at the severe end seizures, obtundation, and brainstem herniation.</p>"+
-        "<p>Severe symptomatic hyponatremia — seizing, deeply obtunded, or posturing — is one of the few true sodium emergencies, and it is treated with <strong>hypertonic (3%) saline</strong>, not with slow fluids. The modern approach is small, defined boluses aimed at a quick, modest bump to pull water out of brain cells and break the crisis:</p>"+
-        "<div class='formula'>3% saline: <span class='fk'>100–150 mL</span> bolus, may repeat ×1–2<br>goal: raise Na ~<span class='fk'>4–6 mEq/L</span> to abort symptoms</div>"+
-        "<p>That initial 4–6 mEq/L is usually enough to stop a seizure; you are not trying to normalize the sodium in the truck, only to buy brain room. Everything after that is governed by the correction limit in the next section.</p>"
+      { h:"3", t:"When low sodium is a true emergency", html:
+        "<p>Most low sodium is chronic, unimpressive and does not need urgent treatment. A small number of patients are about to die from it, and they look completely different.</p>"+
+        "<p>The danger is in the brain. Water follows salt, so when the blood becomes dilute, water moves <em>into</em> brain cells and they swell. The skull has no room to give.</p>"+
+        "<p><strong>Signs it has become an emergency:</strong> seizures, a falling level of consciousness, vomiting with a headache, or a patient who is obviously deteriorating in front of you. These are signs of brain swelling, not of the number itself.</p>"+
+        "<p>Speed matters more than the value. A sodium that fell to 118 over an hour is far more dangerous than a sodium that has sat at 118 for a month, because the brain has had no time to adjust.</p>"+
+        "<div class='formula'>Seizing or obtunded from acute hyponatremia:<br>&nbsp;&nbsp;<span class='fk'>3% hypertonic saline, 100–150 mL</span> over about 10 minutes<br>&nbsp;&nbsp;may repeat until the seizure stops &mdash; per your protocol and medical direction</div>"+
+        "<p>This is the one situation where you deliberately raise the sodium quickly, and it is justified because brain swelling will kill the patient faster than the correction can hurt them. You are not trying to normalize the number — you are trying to stop the seizure. A rise of 4 to 6 mEq/L is usually enough.</p>"+
+        "<div class='dangerbox' style='background:var(--red-soft);border:1px solid var(--red-line);border-left:4px solid var(--red);border-radius:10px;padding:13px 15px;margin:18px 0'><span style='font-weight:800;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--red);display:block;margin-bottom:5px'>The exception, not the rule</span>Hypertonic saline is for the actively seizing or obtunded patient. A stable patient with a sodium of 118 and no symptoms must be corrected <em>slowly</em> — see the next section.</div>"
       },
-      { h:"4", t:"The correction limit and osmotic demyelination", html:
-        "<p>Here is the rule that makes hyponatremia dangerous to <em>treat</em> as well as to have. When sodium has been low for more than about 48 hours, brain cells adapt by expelling their own osmoles. Raise the serum sodium too fast and water is suddenly yanked out of those now-solute-depleted cells, shearing the myelin sheaths of the pons and beyond. This is <strong>osmotic demyelination syndrome (ODS)</strong>, historically called central pontine myelinolysis — a catastrophic, often permanent injury (dysarthria, quadriparesis, 'locked-in' states) that appears days after the correction.</p>"+
-        "<div class='formula'>correction limit: ≤ <span class='fk'>8 mEq/L</span> per 24 h<br>(≤ 6 in the highest-risk patients)</div>"+
-        "<p>Higher-risk patients — where you stay at the conservative end — include chronic alcoholism, malnutrition, advanced liver disease, hypokalemia, and a starting sodium below 105. Note the cruel asymmetry of the disease: the emergency (cerebral edema) comes from correcting <em>too slowly</em> in a crashing patient, and ODS comes from correcting <em>too fast</em>. You need enough to break a seizure, then a firm ceiling on the 24-hour total.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — go slow, and re-lower if needed</span>"+
-        "<p>Observational and case data consistently link overcorrection (&gt;8–10 mEq/L in 24 h) to ODS, and guidelines endorse a ≤8 mEq/L daily limit, lower in high-risk patients. If sodium is rising too fast — often because the underlying cause resolves and the kidney dumps free water (an autocorrecting brisk aquaresis) — the recognized rescue is to <em>re-lower</em> the sodium with free water (D5W) and/or desmopressin. On transport, the practical danger is an aggressive drip outrunning the limit.</p>"+
-        "<div class='grade'>Quality: moderate (consistent observational data and strong physiologic mechanism; guideline-endorsed).</div></div>"
+      { h:"4", t:"The speed limit — and why it exists", html:
+        "<p>This is the part that surprises people: with chronic low sodium, <strong>correcting it too fast does more harm than the low sodium was doing.</strong></p>"+
+        an("Surfacing too fast",
+          "<p>A diver who has been deep for hours cannot come straight up. Their body adapted to the pressure down there, and surfacing too quickly causes the bends — injury caused by the <b>rate of change</b>, not by being at the surface.</p>"+
+          "<p>Brain cells do the same thing. Given days in dilute blood, they quietly pump out their own particles so they stop swelling — they adapt. Now raise the sodium fast: the blood becomes concentrated but the brain cells have nothing left to hold their water, so they shrivel. The result is "+g("osmotic demyelination","Also called central pontine myelinolysis. Raising a chronically low sodium too quickly damages the insulation around nerve fibres in the brainstem. It appears days later and can leave a patient permanently locked in — awake and aware but unable to move or speak. It is usually irreversible, and it is caused by treatment.")+", and it often shows up days later, after the patient is out of your hands.</p>")+
+        "<div class='formula'>Correction speed limit: <span class='fk'>no more than 8–10 mEq/L in 24 hours</span><br>High-risk patients: stay under <span class='fk'>6–8 mEq/L in 24 hours</span></div>"+
+        "<p><strong>Who is highest risk?</strong> Chronic low sodium plus any of: heavy alcohol use, malnutrition, liver disease, or a low potassium. Those patients have the least reserve and the worst outcomes when overcorrected.</p>"+
+        "<p>Practically, in transport: know the sodium at departure, know what is running, and document the rate. If the sodium is climbing faster than about 0.5 mEq/L per hour, flag it to the receiving team and to medical direction. Overcorrection is frequently caused in transit and noticed days later.</p>"
       },
-      { h:"5", t:"Hypernatremia is always a water-deficit state", html:
-        "<p>Flip the frame. Hypernatremia (Na &gt; 145) means the blood is too concentrated — there is not enough water for the salt. It is therefore, almost by definition, a <strong>free-water deficit</strong>. And there is an important clue baked into who gets it: a thirsty person with an intact thirst mechanism and access to water essentially cannot become hypernatremic — they drink. So hypernatremia is a disease of people who <em>can't get to water or can't sense they need it</em>: the intubated, the very old, infants, the neurologically impaired, and anyone with a driving water loss they can't keep up with.</p>"+
-        "<p>The causes sort into water losses outpacing intake:</p>"+
-        "<ul>"+
-        "<li><strong>Pure water loss</strong> — diabetes insipidus (see below), insensible/respiratory losses, fever.</li>"+
-        "<li><strong>Hypotonic fluid loss</strong> — osmotic diuresis (hyperglycemia, mannitol, high-protein tube feeds), GI losses, diuretics.</li>"+
-        "<li><strong>Rarely, sodium gain</strong> — hypertonic saline or bicarbonate administration, salt ingestion.</li>"+
-        "</ul>"+
-        "<p>Symptoms are again neurologic — lethargy, irritability, weakness, and with severe or rapid rises, seizures and intracranial bleeding from a shrinking brain tearing its bridging veins.</p>"
+      { h:"5", t:"High sodium is always a water problem", html:
+        "<p>If low sodium is usually too much water, high sodium is the mirror image: <strong>not enough water.</strong> It is almost never caused by eating too much salt.</p>"+
+        "<p>That means the patients who become hypernatremic are the ones who <em>cannot get a drink</em>: the elderly, the very young, patients with dementia, intubated patients, and anyone with a big ongoing water loss — burns, fever, diarrhoea, or the diabetes insipidus in the next section.</p>"+
+        "<p>The symptoms are brain symptoms again, this time from cells shrinking rather than swelling: confusion, weakness, irritability, twitching, and in severe cases seizures and coma.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> High sodium means the patient is short of water. Ask what stopped them drinking, or what is making them lose water faster than they can replace it.</div>"
       },
-      { h:"6", t:"Correcting hypernatremia — and the mirror-image trap", html:
-        "<p>Estimate how much water is missing with the free-water deficit, then replace it — but, exactly mirroring hyponatremia, <em>slowly.</em></p>"+
-        "<div class='formula'><span class='fk'>Free-water deficit</span> = TBW × [(Na / 140) − 1]<br>TBW ≈ 0.6 × wt(kg) (men) · 0.5 × wt (women)</div>"+
-        "<p>The trap: a brain that has been hypernatremic for more than a day has generated intracellular osmoles to defend its volume. Pour water in too fast and those cells swell — <strong>cerebral edema</strong>, the same feared endpoint from the opposite direction. So the correction ceiling for chronic hypernatremia is likewise gentle:</p>"+
-        "<div class='formula'>lower Na by ≤ <span class='fk'>10 mEq/L</span> per 24 h (chronic)</div>"+
-        "<p>Replace with hypotonic fluid — oral or enteral free water when possible, or IV D5W or ½-normal saline — and recheck the sodium frequently. One caveat for the crashing patient: if hypernatremia coexists with overt <em>hypovolemic shock</em>, restore perfusion first with isotonic fluid, then turn to the free-water deficit. Perfusion beats the number.</p>"
+      { h:"6", t:"Fixing high sodium — the same trap in reverse", html:
+        "<p>The brain adapts to high sodium the same way it adapts to low. Given time, brain cells pull particles in so they stop shrinking. Drop the sodium too fast and water floods those cells — <strong>cerebral edema, seizures, and death.</strong> Same mechanism, opposite direction.</p>"+
+        "<div class='formula'>Chronic high sodium: lower it no faster than <span class='fk'>10–12 mEq/L in 24 hours</span></div>"+
+        "<p><strong>The one exception that outranks the speed limit:</strong> a patient who is in shock. If they are hypotensive and poorly perfused, restoring circulating volume comes first, with isotonic fluid, even though that will move the sodium. Shock kills in minutes; a slightly fast sodium correction does not. Fix the blood pressure, then slow down and correct the water deficit gradually.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Both directions have a speed limit, and both are about the brain adapting. But circulation always outranks chemistry — treat shock first, then correct slowly.</div>"
       },
-      { h:"7", t:"Diabetes insipidus: a water-handling failure", html:
-        "<p>Diabetes insipidus (DI) is worth its own footing because it is a common driver of transport hypernatremia and it is frequently misread. DI has nothing to do with glucose — it is a failure to <em>concentrate urine</em>, producing large volumes of dilute urine and, if the patient can't drink to keep up, a rising sodium.</p>"+
-        "<ul>"+
-        "<li><strong>Central DI</strong> — the pituitary fails to release antidiuretic hormone (ADH/vasopressin). Common after neurosurgery, traumatic brain injury, or in brain death. It <em>responds</em> to desmopressin (DDAVP).</li>"+
-        "<li><strong>Nephrogenic DI</strong> — the kidney doesn't respond to ADH (lithium, chronic hypercalcemia, hypokalemia). It does <em>not</em> respond to DDAVP; treatment addresses the cause.</li>"+
-        "</ul>"+
-        "<p>The transport picture that should trigger the thought: a neuro patient with copious, dilute urine and a climbing sodium. The management is to keep pace with the massive free-water losses and, in central DI, replace the missing hormone with DDAVP. Watch the urine output like a hemodynamic vital sign — it can be liters per hour and will dehydrate a patient fast.</p>"
+      { h:"7", t:"Diabetes insipidus — the tap left running", html:
+        "<p>Despite the name, this has nothing to do with sugar diabetes. The word \"insipidus\" means tasteless — a reference to the urine being dilute rather than sweet.</p>"+
+        an("A tap you cannot shut off",
+          "<p>Normally a hormone called "+g("ADH","Antidiuretic hormone, also called vasopressin. It tells the kidney to hold on to water. \"Anti-diuretic\" simply means \"stops you making urine.\" When it is missing, the kidney cannot concentrate urine and water pours out.")+" tells the kidney to hold water back. In diabetes insipidus that signal is missing, or the kidney stops listening to it.</p>"+
+          "<p>The result is a tap stuck open. <b>The patient pours out litres of dilute, almost water-clear urine</b> while their blood gets saltier and saltier. If they can drink enough to keep up, they stay level. If they cannot — because they are intubated, unconscious, or a small child — the sodium climbs fast.</p>")+
+        "<p><strong>The picture to recognize:</strong> huge urine output (often many litres), very dilute urine, and a <em>rising</em> sodium. That combination is the giveaway. It is common after neurosurgery, head injury, or pituitary problems.</p>"+
+        "<p>Note the contrast with a diuretic or with high glucose, where a big urine output comes with a normal or falling sodium. In diabetes insipidus the sodium goes <em>up</em> because the patient is losing water without salt.</p>"+
+        "<p>Treatment is to replace the water and, when the cause is the missing hormone, to give "+g("desmopressin","A manufactured version of ADH, often written DDAVP. It replaces the missing signal so the kidney holds on to water again.")+". In transport: match the fluid to the urine output as ordered, watch the sodium, and do not let a patient with no ability to drink fall behind.</p>"
       },
       { h:"8", t:"The sodium anchor for transport", html:
-        "<p>Two ideas carry almost every sodium decision you will make in the back of a truck or aircraft.</p>"+
-        "<p>First, <strong>chronicity dictates speed.</strong> An abnormal sodium that developed slowly must be corrected slowly, in either direction — because the brain has adapted, and undoing that adaptation too fast is what injures it (ODS when going up, cerebral edema when coming down). The only license to move quickly is an acute, severely symptomatic derangement, and even then you make a small, defined move to break symptoms and then hold the line.</p>"+
-        "<p>Second, <strong>on transport your job is usually to hold the line, not to fix the number.</strong> The most common real-world harm is an inherited drip quietly overcorrecting over a two-hour flight. Know the running rate, do the arithmetic on where it will put the sodium by the time you land, recheck when you can, and be ready to slow the correction — or, if it is outrunning the limit, to add free water. Faithful, bounded correction beats an aggressive one every time.</p>"+
-        "<div class='keybox'><span class='kt'>Anchor</span> Sodium is water. Correct chronic derangements by ≤8 mEq/L (Na up) or ≤10 mEq/L (Na down) per 24 h. Reserve fast moves — 3% saline in small boluses — for the actively seizing or obtunded patient, and only to abort symptoms.</div>"
+        "<p>Four things to carry out of this module.</p>"+
+        "<ol>"+
+        "<li><strong>Read every sodium as a water statement.</strong> Low usually means too much water; high means too little. That reframing explains most of the treatments.</li>"+
+        "<li><strong>Correct for glucose before you react.</strong> A DKA patient with a sodium of 128 and a glucose of 700 has a real sodium near 138.</li>"+
+        "<li><strong>Fast correction is the danger, in both directions.</strong> The brain adapts, and it is the rate of change that injures it. Know the number at departure, document the rate, and flag anything moving faster than about 0.5 mEq/L per hour.</li>"+
+        "<li><strong>Symptoms outrank numbers.</strong> A seizing patient with acute hyponatremia gets hypertonic saline. A comfortable patient with the same number gets patience. And a patient in shock gets their circulation restored first, whatever the sodium says.</li>"+
+        "</ol>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> The sodium number is about water. The speed of correction is about the brain. And circulation always comes before chemistry.</div>"
       }
     ],
     quiz: [
-      { q:"The serum sodium concentration is primarily a reflection of:",
-        opts:["Total-body sodium content","Whole-body water balance and tonicity","Dietary salt intake over the past week","Renal sodium reabsorption alone"], ans:1,
-        expl:"Sodium is a concentration — salt divided by water — and it is almost always the water (the denominator) that has moved. A low sodium usually means too much water; a high sodium, too little." },
-      { q:"A DKA patient has a measured sodium of 128 and a glucose of 700 mg/dL. The corrected sodium is approximately:",
-        opts:["118 — profound hyponatremia","128 — true hyponatremia","138 — essentially normal","150 — hypernatremia"], ans:2,
-        expl:"Add ~1.6 mEq/L per 100 mg/dL of glucose above 100. Glucose is ~600 above normal → add ~9–10: 128 + 10 ≈ 138. The hyponatremia is translocational (dilutional), not true — treating the number would be an error." },
-      { q:"Which condition classically causes EUVOLEMIC hypotonic hyponatremia?",
-        opts:["Congestive heart failure","SIADH","Diuretic use with GI losses","Cirrhosis"], ans:1,
-        expl:"SIADH is the archetypal euvolemic hyponatremia — water is retained without edema. Heart failure and cirrhosis are hypervolemic; diuretics with GI losses are hypovolemic." },
-      { q:"A patient is actively seizing from an acute severe hyponatremia. The appropriate initial treatment is:",
-        opts:["A 1-liter bolus of normal saline","A 100–150 mL bolus of 3% hypertonic saline","Fluid restriction only","Rapid correction to a normal sodium of 140"], ans:1,
-        expl:"Severe symptomatic hyponatremia is treated with small boluses of 3% saline (100–150 mL) to raise the sodium ~4–6 mEq/L and abort the seizure — not to normalize it, and not with isotonic fluid." },
-      { q:"Correcting a chronic hyponatremia too rapidly risks which complication?",
-        opts:["Cerebral edema","Osmotic demyelination syndrome","Diabetes insipidus","Hyperchloremic acidosis"], ans:1,
-        expl:"Overly fast correction of chronic hyponatremia yanks water out of adapted brain cells, causing osmotic demyelination syndrome (central pontine myelinolysis) — a delayed, often permanent injury. Limit correction to ≤8 mEq/L per 24 h." },
-      { q:"Which patient is at HIGHEST risk for osmotic demyelination with overcorrection?",
-        opts:["A well-nourished patient with a sodium of 132","A malnourished patient with alcoholism and a sodium of 108","A patient with acute hyponatremia over 6 hours","A hypernatremic patient being corrected"], ans:1,
-        expl:"Chronic alcoholism, malnutrition, hypokalemia, liver disease, and a very low starting sodium all raise ODS risk — stay at the conservative correction limit (≤6 mEq/L/24h). Acute (<48 h) hyponatremia carries much lower ODS risk." },
-      { q:"Hypernatremia is fundamentally a state of:",
-        opts:["Excess total-body sodium","A free-water deficit","Bicarbonate loss","Excess antidiuretic hormone"], ans:1,
-        expl:"Hypernatremia means too little water for the salt — a free-water deficit. It occurs in those who can't access or sense thirst (intubated, elderly, neuro-impaired) or who have large ongoing water losses." },
-      { q:"When correcting a CHRONIC hypernatremia, lowering the sodium too quickly risks:",
-        opts:["Osmotic demyelination","Cerebral edema","Metabolic alkalosis","Central diabetes insipidus"], ans:1,
-        expl:"A brain adapted to chronic hypernatremia holds intracellular osmoles; rapid water replacement causes cells to swell — cerebral edema. Lower the sodium by no more than ~10 mEq/L per 24 h." },
-      { q:"A post-neurosurgical patient produces 6 liters of dilute urine and the sodium is climbing. The urine concentrates appropriately after desmopressin (DDAVP). This is:",
-        opts:["Nephrogenic diabetes insipidus","Central diabetes insipidus","SIADH","Osmotic diuresis from hyperglycemia"], ans:1,
-        expl:"Central DI is a failure of ADH release (common after neurosurgery, TBI, brain death) and it responds to DDAVP. Nephrogenic DI does not respond to DDAVP; SIADH causes water retention, not dilute diuresis." },
-      { q:"A hypernatremic patient is also in overt hypovolemic shock. The correct priority is:",
-        opts:["Correct the free-water deficit first with D5W","Restore perfusion with isotonic fluid first, then address the water deficit","Give 3% saline","Withhold all fluids until the sodium is known"], ans:1,
-        expl:"Perfusion beats the number. Restore intravascular volume with isotonic fluid to treat shock first, then turn to the free-water deficit and correct the sodium at the safe rate." }
+      { q:"The sodium level is mostly telling you about:",
+        opts:["How much salt is in the body","How much water is in the body","Kidney function","How much salt the patient ate"], ans:1,
+        expl:"Sodium is a concentration — salt per litre of water. Low sodium usually means too much water diluting it; high sodium means too little water. Reading it as a water statement makes the treatments make sense." },
+      { q:"A DKA patient has a measured sodium of 128 and a glucose of 700 mg/dL. The corrected sodium is roughly:",
+        opts:["118","128","138","148"], ans:2,
+        expl:"Glucose is 600 above 100, so add 1.6 for each 100: 1.6 × 6 ≈ 10. 128 + 10 ≈ 138 — normal. High glucose pulls water into the blood and dilutes the sodium, so it reads falsely low." },
+      { q:"Which condition classically causes low sodium in a patient who looks neither dry nor overloaded?",
+        opts:["Vomiting and diarrhoea","SIADH","Heart failure","Haemorrhage"], ans:1,
+        expl:"SIADH is the classic normal-volume cause — the body holds on to water it does not need. It matters because these patients are treated by restricting water; giving saline can make them worse." },
+      { q:"A patient is actively seizing from acute severe hyponatremia. The appropriate treatment is:",
+        opts:["Fluid restriction alone","3% hypertonic saline, 100–150 mL over about 10 minutes","Normal saline at maintenance rate","Wait and correct slowly"], ans:1,
+        expl:"Seizures mean the brain is swelling, which will kill the patient faster than a fast correction can harm them. Give hypertonic saline to stop the seizure — aiming to raise the sodium only about 4–6 mEq/L, not to normalize it." },
+      { q:"Correcting a chronic low sodium too quickly risks:",
+        opts:["Cerebral edema","Osmotic demyelination","Kidney failure","Rebound hyponatremia"], ans:1,
+        expl:"Brain cells adapt to chronic low sodium by pumping out their own particles. Raising the sodium fast makes them shrivel, damaging the insulation around brainstem nerve fibres. It appears days later and is usually permanent." },
+      { q:"Which patient is at HIGHEST risk of harm from overcorrecting a low sodium?",
+        opts:["A patient whose sodium dropped acutely over 2 hours","A malnourished patient with heavy alcohol use and chronic hyponatremia","A young patient with a sodium of 132","A patient with a high sodium"], ans:1,
+        expl:"Chronic low sodium plus alcohol use, malnutrition, liver disease or a low potassium is the highest-risk combination. Those patients need the tighter limit of 6–8 mEq/L in 24 hours." },
+      { q:"High sodium is fundamentally a state of:",
+        opts:["Too much salt intake","Not enough water","Kidney failure","Too much bicarb"], ans:1,
+        expl:"Hypernatremia is a water problem, not a salt problem. It happens to people who cannot get a drink — the elderly, the very young, dementia and intubated patients — or who are losing water fast." },
+      { q:"When correcting a CHRONIC high sodium, lowering it too quickly risks:",
+        opts:["Osmotic demyelination","Cerebral edema and seizures","Hyperkalemia","Rebound hypernatremia"], ans:1,
+        expl:"The mirror image of the other direction. Brain cells adapted by pulling particles in; dropping the sodium fast floods them with water and they swell. Limit the fall to about 10–12 mEq/L in 24 hours." },
+      { q:"A post-neurosurgical patient is producing 6 litres of very dilute urine and the sodium is climbing. This suggests:",
+        opts:["SIADH","Diabetes insipidus","Heart failure","Diuretic effect"], ans:1,
+        expl:"Massive dilute urine plus a RISING sodium is diabetes insipidus — the ADH signal is missing so the kidney cannot hold water. Note the contrast: SIADH holds water and drops the sodium." },
+      { q:"A hypernatremic patient is also in obvious shock. The correct priority is:",
+        opts:["Correct the sodium slowly and avoid fluid","Restore circulating volume first with isotonic fluid","Give free water only","Give hypertonic saline"], ans:1,
+        expl:"Circulation outranks chemistry. Shock kills in minutes; a slightly fast sodium correction does not. Restore perfusion with isotonic fluid first, then slow down and correct the water deficit gradually." }
     ]
   },
 
@@ -607,107 +679,130 @@ var MODULES = [
     id: 3,
     available: true,
     title: "Potassium",
-    desc: "The ECG signature of hyper- and hypokalemia, the stabilize–shift–eliminate framework, safe repletion, and why refractory hypokalemia is a magnesium problem.",
-    objective: "Recognize the ECG progression of hyper- and hypokalemia, apply the stabilize–shift–eliminate framework to hyperkalemia, replete potassium safely, and know why magnesium must accompany refractory repletion.",
+    desc: "The electrolyte that stops hearts in both directions — reading the ECG, and the three-step fix that actually works.",
+    objective: "Explain why small potassium changes are so dangerous; recognize the ECG progression of high and low potassium; apply the stabilize–shift–eliminate sequence and know which step actually removes potassium; replace potassium safely; and explain why magnesium and digoxin change the picture.",
     content: [
-      { h:"1", t:"Why a tiny number is so lethal", html:
-        "<p>Potassium runs on a knife-edge. The entire normal serum range is <strong>3.5–5.0 mEq/L</strong> — a window barely 1.5 wide — and yet 98% of the body's potassium sits <em>inside</em> cells. That steep gradient across the cell membrane is what sets the resting membrane potential of every excitable cell, and the heart is the one that kills you when it drifts.</p>"+
-        "<p>Because the serum holds so little of the total, small shifts in that number reflect large or dangerous forces, and they translate directly into the cardiac conduction system. This is the core reason potassium disorders are managed with a cardiac monitor running: the number on the chemistry panel is a lagging indicator, and the <strong>ECG is the real-time readout of how much danger the myocardium is actually in.</strong> A potassium of 7.0 with a normal ECG and a potassium of 6.2 with a sine wave are not the same emergency — treat the ECG.</p>"
+      { h:"1", t:"Why such a small number matters so much", html:
+        "<p>Sodium runs around 140. Potassium runs around 4. A change of 2 in the sodium means nothing; a change of 2 in the potassium can stop a heart. Understanding why makes everything else in this module obvious.</p>"+
+        an("The iceberg",
+          "<p><b>Almost all of the body's potassium — about 98% — is hidden inside cells.</b> The blood level you measure is only the small tip showing above the water.</p>"+
+          "<p>Two things follow. First, <b>tiny movements in and out of cells cause big swings in the number you see</b>, because the blood compartment is so small. Second, <b>the blood level can lie about the total</b>: a DKA patient may have a normal or even high potassium on arrival while being profoundly depleted overall, because acid has driven potassium out of cells into the blood. Give insulin and it all rushes back in — and the number falls off a cliff.</p>")+
+        "<p>The reason it matters is electrical. The difference in potassium between the inside and outside of a cell is what lets heart muscle build and release its charge. Change that gradient and the heart's conduction changes with it — which is why potassium problems show up on the monitor before they show up anywhere else.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Potassium is an electrical problem, and the ECG is your fastest test. In a patient at risk, the monitor tells you more, sooner, than the lab does.</div>"
       },
-      { h:"2", t:"The ECG progression of hyperkalemia", html:
-        "<p>Hyperkalemia rewrites the ECG in a fairly reliable sequence as it climbs. You will rarely get the level and the tracing at the same instant, so learning the progression lets you estimate severity from the monitor alone:</p>"+
+      { h:"2", t:"Reading high potassium on the monitor", html:
+        "<p>Hyperkalemia changes the ECG in a fairly predictable order as it worsens. Learn the sequence rather than individual findings, because what matters is <em>where on the path</em> your patient is.</p>"+
         "<ul>"+
-        "<li><strong>Peaked T waves</strong> — the earliest sign; tall, narrow, symmetric, 'tented' T waves (often ~5.5–6.5).</li>"+
-        "<li><strong>P-wave flattening and PR prolongation</strong> — the atria go quiet as conduction slows (~6.5–7.5).</li>"+
-        "<li><strong>QRS widening</strong> — the ventricular complex smears out as the level rises (~7.5–8.5).</li>"+
-        "<li><strong>Sine wave</strong> — the widened QRS merges with the T wave into a rolling sinusoid — a pre-arrest rhythm.</li>"+
-        "<li><strong>Ventricular fibrillation or asystole.</strong></li>"+
+        "<li><strong>Peaked T waves</strong> — tall, narrow, pointed. The earliest characteristic change, classically described as tented or \"you could prick your finger on it.\"</li>"+
+        "<li><strong>Flattened or absent P waves</strong> — the atria stop conducting.</li>"+
+        "<li><strong>Widening QRS</strong> — the dangerous one. The complex smears out and starts to lose its shape.</li>"+
+        "<li><strong>Sine wave</strong> — the widened QRS merges with the T wave into a rolling wave. This is a pre-arrest rhythm.</li>"+
+        "<li><strong>Asystole or VF.</strong></li>"+
         "</ul>"+
-        "<p>These levels are approximate and vary between patients — the <em>trend</em> and the presence of any of these changes matter more than the exact cutoff. Any QRS widening or a sine wave is a 'treat now, ask questions later' finding. And beware the patient in whom hyperkalemia presents as a bradycardia or a new wide-complex rhythm of unclear cause: in the dialysis patient or the crush-injury patient, <em>hyperkalemia is on the top of that list.</em></p>"
+        an("A dimmer switch, not a light switch",
+          "<p>The progression is smooth, and patients slide along it. <b>A peaked T wave is a warning; a widening QRS means the clock is running.</b></p>"+
+          "<p>The practical point: do not wait for a lab value to act on a widening QRS in a dialysis patient or a crush-injury patient. The ECG is the real-time reading, and by the time a number comes back the picture may have moved.</p>")+
+        "<p>One caution — the correlation between the potassium value and the ECG is loose. Some patients show dramatic changes at 6.5; others look almost normal at 7.5. <strong>Treat the ECG and the patient, not the number alone.</strong></p>"
       },
-      { h:"3", t:"Step 1 — stabilize the membrane with calcium", html:
-        "<p>The treatment of dangerous hyperkalemia is a three-step framework, and the steps do different jobs. The first is to protect the heart <em>immediately</em>, before you have lowered the potassium at all.</p>"+
-        "<p><strong>Calcium</strong> raises the threshold potential of the cardiac membrane, restoring the gap between resting and threshold that hyperkalemia had eroded. It is cardioprotective within minutes, and it is the first drug in any hyperkalemia with ECG changes.</p>"+
-        "<div class='formula'>calcium <span class='fk'>gluconate</span> 1–3 g IV &nbsp;—or—&nbsp; calcium <span class='fk'>chloride</span> ~1 g<br>onset minutes · lasts ~30–60 min · <span class='fk'>does not lower K</span></div>"+
-        "<p>Two points that matter. Calcium <em>chloride</em> contains roughly three times the elemental calcium of an equal volume of gluconate, so it works when you need a fast, potent effect through a secure line — but it is caustic and best given centrally; <em>gluconate</em> is gentler for a peripheral IV. And the crucial conceptual point: calcium <strong>buys time, it does not treat the problem.</strong> The potassium is still high; you have only made the heart temporarily tolerant of it. Its brief duration means you must move immediately to the next steps.</p>"
+      { h:"3", t:"Step 1 — protect the heart with calcium", html:
+        "<p>When there are ECG changes, calcium goes in first. Not because it fixes anything, but because it buys you the time to do the things that do.</p>"+
+        an("Sandbagging the house",
+          "<p>Picture a house with floodwater rising around it. You have three jobs, in order: <b>protect the house, move things out of the water's reach, and then actually pump the water away.</b></p>"+
+          "<p><b>Calcium is the sandbags.</b> It does nothing to the flood — the potassium level does not change at all — but it shores up the heart's electrical stability so the rising water stops threatening it. That protection lasts roughly 30 to 60 minutes, so it buys time and nothing more.</p>"+
+          "<p>This is the analogy for the whole treatment sequence, and the rest of the module follows it.</p>")+
+        "<div class='formula'>Calcium gluconate <span class='fk'>1–2 g IV</span> over 5–10 min<br>&nbsp;&nbsp;or calcium chloride <span class='fk'>500 mg–1 g IV</span> (central access preferred — harsh on veins)<br>Onset: minutes &nbsp;·&nbsp; Duration: <span class='fk'>30–60 minutes</span> &nbsp;·&nbsp; Effect on potassium: <span class='fk'>none</span></div>"+
+        "<p><strong>The limitation you must remember:</strong> calcium does not lower the potassium by a single point. If you give calcium and stop there, the protection wears off and the patient is exactly as sick as before — but you may have relaxed because the ECG looked better. Calcium always has to be followed by steps 2 and 3.</p>"+
+        "<p>One caution: in a patient on digoxin, give calcium slowly and with care, since the interaction between calcium and digoxin can worsen toxicity. Discuss with medical direction where time allows.</p>"
       },
       { h:"4", t:"Step 2 — shift potassium into cells", html:
-        "<p>With the membrane stabilized, drive potassium out of the serum and into cells. These agents lower the number within minutes to an hour, but — like calcium — they are <em>temporary</em>: the potassium is still in the body and will leak back out.</p>"+
+        "<p>Now move the potassium out of the blood, where it is dangerous, and into cells, where it is not.</p>"+
+        an("Moving furniture upstairs",
+          "<p>Shifting is <b>carrying the furniture upstairs while the ground floor floods.</b> It gets it out of harm's way quickly — but every stick of it is still in the house. When the shifting drugs wear off, the potassium comes back down.</p>"+
+          "<p>That is why shifting alone is never the end of the treatment, and why a patient who was \"treated\" hours ago can rebound.</p>")+
         "<ul>"+
-        "<li><strong>Insulin + glucose</strong> — the workhorse. Insulin drives potassium intracellularly; give glucose with it to prevent hypoglycemia (e.g., 10 units regular insulin with 25 g dextrose). Onset ~15 min, lasts a few hours.</li>"+
-        "<li><strong>Nebulized beta-agonist (albuterol)</strong> — high-dose albuterol shifts potassium and is additive to insulin. Convenient because it needs no IV, but tachycardia limits it in some patients.</li>"+
-        "<li><strong>Sodium bicarbonate</strong> — modest and slow; genuinely useful mainly when a metabolic acidosis is also present. Not a reliable stand-alone shifter.</li>"+
+        "<li><strong>Insulin with glucose</strong> — the workhorse. Insulin drives potassium into cells. Typically 10 units of regular insulin IV with 25 g of dextrose. Onset 15–30 min, lasts a few hours.</li>"+
+        "<li><strong>Nebulized albuterol</strong> — high dose (10–20 mg, far more than an asthma dose). Works well alongside insulin and needs no IV.</li>"+
+        "<li><strong>Sodium bicarbonate</strong> — only genuinely useful when there is a metabolic acidosis driving the problem. Not a routine step.</li>"+
         "</ul>"+
-        "<div class='evidence'><span class='etag'>Evidence check — watch the glucose</span>"+
-        "<p>Insulin-induced hypoglycemia is the most common and under-appreciated complication of hyperkalemia treatment, occurring in a substantial minority of patients — especially those with renal failure (who clear insulin slowly), low body weight, or a low baseline glucose. Give adequate dextrose with the insulin and <em>recheck the glucose</em> for several hours, including on transport. Reduced-insulin protocols lower the risk in high-risk patients.</p>"+
-        "<div class='grade'>Quality: moderate–high (consistent observational data across multiple cohorts).</div></div>"
+        "<p><strong>Why the glucose goes with the insulin:</strong> the insulin is there for its effect on potassium, not on sugar. Without dextrose alongside it, you will simply make the patient hypoglycemic. Check the glucose before you give it and again afterwards — and remember that a patient who is already hyperglycemic may not need the dextrose.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Insulin and albuterol move potassium; they do not remove it. Recheck the level, expect a rebound as they wear off, and make sure step 3 is happening.</div>"
       },
-      { h:"5", t:"Step 3 — eliminate potassium from the body", html:
-        "<p>Stabilizing and shifting keep the patient alive across the next hour, but only <em>elimination</em> actually removes potassium. This is the step that fixes the problem, and it is the slowest.</p>"+
+      { h:"5", t:"Step 3 — actually remove it", html:
+        "<p>This is the step that treats the disease rather than the monitor, and the only one that lowers the total amount of potassium in the body.</p>"+
+        an("Pumping the water out",
+          "<p>Sandbags protect. Moving furniture upstairs buys time. <b>Only pumping the water out actually ends the flood.</b></p>")+
         "<ul>"+
-        "<li><strong>Dialysis</strong> — the definitive therapy, and the endpoint for the anuric or dialysis-dependent patient. If your hyperkalemic patient makes no urine, everything else is a bridge to this. On transport, the mission is often precisely to get that patient to a dialysis-capable center.</li>"+
-        "<li><strong>Loop diuretics</strong> — increase urinary potassium loss, but only in a patient who still makes urine.</li>"+
-        "<li><strong>GI cation binders</strong> — newer agents (patiromer, sodium zirconium cyclosilicate) bind potassium in the gut; slow onset, more useful subacutely. Older sodium polystyrene sulfonate works slowly and carries a rare risk of intestinal necrosis — it is not an emergency drug.</li>"+
+        "<li><strong>Dialysis</strong> — fast, reliable, and definitive. For a dialysis-dependent patient who makes no urine, this is <em>the</em> treatment; everything else is holding the line until they reach the machine.</li>"+
+        "<li><strong>Loop diuretics</strong> — only useful if the kidneys still make urine. Useless in an anuric patient.</li>"+
+        "<li><strong>Binders</strong> — sodium zirconium or patiromer bind potassium in the gut. Slow, measured in hours, so they are not an emergency treatment.</li>"+
         "</ul>"+
-        "<div class='keybox'><span class='kt'>Anchor</span> Stabilize (calcium) → shift (insulin/glucose, albuterol) → eliminate (dialysis, diuretics, binders). Only the last step removes potassium; the first two buy the time to get there. In the anuric patient, plan for dialysis from the outset.</div>"
+        "<p>For transport this shapes your whole plan. A crush-injury or dialysis patient with a wide QRS needs calcium and shifting drugs now, and needs to be moving toward a dialysis machine — the destination matters as much as the drugs. Make sure the receiving facility knows what is coming.</p>"+
+        "<div class='formula'>Protect: <span class='fk'>calcium</span> &nbsp;→&nbsp; Shift: <span class='fk'>insulin + glucose, albuterol</span> &nbsp;→&nbsp; Remove: <span class='fk'>dialysis, diuretics, binders</span></div>"
       },
-      { h:"6", t:"Hypokalemia: the other end of the same danger", html:
-        "<p>Low potassium (&lt; 3.5) is just as arrhythmogenic and, in transport patients, extremely common — driven by diuretics, GI losses (vomiting, diarrhea, NG suction), and intracellular shifts. The ECG signature is roughly the mirror of hyperkalemia's early changes:</p>"+
+      { h:"6", t:"Low potassium — the other end of the same danger", html:
+        "<p>Potassium kills at both ends. Hypokalemia is quieter and easier to miss, and it is common in exactly the patients you transport: vomiting, diarrhoea, diuretics, DKA under treatment, and alcohol use.</p>"+
+        "<p><strong>On the ECG</strong>, the changes are almost the mirror image of the high end:</p>"+
         "<ul>"+
-        "<li><strong>Flattened T waves</strong> and <strong>ST-segment depression.</strong></li>"+
-        "<li><strong>Prominent U waves</strong> — an extra bump after the T wave, the classic hypokalemia tell.</li>"+
-        "<li><strong>QT prolongation</strong> (really QU), setting up for <strong>torsades de pointes</strong> and other ventricular arrhythmias.</li>"+
+        "<li><strong>Flattened T waves</strong>, then</li>"+
+        "<li><strong>U waves</strong> — an extra small bump after the T wave. This is the characteristic finding of hypokalemia.</li>"+
+        "<li><strong>ST depression</strong>, a long QT, and then ventricular ectopy leading to VT, torsades and VF.</li>"+
         "</ul>"+
-        "<p>The stakes are highest in two groups. In a patient on <strong>digoxin</strong>, hypokalemia dramatically potentiates digoxin toxicity and its arrhythmias. And in anyone with cardiac ischemia or on QT-prolonging drugs, a low potassium is a ready substrate for malignant ventricular rhythms. Keep potassium comfortably above 4.0 in the cardiac patient.</p>"
+        "<p><strong>Why it is dangerous in a patient on digoxin</strong> is worth understanding rather than memorizing. Digoxin and potassium compete for the same pump on the heart cell. When potassium is low, digoxin has less competition and binds more strongly — so a patient with a perfectly normal digoxin level can become frankly toxic simply because their potassium fell. Low potassium plus digoxin is a genuinely dangerous combination.</p>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> U waves mean low potassium. If the patient takes digoxin, a low potassium can make a normal digoxin level behave like an overdose.</div>"
       },
-      { h:"7", t:"Repletion done safely — and the magnesium key", html:
-        "<p>Replacing potassium is not urgent-fast the way lowering it can be, and pushing it carelessly is dangerous: concentrated IV potassium is caustic to veins and a bolus can itself cause a fatal arrhythmia. <strong>IV potassium is never IV-push.</strong> It is infused, and the rate is capped:</p>"+
-        "<div class='formula'>peripheral IV: typically ≤ <span class='fk'>10 mEq/hr</span> (burns the vein faster)<br>central line, monitored: up to ~<span class='fk'>10–20 mEq/hr</span></div>"+
-        "<p>Faster central rates demand continuous ECG monitoring. Oral repletion is safer and faster-absorbed than most people assume and is preferred whenever the patient can take it. Roughly, every 10 mEq of potassium raises the serum by about 0.1 mEq/L — but this is only a guide, because most of what you give redistributes into cells.</p>"+
-        "<p>Now the point that trips up experienced clinicians: <strong>refractory hypokalemia is usually a magnesium problem.</strong> Magnesium is a cofactor that keeps potassium inside the cell; when magnesium is low, the kidney wastes potassium no matter how much you replace, and the potassium simply will not come up. Coexisting hypomagnesemia is common in exactly the same patients (diuretics, alcoholism, GI losses).</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — replace the magnesium</span>"+
-        "<p>Hypomagnesemia promotes renal potassium wasting and renders hypokalemia refractory to potassium repletion until the magnesium is corrected. The practical rule, well supported physiologically and clinically, is to <em>check and replace magnesium whenever you are treating a stubborn hypokalemia</em> — otherwise the potassium chases its tail. The same magnesium deficiency independently predisposes to torsades.</p>"+
-        "<div class='grade'>Quality: moderate (strong mechanism, consistent clinical observation).</div></div>"
+      { h:"7", t:"Replacing it safely — and the magnesium key", html:
+        "<p><strong>The safety rule first, because getting this wrong is lethal.</strong> IV potassium must run on a pump at a controlled rate, always. Free-flowing or bolused potassium causes cardiac arrest. Verify the pump before departure and again after any line change.</p>"+
+        "<div class='formula'>Typical peripheral rate: <span class='fk'>10 mEq/hr</span><br>Central line with cardiac monitoring: up to <span class='fk'>20 mEq/hr</span><br>Never bolus. Never free-flow. <span class='fk'>Pump at all times.</span></div>"+
+        "<p>Peripheral potassium burns. If the patient complains of pain at the site, slow the rate and check the cannula rather than pushing on.</p>"+
+        "<p><strong>Now the part that catches people out.</strong> A patient whose potassium will not come up despite repeated doses almost always has a <em>magnesium</em> problem.</p>"+
+        an("Filling a tub with the drain open",
+          "<p>Magnesium is needed to keep potassium inside cells. When magnesium is low, the kidney leaks potassium no matter how much you give.</p>"+
+          "<p>You are <b>filling the bathtub with the drain wide open.</b> You can pour in as much as you like and the level will not rise. Replace the magnesium and the drain closes — then the potassium you give finally stays in.</p>")+
+        "<p>So: <strong>potassium that will not correct means check the magnesium.</strong> The two are usually low together, for the same reasons — diuretics, alcohol, diarrhoea, poor nutrition.</p>"
       },
       { h:"8", t:"The potassium anchor for transport", html:
-        "<p>Everything in this module reduces to a few transport habits.</p>"+
-        "<p><strong>Let the ECG lead.</strong> The serum level is a snapshot from a lab draw that may be minutes to hours old; the monitor is live. Treat any hyperkalemia with peaked T waves that are widening the QRS as an emergency regardless of the reported number, and remember that hyperkalemia is a first-line explanation for an unexplained bradycardia or wide-complex rhythm in the dialysis or crush patient.</p>"+
-        "<p><strong>Remember what each drug actually does.</strong> If you gave calcium and the T waves settled, do not relax — the potassium is unchanged and the calcium will wear off in half an hour. The shift agents are also temporary. Until the patient has urinated the potassium out or been dialyzed, the danger is only postponed, which is exactly why so many hyperkalemia transports are races to a dialysis center.</p>"+
-        "<p><strong>Replete gently, and never push it.</strong> IV potassium is a controlled infusion with a rate cap and a monitor, and stubborn hypokalemia means you also need to give magnesium. Keep the cardiac patient's potassium above 4.0, and watch the glucose for hours after you give insulin.</p>"+
-        "<div class='keybox'><span class='kt'>Anchor</span> Hyperkalemia: stabilize–shift–eliminate, and let the ECG — not the lab value — set the urgency. Hypokalemia: replete by controlled infusion (never push), keep cardiac patients &gt;4.0, and replace magnesium or the potassium won't rise.</div>"
+        "<p>Five things to carry.</p>"+
+        "<ol>"+
+        "<li><strong>The ECG is faster than the lab.</strong> Peaked T waves are a warning; a widening QRS means act now.</li>"+
+        "<li><strong>Calcium protects but does not treat.</strong> It buys 30 to 60 minutes and changes the potassium not at all. It must always be followed by shifting and removal.</li>"+
+        "<li><strong>Shifting is temporary.</strong> Insulin and albuterol move potassium into cells; expect a rebound as they wear off and recheck.</li>"+
+        "<li><strong>Only dialysis, diuretics or binders remove it</strong> — and in an anuric patient, only dialysis. That shapes the destination, not just the drugs.</li>"+
+        "<li><strong>IV potassium runs on a pump, always.</strong> And if it will not correct, replace the magnesium.</li>"+
+        "</ol>"+
+        "<div class='keybox'><span class='kt'>Anchor</span> Sandbag the house, move the furniture upstairs, then pump the water out. Skip the last step and the flood is still rising.</div>"
       }
     ],
     quiz: [
-      { q:"The earliest characteristic ECG change of hyperkalemia is:",
-        opts:["A widened QRS complex","Peaked (tented) T waves","A sine-wave pattern","Prominent U waves"], ans:1,
-        expl:"Peaked, narrow, symmetric T waves are the earliest sign. As potassium climbs, the P waves flatten, the PR and QRS prolong, and finally a sine wave and arrest — but tented T waves come first." },
-      { q:"In a patient with hyperkalemia and ECG changes, the FIRST drug to give is:",
-        opts:["Insulin and glucose","Nebulized albuterol","IV calcium","Sodium polystyrene sulfonate"], ans:2,
-        expl:"Calcium stabilizes the cardiac membrane within minutes and is cardioprotective. It is given first in any hyperkalemia with ECG changes — even though it does not lower the potassium itself." },
+      { q:"The earliest characteristic ECG change of high potassium is:",
+        opts:["A widened QRS","Peaked T waves","U waves","A sine wave"], ans:1,
+        expl:"Tall, narrow, pointed T waves come first. The progression then runs: flattened P waves, widening QRS, sine wave, arrest. Learn the sequence — where the patient sits on it is what matters." },
+      { q:"In a patient with high potassium and ECG changes, the FIRST drug to give is:",
+        opts:["Insulin and glucose","Calcium","Albuterol","Sodium bicarbonate"], ans:1,
+        expl:"Calcium first — it stabilizes the heart electrically within minutes. It is the sandbags around the house: it protects while you set up the treatments that actually lower the potassium." },
       { q:"What is the key limitation of giving IV calcium in hyperkalemia?",
-        opts:["It rapidly lowers the serum potassium too far","It stabilizes the myocardium but does not lower potassium, and is short-lived","It causes hypoglycemia","It only works in patients on dialysis"], ans:1,
-        expl:"Calcium buys time — it raises the membrane threshold for ~30–60 minutes but leaves the potassium untouched. You must immediately move to shifting and elimination therapies." },
-      { q:"When treating hyperkalemia with insulin, glucose is co-administered primarily to:",
-        opts:["Enhance the potassium-shifting effect","Prevent insulin-induced hypoglycemia","Speed potassium elimination","Stabilize the cardiac membrane"], ans:1,
-        expl:"Insulin drives potassium into cells; dextrose is given with it to prevent hypoglycemia — the most common complication, especially in renal failure. Recheck the glucose for several hours, including during transport." },
+        opts:["It works too slowly","It does not lower the potassium at all","It causes hypoglycemia","It can only be given centrally"], ans:1,
+        expl:"Calcium changes the potassium level by zero. It protects the heart for about 30–60 minutes and then wears off. Giving it and stopping there leaves the patient exactly as sick, with a falsely reassuring monitor." },
+      { q:"When treating hyperkalemia with insulin, glucose is given alongside mainly to:",
+        opts:["Help drive potassium into cells","Prevent hypoglycemia","Correct the acidosis","Speed up the insulin"], ans:1,
+        expl:"The insulin is being used for its effect on potassium, not on sugar. Without dextrose it will simply make the patient hypoglycemic. Check the glucose before and after — an already-hyperglycemic patient may not need it." },
       { q:"Which therapy actually REMOVES potassium from the body rather than shifting it?",
-        opts:["IV calcium","Insulin and glucose","Nebulized albuterol","Dialysis"], ans:3,
-        expl:"Only elimination therapies (dialysis, loop diuretics in a urinating patient, GI binders) remove potassium. Calcium stabilizes; insulin and albuterol shift potassium into cells temporarily." },
-      { q:"A dialysis-dependent (anuric) patient has severe hyperkalemia. The definitive treatment is:",
-        opts:["Loop diuretics","Dialysis","Repeated albuterol","Oral potassium binders alone"], ans:1,
-        expl:"With no urine output, diuretics can't work and shifting is only a bridge. Dialysis is definitive, and transport is often specifically to reach a dialysis-capable center." },
-      { q:"Which ECG finding is characteristic of HYPOkalemia?",
-        opts:["Peaked T waves","Prominent U waves","A shortened QT interval","A sine-wave pattern"], ans:1,
-        expl:"Hypokalemia flattens T waves, depresses the ST segment, and produces prominent U waves with QT/QU prolongation — a substrate for torsades. Peaked T waves and sine waves are hyperkalemia." },
-      { q:"IV potassium repletion should be administered by:",
-        opts:["Rapid IV push for severe deficits","A controlled infusion with a capped rate, never IV push","Intramuscular injection","Subcutaneous injection"], ans:1,
-        expl:"Concentrated IV potassium is caustic and a bolus can be fatal — it is always a controlled infusion (roughly ≤10 mEq/hr peripherally; up to 10–20 mEq/hr centrally with monitoring). Never IV push." },
-      { q:"A patient's hypokalemia will not correct despite repeated potassium repletion. The most likely reason is:",
-        opts:["Coexisting hypomagnesemia","Coexisting hypernatremia","Excess dietary potassium","An overdose of calcium"], ans:0,
-        expl:"Low magnesium promotes renal potassium wasting and makes hypokalemia refractory. Check and replace magnesium whenever potassium won't come up — otherwise repletion chases its tail." },
-      { q:"Why is hypokalemia especially dangerous in a patient taking digoxin?",
-        opts:["It inactivates digoxin","It markedly potentiates digoxin toxicity and its arrhythmias","It raises the digoxin clearance","It has no interaction with digoxin"], ans:1,
-        expl:"Hypokalemia potentiates digoxin binding and dramatically increases the risk of digoxin-toxic arrhythmias. Keep potassium comfortably above 4.0 in patients on digoxin or with cardiac ischemia." }
+        opts:["Insulin and glucose","Nebulized albuterol","Dialysis","Sodium bicarbonate"], ans:2,
+        expl:"Dialysis, loop diuretics and gut binders remove potassium. Insulin, albuterol and bicarb only move it into cells — the furniture goes upstairs but stays in the house, and it comes back down as they wear off." },
+      { q:"A dialysis-dependent patient who makes no urine has severe hyperkalemia. The definitive treatment is:",
+        opts:["Loop diuretics","Dialysis","Repeated insulin dosing","Calcium every 30 minutes"], ans:1,
+        expl:"Diuretics need working kidneys and are useless in an anuric patient. Calcium and shifting drugs hold the line, but only dialysis removes the potassium — which makes the destination as important as the drugs." },
+      { q:"Which ECG finding is characteristic of LOW potassium?",
+        opts:["Peaked T waves","U waves","Absent P waves","A sine wave"], ans:1,
+        expl:"U waves — an extra small bump after the T wave — are the characteristic finding, usually with flattened T waves. The other three all belong to high potassium." },
+      { q:"IV potassium replacement should be given:",
+        opts:["As a rapid bolus","By slow IV push","On a pump at a controlled rate, always","By free-flow gravity drip"], ans:2,
+        expl:"Free-flowing or bolused potassium causes cardiac arrest. It runs on a pump at a controlled rate — typically 10 mEq/hr peripherally. Verify the pump before departure and after any line change." },
+      { q:"A patient's low potassium will not correct despite repeated replacement. What should you check?",
+        opts:["Sodium","Magnesium","Calcium","Phosphate"], ans:1,
+        expl:"Magnesium is needed to keep potassium inside cells. When it is low, the kidney leaks potassium no matter how much you give — filling a tub with the drain open. Replace the magnesium and the potassium finally holds." },
+      { q:"Why is a low potassium especially dangerous in a patient taking digoxin?",
+        opts:["Digoxin lowers potassium further","Digoxin and potassium compete for the same pump, so low potassium increases digoxin binding","Digoxin blocks potassium absorption","It prevents potassium replacement"], ans:1,
+        expl:"With less potassium competing for the same pump, digoxin binds more strongly. A patient with a perfectly normal digoxin level can become frankly toxic purely because their potassium fell." }
     ]
   },
 
@@ -1385,6 +1480,18 @@ function renderHome(){
 
   show("home");
 }
+
+/* ---- Glossary: delegated so re-rendered content stays interactive ---- */
+(function(){
+  var root = document.getElementById("rdContent");
+  if(!root) return;
+  root.addEventListener("click", function(e){
+    var b = e.target.closest(".gl");
+    if(!b || !root.contains(b)) return;
+    var w = b.closest(".gl-wrap");
+    if(w) w.classList.toggle("on");
+  });
+})();
 
 /* ---- Reader ---- */
 var currentModId = null, scrolledEnough = false;
