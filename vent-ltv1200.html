@@ -1079,12 +1079,12 @@ var vals = {
   pc:     {v:15,  min:1,   max:99,  step:1},    // cmH₂O above PEEP (1–99)
   it:     {v:1.0, min:0.3, max:9.9, step:0.1},  // s (0.3–9.9, also capped by I:E 4:1)
   ps:     {v:10,  min:0,   max:60,  step:1},    // cmH₂O above PEEP (OFF, 1–60)
-  fio2:   {v:40,  min:21,  max:100, step:5},    // % (21–100)
+  fio2:   {v:40,  min:21,  max:100, step:1},    // % (21–100, 1% resolution)
   sens:   {v:3,   min:1,   max:9,   step:1},    // L/min flow trigger (1–9)
   peep:   {v:0,   min:0,   max:20,  step:1},    // cmH₂O (0–20)
   hipres: {v:40,  min:5,   max:100, step:5},    // cmH₂O (5–100)
   lowpres:{v:10,  min:0,   max:99,  step:1},    // cmH₂O (OFF, 1–99)
-  lowmv:  {v:3,   min:0,   max:99,  step:1},    // L/min (OFF, 0.1–99)
+  lowmv:  {v:3,   min:0,   max:99,  step:0.5},  // L/min (OFF, 0.1–99)
   apnea:  {v:20,  min:10,  max:60,  step:5},    // s (10–60)
 };
 
@@ -1128,9 +1128,13 @@ function updateKnob(key){
   // Breath Rate reads dashes in pure CPAP (spontaneous — no set rate), like the real LTV.
   if(key==='rate' && ventMode==='cpap'){
     kv.textContent='- -'; kv.classList.add('dashes');
+  } else if((key==='lowpres'||key==='lowmv'||key==='ps') && vals[key].v===0){
+    kv.textContent='OFF'; kv.classList.add('dashes');   // 0 = alarm/support OFF on the LTV
   } else {
     kv.classList.remove('dashes');
-    kv.textContent = key==='it' ? vals[key].v.toFixed(1) : vals[key].v;
+    if(key==='it') kv.textContent=vals[key].v.toFixed(1);
+    else if(key==='lowmv') kv.textContent=vals[key].v.toFixed(1);   // decimal resolution
+    else kv.textContent=vals[key].v;
   }
   if(key===selectedControl) updateKnobPointer();
 }
@@ -1148,12 +1152,14 @@ function updateKnobPointer(){
   });
 }
 // ── RATE ↔ INSP TIME CONSTRAINT (LTV 1200) ───────────────────
-// The LTV 1200 will not allow an inspiratory time that drives the I:E ratio
-// past 4:1 (inverse). I:E ≤ 4:1  ⇒  IT ≤ 4·ET, and IT+ET = 60/rate,
-// so max IT = 0.8 × breath period. Absolute IT range on the device is 0.3–9.9 s.
+// Two limits bound inspiratory time: the 4:1 inverse-ratio limit
+// (IT ≤ 0.8 × breath period) AND an absolute minimum exhalation time the
+// LTV enforces so the lung always has time to empty. Whichever is stricter
+// wins. Absolute IT range on the device is 0.3–9.9 s.
+var MIN_EXH_TIME=0.3;    // s — minimum exhalation time the vent guarantees
 function maxITForRate(rate){
   var cycleS = 60 / rate;
-  var raw    = cycleS * 0.8;                 // 4:1 inverse-ratio limit
+  var raw    = Math.min(cycleS * 0.8, cycleS - MIN_EXH_TIME);   // 4:1 ratio OR min exhale, stricter wins
   return Math.min(9.9, Math.max(vals.it.min, Math.round(raw * 10) / 10));
 }
 function enforceITLimit(){
@@ -1166,24 +1172,27 @@ function enforceITLimit(){
 }
 
 // ── DELIVERABLE PEAK-FLOW ENVELOPE (Vt ÷ IT physics) ──────────
-// In volume mandatory modes the LTV must push the set Tidal Volume in over
-// the set Inspiratory Time, so peak flow = Vt ÷ IT. The blower has a real
-// ceiling (~100 L/min); a huge volume over a tiny IT is physically
-// impossible. Enforce it like the device does — clamp and say why.
-var MAX_PEAK_FLOW=100;   // L/min
+// In volume mandatory modes the LTV delivers a descending flow pattern that
+// tapers from an initial peak to ~50% of peak. Mean flow = Vt ÷ IT, so the
+// INITIAL peak ≈ 1.33 × mean = Vt × 0.08 ÷ IT (L/min). The blower's initial
+// flow is bounded (~10–100 L/min); a large volume over a tiny IT demands a
+// peak the vent cannot produce. Enforce it like the device does.
+var MAX_PEAK_FLOW=100;   // L/min — max initial (peak) flow the blower delivers
+var MIN_PEAK_FLOW=10;    // L/min — min initial flow (informational flag)
+var PFF=0.08;            // peak-flow factor for the LTV descending-ramp pattern
 function volumeMandatory(){ return breathType==='volume' && ventMode!=='cpap' && ventMode!=='nppv'; }
-function peakFlowLPM(){ return volumeMandatory()? (vals.vt.v*0.06/vals.it.v) : null; }
+function peakFlowLPM(){ return volumeMandatory()? (vals.vt.v*PFF/vals.it.v) : null; }   // initial peak flow
 function enforcePeakFlow(changedKey){
   if(!volumeMandatory()) return false;
-  if(vals.vt.v*0.06/vals.it.v <= MAX_PEAK_FLOW+0.01) return false;
+  if(vals.vt.v*PFF/vals.it.v <= MAX_PEAK_FLOW+0.01) return false;
   if(changedKey==='it'){
     // raising flow by shortening IT — hold IT at the shortest deliverable
-    var minIT=Math.ceil((vals.vt.v*0.06/MAX_PEAK_FLOW)*10)/10;
+    var minIT=Math.ceil((vals.vt.v*PFF/MAX_PEAK_FLOW)*10)/10;
     minIT=Math.min(vals.it.max,minIT);
     if(minIT>vals.it.v){ vals.it.v=minIT; updateKnob('it'); scanMessage('MAX FLOW '+MAX_PEAK_FLOW+' L/min — IT HELD',1500); if(typeof sfxDenied==='function')sfxDenied(); return true; }
   }
   // otherwise cap Tidal Volume to what the flow ceiling allows at this IT
-  var capV=Math.floor((MAX_PEAK_FLOW*vals.it.v/0.06)/vals.vt.step)*vals.vt.step;
+  var capV=Math.floor((MAX_PEAK_FLOW*vals.it.v/PFF)/vals.vt.step)*vals.vt.step;
   capV=Math.max(vals.vt.min,capV);
   if(capV<vals.vt.v){ vals.vt.v=capV; updateKnob('vt'); scanMessage('MAX FLOW '+MAX_PEAK_FLOW+' L/min — Vt CAPPED',1500); if(typeof sfxDenied==='function')sfxDenied(); return true; }
   return false;
@@ -1606,7 +1615,7 @@ function renderVcalc(){
   var el=document.getElementById('scan-vcalc'); if(!el) return;
   var show=(selectedControl==='vt'||selectedControl==='it') && breathType==='volume' && ventMode!=='cpap' && ventMode!=='nppv';
   if(show){
-    var flow=Math.round((vals.vt.v/1000)/vals.it.v*60);
+    var flow=Math.round(peakFlowLPM());
     el.classList.add('show');
     el.textContent='Vcalc (peak flow) '+flow+' L/min  ·  Vt '+vals.vt.v+' mL  ·  IT '+vals.it.v.toFixed(1)+' s';
   } else el.classList.remove('show');
@@ -2248,14 +2257,14 @@ var CONTROLS={
     ],
     pearl:'Lower rate in COPD/asthma (10–12) to allow full exhalation and prevent auto-PEEP. Titrate to ETCO₂.'
   },
-  vt:{tag:'control',tagCls:'tag-control',title:'Tidal Volume',range:'50–2000 mL  |  Target 6–8 mL/kg IBW',
+  vt:{tag:'control',tagCls:'tag-control',title:'Tidal Volume',range:'50–2000 mL  |  Target 6–8 mL/kg PBW',
     desc:'Volume per mandatory breath. <strong>Volume mode only.</strong> In pressure modes, delivered Vt depends on set pressure and lung compliance.',
     avail:[
       {mode:'AC-VC / SIMV-VC',yes:true,note:'Guaranteed volume per breath. Vent generates whatever pressure is needed to reach this volume.'},
       {mode:'AC-PC / SIMV-PC',yes:false,note:'Not set directly. Vt depends on Pressure Control level and patient compliance.'},
       {mode:'CPAP / NPPV',yes:false,note:'Patient determines their own Vt. PS augments effort but does not guarantee a set volume.'},
     ],
-    pearl:'Male IBW = 50 + 2.3 × (height in inches − 60). Female = 45.5 + 2.3 × (height in inches − 60). Start at 6 mL/kg, not actual body weight.'
+    pearl:'Size the breath to <strong>predicted body weight (PBW)</strong> — lung size tracks height, not actual weight. Male PBW = 50 + 2.3 × (height in inches − 60); Female = 45.5 + 2.3 × (height in inches − 60). Start at 6 mL/kg PBW.'
   },
   pc:{tag:'control',tagCls:'tag-control',title:'Pressure Control',range:'5–55 cmH₂O above PEEP',
     desc:'Inspiratory pressure target for mandatory breaths. <strong>Pressure mode only.</strong> Vent delivers this pressure above PEEP for the set Inspiratory Time.',
@@ -2391,7 +2400,7 @@ function openDrawer(key){
       html+='<div style="background:#0a0d15;border:1px solid #2a2a4a;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#888;line-height:1.5">';
       html+='<strong style="color:#aaa">Resistance component (PIP−Pplat):</strong> '+d.raw+' cmH₂O ';
       html+='| Simulated R<sub>aw</sub> = '+RAW_CMHZO_PER_LPS+' cmH₂O/(L/s) | Peak flow = '+(Math.round(vals.vt.v/vals.it.v)/1000).toFixed(2)+' L/s</div>';
-      var driveMsg=d.drive>15?'⚠ Driving pressure &gt;15 — ARDS risk elevated. Consider reducing Vt toward 6 mL/kg IBW.':d.drive>12?'Driving pressure borderline — monitor closely.':'Driving pressure within target range.';
+      var driveMsg=d.drive>15?'⚠ Driving pressure &gt;15 — ARDS risk elevated. Consider reducing Vt toward 6 mL/kg PBW.':d.drive>12?'Driving pressure borderline — monitor closely.':'Driving pressure within target range.';
       html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>';
       html+=driveMsg+'<br><br>High PIP + normal Pplat → airway resistance problem (secretions, bronchospasm, biting tube). High PIP + high Pplat → compliance problem (ARDS, pneumothorax, auto-PEEP). Pplat &gt;30 cmH₂O = lung injury risk — reduce Vt or rate.</div>';
     }
@@ -2484,7 +2493,7 @@ var STAGE_DEFS=[
         'Pressure Control and Pressure Support'
       ],
       correct:1,
-      exp:'Minute ventilation = <strong>Rate × Tidal Volume</strong>. Start around 6–8 mL/kg of ideal body weight (~500 mL for an average adult) at 12–16 breaths/min for a normal MV of roughly 7–9 L/min.'
+      exp:'Minute ventilation = <strong>Rate × Tidal Volume</strong>. Start around 6–8 mL/kg of <strong>predicted body weight</strong> (~500 mL for an average adult) at 12–16 breaths/min for a normal MV of roughly 7–9 L/min.'
     },
     goal:{
       text:'Dial a safe starting minute ventilation: keep <strong>Vt about 400–550 mL</strong> and set a rate that puts <strong>MV around 7–9 L/min</strong>.',
@@ -2785,11 +2794,11 @@ var SCENARIO_LEVELS={
     { name:'The Injurious Tidal Volume',
       badge:'L3 · Scenario 1 of 6', badgeCls:'scen-badge-3',
       intro:'You arrive to transfer an ARDS patient to the tertiary center. "The vent\'s been running since the ED — nobody touched the volume," the nurse says. As you set up your LTV you clock the plateau pressure and wince. This lung is being hurt with every breath.',
-      scenario:'32-year-old with ARDS, IBW 70 kg. The vent is delivering Vt 700 mL — that\'s 10 mL/kg — and the plateau pressure is 34 cmH₂O. Oxygenation is borderline. The lungs are small and stiff.',
+      scenario:'32-year-old with ARDS, PBW 70 kg. The vent is delivering Vt 700 mL — that\'s 10 mL/kg — and the plateau pressure is 34 cmH₂O. Oxygenation is borderline. The lungs are small and stiff.',
       vitals:[{k:'HR',v:'110'},{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'Vt now',v:'10 mL/kg'},{k:'FiO₂',v:'60%'}],
       setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
-        q:'Vt 10 mL/kg IBW and Pplat 34 in ARDS. What is the priority — and what does it cost you?',
+        q:'Vt 10 mL/kg PBW and Pplat 34 in ARDS. What is the priority — and what does it cost you?',
         choices:[
           'Leave the volume; just raise PEEP to fix oxygenation',
           'Cut the tidal volume toward 6 mL/kg to protect the lung — then raise the rate so minute ventilation doesn\'t collapse',
@@ -2797,7 +2806,7 @@ var SCENARIO_LEVELS={
           'Switch to pressure control and accept whatever volume results'
         ],
         correct:1,
-        exp:'Large tidal volumes and Pplat > 30 drive ventilator-induced lung injury. Lung-protective ventilation means <strong>~6 mL/kg IBW and Pplat ≤ 30</strong> — but a smaller breath lowers minute ventilation, so you must <strong>raise the rate to compensate</strong>. That trade-off is the whole skill.'
+        exp:'Large tidal volumes and Pplat > 30 drive ventilator-induced lung injury. Lung-protective ventilation means <strong>~6 mL/kg PBW and Pplat ≤ 30</strong> — but a smaller breath lowers minute ventilation, so you must <strong>raise the rate to compensate</strong>. That trade-off is the whole skill.'
       },
       goal:{
         text:'Make it lung-protective, all three at once: <strong>Vt ≈ 6 mL/kg (about 350–450 mL), Pplat ≤ 30, and minute ventilation ≥ 6.5 L/min</strong> — so raise the rate as you drop the volume. (Add PEEP if you like; it helps oxygenation.)',
@@ -2810,7 +2819,7 @@ var SCENARIO_LEVELS={
           return 'Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg  ·  Pplat '+(pplat?pplat.pplat.toFixed(0):'—')+'  ·  MV '+estMinuteVolume().toFixed(1);
         }
       },
-      confirm:'✓ Lung-protective settings dialed in: ~6 mL/kg, plateau under 30, and the rate raised to hold minute ventilation. The ARMA trial showed 6 mL/kg IBW cut mortality ~22% versus 12 mL/kg — IBW, because lung size tracks height, not weight. Permissive hypercapnia is acceptable as long as pH ≥ 7.20.'
+      confirm:'✓ Lung-protective settings dialed in: ~6 mL/kg PBW, plateau under 30, and the rate raised to hold minute ventilation. The ARDSNet (ARMA) trial reported mortality <strong>31.0% vs 39.8%</strong> with 6 vs 12 mL/kg PBW — an 8.8-point absolute reduction (~22% relative). Use predicted body weight, because lung size tracks height, not weight. Permissive hypercapnia is acceptable as long as pH ≥ 7.20.'
     },
     // ─── L3 S2 ────────────────────────────────────────────────
     { name:'Ready to Come Down',
@@ -2903,14 +2912,14 @@ var SCENARIO_LEVELS={
           'Bag-mask ventilation until the diuretic works'
         ],
         correct:1,
-        exp:'An awake patient who can protect their airway in flash pulmonary edema is the ideal candidate for <strong>CPAP</strong>. High airway pressure recruits flooded alveoli AND squeezes preload/afterload down — it treats the physiology while the drugs work, and avoids intubation in most cases.'
+        exp:'An awake patient who can protect their airway in flash pulmonary edema is the ideal candidate for <strong>CPAP</strong>. High airway pressure recruits flooded alveoli AND squeezes preload/afterload down — it treats the physiology while the drugs work. NIV (CPAP or bilevel) is guideline-supported first-line therapy for cardiogenic pulmonary edema and reduces the need for intubation.'
       },
       goal:{
         text:'Set up non-invasive rescue: <strong>CPAP mode</strong>, high pressure <strong>12–18 cmH₂O</strong>, and <strong>FiO₂ ≥ 95%</strong>. Buy oxygenation and unload the heart.',
         check:function(){ return ventMode==='cpap' && vals.peep.v>=12 && vals.peep.v<=18 && vals.fio2.v>=95; },
         readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  CPAP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
       },
-      confirm:'✓ High CPAP recruits collapsed lung and, by raising intrathoracic pressure, drops both preload and afterload — often turning a crashing CHF patient around within minutes and averting intubation in ~70% of cases. Watch for fatigue or a failing mental status; if they tire, intubate.'
+      confirm:'✓ High CPAP recruits collapsed lung and, by raising intrathoracic pressure, drops both preload and afterload — often turning a crashing CHF patient around within minutes. NIV is guideline-supported first-line for cardiogenic pulmonary edema and lowers intubation rates. Watch for fatigue or a failing mental status; if they tire, intubate.'
     },
     // ─── L3 S6: NEW ───────────────────────────────────────────
     { name:'The Blown Pupil',
@@ -3242,7 +3251,8 @@ function renderMonitor(vitals,sc){
     var key=v.k.replace(/₂/g,'2').replace(/\s+/g,' ').trim().toLowerCase();
     if(key==='hr') slot.hr=v.v;
     else if(key==='spo2'||key==='sao2') slot.spo2=v.v;
-    else if(key==='etco2'||key==='paco2') slot.co2=v.v;
+    else if(key==='etco2') slot.co2=v.v;                 // measured capnography → waveform lane
+    else if(key==='paco2'){ slot.paco2=v.v; chips.push(v); }  // arterial gas → chip (no capno waveform)
     else if(key==='rr'||key==='rr total'||key==='rr actual') slot.rr=v.v;
     else chips.push(v);
   });
@@ -3319,7 +3329,7 @@ function renderTestLung(bar){
   // Peak inspiratory flow (Vt ÷ IT)
   var pf=peakFlowLPM(),pfTxt,pfStat;
   if(pf===null){ pfTxt='—'; pfStat='neutral'; }
-  else { pfTxt=Math.round(pf)+' L/min'; pfStat=(pf>=10&&pf<=MAX_PEAK_FLOW)?'good':'warn'; }
+  else { pfTxt=Math.round(pf)+' L/min'; pfStat=(pf>=MIN_PEAK_FLOW&&pf<=MAX_PEAK_FLOW)?'good':'warn'; }
   // Minute volume
   var mv=estMinuteVolume(), mvStat=(mv>=4&&mv<=12)?'good':'warn';
   // Pressures
