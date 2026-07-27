@@ -54,3 +54,42 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 ---
 
 **Bottom line:** §A is done, §B awaits your medical director, §C needs a scope decision, §D is queued production. Certification use should wait until §B and §C are signed off by a medical director and checked against service protocols.
+
+---
+
+# Round 2 — Full learner review (verdict 6/10: supervised supplement, not a credential)
+
+## E. Safety/logic errors corrected now (clear errors, MD to confirm wording)
+
+- ☑ **M7 — chest seal after needle decompression removed.** A chest seal treats an OPEN chest wound; it does not stop an internal pulmonary air leak and can foul the decompression site. Lesson, scenario Q4, and conclusion now teach: secure/monitor the catheter per protocol, reassess for re-tensioning (re-decompress if it recurs), definitive thoracostomy at the receiving facility. The chest-seal misconception is now an explicit wrong-answer distractor. *(Source cited: Joint Trauma System thoracic-injury guidance.)*
+- ☑ **M8 — paralysis/RASS impossibility fixed.** RASS behaviors ("restless, fighting tube") are impossible during effective neuromuscular blockade. The scenario now presents **autonomic** awareness signs (rising HR/BP, lacrimation, diaphoresis) with the patient paralyzed and still, and lesson 8.2 gains a caveat that RASS cannot be scored under paralysis.
+- ☑ **M1 — "PEEP replaces surfactant" softened** to "PEEP is not a substitute for surfactant; it mechanically splints alveoli open until surfactant function returns."
+- ☑ **M4 — driving-pressure contradiction fixed.** The scenario no longer calls ΔP 21 "under control"/"safe lung-protective"; it now reads "improved from 29 to 21 but still elevated — flag for further optimization."
+
+## F. Staged for medical director (guideline / drug dependent — NOT changed)
+
+- ☐ **M3 NIV** — CPAP and bilevel NIV are both evidence-supported in cardiogenic pulmonary edema; reconsider the rigid "one-hour rule" and the GCS/gag absolutes. *(ERS/ATS NIV guideline.)*
+- ☐ **M4** — use **predicted** body weight terminology (not generic "ideal"); make targets disease-specific; frame driving pressure as a **risk marker** computed with total PEEP under passive conditions, not a universal pass/fail threshold. *(ARDSNet.)*
+- ☐ **M5** — "high PIP alone → switch to pressure control" is unsafe; teach assessing Pplat / resistance / circuit / tube / patient first. NIV should not be presented as established first-line for acute asthma.
+- ☐ **M8** — reconsider a **universal** RASS −1 to −2 transport target; **all drug and push-dose pressor content requires medical-director approval.** *(SCCM PADIS.)*
+- ☐ **M9 TBI** — reviewer's targets: EtCO₂ 35–40 (30–35 with active herniation), SpO₂ > 90%, adult SBP ≥ 110 — replace the module's universal SBP > 100 and SpO₂ ≥ 94. *(Brain Trauma Foundation.)* **Reconcile with the round-1 TBI item and the edition your service certifies against.**
+- ☐ **M1** — distinguish **minute vs alveolar** ventilation; qualify PIP/plateau interpretation.
+- ☐ **M7** — qualify the "ten-second," "always bag," and "rules out equipment" absolutes; note manual ventilation can also harm without controlled rate, volume, and PEEP.
+- ☐ **M2** — EtCO₂/SpO₂ don't establish PaCO₂/pH/mixed acid-base (softened in round 1 §A; MD to confirm).
+
+## G. Platform / assessment (software — I own; scoped, not yet built)
+
+- ☐ **Scenario gives completion credit for a wrong path.** Gate advancement so only the correct decision progresses (competency enforcement).
+- ☐ **Matching is keyboard/screen-reader-inoperable.** Make destination bins semantic, focusable, ARIA-labeled.
+- ☐ **Locked module cards are a focus trap.** Add `aria-disabled` + accessible "locked" labeling.
+- ☐ **Credential integrity.** Rename to **certificate of completion** (not "certification"); add a prominent disclaimer that local protocol, medical direction, and manufacturer instructions control and that this is not proof of competency. A truly auditable credential requires a server-side backend (separate project).
+- ☐ **Exam integrity.** Options: randomize/expand the item pool, limit attempts, optionally withhold rationale until submission. (Design choices — confirm.)
+- ☐ **Versioned bibliography** with per-claim source links.
+
+## H. Bigger builds (need your input)
+
+- ☐ **M6 LTV rebuild** from the operator manual (our own words) + your **AMR unit configuration**. The reviewer flagged specifics: individually selected controls (not a left/right set-vs-monitored split); a central sequential monitored-data window; **Comm Port** (not USB); a **POWER LOST** alarm; nominal battery indicators ≈ 45/10/5 min; **no monitored plateau value**; **I:E is calculated/monitored, not directly set**. *(LTV 1200/1150 Quick Reference Guide.)*
+- ☐ **Visuals** — waveforms, oxyhemoglobin curve, PEEP/FiO₂, annotated device images + simulator screenshots.
+- ☐ **Transport module** (from round 1 §C).
+
+**Deployment position (agreed with the review):** usable as a **supervised educational supplement** with a prominent "local protocol / medical direction / manufacturer instructions control" statement. Do **not** require Modules 6–8, use the final exam as proof of competency, or issue a formal credential until the four release blockers (§E started; §H M6 pending) and the assessment controls (§G) are corrected and a medical director signs off §F.

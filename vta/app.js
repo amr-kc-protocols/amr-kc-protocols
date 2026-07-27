@@ -57,7 +57,7 @@ const MODULES = [
         "The pulmonary system has two zones. The conducting zone is everything from the mouth to the terminal bronchioles. It moves air. No gas exchange occurs here. The volume that fills it on each breath is anatomic dead space — approximately 2 mL per kilogram of body weight, or about 150 mL in a 70 kg adult.",
         "The respiratory zone is where gas exchange happens. Type I pneumocytes form the thin alveolar wall (0.2–0.5 µm thick — about 1/100 the diameter of a red blood cell). Type II pneumocytes produce surfactant.",
         "Picture two soap bubbles tied to the ends of a straw, one small and one large. By Laplace's law the small bubble has the higher pressure, so it empties itself into the big one and collapses. Alveoli would do the same to each other on every exhale — except for surfactant, the dish soap Type II cells make to lower that surface tension so the smallest alveoli survive instead of caving into their neighbors. ARDS, smoke inhalation, drowning, and gastric aspiration all damage Type II cells or wash the soap out.",
-        "When the soap is gone, PEEP is your bedside replacement: it is the doorstop you wedge under each alveolus, splinting it open mechanically until surfactant function returns."
+        "When the soap is gone, PEEP is NOT a substitute for surfactant — but it buys time: it is the doorstop you wedge under each alveolus, mechanically splinting it open until surfactant function returns."
       ],
       evidence: { title: "Surfactant and PEEP", body: "Conditions that damage Type II pneumocytes produce a stiff lung with refractory hypoxia. The bedside fix is PEEP — not more FiO₂." }
     },
@@ -820,14 +820,14 @@ const MODULES = [
       { prompt: "Q4. After Vt reduction, Pplat is 26, ΔP is 21, exhaled Vt 380, RR raised to 18, EtCO₂ 42. What now?",
         choices: [
           { label: "Continue current settings, document, and notify receiving facility", outcome: "good",
-            feedback: "Correct. Pplat < 30, ΔP under control, EtCO₂ in range, sat acceptable on titrated FiO₂. Document the change and trajectory. Notify the receiving facility of pre/post numbers." },
+            feedback: "Correct for now. Pplat is < 30, EtCO₂ is in range, sat acceptable on titrated FiO₂, and you've removed the dangerous Vt. Driving pressure improved from 29 to 21 but is still elevated — flag it in handoff for further optimization at the receiving ICU rather than calling it solved. Document the change and trajectory." },
           { label: "Drop Vt further to 250 mL", outcome: "bad",
             feedback: "Vt is already in the lung-protective range (6 mL/kg IBW). Going lower means ventilating mostly dead space. Stop at 4–6 mL/kg IBW." },
           { label: "Pull PEEP off entirely", outcome: "bad",
             feedback: "PEEP 5 is physiologic and helpful. Removing it costs oxygenation. Hold the line." }
         ] }
     ],
-    conclusion: "You arrive at the receiving facility with the patient on safe lung-protective settings: AC/VC Vt 380, RR 18, FiO₂ 60% (weaned), PEEP 5, Pplat 26, ΔP 21. You hand off the pre and post numbers. The receiving team thanks you for catching the dangerous Vt before it caused barotrauma. This is what IBW math saves you from."
+    conclusion: "You arrive at the receiving facility on much safer settings: AC/VC Vt 380 (6 mL/kg IBW), RR 18, FiO₂ 60% (weaned), PEEP 5, Pplat 26. Driving pressure is down from 29 to 21 — better, but still elevated, so you flag it in handoff for further optimization at the receiving ICU rather than calling it solved. The immediate win was catching the dangerous Vt before it caused barotrauma. This is what IBW math saves you from."
   }
 },
 
@@ -1250,7 +1250,7 @@ const MODULES = [
       body: [
         "Sudden rise in PIP, often with falling SpO₂ and BP. Decreased or absent breath sounds on the affected side. Tracheal deviation away from the affected side (LATE).",
         "Hyperresonance to percussion of the affected side. JVD + hemodynamic compromise = TENSION pneumothorax. Clinical diagnosis at the bedside, not waiting for imaging.",
-        "Decompress per protocol: needle thoracostomy at the 2nd ICS midclavicular OR 4th–5th ICS midaxillary. Then chest seal / tube as appropriate.",
+        "Decompress per protocol: needle thoracostomy at the 2nd ICS midclavicular OR 4th–5th ICS midaxillary. Then secure and monitor the catheter/device per protocol, reassess for re-tensioning, and arrange definitive thoracostomy at the receiving facility. (A chest seal treats an OPEN chest wound — it does not stop an internal air leak.)",
         "High-risk populations: asthma/COPD on positive pressure, trauma, recent central line placement. Suspect early."
       ]
     },
@@ -1391,14 +1391,14 @@ const MODULES = [
       { prompt: "Q4. After decompression, BS return on the right and BP recovers to 102/64. What now?",
         choices: [
           { label: "Reconnect the patient to the vent at current settings — no other action needed", outcome: "bad",
-            feedback: "Asthma + barotrauma + post-decompression = needs a chest seal / tube to prevent re-tensioning. Place a chest seal per protocol; the receiving facility will place a definitive chest tube." },
-          { label: "Place chest seal/dressing per protocol, notify receiving, transport on slower/longer-exhalation vent settings", outcome: "good",
-            feedback: "Correct. Chest seal prevents air re-entry. Notify receiving of the decompression. Vent settings for status asthmaticus: AC/VC, low RR (8–10), long I:E (1:4–1:5), permissive hypercapnia." },
-          { label: "Pause ventilation entirely while you work", outcome: "bad",
-            feedback: "Don't stop ventilating a paralyzed patient. Bag through any pause; reconnect to the vent as soon as feasible at safer settings." }
+            feedback: "Positive pressure can re-tension a decompressed chest. You must secure/monitor the catheter, watch for recurrence, and move to asthma-safe settings — not simply reconnect and move on." },
+          { label: "Secure and monitor the catheter/device per protocol, watch for re-tensioning, notify receiving, and transport on slower/longer-exhalation settings", outcome: "good",
+            feedback: "Correct. Keep the decompression catheter secured and reassess continuously — if tension recurs under positive pressure, re-decompress. Notify receiving; definitive care is a thoracostomy there. Vent for status asthmaticus: AC/VC, low RR (8–10), long I:E (1:4–1:5), permissive hypercapnia." },
+          { label: "Apply a chest seal over the site to prevent re-tensioning", outcome: "bad",
+            feedback: "Common misconception. A chest seal treats an OPEN chest wound — it does not stop an internal pulmonary air leak and can interfere with the decompression site. Secure and monitor the catheter per protocol and re-decompress if tension recurs; the receiving facility places a definitive tube." }
         ] }
     ],
-    conclusion: "You decompressed at the bedside, placed a chest seal, reconnected on safer settings (RR 8, I:E 1:5, PEEP 5, accept permissive hypercapnia). Arrival vitals: PIP 36, BP 108/68, SpO₂ 94%, EtCO₂ 60 with shark-fin waveform. The receiving team thanks you for the field decompression and places a definitive chest tube within minutes. Asthma + positive pressure = always be ready for tension PTX. DOPE saves lives."
+    conclusion: "You decompressed at the bedside, secured and monitored the catheter per protocol, and reconnected on safer settings (RR 8, I:E 1:5, PEEP 5, accept permissive hypercapnia), watching for re-tensioning. Arrival vitals: PIP 36, BP 108/68, SpO₂ 94%, EtCO₂ 60 with shark-fin waveform. The receiving team thanks you for the field decompression and places a definitive chest tube within minutes. Asthma + positive pressure = always be ready for tension PTX. DOPE saves lives."
   }
 },
 
@@ -1433,7 +1433,8 @@ const MODULES = [
         "+4 combative danger to staff. +3 very agitated, pulls at tubes. +2 agitated, fights vent. +1 restless but cooperative.",
         "0 alert and calm.",
         "−1 drowsy, sustained eye contact > 10 sec to voice. −2 light sedation, briefly opens eyes to voice. −3 moderate, movement to voice no eye contact. −4 deep, movement to physical stimulus only. −5 unarousable.",
-        "Transport target is RASS −1 to −2. Deeper than −2 makes handoff assessment hard. Lighter than −1 risks self-extubation."
+        "Transport target is RASS −1 to −2. Deeper than −2 makes handoff assessment hard. Lighter than −1 risks self-extubation.",
+        "Critical caveat: RASS CANNOT be scored during neuromuscular blockade — a paralyzed patient always looks calm regardless of awareness. Until paralysis resolves, judge adequacy of analgesia/sedation by autonomic signs (heart rate, blood pressure, lacrimation, diaphoresis), not by RASS."
       ]
     },
     {
@@ -1537,9 +1538,9 @@ const MODULES = [
       ["Just intubated", "5 minutes ago"],
       ["RR set",        "16, FiO₂ 100%, PEEP 5"],
       ["BP",            "92/54 on norepi 8 mcg/min"],
-      ["HR",            "112, sinus tach"],
-      ["RASS post-RSI", "+1 (restless, fighting tube)"],
-      ["Last sedation", "Etomidate at induction only — 4 min ago"],
+      ["HR",            "112 → climbing, sinus tach"],
+      ["Awareness signs","Paralyzed and still — but HR & BP rising, lacrimation, diaphoresis (RASS not usable under paralysis)"],
+      ["Last sedation", "Etomidate at induction only — 4 min ago; no analgesic given"],
       ["Last paralytic", "Rocuronium 100 mg — 5 min ago"]
     ],
     steps: [
@@ -1548,9 +1549,9 @@ const MODULES = [
           { label: "Restful sedation — the etomidate will last another hour", outcome: "bad",
             feedback: "Etomidate's induction effect is short — about 5–10 minutes. Rocuronium lasts 30–60 minutes. She is waking up paralyzed. Awareness with paralysis is happening RIGHT NOW." },
           { label: "Awareness with paralysis — emergent need for analgesia and sedation", outcome: "good",
-            feedback: "Right. Long-acting paralytic outlasts short-acting induction. She is awake, terrified, unable to move. This is a sentinel safety event in real time. Fix immediately." },
+            feedback: "Right. The short induction agent has worn off while the paralytic has not — she may be conscious but unable to move. You detect this by AUTONOMIC signs (rising HR/BP, lacrimation, diaphoresis), NOT by RASS, which is uninterpretable during paralysis. Treat immediately with analgesia + sedation." },
           { label: "Normal post-intubation state", outcome: "bad",
-            feedback: "Restlessness (RASS +1) in a paralyzed patient is awareness with paralysis. Not normal." }
+            feedback: "A paralyzed patient can't be 'restless' or fight the tube — but rising HR/BP with tearing and sweating signals possible awareness under paralysis. That is not a comfortable, normal state. Treat it." }
         ] },
       { prompt: "Q2. What's your first administration sequence?",
         choices: [
