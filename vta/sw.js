@@ -1,14 +1,15 @@
 /* Ventilator Training Academy — service worker
    Cache the app shell so it works offline once installed. */
 
-const CACHE = "vta-pwa-v6";
+const CACHE = "vta-pwa-v7";
 const ASSETS = [
   "./",
   "./academy.html",
   "./styles.css",
+  "./figures.js",
+  "./figures/ltv-panel.jpg",
   "./app.js",
   "./manifest.json",
-  "./Provider_Manual.docx",
   "./icons/icon.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -17,7 +18,12 @@ const ASSETS = [
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS).catch(() => {}))
+    // Cache each asset independently: addAll() rejects wholesale if ANY single
+    // entry 404s, which would silently leave the app with no offline cache at
+    // all. Per-asset puts keep one missing file from breaking the rest.
+    caches.open(CACHE).then((cache) =>
+      Promise.all(ASSETS.map((url) => cache.add(url).catch(() => {})))
+    )
   );
 });
 

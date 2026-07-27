@@ -63,6 +63,7 @@ const MODULES = [
     },
     {
       id: "two-knobs",
+      figure: "twoknobs",
       kicker: "1.3 · The Mental Model",
       title: "Ventilation vs Oxygenation — Two Knobs Each",
       body: [
@@ -86,6 +87,7 @@ const MODULES = [
     },
     {
       id: "vq",
+      figure: "vq",
       kicker: "1.5 · V/Q Matching",
       title: "Shunt vs Dead Space",
       body: [
@@ -108,6 +110,7 @@ const MODULES = [
     },
     {
       id: "pip-pplat",
+      figure: "pip_pplat",
       kicker: "1.7 · The Bedside Test",
       title: "PIP vs Pplat",
       body: [
@@ -256,6 +259,7 @@ const MODULES = [
     },
     {
       id: "cliff",
+      figure: "oxyhb",
       kicker: "2.2 · The Oxyhemoglobin Curve",
       title: "Why SpO₂ Lies — Until It Doesn't",
       body: [
@@ -310,6 +314,7 @@ const MODULES = [
     },
     {
       id: "waveforms",
+      figure: "capno",
       kicker: "2.7 · Waveforms",
       title: "Four Capnography Patterns Every EMS Provider Must Recognize",
       body: [
@@ -694,6 +699,7 @@ const MODULES = [
     },
     {
       id: "pressures", kicker: "4.5 · Pressures", title: "PIP, Pplat, and Driving Pressure",
+      figure: "pip_pplat",
       body: [
         "Peak Inspiratory Pressure (PIP): highest airway pressure during inspiration. Displayed continuously. Keep < 35 cmH₂O.",
         "Plateau Pressure (Pplat): airway pressure during a 0.5-second inspiratory hold (no flow). Reflects alveolar pressure / compliance. Keep < 30 cmH₂O — ARDSNet protocol. Press and hold the inspiratory hold button on the LTV to measure.",
@@ -845,6 +851,7 @@ const MODULES = [
   lessons: [
     {
       id: "v-vs-p", kicker: "5.1 · Targeting", title: "Volume vs Pressure Targeting",
+      figure: "volpress",
       body: [
         "Every vent breath guarantees one thing and lets the other float — like inflating a tire: pump to a set volume of air and the pressure lands where it lands, or pump to a set pressure and the volume lands where it lands. You never get to fix both at once.",
         "Volume-targeted (AC/VC): you set Vt — vent delivers it. PRESSURE varies with lung compliance. Most EMS default. Watch PIP / Pplat.",
@@ -1028,7 +1035,9 @@ const MODULES = [
 
   lessons: [
     {
-      id: "front", kicker: "6.1 · Hardware", title: "Front Panel and Side Connections",
+      id: "front",
+      figure: "ltv_panel",
+      kicker: "6.1 · Hardware", title: "Front Panel and Side Connections",
       body: [
         "Front panel essentials: On/Standby power. A bank of INDIVIDUAL control windows — one per setting (Breath Rate, Tidal Volume, Pressure Control, Inspiratory Time, Pressure Support, O₂ %, Sensitivity, PEEP) plus the alarm-limit windows. Two Select buttons (Mode and Breath Type). The Set Value knob. Manual Breath, Alarm Silence/Reset, Control Lock, and the display window.",
         "Side/rear connections: O₂ inlet — high-pressure DISS or a low-pressure fitting depending on configuration. Patient circuit ports including the easily-missed exhalation valve drive line. Battery compartment, external power input, bacterial/viral filter, and a Comm Port for service and data (it is NOT a USB port). Confirm the exact connections on YOUR unit — configurations vary.",
@@ -1221,6 +1230,7 @@ const MODULES = [
   lessons: [
     {
       id: "philosophy", kicker: "7.1 · Philosophy", title: "What Alarms Are For",
+      figure: "dope",
       body: [
         "Alarms are NOT nuisances. They are information about a deteriorating system. Two kinds: equipment alarms (machine problem) and patient alarms (patient problem). Some are both.",
         "The cardinal rule: READ the alarm before you SILENCE it. Silencing an alarm without identifying the cause is a sentinel-level safety event, documented in nearly every transport-service incident review.",
@@ -1609,7 +1619,9 @@ const MODULES = [
       ]
     },
     {
-      id: "auto-peep", kicker: "9.2 · Auto-PEEP", title: "When the Lung Doesn't Empty",
+      id: "auto-peep",
+      figure: "autopeep",
+      kicker: "9.2 · Auto-PEEP", title: "When the Lung Doesn't Empty",
       body: [
         "Picture pouring into a glass that drains slowly: send the next splash before it empties and the level climbs until it overflows. Auto-PEEP is the same — in an obstructed lung that exhales slowly, the next breath starts before the last one finishes, so air stacks, the chest over-fills, intrathoracic pressure rises, venous return drops, and BP falls.",
         "Clinical signs: rising PIP without rising Pplat; falling BP; patient \"fights\" the vent; expiratory flow waveform doesn't return to zero before next breath.",
@@ -2464,6 +2476,25 @@ function renderModuleHome() {
   mount(container);
 }
 
+// Teaching figure for a lesson. Figures live in figures.js as inline SVG so the
+// app stays offline-capable; returns null when the lesson has no figure or the
+// figure set failed to load.
+function buildFigure(key) {
+  if (!key || typeof FIGURES === "undefined" || !FIGURES[key]) return null;
+  const f = FIGURES[key];
+  const fig = el("figure", { class: "lesson-figure" });
+  if (f.img) {
+    fig.appendChild(el("img", { class: "lesson-figure-img", src: f.img, alt: f.alt || f.title, loading: "lazy" }));
+  } else {
+    const holder = el("div", { class: "lesson-figure-svg", role: "img", "aria-label": f.alt || f.title });
+    holder.innerHTML = f.svg;
+    fig.appendChild(holder);
+  }
+  fig.appendChild(el("figcaption", { class: "lesson-figure-cap" },
+    f.title + (f.note ? " — " + f.note : "")));
+  return fig;
+}
+
 // ---------- LESSONS ----------
 function renderLessons() {
   const m = MODULES.find(mm => mm.id === Nav.moduleId);
@@ -2490,6 +2521,7 @@ function renderLessons() {
       Array.isArray(p)
         ? el("ul", { class: "lesson-list" }, ...p.map(li => el("li", null, li)))
         : el("p", null, p))),
+    buildFigure(lesson.figure),
     lesson.pearl && el("aside", { class: "callout callout-pearl" },
       el("span", { class: "callout-label" }, `Clinical Pearl · ${lesson.pearl.title}`),
       lesson.pearl.body),

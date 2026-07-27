@@ -98,7 +98,11 @@ Each lists the current course text, the reviewer's concern, the cited source, an
   - **Match** — "Inspiratory Hold (measures Pplat)" replaced with "100% O₂"; controls relabelled to the real ones.
   - **Scenario** — removed "verify Pplat displays"; removed the last "switches silently to internal battery" claim (now POWER LOST).
   - ☐ **Still needs from you:** confirmation against your **AMR unit configuration and operator manual** — O₂ inlet type, whether your units support the inspiratory-hold maneuver, exact alarm vocabulary, and the **45/10/5-minute** battery indicator behaviour. Anything config-specific is deliberately hedged ("confirm on YOUR unit") rather than asserted.
-- ☐ **Visuals** — waveforms, oxyhemoglobin curve, PEEP/FiO₂, annotated device images + simulator screenshots.
+- ☑ **Visuals — FIRST BATCH DONE.** Eight teaching diagrams authored as inline SVG in `vta/figures.js` (no third-party image licences, no extra network requests, works offline) and shown in both the app and the decks:
+  **capnography patterns** (normal / shark-fin / rebreathing / lost), **oxyhaemoglobin dissociation curve** (tabletop, the 90%≈60 cliff, 92–96% target band), **PIP vs Pplat** pressure–time with the resistance and driving-pressure brackets, **auto-PEEP** flow–time, **two-knob model**, **shunt vs dead space**, **DOPE + the 10-second rule**, and **volume vs pressure targeting**.
+  Plus a **device visual for Module 6** captured from this project's own LTV simulator (`vta/figures/ltv-panel.jpg`) — an owned asset, so no manufacturer-image licensing problem.
+  In the decks each figure takes the right column with aspect ratio preserved (verified 0.0% distortion, all within slide bounds).
+  ☐ **Still to add:** PEEP/FiO₂ ladder table, circuit diagram, and annotated close-ups of individual panel regions.
 - ☐ **Transport module** (from round 1 §C).
 
 **Deployment position (agreed with the review):** usable as a **supervised educational supplement** with a prominent "local protocol / medical direction / manufacturer instructions control" statement. Do **not** require Modules 6–8, use the final exam as proof of competency, or issue a formal credential until the four release blockers (§E started; §H M6 pending) and the assessment controls (§G) are corrected and a medical director signs off §F.

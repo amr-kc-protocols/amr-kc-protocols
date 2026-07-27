@@ -1270,6 +1270,41 @@ select.cert-input { cursor: pointer; }
 .callout-list li:first-child { margin-top: 0; }
 .callout-list li:last-child { margin-bottom: 0; }
 
+/* ---------- Teaching figures ---------- */
+.lesson-figure {
+  margin: 1.1rem 0 0.4rem;
+  padding: 0;
+}
+.lesson-figure-svg {
+  background: var(--white);
+  border: 1px solid var(--soft);
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  overflow-x: auto;
+}
+.lesson-figure-svg svg {
+  display: block;
+  width: 100%;
+  min-width: 460px;   /* keep labels legible; container scrolls on small screens */
+  height: auto;
+}
+.lesson-figure-img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--soft);
+  border-radius: 12px;
+}
+.lesson-figure-cap {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* ---------- Scope-of-use notice (course hub) ---------- */
 .scope-notice {
   display: block;
