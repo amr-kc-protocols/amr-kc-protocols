@@ -1631,7 +1631,9 @@ const MODULES = [
       pearl: { title: "Brief disconnect", body: "Hypotensive asthmatic on the vent? Disconnect from the circuit for 5–10 sec. Release the trapped gas. BP often recovers in under a minute. Reconnect on slower settings." }
     },
     {
-      id: "ards", kicker: "9.3 · ARDS", title: "Lung-Protective Ventilation",
+      id: "ards",
+      figure: "peep_fio2",
+      kicker: "9.3 · ARDS", title: "Lung-Protective Ventilation",
       body: [
         "Acute Respiratory Distress Syndrome: diffuse alveolar damage, refractory hypoxia. Berlin definition (2012): bilateral infiltrates, not cardiac, within 1 week. Severity by P/F ratio: mild 200–300, moderate 100–200, severe < 100. A 2023/2024 Global Definition of ARDS now also allows diagnosis by SpO₂/FiO₂ and includes patients on HFNO ≥ 30 L/min or CPAP/NIV ≥ 5 cmH₂O — but the Berlin P/F severity bands remain in everyday bedside use.",
         "Goal: protect the alveoli you have left. The mental model is the 'baby lung' — in ARDS so much lung is flooded or collapsed that only a small, child-sized portion is still open to ventilate. You are not filling an adult lung; you are filling what survives. So: small breaths, modest pressure, generous PEEP — a normal-sized Vt would over-stretch those few survivors and injure them.",

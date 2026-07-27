@@ -102,7 +102,8 @@ Each lists the current course text, the reviewer's concern, the cited source, an
   **capnography patterns** (normal / shark-fin / rebreathing / lost), **oxyhaemoglobin dissociation curve** (tabletop, the 90%≈60 cliff, 92–96% target band), **PIP vs Pplat** pressure–time with the resistance and driving-pressure brackets, **auto-PEEP** flow–time, **two-knob model**, **shunt vs dead space**, **DOPE + the 10-second rule**, and **volume vs pressure targeting**.
   Plus a **device visual for Module 6** captured from this project's own LTV simulator (`vta/figures/ltv-panel.jpg`) — an owned asset, so no manufacturer-image licensing problem.
   In the decks each figure takes the right column with aspect ratio preserved (verified 0.0% distortion, all within slide bounds).
-  ☐ **Still to add:** PEEP/FiO₂ ladder table, circuit diagram, and annotated close-ups of individual panel regions.
+  ☑ **PEEP/FiO₂ pairing figure added** (M9.3) — renders the anchor points already taught in the course (0.3→5, 0.5→8–10, 0.7→10–14, 0.9→14–18, 1.0→18–24) with the message that both rise together; captioned "anchor points only — carry the full card and follow your service protocol." No new numbers introduced.
+  ☐ **Still to add:** circuit diagram and annotated close-ups of individual panel regions.
 - ☐ **Transport module** (from round 1 §C).
 
 **Deployment position (agreed with the review):** usable as a **supervised educational supplement** with a prominent "local protocol / medical direction / manufacturer instructions control" statement. Do **not** require Modules 6–8, use the final exam as proof of competency, or issue a formal credential until the four release blockers (§E started; §H M6 pending) and the assessment controls (§G) are corrected and a medical director signs off §F.

@@ -237,6 +237,24 @@ ltv_panel: {
   note: "Captured from this course's LTV simulator. Confirm against your own unit — configurations vary."
 },
 
+// ---------- ARDSNet PEEP/FiO2 pairing (anchor points already taught in M9.3) ----------
+peep_fio2: {
+  title: "PEEP and FiO₂ move together — ARDSNet lower-PEEP anchor points",
+  alt: "Bar chart showing suggested PEEP rising as FiO2 rises: 0.3 to PEEP 5, 0.5 to 8 to 10, 0.7 to 10 to 14, 0.9 to 14 to 18, and 1.0 to 18 to 24.",
+  svg: `<svg viewBox="0 0 620 270" xmlns="http://www.w3.org/2000/svg" role="img">
+  <rect x="0" y="0" width="620" height="270" fill="#fff"/>
+  ${[["0.3","5",5],["0.5","8–10",9],["0.7","10–14",12],["0.9","14–18",16],["1.0","18–24",21]]
+    .map((d,i)=>{const x=64+i*104, h=d[2]*6.4, y=196-h; return `
+      <rect x="${x}" y="${y}" width="76" height="${h}" rx="6" fill="${F_BLUE}" opacity="${0.35+i*0.14}"/>
+      <text x="${x+38}" y="${y-9}" font-size="15" font-weight="700" fill="${F_NAVY}" text-anchor="middle">${d[1]}</text>
+      <text x="${x+38}" y="218" font-size="14" font-weight="700" fill="${F_INK}" text-anchor="middle">${d[0]}</text>`;}).join("")}
+  <line x1="46" y1="196" x2="580" y2="196" stroke="${F_INK}" stroke-width="2"/>
+  <text x="310" y="242" font-size="13" font-weight="700" fill="${F_INK}" text-anchor="middle">FiO₂  →   (suggested PEEP, cmH₂O, shown above each bar)</text>
+  <text x="310" y="262" font-size="12" fill="${F_MUTE}" text-anchor="middle">Anchor points only — carry the full card and follow your service protocol.</text>
+  <text x="46" y="30" font-size="12.5" font-weight="700" fill="${F_GOLD}">Worse oxygenation → BOTH go up. Never chase FiO₂ alone.</text>
+</svg>`
+},
+
 // ---------- Volume vs pressure targeting ----------
 volpress: {
   title: "Volume-targeted vs pressure-targeted breaths",
