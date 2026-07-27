@@ -279,6 +279,26 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
   .progbar > i{ transition:none; }
 }
 
+/* ── Evidence-strength badges (ported from the Airway Academy) ──── */
+.ev-hd{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:7px; }
+.ev-t{ font-family:var(--sans); font-weight:800; font-size:14px; color:var(--ink); margin-bottom:2px; }
+.ev-tier{ font-family:var(--sans); font-weight:800; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 9px; border-radius:999px; border:1px solid; }
+.ev-tier::before{ content:"evidence: "; opacity:.72; }
+.ev-strong    .ev-tier{ color:var(--green);   background:var(--green-soft); border-color:var(--green-line); }
+.ev-moderate  .ev-tier{ color:var(--blue-dk); background:var(--blue-soft);  border-color:var(--blue-line); }
+.ev-limited   .ev-tier{ color:var(--amber);   background:var(--amber-soft); border-color:var(--amber-line); }
+.ev-contested .ev-tier{ color:var(--red);     background:var(--red-soft);   border-color:var(--red-line); }
+.evidence.ev-strong{ border-left-color:var(--green); }
+.evidence.ev-moderate{ border-left-color:var(--blue); }
+.evidence.ev-limited{ border-left-color:var(--amber); }
+.evidence.ev-contested{ border-left-color:var(--red); }
+.evlegend{ background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:15px 16px; margin:0 0 20px; }
+.evlegend h4{ font-family:var(--sans); font-weight:800; font-size:14px; color:var(--ink); margin:0 0 6px; }
+.evlegend p{ font-size:13px; color:var(--ink-2); line-height:1.5; margin:0 0 11px; }
+.evlegend .evrow{ display:flex; align-items:flex-start; gap:10px; margin:7px 0; font-size:12.5px; color:var(--ink-2); line-height:1.45; }
+.evlegend .ev-tier{ flex:0 0 auto; }
+
 @media print{
   body{ background:#fff; }
   header.mon, main > *:not(#view-cert), .back, .cta-wrap, footer.adm, .print-hide{ display:none !important; }
@@ -326,6 +346,7 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
         <label for="nameInput">Learner name (appears on your certificate)</label>
         <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
       </div>
+      <div class='evlegend print-hide'><h4>How the evidence is graded</h4><p>Claims in this course carry an evidence-strength badge, so you can see how firm the ground is. Weak evidence is labelled as weak &mdash; and occasionally still supports a strong recommendation, which is said explicitly where it applies.</p><div class='evrow ev-strong'><span class='ev-tier'>Strong</span><span>Large or consistent randomized evidence, or an aligned guideline position.</span></div><div class='evrow ev-moderate'><span class='ev-tier'>Moderate</span><span>Reasonable evidence with real limitations &mdash; single trials, or consistent observational data.</span></div><div class='evrow ev-limited'><span class='ev-tier'>Limited</span><span>Case reports, mechanism, or consensus only. Treat conclusions cautiously.</span></div><div class='evrow ev-contested'><span class='ev-tier'>Contested</span><span>Good-quality studies that disagree. Reasonable clinicians differ.</span></div></div>
       <p class="eyebrow">Course Modules &middot; Sequential</p>
       <ul class="modlist" id="modList"></ul>
       <div id="finalSlot"></div>
@@ -421,7 +442,7 @@ var MODULES = [
         "<li><strong>Position the airway</strong> — the head in a neutral 'sniffing' position, neither flexed nor hyperextended, to open the airway.</li>"+
         "</ul>"+
         "<p>Suctioning is <em>not</em> routine. Clear the mouth and nose (mouth before nose) only if there are obvious secretions <em>and</em> the airway appears obstructed, because aggressive pharyngeal suctioning can trigger a vagal bradycardia and apnea — doing harm in the name of tidiness.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — don't over-suction</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div><div class='ev-t'>don't over-suction</div>"+
         "<p>Routine suctioning of the vigorous newborn provides no benefit and can cause reflex bradycardia and mucosal injury. Guidelines reserve suctioning for infants with a clinically obstructed airway or those who require PPV and are not ventilating well. Less is more.</p>"+
         "<div class='grade'>Quality: moderate (consensus guideline supported by physiologic and observational data).</div></div>"
       },
@@ -537,7 +558,7 @@ var MODULES = [
       { h:"7", t:"CPAP: the breathing but laboring newborn", html:
         "<p>Not every struggling newborn is apneic. Consider the infant who <em>is</em> breathing on their own and has a heart rate above 100, but is working hard — grunting, retracting, tachypneic, with a low SpO₂. This baby does not need you to breathe <em>for</em> them; they need help keeping their alveoli open. That is the role of <strong>CPAP</strong> — continuous positive airway pressure, typically around 5 cmH₂O.</p>"+
         "<p>The distinction is clean and important: <em>apneic or HR &lt; 100 &rarr; PPV; spontaneously breathing with labored effort and HR &gt; 100 &rarr; consider CPAP.</em> CPAP is especially valuable in the <strong>preterm</strong> infant, where it can support the surfactant-deficient lung and often avoid intubation altogether.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — CPAP over routine intubation in preterm</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div><div class='ev-t'>CPAP over routine intubation in preterm</div>"+
         "<p>In preterm infants, starting with CPAP rather than routine intubation and mechanical ventilation reduces the need for intubation and surfactant and does not increase harm; large trials (e.g., COIN, SUPPORT) support a CPAP-first strategy for the spontaneously breathing preterm newborn. Gentle, non-invasive support protects the fragile preterm lung.</p>"+
         "<div class='grade'>Quality: high (multiple randomized controlled trials).</div></div>"
       },
@@ -607,7 +628,7 @@ var MODULES = [
         "<li><strong>During chest compressions:</strong> increase to <strong>100% oxygen</strong> (Module 4), then wean once the heart rate recovers.</li>"+
         "</ul>"+
         "<p>From the starting point you titrate up or down with an oxygen <strong>blender</strong>, guided by the pulse oximeter, to stay within the target range for each minute of life.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — start with air, not 100%</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div><div class='ev-t'>start with air, not 100%</div>"+
         "<p>In term and late-preterm newborns, initiating resuscitation with room air rather than 100% oxygen is associated with lower mortality and less oxidative stress; meta-analyses of randomized trials (Saugstad and colleagues) support a 21% starting concentration, titrated up only as needed. Beginning at 100% oxygen offers no benefit and adds free-radical injury.</p>"+
         "<div class='grade'>Quality: high (meta-analyses of randomized trials in term/late-preterm infants).</div></div>"
       },
@@ -633,7 +654,7 @@ var MODULES = [
         "<li>A higher hematocrit and better iron stores for months afterward.</li>"+
         "<li>In preterm infants specifically, <strong>less intraventricular hemorrhage and less necrotizing enterocolitis</strong>.</li>"+
         "</ul>"+
-        "<div class='evidence'><span class='etag'>Evidence check — delayed cord clamping</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div><div class='ev-t'>delayed cord clamping</div>"+
         "<p>Delaying cord clamping for vigorous infants improves iron stores and transitional hemodynamics, and in preterm infants reduces intraventricular hemorrhage, necrotizing enterocolitis, and the need for transfusion (Cochrane reviews). Umbilical-cord milking has been studied as a faster alternative but is used cautiously and generally avoided in the most preterm infants (&lt; 28 weeks) because of an IVH signal.</p>"+
         "<div class='grade'>Quality: high for delayed clamping benefits (systematic reviews of randomized trials).</div></div>"
       },
@@ -707,7 +728,7 @@ var MODULES = [
         "<p>There are two accepted hand techniques, but one is clearly better. The <strong>two-thumb encircling-hands technique</strong> — both thumbs on the sternum, hands wrapping the chest and supporting the back — is preferred because it generates higher blood pressure and better coronary perfusion and fatigues the rescuer less. The older <strong>two-finger technique</strong> (two fingertips on the sternum) is a fallback, useful mainly when a single rescuer needs access to the umbilicus for line placement.</p>"+
         "<div class='formula'>Landmark: <span class='fk'>lower third of the sternum</span>, just below the internipple line<br>Depth: <span class='fk'>one-third</span> of the chest's anterior-posterior diameter</div>"+
         "<p>Compress the lower third of the sternum — below the nipple line, above the xiphoid — to about one-third of the chest depth, and allow <strong>full recoil</strong> between compressions so the heart can refill. Thumbs stay on the chest between compressions.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — two thumbs beat two fingers</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div><div class='ev-t'>two thumbs beat two fingers</div>"+
         "<p>The two-thumb encircling technique produces higher systolic and coronary perfusion pressures and less rescuer fatigue than the two-finger technique in manikin and physiologic studies, and it is the recommended method. Reserve two-finger compressions for situations where umbilical access is needed simultaneously.</p>"+
         "<div class='grade'>Quality: moderate (consistent manikin and physiologic data).</div></div>"
       },
@@ -807,7 +828,7 @@ var MODULES = [
         "<p>The route is where errors happen, so anchor it firmly: <strong>the intravenous route is strongly preferred</strong>, and in the newborn that means the <strong>umbilical vein</strong> (a UVC). The concentration is <strong>0.1 mg/mL</strong> (the old '1:10,000').</p>"+
         "<div class='formula'><span class='fk'>IV/UVC</span> (preferred): 0.01–0.03 mg/kg = 0.1–0.3 mL/kg of 0.1 mg/mL<br><span class='fk'>ETT</span> (bridge only): 0.05–0.1 mg/kg = 0.5–1 mL/kg<br>repeat every <span class='fk'>3–5 minutes</span> as needed</div>"+
         "<p>Notice the endotracheal dose is <em>higher</em>. That is because absorption across the lung during a low-output resuscitation is poor and erratic, so more drug is needed to achieve an unreliable effect. The endotracheal route is a stopgap only — reasonable for the first dose while a UVC is being placed, but you should move to the IV route as fast as access allows, and never let the endotracheal route delay establishing a UVC.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — IV over ETT epinephrine</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div><div class='ev-t'>IV over ETT epinephrine</div>"+
         "<p>Intravenous (umbilical venous) epinephrine produces more reliable drug delivery and a better heart-rate response than the endotracheal route, where absorption is inconsistent during low-output states. Guidelines prefer the IV route and reserve endotracheal dosing as a temporary measure while vascular access is obtained.</p>"+
         "<div class='grade'>Quality: moderate (physiologic and observational data; consistent guideline preference).</div></div>"
       },
@@ -929,7 +950,7 @@ var MODULES = [
       },
       { h:"7", t:"Why the meconium change makes sense", html:
         "<p>The reversal was not arbitrary — it followed the evidence, and understanding why cements it. Routine tracheal suctioning of non-vigorous meconium-exposed newborns was found <em>not</em> to improve outcomes (it did not reduce meconium aspiration syndrome or mortality), while it <em>did</em> carry real harms: the procedure delayed the start of effective ventilation — the one intervention that helps — and the laryngoscopy and suctioning could themselves cause hypoxia, bradycardia, and airway injury.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — routine meconium suctioning</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div><div class='ev-t'>routine meconium suctioning</div>"+
         "<p>Trials and reviews found no benefit from routine intubation and tracheal suctioning of non-vigorous newborns with meconium-stained fluid compared with immediately starting resuscitation, and the delay it introduced was potentially harmful. Guidelines (NRP, ILCOR) now recommend against routine tracheal suctioning and prioritize prompt ventilation. Endotracheal suctioning is reserved for the specific case of a suspected airway obstruction that is preventing effective ventilation.</p>"+
         "<div class='grade'>Quality: moderate (randomized and observational data supporting the guideline change).</div></div>"+
         "<p>The through-line is the same physiology this whole course rests on: the meconium-exposed newborn who is in trouble is in trouble because of hypoxia, and the fix is ventilation — not a detour to clean the trachea while the clock runs.</p>"
@@ -1012,7 +1033,7 @@ var MODULES = [
         "<li><strong>A radiant warmer</strong>, ideally with a <strong>servo-controlled</strong> skin probe that adjusts output to hold the target temperature.</li>"+
         "<li><strong>A thermal mattress</strong> (exothermic gel pad) and a <strong>warm room</strong> (raise the delivery-room temperature for very preterm births).</li>"+
         "</ul>"+
-        "<div class='evidence'><span class='etag'>Evidence check — plastic wrap in the very preterm</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div><div class='ev-t'>plastic wrap in the very preterm</div>"+
         "<p>Immediately placing very preterm infants (&lt; 32 weeks) in polyethylene wrap without drying, under a radiant warmer, significantly reduces admission hypothermia compared with drying and blankets alone, and normothermia on admission is associated with better survival. The bundle — wrap, hat, servo warmer, warm room — is standard practice.</p>"+
         "<div class='grade'>Quality: high (randomized trials and consistent observational outcome data).</div></div>"
       },
@@ -1126,7 +1147,7 @@ var MODULES = [
       { h:"7", t:"The blue baby who won't improve: prostaglandin", html:
         "<p>One specific scenario deserves its own footing, because missing it is fatal and recognizing it is lifesaving. Consider a newborn with persistent <strong>cyanosis or shock that does not respond to oxygen and ventilation</strong> — you are doing everything right and the infant stays blue, or collapses into shock in the first days of life. Think of a <strong>duct-dependent congenital heart lesion.</strong></p>"+
         "<p>Some cardiac malformations survive in utero only because the ductus arteriosus is open, shunting blood around the defect. As the ductus naturally closes after birth (Module 1), the infant abruptly decompensates — turning profoundly cyanotic (duct-dependent pulmonary blood flow) or into shock with absent pulses (duct-dependent systemic blood flow). The treatment is to <strong>reopen and maintain the ductus with a prostaglandin (PGE₁) infusion</strong>:</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — PGE₁ for duct-dependent lesions</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div><div class='ev-t'>PGE₁ for duct-dependent lesions</div>"+
         "<p>Prostaglandin E₁ maintains ductal patency and is life-saving in duct-dependent congenital heart disease, restoring pulmonary or systemic blood flow until surgical or catheter intervention. A key transport caveat: PGE₁ can cause <strong>apnea</strong> (as well as hypotension and fever), so a newborn started on prostaglandin for transport often needs the airway secured or close apnea monitoring. The classic teaching is that a cyanotic newborn who does not improve with oxygen should raise suspicion of cardiac disease — the 'hyperoxia test' logic — and prompt consideration of PGE₁ in consultation with the receiving center.</p>"+
         "<div class='grade'>Quality: high for efficacy (well-established standard of care); apnea is a recognized, expected effect.</div></div>"+
         "<div class='keybox'><span class='kt'>Anchor</span> A newborn who stays cyanotic or shocked despite good oxygenation and ventilation may have a duct-dependent heart lesion. PGE₁ keeps the duct open and is life-saving — but be ready for apnea and protect the airway on transport.</div>"
