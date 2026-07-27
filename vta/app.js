@@ -252,7 +252,7 @@ const MODULES = [
         "Type II, hypercapnic respiratory failure, is PaCO₂ greater than 50 mmHg accompanied by a pH less than 7.35. The pH requirement matters because chronic CO₂ retainers (stable COPD, for example) live with PaCO₂ in the 60s while their kidneys retain bicarbonate, keeping pH near normal. An acute rise in CO₂ has no time to compensate — pH crashes, and that acidosis defines the failure.",
         "Mixed failure (Type I + Type II) is common: pneumonia in a COPD patient, ARDS with respiratory fatigue. Treat what you see."
       ],
-      pearl: { title: "ABGs in EMS", body: "We rarely have an arterial blood gas prehospital. Clinical signs + EtCO₂ + SpO₂ give us the same diagnosis a few minutes earlier than the lab does. Don't wait for the gas." }
+      pearl: { title: "ABGs in EMS", body: "We rarely have an arterial blood gas prehospital. Clinical signs + EtCO₂ + SpO₂ support recognition and let you act early — but they do NOT replace an ABG. The PaCO₂–EtCO₂ gap widens with shock and V/Q mismatch, so EtCO₂ can under-read a rising PaCO₂. Treat on the clinical picture; confirm gas exchange with an ABG when available." }
     },
     {
       id: "cliff",
@@ -710,7 +710,7 @@ const MODULES = [
         "Safe adult defaults to defend: AC/VC mode; Vt 6–8 mL/kg IBW; RR 14, titrated to EtCO₂ 35–45; FiO₂ 100% then wean; PEEP 5; I:E 1:2; alarms PIP 35, low MV 4, low PEEP 3, apnea 20 sec.",
         "When in doubt, return to defaults. Change ONE thing at a time, reassess in 30 seconds, and document with vitals before and after."
       ],
-      pearl: { title: "5'10\" rule of thumb", body: "5'10\" adult ≈ 73 kg IBW → Vt 440–580 mL. Memorize this anchor for when you don't have a card handy." }
+      pearl: { title: "5'10\" rule of thumb", body: "IBW is sex-specific — one number won't do. By the Devine formulas a 5'10\" man ≈ 73 kg (Vt 440–580 mL) and a 5'10\" woman ≈ 68.5 kg (Vt 410–548 mL). Anchor to the patient's sex and height, never actual weight." }
     }
   ],
 
@@ -1040,9 +1040,9 @@ const MODULES = [
     {
       id: "battery", kicker: "6.2 · Power", title: "Battery and Line Power",
       body: [
-        "Internal battery: lithium-ion, ~60 min at moderate load. Drains FASTER at high FiO₂, high PEEP, rapid rates. Worst-case: ~30 min.",
+        "Internal battery: sealed lead-acid, ~45 min at nominal settings (per the LTV operator manual). Drains FASTER at high FiO₂, high PEEP, rapid rates — plan far less for a sick lung. Always confirm runtime against your unit's manual.",
         "Battery health degrades over service life. A unit in service > 3 years and never replaced will deliver less than spec. Document unexpected battery alarms.",
-        "On the truck: confirm \"line power\" on the display before loading the patient. If the AC plug bumps loose, the LTV switches silently to battery without alarm.",
+        "On the truck: confirm \"line power\" on the display before loading the patient. If external power is lost, the LTV annunciates a POWER LOST alarm and transfers to the internal battery — the switch is NOT silent; acknowledge the alarm and restore AC.",
         "Pre-flight rule: 100% battery + line power confirmed = ready. Test external battery packs under load — a pack that holds static charge but fails under demand is a transport hazard."
       ]
     },
@@ -1057,14 +1057,16 @@ const MODULES = [
       pearl: { title: "Set vs Exhaled", body: "Exhaled Vt consistently < set Vt by > 10%? Check ETT cuff, walk the circuit, look at the exhalation valve drive line. Persistent leak = lost PEEP = lost oxygenation." }
     },
     {
-      id: "alarms", kicker: "6.4 · Alarms", title: "The Six Alarms",
+      id: "alarms", kicker: "6.4 · Alarms", title: "The Core Alarms",
       body: [
         "HIGH PRESSURE — PIP exceeded threshold (default ~40 cmH₂O; set to 35 in lung-protective). Most common in EMS.",
         "LOW PRESSURE / LOW PEEP — circuit leak, disconnect, ETT cuff leak. Default 4 cmH₂O below set PEEP.",
         "LOW MINUTE VOLUME — exhaled MV below threshold. Default is often 0 — set this to ~70% of expected MV.",
         "APNEA — no detected breath in apnea time (default 20 sec). Triggered by complete loss of effort or sensor failure.",
-        "POWER FAILURE / LOW BATTERY — switch to AC immediately. GAS SUPPLY — O₂ source pressure low; check tank, regulator, hose.",
-        "Triage: READ the alarm BEFORE silencing. Silencing without identifying the cause is a sentinel-level safety event."
+        "POWER LOST / LOW BATTERY — external power lost (transfer to internal battery) or battery depleting. Restore AC promptly.",
+        "GAS SUPPLY — O₂ source pressure low; check tank, regulator, and hose.",
+        "Triage: READ the alarm BEFORE silencing. Silencing without identifying the cause is a sentinel-level safety event.",
+        "This is the core set — the operator manual lists additional device and self-test alarms. Know your unit's full alarm list before transport."
       ]
     },
     {
@@ -1083,7 +1085,7 @@ const MODULES = [
       id: "workflow", kicker: "6.6 · Workflow", title: "Safe Changes & Common Pitfalls",
       body: [
         "Safe-change workflow: 1) Verbalize the change BEFORE you turn the dial. 2) Press SELECT to navigate. 3) Rotate CONTROL knob. 4) Press SELECT (or wait 5 sec) to commit. 5) Reassess in 30 sec. 6) Document with vitals before AND after.",
-        "Common pitfalls from incident reviews: forgetting to set LOW MV alarm; setting PEEP at the dial but forgetting to attach the PEEP valve; pediatric patient on the adult circuit (dead space > Vt); battery silently switching to internal when AC plug bumps loose; POST skipped because \"the next shift will do it.\""
+        "Common pitfalls from incident reviews: forgetting to set LOW MV alarm; setting PEEP at the dial but forgetting to attach the PEEP valve; pediatric patient on the adult circuit (dead space > Vt); missing the POWER LOST alarm when the AC plug bumps loose and the unit transfers to internal battery; POST skipped because \"the next shift will do it.\""
       ]
     }
   ],
@@ -1099,9 +1101,9 @@ const MODULES = [
       { q: "An EMS provider notes exhaled Vt is consistently 70 mL lower than set Vt. The MOST appropriate first action is:",
         choices: ["Silence the alarm and continue", "Increase Vt to compensate", "Switch from AC/VC to AC/PC", "Investigate for a circuit or cuff leak"], answer: 3,
         rationale: "Persistent divergence between set and exhaled Vt is a leak. Check ETT cuff with a pilot syringe; walk the circuit for loose connections; check the exhalation valve drive line." },
-      { q: "Internal LTV battery runtime at moderate load is approximately:",
-        choices: ["10 min", "180 min", "60 min", "8 hr"], answer: 2,
-        rationale: "Approximately 60 minutes at moderate load. Less at high FiO₂, high PEEP, or rapid rates. Always verify line power on the truck." },
+      { q: "Internal LTV battery runtime at nominal settings is approximately:",
+        choices: ["10 min", "180 min", "45 min", "8 hr"], answer: 2,
+        rationale: "Approximately 45 minutes at nominal settings per the operator manual (sealed lead-acid battery). Less at high FiO₂, high PEEP, or rapid rates. Always verify line power on the truck and confirm runtime against your unit's manual." },
       { q: "Most commonly missed connection on the LTV circuit:",
         choices: ["Exhalation valve drive line", "Bacterial filter", "Y-piece", "Inspiratory limb"], answer: 0,
         rationale: "The exhalation valve drive line is a small skinny tube that's easily missed when packing. Without it, the valve doesn't open and the patient cannot exhale." },
@@ -1447,12 +1449,12 @@ const MODULES = [
     {
       id: "pressors", kicker: "8.4 · Push-Dose Pressors", title: "Ready BEFORE You Push Induction",
       body: [
-        "Post-intubation hypotension affects ~25% of EMS RSI (Heffner 2012). The fix is anticipation.",
-        "Push-dose epinephrine — first-line for most EMS shock states. Mix 1 mg (1:10,000) into 100 mL NS = 10 mcg/mL. Dose 5–20 mcg IV (typically 10 mcg) every 1–5 min. Onset 1 min, duration 5–10 min. Inotropy + vasoconstriction.",
+        "Post-intubation hypotension is common after emergency intubation — about 25% in Heffner's 2012 emergency-department cohort (an ED, not prehospital, study; anticipate it in the field too). The fix is anticipation.",
+        "Push-dose epinephrine — a rapid bridge for peri-intubation hypotension. Mix 1 mg (1:10,000) into 100 mL NS = 10 mcg/mL. Dose 5–20 mcg IV (typically 10 mcg) every 1–5 min. Onset 1 min, duration 5–10 min. Inotropy + vasoconstriction. It buys time until a continuous infusion is running — it is not the definitive pressor.",
         "Push-dose phenylephrine — alternative when avoiding tachycardia. Mix 10 mg into 100 mL NS = 100 mcg/mL. Dose 50–200 mcg IV q1–5 min. Pure α-agonist; reflex bradycardia possible.",
         "Label every syringe clearly. Document every push. Move to a continuous infusion as soon as practical — norepinephrine is the first-line infused vasopressor for most shock states (Surviving Sepsis 2021), started at 0.05–0.1 mcg/kg/min and titrated to MAP ≥ 65, and it can run peripherally through a good IV for transport. Push-dose pressors are a bridge to that infusion."
       ],
-      evidence: { title: "Post-intubation hypotension", body: "Heffner 2012: incidence ~25% in EMS RSI. Higher in shock states. Always have push-dose pressors prepared before pushing the induction agent." }
+      evidence: { title: "Post-intubation hypotension", body: "Heffner 2012: ~25% incidence in an emergency-department intubation cohort (not a prehospital study). Higher in shock states. Always have push-dose pressors prepared before pushing the induction agent." }
     },
     {
       id: "pitfalls", kicker: "8.5 · Pitfalls", title: "What Goes Wrong",
@@ -1481,9 +1483,9 @@ const MODULES = [
       { q: "Push-dose phenylephrine is prepared as:",
         choices: ["1 mg into 100 mL NS = 10 mcg/mL", "100 mg into 100 mL NS = 1000 mcg/mL", "10 mg into 1000 mL NS = 10 mcg/mL", "10 mg into 100 mL NS = 100 mcg/mL"], answer: 3,
         rationale: "Push-dose phenylephrine: 10 mg into 100 mL NS = 100 mcg/mL. Dose 50–200 mcg IV every 1–5 min. Pure α-agonist; reflex bradycardia possible. Note: many EMS services carry push-dose epinephrine only — check what your service stocks." },
-      { q: "Post-intubation hypotension incidence in EMS RSI is approximately (Heffner 2012):",
+      { q: "Post-intubation hypotension incidence after emergency intubation is approximately (Heffner 2012):",
         choices: ["~5%", "~50%", "~25%", "~75%"], answer: 2,
-        rationale: "Approximately 25% of EMS RSI patients develop post-intubation hypotension. Push-dose pressors should be prepared BEFORE pushing the induction agent." },
+        rationale: "Approximately 25% in Heffner's 2012 emergency-department cohort — anticipate it after any emergency intubation. Push-dose pressors should be prepared BEFORE pushing the induction agent." },
       { q: "Which agent is generally preferred for RSI induction in a septic shock patient?",
         choices: ["Midazolam", "Ketamine", "Propofol", "Etomidate alone"], answer: 1,
         rationale: "Ketamine preserves or augments sympathetic tone — preferred in shock. KETASED (Jabre 2009) showed ketamine equivalent to etomidate without the adrenal suppression. Etomidate's adrenal suppression is debated in septic shock. Note: some services restrict ketamine to ongoing sedation of already-intubated patients rather than field induction — know your local scope." },
