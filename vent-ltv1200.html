@@ -1794,7 +1794,7 @@ var _bootThen=null, _pendingPreset=null;
 var PRESETS={   // factory presets from the LTV 1200/1150 Quick Reference Guide
   adult:    {mode:'ac',bt:'volume',  rate:12,vt:500,it:1.0,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
   pediatric:{mode:'ac',bt:'pressure',rate:15,vt:250,it:0.7,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:30,lowpres:10,lowmv:1,apnea:20},
-  infant:   {mode:'ac',bt:'pressure',rate:20,vt:50, it:0.3,pc:15,ps:10,peep:0,fio2:40,sens:2,hipres:30,lowpres:10,lowmv:1,apnea:20}
+  infant:   {mode:'ac',bt:'pressure',rate:20,vt:50, it:0.3,pc:15,ps:10,peep:0,fio2:40,sens:2,hipres:30,lowpres:10,lowmv:0.5,apnea:20}
 };
 function applyPreset(name){
   var p=PRESETS[name]; if(!p) return;
@@ -2119,6 +2119,29 @@ function monitoredPIP(){
   var d=calcPplat(); return d? d.pip : livePeak();
 }
 
+// ── DYNAMIC AUTO-PEEP (gas trapping) ──────────────────────────
+// Intrinsic PEEP is not a fixed number: it falls as the learner gives the
+// lung more time to empty (lower rate / shorter inspiratory time) and climbs
+// when expiration is cut short. Model it off the lung's expiratory time
+// constant τ = R × C, decaying from the scenario's starting estimate as the
+// available expiratory time lengthens beyond ~1.3τ.
+function expTimeS(){
+  if(ventMode==='cpap'||ventMode==='nppv') return null;
+  return Math.max(0.1, (60/vals.rate.v) - vals.it.v);
+}
+function effectiveAutoPEEP(){
+  var base=(lung&&lung.autoPEEP)||0;
+  if(base<=0) return 0;
+  if(ventMode==='cpap'||ventMode==='nppv') return 0;   // no mandatory breath stacking
+  var Cl=lung.compliance/1000;          // compliance in L/cmH₂O
+  var tau=lung.resistance*Cl;           // expiratory time constant (s)
+  if(tau<=0) return 0;
+  var Te=expTimeS();
+  var refTe=1.3*tau;                    // starting estimate is anchored here
+  var factor=Math.exp(-(Te-refTe)/tau); // <1 as Te lengthens, >1 as it shortens
+  return Math.round(Math.max(0, Math.min(base*1.2, base*factor))*10)/10;
+}
+
 // ── INSP HOLD / PLATEAU ───────────────────────────────────────
 var inspHoldActive=false;
 var inspHoldStartTs=0;    // wall-clock timestamp (from rAF)
@@ -2135,7 +2158,8 @@ function calcPplat(){
   // a compliance problem — which the Insp-Hold maneuver reveals.
   if(breathType!=='volume'||ventMode==='cpap'||ventMode==='nppv') return null;
   if(typeof lung==='undefined'||!lung) return null;   // guard: a deep-link can render before `lung` initializes
-  var peep=vals.peep.v + (lung.autoPEEP||0);          // intrinsic PEEP adds to baseline
+  var aPEEP=effectiveAutoPEEP();                        // dynamic intrinsic PEEP (responds to expiratory time)
+  var peep=vals.peep.v + aPEEP;                         // intrinsic PEEP adds to baseline
   var pplat=peep + vals.vt.v/lung.compliance;
   var resPressure=resistivePressure();                 // peak flow × resistance
   var pip=pplat + resPressure;
@@ -2143,7 +2167,7 @@ function calcPplat(){
   var comp=drive>0?Math.round(vals.vt.v/drive):0;
   return {pip:Math.round(pip*10)/10, pplat:Math.round(pplat*10)/10,
           drive:Math.round(drive*10)/10, comp:comp, raw:Math.round(resPressure*10)/10,
-          autoPEEP:(lung.autoPEEP||0)};
+          autoPEEP:aPEEP};
 }
 
 function triggerInspHold(){
@@ -2242,7 +2266,7 @@ function calcPressure(tMs){
 
   // Volume control mode — IT directly controlled (per LTV manual).
   // Peak = PEEP(+autoPEEP) + elastic (Vt/compliance) + resistive (peak flow × Raw).
-  var pplat_v=peep+(lung.autoPEEP||0)+vals.vt.v/lung.compliance;
+  var pplat_v=peep+effectiveAutoPEEP()+vals.vt.v/lung.compliance;
   var pip_v=pplat_v+resistivePressure();
   var insFrac_v=Math.min((vals.it.v*1000)/cycleMs,0.85);
   var p;
@@ -2625,7 +2649,7 @@ function openDrawer(key){
       html+='</div>';
       html+='<div style="background:#0a0d15;border:1px solid #2a2a4a;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#888;line-height:1.5">';
       html+='<strong style="color:#aaa">Resistance component (PIP−Pplat):</strong> '+d.raw+' cmH₂O ';
-      html+='| R<sub>aw</sub> = '+lung.resistance+' cmH₂O/(L/s)'+(d.autoPEEP?(' | auto-PEEP '+d.autoPEEP+' cmH₂O'):'')+' | Peak flow = '+((peakFlowLPM()||0)/60).toFixed(2)+' L/s</div>';
+      html+='| R<sub>aw</sub> = '+lung.resistance+' cmH₂O/(L/s)'+(d.autoPEEP?(' | auto-PEEP ≈ '+d.autoPEEP+' cmH₂O (falls as you lengthen exhalation)'):'')+' | Peak flow = '+((peakFlowLPM()||0)/60).toFixed(2)+' L/s</div>';
       var driveMsg=d.drive>15?'⚠ Driving pressure &gt;15 — ARDS risk elevated. Consider reducing Vt toward 6 mL/kg PBW.':d.drive>12?'Driving pressure borderline — monitor closely.':'Driving pressure within target range.';
       html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>';
       html+=driveMsg+'<br><br>High PIP + normal Pplat → airway resistance problem (secretions, bronchospasm, biting tube). High PIP + high Pplat → compliance problem (ARDS, pneumothorax, auto-PEEP). Pplat &gt;30 cmH₂O = lung injury risk — reduce Vt or rate.</div>';
@@ -2794,7 +2818,7 @@ var STAGE_DEFS=[
         'The low minute-volume alarm is misset'
       ],
       correct:1,
-      exp:'<strong>Assess before you adjust.</strong> Reaching the same pressure every breath does not by itself mean the limit is too low — a fixed obstruction can do the same. But you\'ve done the work-up (comfortable patient, equal sounds, patent tube, normal plateau), which rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem — set the High Pressure limit 5–10 cmH₂O above the normal PIP. A true obstruction would make pressures climb and the plateau rise.'
+      exp:'<strong>Assess before you adjust.</strong> Reaching the same pressure every breath does not by itself mean the limit is too low — a fixed obstruction can do the same. But you\'ve done the work-up (comfortable patient, equal sounds, patent tube, normal plateau), which rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem — set the High Pressure limit 5–10 cmH₂O above the normal PIP. A true obstruction (kink, plug, bronchospasm) would drive the <em>PIP</em> up while the plateau stayed near-normal — a widening PIP–plateau gap; a <em>rising plateau</em> instead means stiffer lungs (falling compliance). A normal plateau argues against both.'
     },
     goal:{
       text:'With obstruction ruled out, set the <strong>High Pressure limit 5–10 above the PIP shown below</strong> so it catches real trouble without nuisance-alarming.',
@@ -2872,8 +2896,8 @@ var SCENARIO_LEVELS={
     { name:'The Rising CO₂',
       badge:'L2 · Scenario 1 of 6', badgeCls:'scen-badge-2',
       intro:'Interfacility transfer — you\'re moving a fresh post-op patient from a community hospital to the tertiary ICU. During your pre-transport assessment the sending RT mentions the CO₂ has crept up on the last two gases. You get your LTV set before you load.',
-      scenario:'45-year-old post-op, sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
-      vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'HR',v:'102'}],
+      scenario:'45-year-old post-op man, 178 cm tall (≈ 70 kg predicted body weight), sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
+      vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'PBW',v:'70 kg'},{k:'HR',v:'102'}],
       lung:{compliance:40,resistance:10,label:'Post-op'},
       setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
@@ -2888,11 +2912,11 @@ var SCENARIO_LEVELS={
         exp:'A high PaCO₂ with a low pH and normal oxygenation is a <strong>respiratory acidosis</strong>. CO₂ clearance is proportional to minute ventilation (Rate × Vt) — so raising MV is the fix.'
       },
       goal:{
-        text:'Raise minute ventilation to clear the CO₂ — get <strong>MV into roughly 7–10 L/min</strong> (it\'s 4.5 now). Increase the rate, the tidal volume, or both — but keep Vt lung-safe.',
-        check:function(){ var mv=estMinuteVolume(); return mv>=7 && mv<=10.5; },
-        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min'; }
+        text:'Raise minute ventilation to clear the CO₂ — get <strong>MV into roughly 7–10 L/min</strong> (it\'s 4.5 now) while keeping <strong>Vt lung-safe (≤ 8 mL/kg, so ≤ ~560 mL for 70 kg PBW)</strong>. Prefer more <em>rate</em>, not a bigger breath.',
+        check:function(){ var mv=estMinuteVolume(); return mv>=7 && mv<=10.5 && vals.vt.v<=560; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg'; }
       },
-      confirm:'✓ Minute ventilation roughly doubled — CO₂ clearance rises and the acidosis corrects. There was no single right knob: more rate or more volume both raise MV. Watch the ceiling — driving MV far above need blows off too much CO₂ and can cause alkalosis.'
+      confirm:'✓ Minute ventilation roughly doubled and the acidosis corrects — and you did it the safe way, by <strong>raising rate rather than oversizing the breath</strong>. MV = Rate × Vt, but only rate is free of lung-stretch cost: pushing Vt past ~8 mL/kg PBW trades CO₂ clearance for volutrauma. Watch the ceiling too — driving MV far above need causes alkalosis.'
     },
     // ─── L2 S2 ────────────────────────────────────────────────
     { name:'Hypoxemia That Won\'t Budge',
@@ -2937,7 +2961,7 @@ var SCENARIO_LEVELS={
           'Auto-PEEP is elevating the circuit pressure'
         ],
         correct:2,
-        exp:'<strong>Assess before you adjust.</strong> A fixed obstruction (plug, mainstem, kink) can also cap inspiration at the <em>same</em> pressure every breath — reaching the limit repeatedly does NOT by itself prove the limit is too low. Here the work-up is complete and normal: equal breath sounds, patent tube, no secretions, and a normal plateau pressure — that rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem: it sits at/below the patient\'s own peak. A real obstruction would make pressures <em>climb or vary</em> and raise the plateau.'
+        exp:'<strong>Assess before you adjust.</strong> A fixed obstruction (plug, mainstem, kink) can also cap inspiration at the <em>same</em> pressure every breath — reaching the limit repeatedly does NOT by itself prove the limit is too low. Here the work-up is complete and normal: equal breath sounds, patent tube, no secretions, and a normal plateau pressure — that rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem: it sits at/below the patient\'s own peak. A real obstruction would drive the <em>PIP</em> up while the plateau stayed near-normal (a widening PIP–plateau gap); a high <em>plateau</em> would instead signal reduced compliance. The normal plateau here points to neither.'
       },
       goal:{
         text:'Now that obstruction is ruled out, set the High Pressure limit <strong>5–10 cmH₂O above the confirmed-normal PIP (~30)</strong> — roughly 35–45 cmH₂O. (Listen — the nuisance alarm stops when you clear the PIP.)',
@@ -3069,33 +3093,33 @@ var SCENARIO_LEVELS={
       lung:{compliance:45,resistance:10,label:'Recovering'},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
-        q:'Awake, strong effort, RSBI 62, good gas exchange — the readiness screen is passed. What is the evidence-based next step?',
+        q:'Awake, strong effort, RSBI 62, good gas exchange — the readiness screen is passed. Under your medical-control order to ease support, what is the appropriate transport step?',
         choices:[
           'Keep full AC control — it\'s working, don\'t rock the boat',
-          'Conduct a spontaneous breathing trial (SBT): put them on minimal support (CPAP/PSV, low pressure support) and watch tolerance',
+          'Trial reduced support as ordered (CPAP/PSV, low pressure support) and monitor tolerance closely, ready to restore support',
           'Wean gradually on SIMV, ratcheting the mandatory rate down over hours',
-          'Extubate immediately — no trial needed'
+          'Extubate now — a passed screen means they\'re ready'
         ],
         correct:1,
-        exp:'A passed readiness screen (RSBI < 105, adequate oxygenation, awake, stable) calls for a <strong>spontaneous breathing trial</strong>, not gradual mode-weaning. Put the patient on <strong>minimal support</strong> — CPAP/PSV with low pressure support (or a T-piece) — and observe ~30 min. <strong>SIMV-based weaning is associated with worse outcomes and delayed liberation</strong> (AARC 2024 liberation guideline), so it is not the modern bridge.'
+        exp:'A passed readiness screen (RSBI < 105, adequate oxygenation, awake, stable) supports a <strong>monitored trial of reduced support</strong> — here authorized by your medical-control order. Move to <strong>minimal support</strong> (CPAP/PSV, low pressure support) and watch tolerance, ready to restore full support if they tire. Mind the scope: a passed trial is only <em>one</em> input to extubation readiness — <strong>airway protection, cough strength and secretion burden still govern that decision</strong>, and <strong>extubating for weaning is not a field intervention</strong> without a specific protocol and physician direction. SIMV rate-ratcheting is linked to slower liberation (AARC 2024) and is not the modern bridge. Your job: reduce support as ordered, monitor, and communicate readiness to the receiving team.'
       },
       goal:{
-        text:'Run an SBT — switch to <strong>CPAP / PSV</strong> (spontaneous), set a low <strong>pressure support 5–8 cmH₂O</strong> and <strong>PEEP ≤ 5</strong>, and watch tolerance (RR, Vt, SpO₂, comfort).',
+        text:'Under your medical-control order, trial reduced support — switch to <strong>CPAP / PSV</strong> (spontaneous), set a low <strong>pressure support 5–8 cmH₂O</strong> and <strong>PEEP ≤ 5</strong>, and watch tolerance (RR, Vt, SpO₂, comfort). Be ready to restore full support if they tire.',
         check:function(){ return ventMode==='cpap' && vals.ps.v>=5 && vals.ps.v<=8 && vals.peep.v<=5; },
         readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  PS '+vals.ps.v+'  ·  PEEP '+vals.peep.v; }
       },
-      confirm:'✓ Spontaneous breathing trial underway — minimal support, the patient carrying the work. A tolerated SBT (~30 min: stable RR/Vt/SpO₂, comfortable, RSBI < 105) is the evidence-based path to extubation. SIMV weaning, by contrast, is linked to worse outcomes and slower liberation (AARC 2024). Trend tolerance; if they pass, extubate.'
+      confirm:'✓ Reduced to a monitored spontaneous trial with the patient carrying the work — the right transport action when it is ordered and tolerance is watched. A tolerated trial (stable RR/Vt/SpO₂, comfortable, RSBI < 105) is <em>one</em> input toward liberation, <strong>not a green light to extubate</strong>: airway protection, cough and secretions still decide that, and the extubation decision belongs to the receiving team and medical direction. If they tire, restore support. SIMV rate-weaning, by contrast, is linked to slower liberation (AARC 2024). Recognize readiness — and communicate it.'
     },
     // ─── L3 S3 ────────────────────────────────────────────────
     { name:'The Swinging Peak Pressure',
       badge:'L3 · Scenario 3 of 6', badgeCls:'scen-badge-3',
       intro:'Mid-transport with an intubated status asthmaticus. The peak pressure alarm keeps shrieking and the peaks bounce wildly — you\'re miles out and worried about barotrauma. Before you chase that number, an inspiratory hold tells a different story.',
-      scenario:'Intubated status asthmaticus on volume control. Peak pressure lurches breath to breath — 32 one breath, 54 the next — but an inspiratory-hold plateau is far lower, around 20. The rate is 22 and expiratory flow doesn\'t return to baseline before the next breath. SpO₂ and CO₂ are holding for now.',
-      vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54'},{k:'Pplat',v:'~20 cmH₂O'},{k:'EtCO₂',v:'44 mmHg'},{k:'HR',v:'104'}],
+      scenario:'Intubated status asthmaticus on volume control. Peak pressure lurches breath to breath — 32 one breath, 54 the next — but an inspiratory-hold plateau is far lower, around 25. The rate is 22 and expiratory flow doesn\'t return to baseline before the next breath. SpO₂ and CO₂ are holding for now.',
+      vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54'},{k:'Pplat',v:'~25 cmH₂O'},{k:'EtCO₂',v:'44 mmHg'},{k:'HR',v:'104'}],
       lung:{compliance:45,resistance:30,autoPEEP:8,label:'Status asthmaticus'},
       setup:{mode:'ac',bt:'volume',rate:22,vt:550,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
-        q:'PIP swings to 54, but the inspiratory-hold plateau is only ~20. What does that tell you, and what is the priority?',
+        q:'PIP swings to 54, but the inspiratory-hold plateau is only ~25. What does that tell you, and what is the priority?',
         choices:[
           'The alveoli are dangerously over-pressured — cut tidal volume hard and cap the peak',
           'The high PIP is resistive (airway), not alveolar — protect expiration: slow the rate, short Ti/high flow, long exhale, permissive hypercapnia; watch plateau & auto-PEEP',
@@ -3116,8 +3140,8 @@ var SCENARIO_LEVELS={
     { name:'Losing the Oxygenation Battle',
       badge:'L3 · Scenario 4 of 6', badgeCls:'scen-badge-3',
       intro:'You\'re transferring a severe ARDS patient to an ECMO center. Partway there the saturations start sliding despite everything the sending team set. The monitor keeps alarming in the back of the truck — this is the oxygenation battle, and you\'re losing it.',
-      scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82% — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
-      vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
+      scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82%. The latest ABG shows PaO₂ 41 mmHg on FiO₂ 0.70 — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
+      vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'PaO₂',v:'41 mmHg'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8'},{k:'P/F',v:'≈ 59'}],
       lung:{compliance:22,resistance:10,label:'Severe ARDS'},
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
@@ -3167,8 +3191,8 @@ var SCENARIO_LEVELS={
     // ─── L3 S6: NEW ───────────────────────────────────────────
     { name:'The Blown Pupil',
       badge:'L3 · Scenario 6 of 6', badgeCls:'scen-badge-3',
-      intro:'You\'re transporting a head-injured trauma patient to the neuro center. Halfway there the left pupil blows — herniation, in the back of your truck, still twelve minutes out. You need a bridge from the ventilator right now to buy this brain time.',
-      scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. The neurosurgeon is 6 minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
+      intro:'You\'re transporting a head-injured trauma patient to the neuro center. Halfway there the left pupil blows — herniation, in the back of your truck, still eight minutes out. You need a bridge from the ventilator right now to buy this brain time.',
+      scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. Definitive neurosurgical care is still eight minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
       vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'40 mmHg'},{k:'PaCO₂',v:'42 mmHg'},{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'}],
       lung:{compliance:50,resistance:8,label:'TBI (lungs OK)'},
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
@@ -3201,24 +3225,24 @@ var ACADEMY_SCENARIOS={
   'initial-settings':{
     name:'Initial Settings — Newly Intubated',
     badge:'Academy · Initial Vent Setup', badgeCls:'scen-badge-2',
-    intro:'Module 4 practice. You\'re accepting an 80 kg (≈75 kg IBW) man, just intubated for airway protection before a transfer. His lungs are healthy — no ARDS, no obstruction. The sending RT handed him over on whatever was dialed up in a hurry. Build safe initial settings from here.',
-    scenario:'75 kg IBW, healthy lungs, fully sedated for transport. The vent came to you at Vt 700 mL (that\'s ~9 mL/kg), PEEP 0, and 100% oxygen. Set sane, lung-protective starting settings for the road.',
+    intro:'Module 4 practice. You\'re accepting an 80 kg (≈75 kg PBW) man, just intubated for airway protection before a transfer. His lungs are healthy — no ARDS, no obstruction. The sending RT handed him over on whatever was dialed up in a hurry. Build safe initial settings from here.',
+    scenario:'75 kg PBW, healthy lungs, fully sedated for transport. The vent came to you at Vt 700 mL (that\'s ~9 mL/kg), PEEP 0, and 100% oxygen. Set sane, lung-protective starting settings for the road.',
     vitals:[{k:'HR',v:'92'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'38 mmHg'},{k:'BP',v:'128/74'}],
     lung:{compliance:50,resistance:8,label:'Healthy'},
     setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:0,pc:15,ps:10,fio2:100,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
-      q:'Healthy lungs, 75 kg IBW, just intubated. What defines a safe INITIAL tidal volume and baseline?',
+      q:'Healthy lungs, 75 kg PBW, just intubated. What defines a safe INITIAL tidal volume and baseline?',
       choices:[
         'Whatever was set at the sending hospital — don\'t change it',
-        'About 6–8 mL/kg IBW (≈450–600 mL) with a little PEEP (~5) — lung-protective from breath one',
+        'About 6–8 mL/kg PBW (≈450–600 mL) with a little PEEP (~5) — lung-protective from breath one',
         'The biggest volume the high-pressure alarm allows',
         '4 mL/kg — always use the smallest possible breath'
       ],
       correct:1,
-      exp:'Start every intubated patient lung-protective: <strong>6–8 mL/kg of ideal body weight</strong> (here ~450–600 mL), physiologic <strong>PEEP ~5</strong>, and a rate that gives a normal minute ventilation. You don\'t wait for ARDS to protect the lung — you start protected. 9 mL/kg on healthy lungs is still too much.'
+      exp:'Start every intubated patient lung-protective: <strong>6–8 mL/kg of predicted body weight</strong> (here ~450–600 mL), physiologic <strong>PEEP ~5</strong>, and a rate that gives a normal minute ventilation. You don\'t wait for ARDS to protect the lung — you start protected. 9 mL/kg on healthy lungs is still too much.'
     },
     goal:{
-      text:'Dial safe initial settings for a 75 kg IBW adult: <strong>Vt about 450–600 mL (6–8 mL/kg)</strong>, <strong>PEEP ~5</strong>, and a rate giving <strong>MV 7–9 L/min</strong>.',
+      text:'Dial safe initial settings for a 75 kg PBW adult: <strong>Vt about 450–600 mL (6–8 mL/kg)</strong>, <strong>PEEP ~5</strong>, and a rate giving <strong>MV 7–9 L/min</strong>.',
       check:function(){ var mv=estMinuteVolume(); return vals.vt.v>=450&&vals.vt.v<=600&&vals.peep.v>=4&&vals.peep.v<=6&&mv>=7&&mv<=9.5; },
       readout:function(){ return 'Vt '+(vals.vt.v/75).toFixed(1)+' mL/kg  ·  PEEP '+vals.peep.v+'  ·  MV '+estMinuteVolume().toFixed(1); }
     },
@@ -3328,7 +3352,7 @@ var ACADEMY_SCENARIOS={
     name:'Capstone — The Whole Package',
     badge:'Academy · Capstone', badgeCls:'scen-badge-3',
     intro:'Final challenge. The sickest patient of your shift: severe ARDS going to an ECMO center, hours on the road. Everything you\'ve learned lands on this one vent — lung protection, oxygenation, minute ventilation, and safe alarms, all at once. No hand-holding. Get it right.',
-    scenario:'28-year-old, severe ARDS, IBW 70 kg. Handed over at Vt 650 mL (9.3 mL/kg), PEEP 5, FiO₂ 70%, and SpO₂ still only 85%. The lungs are stiff and the plateau is high. Make it lung-protective AND oxygenating for a long transport.',
+    scenario:'28-year-old, severe ARDS, PBW 70 kg. Handed over at Vt 650 mL (9.3 mL/kg), PEEP 5, FiO₂ 70%, and SpO₂ still only 85%. The lungs are stiff and the plateau is high. Make it lung-protective AND oxygenating for a long transport.',
     vitals:[{k:'HR',v:'116'},{k:'SpO₂',v:'85%'},{k:'Pplat',v:'33 cmH₂O'},{k:'FiO₂',v:'70%'}],
     setup:{mode:'ac',bt:'volume',rate:14,vt:650,it:1.0,peep:5,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
@@ -3615,7 +3639,7 @@ function renderTestLung(bar){
         return '<button class="tl-lung'+(k===freeLungKey?' on':'')+'" onclick="setFreeLung(\''+k+'\')">'+FREE_LUNGS[k].label+'</button>';
       }).join('')
     +'</div>'
-    +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP <b>'+lung.autoPEEP+'</b>':'')+'</div>'
+    +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP ≈ <b>'+effectiveAutoPEEP()+'</b> cmH₂O (dynamic)':'')+'</div>'
     +'<div class="tl-grid">'
       +_tlChip('I:E', ieTxt, ieStat)
       +_tlChip('Peak Flow', pfTxt, pfStat)
