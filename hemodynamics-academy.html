@@ -277,6 +277,26 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
   .progbar > i{ transition:none; }
 }
 
+/* ── Evidence-strength badges (ported from the Airway Academy) ──── */
+.ev-hd{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:7px; }
+.ev-t{ font-family:var(--sans); font-weight:800; font-size:14px; color:var(--ink); margin-bottom:2px; }
+.ev-tier{ font-family:var(--sans); font-weight:800; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 9px; border-radius:999px; border:1px solid; }
+.ev-tier::before{ content:"evidence: "; opacity:.72; }
+.ev-strong    .ev-tier{ color:var(--green);   background:var(--green-soft); border-color:var(--green-line); }
+.ev-moderate  .ev-tier{ color:var(--blue-dk); background:var(--blue-soft);  border-color:var(--blue-line); }
+.ev-limited   .ev-tier{ color:var(--amber);   background:var(--amber-soft); border-color:var(--amber-line); }
+.ev-contested .ev-tier{ color:var(--red);     background:var(--red-soft);   border-color:var(--red-line); }
+.evidence.ev-strong{ border-left-color:var(--green); }
+.evidence.ev-moderate{ border-left-color:var(--blue); }
+.evidence.ev-limited{ border-left-color:var(--amber); }
+.evidence.ev-contested{ border-left-color:var(--red); }
+.evlegend{ background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:15px 16px; margin:0 0 20px; }
+.evlegend h4{ font-family:var(--sans); font-weight:800; font-size:14px; color:var(--ink); margin:0 0 6px; }
+.evlegend p{ font-size:13px; color:var(--ink-2); line-height:1.5; margin:0 0 11px; }
+.evlegend .evrow{ display:flex; align-items:flex-start; gap:10px; margin:7px 0; font-size:12.5px; color:var(--ink-2); line-height:1.45; }
+.evlegend .ev-tier{ flex:0 0 auto; }
+
 @media print{
   body{ background:#fff; }
   header.mon, main > *:not(#view-cert), .back, .cta-wrap, footer.adm, .print-hide{ display:none !important; }
@@ -324,6 +344,7 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
         <label for="nameInput">Learner name (appears on your certificate)</label>
         <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
       </div>
+      <div class='evlegend print-hide'><h4>How the evidence is graded</h4><p>Claims in this course carry an evidence-strength badge, so you can see how firm the ground is. Weak evidence is labelled as weak &mdash; and occasionally still supports a strong recommendation, which is said explicitly where it applies.</p><div class='evrow ev-strong'><span class='ev-tier'>Strong</span><span>Large or consistent randomized evidence, or an aligned guideline position.</span></div><div class='evrow ev-moderate'><span class='ev-tier'>Moderate</span><span>Reasonable evidence with real limitations &mdash; single trials, or consistent observational data.</span></div><div class='evrow ev-limited'><span class='ev-tier'>Limited</span><span>Case reports, mechanism, or consensus only. Treat conclusions cautiously.</span></div><div class='evrow ev-contested'><span class='ev-tier'>Contested</span><span>Good-quality studies that disagree. Reasonable clinicians differ.</span></div></div>
       <p class="eyebrow">Course Modules &middot; Sequential</p>
       <ul class="modlist" id="modList"></ul>
       <div id="finalSlot"></div>
@@ -406,7 +427,7 @@ var MODULES = [
       { h:"3", t:"Preload and the Frank–Starling relationship", html:
         "<p>The Frank–Starling mechanism describes how stretching cardiac muscle before contraction increases the force it generates. Plot preload against stroke volume and you get a curve that rises, then flattens: on the steep part, giving volume increases output; on the flat part, more volume just raises filling pressures and backs fluid into the lungs without buying you flow.</p>"+
         "<p>The clinical question — <em>will this patient's output rise if I give fluid?</em> — is the question of fluid responsiveness. And this is where a common bedside habit fails.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — CVP</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div><div class='ev-t'>CVP</div>"+
         "<p>Central venous pressure (CVP) is a poor predictor of fluid responsiveness. Systematic reviews across dozens of studies found essentially no reliable relationship between a static CVP value and whether cardiac output will rise with a fluid bolus (Marik and colleagues, 2008 and 2013).</p>"+
         "<p>Dynamic measures perform far better: pulse-pressure or stroke-volume variation in a passively ventilated patient, or the change in output after a passive leg raise. Use trends and dynamic responses, not a single filling pressure.</p>"+
         "<div class='grade'>Quality: moderate–high (consistent across multiple systematic reviews of mostly observational and physiologic data).</div></div>"
@@ -429,7 +450,7 @@ var MODULES = [
       },
       { h:"7", t:"What MAP target should you actually chase?", html:
         "<p>MAP ≥ 65 mmHg is the conventional resuscitation floor, but the evidence tells a more nuanced story than a single universal number.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check — MAP targets</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div><div class='ev-t'>MAP targets</div>"+
         "<p><b>SEPSISPAM</b> (Asfar et al., NEJM 2014) randomized septic-shock patients to a high MAP target (80–85) versus 65–70. There was no overall mortality difference, and the higher target caused more atrial fibrillation. But a pre-specified subgroup with <em>chronic hypertension</em> had less renal injury and less need for dialysis at the higher target.</p>"+
         "<p><b>The 65 Trial</b> (Lamontagne et al., JAMA 2020) tested permissive hypotension (target 60–65) in vasodilatory shock in patients 65 and older. It reduced vasopressor exposure with no clear increase in mortality — supporting a lower target in older patients.</p>"+
         "<p><b>Bottom line:</b> MAP 65 is a reasonable default. Individualize upward for chronic hypertensives (their autoregulation is reset higher) and consider tolerating the low-to-mid 60s in older vasodilatory-shock patients rather than chasing pressure with escalating vasopressors.</p>"+
@@ -489,7 +510,7 @@ var MODULES = [
       { h:"1", t:"What an arterial line actually measures", html:
         "<p>Strip away the mystique and an arterial line is plumbing. A continuous column of saline connects the patient's artery to a pressure transducer. Every heartbeat pushes on that column, the transducer converts the push into an electrical signal, and the monitor draws it as a wave. There is no magic — just a pressure sensor on the end of a fluid-filled tube.</p>"+
         "<p>Why bother, when a blood-pressure cuff is right there? Because a cuff gives you a <em>snapshot</em> every three to five minutes, and it takes that snapshot by squeezing until flow stops. An arterial line gives you the true pressure <em>every single beat</em>, continuously, and it does it without interrupting flow. Think of it as a stethoscope for pressure that never blinks. In a patient on a vasopressor or crashing in front of you, the difference between a reading every beat and a guess every few minutes is the difference between steering and hoping.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div>"+
         "<p>Arterial lines are the accepted standard for beat-to-beat pressure in shock and for titrating vasopressors, but that standing rests mainly on physiologic rationale and consistency, not on large trials showing they lower mortality versus a cuff. What is better supported is the other half of the argument: oscillometric (cuff) blood pressure becomes unreliable at low pressures and in low-flow states, where it tends to read inaccurately. So the case for the a-line in shock is really a case against trusting the cuff there.</p>"+
         "<div class='grade'>Quality: moderate for cuff unreliability in hypotension (observational); the outcome case for a-lines is consensus and physiologic rather than RCT-proven.</div></div>"
       },
@@ -540,7 +561,7 @@ var MODULES = [
         "<p>Arterial lines are generally safe, but the failure modes are worth respecting: hematoma and bleeding (a disconnected arterial line bleeds fast, because it is under arterial pressure), thrombosis, distal ischemia (uncommon), local infection (lower risk than a central line, but not zero), nerve injury, and air embolism.</p>"+
         "<p>And then there is the absolute rule:</p>"+
         "<div class='keybox'><span class='kt'>Never</span> Never inject medication into an arterial line. Intra-arterial injection can cause severe distal ischemia and limb loss. The a-line is a one-way window for reading pressure, not a door for drugs. Label it clearly and treat every port as read-only.</div>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-limited'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Limited</span></div>"+
         "<p>The modified Allen test — occluding the radial and ulnar arteries and timing the return of color to check ulnar collateral flow before radial cannulation — is widely taught but poorly supported. Studies have found it does not reliably predict which patients will develop ischemic complications. Many clinicians still perform it out of habit or policy, but do not treat a 'passing' test as a guarantee of safety, or a 'failing' one as a firm contraindication.</p>"+
         "<div class='grade'>Quality: low (observational; poor predictive value in the available evidence).</div></div>"+
         "<p>For transport specifically: keep the flush bag pressurized to ~300 mmHg with a slow continuous flush (about 3 mL/hr) to hold the line open, double-check every connection because of the bleeding risk, and re-level and re-zero after any move.</p>"
@@ -609,24 +630,24 @@ var MODULES = [
       },
       { h:"3", t:"Norepinephrine: the balanced default", html:
         "<p>Norepinephrine is strong on alpha-1 with a modest beta-1 kick. That combination raises SVR and MAP while lending a little inotropic support, and it does so with relatively little tachycardia. Think of it as the all-wheel-drive pressor: good traction across most shock states, which is exactly why it is first-line for septic, vasodilatory, and undifferentiated shock.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div>"+
         "<p>SOAP II (2010) randomized shock patients to norepinephrine or dopamine as first-line. There was more arrhythmia with dopamine, and a pre-specified cardiogenic-shock subgroup had higher mortality with dopamine. The Surviving Sepsis Campaign recommends norepinephrine as the first-line vasopressor in septic shock. This is one of the better-supported choices in critical care.</p>"+
         "<div class='grade'>Quality: high (RCT plus strong guideline recommendation).</div></div>"
       },
       { h:"4", t:"The specialists: epinephrine, phenylephrine, vasopressin", html:
         "<p><strong>Epinephrine</strong> pushes both alpha and beta hard. It is first-line in anaphylaxis and cardiac arrest and a common second-line add-on in septic shock. Two things to expect: it raises heart rate, and it produces a <em>benign</em> rise in lactate through beta-2-driven glycogenolysis and stimulation of the sodium-potassium pump. Do not mistake that lactate bump for worsening perfusion and chase it in circles.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div>"+
         "<p>Head-to-head, epinephrine and norepinephrine achieve MAP targets comparably, but epinephrine causes more tachycardia and more transient lactic acidosis. It is a reasonable add-on, not usually the first choice, when norepinephrine alone is not enough.</p>"+
         "<div class='grade'>Quality: moderate (RCTs comparing catecholamines; metabolic effects well described pharmacologically).</div></div>"+
         "<p><strong>Phenylephrine</strong> is a pure alpha-1 agent: vasoconstriction with no inotropy or chronotropy, and it can actually cause a reflex bradycardia as the body responds to the rising pressure. That makes it handy when a tachyarrhythmia limits catecholamines, and as a quick push-dose agent. As a sole agent in septic shock it is less preferred, because with no inotropic support it can drop cardiac output even as pressure rises.</p>"+
         "<p><strong>Vasopressin</strong> constricts through the V1 receptor — a completely different key from the adrenergic lock. It is given at a fixed low dose (0.03–0.04 units/min) as a catecholamine-sparing add-on to norepinephrine, not titrated up and down, and it does not cause tachycardia. Because it works outside the adrenergic system, it can still bite when acidosis and receptor downregulation have blunted the catecholamines.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div>"+
         "<p>VASST (2008) added vasopressin to norepinephrine and found no overall mortality difference, with a possible benefit in less-severe shock. VANISH (2016) compared vasopressin-first to norepinephrine-first and found no difference in renal-failure-free days. The honest summary: vasopressin is a useful catecholamine-sparing adjunct, not a proven mortality-lowering agent.</p>"+
         "<div class='grade'>Quality: high for the trials; the takeaway is 'adjunctive/sparing,' with genuine uncertainty about outcome benefit.</div></div>"
       },
       { h:"5", t:"Dopamine and the renal-dose myth", html:
         "<p>Dopamine is often taught as tidily dose-dependent — dopaminergic at low doses, beta-1 in the middle, alpha at the top. In practice those ranges overlap messily, and the drug carries a real cost: more arrhythmias than norepinephrine, and the worse cardiogenic-shock signal from SOAP II. It has largely fallen out of favor as a first-line pressor.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div>"+
         "<p>The idea of 'renal-dose' dopamine to protect the kidneys is a myth that has been formally debunked. A randomized trial (Bellomo and colleagues, 2000) found low-dose dopamine did not prevent renal dysfunction. Increased urine output is not the same as preserved kidney function.</p>"+
         "<div class='grade'>Quality: high (RCT evidence against renoprotection).</div></div>"
       },
@@ -634,7 +655,7 @@ var MODULES = [
         "<p>When the problem is a failing pump, vasoconstrictors are the wrong tool. You need an inotrope.</p>"+
         "<p><strong>Dobutamine</strong> is primarily a beta-1 inotrope with some beta-2 activity. It raises contractility and cardiac output — but the beta-2 effect can lower SVR and drop blood pressure, so in cardiogenic shock it is often paired with a vasopressor. It presses the gas pedal on the heart; it does not squeeze the pipes.</p>"+
         "<p><strong>Milrinone</strong> takes a different route. It inhibits phosphodiesterase-3, raising intracellular cAMP <em>without going through the beta receptor at all</em>. That is its signature advantage: it still works when the beta 'front door' is locked — in patients on chronic beta-blockade or with the receptor downregulation of chronic heart failure. It is an 'inodilator': a positive inotrope that also dilates both systemic and pulmonary vessels, which makes it valuable in right-ventricular failure and pulmonary hypertension but also means it can cause hypotension. It is renally cleared with a longer half-life than dobutamine, so it is harder to titrate off quickly.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div>"+
         "<p>DOREMI (2021) compared milrinone and dobutamine head-to-head in cardiogenic shock and found no significant difference in the primary composite outcome. Neither is a clear winner; the choice is patient-specific (for example, milrinone when beta-blockade or pulmonary hypertension dominates).</p>"+
         "<div class='grade'>Quality: moderate-high (RCT showing no significant difference).</div></div>"+
         "<div class='keybox'><span class='kt'>Caution</span> Every inotrope raises myocardial oxygen demand. In active ischemia, driving the pump harder can deepen the injury you are trying to survive.</div>"
@@ -642,7 +663,7 @@ var MODULES = [
       { h:"7", t:"Delivery in the real world", html:
         "<p>Knowing the drug is half the job; getting it into the patient safely is the other half.</p>"+
         "<p><strong>Push-dose pressors</strong> bridge transient hypotension — the dip around intubation, or the gap while an infusion spins up. The common agents are push-dose epinephrine (roughly 10–20 mcg) and phenylephrine (roughly 50–200 mcg).</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-limited'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Limited</span></div>"+
         "<p>The evidence for push-dose pressors is largely observational and extrapolated from the operating room, and the literature documents a real rate of dosing errors and hemodynamic overshoot from bedside dilution under pressure. Use them deliberately, with the dilution double-checked, not reflexively.</p>"+
         "<div class='grade'>Quality: low (observational/extrapolated; known error risk).</div></div>"+
         "<p><strong>Central versus peripheral.</strong> The classic teaching required a central line for vasopressors because extravasation can cause tissue necrosis. That teaching is softening: a growing body of observational data supports short-term peripheral norepinephrine through a good proximal, large-bore IV with close monitoring. It is not high-quality randomized evidence, so follow your protocol — but know the practice is evolving. If extravasation does occur, the antidote is phentolamine (an alpha-blocker) infiltrated locally.</p>"+
@@ -717,7 +738,7 @@ var MODULES = [
         "<p>Dissection is the emergency that breaks the gradual-lowering rule and adds a rule of its own. The force that propagates the tear is not just the pressure but the <em>rate of rise</em> of pressure with each beat — the shearing force, dP/dt. That changes the order of operations.</p>"+
         "<div class='keybox'><span class='kt'>Sequence</span> Give the beta-blocker (esmolol or labetalol) FIRST to slow the heart and blunt the shearing force, THEN add a vasodilator for the pressure. Targets are aggressive and fast: systolic ~100–120 mmHg and heart rate under 60, within about 20 minutes.</div>"+
         "<p>Reverse that order and you cause harm. Give a pure vasodilator first and the reflex tachycardia it triggers <em>increases</em> dP/dt — like flooring the accelerator the instant you lift off the brake — driving the pulse harder into the tear and extending the dissection. Slow the current before you lower the water level.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-limited'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Limited</span></div>"+
         "<p>The rate-before-pressure sequence and the ~100–120 systolic target rest on physiologic rationale and consistent guideline consensus rather than a randomized trial, but the mechanism (shear force propagates dissection) is well established and the recommendation is uniform across guidelines.</p>"+
         "<div class='grade'>Quality: consensus and physiologic (uniform guideline recommendation).</div></div>"
       },
@@ -725,13 +746,13 @@ var MODULES = [
         "<p>Two acute brain emergencies pull blood pressure management in opposite directions from the usual instinct.</p>"+
         "<p><strong>Acute ischemic stroke</strong> runs on <em>permissive hypertension</em>. The tissue around the clot survives on collateral flow that depends on pressure, so you generally do not lower it unless it is extreme: above about 220/120, or above 185/110 if the patient is a candidate for thrombolysis. Lower it aggressively and you can extend the infarct.</p>"+
         "<p><strong>Intracerebral hemorrhage</strong> is the mirror image — here, high pressure can expand the bleed.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div>"+
         "<p>Two trials define the ICH target. INTERACT2 (2013) found lowering systolic to under 140 was safe and modestly improved functional outcomes. ATACH-2 (2016) pushed harder (110–139 vs 140–179) and found no additional benefit and more renal adverse events. The practical synthesis: aim for a systolic around 140, which is safe and reasonable; going substantially lower does not clearly help and may harm.</p>"+
         "<div class='grade'>Quality: high (two large RCTs converging on a ~140 target).</div></div>"
       },
       { h:"6", t:"Sympathetic crisis: mind the unopposed alpha", html:
         "<p>In catecholamine-driven crises — cocaine or amphetamine toxicity, pheochromocytoma — the classic teaching is to avoid <em>unopposed beta-blockade</em>. Block beta (which includes beta-2 vasodilation) while leaving alpha-mediated vasoconstriction unchecked, and you can theoretically worsen the hypertension and coronary vasoconstriction. Preferred agents are benzodiazepines (which treat the sympathetic surge at its source), and vasodilators such as nicardipine or phentolamine.</p>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-contested'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Contested</span></div>"+
         "<p>The unopposed-alpha concern is widely taught and mechanistically plausible, but the clinical evidence is largely observational and case-based, and some recent data question how often it matters in practice. Treat it as a reasonable default — lead with benzodiazepines — rather than an ironclad law.</p>"+
         "<div class='grade'>Quality: low (observational/theoretical); widely taught, genuinely debated.</div></div>"
       },
@@ -817,7 +838,7 @@ var MODULES = [
         "</ul>"
       },
       { h:"6", t:"What the evidence actually shows", html:
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div>"+
         "<p>The IABP-SHOCK II trial (2012) randomized patients with acute-MI cardiogenic shock to IABP or no IABP and found no reduction in 30-day mortality (about 40% in both arms), a result that held at long-term follow-up. On the strength of that trial, guidelines downgraded the routine use of IABP in infarct-related cardiogenic shock.</p>"+
         "<p>It has not vanished: the balloon pump still has a role in specific situations such as the mechanical complications of MI and as a bridge. But the era of reflexively placing one for cardiogenic shock is over.</p>"+
         "<div class='grade'>Quality: high (large RCT with long-term follow-up).</div></div>"
@@ -907,7 +928,7 @@ var MODULES = [
         "</ul>"
       },
       { h:"7", t:"What the evidence shows", html:
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div>"+
         "<p>DanGer Shock (2024) is a landmark: it was the first randomized trial of any mechanical support device to show a survival benefit in acute-MI cardiogenic shock. In carefully selected STEMI shock patients, the Impella CP reduced 180-day mortality (45.8% vs 58.5%; hazard ratio 0.74; number needed to treat about 8), and long-term follow-up sustained the benefit — leading to a guideline upgrade to class 2a.</p>"+
         "<p>Two honest caveats. First, the benefit came at a real cost: significantly more bleeding, vascular complications, renal-replacement therapy, and sepsis. Second, the trial was highly selective — it excluded comatose cardiac-arrest survivors, mechanical complications, and right-ventricular failure — so the result does not automatically generalize to every shock patient. Earlier, smaller trials (IMPRESS, ISAR-SHOCK) were neutral.</p>"+
         "<div class='grade'>Quality: high for selected STEMI shock (RCT plus durable follow-up); benefit is real but bounded by strict selection and a higher complication rate.</div></div>"
@@ -990,10 +1011,10 @@ var MODULES = [
         "</ul>"
       },
       { h:"6", t:"What the evidence shows", html:
-        "<div class='evidence'><span class='etag'>Evidence check — VA-ECMO in infarct shock</span>"+
+        "<div class='evidence ev-strong'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Strong</span></div><div class='ev-t'>VA-ECMO in infarct shock</div>"+
         "<p>ECLS-SHOCK (2023), together with ECMO-CS and a meta-analysis, found that routine early VA-ECMO in acute-MI cardiogenic shock did <em>not</em> reduce 30-day mortality (about 48% vs 49%) and increased complications such as bleeding and limb ischemia, with no benefit in any subgroup. This has pushed the field away from reflexive VA-ECMO toward selective, individualized use.</p>"+
         "<div class='grade'>Quality: high (RCT plus meta-analysis).</div></div>"+
-        "<div class='evidence'><span class='etag'>Evidence check — VV-ECMO in ARDS</span>"+
+        "<div class='evidence ev-moderate'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Moderate</span></div><div class='ev-t'>VV-ECMO in ARDS</div>"+
         "<p>For severe ARDS the picture is more favorable but less clean. EOLIA (2018) compared VV-ECMO to conventional management; the mortality difference (35% vs 46%) did not reach statistical significance, partly because many control patients crossed over to ECMO as a rescue, and a later Bayesian re-analysis suggested a probable benefit. The earlier CESAR trial supported referral to an ECMO center. The reasonable read: VV-ECMO is a rescue therapy for refractory severe ARDS in experienced centers, not a routine first step.</p>"+
         "<div class='grade'>Quality: moderate (one major RCT with high crossover; supportive but not definitive).</div></div>"
       },
@@ -1085,7 +1106,7 @@ var MODULES = [
         "<li><strong>If the device is NOT functioning and cannot be restarted, AND there are no signs of life / inadequate perfusion</strong> (for example unresponsive with ETCO2 under 20 or MAP at or below 50) — chest compressions ARE now recommended.</li>"+
         "<li><strong>Defibrillation is not contraindicated.</strong> Shock a shockable rhythm as usual.</li>"+
         "</ul>"+
-        "<div class='evidence'><span class='etag'>Evidence check</span>"+
+        "<div class='evidence ev-limited'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Limited</span></div>"+
         "<p>The old blanket prohibition on compressions — out of fear of dislodging the outflow cannula — has been replaced by a perfusion-based approach (AHA scientific statement, 2017, carried into current ACLS/AHA guidance). The dislodgement fear was theoretical: there is no reported case of compressions dislodging an LVAD, and case series suggest compressions can be performed when truly indicated. The supporting evidence is consensus and observational, not randomized — so the algorithm is a reasoned default, prioritizing device troubleshooting first and reserving compressions for genuine pump failure with no perfusion.</p>"+
         "<div class='grade'>Quality: low–moderate (expert consensus and case series; no RCT).</div></div>"
       },
