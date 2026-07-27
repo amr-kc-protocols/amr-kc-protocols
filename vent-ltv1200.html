@@ -421,6 +421,13 @@ canvas#pip-canvas{display:none}
 .lvl-badge-free{background:#efeaf9;color:var(--purple-dark);border:1px solid var(--purple-dark)}
 .lvl-card-free:hover,.lvl-card-free:active{border-color:var(--purple-dark);background:#f4f1fb}
 .lvl-card-free:hover .lvl-arrow{color:var(--purple-dark)}
+.lvl-card.lvl-complete{border-color:var(--green);background:#f4fcf7}
+.lvl-done{font-size:8px;font-weight:700;letter-spacing:0.06em;padding:2px 7px;border-radius:10px;
+  background:var(--green);color:#fff;white-space:nowrap;margin-left:auto}
+#lvl-reset{display:none;align-items:center;gap:6px;margin:2px auto 0;padding:7px 14px;
+  background:transparent;border:1.5px solid var(--border);border-radius:9px;
+  color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#lvl-reset:hover,#lvl-reset:active{border-color:var(--alarm);color:var(--alarm)}
 /* Test Lung live plausibility chips */
 .tl-badge{color:var(--purple-dark);background:#efeaf9;border:1px solid var(--purple-dark)}
 .tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
@@ -3998,7 +4005,44 @@ function openLevelSelect(){
   if(ov) ov.classList.remove('hidden');
   freeMode=false;
   gameLevel=0;
+  renderLevelBadges();
   renderMissionCard();
+}
+
+// ── PROGRESS PERSISTENCE ──────────────────────────────────────
+// Completed levels survive a reload via localStorage. Purely local to the
+// simulator/game; no academy coupling. Private-mode failures degrade silently.
+var PROGRESS_KEY='ltv1200_progress_v1';
+function loadProgress(){
+  try{ var j=localStorage.getItem(PROGRESS_KEY); return j?JSON.parse(j):{levels:{}}; }
+  catch(_){ return {levels:{}}; }
+}
+function saveLevelComplete(n){
+  if(!(n>=1&&n<=3)) return;   // only the three core levels earn a badge
+  try{ var p=loadProgress(); p.levels[n]=true; p.updated=Date.now();
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); }catch(_){}
+}
+function resetProgress(){
+  try{ localStorage.removeItem(PROGRESS_KEY); }catch(_){}
+  renderLevelBadges();
+  scanMessage('PROGRESS RESET',1400);
+}
+// Paint a completion check on the level-select cards + toggle a reset control.
+function renderLevelBadges(){
+  var p=loadProgress(), any=false;
+  document.querySelectorAll('.lvl-card[data-level]').forEach(function(card){
+    var n=card.getAttribute('data-level'), done=!!(p.levels&&p.levels[n]);
+    card.classList.toggle('lvl-complete',done);
+    var mark=card.querySelector('.lvl-done');
+    if(done){
+      if(!mark){ mark=document.createElement('span'); mark.className='lvl-done'; mark.setAttribute('aria-label','completed');
+        mark.textContent='✓ Completed';
+        var top=card.querySelector('.lvl-card-top'); if(top) top.appendChild(mark); }
+      any=true;
+    } else if(mark){ mark.remove(); }
+  });
+  var reset=document.getElementById('lvl-reset');
+  if(reset) reset.style.display=any?'inline-flex':'none';
 }
 
 // ── INIT GAME ─────────────────────────────────────────────────
@@ -4197,6 +4241,7 @@ function showVictoryOverlay(level){
   var ov=document.getElementById('victory-overlay');
   var card=document.getElementById('victory-card');
   if(!ov||!card) return;
+  saveLevelComplete(level);   // remember this level for the badge on the chooser
 
   var icon, glowCls, colorStr, levelTxt, subTxt, btnsHtml;
   if(level===1){
@@ -4276,7 +4321,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
   <div class="lvlsel-inner">
     <div class="lvlsel-title">Ventilator Simulator</div>
     <div class="lvlsel-sub">Choose a level, or free-play the Test Lung</div>
-    <div class="lvl-card" onclick="startLevel(1)" role="button" tabindex="0" aria-label="Level 1, Tutorial, Beginner. Learn the controls step by step.">
+    <div class="lvl-card" data-level="1" onclick="startLevel(1)" role="button" tabindex="0" aria-label="Level 1, Tutorial, Beginner. Learn the controls step by step.">
       <div class="lvl-card-top">
         <div class="lvl-name">Level 1 — Tutorial</div>
         <span class="lvl-badge lvl-badge-1">Beginner</span>
@@ -4284,7 +4329,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
       <div class="lvl-desc">Learn the controls step by step. Settings unlock progressively as you demonstrate each concept and answer a question.</div>
       <span class="lvl-arrow">›</span>
     </div>
-    <div class="lvl-card" onclick="startLevel(2)" role="button" tabindex="0" aria-label="Level 2, Clinical Scenarios, Intermediate. Six real patient situations.">
+    <div class="lvl-card" data-level="2" onclick="startLevel(2)" role="button" tabindex="0" aria-label="Level 2, Clinical Scenarios, Intermediate. Six real patient situations.">
       <div class="lvl-card-top">
         <div class="lvl-name">Level 2 — Clinical Scenarios</div>
         <span class="lvl-badge lvl-badge-2">Intermediate</span>
@@ -4292,7 +4337,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
       <div class="lvl-desc">6 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
       <span class="lvl-arrow">›</span>
     </div>
-    <div class="lvl-card" onclick="startLevel(3)" role="button" tabindex="0" aria-label="Level 3, Advanced Management, Advanced. Six complex cases.">
+    <div class="lvl-card" data-level="3" onclick="startLevel(3)" role="button" tabindex="0" aria-label="Level 3, Advanced Management, Advanced. Six complex cases.">
       <div class="lvl-card-top">
         <div class="lvl-name">Level 3 — Advanced Management</div>
         <span class="lvl-badge lvl-badge-3">Advanced</span>
@@ -4308,6 +4353,7 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
       <div class="lvl-desc">No missions. Dial any settings you want; the vent enforces only what it can physically deliver (I:E capped by rate, tidal volume capped by peak flow). Live plausibility readout.</div>
       <span class="lvl-arrow">›</span>
     </div>
+    <button id="lvl-reset" onclick="resetProgress()" style="display:none">Reset progress</button>
   </div>
 </div>
 
