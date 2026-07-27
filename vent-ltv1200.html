@@ -394,6 +394,13 @@ canvas#pip-canvas{display:none}
 .tl-chip{border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;background:#fff}
 .tl-chip-k{font-size:8px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;margin-bottom:2px}
 .tl-chip-v{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1.1}
+.tl-lungs{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.tl-lung{flex:1;min-width:64px;padding:7px 4px;border-radius:8px;border:1.5px solid var(--border);
+  background:#fff;color:var(--sub);font-size:10px;font-weight:700;cursor:pointer;-webkit-user-select:none;user-select:none}
+.tl-lung.on{border-color:var(--purple-dark);background:#efeaf9;color:var(--purple-dark)}
+.tl-lung:active{transform:scale(0.96)}
+.tl-mech{font-family:var(--mono);font-size:9.5px;color:var(--sub);margin-top:6px}
+.tl-mech b{color:var(--text)}
 
 /* Scenario mission card elements */
 .scen-back-btn{font-size:9px;color:var(--sub);background:none;border:none;cursor:pointer;
@@ -1574,9 +1581,9 @@ function monitorData(){
   var spont=(ventMode==='cpap'||ventMode==='nppv');
   var pip=livePeak(), map=liveMean();
   var f=spont?15:vals.rate.v, vte;
-  if(spont) vte=Math.round(400+vals.ps.v*SIM_COMPLIANCE);
+  if(spont) vte=Math.round(400+vals.ps.v*lung.compliance);
   else if(breathType==='volume') vte=vals.vt.v;
-  else vte=Math.round(vals.pc.v*SIM_COMPLIANCE);
+  else vte=Math.round(vals.pc.v*lung.compliance);   // pressure control: delivered Vt = PC × compliance
   return [
     {p:'PIP', v:(pip==null?'--':Math.round(pip)), u:'cmH₂O'},
     {p:'MAP', v:(map==null?'--':Math.round(map)), u:'cmH₂O'},
@@ -1740,8 +1747,28 @@ renderScan();
 // Live monitoring of peak pressure, low peak/disconnect, and minute volume,
 // with priority-ranked audible tones and a 60-second silence (like the LTV
 // "Silence / Reset" key). Delivered tidal/MV is estimated from the same lung
-// model the waveform uses (static compliance ≈ 20 mL/cmH₂O).
-var SIM_COMPLIANCE=20; // mL/cmH₂O — matches calcPressure/calcPplat
+// model the waveform uses.
+// ── LUNG MECHANICS (per-scenario) ─────────────────────────────
+// Each scenario/disease sets its own static compliance and airway resistance,
+// so ARDS (stiff), COPD/asthma (obstructed) and healthy lungs behave
+// mechanically differently — not just narratively. Defaults ≈ a generic
+// sick-ish adult so the tutorial numbers are unchanged.
+var LUNG_DEFAULT={compliance:20, resistance:12, autoPEEP:0, label:'Generic'};
+var lung={compliance:20, resistance:12, autoPEEP:0, label:'Generic'};
+function setLung(m){
+  lung={compliance:(m&&m.compliance)||LUNG_DEFAULT.compliance,
+        resistance:(m&&m.resistance)||LUNG_DEFAULT.resistance,
+        autoPEEP:(m&&m.autoPEEP)||0,
+        label:(m&&m.label)||LUNG_DEFAULT.label};
+}
+// Live plateau/PIP the current lung would produce at the current volume settings.
+function estPplat(){ return vals.peep.v + vals.vt.v/lung.compliance; }
+function resistivePressure(){   // cmH₂O added by airway resistance at peak flow
+  var pf=peakFlowLPM(); if(pf===null) return 0;
+  return (pf/60)*lung.resistance;   // L/s × cmH₂O/(L/s)
+}
+function estPIP(){ return estPplat() + resistivePressure(); }
+var SIM_COMPLIANCE=20; // legacy alias (kept for any external refs; live model uses lung.compliance)
 var alarms={
   hipres: {active:false, priority:'high', label:'HIGH PRESSURE'},
   lowpres:{active:false, priority:'high', label:'LOW PRESSURE / DISCONNECT'},
@@ -1756,11 +1783,11 @@ function estMinuteVolume(){
   if(ventMode==='cpap'||ventMode==='nppv'){
     // Spontaneous patient generates their own tidal (~400 mL) augmented by support
     var spontRate=15;
-    var tidal=400 + vals.ps.v*SIM_COMPLIANCE;
+    var tidal=400 + vals.ps.v*lung.compliance;
     return (tidal*spontRate)/1000;
   }
   if(breathType==='volume') return (vals.vt.v*vals.rate.v)/1000;
-  return (vals.pc.v*SIM_COMPLIANCE*vals.rate.v)/1000;      // pressure control estimate
+  return (vals.pc.v*lung.compliance*vals.rate.v)/1000;      // pressure control estimate
 }
 
 function alarmsSuppressed(){
@@ -1907,18 +1934,21 @@ var inspHoldPplat=0;
 var RAW_CMHZO_PER_LPS=12; // simulated airway resistance cmH₂O/(L/s)
 
 function calcPplat(){
-  // Only meaningful in Volume mandatory modes
+  // Only meaningful in Volume mandatory modes.
+  // Correct mechanics: Pplat = PEEP + Vt/Compliance (elastic, zero-flow);
+  // PIP = Pplat + resistive pressure (peak flow × airway resistance). So a
+  // high PIP with a NORMAL Pplat is a resistance problem, and a high Pplat is
+  // a compliance problem — which the Insp-Hold maneuver reveals.
   if(breathType!=='volume'||ventMode==='cpap'||ventMode==='nppv') return null;
-  var compliance=20; // mL/cmH₂O (matches calcPressure)
-  var peep=vals.peep.v;
-  var pip=peep+vals.vt.v/compliance;
-  var peakFlow_LPS=(vals.vt.v/1000)/vals.it.v; // L/s constant flow
-  var resPressure=peakFlow_LPS*RAW_CMHZO_PER_LPS;
-  var pplat=Math.max(peep, pip-resPressure);
-  var drive=pplat-peep;
+  var peep=vals.peep.v + (lung.autoPEEP||0);          // intrinsic PEEP adds to baseline
+  var pplat=peep + vals.vt.v/lung.compliance;
+  var resPressure=resistivePressure();                 // peak flow × resistance
+  var pip=pplat + resPressure;
+  var drive=pplat-vals.peep.v;                          // driving pressure above set PEEP
   var comp=drive>0?Math.round(vals.vt.v/drive):0;
   return {pip:Math.round(pip*10)/10, pplat:Math.round(pplat*10)/10,
-          drive:Math.round(drive*10)/10, comp:comp, raw:Math.round(resPressure*10)/10};
+          drive:Math.round(drive*10)/10, comp:comp, raw:Math.round(resPressure*10)/10,
+          autoPEEP:(lung.autoPEEP||0)};
 }
 
 function triggerInspHold(){
@@ -2015,10 +2045,10 @@ function calcPressure(tMs){
     return Math.min(hi,Math.max(0,p));
   }
 
-  // Volume control mode — IT now directly controlled (per LTV manual)
-  // Compliance ~20 mL/cmH₂O = typical ventilated/sick patient (normal: 60-80)
-  var compliance=20;
-  var pip_v=peep+vals.vt.v/compliance;
+  // Volume control mode — IT directly controlled (per LTV manual).
+  // Peak = PEEP(+autoPEEP) + elastic (Vt/compliance) + resistive (peak flow × Raw).
+  var pplat_v=peep+(lung.autoPEEP||0)+vals.vt.v/lung.compliance;
+  var pip_v=pplat_v+resistivePressure();
   var insFrac_v=Math.min((vals.it.v*1000)/cycleMs,0.85);
   var p;
   if(ph<insFrac_v){
@@ -2399,7 +2429,7 @@ function openDrawer(key){
       html+='</div>';
       html+='<div style="background:#0a0d15;border:1px solid #2a2a4a;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#888;line-height:1.5">';
       html+='<strong style="color:#aaa">Resistance component (PIP−Pplat):</strong> '+d.raw+' cmH₂O ';
-      html+='| Simulated R<sub>aw</sub> = '+RAW_CMHZO_PER_LPS+' cmH₂O/(L/s) | Peak flow = '+(Math.round(vals.vt.v/vals.it.v)/1000).toFixed(2)+' L/s</div>';
+      html+='| R<sub>aw</sub> = '+lung.resistance+' cmH₂O/(L/s)'+(d.autoPEEP?(' | auto-PEEP '+d.autoPEEP+' cmH₂O'):'')+' | Peak flow = '+((peakFlowLPM()||0)/60).toFixed(2)+' L/s</div>';
       var driveMsg=d.drive>15?'⚠ Driving pressure &gt;15 — ARDS risk elevated. Consider reducing Vt toward 6 mL/kg PBW.':d.drive>12?'Driving pressure borderline — monitor closely.':'Driving pressure within target range.';
       html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>';
       html+=driveMsg+'<br><br>High PIP + normal Pplat → airway resistance problem (secretions, bronchospasm, biting tube). High PIP + high Pplat → compliance problem (ARDS, pneumothorax, auto-PEEP). Pplat &gt;30 cmH₂O = lung injury risk — reduce Vt or rate.</div>';
@@ -2566,8 +2596,8 @@ var STAGE_DEFS=[
     },
     goal:{
       text:'Silence the nuisance alarm the right way — set the <strong>High Pressure limit about 5–10 above the PIP</strong> (roughly 35–45 for this patient).',
-      check:function(){ var pip=vals.peep.v+vals.vt.v/20; return vals.hipres.v>=pip+3&&vals.hipres.v<=pip+18; },
-      readout:function(){ var pip=Math.round(vals.peep.v+vals.vt.v/20); return 'Hi-Pres '+vals.hipres.v+'   ·   PIP ~'+pip; }
+      check:function(){ var pip=estPIP(); return vals.hipres.v>=pip+3&&vals.hipres.v<=pip+18; },
+      readout:function(){ var pip=Math.round(estPIP()); return 'Hi-Pres '+vals.hipres.v+'   ·   PIP ~'+pip; }
     },
     confirm:'✓ Hi-Pres set safely above PIP — it\'ll catch a real obstruction on the road without crying wolf over every bump. Reset this after any big change to volume or PEEP. <em>SIMV and Pressure Support unlocked.</em>'
   },
@@ -2642,6 +2672,7 @@ var SCENARIO_LEVELS={
       intro:'Interfacility transfer — you\'re moving a fresh post-op patient from a community hospital to the tertiary ICU. During your pre-transport assessment the sending RT mentions the CO₂ has crept up on the last two gases. You get your LTV set before you load.',
       scenario:'45-year-old post-op, sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
       vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'HR',v:'102'}],
+      lung:{compliance:40,resistance:10,label:'Post-op'},
       setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'PaCO₂ 62, pH 7.28, oxygenation adequate. What is the disturbance, and what has to change?',
@@ -2667,6 +2698,7 @@ var SCENARIO_LEVELS={
       intro:'The sending ED hands you an ARDS patient for transfer to the tertiary ICU. Their sat just won\'t come up, even on max FiO₂. Before you commit to the road, you need it more stable than this.',
       scenario:'62-year-old with ARDS. SpO₂ is stuck at 85% even on FiO₂ 60%. CXR shows dense bilateral infiltrates. PEEP is currently only 3 cmH₂O. EtCO₂ and pH are acceptable.',
       vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'PEEP',v:'3 cmH₂O'}],
+      lung:{compliance:28,resistance:10,label:'ARDS'},
       setup:{mode:'ac',bt:'volume',rate:16,vt:400,it:1.0,peep:3,pc:15,ps:10,fio2:60,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Refractory hypoxemia on a high FiO₂ with diffuse infiltrates and PEEP of 3. What will help most?',
@@ -2692,6 +2724,7 @@ var SCENARIO_LEVELS={
       intro:'You\'re packaging a freshly intubated patient for transfer. The moment you switch them onto your LTV, the High Pressure alarm shrieks on every breath. The sending nurse shrugs: "It did that on our vent too — but he looks completely fine."',
       scenario:'Freshly intubated adult. The High Pressure alarm is sounding on every single breath — at the exact same pressure each time. Breath sounds are equal bilaterally, the tube is patent, there are no secretions, and the patient looks comfortable. The PIP is a normal 30 cmH₂O.',
       vitals:[{k:'SpO₂',v:'98%'},{k:'PIP',v:'30 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'88'}],
+      lung:{compliance:27,resistance:10,label:'Intubated'},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:25,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'The alarm fires at the SAME pressure every breath, with a normal exam and normal PIP. What is going on?',
@@ -2717,6 +2750,7 @@ var SCENARIO_LEVELS={
       intro:'You\'re fifteen minutes into a transfer with an intubated COPD patient when the CO₂ starts climbing on your inline monitor and he begins bucking your vent. You\'re in the back of a moving truck — this is yours to fix.',
       scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. The flow–time curve shows expiratory flow never returns to zero before the next breath begins, EtCO₂ is climbing, and the patient is beginning to fight the vent.',
       vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'pH',v:'7.30'},{k:'HR',v:'112'}],
+      lung:{compliance:50,resistance:22,autoPEEP:6,label:'COPD'},
       setup:{mode:'ac',bt:'volume',rate:18,vt:500,it:1.0,peep:0,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Expiratory flow never returns to baseline before the next breath, and CO₂ is rising. What is the problem?',
@@ -2743,6 +2777,7 @@ var SCENARIO_LEVELS={
       intro:'Loaded and rolling. Your young post-op transfer wakes up, gets agitated, and starts fighting the transport vent. The flow alarm keeps tripping in the back of the truck and the family member riding along is getting nervous.',
       scenario:'28-year-old post-op, awake and air-hungry on AC-VC. Pulling hard at the start of each breath, the flow alarm keeps tripping, and the total rate has climbed to 28. Oxygenation and CO₂ are fine. Inspiratory time is set long at 1.2 s. Sedation is being addressed — but there is also a mechanical fix.',
       vitals:[{k:'SpO₂',v:'97%'},{k:'RR total',v:'28'},{k:'EtCO₂',v:'42 mmHg'},{k:'HR',v:'136'}],
+      lung:{compliance:50,resistance:8,label:'Healthy'},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.2,peep:5,pc:15,ps:8,fio2:40,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'A vigorous patient is out-pacing the vent\'s flow and stacking effort against a long inspiration. Besides sedation, what setting change helps most?',
@@ -2768,6 +2803,7 @@ var SCENARIO_LEVELS={
       intro:'You accept a septic-shock patient for an emergent transfer to a higher level of care. Just intubated, lactate through the roof, and the sending gas shows a frighteningly low pH. Vasopressors are running — the ventilator is your piece of the package.',
       scenario:'56-year-old in septic shock, lactate 6.2. ABG: pH 7.18 with PaCO₂ already low at 28. They were breathing 30+ before intubation. On the current settings MV is only 7.2 L/min — and the low PaCO₂ says they were doing much more work than that themselves.',
       vitals:[{k:'HR',v:'142'},{k:'SpO₂',v:'95%'},{k:'PaCO₂',v:'28 mmHg'},{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'}],
+      lung:{compliance:40,resistance:10,label:'Septic'},
       setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:8,pc:15,ps:10,fio2:60,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'pH 7.18 but PaCO₂ is already LOW at 28. What is the vent\'s job here?',
@@ -2796,6 +2832,7 @@ var SCENARIO_LEVELS={
       intro:'You arrive to transfer an ARDS patient to the tertiary center. "The vent\'s been running since the ED — nobody touched the volume," the nurse says. As you set up your LTV you clock the plateau pressure and wince. This lung is being hurt with every breath.',
       scenario:'32-year-old with ARDS, PBW 70 kg. The vent is delivering Vt 700 mL — that\'s 10 mL/kg — and the plateau pressure is 34 cmH₂O. Oxygenation is borderline. The lungs are small and stiff.',
       vitals:[{k:'HR',v:'110'},{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'Vt now',v:'10 mL/kg'},{k:'FiO₂',v:'60%'}],
+      lung:{compliance:24,resistance:10,label:'ARDS'},
       setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Vt 10 mL/kg PBW and Pplat 34 in ARDS. What is the priority — and what does it cost you?',
@@ -2827,6 +2864,7 @@ var SCENARIO_LEVELS={
       intro:'A long-distance transfer to a rehab-capable facility. Your patient is awake, following commands, and clearly doing more of the breathing than the vent is. Medical control has cleared you to begin easing the support down for the ride.',
       scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support and the RSBI is 62. They\'re fully controlled on AC right now.',
       vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
+      lung:{compliance:45,resistance:10,label:'Recovering'},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Awake, strong effort, RSBI 62, good gas exchange. What\'s the move?',
@@ -2852,6 +2890,7 @@ var SCENARIO_LEVELS={
       intro:'Mid-transport with an intubated status asthmaticus. The peak pressure is bouncing wildly with every breath and you\'re watching for barotrauma miles from the receiving hospital. You take control of the airway pressures.',
       scenario:'Intubated status asthmaticus. On volume control the peak pressure lurches breath to breath — 32 one breath, 54 the next — as the dynamic obstruction changes. You\'re worried about barotrauma from those spikes. SpO₂ and CO₂ are holding for now.',
       vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'104'}],
+      lung:{compliance:45,resistance:30,autoPEEP:8,label:'Status asthmaticus'},
       setup:{mode:'ac',bt:'volume',rate:14,vt:550,it:0.8,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Peak pressure is swinging dangerously high on volume control. How do you put a ceiling on airway pressure — and what becomes variable instead?',
@@ -2877,6 +2916,7 @@ var SCENARIO_LEVELS={
       intro:'You\'re transferring a severe ARDS patient to an ECMO center. Partway there the saturations start sliding despite everything the sending team set. The monitor keeps alarming in the back of the truck — this is the oxygenation battle, and you\'re losing it.',
       scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82% — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
       vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
+      lung:{compliance:22,resistance:10,label:'Severe ARDS'},
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Severe, refractory hypoxemia (P/F ≈ 59) already on lung-protective volumes. What\'s the next ventilator move?',
@@ -2902,6 +2942,7 @@ var SCENARIO_LEVELS={
       intro:'A "routine" transfer goes sideways: your heart-failure patient decompensates into flash pulmonary edema en route, soaked in his own lung fluid and gasping on the non-rebreather. He\'s awake and terrified. You have one shot with your transport vent to keep him off the tube before the receiving ED.',
       scenario:'67-year-old, acute decompensated heart failure. Flash pulmonary edema: SpO₂ 78% on a 100% non-rebreather, RR 34, bilateral crackles to the apices, JVD. Awake and protecting the airway — not yet intubated. The team is pushing nitroglycerin and a diuretic.',
       vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'78%'},{k:'RR',v:'34'},{k:'JVD',v:'Present'},{k:'Crackles',v:'Bilateral'}],
+      lung:{compliance:30,resistance:12,label:'Flash pulmonary edema'},
       setup:{mode:'cpap',bt:'volume',rate:12,vt:400,it:1.0,peep:8,pc:15,ps:5,fio2:40,sens:5,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Awake CHF patient, flash edema, failing on a non-rebreather but still protecting the airway. Best initial respiratory support?',
@@ -2927,6 +2968,7 @@ var SCENARIO_LEVELS={
       intro:'You\'re transporting a head-injured trauma patient to the neuro center. Halfway there the left pupil blows — herniation, in the back of your truck, still twelve minutes out. You need a bridge from the ventilator right now to buy this brain time.',
       scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. The neurosurgeon is 6 minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
       vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'99%'},{k:'PaCO₂',v:'42 mmHg'},{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'}],
+      lung:{compliance:50,resistance:8,label:'TBI (lungs OK)'},
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Acute herniation, surgeon minutes away. What emergency ventilator maneuver buys time — and what is the trap?',
@@ -2960,6 +3002,7 @@ var ACADEMY_SCENARIOS={
     intro:'Module 4 practice. You\'re accepting an 80 kg (≈75 kg IBW) man, just intubated for airway protection before a transfer. His lungs are healthy — no ARDS, no obstruction. The sending RT handed him over on whatever was dialed up in a hurry. Build safe initial settings from here.',
     scenario:'75 kg IBW, healthy lungs, fully sedated for transport. The vent came to you at Vt 700 mL (that\'s ~9 mL/kg), PEEP 0, and 100% oxygen. Set sane, lung-protective starting settings for the road.',
     vitals:[{k:'HR',v:'92'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'38 mmHg'},{k:'BP',v:'128/74'}],
+    lung:{compliance:50,resistance:8,label:'Healthy'},
     setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:0,pc:15,ps:10,fio2:100,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
       q:'Healthy lungs, 75 kg IBW, just intubated. What defines a safe INITIAL tidal volume and baseline?',
@@ -3341,7 +3384,13 @@ function renderTestLung(bar){
      '<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
     +'<div class="scen-header"><div class="mission-stage">Free Play · Test Lung</div>'
     +'<span class="scen-badge tl-badge">SANDBOX</span></div>'
-    +'<div class="scen-text">Dial any settings you like — the vent enforces only what it can physically deliver. Inspiratory time is capped by the rate (so exhalation is never squeezed out), and tidal volume is capped by the peak flow the blower can produce.</div>'
+    +'<div class="scen-text">Dial any settings you like — the vent enforces only what it can physically deliver. Inspiratory time is capped by the rate, and tidal volume by the peak flow the blower can produce. Pick a test lung: each has its own compliance and airway resistance, so the same settings behave differently.</div>'
+    +'<div class="tl-lungs">'
+      +Object.keys(FREE_LUNGS).map(function(k){
+        return '<button class="tl-lung'+(k===freeLungKey?' on':'')+'" onclick="setFreeLung(\''+k+'\')">'+FREE_LUNGS[k].label+'</button>';
+      }).join('')
+    +'</div>'
+    +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP <b>'+lung.autoPEEP+'</b>':'')+'</div>'
     +'<div class="tl-grid">'
       +_tlChip('I:E', ieTxt, ieStat)
       +_tlChip('Peak Flow', pfTxt, pfStat)
@@ -3626,6 +3675,7 @@ function openConfirm(){
 // Apply a tutorial stage's starting state (deliberately imperfect so the learner must act).
 function applyStageEnter(s){
   if(!s||!s.enter) return;
+  setLung(LUNG_DEFAULT);   // tutorial uses a generic lung
   _modeCandidate=null; _btCandidate=null;   // clear any pending previews
   Object.keys(s.enter).forEach(function(k){
     if(k==='mode') ventMode=s.enter[k];
@@ -3737,6 +3787,7 @@ adj=function(key,delta){
 // ── SCENARIO LOADING ──────────────────────────────────────────
 function loadScenario(s){
   var su=s.setup;
+  setLung(s.lung);          // per-scenario lung mechanics (defaults to generic if unset)
   ventMode=su.mode;
   breathType=su.bt;
   _modeCandidate=null; _btCandidate=null; deselect();   // clear any pending previews from the prior case
@@ -3751,8 +3802,24 @@ function loadScenario(s){
 }
 
 // ── FREE PLAY · TEST LUNG ─────────────────────────────────────
+// Selectable test-lung profiles — each changes the mechanics the waveform,
+// PIP/Pplat, and Vte respond to, so the same settings behave differently.
+var FREE_LUNGS={
+  normal:{compliance:50,resistance:8, autoPEEP:0,label:'Normal'},
+  ards:  {compliance:25,resistance:10,autoPEEP:0,label:'ARDS (stiff)'},
+  copd:  {compliance:55,resistance:24,autoPEEP:6,label:'COPD'},
+  asthma:{compliance:45,resistance:32,autoPEEP:8,label:'Asthma'}
+};
+var freeLungKey='normal';
+function setFreeLung(k){
+  freeLungKey=k; setLung(FREE_LUNGS[k]);
+  simTime=0; pressureHistory=[];
+  scanMessage('LUNG: '+FREE_LUNGS[k].label.toUpperCase(),1400);
+  updateUI();
+}
 function startFree(){
   freeMode=true; gameLevel=4; academyMode=false; scenarioDiagnosed=false;
+  freeLungKey='normal'; setLung(FREE_LUNGS.normal);
   var ov=document.getElementById('lvlsel-overlay'); if(ov) ov.classList.add('hidden');
   if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
   ventMode='ac'; breathType='volume';
