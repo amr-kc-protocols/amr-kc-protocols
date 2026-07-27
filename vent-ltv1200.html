@@ -494,6 +494,17 @@ canvas#pip-canvas{display:none}
   background:var(--panel);border:1.5px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px}
 .scen-readout.hit{color:var(--green);border-color:var(--green);background:#eafbf1}
 
+/* Assessment-mode debrief (Level 3) */
+.assess-verdict{font-size:15px;font-weight:800;letter-spacing:0.08em;text-align:center;
+  padding:8px;border-radius:8px;margin-bottom:10px}
+.assess-verdict.pass{color:var(--green);background:#eafbf1;border:1.5px solid var(--green)}
+.assess-verdict.fail{color:var(--alarm);background:#fdecec;border:1.5px solid var(--alarm)}
+.assess-current{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);
+  background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:7px 10px;
+  margin-bottom:8px;text-align:center}
+.assess-hint{font-size:11px;color:var(--text);background:#fff7ed;border:1px solid var(--orange);
+  border-radius:7px;padding:8px 10px;margin-bottom:8px;line-height:1.55}
+
 /* Level-complete card */
 .lc-wrap{text-align:center;padding:10px 0 4px}
 .lc-icon{font-size:26px;margin-bottom:6px}
@@ -3463,11 +3474,34 @@ function renderMonitor(vitals,sc){
 }
 
 // ── SHARED: diagnose → goal → confirm body (used by L1, L2, L3) ──
+// Level 3 runs as a genuine assessment: no live "you hit it" feedback, no
+// exact target ranges up front — the learner commits, then gets graded.
+function assessMode(){ return gameLevel===3 && !academyMode; }
 function renderSolveBody(task){
   if(!scenarioDiagnosed){
     var lbl=gameLevel===1?'▶ STEP 1 · MAKE THE CALL':'▶ STEP 1 · DIAGNOSE THE PROBLEM';
     return '<button class="mission-cta visible ready" onclick="openDiagnose()">'+lbl+'</button>';
   }
+
+  // ── ASSESSMENT MODE (Level 3) ──────────────────────────────
+  // Show the clinical plan the learner chose — not the tuned pass-band — and
+  // let them submit for grading. No live green readout, no target hand-holding.
+  if(assessMode()){
+    var plan=(task.diagnose && task.diagnose.choices) ? task.diagnose.choices[task.diagnose.correct] : task.goal.text;
+    var howA=(!hasOperatedVent)
+      ? '<div class="solve-how">▸ <b>How to change a setting:</b> tap a control below to select it, then turn the <b>Set Value</b> dial.</div>'
+      : '';
+    // After 2 misses, reveal the target ranges as a teaching aid.
+    var key=(_assessAttempts>=2)
+      ? '<div class="scen-goal"><div class="scen-goal-lbl">🎯 Target</div>'+task.goal.text+'</div>'
+      : '';
+    return '<div class="scen-dx"><span class="scen-dx-ico">✓</span> Diagnosed — now execute your plan on the vent</div>'
+      +'<div class="scen-goal"><div class="scen-goal-lbl">📋 Your plan</div>'+plan+'</div>'
+      +key+howA
+      +'<button class="mission-cta visible ready" onclick="submitAssessment()">SUBMIT FOR ASSESSMENT</button>';
+  }
+
+  // ── GUIDED MODE (Levels 1 & 2) ─────────────────────────────
   var met=task.goal.check();
   var dxTxt=gameLevel===1?'Decided — now set the control':'Diagnosed — now fix it on the vent';
   // Operating coach: shown until the learner has worked the dial once, so anyone
@@ -3786,6 +3820,38 @@ function submitDiagnose(idx){
   }
 }
 
+// ── ASSESSMENT FLOW (Level 3): submit → grade → debrief ───────
+var _assessAttempts=0;
+function submitAssessment(){
+  var sc=curTask(); if(!sc||!sc.goal) return;
+  if(!scenarioDiagnosed) return;
+  var pass=sc.goal.check();
+  prepQuizSurface();
+  var html;
+  if(pass){
+    html='<div class="quiz-badge">'+sc.name+' — Assessment</div>'
+      +'<div class="assess-verdict pass">✓ PASS</div>'
+      +'<div class="quiz-unlock" style="display:block">'+(sc.confirm||'✓ Correctly managed.')+'</div>';
+  } else {
+    _assessAttempts++;
+    // Directional coaching without simply handing over the numbers (until 2+ misses).
+    var hint=(_assessAttempts>=2)
+      ? '<div class="assess-hint"><b>Target:</b> '+sc.goal.text+'</div>'
+      : '<div class="assess-hint">One or more values are outside the acceptable range. Re-examine the physiology of your diagnosis and adjust, then resubmit.</div>';
+    html='<div class="quiz-badge">'+sc.name+' — Assessment</div>'
+      +'<div class="assess-verdict fail">✗ NOT YET</div>'
+      +'<div class="assess-current">Your current settings: '+sc.goal.readout()+'</div>'
+      +hint
+      +(sc.diagnose&&sc.diagnose.exp?'<div class="quiz-exp" style="display:block">'+sc.diagnose.exp+'</div>':'');
+  }
+  document.getElementById('quiz-inner').innerHTML=html;
+  var cb=document.getElementById('quiz-continue');
+  cb.style.display='block';
+  if(pass){ cb.textContent='Continue →'; cb.onclick=function(){ advanceStage(); }; sfxCorrect(); }
+  else    { cb.textContent='Adjust & retry →'; cb.onclick=function(){ closeQuiz(); renderMissionCard(); }; sfxWrong(); }
+  document.getElementById('quiz-overlay').classList.add('open');
+}
+
 // ── PROBLEM-SOLVING FLOW: CONFIRM (goal reached) ──────────────
 function openConfirm(){
   var sc=curTask(); if(!sc) return;
@@ -3926,6 +3992,7 @@ function loadScenario(s){
   enforceITLimit();
   simTime=0; pressureHistory=[];
   scenarioDiagnosed=false;   // reset problem-solving progress for the new case
+  _assessAttempts=0;         // reset assessment attempts for the new case
   keys.forEach(function(k){ updateKnob(k); });
   updateUI();
   showIntro(s);              // prime the clinician before they reach the vent
