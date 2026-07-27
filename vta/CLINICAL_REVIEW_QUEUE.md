@@ -77,14 +77,15 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 - ☐ **M7** — qualify the "ten-second," "always bag," and "rules out equipment" absolutes; note manual ventilation can also harm without controlled rate, volume, and PEEP.
 - ☐ **M2** — EtCO₂/SpO₂ don't establish PaCO₂/pH/mixed acid-base (softened in round 1 §A; MD to confirm).
 
-## G. Platform / assessment (software — I own; scoped, not yet built)
+## G. Platform / assessment (software — I own)
 
-- ☐ **Scenario gives completion credit for a wrong path.** Gate advancement so only the correct decision progresses (competency enforcement).
-- ☐ **Matching is keyboard/screen-reader-inoperable.** Make destination bins semantic, focusable, ARIA-labeled.
-- ☐ **Locked module cards are a focus trap.** Add `aria-disabled` + accessible "locked" labeling.
-- ☐ **Credential integrity.** Rename to **certificate of completion** (not "certification"); add a prominent disclaimer that local protocol, medical direction, and manufacturer instructions control and that this is not proof of competency. A truly auditable credential requires a server-side backend (separate project).
-- ☐ **Exam integrity.** Options: randomize/expand the item pool, limit attempts, optionally withhold rationale until submission. (Design choices — confirm.)
+- ☑ **Scenario completion credit for a wrong path — FIXED.** Advancement is now gated: a wrong or partial decision offers only **Try Again** (no advance button), so finishing a case means every step was ultimately answered correctly. A new `firstOutcomes` record keeps the **first** attempt at each step permanently, so retrying no longer erases a miss — the result screen reports **"First-attempt accuracy: N/total."** (Previously, retry popped the record and accuracy always read perfect.)
+- ☑ **Matching keyboard/screen-reader access — FIXED.** Each category now has a real focusable **"Place ⟨item⟩ here"** button with a descriptive `aria-label`; pool items expose `aria-pressed`; placed items announce their bin and (after submit) correctness; a `role="status"` live region announces selection and progress. Bins stay non-role containers so the buttons inside remain valid. On-screen instructions now state the keyboard path. Verified end-to-end by keyboard only.
+- ☑ **Locked module cards — FIXED.** Now `aria-disabled="true"` with a descriptive label ("Locked — finish Module N (Title) first").
+- ☑ **Credential wording + disclaimer — FIXED.** "Final Certification Exam" → **Final Course Exam**; "Certified" → **Course Complete**. A prominent **scope-of-use notice** now sits on the Course Hub above the modules, and the certificate carries a printed disclaimer: certificate of **completion** only, not a certification/licence/competency verification, confers no scope of practice, progress is browser-local and not proctored or auditable, and local protocol + medical direction + manufacturer instructions take precedence.
+- ☐ **Exam integrity.** Still open — options: randomize/expand the item pool beyond the fixed 25, limit attempts, withhold rationale until submission. **Design choices — confirm which you want.**
 - ☐ **Versioned bibliography** with per-claim source links.
+- ☐ **Auditable credentialing** (server-side exam, verified identity, tamper-proof record) — genuinely requires a backend; out of scope for the static app.
 
 ## H. Bigger builds (need your input)
 

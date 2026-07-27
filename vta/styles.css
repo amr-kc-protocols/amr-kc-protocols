@@ -1270,6 +1270,75 @@ select.cert-input { cursor: pointer; }
 .callout-list li:first-child { margin-top: 0; }
 .callout-list li:last-child { margin-bottom: 0; }
 
+/* ---------- Scope-of-use notice (course hub) ---------- */
+.scope-notice {
+  display: block;
+  background: var(--gold-soft);
+  border: 1px solid #e6c89a;
+  border-radius: 12px;
+  padding: 0.85rem 1.1rem;
+  margin: 0 0 1rem;
+}
+.scope-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.scope-body {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* Certificate scope disclaimer — prints with the certificate. */
+.cert-disclaimer {
+  margin: 1.1rem auto 0;
+  max-width: 46em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.62rem;
+  line-height: 1.45;
+  color: #6b6255;
+  text-align: center;
+}
+
+/* ---------- Match: keyboard-operable drop target ---------- */
+.dnd-status {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.dnd-drop {
+  display: block;
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.45rem 0.7rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--white);
+  border: 1.5px dashed var(--soft);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.dnd-drop:enabled:hover { border-color: var(--terra); color: var(--terra); }
+.dnd-drop:disabled { opacity: 0.5; cursor: default; }
+
+/* Gate note when a scenario decision must be retried */
+.gate-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* Locked cards read as unavailable to assistive tech and the eye alike */
+.hub-card[aria-disabled="true"] { cursor: not-allowed; }
+
 /* ---------- Accessibility ---------- */
 /* Visible keyboard focus ring for tab/switch navigation. Only shows on keyboard
    use, so it never interferes with mouse/touch. Blue reads on both the light

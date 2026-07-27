@@ -1776,7 +1776,7 @@ const MODULES = [
 // ---------- 1b. FINAL EXAM (capstone) ----------
 // Cumulative exam, unlocked only after every module is complete.
 const FINAL_EXAM = {
-  title: "Final Certification Exam",
+  title: "Final Course Exam",
   intro: "Twenty-five cumulative questions drawn from all nine modules. You need 20 correct (80%) to pass and earn your certificate. Rationale appears after each answer.",
   passScore: 20,
   questions: [
@@ -2181,6 +2181,18 @@ function renderCourseHub() {
     el("p", { class: "hero-blurb" }, "Self-paced modules. Lessons, knowledge checks, drag-and-drop exercises, and clinical scenarios for AEMT and Paramedic providers. Progress saves to your browser as you go.")
   );
 
+  // Scope-of-use notice. Must be visible before a learner starts anything.
+  const disclaimer = el("aside", { class: "scope-notice", role: "note", "aria-label": "Scope of use" },
+    el("p", { class: "scope-title" }, "Educational supplement — read first"),
+    el("p", { class: "scope-body" },
+      "This course is a supervised educational supplement. It is ",
+      el("strong", null, "not"),
+      " a certification, and completing it does not establish clinical competency or expand your scope of practice. ",
+      el("strong", null, "Your local protocols, your medical director, and the ventilator manufacturer's operating instructions always take precedence"),
+      " over anything taught here. Drug and device content must be confirmed against your service's current protocols before use on a patient."
+    )
+  );
+
   const grid = el("div", { class: "hub-grid" });
   MODULES.forEach(m => {
     const pct = Store.modulePercent(m.id);
@@ -2203,9 +2215,16 @@ function renderCourseHub() {
       statusLabel = "Resume";
     }
 
+    const prevDef = MODULES.find(mm => mm.id === m.id - 1);
     grid.appendChild(
       el("button", {
         class: cardCls, type: "button",
+        // Locked cards stay focusable (so the reason is discoverable) but are
+        // announced as unavailable rather than looking like a live control.
+        "aria-disabled": unlocked ? null : "true",
+        "aria-label": unlocked
+          ? `Module ${m.id}: ${m.title}. ${pct}% complete. ${statusLabel}`
+          : `Module ${m.id}: ${m.title}. Locked — finish Module ${m.id - 1}${prevDef ? " (" + prevDef.title + ")" : ""} first.`,
         onclick: () => Nav.enterModule(m.id)
       },
         el("span", { class: "hub-card-kicker" }, `Module ${m.id} · ~${m.estMin} min`),
@@ -2225,7 +2244,7 @@ function renderCourseHub() {
     );
   });
 
-  mount(el("div", null, hero, grid, buildSimulatorCard(), buildCapstoneCard()));
+  mount(el("div", null, hero, disclaimer, grid, buildSimulatorCard(), buildCapstoneCard()));
 }
 
 // Every hands-on simulator mission, in course order — the Practice Lab index.
@@ -2271,15 +2290,15 @@ function buildCapstoneCard() {
 
   if (certified) {
     cls += " certified";
-    kicker = "★ Certified";
-    title = "Ventilator Academy — Certified";
+    kicker = "★ Course Complete";
+    title = "Ventilator Academy — Completed";
     desc = "You've earned it. View, print, or save your certificate of completion.";
     action = "View Certificate →";
     onclick = () => Nav.go("certificate");
   } else if (!unlocked) {
     cls += " locked";
     kicker = "🔒 Capstone — Locked";
-    title = "Final Certification Exam";
+    title = "Final Course Exam";
     desc = `Complete all nine modules to unlock the final exam. ${doneCount} of ${MODULES.length} modules done.`;
     action = `${doneCount}/${MODULES.length} modules`;
     onclick = null;
@@ -2292,7 +2311,7 @@ function buildCapstoneCard() {
     onclick = () => Nav.go("certform");
   } else if (examDone) {
     kicker = "Capstone — Retake";
-    title = "Final Certification Exam";
+    title = "Final Course Exam";
     const r = Store.state.examResults;
     desc = `Last attempt: ${r.score}/${r.total}. You need ${FINAL_EXAM.passScore}/${r.total} to pass. Review the modules and try again.`;
     action = "Retake Exam →";
@@ -2300,7 +2319,7 @@ function buildCapstoneCard() {
   } else {
     const resuming = Store.hasExamInProgress();
     kicker = "★ Capstone — Unlocked";
-    title = "Final Certification Exam";
+    title = "Final Course Exam";
     desc = resuming
       ? "You have a final exam in progress — pick up where you left off."
       : `All modules complete. ${FINAL_EXAM.questions.length} cumulative questions, ${FINAL_EXAM.passScore}/${FINAL_EXAM.questions.length} (80%) to pass and earn your certificate.`;
@@ -2663,18 +2682,23 @@ function renderMatch() {
   const placedSet = new Set(Object.keys(MatchState.placements));
   const remaining = data.items.filter(it => !placedSet.has(it.id));
 
+  const selectedItem = data.items.find(it => it.id === MatchState.selectedId) || null;
+
   const pool = el("section", { class: "dnd-pool" },
-    el("p", { class: "dnd-pool-label" }, "Drag pool"),
-    el("div", { class: "dnd-items" },
+    el("p", { class: "dnd-pool-label", id: "dnd-pool-label" }, "Items to place"),
+    el("div", { class: "dnd-items", role: "group", "aria-labelledby": "dnd-pool-label" },
       remaining.length === 0
         ? el("span", { style: "color: #888;" }, "All items placed.")
         : remaining.map(it => {
             const cls = ["dnd-item"];
-            if (MatchState.selectedId === it.id) cls.push("selected");
+            const isSel = MatchState.selectedId === it.id;
+            if (isSel) cls.push("selected");
             return el("button", {
               class: cls.join(" "), type: "button", disabled: MatchState.submitted,
+              "aria-pressed": isSel ? "true" : "false",
+              "aria-label": `${it.label}. ${isSel ? "Selected" : "Select to place"}`,
               onclick: () => {
-                MatchState.selectedId = MatchState.selectedId === it.id ? null : it.id;
+                MatchState.selectedId = isSel ? null : it.id;
                 MatchState.persist();
                 renderMatch();
               }
@@ -2683,32 +2707,45 @@ function renderMatch() {
     )
   );
 
+  // Screen-reader status: announces selection and progress without a pointer.
+  const liveStatus = el("p", { class: "dnd-status", role: "status", "aria-live": "polite" },
+    MatchState.submitted ? "Submitted."
+      : selectedItem ? `"${selectedItem.label}" selected. Choose a category to place it in.`
+      : remaining.length === 0 ? "All items placed. Submit when ready."
+      : `${data.items.length - remaining.length} of ${data.items.length} placed. Select an item.`
+  );
+
   const binsContainer = el("div", { class: "dnd-bins" + (data.bins.length === 3 ? " three" : "") });
   data.bins.forEach(bin => {
     const itemsInBin = data.items.filter(it => MatchState.placements[it.id] === bin.id);
     const cls = ["dnd-bin"];
     if (MatchState.selectedId) cls.push("active-target");
 
-    const binNode = el("div", {
-      class: cls.join(" "),
-      onclick: () => {
-        if (!MatchState.selectedId || MatchState.submitted) return;
-        MatchState.placements[MatchState.selectedId] = bin.id;
-        MatchState.selectedId = null;
-        MatchState.persist();
-        renderMatch();
-      }
-    },
+    const place = () => {
+      if (!MatchState.selectedId || MatchState.submitted) return;
+      MatchState.placements[MatchState.selectedId] = bin.id;
+      MatchState.selectedId = null;
+      MatchState.persist();
+      renderMatch();
+    };
+
+    // The bin stays a plain container (no button role) so the buttons inside it
+    // remain valid and individually reachable. Pointer users can click anywhere
+    // in it; keyboard/screen-reader users use the explicit "Place here" button.
+    const binNode = el("div", { class: cls.join(" "), onclick: place },
       el("h3", { class: "dnd-bin-title" }, bin.title),
       el("p", { class: "dnd-bin-sub" }, bin.sub),
       el("div", { class: "dnd-items" },
         itemsInBin.length === 0
-          ? el("span", { style: "color:#888; font-size: 0.9rem;" }, "Tap an item then tap here.")
+          ? el("span", { style: "color:#888; font-size: 0.9rem;" }, "Empty.")
           : itemsInBin.map(it => {
               const itemCls = ["dnd-item", "placed"];
               if (MatchState.submitted) itemCls.push(it.correctBin === bin.id ? "correct" : "incorrect");
               return el("button", {
                 class: itemCls.join(" "), type: "button", disabled: MatchState.submitted,
+                "aria-label": MatchState.submitted
+                  ? `${it.label} in ${bin.title}. ${it.correctBin === bin.id ? "Correct" : "Incorrect"}`
+                  : `${it.label}, placed in ${bin.title}. Activate to remove`,
                 onclick: (e) => {
                   e.stopPropagation();
                   if (MatchState.submitted) return;
@@ -2718,7 +2755,15 @@ function renderMatch() {
                 }
               }, it.label);
             })
-      )
+      ),
+      MatchState.submitted ? null : el("button", {
+        class: "dnd-drop", type: "button",
+        disabled: !MatchState.selectedId,
+        "aria-label": selectedItem
+          ? `Place "${selectedItem.label}" in ${bin.title}`
+          : `${bin.title}: select an item first`,
+        onclick: (e) => { e.stopPropagation(); place(); }
+      }, selectedItem ? `Place “${selectedItem.label}” here` : "Place here")
     );
     binsContainer.appendChild(binNode);
   });
@@ -2764,15 +2809,22 @@ function renderMatch() {
   const instructions = el("div", { class: "dnd-instructions" },
     el("p", { class: "section-kicker" }, "Exercise"),
     el("h1", { class: "section-title" }, data.title),
-    el("p", { style: "margin: 0; color: var(--muted);" }, data.intro)
+    el("p", { style: "margin: 0; color: var(--muted);" }, data.intro),
+    el("p", { style: "margin: 0.35rem 0 0; color: var(--muted); font-size: 0.82rem;" },
+      "Using a keyboard or screen reader? Tab to an item and press Enter to select it, then tab to a category's “Place here” button and press Enter.")
   );
 
-  mount(el("div", null, instructions, pool, binsContainer, feedbackNode, buttons));
+  mount(el("div", null, instructions, pool, liveStatus, binsContainer, feedbackNode, buttons));
 }
 
 // ---------- SCENARIO ----------
+// Scenario decisions are GATED: a learner must reach the correct decision to
+// advance, so finishing a case means every step was ultimately answered
+// correctly. `firstOutcomes` records the FIRST attempt at each step and is never
+// overwritten — that is the honest accuracy measure (retrying no longer erases
+// a wrong attempt the way popping `choices` used to).
 const ScenarioState = {
-  modId: null, stepIdx: 0, choices: [], awaiting: true, lastFeedback: null, lastOutcome: null,
+  modId: null, stepIdx: 0, choices: [], firstOutcomes: [], awaiting: true, lastFeedback: null, lastOutcome: null,
 
   enter(modId) {
     this.modId = modId;
@@ -2780,26 +2832,33 @@ const ScenarioState = {
     if (saved) {
       this.stepIdx = saved.stepIdx || 0;
       this.choices = saved.choices || [];
+      this.firstOutcomes = saved.firstOutcomes || [];
       this.awaiting = saved.awaiting !== false;
       this.lastFeedback = saved.lastFeedback || null;
       this.lastOutcome = saved.lastOutcome || null;
     } else {
-      this.stepIdx = 0; this.choices = []; this.awaiting = true;
+      this.stepIdx = 0; this.choices = []; this.firstOutcomes = []; this.awaiting = true;
       this.lastFeedback = null; this.lastOutcome = null;
     }
+  },
+
+  // Record an attempt. The first attempt at a step is kept permanently.
+  record(stepIdx, outcome) {
+    if (this.firstOutcomes[stepIdx] === undefined) this.firstOutcomes[stepIdx] = outcome;
+    this.choices[stepIdx] = outcome;
   },
 
   persist() {
     if (this.modId == null) return;
     Store.setScenarioInProgress(this.modId, {
-      stepIdx: this.stepIdx, choices: this.choices, awaiting: this.awaiting,
-      lastFeedback: this.lastFeedback, lastOutcome: this.lastOutcome
+      stepIdx: this.stepIdx, choices: this.choices, firstOutcomes: this.firstOutcomes,
+      awaiting: this.awaiting, lastFeedback: this.lastFeedback, lastOutcome: this.lastOutcome
     });
   },
 
   reset() {
     if (this.modId != null) Store.clearScenarioInProgress(this.modId);
-    this.stepIdx = 0; this.choices = []; this.awaiting = true;
+    this.stepIdx = 0; this.choices = []; this.firstOutcomes = []; this.awaiting = true;
     this.lastFeedback = null; this.lastOutcome = null;
   }
 };
@@ -2824,20 +2883,21 @@ function renderScenario() {
   );
 
   if (ScenarioState.stepIdx >= totalSteps) {
-    Store.setScenarioResults(m.id, { choices: ScenarioState.choices });
+    Store.setScenarioResults(m.id, { choices: ScenarioState.choices, firstOutcomes: ScenarioState.firstOutcomes });
     updateProgressPill();
     renderNav();
-    const goodCount = ScenarioState.choices.filter(c => c === "good").length;
+    // Accuracy = decisions correct on the FIRST attempt (retries don't erase a miss).
+    const goodCount = ScenarioState.firstOutcomes.filter(c => c === "good").length;
 
     const card = el("article", { class: "scenario-card" },
       el("p", { class: "section-kicker" }, "Scenario Complete"),
       el("h1", { class: "section-title" }, "Outcome"),
       el("p", { style: "margin-bottom: 1rem;" }, s.conclusion),
       el("div", { class: "scenario-result info" },
-        el("span", { class: "scenario-result-label" }, `Decision accuracy: ${goodCount} / ${totalSteps}`),
+        el("span", { class: "scenario-result-label" }, `First-attempt accuracy: ${goodCount} / ${totalSteps}`),
         goodCount === totalSteps
-          ? "All decisions on first try. You navigated the case the way the textbook does."
-          : "Review the feedback for the steps where you picked a partial or incorrect option."
+          ? "All decisions correct on the first try. You navigated the case the way the textbook does."
+          : "You reached the correct decision at every step, but some took more than one attempt. Review the feedback for those steps."
       ),
       el("div", { class: "button-row" },
         el("button", { class: "btn btn-ghost", type: "button",
@@ -2867,7 +2927,7 @@ function renderScenario() {
             ScenarioState.awaiting = false;
             ScenarioState.lastFeedback = c.feedback;
             ScenarioState.lastOutcome = c.outcome;
-            ScenarioState.choices.push(c.outcome);
+            ScenarioState.record(ScenarioState.stepIdx, c.outcome);
             ScenarioState.persist();
             renderScenario();
           }
@@ -2887,29 +2947,38 @@ function renderScenario() {
     );
 
     const onCorrect = ScenarioState.lastOutcome === "good";
+    // GATE: only a correct decision advances the case. A wrong or partial choice
+    // can only be retried — you cannot click past it and still earn completion.
     promptCard.appendChild(
-      el("div", { class: "button-row" },
-        onCorrect ? null : el("button", {
-          class: "btn btn-ghost", type: "button",
-          onclick: () => {
-            ScenarioState.awaiting = true;
-            ScenarioState.choices.pop();
-            ScenarioState.persist();
-            renderScenario();
-          }
-        }, "Try Again"),
-        el("button", {
-          class: "btn btn-primary", type: "button",
-          onclick: () => {
-            ScenarioState.stepIdx++;
-            ScenarioState.awaiting = true;
-            ScenarioState.lastFeedback = null;
-            ScenarioState.lastOutcome = null;
-            ScenarioState.persist();
-            renderScenario();
-          }
-        }, ScenarioState.stepIdx === totalSteps - 1 ? "See Outcome →" : "Next Decision →")
-      )
+      onCorrect
+        ? el("div", { class: "button-row" },
+            el("button", {
+              class: "btn btn-primary", type: "button",
+              onclick: () => {
+                ScenarioState.stepIdx++;
+                ScenarioState.awaiting = true;
+                ScenarioState.lastFeedback = null;
+                ScenarioState.lastOutcome = null;
+                ScenarioState.persist();
+                renderScenario();
+              }
+            }, ScenarioState.stepIdx === totalSteps - 1 ? "See Outcome →" : "Next Decision →")
+          )
+        : el("div", null,
+            el("p", { class: "gate-note" }, "Choose again to continue — this case advances only on the correct decision."),
+            el("div", { class: "button-row" },
+              el("button", {
+                class: "btn btn-primary", type: "button",
+                onclick: () => {
+                  ScenarioState.awaiting = true;
+                  ScenarioState.lastFeedback = null;
+                  ScenarioState.lastOutcome = null;
+                  ScenarioState.persist();
+                  renderScenario();
+                }
+              }, "Try Again")
+            )
+          )
     );
   }
 
@@ -2934,8 +3003,10 @@ function renderSummary() {
       status: mt ? `${mt.correct} / ${mt.total}` : "Not attempted",
       good: mt && mt.correct === mt.total },
     { kicker: "Scenario", title: m.scenario.title.replace(/Scenario: /, ""),
-      status: sc ? `${sc.choices.filter(c => c === "good").length} / ${sc.choices.length} optimal choices` : "Not attempted",
-      good: sc && sc.choices.every(c => c === "good") }
+      // Score on FIRST attempts; fall back to `choices` for pre-gating saved results.
+      status: sc ? (() => { const f = sc.firstOutcomes || sc.choices || [];
+        return `${f.filter(c => c === "good").length} / ${f.length} on first attempt`; })() : "Not attempted",
+      good: sc && (sc.firstOutcomes || sc.choices || []).every(c => c === "good") }
   ];
 
   const allDone = items.every(it => it.good);
@@ -3065,7 +3136,7 @@ function renderExamResults() {
   const pct = Math.round(correctCount / total * 100);
 
   const message = passed
-    ? `${pct}% — you've cleared the final certification exam. Enter your details to claim your certificate.`
+    ? `${pct}% — you've cleared the final course exam. Enter your details to claim your certificate of completion.`
     : `${pct}%. You need ${FINAL_EXAM.passScore} of ${total} (80%) to pass. Review the modules and retake when ready.`;
 
   const card = el("div", { class: "results-card" },
@@ -3186,7 +3257,7 @@ function renderCertificate() {
       el("p", { class: "cert-name" }, c.name),
       el("p", { class: "cert-cred" }, c.credential),
       el("p", { class: "cert-statement" },
-        "has successfully completed all nine modules of the Ventilator Training Academy and passed the Final Certification Exam covering ventilator physiology, recognition of respiratory failure, lung-protective ventilation, and transport management of the mechanically ventilated patient."),
+        "has successfully completed all nine modules of the Ventilator Training Academy and passed the Final Course Exam covering ventilator physiology, recognition of respiratory failure, lung-protective ventilation, and transport management of the mechanically ventilated patient."),
       el("p", { class: "cert-score" }, `Final Exam Score — ${c.score} / ${c.total} (${pct}%)`),
       el("div", { class: "cert-foot" },
         el("div", { class: "cert-sig" },
@@ -3200,7 +3271,9 @@ function renderCertificate() {
           el("span", { class: "cert-sig-role" }, "Date of Issue")
         )
       ),
-      el("p", { class: "cert-id" }, "Certificate ID — " + c.certId)
+      el("p", { class: "cert-id" }, "Certificate ID — " + c.certId),
+      el("p", { class: "cert-disclaimer" },
+        "This is a certificate of COMPLETION for self-paced education — it is not a certification, licence, or verification of clinical competency, and it confers no scope of practice. Progress and scoring are recorded in the learner's browser and are not independently proctored or auditable. Local protocol, medical direction, and the manufacturer's operating instructions always take precedence over this course.")
     )
   );
 
