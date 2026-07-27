@@ -89,7 +89,15 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 
 ## H. Bigger builds (need your input)
 
-- ☐ **M6 LTV rebuild** from the operator manual (our own words) + your **AMR unit configuration**. The reviewer flagged specifics: individually selected controls (not a left/right set-vs-monitored split); a central sequential monitored-data window; **Comm Port** (not USB); a **POWER LOST** alarm; nominal battery indicators ≈ 45/10/5 min; **no monitored plateau value**; **I:E is calculated/monitored, not directly set**. *(LTV 1200/1150 Quick Reference Guide.)*
+- ☑ **M6 LTV rebuild — DONE (pending your config confirmation).** Rebuilt against the reviewer's cited corrections *and* cross-checked against this repo's own LTV simulator, which already modelled the device correctly — the module text was the outlier. Changes:
+  - **6.1 Hardware** — removed the "settings left / monitored right" display claim; now describes the bank of **individual control windows** (Breath Rate, Tidal Volume, Pressure Control, Inspiratory Time, Pressure Support, O₂ %, Sensitivity, PEEP + alarm limits), the two **Select** buttons, and the **Set Value** knob. **USB → Comm Port** ("it is NOT a USB port"), with a note that connections vary by configuration.
+  - **6.3 Display** — rebuilt. Teaches the **single scanning monitored window** (PIP, MAP, PEEP, f, Vte, VE, I:E) and **Monitor Select** (halt / step / resume); states **I:E is calculated from Inspiratory Time + rate, not set directly**; states there is **no continuously monitored plateau pressure** (hold maneuver only, per your manual/config).
+  - **6.5** — "POST / Power-On Self-Test" reframed as **Startup and Pre-Use Checkout**, explicitly deferring to the operator manual + agency equipment check ("replaces neither document"). Removed the "verify Pplat on inspiratory hold" step; added the patient-setup prompt and per-patient alarm limits.
+  - **6.6 Workflow** — corrected to the real select → Set Value knob → confirm grammar (matches the simulator).
+  - **Quiz** — the old "settings LEFT / monitored RIGHT" answer is now a **wrong-answer distractor** with a rationale that refutes it; the Pplat question replaced with a set-vs-calculated (I:E) question.
+  - **Match** — "Inspiratory Hold (measures Pplat)" replaced with "100% O₂"; controls relabelled to the real ones.
+  - **Scenario** — removed "verify Pplat displays"; removed the last "switches silently to internal battery" claim (now POWER LOST).
+  - ☐ **Still needs from you:** confirmation against your **AMR unit configuration and operator manual** — O₂ inlet type, whether your units support the inspiratory-hold maneuver, exact alarm vocabulary, and the **45/10/5-minute** battery indicator behaviour. Anything config-specific is deliberately hedged ("confirm on YOUR unit") rather than asserted.
 - ☐ **Visuals** — waveforms, oxyhemoglobin curve, PEEP/FiO₂, annotated device images + simulator screenshots.
 - ☐ **Transport module** (from round 1 §C).
 

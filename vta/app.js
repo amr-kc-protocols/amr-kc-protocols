@@ -1021,7 +1021,7 @@ const MODULES = [
 {
   id: 6,
   title: "LTV 1200 — The Platform Tour",
-  blurb: "Every knob, every screen, every alarm — without a patient on it. POST every shift, every patient.",
+  blurb: "Every control, every screen, every alarm — without a patient on it. Check it every shift, every patient.",
   estMin: 50,
   practiceLevel: 1,
   practiceNote: "Learn the controls hands-on: work the LTV 1200 tutorial on the simulator.",
@@ -1030,8 +1030,8 @@ const MODULES = [
     {
       id: "front", kicker: "6.1 · Hardware", title: "Front Panel and Side Connections",
       body: [
-        "Front panel essentials: Power button (top corner, momentary press). Display (settings on left, monitored on right). Control knob (right of display — scrolls values). Select button (moves cursor between parameters). Manual breath, Alarm Silence (60-sec mute), Alarm Reset.",
-        "Side panel: O₂ inlet at 50 PSI (DISS or quick-connect). Patient circuit ports including the easily-missed exhalation valve drive line. Battery compartment, AC/DC power, bacterial/viral filter, USB (service only).",
+        "Front panel essentials: On/Standby power. A bank of INDIVIDUAL control windows — one per setting (Breath Rate, Tidal Volume, Pressure Control, Inspiratory Time, Pressure Support, O₂ %, Sensitivity, PEEP) plus the alarm-limit windows. Two Select buttons (Mode and Breath Type). The Set Value knob. Manual Breath, Alarm Silence/Reset, Control Lock, and the display window.",
+        "Side/rear connections: O₂ inlet — high-pressure DISS or a low-pressure fitting depending on configuration. Patient circuit ports including the easily-missed exhalation valve drive line. Battery compartment, external power input, bacterial/viral filter, and a Comm Port for service and data (it is NOT a USB port). Confirm the exact connections on YOUR unit — configurations vary.",
         "Practice on the unit until you can find every control by feel. In a noisy ambulance bay or moving aircraft, you can't read labels.",
         "The exhalation valve drive line is the most-missed connection. Without it, the patient cannot exhale. Verify every POST."
       ],
@@ -1049,10 +1049,12 @@ const MODULES = [
     {
       id: "display", kicker: "6.3 · Display", title: "Reading the Screen",
       body: [
-        "Display is organized left-to-right. SETTINGS on the left — what you programmed. MONITORED VALUES on the right — what the patient is actually receiving.",
-        "Settings half: Mode (top), Vt, RR, FiO₂, PEEP, I:E, trigger sensitivity. Scan top to bottom on every check.",
-        "Monitored half: PIP, exhaled Vt, total RR (set + spontaneous), exhaled MV, Pplat (when inspiratory hold is pressed), calculated I:E, FiO₂ delivered (if sensor present).",
-        "Divergence between SET Vt and EXHALED Vt is the earliest sign of a leak or compliance change. Don't silence — investigate."
+        "The LTV does NOT split the screen into a settings half and a monitored half. Each setting lives in its OWN window and you work one at a time: press that control to select it (it brightens, the rest dim), turn the Set Value knob, then confirm.",
+        "Monitored data appears in ONE display window that SCANS — cycling through the measured values one at a time: PIP, MAP, PEEP, f (total rate), Vte (exhaled tidal volume), VE (exhaled minute volume), and I:E. Alarm messages appear in this same window.",
+        "Press Monitor Select once to halt the scan on a value, again to step to the next, or twice quickly to resume scanning.",
+        "Know which numbers you SET and which the vent CALCULATES. You set Inspiratory Time; the vent derives and displays I:E from that and the rate. Trying to dial I:E directly is a common novice error — change Inspiratory Time or the rate instead.",
+        "There is NO continuously monitored plateau pressure on this display. Pplat is obtained with an inspiratory hold maneuver where your unit and configuration support it — confirm the procedure in your operator manual.",
+        "Divergence between SET Vt and EXHALED Vt (Vte) is the earliest sign of a leak or compliance change. Don't silence — investigate."
       ],
       pearl: { title: "Set vs Exhaled", body: "Exhaled Vt consistently < set Vt by > 10%? Check ETT cuff, walk the circuit, look at the exhalation valve drive line. Persistent leak = lost PEEP = lost oxygenation." }
     },
@@ -1070,21 +1072,22 @@ const MODULES = [
       ]
     },
     {
-      id: "post", kicker: "6.5 · POST", title: "Power-On Self-Test",
+      id: "post", kicker: "6.5 · Checkout", title: "Startup and Pre-Use Checkout",
       body: [
-        "Every shift change, every patient. Five steps.",
-        "1. Connect circuit + test lung BEFORE powering on. POST without a circuit is meaningless.",
-        "2. Power on. Watch screen for any RED indicator. POST runs automatically — let it complete.",
-        "3. Verify alarms by triggering them: occlude circuit (high pressure should fire). Disconnect lung (low pressure should fire).",
-        "4. Verify Pplat: press inspiratory hold; confirm reading on display.",
-        "5. Document POST in service equipment log. Pull from service if POST fails."
+        "Follow the startup and operational-verification procedure in your operator manual PLUS your agency\'s documented equipment check. What follows is the SHAPE of that check — it replaces neither document.",
+        "Connect a complete circuit and test lung BEFORE powering on — including the exhalation valve drive line. A checkout without a circuit tests nothing that matters.",
+        "Power on and let the unit finish its self test. Any failure indication means the unit comes out of service — tag it, document it, replace it.",
+        "Answer the patient setup prompt, then load and verify settings appropriate to your patient before connecting them.",
+        "Set alarm limits for THIS patient — especially Low Minute Volume, which commonly sits at a value that will never alarm.",
+        "Verify the gas source at the required pressure, the battery state of charge, and that the display indicates external power when docked.",
+        "Document the check per agency policy."
       ],
-      evidence: { title: "Why POST", body: "Most field LTV failures are caught during POST. The worst time to find one is mid-transport." }
+      evidence: { title: "Why the pre-use check", body: "Most field LTV failures are caught during pre-use checkout — the worst time to find one is mid-transport. The manufacturer\'s instructions and your agency policy control the exact steps and their order." }
     },
     {
       id: "workflow", kicker: "6.6 · Workflow", title: "Safe Changes & Common Pitfalls",
       body: [
-        "Safe-change workflow: 1) Verbalize the change BEFORE you turn the dial. 2) Press SELECT to navigate. 3) Rotate CONTROL knob. 4) Press SELECT (or wait 5 sec) to commit. 5) Reassess in 30 sec. 6) Document with vitals before AND after.",
+        "Safe-change workflow: 1) Verbalize the change BEFORE you touch the panel. 2) Press that control\'s window to SELECT it — it brightens, the rest dim. 3) Turn the Set Value knob. 4) Confirm — press the control again, select another, press Control Lock, or let it time out. 5) Reassess in 30 sec. 6) Document with vitals before AND after.",
         "Common pitfalls from incident reviews: forgetting to set LOW MV alarm; setting PEEP at the dial but forgetting to attach the PEEP valve; pediatric patient on the adult circuit (dead space > Vt); missing the POWER LOST alarm when the AC plug bumps loose and the unit transfers to internal battery; POST skipped because \"the next shift will do it.\""
       ]
     }
@@ -1110,15 +1113,15 @@ const MODULES = [
       { q: "The default value for the LOW MINUTE VOLUME alarm is often:",
         choices: ["Set automatically to 70% of expected MV", "Always 4 L/min", "Zero — must be set manually for each patient", "Linked to the apnea alarm"], answer: 2,
         rationale: "Default is often 0 (off). Set it to ~70% of expected MV on every patient. Don't trust apnea alone — by then 20+ seconds have passed." },
-      { q: "The LTV display organizes the screen as:",
-        choices: ["Set values on top, monitored values on bottom", "All settings on the right", "Settings on the LEFT, monitored values on the RIGHT", "Alphabetically"], answer: 2,
-        rationale: "Settings on the left (what you programmed), monitored values on the right (what the patient receives). Scan top-to-bottom on both halves." },
+      { q: "Monitored data on the LTV 1200 is displayed:",
+        choices: ["Settings on the left, monitored values on the right", "In ONE window that scans through the measured values", "Only on an external monitor", "As a continuous waveform tracing"], answer: 1,
+        rationale: "The LTV shows one monitored value at a time in a single display window that cycles — PIP, MAP, PEEP, f, Vte, VE, I:E. Press Monitor Select to halt on a value, step to the next, or resume scanning. There is no left/right settings-versus-monitored split." },
       { q: "The Alarm Silence button quiets an active alarm for approximately:",
         choices: ["10 seconds", "5 minutes", "Indefinitely", "60 seconds"], answer: 3,
         rationale: "60 seconds. Silence is a fix-the-problem window, not a permanent mute. After 60 sec, if the cause persists, the alarm re-fires." },
-      { q: "To measure plateau pressure on the LTV, you:",
-        choices: ["Wait for the vent to display it automatically", "Disconnect the patient briefly", "Press and hold the inspiratory hold button during inspiration", "Increase the set rate"], answer: 2,
-        rationale: "Press and hold the inspiratory hold button while observing the pressure waveform. Pplat appears as a brief flat segment after the peak. Release to resume." },
+      { q: "Which value does the LTV 1200 CALCULATE and display rather than let you set directly?",
+        choices: ["Tidal Volume", "Inspiratory Time", "I:E ratio", "PEEP"], answer: 2,
+        rationale: "You set Inspiratory Time (and the rate); the vent derives and displays I:E from them. To change I:E you change Inspiratory Time or the rate — you cannot dial I:E itself. Note also that plateau pressure is NOT a continuously monitored value on this vent." },
       { q: "When changing a setting on the LTV, the correct workflow is:",
         choices: ["Change it quickly so you don't miss anything", "Verbalize the change, navigate, change one parameter, reassess in 30 sec, document", "Make all needed changes at once for efficiency", "Wait for the patient to deteriorate before adjusting"], answer: 1,
         rationale: "Verbalize → Change ONE thing → Reassess in 30 sec → Document with pre/post vitals. Two changes at once defeats your ability to know which helped." },
@@ -1137,15 +1140,15 @@ const MODULES = [
       { id: "delivery", title: "Delivers a Breath / Measures", sub: "Direct breath delivery or measurement" }
     ],
     items: [
-      { id: "select-btn",  label: "Select button",          correctBin: "select" },
-      { id: "control",     label: "Control knob",           correctBin: "select" },
+      { id: "select-btn",  label: "Mode / Breath Type Select buttons", correctBin: "select" },
+      { id: "control",     label: "Set Value knob",         correctBin: "select" },
       { id: "silence",     label: "Alarm Silence (60-sec mute)", correctBin: "alarms" },
       { id: "reset",       label: "Alarm Reset",            correctBin: "alarms" },
       { id: "manual",      label: "Manual Breath button",   correctBin: "delivery" },
-      { id: "hold",        label: "Inspiratory Hold (measures Pplat)", correctBin: "delivery" }
+      { id: "o2flush",     label: "100% O₂ button (oxygen enrichment)", correctBin: "delivery" }
     ],
     feedback: {
-      pass: "Right. Select + Control are how you navigate and program. Silence + Reset manage alarms. Manual breath delivers one on demand; Inspiratory Hold measures Pplat.",
+      pass: "Right. The Select buttons and Set Value knob are how you program. Silence + Reset manage alarms. Manual Breath delivers a breath on demand; 100% O₂ enriches the delivered gas.",
       fail: "Review the front-panel lesson. Spend lab time finding each button by feel — you can't read labels in a moving truck."
     }
   },
@@ -1158,7 +1161,7 @@ const MODULES = [
       ["Battery LED",  "GREEN — 100%"],
       ["AC plug",      "Connected"],
       ["Display",      "OFF (unit powered down)"],
-      ["Last POST",    "Unknown — last shift didn't document"],
+      ["Last checkout","Unknown — last shift didn't document"],
       ["Circuit",      "Bagged in cabinet — needs to be opened"],
       ["Test lung",    "On the shelf"]
     ],
@@ -1186,14 +1189,14 @@ const MODULES = [
           { label: "Trust POST and move on", outcome: "partial",
             feedback: "POST runs the unit's self-check, but manually triggering alarms confirms they actually sound. Briefly occlude the circuit to fire HIGH PRESSURE; disconnect the lung to fire LOW PRESSURE." },
           { label: "Occlude the circuit (high pressure should fire) and disconnect the test lung (low pressure should fire)", outcome: "good",
-            feedback: "Right. Trigger each alarm to confirm it sounds. Then reset and reconnect. Also verify Pplat displays when you press the inspiratory hold button." },
+            feedback: "Right. Trigger each alarm to confirm it actually sounds, then reset and reconnect. Then confirm alarm limits are set for the patient — Low Minute Volume especially." },
           { label: "Disconnect from AC power to fire the battery alarm", outcome: "bad",
             feedback: "Don't unplug a charged unit just to test the alarm — you'll start draining battery. The high-pressure and low-pressure alarms are the bedside-relevant ones to verify." }
         ] },
       { prompt: "Q4. Everything verified. Last check before considering the unit \"ready for patient use\"?",
         choices: [
           { label: "Confirm the display reads 'LINE POWER' — not 'BATTERY'", outcome: "good",
-            feedback: "Right. The LTV switches silently to internal battery if the AC plug bumps loose. Confirm line power on the display before declaring ready. Document POST in the service equipment log." },
+            feedback: "Right. If external power drops the unit alarms POWER LOST and transfers to the internal battery — confirm external power on the display before declaring the unit ready, so you start the call with a full battery in reserve. Document the checkout in the equipment log." },
           { label: "Reset Vt and RR to factory defaults", outcome: "bad",
             feedback: "Settings will be programmed for the specific patient at pickup. Don't fiddle with them as a final step." },
           { label: "Wipe the unit down with bleach", outcome: "bad",
