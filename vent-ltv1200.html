@@ -1303,7 +1303,7 @@ function adj(key,delta){
     // Snap simTime to start of next new cycle to prevent phase-jump glitch
     var newCycleMs=60000/vals.rate.v;
     simTime=Math.ceil(simTime/newCycleMs)*newCycleMs;
-    pressureHistory=[];
+    pressureHistory=[]; resetMeasuredPIP();
   } else if(key==='it'){
     enforceITLimit(); // update max first
     var wantIT=Math.round((c.v+delta)*10)/10;
@@ -1707,7 +1707,7 @@ function liveMean(){
 }
 function monitorData(){
   var spont=(ventMode==='cpap'||ventMode==='nppv');
-  var pip=livePeak(), map=liveMean();
+  var pip=monitoredPIP(), map=liveMean();
   var f=spont?15:vals.rate.v, vte;
   if(spont) vte=Math.round(400+vals.ps.v*lung.compliance);
   else if(breathType==='volume') vte=vals.vt.v;
@@ -1780,7 +1780,7 @@ function applyPreset(name){
   var keys=['rate','vt','it','pc','ps','peep','fio2','sens','hipres','lowpres','lowmv','apnea'];
   keys.forEach(function(k){ if(p[k]!==undefined) vals[k].v=p[k]; });
   enforceITLimit(); keys.forEach(updateKnob);
-  simTime=0; pressureHistory=[]; updateUI();
+  simTime=0; pressureHistory=[]; resetMeasuredPIP(); updateUI();
 }
 function powerOnSequence(then){ _bootThen=then||null; try{getAC();}catch(_){}; runPOST(); }
 function runPOST(){
@@ -2067,6 +2067,36 @@ var simTime=0;
 var pressureHistory=[];
 var CANVAS_SECS=8; // seconds of history shown
 
+// ── MEASURED PIP (peak-hold) ──────────────────────────────────
+// The real LTV latches the highest airway pressure of the last delivered
+// breath and holds it on the PIP display until the next breath — it does NOT
+// track instantaneous pressure. We accumulate the peak within each mandatory
+// breath and latch it at the cycle boundary.
+var _measuredPIP=null;       // latched peak from the last completed breath
+var _breathPeakAccum=-1e9;   // running max within the current breath
+var _lastBreathPhase=0;
+function resetMeasuredPIP(){ _measuredPIP=null; _breathPeakAccum=-1e9; _lastBreathPhase=0; }
+function trackMeasuredPIP(p){
+  if(p>_breathPeakAccum) _breathPeakAccum=p;
+  // Spontaneous modes have no fixed mandatory cycle — fall back to a rolling peak.
+  if(ventMode==='cpap'||ventMode==='nppv'){ _measuredPIP=null; return; }
+  var cycleMs=60000/vals.rate.v;
+  var ph=(simTime%cycleMs)/cycleMs;
+  if(ph < _lastBreathPhase-0.001){   // phase wrapped → a breath just completed
+    _measuredPIP=_breathPeakAccum;
+    _breathPeakAccum=p;
+  }
+  _lastBreathPhase=ph;
+}
+// The value the PIP window/monitor should show: the held peak in mandatory
+// modes (seeded from the model until the first breath latches), a rolling
+// peak in spontaneous modes.
+function monitoredPIP(){
+  if(ventMode==='cpap'||ventMode==='nppv') return livePeak();
+  if(_measuredPIP!=null) return _measuredPIP;
+  var d=calcPplat(); return d? d.pip : livePeak();
+}
+
 // ── INSP HOLD / PLATEAU ───────────────────────────────────────
 var inspHoldActive=false;
 var inspHoldStartTs=0;    // wall-clock timestamp (from rAF)
@@ -2082,6 +2112,7 @@ function calcPplat(){
   // high PIP with a NORMAL Pplat is a resistance problem, and a high Pplat is
   // a compliance problem — which the Insp-Hold maneuver reveals.
   if(breathType!=='volume'||ventMode==='cpap'||ventMode==='nppv') return null;
+  if(typeof lung==='undefined'||!lung) return null;   // guard: a deep-link can render before `lung` initializes
   var peep=vals.peep.v + (lung.autoPEEP||0);          // intrinsic PEEP adds to baseline
   var pplat=peep + vals.vt.v/lung.compliance;
   var resPressure=resistivePressure();                 // peak flow × resistance
@@ -2262,9 +2293,9 @@ function drawWaveform(){
   // PIP readout + LED bar always update, even with the canvas hidden
   if(pressureHistory.length>1){
     var liveP=pressureHistory[pressureHistory.length-1];
-    updateLedBar(liveP);
+    updateLedBar(liveP);   // the LED bar tracks instantaneous airway pressure
     var pd=document.getElementById('pip-display');
-    if(pd) pd.textContent=Math.round(liveP);
+    if(pd){ var mp=monitoredPIP(); pd.textContent=(mp==null?'—':Math.round(mp)); }   // PIP window holds the measured peak
   }
   resizeCanvas();
   var W=canvas.width, H=canvas.height;
@@ -2395,6 +2426,7 @@ function animLoop(ts){
       if(inspHoldActive && inspHoldStartTs===null) inspHoldStartTs=ts;
       simTime+=dt;
       var p=calcPressure(simTime);
+      trackMeasuredPIP(p);
       pressureHistory.push(p);
       // Keep only CANVAS_SECS worth of history at ~60fps
       var maxLen=Math.ceil(CANVAS_SECS*60);
@@ -3887,7 +3919,7 @@ function applyStageEnter(s){
   });
   enforceITLimit();
   ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(updateKnob);
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
 }
 
 function advanceStage(){
@@ -3997,7 +4029,7 @@ function loadScenario(s){
   var keys=['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'];
   keys.forEach(function(k){ if(su[k]!==undefined) vals[k].v=su[k]; });
   enforceITLimit();
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
   scenarioDiagnosed=false;   // reset problem-solving progress for the new case
   _assessAttempts=0;         // reset assessment attempts for the new case
   keys.forEach(function(k){ updateKnob(k); });
@@ -4017,7 +4049,7 @@ var FREE_LUNGS={
 var freeLungKey='normal';
 function setFreeLung(k){
   freeLungKey=k; setLung(FREE_LUNGS[k]);
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
   scanMessage('LUNG: '+FREE_LUNGS[k].label.toUpperCase(),1400);
   updateUI();
 }
@@ -4032,7 +4064,7 @@ function startFree(){
   enforceITLimit();
   _modeCandidate=null; _btCandidate=null; deselect();
   ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(updateKnob);
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
   updateUI();
   var bar=document.getElementById('mission-bar');
   if(bar){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){ window.scrollTo(0,0); } }
@@ -4058,7 +4090,7 @@ function startLevel(n){
     vals.hipres.v=40; vals.lowpres.v=10; vals.lowmv.v=3; vals.apnea.v=20;
     enforceITLimit();
     ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(function(k){ updateKnob(k); });
-    simTime=0; pressureHistory=[];
+    simTime=0; pressureHistory=[]; resetMeasuredPIP();
     applyStageEnter(STAGE_DEFS[0]);
     updateUI();
     showIntro({name:'LTV 1200 — Setup Walkthrough', badge:'Level 1 · Tutorial',
