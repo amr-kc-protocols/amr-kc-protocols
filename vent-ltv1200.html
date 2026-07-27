@@ -1053,11 +1053,11 @@ canvas#pip-canvas{display:none}
 
   <!-- NPPV IPAP DISPLAY (shows when NPPV active) -->
   <div id="ipap-display" style="display:none;background:#041520;border:1px solid #1a4a6a;border-radius:8px;padding:10px 14px;margin-top:8px;font-family:var(--mono)">
-    <div style="font-size:8px;color:#38bdf8;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px">NPPV CALCULATED VALUES</div>
+    <div style="font-size:8px;color:#38bdf8;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px">NPPV SET VALUES · IPAP / EPAP</div>
     <div style="display:flex;gap:20px">
-      <div><div style="font-size:8px;color:#1a5a7a">EPAP (PEEP)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-epap">5</span> <span style="font-size:10px">cmH₂O</span></div></div>
-      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">IPAP (EPAP + PS)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ipap">13</span> <span style="font-size:10px">cmH₂O</span></div></div>
-      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">PRESSURE SUPPORT</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ps">8</span> <span style="font-size:10px">cmH₂O above EPAP</span></div></div>
+      <div><div style="font-size:8px;color:#1a5a7a">IPAP (set)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ipap">13</span> <span style="font-size:10px">cmH₂O</span></div></div>
+      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">EPAP (set)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-epap">5</span> <span style="font-size:10px">cmH₂O</span></div></div>
+      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">SUPPORT (IPAP − EPAP)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ps">8</span> <span style="font-size:10px">cmH₂O</span></div></div>
     </div>
   </div>
 
@@ -1212,6 +1212,13 @@ function calcIE(){
 }
 
 // ── CONTROL WINDOW UPDATES ────────────────────────────────────
+// The number a control window should show. On the real LTV in NPPV, the
+// Pres. Support display reads the actual IPAP (= EPAP + support), not the
+// support difference — so we surface IPAP there and keep support internal.
+function ctrlDisplayValue(key){
+  if(key==='ps' && ventMode==='nppv') return vals.peep.v + vals.ps.v;   // IPAP
+  return vals[key].v;
+}
 // Each control now shows its value in an LED window (no rotating indicator).
 function updateKnob(key){
   var kv=document.getElementById('kv-'+key);
@@ -1219,6 +1226,8 @@ function updateKnob(key){
   // Breath Rate reads dashes in pure CPAP (spontaneous — no set rate), like the real LTV.
   if(key==='rate' && ventMode==='cpap'){
     kv.textContent='- -'; kv.classList.add('dashes');
+  } else if(key==='ps' && ventMode==='nppv'){
+    kv.classList.remove('dashes'); kv.textContent=ctrlDisplayValue('ps');   // show absolute IPAP, never OFF
   } else if((key==='lowpres'||key==='lowmv'||key==='ps') && vals[key].v===0){
     kv.textContent='OFF'; kv.classList.add('dashes');   // 0 = alarm/support OFF on the LTV
   } else {
@@ -1227,6 +1236,8 @@ function updateKnob(key){
     else if(key==='lowmv') kv.textContent=vals[key].v.toFixed(1);   // decimal resolution
     else kv.textContent=vals[key].v;
   }
+  // In NPPV the IPAP window is EPAP + support, so a change to EPAP must refresh it too.
+  if(key==='peep' && ventMode==='nppv'){ var kvp=document.getElementById('kv-ps'); if(kvp) kvp.textContent=ctrlDisplayValue('ps'); }
   if(key===selectedControl) updateKnobPointer();
   if(typeof refreshA11y==='function') refreshA11y();
 }
@@ -1303,7 +1314,7 @@ function adj(key,delta){
     // Snap simTime to start of next new cycle to prevent phase-jump glitch
     var newCycleMs=60000/vals.rate.v;
     simTime=Math.ceil(simTime/newCycleMs)*newCycleMs;
-    pressureHistory=[];
+    pressureHistory=[]; resetMeasuredPIP();
   } else if(key==='it'){
     enforceITLimit(); // update max first
     var wantIT=Math.round((c.v+delta)*10)/10;
@@ -1315,6 +1326,15 @@ function adj(key,delta){
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
     enforcePeakFlow('vt');     // raising Vt past the flow ceiling is capped
+  } else if(key==='peep' && ventMode==='nppv'){
+    // NPPV: EPAP and IPAP are independent set values on the LTV. Hold IPAP
+    // fixed as EPAP moves (support = IPAP − EPAP floats), so raising EPAP
+    // does not drag IPAP up with it.
+    var before=c.v;
+    c.v=Math.round(Math.min(c.max,Math.max(c.min,c.v+delta)));
+    var applied=c.v-before;
+    if(applied!==0){ vals.ps.v=Math.max(0,Math.min(vals.ps.max, vals.ps.v-applied)); }
+    updateKnob('peep'); updateKnob('ps');
   } else {
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
@@ -1379,8 +1399,8 @@ function updateUI(){
 
   // NPPV relabeling on the control tiles
   var isNPPV=(ventMode==='nppv');
-  var lblPs=document.getElementById('lbl-ps');   if(lblPs) lblPs.textContent = isNPPV?'IPAP (above EPAP)':'Pres. Support';
-  var unPs =document.getElementById('kv-ps-unit');if(unPs) unPs.textContent = isNPPV?'+EPAP':'cmH₂O';
+  var lblPs=document.getElementById('lbl-ps');   if(lblPs) lblPs.textContent = isNPPV?'IPAP':'Pres. Support';
+  var unPs =document.getElementById('kv-ps-unit');if(unPs) unPs.textContent = 'cmH₂O';   // IPAP is an absolute pressure, like the real LTV display
   var lblPeep=document.getElementById('peep-main-lbl'); if(lblPeep) lblPeep.textContent = isNPPV?'EPAP':'PEEP';
   var unPeep=document.getElementById('peep-unit-lbl');  if(unPeep) unPeep.textContent='cmH₂O';
   var lblRate=document.getElementById('lbl-rate');       if(lblRate) lblRate.textContent = isNPPV?'Apnea Backup':'Breath Rate';
@@ -1626,8 +1646,8 @@ function renderDock(){
   dock.classList.toggle('show',show);
   if(!show) return;
   var key=selectedControl, c=vals[key];
-  document.getElementById('dock-name').textContent=CONTROL_SHORT[key]||key;
-  document.getElementById('dock-val').textContent = key==='it'? c.v.toFixed(1) : c.v;
+  document.getElementById('dock-name').textContent=(key==='ps'&&ventMode==='nppv')?'IPAP':(CONTROL_SHORT[key]||key);
+  document.getElementById('dock-val').textContent = key==='it'? c.v.toFixed(1) : ctrlDisplayValue(key);
   document.getElementById('dock-unit').textContent = (typeof KNOB_UNITS!=='undefined' && KNOB_UNITS[key])||'';
 }
 window.addEventListener('scroll',function(){ if(selectedControl) renderDock(); },{passive:true});
@@ -1661,8 +1681,9 @@ var CTRL_UNIT={rate:'breaths per minute',vt:'millilitres',pc:'centimetres H2O',i
 function refreshA11y(){
   document.querySelectorAll('.ctrl2').forEach(function(t){
     var key=t.getAttribute('data-key'), c=vals[key]; if(!c) return;
-    var name=(CONTROL_SHORT[key]||key);
+    var name=(key==='ps'&&ventMode==='nppv')?'IPAP':(CONTROL_SHORT[key]||key);
     var valTxt = (key==='rate'&&ventMode==='cpap') ? 'off, spontaneous'
+      : (key==='ps'&&ventMode==='nppv') ? ctrlDisplayValue('ps')
       : ((key==='lowpres'||key==='lowmv'||key==='ps') && c.v===0) ? 'off'
       : (key==='it'||key==='lowmv') ? c.v.toFixed(1) : c.v;
     var state = t.classList.contains('game-locked') ? ', locked'
@@ -1674,8 +1695,9 @@ function refreshA11y(){
   ['setknob','dockknob'].forEach(function(id){
     var k=document.getElementById(id); if(!k) return;
     if(selectedControl && vals[selectedControl]){
-      var c=vals[selectedControl], nm=(CONTROL_SHORT[selectedControl]||selectedControl);
-      var v=(selectedControl==='it'||selectedControl==='lowmv')?c.v.toFixed(1):c.v;
+      var c=vals[selectedControl], isNPPVps=(selectedControl==='ps'&&ventMode==='nppv');
+      var nm=isNPPVps?'IPAP':(CONTROL_SHORT[selectedControl]||selectedControl);
+      var v=(selectedControl==='it'||selectedControl==='lowmv')?c.v.toFixed(1):ctrlDisplayValue(selectedControl);
       k.setAttribute('aria-valuemin',c.min); k.setAttribute('aria-valuemax',c.max);
       k.setAttribute('aria-valuenow',c.v); k.setAttribute('aria-valuetext',nm+' '+v+' '+(CTRL_UNIT[selectedControl]||''));
       k.setAttribute('aria-label','Set Value — '+nm);
@@ -1707,7 +1729,7 @@ function liveMean(){
 }
 function monitorData(){
   var spont=(ventMode==='cpap'||ventMode==='nppv');
-  var pip=livePeak(), map=liveMean();
+  var pip=monitoredPIP(), map=liveMean();
   var f=spont?15:vals.rate.v, vte;
   if(spont) vte=Math.round(400+vals.ps.v*lung.compliance);
   else if(breathType==='volume') vte=vals.vt.v;
@@ -1772,7 +1794,7 @@ var _bootThen=null, _pendingPreset=null;
 var PRESETS={   // factory presets from the LTV 1200/1150 Quick Reference Guide
   adult:    {mode:'ac',bt:'volume',  rate:12,vt:500,it:1.0,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
   pediatric:{mode:'ac',bt:'pressure',rate:15,vt:250,it:0.7,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:30,lowpres:10,lowmv:1,apnea:20},
-  infant:   {mode:'ac',bt:'pressure',rate:20,vt:50, it:0.3,pc:15,ps:10,peep:0,fio2:40,sens:2,hipres:30,lowpres:10,lowmv:1,apnea:20}
+  infant:   {mode:'ac',bt:'pressure',rate:20,vt:50, it:0.3,pc:15,ps:10,peep:0,fio2:40,sens:2,hipres:30,lowpres:10,lowmv:0.5,apnea:20}
 };
 function applyPreset(name){
   var p=PRESETS[name]; if(!p) return;
@@ -1780,7 +1802,7 @@ function applyPreset(name){
   var keys=['rate','vt','it','pc','ps','peep','fio2','sens','hipres','lowpres','lowmv','apnea'];
   keys.forEach(function(k){ if(p[k]!==undefined) vals[k].v=p[k]; });
   enforceITLimit(); keys.forEach(updateKnob);
-  simTime=0; pressureHistory=[]; updateUI();
+  simTime=0; pressureHistory=[]; resetMeasuredPIP(); updateUI();
 }
 function powerOnSequence(then){ _bootThen=then||null; try{getAC();}catch(_){}; runPOST(); }
 function runPOST(){
@@ -1821,22 +1843,29 @@ function newPatient(){
     +'<div class="boot-lcd"><div class="boot-lcd-line">SELECT PATIENT</div>'
     +'<div class="boot-lcd-sub">Preset values load by patient size (LTV QRG)</div></div>'
     +'<div class="boot-msg">Choose the patient category to load the factory presets, then reassess every setting before use.</div>'
-    +'<div class="boot-preset-row">'
-    +'<div class="boot-preset" onclick="pickPreset(this,\'infant\')"><div class="boot-preset-name">INFANT</div><div class="boot-preset-wt">5–10 kg</div></div>'
-    +'<div class="boot-preset" onclick="pickPreset(this,\'pediatric\')"><div class="boot-preset-name">PEDIATRIC</div><div class="boot-preset-wt">10–40 kg</div></div>'
-    +'<div class="boot-preset" onclick="pickPreset(this,\'adult\')"><div class="boot-preset-name">ADULT</div><div class="boot-preset-wt">&gt; 40 kg</div></div>'
+    +'<div class="boot-preset-row" role="radiogroup" aria-label="Patient type preset">'
+    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Infant preset, 5 to 10 kilograms" onclick="pickPreset(this,\'infant\')"><div class="boot-preset-name">INFANT</div><div class="boot-preset-wt">5–10 kg</div></div>'
+    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Pediatric preset, 10 to 40 kilograms" onclick="pickPreset(this,\'pediatric\')"><div class="boot-preset-name">PEDIATRIC</div><div class="boot-preset-wt">10–40 kg</div></div>'
+    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Adult preset, over 40 kilograms" onclick="pickPreset(this,\'adult\')"><div class="boot-preset-name">ADULT</div><div class="boot-preset-wt">&gt; 40 kg</div></div>'
     +'</div>'
     +'<div class="boot-btns" style="margin-top:14px"><button class="boot-btn primary" id="preset-go" style="opacity:0.5;pointer-events:none" onclick="confirmPreset()">SELECT</button></div>';
 }
 function pickPreset(el,name){
   _pendingPreset=name;
-  document.querySelectorAll('.boot-preset').forEach(function(p){ p.classList.remove('sel'); });
-  el.classList.add('sel');
+  document.querySelectorAll('.boot-preset').forEach(function(p){ p.classList.remove('sel'); p.setAttribute('aria-checked','false'); });
+  el.classList.add('sel'); el.setAttribute('aria-checked','true');
   var go=document.getElementById('preset-go'); if(go){ go.style.opacity='1'; go.style.pointerEvents='auto'; }
 }
 function confirmPreset(){ if(_pendingPreset) applyPreset(_pendingPreset); finishBoot(); }
 function finishBoot(){
   var ov=document.getElementById('boot-overlay'); if(ov) ov.classList.remove('open');
+  // Neutralize the preset SELECT button: pickPreset() gives it an inline
+  // pointer-events:auto that would otherwise survive the overlay closing
+  // (a descendant with :auto still receives clicks under a parent set to
+  // :none), leaving an invisible button clickable over the scenario intro.
+  var go=document.getElementById('preset-go');
+  if(go){ go.style.pointerEvents='none'; go.style.opacity='0.5'; }
+  _pendingPreset=null;
   deviceState='run'; applyStandbyVisual(); updateUI();
   if(_bootThen){ var f=_bootThen; _bootThen=null; f(); }
 }
@@ -2060,6 +2089,59 @@ var simTime=0;
 var pressureHistory=[];
 var CANVAS_SECS=8; // seconds of history shown
 
+// ── MEASURED PIP (peak-hold) ──────────────────────────────────
+// The real LTV latches the highest airway pressure of the last delivered
+// breath and holds it on the PIP display until the next breath — it does NOT
+// track instantaneous pressure. We accumulate the peak within each mandatory
+// breath and latch it at the cycle boundary.
+var _measuredPIP=null;       // latched peak from the last completed breath
+var _breathPeakAccum=-1e9;   // running max within the current breath
+var _lastBreathPhase=0;
+function resetMeasuredPIP(){ _measuredPIP=null; _breathPeakAccum=-1e9; _lastBreathPhase=0; }
+function trackMeasuredPIP(p){
+  if(p>_breathPeakAccum) _breathPeakAccum=p;
+  // Spontaneous modes have no fixed mandatory cycle — fall back to a rolling peak.
+  if(ventMode==='cpap'||ventMode==='nppv'){ _measuredPIP=null; return; }
+  var cycleMs=60000/vals.rate.v;
+  var ph=(simTime%cycleMs)/cycleMs;
+  if(ph < _lastBreathPhase-0.001){   // phase wrapped → a breath just completed
+    _measuredPIP=_breathPeakAccum;
+    _breathPeakAccum=p;
+  }
+  _lastBreathPhase=ph;
+}
+// The value the PIP window/monitor should show: the held peak in mandatory
+// modes (seeded from the model until the first breath latches), a rolling
+// peak in spontaneous modes.
+function monitoredPIP(){
+  if(ventMode==='cpap'||ventMode==='nppv') return livePeak();
+  if(_measuredPIP!=null) return _measuredPIP;
+  var d=calcPplat(); return d? d.pip : livePeak();
+}
+
+// ── DYNAMIC AUTO-PEEP (gas trapping) ──────────────────────────
+// Intrinsic PEEP is not a fixed number: it falls as the learner gives the
+// lung more time to empty (lower rate / shorter inspiratory time) and climbs
+// when expiration is cut short. Model it off the lung's expiratory time
+// constant τ = R × C, decaying from the scenario's starting estimate as the
+// available expiratory time lengthens beyond ~1.3τ.
+function expTimeS(){
+  if(ventMode==='cpap'||ventMode==='nppv') return null;
+  return Math.max(0.1, (60/vals.rate.v) - vals.it.v);
+}
+function effectiveAutoPEEP(){
+  var base=(lung&&lung.autoPEEP)||0;
+  if(base<=0) return 0;
+  if(ventMode==='cpap'||ventMode==='nppv') return 0;   // no mandatory breath stacking
+  var Cl=lung.compliance/1000;          // compliance in L/cmH₂O
+  var tau=lung.resistance*Cl;           // expiratory time constant (s)
+  if(tau<=0) return 0;
+  var Te=expTimeS();
+  var refTe=1.3*tau;                    // starting estimate is anchored here
+  var factor=Math.exp(-(Te-refTe)/tau); // <1 as Te lengthens, >1 as it shortens
+  return Math.round(Math.max(0, Math.min(base*1.2, base*factor))*10)/10;
+}
+
 // ── INSP HOLD / PLATEAU ───────────────────────────────────────
 var inspHoldActive=false;
 var inspHoldStartTs=0;    // wall-clock timestamp (from rAF)
@@ -2075,7 +2157,9 @@ function calcPplat(){
   // high PIP with a NORMAL Pplat is a resistance problem, and a high Pplat is
   // a compliance problem — which the Insp-Hold maneuver reveals.
   if(breathType!=='volume'||ventMode==='cpap'||ventMode==='nppv') return null;
-  var peep=vals.peep.v + (lung.autoPEEP||0);          // intrinsic PEEP adds to baseline
+  if(typeof lung==='undefined'||!lung) return null;   // guard: a deep-link can render before `lung` initializes
+  var aPEEP=effectiveAutoPEEP();                        // dynamic intrinsic PEEP (responds to expiratory time)
+  var peep=vals.peep.v + aPEEP;                         // intrinsic PEEP adds to baseline
   var pplat=peep + vals.vt.v/lung.compliance;
   var resPressure=resistivePressure();                 // peak flow × resistance
   var pip=pplat + resPressure;
@@ -2083,7 +2167,7 @@ function calcPplat(){
   var comp=drive>0?Math.round(vals.vt.v/drive):0;
   return {pip:Math.round(pip*10)/10, pplat:Math.round(pplat*10)/10,
           drive:Math.round(drive*10)/10, comp:comp, raw:Math.round(resPressure*10)/10,
-          autoPEEP:(lung.autoPEEP||0)};
+          autoPEEP:aPEEP};
 }
 
 function triggerInspHold(){
@@ -2182,7 +2266,7 @@ function calcPressure(tMs){
 
   // Volume control mode — IT directly controlled (per LTV manual).
   // Peak = PEEP(+autoPEEP) + elastic (Vt/compliance) + resistive (peak flow × Raw).
-  var pplat_v=peep+(lung.autoPEEP||0)+vals.vt.v/lung.compliance;
+  var pplat_v=peep+effectiveAutoPEEP()+vals.vt.v/lung.compliance;
   var pip_v=pplat_v+resistivePressure();
   var insFrac_v=Math.min((vals.it.v*1000)/cycleMs,0.85);
   var p;
@@ -2255,9 +2339,9 @@ function drawWaveform(){
   // PIP readout + LED bar always update, even with the canvas hidden
   if(pressureHistory.length>1){
     var liveP=pressureHistory[pressureHistory.length-1];
-    updateLedBar(liveP);
+    updateLedBar(liveP);   // the LED bar tracks instantaneous airway pressure
     var pd=document.getElementById('pip-display');
-    if(pd) pd.textContent=Math.round(liveP);
+    if(pd){ var mp=monitoredPIP(); pd.textContent=(mp==null?'—':Math.round(mp)); }   // PIP window holds the measured peak
   }
   resizeCanvas();
   var W=canvas.width, H=canvas.height;
@@ -2388,6 +2472,7 @@ function animLoop(ts){
       if(inspHoldActive && inspHoldStartTs===null) inspHoldStartTs=ts;
       simTime+=dt;
       var p=calcPressure(simTime);
+      trackMeasuredPIP(p);
       pressureHistory.push(p);
       // Keep only CANVAS_SECS worth of history at ~60fps
       var maxLen=Math.ceil(CANVAS_SECS*60);
@@ -2450,15 +2535,15 @@ var CONTROLS={
     ],
     pearl:'Max IT = (60÷Rate) − 0.5 s. Example: Rate 12 → cycle = 5.0 s → max IT = 4.5 s. At Rate 20 → cycle = 3.0 s → max IT = 2.5 s. Insufficient exp time → auto-PEEP and hemodynamic compromise.'
   },
-  ps:{tag:'control',tagCls:'tag-control',title:'Pressure Support / IPAP',range:'0–40 cmH₂O  |  Typical: 5–10',
-    desc:'In invasive modes: pressure boost for spontaneous breaths. <strong>In NPPV: this is the IPAP above EPAP</strong> — the total inspiratory pressure = EPAP + this value.',
+  ps:{tag:'control',tagCls:'tag-control',title:'Pressure Support / IPAP',range:'0–40 cmH₂O  |  Typical PS: 5–10',
+    desc:'In invasive modes (SIMV, CPAP/PSV) this control sets <strong>Pressure Support</strong> — a pressure boost above PEEP for spontaneous breaths. <strong>In NPPV the LTV display reads the absolute IPAP</strong>: you SET IPAP and SET EPAP as two independent values, and the device derives support = IPAP − EPAP.',
     avail:[
       {mode:'AC-VC / AC-PC',yes:false,note:'All breaths are mandatory in A/C. No spontaneous breaths to support.'},
       {mode:'SIMV-VC / SIMV-PC',yes:true,note:'Supports spontaneous breaths between mandatory breaths. Reduces work of breathing.'},
       {mode:'CPAP / PSV',yes:true,note:'Primary ventilation. Every breath is PS-augmented. Wean by reducing PS.'},
-      {mode:'NPPV / BiPAP',yes:true,note:'Sets IPAP above EPAP. Total inspiratory pressure = EPAP + this value. Typical NPPV: EPAP 5, IPAP 10–15 (so PS = 5–10).'},
+      {mode:'NPPV / BiPAP',yes:true,note:'Display reads the actual IPAP (absolute). SET IPAP, then SET EPAP; support = IPAP − EPAP. Typical: EPAP 5, IPAP 10–15.'},
     ],
-    pearl:'NPPV example: EPAP 5 + PS 10 = IPAP 15 cmH₂O. IPAP drives CO₂ removal; EPAP improves oxygenation. Minimum PS of ~5 overcomes mask/circuit resistance.'
+    pearl:'NPPV: the LTV shows IPAP and EPAP directly — e.g. IPAP 15 / EPAP 5 gives 10 cmH₂O of support. IPAP drives CO₂ removal; EPAP improves oxygenation. Raising EPAP does not raise IPAP — support narrows. Keep IPAP at least ~5 above EPAP to overcome mask/circuit resistance.'
   },
   fio2:{tag:'control',tagCls:'tag-control',title:'FiO₂ / O₂ Flush',range:'21–100%  |  Hold 3 sec for 100% flush',
     desc:'Fraction of inspired oxygen. Active in all modes. In NPPV, oxygen is entrained into the circuit at this concentration.',
@@ -2564,7 +2649,7 @@ function openDrawer(key){
       html+='</div>';
       html+='<div style="background:#0a0d15;border:1px solid #2a2a4a;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#888;line-height:1.5">';
       html+='<strong style="color:#aaa">Resistance component (PIP−Pplat):</strong> '+d.raw+' cmH₂O ';
-      html+='| R<sub>aw</sub> = '+lung.resistance+' cmH₂O/(L/s)'+(d.autoPEEP?(' | auto-PEEP '+d.autoPEEP+' cmH₂O'):'')+' | Peak flow = '+((peakFlowLPM()||0)/60).toFixed(2)+' L/s</div>';
+      html+='| R<sub>aw</sub> = '+lung.resistance+' cmH₂O/(L/s)'+(d.autoPEEP?(' | auto-PEEP ≈ '+d.autoPEEP+' cmH₂O (falls as you lengthen exhalation)'):'')+' | Peak flow = '+((peakFlowLPM()||0)/60).toFixed(2)+' L/s</div>';
       var driveMsg=d.drive>15?'⚠ Driving pressure &gt;15 — ARDS risk elevated. Consider reducing Vt toward 6 mL/kg PBW.':d.drive>12?'Driving pressure borderline — monitor closely.':'Driving pressure within target range.';
       html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>';
       html+=driveMsg+'<br><br>High PIP + normal Pplat → airway resistance problem (secretions, bronchospasm, biting tube). High PIP + high Pplat → compliance problem (ARDS, pneumothorax, auto-PEEP). Pplat &gt;30 cmH₂O = lung injury risk — reduce Vt or rate.</div>';
@@ -2733,7 +2818,7 @@ var STAGE_DEFS=[
         'The low minute-volume alarm is misset'
       ],
       correct:1,
-      exp:'<strong>Assess before you adjust.</strong> Reaching the same pressure every breath does not by itself mean the limit is too low — a fixed obstruction can do the same. But you\'ve done the work-up (comfortable patient, equal sounds, patent tube, normal plateau), which rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem — set the High Pressure limit 5–10 cmH₂O above the normal PIP. A true obstruction would make pressures climb and the plateau rise.'
+      exp:'<strong>Assess before you adjust.</strong> Reaching the same pressure every breath does not by itself mean the limit is too low — a fixed obstruction can do the same. But you\'ve done the work-up (comfortable patient, equal sounds, patent tube, normal plateau), which rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem — set the High Pressure limit 5–10 cmH₂O above the normal PIP. A true obstruction (kink, plug, bronchospasm) would drive the <em>PIP</em> up while the plateau stayed near-normal — a widening PIP–plateau gap; a <em>rising plateau</em> instead means stiffer lungs (falling compliance). A normal plateau argues against both.'
     },
     goal:{
       text:'With obstruction ruled out, set the <strong>High Pressure limit 5–10 above the PIP shown below</strong> so it catches real trouble without nuisance-alarming.',
@@ -2811,8 +2896,8 @@ var SCENARIO_LEVELS={
     { name:'The Rising CO₂',
       badge:'L2 · Scenario 1 of 6', badgeCls:'scen-badge-2',
       intro:'Interfacility transfer — you\'re moving a fresh post-op patient from a community hospital to the tertiary ICU. During your pre-transport assessment the sending RT mentions the CO₂ has crept up on the last two gases. You get your LTV set before you load.',
-      scenario:'45-year-old post-op, sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
-      vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'HR',v:'102'}],
+      scenario:'45-year-old post-op man, 178 cm tall (≈ 70 kg predicted body weight), sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
+      vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'PBW',v:'70 kg'},{k:'HR',v:'102'}],
       lung:{compliance:40,resistance:10,label:'Post-op'},
       setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
@@ -2827,11 +2912,11 @@ var SCENARIO_LEVELS={
         exp:'A high PaCO₂ with a low pH and normal oxygenation is a <strong>respiratory acidosis</strong>. CO₂ clearance is proportional to minute ventilation (Rate × Vt) — so raising MV is the fix.'
       },
       goal:{
-        text:'Raise minute ventilation to clear the CO₂ — get <strong>MV into roughly 7–10 L/min</strong> (it\'s 4.5 now). Increase the rate, the tidal volume, or both — but keep Vt lung-safe.',
-        check:function(){ var mv=estMinuteVolume(); return mv>=7 && mv<=10.5; },
-        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min'; }
+        text:'Raise minute ventilation to clear the CO₂ — get <strong>MV into roughly 7–10 L/min</strong> (it\'s 4.5 now) while keeping <strong>Vt lung-safe (≤ 8 mL/kg, so ≤ ~560 mL for 70 kg PBW)</strong>. Prefer more <em>rate</em>, not a bigger breath.',
+        check:function(){ var mv=estMinuteVolume(); return mv>=7 && mv<=10.5 && vals.vt.v<=560; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg'; }
       },
-      confirm:'✓ Minute ventilation roughly doubled — CO₂ clearance rises and the acidosis corrects. There was no single right knob: more rate or more volume both raise MV. Watch the ceiling — driving MV far above need blows off too much CO₂ and can cause alkalosis.'
+      confirm:'✓ Minute ventilation roughly doubled and the acidosis corrects — and you did it the safe way, by <strong>raising rate rather than oversizing the breath</strong>. MV = Rate × Vt, but only rate is free of lung-stretch cost: pushing Vt past ~8 mL/kg PBW trades CO₂ clearance for volutrauma. Watch the ceiling too — driving MV far above need causes alkalosis.'
     },
     // ─── L2 S2 ────────────────────────────────────────────────
     { name:'Hypoxemia That Won\'t Budge',
@@ -2876,7 +2961,7 @@ var SCENARIO_LEVELS={
           'Auto-PEEP is elevating the circuit pressure'
         ],
         correct:2,
-        exp:'<strong>Assess before you adjust.</strong> A fixed obstruction (plug, mainstem, kink) can also cap inspiration at the <em>same</em> pressure every breath — reaching the limit repeatedly does NOT by itself prove the limit is too low. Here the work-up is complete and normal: equal breath sounds, patent tube, no secretions, and a normal plateau pressure — that rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem: it sits at/below the patient\'s own peak. A real obstruction would make pressures <em>climb or vary</em> and raise the plateau.'
+        exp:'<strong>Assess before you adjust.</strong> A fixed obstruction (plug, mainstem, kink) can also cap inspiration at the <em>same</em> pressure every breath — reaching the limit repeatedly does NOT by itself prove the limit is too low. Here the work-up is complete and normal: equal breath sounds, patent tube, no secretions, and a normal plateau pressure — that rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem: it sits at/below the patient\'s own peak. A real obstruction would drive the <em>PIP</em> up while the plateau stayed near-normal (a widening PIP–plateau gap); a high <em>plateau</em> would instead signal reduced compliance. The normal plateau here points to neither.'
       },
       goal:{
         text:'Now that obstruction is ruled out, set the High Pressure limit <strong>5–10 cmH₂O above the confirmed-normal PIP (~30)</strong> — roughly 35–45 cmH₂O. (Listen — the nuisance alarm stops when you clear the PIP.)',
@@ -3008,33 +3093,33 @@ var SCENARIO_LEVELS={
       lung:{compliance:45,resistance:10,label:'Recovering'},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
-        q:'Awake, strong effort, RSBI 62, good gas exchange — the readiness screen is passed. What is the evidence-based next step?',
+        q:'Awake, strong effort, RSBI 62, good gas exchange — the readiness screen is passed. Under your medical-control order to ease support, what is the appropriate transport step?',
         choices:[
           'Keep full AC control — it\'s working, don\'t rock the boat',
-          'Conduct a spontaneous breathing trial (SBT): put them on minimal support (CPAP/PSV, low pressure support) and watch tolerance',
+          'Trial reduced support as ordered (CPAP/PSV, low pressure support) and monitor tolerance closely, ready to restore support',
           'Wean gradually on SIMV, ratcheting the mandatory rate down over hours',
-          'Extubate immediately — no trial needed'
+          'Extubate now — a passed screen means they\'re ready'
         ],
         correct:1,
-        exp:'A passed readiness screen (RSBI < 105, adequate oxygenation, awake, stable) calls for a <strong>spontaneous breathing trial</strong>, not gradual mode-weaning. Put the patient on <strong>minimal support</strong> — CPAP/PSV with low pressure support (or a T-piece) — and observe ~30 min. <strong>SIMV-based weaning is associated with worse outcomes and delayed liberation</strong> (AARC 2024 liberation guideline), so it is not the modern bridge.'
+        exp:'A passed readiness screen (RSBI < 105, adequate oxygenation, awake, stable) supports a <strong>monitored trial of reduced support</strong> — here authorized by your medical-control order. Move to <strong>minimal support</strong> (CPAP/PSV, low pressure support) and watch tolerance, ready to restore full support if they tire. Mind the scope: a passed trial is only <em>one</em> input to extubation readiness — <strong>airway protection, cough strength and secretion burden still govern that decision</strong>, and <strong>extubating for weaning is not a field intervention</strong> without a specific protocol and physician direction. SIMV rate-ratcheting is linked to slower liberation (AARC 2024) and is not the modern bridge. Your job: reduce support as ordered, monitor, and communicate readiness to the receiving team.'
       },
       goal:{
-        text:'Run an SBT — switch to <strong>CPAP / PSV</strong> (spontaneous), set a low <strong>pressure support 5–8 cmH₂O</strong> and <strong>PEEP ≤ 5</strong>, and watch tolerance (RR, Vt, SpO₂, comfort).',
+        text:'Under your medical-control order, trial reduced support — switch to <strong>CPAP / PSV</strong> (spontaneous), set a low <strong>pressure support 5–8 cmH₂O</strong> and <strong>PEEP ≤ 5</strong>, and watch tolerance (RR, Vt, SpO₂, comfort). Be ready to restore full support if they tire.',
         check:function(){ return ventMode==='cpap' && vals.ps.v>=5 && vals.ps.v<=8 && vals.peep.v<=5; },
         readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  PS '+vals.ps.v+'  ·  PEEP '+vals.peep.v; }
       },
-      confirm:'✓ Spontaneous breathing trial underway — minimal support, the patient carrying the work. A tolerated SBT (~30 min: stable RR/Vt/SpO₂, comfortable, RSBI < 105) is the evidence-based path to extubation. SIMV weaning, by contrast, is linked to worse outcomes and slower liberation (AARC 2024). Trend tolerance; if they pass, extubate.'
+      confirm:'✓ Reduced to a monitored spontaneous trial with the patient carrying the work — the right transport action when it is ordered and tolerance is watched. A tolerated trial (stable RR/Vt/SpO₂, comfortable, RSBI < 105) is <em>one</em> input toward liberation, <strong>not a green light to extubate</strong>: airway protection, cough and secretions still decide that, and the extubation decision belongs to the receiving team and medical direction. If they tire, restore support. SIMV rate-weaning, by contrast, is linked to slower liberation (AARC 2024). Recognize readiness — and communicate it.'
     },
     // ─── L3 S3 ────────────────────────────────────────────────
     { name:'The Swinging Peak Pressure',
       badge:'L3 · Scenario 3 of 6', badgeCls:'scen-badge-3',
       intro:'Mid-transport with an intubated status asthmaticus. The peak pressure alarm keeps shrieking and the peaks bounce wildly — you\'re miles out and worried about barotrauma. Before you chase that number, an inspiratory hold tells a different story.',
-      scenario:'Intubated status asthmaticus on volume control. Peak pressure lurches breath to breath — 32 one breath, 54 the next — but an inspiratory-hold plateau is far lower, around 20. The rate is 22 and expiratory flow doesn\'t return to baseline before the next breath. SpO₂ and CO₂ are holding for now.',
-      vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54'},{k:'Pplat',v:'~20 cmH₂O'},{k:'EtCO₂',v:'44 mmHg'},{k:'HR',v:'104'}],
+      scenario:'Intubated status asthmaticus on volume control. Peak pressure lurches breath to breath — 32 one breath, 54 the next — but an inspiratory-hold plateau is far lower, around 25. The rate is 22 and expiratory flow doesn\'t return to baseline before the next breath. SpO₂ and CO₂ are holding for now.',
+      vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54'},{k:'Pplat',v:'~25 cmH₂O'},{k:'EtCO₂',v:'44 mmHg'},{k:'HR',v:'104'}],
       lung:{compliance:45,resistance:30,autoPEEP:8,label:'Status asthmaticus'},
       setup:{mode:'ac',bt:'volume',rate:22,vt:550,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
-        q:'PIP swings to 54, but the inspiratory-hold plateau is only ~20. What does that tell you, and what is the priority?',
+        q:'PIP swings to 54, but the inspiratory-hold plateau is only ~25. What does that tell you, and what is the priority?',
         choices:[
           'The alveoli are dangerously over-pressured — cut tidal volume hard and cap the peak',
           'The high PIP is resistive (airway), not alveolar — protect expiration: slow the rate, short Ti/high flow, long exhale, permissive hypercapnia; watch plateau & auto-PEEP',
@@ -3055,8 +3140,8 @@ var SCENARIO_LEVELS={
     { name:'Losing the Oxygenation Battle',
       badge:'L3 · Scenario 4 of 6', badgeCls:'scen-badge-3',
       intro:'You\'re transferring a severe ARDS patient to an ECMO center. Partway there the saturations start sliding despite everything the sending team set. The monitor keeps alarming in the back of the truck — this is the oxygenation battle, and you\'re losing it.',
-      scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82% — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
-      vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8 cmH₂O'},{k:'P/F',v:'≈ 59'}],
+      scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82%. The latest ABG shows PaO₂ 41 mmHg on FiO₂ 0.70 — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
+      vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'PaO₂',v:'41 mmHg'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8'},{k:'P/F',v:'≈ 59'}],
       lung:{compliance:22,resistance:10,label:'Severe ARDS'},
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
@@ -3106,8 +3191,8 @@ var SCENARIO_LEVELS={
     // ─── L3 S6: NEW ───────────────────────────────────────────
     { name:'The Blown Pupil',
       badge:'L3 · Scenario 6 of 6', badgeCls:'scen-badge-3',
-      intro:'You\'re transporting a head-injured trauma patient to the neuro center. Halfway there the left pupil blows — herniation, in the back of your truck, still twelve minutes out. You need a bridge from the ventilator right now to buy this brain time.',
-      scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. The neurosurgeon is 6 minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
+      intro:'You\'re transporting a head-injured trauma patient to the neuro center. Halfway there the left pupil blows — herniation, in the back of your truck, still eight minutes out. You need a bridge from the ventilator right now to buy this brain time.',
+      scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. Definitive neurosurgical care is still eight minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
       vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'40 mmHg'},{k:'PaCO₂',v:'42 mmHg'},{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'}],
       lung:{compliance:50,resistance:8,label:'TBI (lungs OK)'},
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
@@ -3140,24 +3225,24 @@ var ACADEMY_SCENARIOS={
   'initial-settings':{
     name:'Initial Settings — Newly Intubated',
     badge:'Academy · Initial Vent Setup', badgeCls:'scen-badge-2',
-    intro:'Module 4 practice. You\'re accepting an 80 kg (≈75 kg IBW) man, just intubated for airway protection before a transfer. His lungs are healthy — no ARDS, no obstruction. The sending RT handed him over on whatever was dialed up in a hurry. Build safe initial settings from here.',
-    scenario:'75 kg IBW, healthy lungs, fully sedated for transport. The vent came to you at Vt 700 mL (that\'s ~9 mL/kg), PEEP 0, and 100% oxygen. Set sane, lung-protective starting settings for the road.',
+    intro:'Module 4 practice. You\'re accepting an 80 kg (≈75 kg PBW) man, just intubated for airway protection before a transfer. His lungs are healthy — no ARDS, no obstruction. The sending RT handed him over on whatever was dialed up in a hurry. Build safe initial settings from here.',
+    scenario:'75 kg PBW, healthy lungs, fully sedated for transport. The vent came to you at Vt 700 mL (that\'s ~9 mL/kg), PEEP 0, and 100% oxygen. Set sane, lung-protective starting settings for the road.',
     vitals:[{k:'HR',v:'92'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'38 mmHg'},{k:'BP',v:'128/74'}],
     lung:{compliance:50,resistance:8,label:'Healthy'},
     setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:0,pc:15,ps:10,fio2:100,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
-      q:'Healthy lungs, 75 kg IBW, just intubated. What defines a safe INITIAL tidal volume and baseline?',
+      q:'Healthy lungs, 75 kg PBW, just intubated. What defines a safe INITIAL tidal volume and baseline?',
       choices:[
         'Whatever was set at the sending hospital — don\'t change it',
-        'About 6–8 mL/kg IBW (≈450–600 mL) with a little PEEP (~5) — lung-protective from breath one',
+        'About 6–8 mL/kg PBW (≈450–600 mL) with a little PEEP (~5) — lung-protective from breath one',
         'The biggest volume the high-pressure alarm allows',
         '4 mL/kg — always use the smallest possible breath'
       ],
       correct:1,
-      exp:'Start every intubated patient lung-protective: <strong>6–8 mL/kg of ideal body weight</strong> (here ~450–600 mL), physiologic <strong>PEEP ~5</strong>, and a rate that gives a normal minute ventilation. You don\'t wait for ARDS to protect the lung — you start protected. 9 mL/kg on healthy lungs is still too much.'
+      exp:'Start every intubated patient lung-protective: <strong>6–8 mL/kg of predicted body weight</strong> (here ~450–600 mL), physiologic <strong>PEEP ~5</strong>, and a rate that gives a normal minute ventilation. You don\'t wait for ARDS to protect the lung — you start protected. 9 mL/kg on healthy lungs is still too much.'
     },
     goal:{
-      text:'Dial safe initial settings for a 75 kg IBW adult: <strong>Vt about 450–600 mL (6–8 mL/kg)</strong>, <strong>PEEP ~5</strong>, and a rate giving <strong>MV 7–9 L/min</strong>.',
+      text:'Dial safe initial settings for a 75 kg PBW adult: <strong>Vt about 450–600 mL (6–8 mL/kg)</strong>, <strong>PEEP ~5</strong>, and a rate giving <strong>MV 7–9 L/min</strong>.',
       check:function(){ var mv=estMinuteVolume(); return vals.vt.v>=450&&vals.vt.v<=600&&vals.peep.v>=4&&vals.peep.v<=6&&mv>=7&&mv<=9.5; },
       readout:function(){ return 'Vt '+(vals.vt.v/75).toFixed(1)+' mL/kg  ·  PEEP '+vals.peep.v+'  ·  MV '+estMinuteVolume().toFixed(1); }
     },
@@ -3267,7 +3352,7 @@ var ACADEMY_SCENARIOS={
     name:'Capstone — The Whole Package',
     badge:'Academy · Capstone', badgeCls:'scen-badge-3',
     intro:'Final challenge. The sickest patient of your shift: severe ARDS going to an ECMO center, hours on the road. Everything you\'ve learned lands on this one vent — lung protection, oxygenation, minute ventilation, and safe alarms, all at once. No hand-holding. Get it right.',
-    scenario:'28-year-old, severe ARDS, IBW 70 kg. Handed over at Vt 650 mL (9.3 mL/kg), PEEP 5, FiO₂ 70%, and SpO₂ still only 85%. The lungs are stiff and the plateau is high. Make it lung-protective AND oxygenating for a long transport.',
+    scenario:'28-year-old, severe ARDS, PBW 70 kg. Handed over at Vt 650 mL (9.3 mL/kg), PEEP 5, FiO₂ 70%, and SpO₂ still only 85%. The lungs are stiff and the plateau is high. Make it lung-protective AND oxygenating for a long transport.',
     vitals:[{k:'HR',v:'116'},{k:'SpO₂',v:'85%'},{k:'Pplat',v:'33 cmH₂O'},{k:'FiO₂',v:'70%'}],
     setup:{mode:'ac',bt:'volume',rate:14,vt:650,it:1.0,peep:5,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
@@ -3554,7 +3639,7 @@ function renderTestLung(bar){
         return '<button class="tl-lung'+(k===freeLungKey?' on':'')+'" onclick="setFreeLung(\''+k+'\')">'+FREE_LUNGS[k].label+'</button>';
       }).join('')
     +'</div>'
-    +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP <b>'+lung.autoPEEP+'</b>':'')+'</div>'
+    +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP ≈ <b>'+effectiveAutoPEEP()+'</b> cmH₂O (dynamic)':'')+'</div>'
     +'<div class="tl-grid">'
       +_tlChip('I:E', ieTxt, ieStat)
       +_tlChip('Peak Flow', pfTxt, pfStat)
@@ -3712,7 +3797,7 @@ function submitAnswer(idx){
   var correct=task.quiz.correct;
   quizAnsweredCorrect=(idx===correct);
   btns.forEach(function(b,i){
-    b.classList.add('disabled');
+    b.classList.add('disabled'); b.disabled=true;   // truly inert to assistive tech, not just visually
     if(i===correct)      b.classList.add('correct');
     else if(i===idx)     b.classList.add('wrong');
     else                 b.classList.add('reveal');
@@ -3801,7 +3886,7 @@ function submitDiagnose(idx){
   if(!btns.length||btns[0].classList.contains('disabled')) return;
   var ok=(idx===d.correct);
   btns.forEach(function(b,i){
-    b.classList.add('disabled');
+    b.classList.add('disabled'); b.disabled=true;   // truly inert to assistive tech, not just visually
     if(i===d.correct)   b.classList.add('correct');
     else if(i===idx)    b.classList.add('wrong');
     else                b.classList.add('reveal');
@@ -3880,7 +3965,7 @@ function applyStageEnter(s){
   });
   enforceITLimit();
   ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(updateKnob);
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
 }
 
 function advanceStage(){
@@ -3990,7 +4075,7 @@ function loadScenario(s){
   var keys=['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'];
   keys.forEach(function(k){ if(su[k]!==undefined) vals[k].v=su[k]; });
   enforceITLimit();
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
   scenarioDiagnosed=false;   // reset problem-solving progress for the new case
   _assessAttempts=0;         // reset assessment attempts for the new case
   keys.forEach(function(k){ updateKnob(k); });
@@ -4010,7 +4095,7 @@ var FREE_LUNGS={
 var freeLungKey='normal';
 function setFreeLung(k){
   freeLungKey=k; setLung(FREE_LUNGS[k]);
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
   scanMessage('LUNG: '+FREE_LUNGS[k].label.toUpperCase(),1400);
   updateUI();
 }
@@ -4025,7 +4110,7 @@ function startFree(){
   enforceITLimit();
   _modeCandidate=null; _btCandidate=null; deselect();
   ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(updateKnob);
-  simTime=0; pressureHistory=[];
+  simTime=0; pressureHistory=[]; resetMeasuredPIP();
   updateUI();
   var bar=document.getElementById('mission-bar');
   if(bar){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){ window.scrollTo(0,0); } }
@@ -4051,7 +4136,7 @@ function startLevel(n){
     vals.hipres.v=40; vals.lowpres.v=10; vals.lowmv.v=3; vals.apnea.v=20;
     enforceITLimit();
     ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(function(k){ updateKnob(k); });
-    simTime=0; pressureHistory=[];
+    simTime=0; pressureHistory=[]; resetMeasuredPIP();
     applyStageEnter(STAGE_DEFS[0]);
     updateUI();
     showIntro({name:'LTV 1200 — Setup Walkthrough', badge:'Level 1 · Tutorial',
@@ -4443,14 +4528,15 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter' && e.key!==' ') return;
   var el=document.activeElement;
-  if(el && el.getAttribute && el.getAttribute('role')==='button' && el.hasAttribute('onclick')){
-    e.preventDefault(); el.click();
-  }
+  if(!el||!el.getAttribute||!el.hasAttribute('onclick')) return;
+  var role=el.getAttribute('role');
+  if(role==='button' || role==='radio'){ e.preventDefault(); el.click(); }
 });
 // Keep hidden overlays out of the accessibility tree AND the tab order.
 // Each entry maps an overlay id to a predicate for "currently shown".
 (function(){
   var OV={
+    'boot-overlay':  function(el){ return el.classList.contains('open'); },
     'drawer':        function(el){ return el.classList.contains('open'); },
     'quiz-overlay':  function(el){ return el.classList.contains('open'); },
     'intro-overlay': function(el){ return el.classList.contains('open'); },
