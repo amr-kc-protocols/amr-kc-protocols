@@ -1821,22 +1821,29 @@ function newPatient(){
     +'<div class="boot-lcd"><div class="boot-lcd-line">SELECT PATIENT</div>'
     +'<div class="boot-lcd-sub">Preset values load by patient size (LTV QRG)</div></div>'
     +'<div class="boot-msg">Choose the patient category to load the factory presets, then reassess every setting before use.</div>'
-    +'<div class="boot-preset-row">'
-    +'<div class="boot-preset" onclick="pickPreset(this,\'infant\')"><div class="boot-preset-name">INFANT</div><div class="boot-preset-wt">5–10 kg</div></div>'
-    +'<div class="boot-preset" onclick="pickPreset(this,\'pediatric\')"><div class="boot-preset-name">PEDIATRIC</div><div class="boot-preset-wt">10–40 kg</div></div>'
-    +'<div class="boot-preset" onclick="pickPreset(this,\'adult\')"><div class="boot-preset-name">ADULT</div><div class="boot-preset-wt">&gt; 40 kg</div></div>'
+    +'<div class="boot-preset-row" role="radiogroup" aria-label="Patient type preset">'
+    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Infant preset, 5 to 10 kilograms" onclick="pickPreset(this,\'infant\')"><div class="boot-preset-name">INFANT</div><div class="boot-preset-wt">5–10 kg</div></div>'
+    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Pediatric preset, 10 to 40 kilograms" onclick="pickPreset(this,\'pediatric\')"><div class="boot-preset-name">PEDIATRIC</div><div class="boot-preset-wt">10–40 kg</div></div>'
+    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Adult preset, over 40 kilograms" onclick="pickPreset(this,\'adult\')"><div class="boot-preset-name">ADULT</div><div class="boot-preset-wt">&gt; 40 kg</div></div>'
     +'</div>'
     +'<div class="boot-btns" style="margin-top:14px"><button class="boot-btn primary" id="preset-go" style="opacity:0.5;pointer-events:none" onclick="confirmPreset()">SELECT</button></div>';
 }
 function pickPreset(el,name){
   _pendingPreset=name;
-  document.querySelectorAll('.boot-preset').forEach(function(p){ p.classList.remove('sel'); });
-  el.classList.add('sel');
+  document.querySelectorAll('.boot-preset').forEach(function(p){ p.classList.remove('sel'); p.setAttribute('aria-checked','false'); });
+  el.classList.add('sel'); el.setAttribute('aria-checked','true');
   var go=document.getElementById('preset-go'); if(go){ go.style.opacity='1'; go.style.pointerEvents='auto'; }
 }
 function confirmPreset(){ if(_pendingPreset) applyPreset(_pendingPreset); finishBoot(); }
 function finishBoot(){
   var ov=document.getElementById('boot-overlay'); if(ov) ov.classList.remove('open');
+  // Neutralize the preset SELECT button: pickPreset() gives it an inline
+  // pointer-events:auto that would otherwise survive the overlay closing
+  // (a descendant with :auto still receives clicks under a parent set to
+  // :none), leaving an invisible button clickable over the scenario intro.
+  var go=document.getElementById('preset-go');
+  if(go){ go.style.pointerEvents='none'; go.style.opacity='0.5'; }
+  _pendingPreset=null;
   deviceState='run'; applyStandbyVisual(); updateUI();
   if(_bootThen){ var f=_bootThen; _bootThen=null; f(); }
 }
@@ -3712,7 +3719,7 @@ function submitAnswer(idx){
   var correct=task.quiz.correct;
   quizAnsweredCorrect=(idx===correct);
   btns.forEach(function(b,i){
-    b.classList.add('disabled');
+    b.classList.add('disabled'); b.disabled=true;   // truly inert to assistive tech, not just visually
     if(i===correct)      b.classList.add('correct');
     else if(i===idx)     b.classList.add('wrong');
     else                 b.classList.add('reveal');
@@ -3801,7 +3808,7 @@ function submitDiagnose(idx){
   if(!btns.length||btns[0].classList.contains('disabled')) return;
   var ok=(idx===d.correct);
   btns.forEach(function(b,i){
-    b.classList.add('disabled');
+    b.classList.add('disabled'); b.disabled=true;   // truly inert to assistive tech, not just visually
     if(i===d.correct)   b.classList.add('correct');
     else if(i===idx)    b.classList.add('wrong');
     else                b.classList.add('reveal');
@@ -4443,14 +4450,15 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter' && e.key!==' ') return;
   var el=document.activeElement;
-  if(el && el.getAttribute && el.getAttribute('role')==='button' && el.hasAttribute('onclick')){
-    e.preventDefault(); el.click();
-  }
+  if(!el||!el.getAttribute||!el.hasAttribute('onclick')) return;
+  var role=el.getAttribute('role');
+  if(role==='button' || role==='radio'){ e.preventDefault(); el.click(); }
 });
 // Keep hidden overlays out of the accessibility tree AND the tab order.
 // Each entry maps an overlay id to a predicate for "currently shown".
 (function(){
   var OV={
+    'boot-overlay':  function(el){ return el.classList.contains('open'); },
     'drawer':        function(el){ return el.classList.contains('open'); },
     'quiz-overlay':  function(el){ return el.classList.contains('open'); },
     'intro-overlay': function(el){ return el.classList.contains('open'); },
