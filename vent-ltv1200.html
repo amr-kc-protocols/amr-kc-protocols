@@ -1053,11 +1053,11 @@ canvas#pip-canvas{display:none}
 
   <!-- NPPV IPAP DISPLAY (shows when NPPV active) -->
   <div id="ipap-display" style="display:none;background:#041520;border:1px solid #1a4a6a;border-radius:8px;padding:10px 14px;margin-top:8px;font-family:var(--mono)">
-    <div style="font-size:8px;color:#38bdf8;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px">NPPV CALCULATED VALUES</div>
+    <div style="font-size:8px;color:#38bdf8;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px">NPPV SET VALUES · IPAP / EPAP</div>
     <div style="display:flex;gap:20px">
-      <div><div style="font-size:8px;color:#1a5a7a">EPAP (PEEP)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-epap">5</span> <span style="font-size:10px">cmH₂O</span></div></div>
-      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">IPAP (EPAP + PS)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ipap">13</span> <span style="font-size:10px">cmH₂O</span></div></div>
-      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">PRESSURE SUPPORT</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ps">8</span> <span style="font-size:10px">cmH₂O above EPAP</span></div></div>
+      <div><div style="font-size:8px;color:#1a5a7a">IPAP (set)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ipap">13</span> <span style="font-size:10px">cmH₂O</span></div></div>
+      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">EPAP (set)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-epap">5</span> <span style="font-size:10px">cmH₂O</span></div></div>
+      <div style="border-left:1px solid #1a3a4a;padding-left:20px"><div style="font-size:8px;color:#1a5a7a">SUPPORT (IPAP − EPAP)</div><div style="font-size:18px;font-weight:700;color:#38bdf8"><span id="nppv-ps">8</span> <span style="font-size:10px">cmH₂O</span></div></div>
     </div>
   </div>
 
@@ -1212,6 +1212,13 @@ function calcIE(){
 }
 
 // ── CONTROL WINDOW UPDATES ────────────────────────────────────
+// The number a control window should show. On the real LTV in NPPV, the
+// Pres. Support display reads the actual IPAP (= EPAP + support), not the
+// support difference — so we surface IPAP there and keep support internal.
+function ctrlDisplayValue(key){
+  if(key==='ps' && ventMode==='nppv') return vals.peep.v + vals.ps.v;   // IPAP
+  return vals[key].v;
+}
 // Each control now shows its value in an LED window (no rotating indicator).
 function updateKnob(key){
   var kv=document.getElementById('kv-'+key);
@@ -1219,6 +1226,8 @@ function updateKnob(key){
   // Breath Rate reads dashes in pure CPAP (spontaneous — no set rate), like the real LTV.
   if(key==='rate' && ventMode==='cpap'){
     kv.textContent='- -'; kv.classList.add('dashes');
+  } else if(key==='ps' && ventMode==='nppv'){
+    kv.classList.remove('dashes'); kv.textContent=ctrlDisplayValue('ps');   // show absolute IPAP, never OFF
   } else if((key==='lowpres'||key==='lowmv'||key==='ps') && vals[key].v===0){
     kv.textContent='OFF'; kv.classList.add('dashes');   // 0 = alarm/support OFF on the LTV
   } else {
@@ -1227,6 +1236,8 @@ function updateKnob(key){
     else if(key==='lowmv') kv.textContent=vals[key].v.toFixed(1);   // decimal resolution
     else kv.textContent=vals[key].v;
   }
+  // In NPPV the IPAP window is EPAP + support, so a change to EPAP must refresh it too.
+  if(key==='peep' && ventMode==='nppv'){ var kvp=document.getElementById('kv-ps'); if(kvp) kvp.textContent=ctrlDisplayValue('ps'); }
   if(key===selectedControl) updateKnobPointer();
   if(typeof refreshA11y==='function') refreshA11y();
 }
@@ -1315,6 +1326,15 @@ function adj(key,delta){
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
     enforcePeakFlow('vt');     // raising Vt past the flow ceiling is capped
+  } else if(key==='peep' && ventMode==='nppv'){
+    // NPPV: EPAP and IPAP are independent set values on the LTV. Hold IPAP
+    // fixed as EPAP moves (support = IPAP − EPAP floats), so raising EPAP
+    // does not drag IPAP up with it.
+    var before=c.v;
+    c.v=Math.round(Math.min(c.max,Math.max(c.min,c.v+delta)));
+    var applied=c.v-before;
+    if(applied!==0){ vals.ps.v=Math.max(0,Math.min(vals.ps.max, vals.ps.v-applied)); }
+    updateKnob('peep'); updateKnob('ps');
   } else {
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
@@ -1379,8 +1399,8 @@ function updateUI(){
 
   // NPPV relabeling on the control tiles
   var isNPPV=(ventMode==='nppv');
-  var lblPs=document.getElementById('lbl-ps');   if(lblPs) lblPs.textContent = isNPPV?'IPAP (above EPAP)':'Pres. Support';
-  var unPs =document.getElementById('kv-ps-unit');if(unPs) unPs.textContent = isNPPV?'+EPAP':'cmH₂O';
+  var lblPs=document.getElementById('lbl-ps');   if(lblPs) lblPs.textContent = isNPPV?'IPAP':'Pres. Support';
+  var unPs =document.getElementById('kv-ps-unit');if(unPs) unPs.textContent = 'cmH₂O';   // IPAP is an absolute pressure, like the real LTV display
   var lblPeep=document.getElementById('peep-main-lbl'); if(lblPeep) lblPeep.textContent = isNPPV?'EPAP':'PEEP';
   var unPeep=document.getElementById('peep-unit-lbl');  if(unPeep) unPeep.textContent='cmH₂O';
   var lblRate=document.getElementById('lbl-rate');       if(lblRate) lblRate.textContent = isNPPV?'Apnea Backup':'Breath Rate';
@@ -1626,8 +1646,8 @@ function renderDock(){
   dock.classList.toggle('show',show);
   if(!show) return;
   var key=selectedControl, c=vals[key];
-  document.getElementById('dock-name').textContent=CONTROL_SHORT[key]||key;
-  document.getElementById('dock-val').textContent = key==='it'? c.v.toFixed(1) : c.v;
+  document.getElementById('dock-name').textContent=(key==='ps'&&ventMode==='nppv')?'IPAP':(CONTROL_SHORT[key]||key);
+  document.getElementById('dock-val').textContent = key==='it'? c.v.toFixed(1) : ctrlDisplayValue(key);
   document.getElementById('dock-unit').textContent = (typeof KNOB_UNITS!=='undefined' && KNOB_UNITS[key])||'';
 }
 window.addEventListener('scroll',function(){ if(selectedControl) renderDock(); },{passive:true});
@@ -1661,8 +1681,9 @@ var CTRL_UNIT={rate:'breaths per minute',vt:'millilitres',pc:'centimetres H2O',i
 function refreshA11y(){
   document.querySelectorAll('.ctrl2').forEach(function(t){
     var key=t.getAttribute('data-key'), c=vals[key]; if(!c) return;
-    var name=(CONTROL_SHORT[key]||key);
+    var name=(key==='ps'&&ventMode==='nppv')?'IPAP':(CONTROL_SHORT[key]||key);
     var valTxt = (key==='rate'&&ventMode==='cpap') ? 'off, spontaneous'
+      : (key==='ps'&&ventMode==='nppv') ? ctrlDisplayValue('ps')
       : ((key==='lowpres'||key==='lowmv'||key==='ps') && c.v===0) ? 'off'
       : (key==='it'||key==='lowmv') ? c.v.toFixed(1) : c.v;
     var state = t.classList.contains('game-locked') ? ', locked'
@@ -1674,8 +1695,9 @@ function refreshA11y(){
   ['setknob','dockknob'].forEach(function(id){
     var k=document.getElementById(id); if(!k) return;
     if(selectedControl && vals[selectedControl]){
-      var c=vals[selectedControl], nm=(CONTROL_SHORT[selectedControl]||selectedControl);
-      var v=(selectedControl==='it'||selectedControl==='lowmv')?c.v.toFixed(1):c.v;
+      var c=vals[selectedControl], isNPPVps=(selectedControl==='ps'&&ventMode==='nppv');
+      var nm=isNPPVps?'IPAP':(CONTROL_SHORT[selectedControl]||selectedControl);
+      var v=(selectedControl==='it'||selectedControl==='lowmv')?c.v.toFixed(1):ctrlDisplayValue(selectedControl);
       k.setAttribute('aria-valuemin',c.min); k.setAttribute('aria-valuemax',c.max);
       k.setAttribute('aria-valuenow',c.v); k.setAttribute('aria-valuetext',nm+' '+v+' '+(CTRL_UNIT[selectedControl]||''));
       k.setAttribute('aria-label','Set Value — '+nm);
@@ -2489,15 +2511,15 @@ var CONTROLS={
     ],
     pearl:'Max IT = (60÷Rate) − 0.5 s. Example: Rate 12 → cycle = 5.0 s → max IT = 4.5 s. At Rate 20 → cycle = 3.0 s → max IT = 2.5 s. Insufficient exp time → auto-PEEP and hemodynamic compromise.'
   },
-  ps:{tag:'control',tagCls:'tag-control',title:'Pressure Support / IPAP',range:'0–40 cmH₂O  |  Typical: 5–10',
-    desc:'In invasive modes: pressure boost for spontaneous breaths. <strong>In NPPV: this is the IPAP above EPAP</strong> — the total inspiratory pressure = EPAP + this value.',
+  ps:{tag:'control',tagCls:'tag-control',title:'Pressure Support / IPAP',range:'0–40 cmH₂O  |  Typical PS: 5–10',
+    desc:'In invasive modes (SIMV, CPAP/PSV) this control sets <strong>Pressure Support</strong> — a pressure boost above PEEP for spontaneous breaths. <strong>In NPPV the LTV display reads the absolute IPAP</strong>: you SET IPAP and SET EPAP as two independent values, and the device derives support = IPAP − EPAP.',
     avail:[
       {mode:'AC-VC / AC-PC',yes:false,note:'All breaths are mandatory in A/C. No spontaneous breaths to support.'},
       {mode:'SIMV-VC / SIMV-PC',yes:true,note:'Supports spontaneous breaths between mandatory breaths. Reduces work of breathing.'},
       {mode:'CPAP / PSV',yes:true,note:'Primary ventilation. Every breath is PS-augmented. Wean by reducing PS.'},
-      {mode:'NPPV / BiPAP',yes:true,note:'Sets IPAP above EPAP. Total inspiratory pressure = EPAP + this value. Typical NPPV: EPAP 5, IPAP 10–15 (so PS = 5–10).'},
+      {mode:'NPPV / BiPAP',yes:true,note:'Display reads the actual IPAP (absolute). SET IPAP, then SET EPAP; support = IPAP − EPAP. Typical: EPAP 5, IPAP 10–15.'},
     ],
-    pearl:'NPPV example: EPAP 5 + PS 10 = IPAP 15 cmH₂O. IPAP drives CO₂ removal; EPAP improves oxygenation. Minimum PS of ~5 overcomes mask/circuit resistance.'
+    pearl:'NPPV: the LTV shows IPAP and EPAP directly — e.g. IPAP 15 / EPAP 5 gives 10 cmH₂O of support. IPAP drives CO₂ removal; EPAP improves oxygenation. Raising EPAP does not raise IPAP — support narrows. Keep IPAP at least ~5 above EPAP to overcome mask/circuit resistance.'
   },
   fio2:{tag:'control',tagCls:'tag-control',title:'FiO₂ / O₂ Flush',range:'21–100%  |  Hold 3 sec for 100% flush',
     desc:'Fraction of inspired oxygen. Active in all modes. In NPPV, oxygen is entrained into the circuit at this concentration.',
