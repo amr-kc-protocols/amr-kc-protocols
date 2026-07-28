@@ -13,7 +13,7 @@ Day 1 — Foundations
 - Module 1 — Pulmonary Anatomy & Physiology (45 min · 7 lessons, 10-question quiz, knob-matching, COPD scenario)
 - Module 2 — Recognizing Respiratory Failure (45 min · 7 lessons, 10-question quiz, Type I vs Type II matching, asthma pre-arrest scenario)
 - Module 3 — Indications for Ventilatory Support (40 min · 6 lessons, 10-question quiz, intervention matching, CHF pulmonary edema scenario)
-- Module 4 — Ventilator Vocabulary & Initial Settings (50 min · 6 lessons, 10-question quiz, set-vs-monitored matching, IBW correction scenario)
+- Module 4 — Ventilator Vocabulary & Initial Settings (50 min · 6 lessons, 10-question quiz, set-vs-monitored matching, PBW correction scenario)
 - Module 5 — Modes of Ventilation (60 min · 6 lessons, 10-question quiz, mode-selection matching, inherited PRVC scenario)
 
 Day 2 — Application

@@ -82,7 +82,7 @@ const MODULES = [
         "Every breath is like mailing a package down a long hallway to a room at the far end. The hallway holds air but does no gas exchange — anything that never reaches the room is wasted effort. That wasted volume is dead space: the part of every breath that does not participate in gas exchange. It comes in three kinds.",
         "Anatomic dead space is the volume of the conducting airways: approximately 2 mL per kilogram of body weight. Alveolar dead space is the volume of alveoli that are ventilated but not perfused — for example, downstream of a pulmonary embolism. Equipment dead space is the volume of the vent circuit between the ETT tip and the Y-piece — up to 80 to 90 mL on an adult circuit.",
         "Total physiologic dead space is normally about 30% of tidal volume in a healthy adult. A study by Nuckton and colleagues (NEJM 2002) showed that VD/VT greater than 0.6 in ARDS strongly predicts mortality.",
-        "The practical bedside implication: tidal volume must be large enough to overcome dead space. Set Vt too low and the whole breath gets stuck in the hallway — dead space eats it before any reaches the room. Aim for 6–8 mL per kg of ideal body weight in most adults; 4–6 mL/kg IBW in ARDS."
+        "The practical bedside implication: tidal volume must be large enough to overcome dead space. Set Vt too low and the whole breath gets stuck in the hallway — dead space eats it before any reaches the room. Aim for 6–8 mL per kg of predicted body weight in most adults; 4–6 mL/kg PBW in ARDS."
       ]
     },
     {
@@ -155,7 +155,7 @@ const MODULES = [
       { q: "A patient is intubated for COPD exacerbation with hypercapnia. EtCO₂ trends from 60 to 75 mmHg over five minutes despite no setting change. What does this suggest?",
         choices: ["Improving lung function", "Worsening ventilation / patient fatigue", "Excessive sedation", "Auto-PEEP only"], answer: 1,
         rationale: "A rising EtCO₂ trend means the patient is moving less air relative to CO₂ production. In a Type II failure picture, this is a fatigue signal — escalate." },
-      { q: "ARDSNet (NEJM 2000) demonstrated that ventilation at 6 mL/kg of ideal body weight compared to 12 mL/kg reduced mortality from approximately:",
+      { q: "ARDSNet (NEJM 2000) demonstrated that ventilation at 6 mL/kg of predicted body weight compared to 12 mL/kg reduced mortality from approximately:",
         choices: ["60% to 50%", "20% to 15%", "There was no difference", "40% to 31%"], answer: 3,
         rationale: "The ARMA trial showed mortality 39.8% (12 mL/kg) vs 31.0% (6 mL/kg) — absolute reduction 8.8%, NNT 11 lives saved. One of the most evidence-based interventions in critical care." }
     ]
@@ -437,7 +437,7 @@ const MODULES = [
             feedback: "PEEP can worsen auto-PEEP and drop blood pressure in this scenario. Keep PEEP low (0–5). The lever here is expiratory time, not PEEP." }
         ] }
     ],
-    conclusion: "She is intubated, bagged at slow rate while you prepare the vent. Settings: AC/VC, RR 10, Vt 6 mL/kg IBW, I:E 1:5, PEEP 5, FiO₂ 100%. Push-dose epi ready. EtCO₂ returns at 70 with a shark-fin trace — manageable. Transport stable to the receiving ICU. Identifying pre-arrest in time saved this patient."
+    conclusion: "She is intubated, bagged at slow rate while you prepare the vent. Settings: AC/VC, RR 10, Vt 6 mL/kg PBW, I:E 1:5, PEEP 5, FiO₂ 100%. Push-dose epi ready. EtCO₂ returns at 70 with a shark-fin trace — manageable. Transport stable to the receiving ICU. Identifying pre-arrest in time saved this patient."
   }
 },
 
@@ -481,7 +481,7 @@ const MODULES = [
       body: [
         "NIV that is going to work shows signs of working within minutes. Improvement: falling respiratory rate, rising saturation, lengthening of speech, softening accessory muscle use, normalizing EtCO₂ trend. Vital signs should improve in 5 to 15 minutes. Mental status improves in parallel.",
         "NIV that is not going to work also declares itself early. Persistent or rising RR, no change in saturation, declining mental status, vomiting, inability to tolerate the mask are all signs of failure.",
-        "Apply the 1-hour rule. If the patient has been on NIV for 60 minutes without clear improvement, escalate to invasive ventilation. Continuing in a non-improving patient delays intubation under increasingly poor conditions — by the time the team gives up, the patient is often hypoxic, hypotensive, and exhausted."
+        "There is no universal clock that makes NIV safe until a particular minute. Reassess continuously and escalate without delay for worsening oxygenation or ventilation, declining mental status or airway protection, hemodynamic instability, intolerance, or failure to improve. Follow the receiving clinician's plan and your local protocol; do not let an arbitrary trial duration delay a needed definitive airway."
       ],
       pearl: { title: "Sit them up", body: "Upright posture (head of bed 30°+) improves functional residual capacity and reduces work of breathing. Always sit your NIV and your pre-RSI patients up." }
     },
@@ -490,13 +490,13 @@ const MODULES = [
       kicker: "3.4 · Contraindications",
       title: "When NIV Is the WRONG Tool",
       body: [
-        "ABSOLUTE contraindications must be respected.",
-        "1. Inability to protect the airway — GCS ≤ 8, no gag, active vomiting, copious secretions. NIV in such a patient is a comfortable way to deliver gastric contents into the lung.",
+        "NIV requires active patient selection and close reassessment. These findings make NIV unsafe or likely to fail and should prompt a definitive-airway plan:",
+        "1. Inability to protect the airway, active vomiting, or secretions the patient cannot clear. A GCS number or gag reflex alone does not prove airway protection; assess the whole patient.",
         "2. Facial trauma or severe deformity preventing mask seal.",
         "3. Hemodynamic instability or peri-arrest state. The time required to set up NIV is wasted on a patient who needs definitive airway control.",
         "4. Pneumothorax (until decompressed). Positive pressure can tension a small PTX into a fatal one.",
-        "5. Cardiac or respiratory arrest. Bag-mask ventilation and intubation are the only acceptable options.",
-        "When in doubt: secure the airway."
+        "5. Cardiac or respiratory arrest. Begin protocol-directed resuscitation and ventilation.",
+        "When the patient cannot safely cooperate, protect the airway, or improve on NIV, move to the appropriate definitive-airway pathway."
       ],
       pearl: { title: "Vomiting on NIV", body: "If a patient on NIV begins to vomit, remove the mask immediately, suction aggressively, and prepare to secure the airway. Most protocols treat any vomiting episode as an absolute contraindication going forward." }
     },
@@ -506,8 +506,8 @@ const MODULES = [
       title: "Indications for Endotracheal Intubation",
       body: [
         "Move to invasive mechanical ventilation when:",
-        "1. NIV is failing after a fair trial (typically 30 to 60 minutes; maximum 2 hours).",
-        "2. GCS ≤ 8 or unable to protect airway.",
+        "1. NIV is failing despite prompt optimization and ongoing reassessment.",
+        "2. The patient cannot protect the airway or manage secretions; do not use a GCS cutoff alone.",
         "3. Apnea or agonal respirations.",
         "4. Refractory hypoxia despite high-FiO₂ NIV.",
         "5. Hemodynamic instability requiring control of work of breathing.",
@@ -536,9 +536,9 @@ const MODULES = [
       { q: "A 65-year-old in acute pulmonary edema is awake, RR 32, SpO₂ 84% on non-rebreather, frothy sputum. The BEST next step within EMS scope is:",
         choices: ["Immediate intubation", "BVM with PEEP valve only", "CPAP at 5–10 cmH₂O with FiO₂ 100%", "Nasal cannula at 6 L/min"], answer: 2,
         rationale: "Acute pulmonary edema in an awake patient with intact airway protection is the textbook CPAP indication. Cochrane evidence: NNT ~5 to prevent intubation. Reassess in 5–10 min." },
-      { q: "Which of the following is an ABSOLUTE contraindication to NIV?",
+      { q: "Which finding most strongly argues against continuing NIV?",
         choices: ["Inability to protect the airway", "Mild claustrophobia", "Tachypnea > 30", "Mild bronchospasm"], answer: 0,
-        rationale: "Cannot protect the airway (GCS ≤ 8, vomiting, copious secretions) is absolute. NIV in such patients risks aspiration." },
+        rationale: "A patient who cannot protect the airway or clear secretions is at high aspiration risk. Do not use GCS or gag reflex as a stand-alone test; assess airway protection and the whole clinical trajectory." },
       { q: "BiPAP is first-line for which of the following EMS scenarios?",
         choices: ["Acute pulmonary edema with CHF", "COPD exacerbation with hypercapnia", "Severe traumatic brain injury", "Tension pneumothorax (post-decompression)"], answer: 1,
         rationale: "COPD with hypercapnia is the textbook BiPAP indication. Brochard NEJM 1995 demonstrated mortality reduction. CHF is CPAP. TBI patients with GCS ≤ 8 need intubation, not NIV." },
@@ -551,9 +551,9 @@ const MODULES = [
       { q: "Typical starting settings for CPAP in acute pulmonary edema are:",
         choices: ["20 cmH₂O at FiO₂ 21%", "5–10 cmH₂O at FiO₂ 100%, then wean", "1–2 cmH₂O at FiO₂ 50%", "IPAP 20 / EPAP 5"], answer: 1,
         rationale: "Start CPAP at 5–10 cmH₂O with FiO₂ 100%, then titrate as the patient improves. The IPAP/EPAP option is BiPAP, not CPAP." },
-      { q: "The 1-hour rule for NIV means:",
-        choices: ["If no improvement at 60 minutes, escalate to invasive ventilation", "NIV must be attempted for at least 1 hour before escalation", "NIV cannot exceed 1 hour total", "Switch from CPAP to BiPAP every hour"], answer: 0,
-        rationale: "If the patient is not improving at 60 minutes on NIV, escalate. Continuing in a non-improving patient delays intubation under increasingly poor conditions." },
+      { q: "Which principle should guide the duration of an NIV trial?",
+        choices: ["Reassess continuously and escalate promptly if the patient worsens or fails to improve", "NIV must be attempted for at least 1 hour", "NIV must stop at exactly 1 hour", "Change from CPAP to bilevel NIV every hour"], answer: 0,
+        rationale: "NIV has no universal one-hour pass/fail rule. Use repeated clinical reassessment and local protocol; worsening airway protection, gas exchange, hemodynamics, or work of breathing should trigger prompt escalation." },
       { q: "NoDESAT (apneic oxygenation during laryngoscopy) involves:",
         choices: ["A nasal cannula at 15 L/min left in place during intubation", "Increasing the NRB flow during the apneic phase", "Bag-mask ventilation during laryngoscopy", "Cricoid pressure for the entire apnea"], answer: 0,
         rationale: "NoDESAT: place a nasal cannula at flush rate (15 L/min) during pre-oxygenation and leave it in place during the laryngoscopy. Extends safe apnea time, particularly in obese and pediatric patients." },
@@ -562,7 +562,7 @@ const MODULES = [
         rationale: "CPAP raises intrathoracic pressure (reducing preload) and reduces LV afterload (reducing transmural cardiac pressure), in addition to pushing alveolar fluid back into capillaries. Triple effect." },
       { q: "A COPD patient on BiPAP for 60 minutes shows no improvement, persistent CO₂ retention, and is becoming drowsy. The MOST appropriate next step is:",
         choices: ["Escalate to invasive mechanical ventilation", "Continue BiPAP — give it more time", "Switch to CPAP", "Add high-flow nasal cannula on top of BiPAP"], answer: 0,
-        rationale: "1-hour rule. NIV failure with worsening mental status is an indication for invasive ventilation. Continuing now wastes time and risks aspiration as he loses airway protection." }
+        rationale: "Worsening mental status plus persistent ventilatory failure means the NIV trial is failing and airway protection is deteriorating. Escalate promptly rather than waiting for a fixed time threshold." }
     ]
   },
 
@@ -629,7 +629,7 @@ const MODULES = [
           { label: "5 to 10 minutes — looking for RR down, sat up, speech lengthening", outcome: "good",
             feedback: "Right. Reassess at 5 and again at 10 minutes. Falling RR, rising sat, longer phrases, softer accessory muscle use are signs of success. Document the trend." },
           { label: "Reassessment is not necessary once CPAP is on", outcome: "bad",
-            feedback: "Never. NIV is a trial, not a destination. Reassess regularly. If she is not improving by 30–60 minutes, the 1-hour rule says escalate." }
+            feedback: "Never. NIV is a monitored trial, not a destination. Reassess repeatedly and escalate promptly if oxygenation, ventilation, work of breathing, hemodynamics, or airway protection worsens; do not wait for an arbitrary clock." }
         ] },
       { prompt: "Q4. Ten minutes into CPAP: RR 22, SpO₂ 94%, frothier sputum reduced, she is speaking 4–5 word sentences. What now?",
         choices: [
@@ -653,28 +653,28 @@ const MODULES = [
 {
   id: 4,
   title: "Vent Vocabulary & Initial Settings",
-  blurb: "The eight numbers every vented patient has. IBW math, the ARDSNet history, and how to defend any setting you turn.",
+  blurb: "The eight numbers every vented patient has. PBW math, the ARDSNet history, and how to defend any setting you turn.",
   estMin: 50,
   practiceScenario: "initial-settings",
-  practiceNote: "Build safe initial settings on a freshly intubated patient — Vt by IBW, PEEP, and minute ventilation.",
+  practiceNote: "Build safe initial settings on a freshly intubated patient — Vt by PBW, PEEP, and minute ventilation.",
 
   lessons: [
     {
       id: "vt", kicker: "4.1 · Tidal Volume", title: "Vt — How Much Air Per Breath",
       body: [
         "Tidal volume is the volume the ventilator delivers with each mandatory breath, measured in milliliters.",
-        "Modern adult target: 6 to 8 mL per kilogram of IDEAL body weight. Lower (4 to 6 mL/kg IBW) for ARDS. Pediatric: 6 to 8 mL/kg of ACTUAL body weight.",
-        "History matters. The 1990s standard was 10 to 12 mL/kg. ARDSNet ARMA (NEJM 2000) randomized 861 ARDS patients to 12 vs 6 mL/kg IBW. Mortality dropped from 39.8% to 31.0% (NNT 11). One of the most evidence-based interventions in critical care.",
-        "Too low: dead space eats the breath; CO₂ rises despite normal-looking MV. Too high: alveolar over-distention, volutrauma. Always use IBW, not actual."
+        "Modern adult target: 6 to 8 mL per kilogram of PREDICTED body weight. Lower (4 to 6 mL/kg PBW) for ARDS. Pediatric: 6 to 8 mL/kg of ACTUAL body weight.",
+        "History matters. The 1990s standard was 10 to 12 mL/kg. ARDSNet ARMA (NEJM 2000) randomized 861 ARDS patients to 12 vs 6 mL/kg PBW. Mortality dropped from 39.8% to 31.0% (NNT 11). One of the most evidence-based interventions in critical care.",
+        "Too low: dead space eats the breath; CO₂ rises despite normal-looking MV. Too high: alveolar over-distention, volutrauma. Always use PBW, not actual."
       ],
-      evidence: { title: "ARDSNet ARMA, NEJM 2000", body: "Randomized 861 ARDS patients to 12 mL/kg vs 6 mL/kg IBW. Mortality 39.8% vs 31.0%. NNT 11. The trial also kept Pplat < 30 and paired PEEP with FiO₂." }
+      evidence: { title: "ARDSNet ARMA, NEJM 2000", body: "Randomized 861 ARDS patients to 12 mL/kg vs 6 mL/kg PBW. Mortality 39.8% vs 31.0%. NNT 11. The trial also kept Pplat < 30 and paired PEEP with FiO₂." }
     },
     {
       id: "rr-mv", kicker: "4.2 · Rate", title: "Respiratory Rate & Minute Ventilation",
       body: [
         "Respiratory rate is the number of mandatory breaths per minute the vent delivers. Adult initial: 12 to 16, titrated to EtCO₂ 35 to 45.",
         "Lower (8 to 10) for asthma/COPD — let them exhale. Higher (18 to 22) in ARDS where Vt is reduced.",
-        "Minute ventilation (MV) = RR × Vt. Adult target 6 to 8 L/min. For a 70 kg IBW adult: Vt 480 mL × RR 14 = 6.7 L/min, right in range.",
+        "Minute ventilation (MV) = RR × Vt. Adult target 6 to 8 L/min. For a 70 kg PBW adult: Vt 480 mL × RR 14 = 6.7 L/min, right in range.",
         "Set the LOW MV alarm at ~70% of expected MV. The apnea alarm fires after 20 seconds of no breath — by then the patient has been failing for a while."
       ]
     },
@@ -709,26 +709,26 @@ const MODULES = [
       evidence: { title: "Amato 2015 driving pressure", body: "Pplat − PEEP < 14 cmH₂O is the modern ARDS target. Stronger mortality predictor than Vt, Pplat, or PEEP individually." }
     },
     {
-      id: "settings", kicker: "4.6 · Defaults", title: "IBW Math and Safe Initial Settings",
+      id: "settings", kicker: "4.6 · Defaults", title: "PBW Math and Safe Initial Settings",
       body: [
-        "Devine IBW formulas. Men: 50 + 2.3 × (inches over 60). Women: 45.5 + 2.3 × (inches over 60).",
+        "Devine PBW formulas. Men: 50 + 2.3 × (inches over 60). Women: 45.5 + 2.3 × (inches over 60).",
         "Examples. 5'6\" man: 50 + 2.3 × 6 = 63.8 kg → safe Vt 380–510 mL. 5'10\" woman: 45.5 + 2.3 × 10 = 68.5 kg → safe Vt 410–548 mL.",
-        "Safe adult defaults to defend: AC/VC mode; Vt 6–8 mL/kg IBW; RR 14, titrated to EtCO₂ 35–45; FiO₂ 100% then wean; PEEP 5; I:E 1:2; alarms PIP 35, low MV 4, low PEEP 3, apnea 20 sec.",
+        "Safe adult defaults to defend: AC/VC mode; Vt 6–8 mL/kg PBW; RR 14, titrated to EtCO₂ 35–45; FiO₂ 100% then wean; PEEP 5; I:E 1:2; alarms PIP 35, low MV 4, low PEEP 3, apnea 20 sec.",
         "When in doubt, return to defaults. Change ONE thing at a time, reassess in 30 seconds, and document with vitals before and after."
       ],
-      pearl: { title: "5'10\" rule of thumb", body: "IBW is sex-specific — one number won't do. By the Devine formulas a 5'10\" man ≈ 73 kg (Vt 440–580 mL) and a 5'10\" woman ≈ 68.5 kg (Vt 410–548 mL). Anchor to the patient's sex and height, never actual weight." }
+      pearl: { title: "5'10\" rule of thumb", body: "PBW is sex-specific — one number won't do. By the Devine formulas a 5'10\" man ≈ 73 kg (Vt 440–580 mL) and a 5'10\" woman ≈ 68.5 kg (Vt 410–548 mL). Anchor to the patient's sex and height, never actual weight." }
     }
   ],
 
   quiz: {
     title: "Module 4 Knowledge Check",
-    intro: "Ten questions on the eight numbers and IBW math.",
+    intro: "Ten questions on the eight numbers and PBW math.",
     passScore: 8,
     questions: [
       { q: "A 5'6\" male weighs 250 lb. What initial Vt should you set on AC/VC?",
-        choices: ["6–8 mL/kg of actual 113 kg → 700–900 mL", "6–8 mL/kg of IBW ~64 kg → 380–510 mL", "Use last documented Vt", "10 mL/kg actual weight"], answer: 1,
-        rationale: "Devine IBW for a 5'6\" man = 50 + 2.3 × 6 = 63.8 kg. Vt = 6–8 mL/kg IBW = 380–510 mL. Lungs scale with height, not actual weight." },
-      { q: "ARDSNet (ARMA, NEJM 2000) showed mortality at 6 mL/kg vs 12 mL/kg IBW was approximately:",
+        choices: ["6–8 mL/kg of actual 113 kg → 700–900 mL", "6–8 mL/kg of PBW ~64 kg → 380–510 mL", "Use last documented Vt", "10 mL/kg actual weight"], answer: 1,
+        rationale: "Devine PBW for a 5'6\" man = 50 + 2.3 × 6 = 63.8 kg. Vt = 6–8 mL/kg PBW = 380–510 mL. Lungs scale with height, not actual weight." },
+      { q: "ARDSNet (ARMA, NEJM 2000) showed mortality at 6 mL/kg vs 12 mL/kg PBW was approximately:",
         choices: ["31% vs 40%", "No difference", "20% vs 25%", "50% vs 60%"], answer: 0,
         rationale: "31.0% (6 mL/kg) vs 39.8% (12 mL/kg). Absolute reduction 8.8%. NNT 11 lives saved. Foundational evidence for lung-protective ventilation." },
       { q: "Plateau pressure ceiling in ARDS, per ARDSNet protocol:",
@@ -748,7 +748,7 @@ const MODULES = [
         rationale: "Hyperoxia post-ROSC worsens neurologic outcome (multiple observational studies). The 2025 AHA guidelines recommend titrating FiO₂ to SpO₂ 90–98% (prior target 92–98%)." },
       { q: "Adult target minute ventilation:",
         choices: ["6–8 L/min", "2–4 L/min", "12–14 L/min", "20+ L/min"], answer: 0,
-        rationale: "Adult MV target is 6–8 L/min (RR × Vt). For a 70 kg IBW adult: Vt 480 × RR 14 = 6.7 L/min." },
+        rationale: "Adult MV target is 6–8 L/min (RR × Vt). For a 70 kg PBW adult: Vt 480 × RR 14 = 6.7 L/min." },
       { q: "PIP rises from 22 to 40, Pplat stays at 24. The MOST likely cause is:",
         choices: ["Worsening ARDS", "Pneumothorax", "Auto-PEEP", "Mucus plug or bronchospasm"], answer: 3,
         rationale: "PIP up + Pplat unchanged = AIRWAY problem (resistance). ARDS or PTX would raise both. Suction, bronchodilator, check the tube." },
@@ -799,15 +799,15 @@ const MODULES = [
       { prompt: "Q1. What is the single biggest problem with these settings?",
         choices: [
           { label: "PEEP too low for ARDS", outcome: "bad",
-            feedback: "This isn't necessarily ARDS yet. The actual problem is the Vt was set from actual body weight, not IBW. Pick again." },
-          { label: "Vt was calculated from actual body weight (250 lb), not from ideal body weight", outcome: "good",
-            feedback: "Right. 800 mL on a 5'6\" patient is enormous. His IBW is 50 + 2.3 × 6 = 63.8 kg. Safe Vt is 6–8 mL/kg IBW = 380–510 mL. He's getting almost double a safe breath, hence Pplat 34." },
+            feedback: "This isn't necessarily ARDS yet. The actual problem is the Vt was set from actual body weight, not PBW. Pick again." },
+          { label: "Vt was calculated from actual body weight (250 lb), not from predicted body weight", outcome: "good",
+            feedback: "Right. 800 mL on a 5'6\" patient is enormous. His PBW is 50 + 2.3 × 6 = 63.8 kg. Safe Vt is 6–8 mL/kg PBW = 380–510 mL. He's getting almost double a safe breath, hence Pplat 34." },
           { label: "FiO₂ is too high", outcome: "partial",
             feedback: "FiO₂ should be weaned, but the urgent problem is the dangerous tidal volume causing high Pplat. Identify the worst problem first." }
         ] },
       { prompt: "Q2. Pplat is 34 cmH₂O. Driving pressure (Pplat − PEEP) is 29. What's the immediate target?",
         choices: [
-          { label: "Drop Vt to ~6 mL/kg IBW (380 mL) and re-check Pplat", outcome: "good",
+          { label: "Drop Vt to ~6 mL/kg PBW (380 mL) and re-check Pplat", outcome: "good",
             feedback: "Correct. Lower Vt brings Pplat back under 30 and ΔP back toward 14. You may need to bump RR to maintain MV with smaller Vt." },
           { label: "Increase PEEP to bring driving pressure down", outcome: "bad",
             feedback: "Raising PEEP also raises Pplat. The lever here is Vt reduction. PEEP titration is separate and should follow the ARDSNet table." },
@@ -828,12 +828,12 @@ const MODULES = [
           { label: "Continue current settings, document, and notify receiving facility", outcome: "good",
             feedback: "Correct for now. Pplat is < 30, EtCO₂ is in range, sat acceptable on titrated FiO₂, and you've removed the dangerous Vt. Driving pressure improved from 29 to 21 but is still elevated — flag it in handoff for further optimization at the receiving ICU rather than calling it solved. Document the change and trajectory." },
           { label: "Drop Vt further to 250 mL", outcome: "bad",
-            feedback: "Vt is already in the lung-protective range (6 mL/kg IBW). Going lower means ventilating mostly dead space. Stop at 4–6 mL/kg IBW." },
+            feedback: "Vt is already in the lung-protective range (6 mL/kg PBW). Going lower means ventilating mostly dead space. Stop at 4–6 mL/kg PBW." },
           { label: "Pull PEEP off entirely", outcome: "bad",
             feedback: "PEEP 5 is physiologic and helpful. Removing it costs oxygenation. Hold the line." }
         ] }
     ],
-    conclusion: "You arrive at the receiving facility on much safer settings: AC/VC Vt 380 (6 mL/kg IBW), RR 18, FiO₂ 60% (weaned), PEEP 5, Pplat 26. Driving pressure is down from 29 to 21 — better, but still elevated, so you flag it in handoff for further optimization at the receiving ICU rather than calling it solved. The immediate win was catching the dangerous Vt before it caused barotrauma. This is what IBW math saves you from."
+    conclusion: "You arrive at the receiving facility on much safer settings: AC/VC Vt 380 (6 mL/kg PBW), RR 18, FiO₂ 60% (weaned), PEEP 5, Pplat 26. Driving pressure is down from 29 to 21 — better, but still elevated, so you flag it in handoff for further optimization at the receiving ICU rather than calling it solved. The immediate win was catching the dangerous Vt before it caused barotrauma. This is what PBW math saves you from."
   }
 },
 
@@ -855,7 +855,7 @@ const MODULES = [
       body: [
         "Every vent breath guarantees one thing and lets the other float — like inflating a tire: pump to a set volume of air and the pressure lands where it lands, or pump to a set pressure and the volume lands where it lands. You never get to fix both at once.",
         "Volume-targeted (AC/VC): you set Vt — vent delivers it. PRESSURE varies with lung compliance. Most EMS default. Watch PIP / Pplat.",
-        "Pressure-targeted (AC/PC): you set inspiratory pressure — vent delivers it. VOLUME varies. Pressure capped, so barotrauma risk lower. Watch delivered Vt.",
+        "Pressure-targeted (AC/PC): you set inspiratory pressure — vent delivers it. VOLUME varies. The airway-pressure target is limited, but that does not by itself prevent lung injury; watch delivered Vt, PEEP, plateau pressure when measurable, and the patient's mechanics.",
         "Trade-off: AC/VC gives predictable minute ventilation but variable pressure. AC/PC caps pressure but volume floats with stiffness."
       ]
     },
@@ -942,7 +942,7 @@ const MODULES = [
         rationale: "Pressure support of about 5 cmH₂O compensates for the resistance added by the ETT and circuit — \"physiologic\" support. 10–15 actively unloads the diaphragm." },
       { q: "You inherit a patient on PRVC at a sending facility. The LTV does not offer PRVC. The MOST appropriate move is:",
         choices: ["Refuse the transfer", "Coordinate with the sending team and switch to AC/VC matching the Vt target", "Leave the patient on the sending vent", "Switch to BiPAP"], answer: 1,
-        rationale: "Coordinate the change, set AC/VC with matching Vt and RR, document pre and post numbers, watch PIP closely. If PIP exceeds 35, transition to AC/PC." }
+        rationale: "Coordinate the change, set AC/VC with the agreed Vt and RR, and document pre/post values. If PIP rises, assess the patient, tube, circuit, secretions, resistance, plateau pressure, and auto-PEEP; high PIP alone is not an indication to switch modes." }
     ]
   },
 
@@ -958,7 +958,7 @@ const MODULES = [
       { id: "chf-awake",  label: "65 yo CHF, awake, RR 32, sat 82% on NRB", correctBin: "cpap" },
       { id: "edema-mild", label: "Awake pulmonary edema, sat 90% on NRB", correctBin: "cpap" },
       { id: "copd-fatigue", label: "70 yo COPD, drowsy, EtCO₂ 62, RR 28", correctBin: "bipap" },
-      { id: "asthma-coop", label: "Asthma exacerbation, awake, EtCO₂ 55, cooperative", correctBin: "bipap" },
+      { id: "ohs-coop", label: "Obesity-hypoventilation flare, awake, hypercapnic, cooperative", correctBin: "bipap" },
       { id: "fresh-tube", label: "Just RSI'd trauma patient, lung mechanics unknown", correctBin: "acvc" },
       { id: "sepsis-tube", label: "Septic shock post-RSI, intubated 5 min ago", correctBin: "acvc" }
     ],
@@ -971,7 +971,7 @@ const MODULES = [
   scenario: {
     title: "Scenario: Inherited Patient on PRVC",
     intro: "Critical-care transport from a community ICU. The patient is on PRVC. Your LTV 1200 doesn't offer PRVC. Walk through the safe handoff.",
-    patient: "54-year-old female, 5'5\" (IBW ~57 kg). ARDS day 1 from urosepsis. On PRVC, target Vt 340 mL.",
+    patient: "54-year-old female, 5'5\" (PBW ~57 kg). ARDS day 1 from urosepsis. On PRVC, target Vt 340 mL.",
     vitals: [
       ["Sending vent",  "PRVC, target Vt 340, RR 22, FiO₂ 80%, PEEP 12"],
       ["PIP / Pplat",  "28 / 24 cmH₂O on sending"],
@@ -993,13 +993,13 @@ const MODULES = [
       { prompt: "Q2. On AC/VC at Vt 340 / RR 22 / PEEP 12 / FiO₂ 80%, Pplat measures 28. Driving pressure?",
         choices: [
           { label: "ΔP = 16. Above target — consider Vt reduction.", outcome: "good",
-            feedback: "Correct. ΔP = Pplat − PEEP = 28 − 12 = 16. Amato 2015 target is < 14. You can drop Vt slightly (toward 4–5 mL/kg IBW) to reduce ΔP." },
+            feedback: "Correct. ΔP = Pplat − PEEP = 28 − 12 = 16. Amato 2015 target is < 14. You can drop Vt slightly (toward 4–5 mL/kg PBW) to reduce ΔP." },
           { label: "ΔP = 28 (same as Pplat)", outcome: "bad",
             feedback: "ΔP = Pplat − PEEP, not just Pplat. PEEP matters because it's the baseline above which the lung is cyclically stretched." },
           { label: "ΔP = 40 (Pplat + PEEP)", outcome: "bad",
             feedback: "ΔP = Pplat MINUS PEEP, not plus. Driving pressure is the cyclic stress on the lung above baseline." }
         ] },
-      { prompt: "Q3. You drop Vt from 340 to 280 mL (4.9 mL/kg IBW). Pplat now 24. EtCO₂ trends up to 52. What do you do?",
+      { prompt: "Q3. You drop Vt from 340 to 280 mL (4.9 mL/kg PBW). Pplat now 24. EtCO₂ trends up to 52. What do you do?",
         choices: [
           { label: "Accept permissive hypercapnia as long as pH ≥ 7.20", outcome: "good",
             feedback: "Right. Permissive hypercapnia is the ARDS rule. Pplat under control (24) and ΔP now 12 are more important than a perfectly normal CO₂. Re-check pH if available." },
@@ -1212,7 +1212,7 @@ const MODULES = [
             feedback: "Cleaning is part of pre-shift but not the LAST step. The critical last step is confirming line power. Bleach is also too harsh for the LTV display — use approved wipes." }
         ] }
     ],
-    conclusion: "You document the POST in the equipment log: passed, alarms verified, Pplat reads on hold, battery 100%, line power confirmed. The unit is ready for patient pickup. When the call comes, you load the patient knowing the vent has been validated. This is the discipline that catches failures BEFORE the patient pays for them."
+    conclusion: "You document the pre-use checkout in the equipment log: startup completed, alarms and circuit verified per the agency checklist, battery status checked, and external power confirmed. The unit is ready for patient pickup. When the call comes, you load the patient knowing the vent has been checked against the operator manual and local procedure. This is the discipline that catches failures before the patient pays for them."
   }
 },
 
@@ -1222,7 +1222,7 @@ const MODULES = [
 {
   id: 7,
   title: "Alarms & Troubleshooting",
-  blurb: "Every alarm is information. DOPE is the universal algorithm. The 10-second rule is non-negotiable.",
+  blurb: "Every alarm is information. Assess the patient first, use DOPE to organize the search, and support ventilation when the patient is not being ventilated safely.",
   estMin: 55,
   practiceLevel: 2,
   practiceNote: "Test yourself on the simulator's clinical scenarios — set alarm limits and correct the vent under pressure.",
@@ -1308,7 +1308,7 @@ const MODULES = [
         rationale: "DOPE: Dislodgement, Obstruction, Pneumothorax, Equipment failure. The universal algorithm for every deteriorating ventilated patient. Some texts add S for Stacked breaths (auto-PEEP)." },
       { q: "If you cannot resolve an alarm in approximately 10 seconds, the next step is:",
         choices: ["Silence the alarm and continue", "Increase FiO₂ on the vent", "Call medical control before doing anything", "Disconnect from the vent and bag with 100% O₂"], answer: 3,
-        rationale: "The 10-second rule. Bagging is diagnostic (tells you whether patient or machine is the problem) AND therapeutic. Rarely the wrong answer." },
+        rationale: "If ventilation is inadequate and the cause is not immediately corrected, disconnect and provide controlled manual ventilation with oxygen and PEEP while troubleshooting. Manual ventilation is supportive, not a perfect diagnostic test, and excessive rate or volume can cause harm." },
       { q: "A vented patient suddenly develops PIP 52, no EtCO₂ waveform, BS absent right, hypotension, JVD. The MOST urgent action is:",
         choices: ["Increase FiO₂ to 100%", "Increase sedation", "Document and continue transport", "Decompress the right chest"], answer: 3,
         rationale: "Tension pneumothorax until proven otherwise. Decompress at the bedside (needle at 2nd ICS midclavicular OR 4th–5th midaxillary). Bag with 100% during decompression." },
@@ -1364,7 +1364,7 @@ const MODULES = [
   scenario: {
     title: "Scenario: Run DOPE in 60 Seconds",
     intro: "27-year-old female, intubated 30 minutes ago for status asthmaticus. Sedated, paralyzed, AC/VC. You're alone in the back of the truck — partner is driving.",
-    patient: "27-year-old female, 65 kg IBW, status asthmaticus, intubated 30 min ago",
+    patient: "27-year-old female, 65 kg PBW, status asthmaticus, intubated 30 min ago",
     vitals: [
       ["Alarm",       "HIGH PRESSURE, PIP 52 cmH₂O"],
       ["EtCO₂",       "No waveform"],
@@ -1435,7 +1435,7 @@ const MODULES = [
         "Safety: awake fighting patients pull tubes and lines — self-extubation is a sentinel event.",
         "Oxygenation: lower work of breathing = lower O₂ demand = easier oxygenation.",
         "Hemodynamics: well-sedated patients have less sympathetic drive and more predictable response to vasopressors.",
-        "Modern ICU evidence (ABCDE bundle, SAT/SBT): LIGHTER sedation with daily wake-ups reduces vent days and mortality. EMS target: RASS −1 to −2 — calm but arousable."
+        "Modern ICU evidence supports avoiding unnecessary deep sedation when clinically appropriate. Transport sedation goals must be individualized to pain, ventilator synchrony, hemodynamics, neurologic needs, paralytic status, and the sending clinician's plan; there is no universal EMS RASS target."
       ],
       pearl: { title: "Iron rule", body: "Paralyze ONLY a patient who is also analgesed AND sedated. Bolt-and-paralyze without sedation = awareness with paralysis. Sentinel safety event." }
     },
@@ -1446,7 +1446,7 @@ const MODULES = [
         "+4 combative danger to staff. +3 very agitated, pulls at tubes. +2 agitated, fights vent. +1 restless but cooperative.",
         "0 alert and calm.",
         "−1 drowsy, sustained eye contact > 10 sec to voice. −2 light sedation, briefly opens eyes to voice. −3 moderate, movement to voice no eye contact. −4 deep, movement to physical stimulus only. −5 unarousable.",
-        "Transport target is RASS −1 to −2. Deeper than −2 makes handoff assessment hard. Lighter than −1 risks self-extubation.",
+        "Use the ordered, patient-specific sedation goal and reassess pain, synchrony, hemodynamics, and neurologic needs. A lighter target may suit some patients; others require deeper sedation. RASS cannot be interpreted during effective neuromuscular blockade.",
         "Critical caveat: RASS CANNOT be scored during neuromuscular blockade — a paralyzed patient always looks calm regardless of awareness. Until paralysis resolves, judge adequacy of analgesia/sedation by autonomic signs (heart rate, blood pressure, lacrimation, diaphoresis), not by RASS."
       ]
     },
@@ -1474,7 +1474,7 @@ const MODULES = [
       id: "pitfalls", kicker: "8.5 · Pitfalls", title: "What Goes Wrong",
       body: [
         "Under-sedation in the first 10 minutes after intubation. Long-acting paralytics outlast a single induction dose. Bolt → sedate → redose sedation BEFORE paralysis wears off.",
-        "Over-sedation pre-arrival. RASS −5 patients can't help with hand-off and are at higher risk of hemodynamic instability. Target RASS −1 to −2 by handoff.",
+        "Unnecessary deep sedation can worsen hemodynamics and obscure examination, but deliberately lightening every patient before arrival can also be unsafe. Maintain the individualized plan and communicate drug timing, response, paralytic status, and the intended sedation goal at handoff.",
         "Paralytic without analgesia/sedation. Awareness with paralysis — sentinel safety event. Always pair long-acting paralytics with BOTH.",
         "Post-intubation hypotension. ~25% incidence. Push-dose pressors should be in your hand before induction.",
         "Mixing too many agents. Stick with one analgesic + one sedative for transport."
@@ -1506,9 +1506,9 @@ const MODULES = [
       { q: "PRIS (propofol-related infusion syndrome) is most associated with:",
         choices: ["Single induction dose of propofol", "Infusion rates > 4 mg/kg/hr or duration > 48 hr", "Patients receiving fentanyl simultaneously", "Patients on ketamine"], answer: 1,
         rationale: "PRIS occurs at high doses or prolonged infusions: > 4 mg/kg/hr or > 48 hr. Metabolic acidosis, rhabdomyolysis, cardiac arrhythmia — potentially fatal." },
-      { q: "Transport RASS target for a vented EMS patient is typically:",
-        choices: ["0 — alert and calm", "−3 to −4 — moderate to deep sedation", "−5 — unarousable", "−1 to −2 — calm but arousable"], answer: 3,
-        rationale: "RASS −1 to −2 is the transport target: calm but arousable. Allows handoff assessment at the receiving facility. Deeper sedation increases hemodynamic risk and complicates handoff." },
+      { q: "Which statement best describes a sedation goal during interfacility transport?",
+        choices: ["Every patient should be RASS 0", "Every patient should be RASS −5", "Use an individualized ordered goal based on pain, synchrony, hemodynamics, neurologic needs, and paralytic status", "Always lighten to RASS −1 before arrival"], answer: 2,
+        rationale: "There is no universal transport RASS target. Follow the sending plan and local protocol, reassess the whole patient, and remember that RASS cannot be scored during effective neuromuscular blockade." },
       { q: "Fentanyl chest wall rigidity is most associated with:",
         choices: ["High doses pushed rapidly (e.g., > 5 mcg/kg fast bolus)", "Low doses", "Long infusions", "Pediatric patients"], answer: 0,
         rationale: "Chest wall rigidity is rare but occurs with high doses pushed rapidly. Push fentanyl slowly. Treatment if it occurs: neuromuscular blockade to bag the patient." },
@@ -1517,7 +1517,7 @@ const MODULES = [
         rationale: "Older teaching avoided ketamine in TBI. Modern evidence (multiple RCTs through the 2010s) shows no clinically meaningful ICP rise. Ketamine is acceptable in TBI, particularly when hemodynamic stability matters." },
       { q: "Modern ICU sedation evidence (ABCDE bundle, SAT/SBT trials) supports:",
         choices: ["Deeper sedation (RASS −5) to prevent agitation", "Continuous paralytics for synchrony", "Avoiding sedation entirely", "Lighter sedation with daily wake-ups"], answer: 3,
-        rationale: "Modern ICU evidence (ABCDE bundle, SAT/SBT) shows LIGHTER sedation with daily wake-ups reduces vent days and mortality. Target lighter sedation (RASS −1 to −2 in EMS transport)." }
+        rationale: "Modern ICU evidence supports avoiding unnecessary deep sedation and using structured awakening and breathing assessments when appropriate. Transport clinicians should preserve the individualized sedation plan rather than impose a universal RASS target." }
     ]
   },
 
@@ -1614,7 +1614,7 @@ const MODULES = [
       id: "asthma-copd", kicker: "9.1 · Asthma & COPD", title: "Let Them Exhale",
       body: [
         "Obstructive disease is fundamentally an EXHALATION problem. Air goes in easily; getting it out takes time.",
-        "Strategy: low rate (RR 8–10), long expiratory time (I:E 1:4 or 1:5), Vt 6–8 mL/kg IBW, FiO₂ to SpO₂ ≥ 88% (COPD) or ≥ 92% (asthma), PEEP 0–5 cmH₂O. Permissive hypercapnia is acceptable; pH ≥ 7.20 typical floor.",
+        "Strategy: low rate (RR 8–10), long expiratory time (I:E 1:4 or 1:5), Vt 6–8 mL/kg PBW, FiO₂ to SpO₂ ≥ 88% (COPD) or ≥ 92% (asthma), PEEP 0–5 cmH₂O. Permissive hypercapnia is acceptable; pH ≥ 7.20 typical floor.",
         "Don't chase a normal CO₂ at the cost of barotrauma. Forcing the rate up stacks breaths and drops BP via auto-PEEP."
       ]
     },
@@ -1637,8 +1637,8 @@ const MODULES = [
       body: [
         "Acute Respiratory Distress Syndrome: diffuse alveolar damage, refractory hypoxia. Berlin definition (2012): bilateral infiltrates, not cardiac, within 1 week. Severity by P/F ratio: mild 200–300, moderate 100–200, severe < 100. A 2023/2024 Global Definition of ARDS now also allows diagnosis by SpO₂/FiO₂ and includes patients on HFNO ≥ 30 L/min or CPAP/NIV ≥ 5 cmH₂O — but the Berlin P/F severity bands remain in everyday bedside use.",
         "Goal: protect the alveoli you have left. The mental model is the 'baby lung' — in ARDS so much lung is flooded or collapsed that only a small, child-sized portion is still open to ventilate. You are not filling an adult lung; you are filling what survives. So: small breaths, modest pressure, generous PEEP — a normal-sized Vt would over-stretch those few survivors and injure them.",
-        "Settings: AC/VC or AC/PC; Vt 4–6 mL/kg IBW (LOWER than usual); RR 18–22 to maintain MV; PEEP 10–15 per ARDSNet table; Pplat < 30; driving pressure (Pplat − PEEP) < 14 cmH₂O.",
-        "ARDSNet ARMA (NEJM 2000): mortality 31% vs 40% comparing 6 vs 12 mL/kg IBW. NNT 11. The most evidence-based ARDS intervention."
+        "Settings: AC/VC or AC/PC; Vt 4–6 mL/kg PBW (LOWER than usual); RR 18–22 to maintain MV; PEEP 10–15 per ARDSNet table; Pplat < 30; driving pressure (Pplat − PEEP) < 14 cmH₂O.",
+        "ARDSNet ARMA (NEJM 2000): mortality 31% vs 40% comparing 6 vs 12 mL/kg PBW. NNT 11. The most evidence-based ARDS intervention."
       ],
       evidence: { title: "ARDSNet PEEP/FiO₂ Lower-PEEP Table", body: "FiO₂ 0.3 → PEEP 5. FiO₂ 0.5 → PEEP 8–10. FiO₂ 0.7 → PEEP 10–14. FiO₂ 1.0 → PEEP 18–24. Carry the card." }
     },
@@ -1657,7 +1657,7 @@ const MODULES = [
       body: [
         "Two enemies of the injured brain: hypoxia and hypotension. A single SpO₂ < 90 or SBP < 90 doubles mortality in moderate-severe TBI (Brain Trauma Foundation 4th ed., 2017).",
         "Strict normocapnia: target EtCO₂ 35–40 mmHg. Avoid prophylactic hyperventilation (BTF Level IIB recommendation) — drops cerebral blood flow and worsens secondary injury.",
-        "Standard TBI settings: AC/VC, Vt 6–8 mL/kg IBW, RR 12–16 titrated to EtCO₂ 35–40, PEEP 5, FiO₂ to SpO₂ ≥ 94%, pressors ready. BTF age-stratified BP target: SBP ≥ 100 (ages 50–69), SBP ≥ 110 (other ages); for simplicity, target SBP > 100 in all adult TBI.",
+        "Standard TBI settings: AC/VC, Vt 6–8 mL/kg PBW, RR 12–16 titrated to EtCO₂ 35–40, PEEP 5, FiO₂ to SpO₂ ≥ 94%, pressors ready. BTF age-stratified BP target: SBP ≥ 100 (ages 50–69), SBP ≥ 110 (other ages); for simplicity, target SBP > 100 in all adult TBI.",
         "Hyperventilation rescue (transient, for impending herniation only): increase RR to target EtCO₂ 30–35 mmHg (NEVER below 30). Return to normocapnia once the exam improves (typically 2–5 min)."
       ],
       pearl: { title: "Hyperventilation past the rescue window is harmful", body: "Use brief hyperventilation only for signs of impending herniation (Cushing's triad, blown pupil, posturing). Return EtCO₂ to 35–40 as soon as exam improves. EtCO₂ < 30 worsens ischemia." }
@@ -1687,9 +1687,9 @@ const MODULES = [
       { q: "Routine EtCO₂ target in TBI per Brain Trauma Foundation:",
         choices: ["35–40 mmHg", "25–30 mmHg", "30–35 mmHg", "45–50 mmHg"], answer: 0,
         rationale: "Strict normocapnia at 35–40 mmHg. Avoid prophylactic hyperventilation (BTF Level IIB). Hyperventilation only for transient herniation rescue (to 30–35, never below 30)." },
-      { q: "ARDS patient (IBW 57 kg) on Vt 480 mL. Pplat is 32. The MOST appropriate next adjustment:",
-        choices: ["Increase Vt to 600 mL", "Increase RR to 30 immediately", "Decrease Vt toward 4–6 mL/kg IBW (240–340 mL); accept higher CO₂ if needed", "Drop PEEP to 0"], answer: 2,
-        rationale: "Pplat > 30 in ARDS = drop Vt. ARDSNet 6 mL/kg IBW (~340 mL here), down to 4 mL/kg if Pplat doesn't improve. Permissive hypercapnia OK; pH ≥ 7.20 typical floor." },
+      { q: "ARDS patient (PBW 57 kg) on Vt 480 mL. Pplat is 32. The MOST appropriate next adjustment:",
+        choices: ["Increase Vt to 600 mL", "Increase RR to 30 immediately", "Decrease Vt toward 4–6 mL/kg PBW (240–340 mL); accept higher CO₂ if needed", "Drop PEEP to 0"], answer: 2,
+        rationale: "Pplat > 30 in ARDS = drop Vt. ARDSNet 6 mL/kg PBW (~340 mL here), down to 4 mL/kg if Pplat doesn't improve. Permissive hypercapnia OK; pH ≥ 7.20 typical floor." },
       { q: "A previously-stable vented asthmatic suddenly drops BP to 70/40. Flow waveform doesn't return to zero before next breath. The bedside maneuver to try FIRST is:",
         choices: ["Briefly disconnect from the vent for 5–10 seconds to release trapped gas", "Push fluids and norepinephrine", "Increase PEEP to splint airways", "Increase the rate to normalize CO₂"], answer: 0,
         rationale: "Auto-PEEP physiology — trapped gas → high intrathoracic pressure → preload drops → BP falls. Brief disconnect releases the trapped gas. BP often recovers in under a minute." },
@@ -1794,7 +1794,8 @@ const MODULES = [
 // Cumulative exam, unlocked only after every module is complete.
 const FINAL_EXAM = {
   title: "Final Course Exam",
-  intro: "Twenty-five cumulative questions drawn from all nine modules. You need 20 correct (80%) to pass and earn your certificate. Rationale appears after each answer.",
+  intro: "Twenty-five cumulative questions are randomized from a larger course-wide pool. You need 20 correct (80%) to pass and earn your certificate of completion. Answers and rationales are withheld until the attempt is submitted.",
+  questionCount: 25,
   passScore: 20,
   questions: [
     { q: "Minute ventilation — the volume of gas moved per minute — is the product of:",
@@ -1810,11 +1811,11 @@ const FINAL_EXAM = {
       choices: ["PIP − PEEP", "PIP − Pplat", "Pplat + PEEP", "Pplat − PEEP"], answer: 3,
       rationale: "ΔP = Pplat − PEEP. Amato et al. (NEJM 2015) found ΔP > 14 cmH₂O strongly predicts ARDS mortality." },
     { q: "Tidal volume on a ventilated patient should be set according to:",
-      choices: ["Actual body weight", "BMI", "Ideal body weight (height and sex)", "Body surface area"], answer: 2,
-      rationale: "Vt tracks lung size, which scales with height — so it is set on ideal body weight. Using actual weight in an obese patient delivers injurious volumes." },
+      choices: ["Actual body weight", "BMI", "Predicted body weight (height and sex)", "Body surface area"], answer: 2,
+      rationale: "Vt tracks lung size, which scales with height — so it is set on predicted body weight. Using actual weight in an obese patient delivers injurious volumes." },
     { q: "The ARDSNet (ARMA) trial established a lung-protective tidal volume target of:",
-      choices: ["4 mL/kg IBW", "10 mL/kg IBW", "12 mL/kg IBW", "6 mL/kg IBW"], answer: 3,
-      rationale: "6 mL/kg IBW reduced mortality from ~40% to ~31% versus 12 mL/kg, with plateau pressure kept ≤ 30 cmH₂O." },
+      choices: ["4 mL/kg PBW", "10 mL/kg PBW", "12 mL/kg PBW", "6 mL/kg PBW"], answer: 3,
+      rationale: "6 mL/kg PBW reduced mortality from ~40% to ~31% versus 12 mL/kg, with plateau pressure kept ≤ 30 cmH₂O." },
     { q: "To minimize ventilator-induced lung injury, plateau pressure should generally be kept at or below:",
       choices: ["20 cmH₂O", "40 cmH₂O", "30 cmH₂O", "50 cmH₂O"], answer: 2,
       rationale: "Pplat ≤ 30 cmH₂O is the lung-protective ceiling; Pplat reflects alveolar pressure and correlates with overdistension injury." },
@@ -2261,7 +2262,36 @@ function renderCourseHub() {
     );
   });
 
-  mount(el("div", null, hero, disclaimer, grid, buildSimulatorCard(), buildCapstoneCard()));
+  mount(el("div", null, hero, disclaimer, grid, buildSimulatorCard(), buildCapstoneCard(), buildReferencesCard()));
+}
+
+const COURSE_REFERENCES = [
+  { modules: "M1 · M4 · M9", title: "AHRQ Low Tidal Volume Ventilation — Introduction, Evidence, and Implementation", version: "AHRQ facilitator guide; accessed July 2026", href: "https://www.ahrq.gov/hai/tools/mvp/modules/technical/ltvv-intro-fac-guide.html" },
+  { modules: "M3 · M5", title: "Official ERS/ATS Clinical Practice Guideline: NIV for Acute Respiratory Failure", version: "European Respiratory Journal 2017; 50:1602426", href: "https://www.thoracic.org/statements/resources/cc/niv-guidelines.pdf" },
+  { modules: "M5", title: "AARC Clinical Practice Guideline: Spontaneous Breathing Trials", version: "Respiratory Care 2024; DOI 10.4187/respcare.11735", href: "https://www.aarc.org/wp-content/uploads/2023/11/CPG2024SpontaneousBreathingTrial.pdf" },
+  { modules: "M6", title: "LTV 1200 / 1150 Operator's Manual", version: "Document 19802-001, Revision F", href: "https://www.aarc.org/wp-content/uploads/2014/11/19802-001-F-LTV-1200-and-1150-Ops-Manual.pdf" },
+  { modules: "M6", title: "LTV 1200 / 1150 Quick Reference Guide", version: "Document 19822-001, Revision B", href: "https://www.aarc.org/wp-content/uploads/2014/11/19822-001-B-LTV-1200-1150-Quick-Reference-Guide.pdf" },
+  { modules: "M7", title: "Joint Trauma System: Wartime Thoracic Injury", version: "Clinical Practice Guideline, 26 December 2018", href: "https://jts.health.mil/assets/docs/cpgs/Wartime_Thoracic_Injury_26_Dec_2018_ID74.pdf" },
+  { modules: "M8", title: "SCCM PADIS Guidelines", version: "Clinical practice guideline; verify local formulary and protocol", href: "https://www.sccm.org/clinical-resources/guidelines/guidelines/guidelines-for-the-prevention-and-management-of-pa" },
+  { modules: "M9", title: "Brain Trauma Foundation: Prehospital Management of TBI, 3rd Edition", version: "Current prehospital guideline; published 2023", href: "https://braintrauma.org/coma/guidelines/pre-hospital" }
+];
+
+function buildReferencesCard() {
+  return el("section", { class: "resources references", "aria-labelledby": "references-title" },
+    el("p", { class: "resources-kicker", id: "references-title" }, "Versioned Course References"),
+    el("p", { class: "references-intro" },
+      "Module tags show where each source is used. Sources support education; local protocol, medical direction, and the current manufacturer manual control clinical practice."),
+    ...COURSE_REFERENCES.map(ref =>
+      el("a", { class: "reference-row", href: ref.href, target: "_blank", rel: "noopener noreferrer" },
+        el("span", { class: "reference-mod" }, ref.modules),
+        el("span", { class: "reference-text" },
+          el("strong", null, ref.title),
+          el("small", null, ref.version)
+        ),
+        el("span", { class: "resource-arr", "aria-hidden": "true" }, "↗")
+      )
+    )
+  );
 }
 
 // Every hands-on simulator mission, in course order — the Practice Lab index.
@@ -2339,7 +2369,7 @@ function buildCapstoneCard() {
     title = "Final Course Exam";
     desc = resuming
       ? "You have a final exam in progress — pick up where you left off."
-      : `All modules complete. ${FINAL_EXAM.questions.length} cumulative questions, ${FINAL_EXAM.passScore}/${FINAL_EXAM.questions.length} (80%) to pass and earn your certificate.`;
+      : `All modules complete. ${FINAL_EXAM.questionCount} randomized cumulative questions, ${FINAL_EXAM.passScore}/${FINAL_EXAM.questionCount} (80%) to pass and earn your certificate of completion.`;
     action = resuming ? "Resume Exam →" : "Begin Final Exam →";
     onclick = () => { ExamState.enter(); Nav.go("exam"); };
   }
@@ -3083,7 +3113,7 @@ function renderSummary() {
 
 // ---------- FINAL EXAM ----------
 const ExamState = {
-  idx: 0, picked: null, answers: [],
+  idx: 0, picked: null, answers: [], questions: [],
 
   enter() {
     const s = Store.state.examInProgress;
@@ -3091,33 +3121,42 @@ const ExamState = {
       this.idx = s.idx || 0;
       this.picked = (s.picked === undefined) ? null : s.picked;
       this.answers = s.answers || [];
+      this.questions = s.questions || [];
     } else {
       this.idx = 0; this.picked = null; this.answers = [];
+      const pool = FINAL_EXAM.questions.concat(...MODULES.map(m => m.quiz.questions));
+      this.questions = pool
+        .map(question => ({ question, order: Math.random() }))
+        .sort((a, b) => a.order - b.order)
+        .slice(0, FINAL_EXAM.questionCount)
+        .map(({ question }) => question);
     }
+    if (!this.questions.length) {
+      this.questions = FINAL_EXAM.questions.slice(0, FINAL_EXAM.questionCount);
+    }
+    this.persist();
   },
-  persist() { Store.setExamInProgress({ idx: this.idx, picked: this.picked, answers: this.answers }); },
-  reset()   { Store.clearExamInProgress(); this.idx = 0; this.picked = null; this.answers = []; }
+  persist() { Store.setExamInProgress({ idx: this.idx, picked: this.picked, answers: this.answers, questions: this.questions }); },
+  reset()   { Store.clearExamInProgress(); this.idx = 0; this.picked = null; this.answers = []; this.questions = []; }
 };
 
 function renderExam() {
   if (!Store.isExamUnlocked()) { Nav.exitToCourse(); return; }
-  if (ExamState.idx < FINAL_EXAM.questions.length) renderExamQuestion();
+  if (!ExamState.questions.length) ExamState.enter();
+  if (ExamState.idx < ExamState.questions.length) renderExamQuestion();
   else renderExamResults();
 }
 
 function renderExamQuestion() {
-  const total = FINAL_EXAM.questions.length;
-  const q = FINAL_EXAM.questions[ExamState.idx];
+  const total = ExamState.questions.length;
+  const q = ExamState.questions[ExamState.idx];
   const picked = ExamState.picked;
   const answered = picked != null;
 
   const optionsContainer = el("div", { class: "quiz-options" });
   q.choices.forEach((choice, i) => {
     const cls = ["quiz-option"];
-    if (answered) {
-      if (i === q.answer) cls.push("correct");
-      else if (i === picked) cls.push("incorrect");
-    } else if (picked === i) cls.push("selected");
+    if (picked === i) cls.push("selected");
     optionsContainer.appendChild(
       el("button", {
         class: cls.join(" "), type: "button", disabled: answered,
@@ -3135,15 +3174,12 @@ function renderExamQuestion() {
     optionsContainer
   );
 
-  if (answered) {
-    const correct = picked === q.answer;
-    card.appendChild(
-      el("div", { class: "feedback " + (correct ? "feedback-correct" : "feedback-incorrect") },
-        el("span", { class: "feedback-label" }, correct ? "Correct." : `Incorrect (answer: ${["A","B","C","D"][q.answer]}).`),
-        q.rationale
-      )
-    );
-  }
+  if (answered) card.appendChild(
+    el("div", { class: "feedback" },
+      el("span", { class: "feedback-label" }, "Answer recorded."),
+      "The correct answer and rationale will appear after you submit the full exam."
+    )
+  );
 
   const buttons = el("div", { class: "button-row" },
     el("button", { class: "btn btn-ghost", type: "button", onclick: () => Nav.exitToCourse() }, "Exit"),
@@ -3166,10 +3202,10 @@ function renderExamQuestion() {
 }
 
 function renderExamResults() {
-  const total = FINAL_EXAM.questions.length;
+  const total = ExamState.questions.length;
   const correctCount = ExamState.answers.filter(a => a && a.correct).length;
   const passed = correctCount >= FINAL_EXAM.passScore;
-  Store.setExamResults({ score: correctCount, total, passed });
+  Store.setExamResults({ score: correctCount, total, passed, submittedAt: Date.now() });
   const pct = Math.round(correctCount / total * 100);
 
   const message = passed
@@ -3191,9 +3227,24 @@ function renderExamResults() {
     )
   );
 
+  const review = el("section", { class: "resources exam-review" },
+    el("p", { class: "resources-kicker" }, "Attempt Review"),
+    ...ExamState.questions.map((q, i) => {
+      const answer = ExamState.answers[i];
+      const correct = !!answer && answer.correct;
+      const pickedText = answer ? q.choices[answer.picked] : "No answer";
+      return el("details", { class: "reference-item" },
+        el("summary", null, `${i + 1}. ${correct ? "Correct" : "Review"} — ${q.q}`),
+        el("p", null, `Your answer: ${pickedText}`),
+        el("p", null, `Correct answer: ${q.choices[q.answer]}`),
+        el("p", null, q.rationale)
+      );
+    })
+  );
+
   updateProgressPill();
   renderNav();
-  mount(card);
+  mount(el("div", null, card, review));
 }
 
 // Deterministic, human-readable certificate ID.
@@ -3245,7 +3296,7 @@ function renderCertForm() {
     status.className = "cert-form-status";
     if (!name) { status.textContent = "Enter your full name."; status.classList.add("err"); return; }
     if (!cred) { status.textContent = "Select your credential level."; status.classList.add("err"); return; }
-    const r = Store.state.examResults || { score: FINAL_EXAM.passScore, total: FINAL_EXAM.questions.length };
+    const r = Store.state.examResults || { score: FINAL_EXAM.passScore, total: FINAL_EXAM.questionCount };
     const issuedAt = Date.now();
     const cert = {
       name, credential: cred,

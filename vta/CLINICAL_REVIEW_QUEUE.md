@@ -14,7 +14,7 @@ Legend: ☑ = already corrected in `app.js` (factual, non-guideline) · ☐ = st
 - ☑ **Power loss is not silent** — corrected to state the LTV annunciates a **POWER LOST** alarm on transfer to internal battery (two places, plus the pitfalls list).
 - ☑ **"The Six Alarms" → "The Core Alarms"** — now lists six cleanly (HIGH PRESSURE, LOW PRESSURE/LOW PEEP, LOW MINUTE VOLUME, APNEA, POWER LOST/LOW BATTERY, GAS SUPPLY) and states the manual lists additional device/self-test alarms. *(Full manufacturer alarm vocabulary still to be built — see §C.)*
 - ☑ **Battery quiz item** — answer changed 60 → 45 min.
-- ☑ **IBW shortcut is sex-specific** — pearl now gives 5'10" man ≈ 73 kg / woman ≈ 68.5 kg.
+- ☑ **PBW shortcut is sex-specific** — pearl now gives 5'10" man ≈ 73 kg / woman ≈ 68.5 kg.
 - ☑ **Heffner 2012** — relabeled as an **emergency-department** cohort (not EMS/prehospital); quiz stem and rationale updated.
 - ☑ **Push-dose epi framing** — no longer called "first-line for most EMS shock states"; reframed as a rapid **bridge** to a continuous infusion (resolves the internal contradiction with the norepinephrine-first-line statement).
 - ☑ **EtCO₂/SpO₂ vs ABG** — pearl no longer says they give "the same diagnosis as the lab"; now states they support recognition but do not replace an ABG (PaCO₂–EtCO₂ gap widens with shock/V-Q mismatch).
@@ -66,15 +66,15 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 - ☑ **M1 — "PEEP replaces surfactant" softened** to "PEEP is not a substitute for surfactant; it mechanically splints alveoli open until surfactant function returns."
 - ☑ **M4 — driving-pressure contradiction fixed.** The scenario no longer calls ΔP 21 "under control"/"safe lung-protective"; it now reads "improved from 29 to 21 but still elevated — flag for further optimization."
 
-## F. Staged for medical director (guideline / drug dependent — NOT changed)
+## F. Medical-director review (safe framing updated; numeric/protocol content still awaiting sign-off)
 
-- ☐ **M3 NIV** — CPAP and bilevel NIV are both evidence-supported in cardiogenic pulmonary edema; reconsider the rigid "one-hour rule" and the GCS/gag absolutes. *(ERS/ATS NIV guideline.)*
-- ☐ **M4** — use **predicted** body weight terminology (not generic "ideal"); make targets disease-specific; frame driving pressure as a **risk marker** computed with total PEEP under passive conditions, not a universal pass/fail threshold. *(ARDSNet.)*
-- ☐ **M5** — "high PIP alone → switch to pressure control" is unsafe; teach assessing Pplat / resistance / circuit / tube / patient first. NIV should not be presented as established first-line for acute asthma.
-- ☐ **M8** — reconsider a **universal** RASS −1 to −2 transport target; **all drug and push-dose pressor content requires medical-director approval.** *(SCCM PADIS.)*
+- ☑ **M3 NIV framing corrected** — removed the rigid one-hour rule and GCS/gag absolutes. The course now teaches continuous reassessment, prompt escalation for failure, and whole-patient airway-protection assessment. CPAP and bilevel NIV are both acknowledged for cardiogenic pulmonary edema. *(ERS/ATS NIV guideline.)* ☐ **MD still to approve local selection criteria and settings.**
+- ☑ **M4 terminology corrected** — **predicted body weight (PBW)** now replaces generic "ideal body weight" throughout the live app, facilitator guide, and learner-facing labels. ☐ **MD still to approve disease-specific numeric targets and final driving-pressure language.**
+- ☑ **M5 high-PIP and asthma framing corrected** — removed the instruction to switch to pressure control solely because PIP exceeds a number; learners now assess patient, tube, circuit, secretions, resistance, plateau pressure, and auto-PEEP. The mode-matching exercise no longer presents bilevel NIV as established first-line therapy for acute asthma. ☐ **MD still to approve mode-transition and NIV protocol language.**
+- ☑ **M8 universal RASS target removed** — transport goals are now individualized to pain, synchrony, hemodynamics, neurologic needs, paralytic status, and the sending plan; RASS is explicitly unusable during effective blockade. ☐ **All drug and push-dose pressor content still requires medical-director approval.** *(SCCM PADIS.)*
 - ☐ **M9 TBI** — reviewer's targets: EtCO₂ 35–40 (30–35 with active herniation), SpO₂ > 90%, adult SBP ≥ 110 — replace the module's universal SBP > 100 and SpO₂ ≥ 94. *(Brain Trauma Foundation.)* **Reconcile with the round-1 TBI item and the edition your service certifies against.**
 - ☐ **M1** — distinguish **minute vs alveolar** ventilation; qualify PIP/plateau interpretation.
-- ☐ **M7** — qualify the "ten-second," "always bag," and "rules out equipment" absolutes; note manual ventilation can also harm without controlled rate, volume, and PEEP.
+- ☑ **M7 alarm language qualified** — removed the non-negotiable ten-second rule and claims that bagging reliably separates patient from equipment. Backup ventilation is now taught as controlled manual ventilation with appropriate rate, volume, oxygen, and PEEP while troubleshooting.
 - ☐ **M2** — EtCO₂/SpO₂ don't establish PaCO₂/pH/mixed acid-base (softened in round 1 §A; MD to confirm).
 
 ## G. Platform / assessment (software — I own)
@@ -83,8 +83,8 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 - ☑ **Matching keyboard/screen-reader access — FIXED.** Each category now has a real focusable **"Place ⟨item⟩ here"** button with a descriptive `aria-label`; pool items expose `aria-pressed`; placed items announce their bin and (after submit) correctness; a `role="status"` live region announces selection and progress. Bins stay non-role containers so the buttons inside remain valid. On-screen instructions now state the keyboard path. Verified end-to-end by keyboard only.
 - ☑ **Locked module cards — FIXED.** Now `aria-disabled="true"` with a descriptive label ("Locked — finish Module N (Title) first").
 - ☑ **Credential wording + disclaimer — FIXED.** "Final Certification Exam" → **Final Course Exam**; "Certified" → **Course Complete**. A prominent **scope-of-use notice** now sits on the Course Hub above the modules, and the certificate carries a printed disclaimer: certificate of **completion** only, not a certification/licence/competency verification, confers no scope of practice, progress is browser-local and not proctored or auditable, and local protocol + medical direction + manufacturer instructions take precedence.
-- ☐ **Exam integrity.** Still open — options: randomize/expand the item pool beyond the fixed 25, limit attempts, withhold rationale until submission. **Design choices — confirm which you want.**
-- ☐ **Versioned bibliography** with per-claim source links.
+- ☑ **Exam integrity improved within the static-app limit.** Each attempt draws 25 randomized questions from the curated capstone plus all nine module banks; answers and rationales are withheld until submission, then shown in an attempt review. The selected set and progress persist across reload. Attempt limits remain intentionally unenforced because browser-local limits are trivial to bypass and could imply security the static app does not have.
+- ☑ **Versioned bibliography added.** The Course Hub now links primary/official sources with module tags, document versions or publication dates, and a reminder that local protocol and current manufacturer instructions control. Fine-grained claim-level footnotes remain a future editorial enhancement.
 - ☐ **Auditable credentialing** (server-side exam, verified identity, tamper-proof record) — genuinely requires a backend; out of scope for the static app.
 
 ## H. Bigger builds (need your input)
@@ -96,7 +96,7 @@ Each lists the current course text, the reviewer's concern, the cited source, an
   - **6.6 Workflow** — corrected to the real select → Set Value knob → confirm grammar (matches the simulator).
   - **Quiz** — the old "settings LEFT / monitored RIGHT" answer is now a **wrong-answer distractor** with a rationale that refutes it; the Pplat question replaced with a set-vs-calculated (I:E) question.
   - **Match** — "Inspiratory Hold (measures Pplat)" replaced with "100% O₂"; controls relabelled to the real ones.
-  - **Scenario** — removed "verify Pplat displays"; removed the last "switches silently to internal battery" claim (now POWER LOST).
+  - **Scenario** — removed "verify Pplat displays"; removed the last "switches silently to internal battery" claim (now POWER LOST). A stale conclusion in the app and facilitator guide was also removed in the final QA pass.
   - ☐ **Still needs from you:** confirmation against your **AMR unit configuration and operator manual** — O₂ inlet type, whether your units support the inspiratory-hold maneuver, exact alarm vocabulary, and the **45/10/5-minute** battery indicator behaviour. Anything config-specific is deliberately hedged ("confirm on YOUR unit") rather than asserted.
 - ☑ **Visuals — FIRST BATCH DONE.** Eight teaching diagrams authored as inline SVG in `vta/figures.js` (no third-party image licences, no extra network requests, works offline) and shown in both the app and the decks:
   **capnography patterns** (normal / shark-fin / rebreathing / lost), **oxyhaemoglobin dissociation curve** (tabletop, the 90%≈60 cliff, 92–96% target band), **PIP vs Pplat** pressure–time with the resistance and driving-pressure brackets, **auto-PEEP** flow–time, **two-knob model**, **shunt vs dead space**, **DOPE + the 10-second rule**, and **volume vs pressure targeting**.
@@ -106,4 +106,4 @@ Each lists the current course text, the reviewer's concern, the cited source, an
   ☐ **Still to add:** circuit diagram and annotated close-ups of individual panel regions.
 - ☐ **Transport module** (from round 1 §C).
 
-**Deployment position (agreed with the review):** usable as a **supervised educational supplement** with a prominent "local protocol / medical direction / manufacturer instructions control" statement. Do **not** require Modules 6–8, use the final exam as proof of competency, or issue a formal credential until the four release blockers (§E started; §H M6 pending) and the assessment controls (§G) are corrected and a medical director signs off §F.
+**Deployment position (agreed with the review):** usable as a **supervised educational supplement** with a prominent "local protocol / medical direction / manufacturer instructions control" statement. The four identified release-blocking factual/logic errors and the static-app assessment controls are now corrected. Do **not** use the final exam as proof of competency or issue a formal credential until the remaining protocol/drug/device-configuration items receive medical-director and service sign-off; auditable credentialing still requires a backend.
