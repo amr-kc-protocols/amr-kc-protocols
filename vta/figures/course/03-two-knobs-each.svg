@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Ventilation and oxygenation controls</title>
+  <desc id="desc">Two ventilation controls, respiratory rate and tidal volume, compared with two oxygenation controls, oxygen concentration and PEEP.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#173F6D" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#0B67C2"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#45BDEB"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#C84343"/>
+    </marker>
+    <style>
+      text { font-family: Aptos, Arial, Helvetica, sans-serif; fill: #243548; }
+      .label { font-size: 30px; font-weight: 700; fill: #173F6D; }
+      .small { font-size: 23px; font-weight: 600; }
+      .tiny { font-size: 19px; font-weight: 500; fill: #738396; }
+      .micro { font-size: 16px; font-weight: 600; fill: #738396; letter-spacing: 0.7px; }
+      .formula { font-size: 34px; font-weight: 700; fill: #173F6D; }
+      .card { fill: #FFFFFF; stroke: #CCD7E3; stroke-width: 2; }
+      .flow { fill: none; stroke: #45BDEB; stroke-width: 12; stroke-linecap: round; marker-end: url(#arrow-cyan); }
+      .blood { fill: none; stroke: #C84343; stroke-width: 12; stroke-linecap: round; marker-end: url(#arrow-red); }
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#FBFCFE"/>
+  
+    <rect x="70" y="70" width="700" height="730" rx="34" class="card" filter="url(#shadow)"/>
+    <rect x="830" y="70" width="700" height="730" rx="34" class="card" filter="url(#shadow)"/>
+    <rect x="70" y="70" width="700" height="110" rx="34" fill="#173F6D"/>
+    <path d="M70 146 V104 Q70 70 104 70 H736 Q770 70 770 104 V180 H70Z" fill="#173F6D"/>
+    <rect x="830" y="70" width="700" height="110" rx="34" fill="#0B67C2"/>
+    <path d="M830 146 V104 Q830 70 864 70 H1496 Q1530 70 1530 104 V180 H830Z" fill="#0B67C2"/>
+    <text x="420" y="139" text-anchor="middle" font-size="40" font-weight="700" fill="#FFFFFF" style="fill:#FFFFFF">VENTILATION</text>
+    <text x="1180" y="139" text-anchor="middle" font-size="40" font-weight="700" fill="#FFFFFF" style="fill:#FFFFFF">OXYGENATION</text>
+    
+    <circle cx="270" cy="390" r="136" fill="#FFFFFF" stroke="#CCD7E3" stroke-width="3" filter="url(#shadow)"/>
+    <path d="M 154 408 A 116 116 0 1 1 386 408" fill="none" stroke="#CCD7E3" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 154 408 A 116 116 0 0 1 360.6055112940067 427.34489688232685" fill="none" stroke="#173F6D" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="270" cy="390" r="82" fill="#EAF3FC" stroke="#173F6D" stroke-width="4"/>
+    <line x1="270" y1="390" x2="360.6055112940067" y2="427.34489688232685" stroke="#173F6D" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="270" cy="390" r="13" fill="#173F6D"/>
+    <text x="270" y="582" text-anchor="middle" class="label">RR</text>
+    <text x="270" y="614" text-anchor="middle" class="tiny">breaths per minute</text>
+    
+    <circle cx="570" cy="390" r="136" fill="#FFFFFF" stroke="#CCD7E3" stroke-width="3" filter="url(#shadow)"/>
+    <path d="M 454 408 A 116 116 0 1 1 686 408" fill="none" stroke="#CCD7E3" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 454 408 A 116 116 0 0 1 636.0816339832048 462.36862338133665" fill="none" stroke="#0B67C2" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="570" cy="390" r="82" fill="#EAF3FC" stroke="#0B67C2" stroke-width="4"/>
+    <line x1="570" y1="390" x2="636.0816339832048" y2="462.36862338133665" stroke="#0B67C2" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="570" cy="390" r="13" fill="#0B67C2"/>
+    <text x="570" y="582" text-anchor="middle" class="label">Vₜ</text>
+    <text x="570" y="614" text-anchor="middle" class="tiny">volume per breath</text>
+    
+    <circle cx="1030" cy="390" r="136" fill="#FFFFFF" stroke="#CCD7E3" stroke-width="3" filter="url(#shadow)"/>
+    <path d="M 914 408 A 116 116 0 1 1 1146 408" fill="none" stroke="#CCD7E3" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 914 408 A 116 116 0 0 1 1076.611172488887 476.2055601409284" fill="none" stroke="#0B67C2" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="1030" cy="390" r="82" fill="#EAF3FC" stroke="#0B67C2" stroke-width="4"/>
+    <line x1="1030" y1="390" x2="1076.611172488887" y2="476.2055601409284" stroke="#0B67C2" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="1030" cy="390" r="13" fill="#0B67C2"/>
+    <text x="1030" y="582" text-anchor="middle" class="label">FiO₂</text>
+    <text x="1030" y="614" text-anchor="middle" class="tiny">oxygen concentration</text>
+    
+    <circle cx="1330" cy="390" r="136" fill="#FFFFFF" stroke="#CCD7E3" stroke-width="3" filter="url(#shadow)"/>
+    <path d="M 1214 408 A 116 116 0 1 1 1446 408" fill="none" stroke="#CCD7E3" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 1214 408 A 116 116 0 0 1 1427.5322851982194 380.4368758236034" fill="none" stroke="#E56B5D" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="1330" cy="390" r="82" fill="#EAF3FC" stroke="#E56B5D" stroke-width="4"/>
+    <line x1="1330" y1="390" x2="1427.5322851982194" y2="380.4368758236034" stroke="#E56B5D" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="1330" cy="390" r="13" fill="#E56B5D"/>
+    <text x="1330" y="582" text-anchor="middle" class="label">PEEP</text>
+    <text x="1330" y="614" text-anchor="middle" class="tiny">alveolar recruitment</text>
+    <line x1="270" y1="668" x2="570" y2="668" stroke="#CCD7E3" stroke-width="3"/>
+    <text x="420" y="722" text-anchor="middle" class="formula">Alveolar ventilation → CO₂</text>
+    <line x1="1030" y1="668" x2="1330" y2="668" stroke="#CCD7E3" stroke-width="3"/>
+    <text x="1180" y="722" text-anchor="middle" class="formula">O₂ delivery + recruitment</text>
+    <text x="420" y="770" text-anchor="middle" class="tiny">Increase minute ventilation to clear more carbon dioxide</text>
+    <text x="1180" y="770" text-anchor="middle" class="tiny">Increase available oxygen and open recruitable alveoli</text>
+    
+</svg>

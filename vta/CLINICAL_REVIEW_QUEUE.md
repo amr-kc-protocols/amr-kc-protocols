@@ -45,15 +45,15 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 
 ---
 
-## D. Visuals — next production batch (no clinical decision needed)
+## D. Visuals — production complete
 
-- ☐ Native diagrams to be built and inserted: capnography waveforms (normal/shark-fin/rebreathing/lost), oxyhemoglobin dissociation curve, PIP vs Pplat pressure–time, auto-PEEP flow–time, ARDSNet PEEP/FiO₂ ladder, DOPE flow.
-- ☐ Device visuals: screenshots of the LTV **simulator** panel/alarm/scan screens (owned asset — avoids copyrighted manufacturer photos).
+- ☑ **Full 27-graphic course kit inserted in the live Academy.** Every graphic is mapped to its intended lesson in Modules 1–9, carries descriptive alternative text, scales responsively, and is cached for offline use.
+- ☑ **Device visuals added:** the owned LTV simulator-panel image plus course-native circuit-connection, battery-indicator, alarm-response, monitored-data, and transport-readiness graphics.
 - ☑ Simulator cue links are now real PowerPoint hyperlinks (were plain text). *(Relative paths — set your hosted base URL when deployed.)*
 
 ---
 
-**Bottom line:** §A is done, §B awaits your medical director, §C needs a scope decision, §D is queued production. Certification use should wait until §B and §C are signed off by a medical director and checked against service protocols.
+**Bottom line:** §A and §D are done, §B awaits your medical director, and §C needs a scope decision. Certification use should wait until §B and §C are signed off by a medical director and checked against service protocols.
 
 ---
 
@@ -103,7 +103,7 @@ Each lists the current course text, the reviewer's concern, the cited source, an
   Plus a **device visual for Module 6** captured from this project's own LTV simulator (`vta/figures/ltv-panel.jpg`) — an owned asset, so no manufacturer-image licensing problem.
   In the decks each figure takes the right column with aspect ratio preserved (verified 0.0% distortion, all within slide bounds).
   ☑ **PEEP/FiO₂ pairing figure added** (M9.3) — renders the anchor points already taught in the course (0.3→5, 0.5→8–10, 0.7→10–14, 0.9→14–18, 1.0→18–24) with the message that both rise together; captioned "anchor points only — carry the full card and follow your service protocol." No new numbers introduced.
-  ☐ **Still to add:** circuit diagram and annotated close-ups of individual panel regions.
+  ☑ **Second visual batch integrated in the live Academy:** 27 responsive course graphics spanning anatomy, physiology, respiratory failure, NIV, preoxygenation, PBW, ventilation modes, ARDS, auto-PEEP, TBI, pediatric guardrails, RASS, transport readiness, and LTV circuit/battery/alarm/monitoring concepts. All are included in the PWA cache. The DOPE and RASS graphics were adjusted to preserve the course's corrected safety framing.
 - ☐ **Transport module** (from round 1 §C).
 
 **Deployment position (agreed with the review):** usable as a **supervised educational supplement** with a prominent "local protocol / medical direction / manufacturer instructions control" statement. The four identified release-blocking factual/logic errors and the static-app assessment controls are now corrected. Do **not** use the final exam as proof of competency or issue a formal credential until the remaining protocol/drug/device-configuration items receive medical-director and service sign-off; auditable credentialing still requires a backend.

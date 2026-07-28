@@ -39,6 +39,7 @@ const MODULES = [
   lessons: [
     {
       id: "path",
+      figure: "breath_path",
       kicker: "1.1 · Anatomy",
       title: "The Path of a Breath",
       body: [
@@ -51,6 +52,7 @@ const MODULES = [
     },
     {
       id: "zones",
+      figure: "lung_zones",
       kicker: "1.2 · Function",
       title: "Two Functional Zones",
       body: [
@@ -63,7 +65,7 @@ const MODULES = [
     },
     {
       id: "two-knobs",
-      figure: "twoknobs",
+      figure: "kit_two_knobs",
       kicker: "1.3 · The Mental Model",
       title: "Ventilation vs Oxygenation — Two Knobs Each",
       body: [
@@ -76,6 +78,7 @@ const MODULES = [
     },
     {
       id: "dead-space",
+      figure: "dead_space",
       kicker: "1.4 · Dead Space",
       title: "Air That Doesn't Help You",
       body: [
@@ -87,7 +90,7 @@ const MODULES = [
     },
     {
       id: "vq",
-      figure: "vq",
+      figure: "kit_vq",
       kicker: "1.5 · V/Q Matching",
       title: "Shunt vs Dead Space",
       body: [
@@ -100,6 +103,7 @@ const MODULES = [
     },
     {
       id: "comp-res",
+      figure: "comp_res",
       kicker: "1.6 · Compliance vs Resistance",
       title: "How the Lung Pushes Back",
       body: [
@@ -110,7 +114,7 @@ const MODULES = [
     },
     {
       id: "pip-pplat",
-      figure: "pip_pplat",
+      figure: "kit_pip_pplat",
       kicker: "1.7 · The Bedside Test",
       title: "PIP vs Pplat",
       body: [
@@ -259,7 +263,7 @@ const MODULES = [
     },
     {
       id: "cliff",
-      figure: "oxyhb",
+      figure: "kit_oxyhb",
       kicker: "2.2 · The Oxyhemoglobin Curve",
       title: "Why SpO₂ Lies — Until It Doesn't",
       body: [
@@ -273,6 +277,7 @@ const MODULES = [
     },
     {
       id: "type1",
+      figure: "failure_types",
       kicker: "2.3 · Type I",
       title: "Hypoxic Failure at the Bedside",
       body: [
@@ -294,6 +299,7 @@ const MODULES = [
     },
     {
       id: "early-late",
+      figure: "failure_progression",
       kicker: "2.5 · Recognition",
       title: "Early Signs, Late Signs, and the False Calm",
       body: [
@@ -314,7 +320,7 @@ const MODULES = [
     },
     {
       id: "waveforms",
-      figure: "capno",
+      figure: "kit_capno",
       kicker: "2.7 · Waveforms",
       title: "Four Capnography Patterns Every EMS Provider Must Recognize",
       body: [
@@ -455,6 +461,7 @@ const MODULES = [
   lessons: [
     {
       id: "niv-indications",
+      figure: "niv_trial",
       kicker: "3.1 · NIV Indications",
       title: "When Non-Invasive Ventilation Is the Right Tool",
       body: [
@@ -466,6 +473,7 @@ const MODULES = [
     },
     {
       id: "cpap-bipap",
+      figure: "cpap_bilevel",
       kicker: "3.2 · The Two Flavors",
       title: "CPAP vs BiPAP",
       body: [
@@ -517,6 +525,7 @@ const MODULES = [
     },
     {
       id: "preox",
+      figure: "preoxygenation",
       kicker: "3.6 · Pre-Oxygenation",
       title: "Buying Yourself Eight Minutes",
       body: [
@@ -661,6 +670,7 @@ const MODULES = [
   lessons: [
     {
       id: "vt", kicker: "4.1 · Tidal Volume", title: "Vt — How Much Air Per Breath",
+      figure: "pbw_vt",
       body: [
         "Tidal volume is the volume the ventilator delivers with each mandatory breath, measured in milliliters.",
         "Modern adult target: 6 to 8 mL per kilogram of PREDICTED body weight. Lower (4 to 6 mL/kg PBW) for ARDS. Pediatric: 6 to 8 mL/kg of ACTUAL body weight.",
@@ -699,7 +709,7 @@ const MODULES = [
     },
     {
       id: "pressures", kicker: "4.5 · Pressures", title: "PIP, Pplat, and Driving Pressure",
-      figure: "pip_pplat",
+      figure: "kit_pip_pplat",
       body: [
         "Peak Inspiratory Pressure (PIP): highest airway pressure during inspiration. Displayed continuously. Keep < 35 cmH₂O.",
         "Plateau Pressure (Pplat): airway pressure during a 0.5-second inspiratory hold (no flow). Reflects alveolar pressure / compliance. Keep < 30 cmH₂O — ARDSNet protocol. Press and hold the inspiratory hold button on the LTV to measure.",
@@ -851,7 +861,7 @@ const MODULES = [
   lessons: [
     {
       id: "v-vs-p", kicker: "5.1 · Targeting", title: "Volume vs Pressure Targeting",
-      figure: "volpress",
+      figure: "kit_volpress",
       body: [
         "Every vent breath guarantees one thing and lets the other float — like inflating a tire: pump to a set volume of air and the pressure lands where it lands, or pump to a set pressure and the volume lands where it lands. You never get to fix both at once.",
         "Volume-targeted (AC/VC): you set Vt — vent delivers it. PRESSURE varies with lung compliance. Most EMS default. Watch PIP / Pplat.",
@@ -881,6 +891,7 @@ const MODULES = [
     },
     {
       id: "cpap-bipap", kicker: "5.4 · NIV Modes", title: "CPAP vs BiPAP",
+      figure: "cpap_bilevel",
       body: [
         "CPAP: ONE pressure throughout the breath. Patient does all the work. Best for OXYGENATION problems (CHF, acute pulmonary edema). Mechanism: pushes alveolar fluid into capillaries, reduces preload + LV afterload. Start 5–10 cmH₂O / FiO₂ 100%.",
         "Bersten et al. (NEJM 1991): in cardiogenic pulmonary edema, CPAP eliminated intubation in the treated arm. Cochrane: NNT 4–7 to prevent intubation.",
@@ -1036,7 +1047,7 @@ const MODULES = [
   lessons: [
     {
       id: "front",
-      figure: "ltv_panel",
+      figure: ["ltv_panel", "ltv_circuit"],
       kicker: "6.1 · Hardware", title: "Front Panel and Side Connections",
       body: [
         "Front panel essentials: On/Standby power. A bank of INDIVIDUAL control windows — one per setting (Breath Rate, Tidal Volume, Pressure Control, Inspiratory Time, Pressure Support, O₂ %, Sensitivity, PEEP) plus the alarm-limit windows. Two Select buttons (Mode and Breath Type). The Set Value knob. Manual Breath, Alarm Silence/Reset, Control Lock, and the display window.",
@@ -1048,6 +1059,7 @@ const MODULES = [
     },
     {
       id: "battery", kicker: "6.2 · Power", title: "Battery and Line Power",
+      figure: "ltv_battery",
       body: [
         "Internal battery: sealed lead-acid, ~45 min at nominal settings (per the LTV operator manual). Drains FASTER at high FiO₂, high PEEP, rapid rates — plan far less for a sick lung. Always confirm runtime against your unit's manual.",
         "Battery health degrades over service life. A unit in service > 3 years and never replaced will deliver less than spec. Document unexpected battery alarms.",
@@ -1057,6 +1069,7 @@ const MODULES = [
     },
     {
       id: "display", kicker: "6.3 · Display", title: "Reading the Screen",
+      figure: "ltv_monitor",
       body: [
         "The LTV does NOT split the screen into a settings half and a monitored half. Each setting lives in its OWN window and you work one at a time: press that control to select it (it brightens, the rest dim), turn the Set Value knob, then confirm.",
         "Monitored data appears in ONE display window that SCANS — cycling through the measured values one at a time: PIP, MAP, PEEP, f (total rate), Vte (exhaled tidal volume), VE (exhaled minute volume), and I:E. Alarm messages appear in this same window.",
@@ -1069,6 +1082,7 @@ const MODULES = [
     },
     {
       id: "alarms", kicker: "6.4 · Alarms", title: "The Core Alarms",
+      figure: "ltv_alarm",
       body: [
         "HIGH PRESSURE — PIP exceeded threshold (default ~40 cmH₂O; set to 35 in lung-protective). Most common in EMS.",
         "LOW PRESSURE / LOW PEEP — circuit leak, disconnect, ETT cuff leak. Default 4 cmH₂O below set PEEP.",
@@ -1095,6 +1109,7 @@ const MODULES = [
     },
     {
       id: "workflow", kicker: "6.6 · Workflow", title: "Safe Changes & Common Pitfalls",
+      figure: "transport_ready",
       body: [
         "Safe-change workflow: 1) Verbalize the change BEFORE you touch the panel. 2) Press that control\'s window to SELECT it — it brightens, the rest dim. 3) Turn the Set Value knob. 4) Confirm — press the control again, select another, press Control Lock, or let it time out. 5) Reassess in 30 sec. 6) Document with vitals before AND after.",
         "Common pitfalls from incident reviews: forgetting to set LOW MV alarm; setting PEEP at the dial but forgetting to attach the PEEP valve; pediatric patient on the adult circuit (dead space > Vt); missing the POWER LOST alarm when the AC plug bumps loose and the unit transfers to internal battery; POST skipped because \"the next shift will do it.\""
@@ -1230,7 +1245,7 @@ const MODULES = [
   lessons: [
     {
       id: "philosophy", kicker: "7.1 · Philosophy", title: "What Alarms Are For",
-      figure: "dope",
+      figure: ["kit_dope", "ltv_alarm"],
       body: [
         "Alarms are NOT nuisances. They are information about a deteriorating system. Two kinds: equipment alarms (machine problem) and patient alarms (patient problem). Some are both.",
         "The cardinal rule: READ the alarm before you SILENCE it. Silencing an alarm without identifying the cause is a sentinel-level safety event, documented in nearly every transport-service incident review.",
@@ -1441,6 +1456,7 @@ const MODULES = [
     },
     {
       id: "rass", kicker: "8.2 · RASS", title: "The Sedation Scale",
+      figure: "rass_scale",
       body: [
         "Richmond Agitation-Sedation Scale runs +4 (combative) to −5 (unarousable).",
         "+4 combative danger to staff. +3 very agitated, pulls at tubes. +2 agitated, fights vent. +1 restless but cooperative.",
@@ -1620,7 +1636,7 @@ const MODULES = [
     },
     {
       id: "auto-peep",
-      figure: "autopeep",
+      figure: "kit_autopeep",
       kicker: "9.2 · Auto-PEEP", title: "When the Lung Doesn't Empty",
       body: [
         "Picture pouring into a glass that drains slowly: send the next splash before it empties and the level climbs until it overflows. Auto-PEEP is the same — in an obstructed lung that exhales slowly, the next breath starts before the last one finishes, so air stacks, the chest over-fills, intrathoracic pressure rises, venous return drops, and BP falls.",
@@ -1632,7 +1648,7 @@ const MODULES = [
     },
     {
       id: "ards",
-      figure: "peep_fio2",
+      figure: ["ards_baby_lung", "peep_fio2"],
       kicker: "9.3 · ARDS", title: "Lung-Protective Ventilation",
       body: [
         "Acute Respiratory Distress Syndrome: diffuse alveolar damage, refractory hypoxia. Berlin definition (2012): bilateral infiltrates, not cardiac, within 1 week. Severity by P/F ratio: mild 200–300, moderate 100–200, severe < 100. A 2023/2024 Global Definition of ARDS now also allows diagnosis by SpO₂/FiO₂ and includes patients on HFNO ≥ 30 L/min or CPAP/NIV ≥ 5 cmH₂O — but the Berlin P/F severity bands remain in everyday bedside use.",
@@ -1654,6 +1670,7 @@ const MODULES = [
     },
     {
       id: "tbi", kicker: "9.5 · TBI", title: "Strict Normocapnia",
+      figure: "tbi_targets",
       body: [
         "Two enemies of the injured brain: hypoxia and hypotension. A single SpO₂ < 90 or SBP < 90 doubles mortality in moderate-severe TBI (Brain Trauma Foundation 4th ed., 2017).",
         "Strict normocapnia: target EtCO₂ 35–40 mmHg. Avoid prophylactic hyperventilation (BTF Level IIB recommendation) — drops cerebral blood flow and worsens secondary injury.",
@@ -1664,6 +1681,7 @@ const MODULES = [
     },
     {
       id: "peds", kicker: "9.6 · Pediatrics", title: "Smaller Everything, Bigger Margins",
+      figure: "peds_guardrails",
       body: [
         "Use length-based weight (Broselow / Handtevy) — don't guess. Vt 6–8 mL/kg of ACTUAL body weight in peds (different from adults).",
         "Age-based RR: infant 25–30, child 15–20, adolescent 12–16. PEEP starts 5; can go higher in severe parenchymal disease.",
@@ -2508,10 +2526,15 @@ function renderModuleHome() {
   mount(container);
 }
 
-// Teaching figure for a lesson. Figures live in figures.js as inline SVG so the
-// app stays offline-capable; returns null when the lesson has no figure or the
-// figure set failed to load.
+// Teaching figure for a lesson. A lesson may use one key or an ordered array of
+// keys. Figure metadata lives in figures.js; returns null when nothing resolves.
 function buildFigure(key) {
+  if (Array.isArray(key)) {
+    const figures = key.map(buildFigure).filter(Boolean);
+    return figures.length
+      ? el("div", { class: "lesson-figures" }, ...figures)
+      : null;
+  }
   if (!key || typeof FIGURES === "undefined" || !FIGURES[key]) return null;
   const f = FIGURES[key];
   const fig = el("figure", { class: "lesson-figure" });

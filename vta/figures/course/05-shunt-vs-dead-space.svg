@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Shunt compared with dead space</title>
+  <desc id="desc">Shunt is perfusion without ventilation; dead space is ventilation without perfusion.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#173F6D" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#0B67C2"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#45BDEB"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#C84343"/>
+    </marker>
+    <style>
+      text { font-family: Aptos, Arial, Helvetica, sans-serif; fill: #243548; }
+      .label { font-size: 30px; font-weight: 700; fill: #173F6D; }
+      .small { font-size: 23px; font-weight: 600; }
+      .tiny { font-size: 19px; font-weight: 500; fill: #738396; }
+      .micro { font-size: 16px; font-weight: 600; fill: #738396; letter-spacing: 0.7px; }
+      .formula { font-size: 34px; font-weight: 700; fill: #173F6D; }
+      .card { fill: #FFFFFF; stroke: #CCD7E3; stroke-width: 2; }
+      .flow { fill: none; stroke: #45BDEB; stroke-width: 12; stroke-linecap: round; marker-end: url(#arrow-cyan); }
+      .blood { fill: none; stroke: #C84343; stroke-width: 12; stroke-linecap: round; marker-end: url(#arrow-red); }
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#FBFCFE"/>
+  
+    <rect x="70" y="80" width="690" height="740" rx="34" class="card" filter="url(#shadow)"/>
+    <rect x="840" y="80" width="690" height="740" rx="34" class="card" filter="url(#shadow)"/>
+    <rect x="70" y="80" width="690" height="106" rx="34" fill="#E56B5D"/>
+    <path d="M70 145 V114 Q70 80 104 80 H726 Q760 80 760 114 V186 H70Z" fill="#E56B5D"/>
+    <rect x="840" y="80" width="690" height="106" rx="34" fill="#0B67C2"/>
+    <path d="M840 145 V114 Q840 80 874 80 H1496 Q1530 80 1530 114 V186 H840Z" fill="#0B67C2"/>
+    <text x="415" y="148" text-anchor="middle" font-size="40" font-weight="700" style="fill:#FFFFFF">SHUNT</text>
+    <text x="1185" y="148" text-anchor="middle" font-size="40" font-weight="700" style="fill:#FFFFFF">DEAD SPACE</text>
+    <path d="M175,430 C262.5,430 300,430 360,430" fill="none" stroke="#738396" stroke-width="15" stroke-linecap="round"/>
+       <line x1="247.5" y1="387.5" x2="318.75" y2="472.5" stroke="#C84343" stroke-width="12.5" stroke-linecap="round"/>
+       <line x1="247.5" y1="472.5" x2="318.75" y2="387.5" stroke="#C84343" stroke-width="12.5" stroke-linecap="round"/><path d="M381.25,567.5 C481.25,636.25 581.25,607.5 640,527.5" fill="none" stroke="#0B67C2" stroke-width="22.5" stroke-linecap="round"/>
+       <path d="M640,527.5 C681.25,461.25 681.25,357.5 615,298.75" fill="none" stroke="#C84343" stroke-width="22.5" stroke-linecap="round"/><circle cx="410" cy="410" r="58.75" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="452.5" cy="357.5" r="61.25" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="518.75" cy="342.5" r="65" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="580" cy="387.5" r="61.25" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="590" cy="452.5" r="60" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="546.25" cy="502.5" r="63.75" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="477.5" cy="511.25" r="65" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="421.25" cy="477.5" r="60" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/><circle cx="500" cy="430" r="77.5" fill="#D7B3AD" stroke="#E56B5D" stroke-width="3.75"/>
+    <path d="M945,430 C1032.5,430 1070,430 1130,430" class="flow"/><path d="M1151.25,567.5 C1251.25,636.25 1351.25,607.5 1410,527.5" fill="none" stroke="#CCD7E3" stroke-width="22.5" stroke-linecap="round" stroke-dasharray="22.5 18.75"/>
+       <line x1="1245" y1="561.25" x2="1320" y2="636.25" stroke="#C84343" stroke-width="12.5" stroke-linecap="round"/>
+       <line x1="1245" y1="636.25" x2="1320" y2="561.25" stroke="#C84343" stroke-width="12.5" stroke-linecap="round"/><circle cx="1180" cy="410" r="58.75" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1222.5" cy="357.5" r="61.25" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1288.75" cy="342.5" r="65" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1350" cy="387.5" r="61.25" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1360" cy="452.5" r="60" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1316.25" cy="502.5" r="63.75" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1247.5" cy="511.25" r="65" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1191.25" cy="477.5" r="60" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/><circle cx="1270" cy="430" r="77.5" fill="#F6C4B8" stroke="#E56B5D" stroke-width="3.75"/>
+    <g transform="translate(180,250)">
+      <circle cx="0" cy="0" r="38" fill="#FBE9E5" stroke="#C84343" stroke-width="4"/>
+      <path d="M-18 -18 L18 18 M-18 18 L18 -18" stroke="#C84343" stroke-width="8" stroke-linecap="round"/>
+      <text x="0" y="70" text-anchor="middle" class="micro">NO VENTILATION</text>
+    </g>
+    <g transform="translate(950,250)">
+      <circle cx="0" cy="0" r="38" fill="#FBE9E5" stroke="#C84343" stroke-width="4"/>
+      <path d="M-18 -18 L18 18 M-18 18 L18 -18" stroke="#C84343" stroke-width="8" stroke-linecap="round"/>
+      <text x="0" y="70" text-anchor="middle" class="micro">NO PERFUSION</text>
+    </g>
+    <rect x="165" y="675" width="500" height="86" rx="18" fill="#FBE9E5"/>
+    <text x="415" y="710" text-anchor="middle" class="small">Perfusion without ventilation</text>
+    <text x="415" y="743" text-anchor="middle" class="tiny">Recruitment and PEEP may help</text>
+    <rect x="935" y="675" width="500" height="86" rx="18" fill="#EAF3FC"/>
+    <text x="1185" y="710" text-anchor="middle" class="small">Ventilation without perfusion</text>
+    <text x="1185" y="743" text-anchor="middle" class="tiny">Ventilation is wasted</text>
+    
+</svg>
