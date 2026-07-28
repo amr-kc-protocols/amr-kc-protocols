@@ -282,4 +282,149 @@ volpress: {
 
 };
 
+// ---------- Course visual kit ----------
+// Purpose-built 16:9 graphics supplied for this Academy. SVG is preferred for
+// crisp responsive rendering; the three medical illustrations are PNG-only.
+Object.assign(FIGURES, {
+  breath_path: {
+    title: "The path of a breath — airway to alveolar gas exchange",
+    alt: "Medical illustration tracing inspired gas from the nose and mouth through the tracheobronchial tree to a magnified alveolus and surrounding capillary.",
+    img: "figures/course/01-path-of-a-breath.png"
+  },
+  lung_zones: {
+    title: "Conducting zone and respiratory zone",
+    alt: "Medical illustration showing the conducting airways transitioning into alveolar respiratory units with surrounding capillaries.",
+    img: "figures/course/02-two-functional-zones.png"
+  },
+  kit_two_knobs: {
+    title: "Two controls for ventilation; two controls for oxygenation",
+    alt: "Ventilation is controlled by respiratory rate and tidal volume, while oxygenation is controlled by inspired oxygen and PEEP.",
+    img: "figures/course/03-two-knobs-each.svg"
+  },
+  dead_space: {
+    title: "Anatomic dead space and alveolar dead space",
+    alt: "Comparison of conducting-airway dead space with alveolar dead space caused by ventilation without perfusion.",
+    img: "figures/course/04-dead-space.svg"
+  },
+  kit_vq: {
+    title: "Shunt versus dead space",
+    alt: "Shunt is perfusion without ventilation; dead space is ventilation without perfusion.",
+    img: "figures/course/05-shunt-vs-dead-space.svg"
+  },
+  comp_res: {
+    title: "Compliance versus resistance",
+    alt: "Compliance describes how easily lungs expand; resistance describes how easily gas moves through the airway.",
+    img: "figures/course/06-compliance-vs-resistance.svg"
+  },
+  kit_pip_pplat: {
+    title: "Peak pressure, plateau pressure, and the resistive pressure difference",
+    alt: "Pressure-time waveform marking PIP, plateau pressure during an inspiratory hold, PEEP, and the resistive pressure difference.",
+    img: "figures/course/07-pip-vs-plateau.svg"
+  },
+  kit_oxyhb: {
+    title: "Oxyhemoglobin dissociation curve — plateau and steep slope",
+    alt: "Sigmoid relationship between arterial oxygen pressure and hemoglobin saturation, emphasizing rapid saturation decline below about 60 millimeters of mercury.",
+    img: "figures/course/08-oxyhemoglobin-dissociation-curve.svg"
+  },
+  failure_types: {
+    title: "Type I hypoxemic versus Type II hypercapnic respiratory failure",
+    alt: "Comparison of Type I oxygen-loading failure and Type II carbon-dioxide-clearance failure.",
+    img: "figures/course/09-type-i-vs-type-ii-respiratory-failure.svg"
+  },
+  kit_capno: {
+    title: "Four capnography patterns",
+    alt: "Normal, bronchospasm shark-fin, rebreathing, and sudden lost-waveform capnograms.",
+    img: "figures/course/10-four-capnography-patterns.svg"
+  },
+  failure_progression: {
+    title: "Respiratory failure progression — busy compensation can become quiet failure",
+    alt: "Progression from compensation through rising work, fatigue, and decompensation, emphasizing trend recognition.",
+    img: "figures/course/11-respiratory-failure-progression.svg"
+  },
+  cpap_bilevel: {
+    title: "CPAP versus bilevel pressure",
+    alt: "CPAP maintains one pressure throughout the cycle; bilevel alternates between IPAP and EPAP, with pressure support equal to IPAP minus EPAP.",
+    img: "figures/course/12-cpap-vs-bilevel-pressure.svg"
+  },
+  niv_trial: {
+    title: "A monitored NIV trial — select, reassess, continue or escalate",
+    alt: "Flow from appropriate NIV patient selection through reassessment within minutes and prompt escalation when the patient deteriorates or fails to improve.",
+    img: "figures/course/13-niv-trial-and-escalation.svg"
+  },
+  preoxygenation: {
+    title: "Preoxygenation fills the functional residual capacity with oxygen",
+    alt: "Comparison of a nitrogen-rich lung reservoir on room air with an oxygen-rich reservoir after effective preoxygenation.",
+    img: "figures/course/14-preoxygenation-reservoir.svg"
+  },
+  pbw_vt: {
+    title: "Predicted body weight and tidal volume begin with height and sex",
+    alt: "Worked predicted-body-weight examples and six-to-eight-milliliter-per-kilogram tidal-volume ranges for a five-foot-ten adult male and female.",
+    img: "figures/course/15-predicted-body-weight-and-tidal-volume.svg"
+  },
+  kit_volpress: {
+    title: "Volume targeting versus pressure targeting",
+    alt: "Volume-targeted ventilation fixes tidal volume while pressure varies; pressure-targeted ventilation fixes inspiratory pressure while tidal volume varies.",
+    img: "figures/course/16-volume-vs-pressure-targeting.svg"
+  },
+  ards_baby_lung: {
+    title: "ARDS baby-lung concept — only a smaller aerated lung remains available",
+    alt: "Medical illustration comparing healthy aerated lungs with ARDS lungs containing extensive dependent flooded and collapsed regions.",
+    img: "figures/course/17-ards-baby-lung.png"
+  },
+  kit_autopeep: {
+    title: "Auto-PEEP — expiratory flow does not return to zero",
+    alt: "Normal complete exhalation compared with expiratory flow still active when the next inspiration begins.",
+    img: "figures/course/18-auto-peep-expiratory-flow.svg"
+  },
+  kit_dope: {
+    title: "DOPE troubleshooting — patient, airway, circuit, then controlled backup ventilation",
+    alt: "Four-part ventilator emergency check for dislodgement, obstruction, pneumothorax, and equipment failure.",
+    img: "figures/course/19-dope-troubleshooting.svg"
+  },
+  tbi_targets: {
+    title: "Prehospital TBI physiologic targets",
+    alt: "Brain Trauma Foundation anchors for oxygen saturation, adult systolic blood pressure, and end-tidal carbon dioxide, with protocol-directed herniation rescue.",
+    img: "figures/course/20-prehospital-tbi-targets.svg",
+    note: "Guideline anchors — reconcile with current local protocol and medical direction."
+  },
+  transport_ready: {
+    title: "Ventilator transport requires redundancy",
+    alt: "Six transport-readiness checks covering power, oxygen, circuit, airway, backup ventilation, and the team plan.",
+    img: "figures/course/21-ventilator-transport-readiness.svg"
+  },
+  ltv_circuit: {
+    title: "LTV 1200 circuit connections",
+    alt: "Conceptual right-side connection schematic for the main breathing tube, high and low flow-transducer lines, and exhalation-valve driver line.",
+    img: "figures/course/22-ltv1200-circuit-connections.svg",
+    note: "Confirm every connection against the unit in service and current operator manual."
+  },
+  ltv_battery: {
+    title: "LTV 1200 internal-battery indicator",
+    alt: "Approximate green, amber, and red internal-battery indications at nominal settings, with external power shown as the transport plan.",
+    img: "figures/course/23-ltv1200-internal-battery-indicator.svg",
+    note: "Approximate only; actual duration varies with battery condition, settings, and operating conditions."
+  },
+  ltv_alarm: {
+    title: "LTV 1200 alarm response — patient first, message second, buttons third",
+    alt: "Sequence to read the alarm, assess the patient and circuit, silence, correct the cause, and reset after correction.",
+    img: "figures/course/24-ltv1200-alarm-response.svg"
+  },
+  ltv_monitor: {
+    title: "Set values versus the LTV monitored-data scan",
+    alt: "Comparison of operator-set controls with the scanning monitored values PIP, MAP, PEEP, total rate, exhaled tidal volume, exhaled minute volume, and I-to-E ratio.",
+    img: "figures/course/25-ltv1200-reading-monitored-data.svg"
+  },
+  rass_scale: {
+    title: "Richmond Agitation–Sedation Scale",
+    alt: "RASS levels from positive four, combative, through zero, alert and calm, to negative five, unarousable; target depth must be individualized.",
+    img: "figures/course/26-rass-sedation-scale.svg",
+    note: "RASS cannot be interpreted during effective neuromuscular blockade."
+  },
+  peds_guardrails: {
+    title: "Pediatric ventilation guardrails",
+    alt: "Length-based weight, patient-sized equipment, measured small tidal volumes, age-based rates, exhaled-volume monitoring, and tight alarms.",
+    img: "figures/course/27-pediatric-ventilation-guardrails.svg"
+  }
+});
+
 if (typeof module !== "undefined" && module.exports) module.exports = { FIGURES };
