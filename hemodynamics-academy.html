@@ -297,6 +297,58 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
 .evlegend .evrow{ display:flex; align-items:flex-start; gap:10px; margin:7px 0; font-size:12.5px; color:var(--ink-2); line-height:1.45; }
 .evlegend .ev-tier{ flex:0 0 auto; }
 
+/* ── Accessibility & new quiz controls ──────────────────────────── */
+.visually-hidden{ position:absolute!important; width:1px; height:1px; margin:-1px; padding:0;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+.skiplink{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;
+  font-family:var(--sans); font-weight:700; font-size:13px; }
+.skiplink:focus{ position:static; left:auto; width:auto; height:auto; overflow:visible;
+  display:inline-block; margin:0 0 8px; padding:8px 12px; background:var(--blue-soft);
+  color:var(--blue-dk); border:2px solid var(--blue); border-radius:9px; }
+/* A visible focus ring on every interactive control. */
+a:focus-visible, button:focus-visible, input:focus-visible, label.opt:focus-within, .acc-h:focus-visible{
+  outline:3px solid var(--blue); outline-offset:2px; border-radius:9px;
+}
+/* Question groups are real fieldsets now; strip default chrome. */
+fieldset.q{ border:1px solid transparent; }
+fieldset.q .qlegend{ display:block; float:none; width:100%; padding:0; margin:0 0 12px; }
+.qlegend .qnum{ display:block; font-family:var(--mono); font-size:11px; color:var(--blue);
+  font-weight:700; letter-spacing:.05em; margin-bottom:5px; }
+.qlegend .qtext{ display:block; font-family:var(--sans); font-weight:600; font-size:15.5px;
+  line-height:1.42; color:var(--ink); }
+/* Options are labels wrapping native radios. */
+label.opt{ display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left;
+  font-family:var(--sans); font-size:14.5px; line-height:1.4; background:var(--paper);
+  border:1.5px solid var(--rule); border-radius:11px; padding:12px 14px; margin:8px 0;
+  cursor:pointer; color:var(--ink); transition:border-color .12s, background .12s; }
+label.opt:hover{ border-color:var(--rule-2); }
+label.opt .optradio{ width:19px; height:19px; margin:0; flex-shrink:0; accent-color:var(--blue); cursor:pointer; }
+label.opt .ol{ font-family:var(--mono); font-weight:700; color:var(--blue); flex-shrink:0; }
+label.opt .otx{ flex:1; min-width:0; }
+label.opt.sel{ border-color:var(--blue); background:var(--blue-soft); }
+label.opt.correct{ border-color:var(--green); background:var(--green-soft); }
+label.opt.wrong{ border-color:var(--red); background:var(--red-soft); }
+label.opt.correct .ol{ color:var(--green); }
+label.opt.wrong .ol{ color:var(--red); }
+.locked-opts label.opt{ cursor:default; }
+.locked-opts label.opt:hover{ border-color:var(--rule); }
+/* Certificate scope statement */
+.cert .c-scope{ font-family:var(--sans); font-size:11.5px; line-height:1.5; color:var(--ink-2);
+  max-width:470px; margin:0 auto 6px; padding:10px 12px; background:var(--card-2);
+  border:1px solid var(--rule); border-radius:9px; text-align:left; }
+.cert .c-scope strong{ color:var(--ink); }
+/* Course meta / orientation panel */
+.orient{ background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:15px 16px; margin:0 0 14px; }
+.orient h4{ font-family:var(--sans); font-weight:800; font-size:14px; color:var(--ink); margin:0 0 8px; }
+.orient dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:5px 12px; }
+.orient dt{ font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--lock); font-weight:700; padding-top:2px; }
+.orient dd{ margin:0; font-size:13px; color:var(--ink-2); line-height:1.5; }
+.orient .disclaim{ margin:11px 0 0; padding:10px 12px; background:var(--amber-soft);
+  border:1px solid var(--amber-line); border-radius:9px; font-size:12.5px; color:var(--amber); line-height:1.5; }
+.verstamp{ font-family:var(--mono); font-size:10.5px; color:var(--lock); letter-spacing:.03em;
+  text-align:center; margin:14px 0 0; }
+
 @media print{
   body{ background:#fff; }
   header.mon, main > *:not(#view-cert), .back, .cta-wrap, footer.adm, .print-hide{ display:none !important; }
@@ -334,6 +386,8 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
 </header>
 
 <div class="storagewarn hidden print-hide" id="storageWarn">Your device isn't saving progress (private browsing or storage is full) — quiz results and your certificate may not persist after you close this page.</div>
+<!-- Single polite live region used for status messages across all views. -->
+<p class="visually-hidden" id="srLive" role="status" aria-live="polite" aria-atomic="true"></p>
 
 <main>
   <div class="wrap">
@@ -345,9 +399,13 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
         <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
       </div>
       <div class='evlegend print-hide'><h4>How the evidence is graded</h4><p>Claims in this course carry an evidence-strength badge, so you can see how firm the ground is. Weak evidence is labelled as weak &mdash; and occasionally still supports a strong recommendation, which is said explicitly where it applies.</p><div class='evrow ev-strong'><span class='ev-tier'>Strong</span><span>Large or consistent randomized evidence, or an aligned guideline position.</span></div><div class='evrow ev-moderate'><span class='ev-tier'>Moderate</span><span>Reasonable evidence with real limitations &mdash; single trials, or consistent observational data.</span></div><div class='evrow ev-limited'><span class='ev-tier'>Limited</span><span>Case reports, mechanism, or consensus only. Treat conclusions cautiously.</span></div><div class='evrow ev-contested'><span class='ev-tier'>Contested</span><span>Good-quality studies that disagree. Reasonable clinicians differ.</span></div></div>
+      <div id="orientSlot"></div>
+      <div id="resumeSlot"></div>
       <p class="eyebrow">Course Modules &middot; Sequential</p>
       <ul class="modlist" id="modList"></ul>
       <div id="finalSlot"></div>
+      <div id="sourcesSlot"></div>
+      <p class="verstamp" id="verStamp"></p>
       <footer class="adm">
         <button class="reset" id="resetBtn">Reset my progress</button>
       </footer>
@@ -367,13 +425,16 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
     </section>
 
     <!-- ===== QUIZ ===== -->
-    <section id="view-quiz" class="hidden">
+    <section id="view-quiz" class="hidden" aria-labelledby="qzTitle">
       <button class="back" id="quizBack">&#x2039; Back to module</button>
+      <a class="skiplink" href="#quizActions">Skip to submit</a>
       <div class="rd-num" id="qzNum"></div>
       <h2 class="rd-title" id="qzTitle"></h2>
       <div class="qmeta" id="qzMeta"></div>
+      <!-- Progress and results are announced politely rather than stealing focus. -->
+      <p class="visually-hidden" id="quizProgress" aria-live="polite" aria-atomic="true"></p>
       <div id="resultSlot"></div>
-      <div id="quizForm"></div>
+      <form id="quizForm" onsubmit="return false;"></form>
       <div class="cta-wrap" id="quizActions"></div>
     </section>
 
@@ -397,9 +458,36 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
 var PASS_MODULE = 80;   // %
 var PASS_FINAL  = 85;   // %
 
+/* ── Content versioning ───────────────────────────────────────────────────
+   COURSE_VERSION is stamped into saved progress. Bump the MAJOR number when a
+   clinical correction changes what a previously-correct answer should be — that
+   invalidates in-flight attempts (see loadState) so nobody finishes an exam
+   graded against superseded content. Bump MINOR for wording/typo/visual work. */
+var FINAL_PER_MODULE = 4;   // questions sampled from each module's bank for the final exam
+var COURSE_VERSION  = "2.0";
+var CLINICAL_REVIEW = "2026-07-30";
+
+/* Number of correct answers needed to pass, and the honest phrasing of it.
+   A 32-question exam at an 85% threshold cannot be met at exactly 85% —
+   the first attainable score at or above it is 28/32 (87.5%). */
+function passMarkCount(total){ return Math.ceil(total * PASS_FINAL / 100); }
+function passMarkText(){
+  var total = MODULES.length * FINAL_PER_MODULE;
+  var need  = passMarkCount(total);
+  return need + " of " + total + " correct (" +
+    (Math.round(need/total*1000)/10) + "%, the first attainable score at or above " + PASS_FINAL + "%)";
+}
+
+/* Single polite announcer for screen readers. */
+function announce(msg){
+  var el = document.getElementById("srLive");
+  if(el) el.textContent = msg;
+}
+
 var MODULES = [
   {
     id: 1,
+    minutes: 20,
     available: true,
     title: "Hemodynamic Physiology Foundations",
     desc: "The pressure–flow relationship, the four determinants of cardiac output, oxygen delivery, and what a MAP target actually buys you.",
@@ -502,6 +590,7 @@ var MODULES = [
 
   {
     id: 2,
+    minutes: 20,
     available: true,
     title: "Arterial Line Monitoring",
     desc: "Leveling and zeroing to the phlebostatic axis, waveform components, the square-wave (damping) test, and troubleshooting a bad tracing.",
@@ -603,6 +692,7 @@ var MODULES = [
 
   {
     id: 3,
+    minutes: 25,
     available: true,
     title: "Pharmacology I — Managing the Hypotensive Patient",
     desc: "Norepinephrine, epinephrine, phenylephrine, vasopressin, dopamine, dobutamine, milrinone: receptor logic, push-dose pressors, and titration to a target.",
@@ -706,6 +796,7 @@ var MODULES = [
 
   {
     id: 4,
+    minutes: 25,
     available: true,
     title: "Pharmacology II — Managing the Hypertensive Patient",
     desc: "Nicardipine, clevidipine, labetalol, esmolol, nitroglycerin, nitroprusside; hypertensive emergency and the dissection, stroke, and ICH pressure targets.",
@@ -796,6 +887,7 @@ var MODULES = [
 
   {
     id: 5,
+    minutes: 20,
     available: true,
     title: "Intra-Aortic Balloon Pump (IABP)",
     desc: "Counterpulsation physiology, augmentation and timing errors, triggering, complications, and what changes in transport.",
@@ -890,6 +982,7 @@ var MODULES = [
 
   {
     id: 6,
+    minutes: 20,
     available: true,
     title: "Impella",
     desc: "Axial-flow physiology, P-levels, the purge system, suction alarms, positioning, and transport considerations.",
@@ -973,6 +1066,7 @@ var MODULES = [
 
   {
     id: 7,
+    minutes: 25,
     available: true,
     title: "ECMO",
     desc: "VA versus VV physiology, the circuit, Harlequin / oxygenator failure, and the transport team's role.",
@@ -1059,6 +1153,7 @@ var MODULES = [
 
   {
     id: 8,
+    minutes: 20,
     available: true,
     title: "LVAD",
     desc: "Continuous-flow physiology, Doppler MAP, controller and alarms, assessing perfusion, and the resuscitation algorithm.",
@@ -1098,17 +1193,23 @@ var MODULES = [
         "</ul>"
       },
       { h:"7", t:"The resuscitation algorithm", html:
-        "<p>This is the highest-stakes reason the module exists, because the instinctive response is wrong. Work the algorithm:</p>"+
+        "<p>This is the highest-stakes reason the module exists. Two instincts are wrong here, in opposite directions — and the second one is the dangerous one.</p>"+
+        "<p>The first wrong instinct is to call every pulseless LVAD patient an arrest. Pulselessness is <em>expected</em> with continuous flow, so an awake, perfusing patient does not get compressions.</p>"+
+        "<p>The second wrong instinct — and the one that costs lives — is to treat compressions as something you earn only <em>after</em> proving the pump has failed. It is not. <strong>Pump failure is not a prerequisite for chest compressions.</strong></p>"+
+        "<div class='keybox'><span class='kt'>The rule</span> An LVAD patient who is <strong>unresponsive with inadequate perfusion</strong> gets <strong>immediate external chest compressions</strong>. Do not delay compressions to interrogate the controller, auscultate for a hum, or reach the VAD coordinator. Pump assessment happens <em>concurrently</em>, by a second rescuer, when one is available.</div>"+
+        "<p>Work it in this order:</p>"+
         "<ul>"+
-        "<li><strong>Assess perfusion, not pulse</strong> — mentation, Doppler MAP, end-tidal CO2 — and auscultate for the hum.</li>"+
-        "<li><strong>Troubleshoot the device</strong> — check power, connections, and the controller, ideally with the VAD coordinator or a trained caregiver. Restarting a stopped pump may be the single most effective thing you can do.</li>"+
-        "<li><strong>If the device is running and the patient is perfusing</strong> (awake, adequate MAP/ETCO2) — do NOT start compressions, even if there is no pulse and even in VT/VF. Treat the rhythm; the pump is doing its job.</li>"+
-        "<li><strong>If the device is NOT functioning and cannot be restarted, AND there are no signs of life / inadequate perfusion</strong> (for example unresponsive with ETCO2 under 20 or MAP at or below 50) — chest compressions ARE now recommended.</li>"+
+        "<li><strong>Assess responsiveness and perfusion, not pulse</strong> — mentation, Doppler opening pressure, end-tidal CO2, skin.</li>"+
+        "<li><strong>Unresponsive with inadequate perfusion</strong> (for example ETCO2 under 20, no measurable pressure, no signs of life) → <strong>start compressions now.</strong> Run the arrest as you otherwise would, including epinephrine and airway management.</li>"+
+        "<li><strong>Concurrently, if you have a second rescuer</strong> — listen for the hum, check power, connections, and the controller, and get the VAD coordinator on the phone. A stopped pump that can be restarted is still enormously valuable, but that work happens <em>alongside</em> compressions, never instead of them.</li>"+
+        "<li><strong>If the device is running and the patient is perfusing</strong> (awake, adequate pressure and ETCO2) — do NOT start compressions, even with no pulse and even in VT/VF. Treat the rhythm; the pump is doing its job.</li>"+
         "<li><strong>Defibrillation is not contraindicated.</strong> Shock a shockable rhythm as usual.</li>"+
         "</ul>"+
+        "<p>Why does this matter so much? Because a running pump and a dying patient can coexist. An LVAD only supports the left ventricle, so the patient can lose perfusion from <strong>right-ventricular failure, tamponade, arrhythmia, hypovolemia, or hemorrhage</strong> while the controller reports a perfectly normal pump. If you require a confirmed pump failure before compressing, every one of those patients gets no circulation while you troubleshoot a device that was never the problem.</p>"+
         "<div class='evidence ev-limited'><div class='ev-hd'><span class='etag'>Evidence check</span><span class='ev-tier'>Limited</span></div>"+
-        "<p>The old blanket prohibition on compressions — out of fear of dislodging the outflow cannula — has been replaced by a perfusion-based approach (AHA scientific statement, 2017, carried into current ACLS/AHA guidance). The dislodgement fear was theoretical: there is no reported case of compressions dislodging an LVAD, and case series suggest compressions can be performed when truly indicated. The supporting evidence is consensus and observational, not randomized — so the algorithm is a reasoned default, prioritizing device troubleshooting first and reserving compressions for genuine pump failure with no perfusion.</p>"+
-        "<div class='grade'>Quality: low–moderate (expert consensus and case series; no RCT).</div></div>"
+        "<div class='ev-t'>Compressions in the LVAD patient</div>"+
+        "<p>The old blanket prohibition on compressions — from fear of dislodging the outflow cannula — has been replaced by a perfusion-based approach. The dislodgement concern was theoretical, and reported experience has not borne it out. Current guidance is that an unresponsive LVAD patient without adequate perfusion should receive external chest compressions, with device assessment performed in parallel rather than as a gate. The supporting evidence is consensus and observational rather than randomized, but the recommendation is directional and strong: the harm of withholding circulation from a non-perfusing patient is concrete, while the dislodgement risk remains hypothetical.</p>"+
+        "<div class='grade'>Quality: limited evidence base (expert consensus, case series, and physiologic reasoning; no RCT) supporting a strong recommendation. Sources: AHA scientific statement on cardiac arrest in patients with mechanical circulatory support (Peberdy et al., <i>Circulation</i> 2017); current AHA ACLS guidance.</div></div>"
       },
       { h:"8", t:"Handoff", html:
         "<div class='keybox'><span class='kt'>Transport</span> Bring the backup controller, batteries, and chargers; keep the driveline secured; document the specific device type; involve the VAD coordinator in the destination decision, because not every hospital can support this patient. Their equipment and their VAD center are part of the patient.</div>"
@@ -1127,9 +1228,9 @@ var MODULES = [
       { q:"An LVAD patient is awake and perfusing but found to be in VT with no pulse. You should:",
         opts:["Begin chest compressions immediately","Treat the rhythm but NOT start compressions, because the pump is perfusing","Turn off the LVAD","Do nothing at all"], ans:1,
         expl:"If the pump is running and the patient is perfusing, compressions are not indicated even in VT/VF. Treat the rhythm; the LVAD keeps flow going independent of native rhythm." },
-      { q:"Chest compressions ARE now recommended in an LVAD patient when:",
-        opts:["Any time there is no palpable pulse","The device is not functioning, cannot be restarted, and there are no signs of life / inadequate perfusion","The patient is hypertensive","The battery alarm sounds"], ans:1,
-        expl:"After troubleshooting, if the pump cannot be restarted and perfusion is absent (e.g., unresponsive, ETCO2 <20, MAP ≤50), compressions are recommended. The old dislodgement fear was theoretical." },
+      { q:"Chest compressions ARE indicated in an LVAD patient when:",
+        opts:["Any time there is no palpable pulse","The patient is unresponsive with inadequate perfusion — start immediately, whether or not pump failure has been confirmed","Only after the pump is confirmed stopped and cannot be restarted","Only once the VAD coordinator authorizes it"], ans:1,
+        expl:"Unresponsive plus inadequate perfusion is the trigger, and compressions start immediately. Pump failure is NOT a prerequisite — an LVAD supports only the left ventricle, so RV failure, tamponade, arrhythmia, or hypovolemia can kill the patient while the controller looks entirely normal. Device assessment happens concurrently with compressions, not before them. (Pulselessness alone is expected with continuous flow and is not by itself an indication.)" },
       { q:"Is defibrillation contraindicated in an LVAD patient?",
         opts:["Yes, never defibrillate","No — defibrillate a shockable rhythm as usual","Only with the VAD coordinator present","Only after removing the controller"], ans:1,
         expl:"Defibrillation is not contraindicated; treat shockable rhythms normally." },
@@ -1142,9 +1243,9 @@ var MODULES = [
       { q:"Why is hypertension particularly dangerous in an LVAD patient?",
         opts:["It has no effect on the pump","High afterload reduces pump flow and raises stroke/bleeding risk","It speeds the pump dangerously","It only affects the right ventricle"], ans:1,
         expl:"These pumps are afterload-sensitive: high systemic pressure opposes output (a cause of low-flow alarms) and increases stroke and bleeding risk — hence a controlled MAP target." },
-      { q:"The correct FIRST step in an unresponsive LVAD patient is to:",
-        opts:["Start chest compressions immediately","Assess perfusion, auscultate for the hum, check power/connections/controller, and contact the VAD coordinator","Remove the driveline","Defibrillate regardless of rhythm"], ans:1,
-        expl:"Lead with perfusion assessment and device troubleshooting (often with the VAD coordinator). Restarting a stopped pump may be the most effective intervention; compressions are reserved for genuine pump failure with no perfusion." }
+      { q:"An LVAD patient is unresponsive with an ETCO2 of 12 and no measurable pressure. You have a partner. What happens first?",
+        opts:["Begin chest compressions immediately, while your partner assesses the pump concurrently","Interrogate the controller and check connections before compressing","Contact the VAD coordinator and await instructions","Withhold compressions because of the outflow-cannula dislodgement risk"], ans:0,
+        expl:"Unresponsive with inadequate perfusion = start compressions now. Device assessment runs in parallel with a second rescuer, not as a gate beforehand. Waiting to confirm pump failure leaves a non-perfusing patient without circulation, and the dislodgement fear is theoretical while the harm of withheld circulation is real." }
     ]
   }
 
@@ -1159,8 +1260,13 @@ var state = loadState();
 function blankState(){
   var m = {};
   MODULES.forEach(function(mod){ m[mod.id] = { read:false, passed:false, best:0 }; });
-  return { learnerName:"", modules:m, finalPassed:false, finalBest:0, completedAt:null };
+  return { learnerName:"", modules:m, finalPassed:false, finalBest:0, completedAt:null,
+           courseVersion:COURSE_VERSION };
 }
+/* Major-version bump = a clinical correction changed an answer key. Completed
+   results from an older major version are retained for the record but flagged,
+   because they were graded against superseded content. */
+function majorOf(v){ return String(v||"0").split(".")[0]; }
 function loadState(){
   try{
     var raw = localStorage.getItem(LS_KEY);
@@ -1171,6 +1277,8 @@ function loadState(){
     base.finalPassed = !!s.finalPassed;
     base.finalBest = s.finalBest || 0;
     base.completedAt = s.completedAt || null;
+    base.courseVersion = s.courseVersion || "1.0";
+    base.staleVersion = majorOf(base.courseVersion) !== majorOf(COURSE_VERSION);
     MODULES.forEach(function(mod){
       if(s.modules && s.modules[mod.id]) base.modules[mod.id] = {
         read:!!s.modules[mod.id].read, passed:!!s.modules[mod.id].passed, best:s.modules[mod.id].best||0 };
@@ -1271,6 +1379,7 @@ function renderHome(){
       "<div class='body'>"+
         "<div class='mtitle'>"+mod.title+"</div>"+
         "<p class='mdesc'>"+mod.desc+"</p>"+
+        "<p class='mdesc' style='margin-top:4px;color:var(--lock)'>~"+(mod.minutes||20)+" min read &middot; "+mod.quiz.length+"-question quiz &middot; pass at "+PASS_MODULE+"%</p>"+
         "<div class='foot'>"+pill+go+"</div>"+
       "</div>";
     if(openable) li.addEventListener("click", function(){ openReader(mod.id); });
@@ -1280,25 +1389,113 @@ function renderHome(){
   // final exam slot
   var slot = document.getElementById("finalSlot");
   var ready = allModulesPassed();
+  var named = hasLearnerName();
+  var finalQ = MODULES.length * FINAL_PER_MODULE;
   slot.innerHTML =
-    "<div class='modcard finalcard "+(ready?"open ready":"locked")+"' id='finalCard'>"+
+    "<div class='modcard finalcard "+((ready&&named)?"open ready":"locked")+"' id='finalCard'>"+
       "<div class='num'>⚑</div>"+
       "<div class='body'>"+
         "<div class='mtitle'>Final Examination</div>"+
-        "<p class='mdesc'>Comprehensive exam across all modules. Pass at "+PASS_FINAL+"% to earn your certificate.</p>"+
+        "<p class='mdesc'>Comprehensive exam across all modules &middot; "+finalQ+" questions. "+
+          "Pass mark: <strong>"+passMarkText()+"</strong>.</p>"+
         "<div class='foot'>"+
           (state.finalPassed
             ? "<span class='pill passed'>✓ Passed</span><span class='go'>View certificate ›</span>"
-            : ready ? "<span class='pill ready'>Unlocked</span><span class='go'>Begin ›</span>"
-                    : "<span class='pill locked'>"+lockSvg()+"Complete all modules</span>")+
+            : !ready ? "<span class='pill locked'>"+lockSvg()+"Complete all modules</span>"
+            : !named ? "<span class='pill soon'>Enter your name to begin</span>"
+                     : "<span class='pill ready'>Unlocked</span><span class='go'>Begin ›</span>")+
         "</div>"+
       "</div>"+
     "</div>";
   var fc = document.getElementById("finalCard");
   if(state.finalPassed) fc.addEventListener("click", function(){ renderCertificate(); show("cert"); });
-  else if(ready) fc.addEventListener("click", startFinal);
+  else if(ready && named) fc.addEventListener("click", startFinal);
+  else if(ready && !named) fc.addEventListener("click", function(){
+    var ni = document.getElementById("nameInput");
+    if(ni){ ni.focus(); ni.scrollIntoView({block:"center"}); }
+    announce("Enter your name before starting the final examination — it appears on your certificate.");
+  });
 
+  renderOrientation();
+  renderResume();
+  renderSources();
+  renderVerStamp();
   show("home");
+}
+
+/* ============================================================================
+   ORIENTATION · SOURCES · RESUME
+   ==========================================================================*/
+function renderOrientation(){
+  var totalMin = MODULES.reduce(function(t,m){ return t + (m.minutes||20); }, 0);
+  var finalQ = MODULES.length * FINAL_PER_MODULE;
+  document.getElementById("orientSlot").innerHTML =
+    "<div class='orient print-hide'>"+
+      "<h4>Before you start</h4>"+
+      "<dl>"+
+        "<dt>Audience</dt><dd>Paramedics, nurses, and clinicians working in critical-care and interfacility transport.</dd>"+
+        "<dt>Prerequisites</dt><dd>Current paramedic or RN licensure, and comfort with basic ECG interpretation and vital-sign physiology. No prior device experience is assumed.</dd>"+
+        "<dt>Scope</dt><dd>Recognition, monitoring, and transport decision-making. This course explains how these devices behave and what their alarms mean &mdash; it does not teach you to insert, initiate, reposition, or reprogram any of them.</dd>"+
+        "<dt>Time</dt><dd>About "+totalMin+" minutes of reading across "+MODULES.length+" modules, plus quizzes.</dd>"+
+        "<dt>To finish</dt><dd>Pass every module quiz at "+PASS_MODULE+"%, then the "+finalQ+"-question final at "+passMarkText()+". A learner name is required before the final so the certificate can be issued.</dd>"+
+      "</dl>"+
+      "<p class='disclaim'><strong>Device-training disclaimer.</strong> Completing this course does not authorize you to operate, adjust, or troubleshoot an IABP, Impella, ECMO circuit, or LVAD independently. Those devices require manufacturer-specific and institution-specific training with a hands-on skills check-off, and you must work within your service's scope of practice, orders, and protocols.</p>"+
+    "</div>";
+}
+function renderSources(){
+  document.getElementById("sourcesSlot").innerHTML =
+    "<div class='orient print-hide' style='margin-top:16px'>"+
+      "<h4>Sources &amp; clinical review</h4>"+
+      "<dl>"+
+        "<dt>Reviewed</dt><dd>Clinically reviewed "+CLINICAL_REVIEW+" &middot; course version "+COURSE_VERSION+".</dd>"+
+      "</dl>"+
+      "<p style='font-size:12.5px;color:var(--ink-2);line-height:1.6;margin:9px 0 0'>"+
+      "Key sources, by module:</p>"+
+      "<p style='font-size:12.5px;color:var(--ink-2);line-height:1.65;margin:6px 0 0'>"+
+      "&bull; Asfar P, et al. High versus low blood-pressure target in septic shock (SEPSISPAM). <i>N Engl J Med</i> 2014;370:1583&ndash;93.<br>"+
+      "&bull; Lamontagne F, et al. Permissive hypotension in vasodilatory shock (65 Trial). <i>JAMA</i> 2020;323:938&ndash;49.<br>"+
+      "&bull; Marik PE, Cavallazzi R. Does the central venous pressure predict fluid responsiveness? <i>Crit Care Med</i> 2013;41:1774&ndash;81.<br>"+
+      "&bull; Isselbacher EM, et al. 2022 ACC/AHA guideline for the diagnosis and management of aortic disease. <i>Circulation</i> 2022;146:e334&ndash;e482.<br>"+
+      "&bull; Greenberg SM, et al. 2022 AHA/ASA guideline for the management of spontaneous intracerebral hemorrhage. <i>Stroke</i> 2022;53:e282&ndash;e361.<br>"+
+      "&bull; AHA/ASA guideline for the early management of acute ischemic stroke (current edition, 2026) &mdash; blood-pressure management before and after thrombolysis.<br>"+
+      "&bull; Thiele H, et al. PCI strategies in cardiogenic shock (CULPRIT-SHOCK) and IABP-SHOCK II. <i>N Engl J Med</i> 2012;367:1287&ndash;96.<br>"+
+      "&bull; Ostadal P, et al. Extracorporeal life support in infarct-related cardiogenic shock (ECMO-CS). <i>Circulation</i> 2023;147:454&ndash;64.<br>"+
+      "&bull; Combes A, et al. ECMO for severe ARDS (EOLIA). <i>N Engl J Med</i> 2018;378:1965&ndash;75.<br>"+
+      "&bull; Extracorporeal Life Support Organization (ELSO). General guidelines for adult ECLS, and ELSO circuit-monitoring guidance.<br>"+
+      "&bull; Abiomed. Impella instructions for use and positioning guidance (model-specific).<br>"+
+      "&bull; Peberdy MA, et al. Cardiopulmonary resuscitation in adults and children with mechanical circulatory support: AHA scientific statement. <i>Circulation</i> 2017;135:e1115&ndash;e1134."+
+      "</p>"+
+    "</div>";
+}
+function renderVerStamp(){
+  var el = document.getElementById("verStamp");
+  if(!el) return;
+  el.textContent = "Course version "+COURSE_VERSION+" · clinically reviewed "+CLINICAL_REVIEW+
+    (state.staleVersion ? " · your saved results predate the current clinical revision" : "");
+}
+/* Offer to pick a partly-finished exam back up. Answers and question order are
+   restored exactly; the seed is reused, so the paper is identical. */
+function renderResume(){
+  var slot = document.getElementById("resumeSlot");
+  if(!slot) return;
+  var a = loadAttempt();
+  if(!a){ slot.innerHTML = ""; return; }
+  var label = a.kind === "final" ? "Final Examination"
+            : ("Module "+pad2(a.modId)+" — "+(getModule(a.modId)||{}).title);
+  var done = 0; a.order.forEach(function(e){ if(a.answers[e.qid]!==undefined) done++; });
+  slot.innerHTML =
+    "<div class='orient print-hide' style='border-color:var(--blue-line);background:var(--blue-soft)'>"+
+      "<h4>Unfinished attempt</h4>"+
+      "<p style='font-size:13px;color:var(--ink-2);margin:0 0 11px'>You have an in-progress "+
+        "<strong>"+label+"</strong> — "+done+" of "+a.order.length+" answered. "+
+        "Resuming restores your answers and the same question order.</p>"+
+      "<button class='cta teal' id='resumeBtn' style='margin-bottom:8px'>Resume attempt ›</button>"+
+      "<button class='cta ghost' id='discardBtn'>Discard and start over</button>"+
+    "</div>";
+  document.getElementById("resumeBtn").addEventListener("click", function(){ resumeAttempt(loadAttempt()); });
+  document.getElementById("discardBtn").addEventListener("click", function(){
+    clearAttempt(); renderHome(); announce("Attempt discarded.");
+  });
 }
 
 /* ---- Reader ---- */
@@ -1342,91 +1539,266 @@ function onReaderScroll(){
   }
 }
 
-/* ---- Quiz (modules) ---- */
-var activeQuiz = null;     // {questions, isFinal, modId, answers[], submitted}
-function startModuleQuiz(id){
-  var mod = getModule(id);
-  activeQuiz = { questions:mod.quiz, isFinal:false, modId:id, answers:new Array(mod.quiz.length).fill(-1), submitted:false, title:mod.title, num:"MODULE "+pad2(id) };
-  renderQuiz();
+/* ============================================================================
+   QUIZ ENGINE — attempt model
+   ----------------------------------------------------------------------------
+   An "attempt" is a persisted, resumable exam session. It records everything
+   needed to rebuild the exact same paper on reload:
+
+     attemptId     unique id for this sitting
+     courseVersion content version it was generated against
+     kind/modId    which quiz
+     seed          PRNG seed; a RETRY gets a new seed, a RELOAD reuses this one
+     order[]       the resolved paper: question ids + per-question option ids,
+                   already shuffled, so restoration never depends on re-running
+                   the shuffle
+     answers{}     qid -> option id (stable ids, not screen positions)
+
+   Stable ids: a question's id is "m<module>q<authoredIndex>" and an option's id
+   is its authored index. Because ids are authored positions and never screen
+   positions, the A–D labels can be shuffled freely without corrupting a saved
+   answer, and answers stay valid across reloads.
+   ==========================================================================*/
+var ATTEMPT_KEY = "hemo_academy_attempt_v1";
+var activeQuiz = null;
+
+function qidOf(modId, i){ return "m"+modId+"q"+i; }
+function newAttemptId(){
+  return "a"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);
 }
-var FINAL_PER_MODULE = 4;   // questions sampled from each module's bank for the final exam
-function shuffled(arr){
+/* mulberry32 — small deterministic PRNG so a seed reproduces a paper exactly */
+function rngFrom(seed){
+  var t = seed >>> 0;
+  return function(){
+    t = (t + 0x6D2B79F5) >>> 0;
+    var r = Math.imul(t ^ (t >>> 15), t | 1);
+    r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffleSeeded(arr, rnd){
   var a = arr.slice();
   for(var i=a.length-1; i>0; i--){
-    var j = Math.floor(Math.random()*(i+1));
+    var j = Math.floor(rnd()*(i+1));
     var t=a[i]; a[i]=a[j]; a[j]=t;
   }
   return a;
 }
-function startFinal(){
-  var pool = [];
-  MODULES.forEach(function(m){
-    if(!m.quiz) return;
-    pool = pool.concat(shuffled(m.quiz).slice(0, FINAL_PER_MODULE));
+/* Kept for any legacy caller; unseeded. */
+function shuffled(arr){ return shuffleSeeded(arr, Math.random); }
+
+function lookupQ(entry){
+  var mod = getModule(entry.modId);
+  return mod && mod.quiz ? mod.quiz[entry.qi] : null;
+}
+
+/* ---- Build a paper ------------------------------------------------------ */
+function buildOrder(kind, modId, seed){
+  var rnd = rngFrom(seed), entries = [];
+  if(kind === "module"){
+    var mod = getModule(modId);
+    mod.quiz.forEach(function(item, i){
+      entries.push({ qid:qidOf(modId,i), modId:modId, qi:i });
+    });
+    entries = shuffleSeeded(entries, rnd);
+  } else {
+    MODULES.forEach(function(m){
+      if(!m.quiz) return;
+      var per = m.quiz.map(function(item, i){
+        return { qid:qidOf(m.id,i), modId:m.id, qi:i };
+      });
+      entries = entries.concat(shuffleSeeded(per, rnd).slice(0, FINAL_PER_MODULE));
+    });
+    entries = shuffleSeeded(entries, rnd);
+  }
+  // Shuffle each question's options AFTER selection; labels are derived later.
+  entries.forEach(function(e){
+    var item = lookupQ(e);
+    var oids = item.opts.map(function(_, oi){ return oi; });
+    e.opts = shuffleSeeded(oids, rnd);
   });
-  pool = shuffled(pool);
-  activeQuiz = { questions:pool, isFinal:true, modId:null, answers:new Array(pool.length).fill(-1), submitted:false, title:"Final Examination", num:"FINAL EXAM" };
+  return entries;
+}
+
+function newAttempt(kind, modId){
+  var seed = (Math.floor(Math.random()*0xFFFFFFFF) >>> 0);
+  return {
+    attemptId: newAttemptId(),
+    courseVersion: COURSE_VERSION,
+    kind: kind, modId: (modId||null),
+    seed: seed,
+    order: buildOrder(kind, modId, seed),
+    answers: {},
+    submitted: false,
+    startedAt: new Date().toISOString()
+  };
+}
+
+/* ---- Persistence ------------------------------------------------------- */
+function saveAttempt(){
+  if(!activeQuiz) return;
+  try{ localStorage.setItem(ATTEMPT_KEY, JSON.stringify(activeQuiz)); }
+  catch(e){ var w=document.getElementById("storageWarn"); if(w) w.classList.remove("hidden"); }
+}
+function clearAttempt(){
+  try{ localStorage.removeItem(ATTEMPT_KEY); }catch(e){}
+}
+function loadAttempt(){
+  try{
+    var raw = localStorage.getItem(ATTEMPT_KEY);
+    if(!raw) return null;
+    var a = JSON.parse(raw);
+    if(!a || !a.order || !a.order.length) return null;
+    // A clinical correction invalidates an in-flight attempt: a question that has
+    // been rewritten must not be graded against the answer key it had before.
+    if(a.courseVersion !== COURSE_VERSION){ clearAttempt(); return null; }
+    if(a.submitted){ clearAttempt(); return null; }
+    // Structural sanity — the bank may have changed size.
+    for(var i=0;i<a.order.length;i++){ if(!lookupQ(a.order[i])){ clearAttempt(); return null; } }
+    return a;
+  }catch(e){ return null; }
+}
+
+/* ---- Entry points ------------------------------------------------------ */
+function startModuleQuiz(id){
+  activeQuiz = newAttempt("module", id);
+  saveAttempt();
   renderQuiz();
 }
-function renderQuiz(){
-  var q = activeQuiz;
-  document.getElementById("qzNum").textContent = q.num;
-  document.getElementById("qzTitle").textContent = q.submitted ? q.title+" — Results" : q.title;
-  var need = q.isFinal ? PASS_FINAL : PASS_MODULE;
-  document.getElementById("qzMeta").textContent =
-    q.questions.length+" questions · pass at "+need+"% · "+Math.ceil(q.questions.length*need/100)+" correct needed";
+function startFinal(){
+  // A certificate can only be issued to a named learner, so the name is
+  // required before the exam starts rather than discovered at the end.
+  if(!hasLearnerName()){
+    renderHome();
+    var ni = document.getElementById("nameInput");
+    if(ni){ ni.focus(); ni.scrollIntoView({block:"center"}); }
+    announce("Enter your name before starting the final examination.");
+    return;
+  }
+  activeQuiz = newAttempt("final", null);
+  saveAttempt();
+  renderQuiz();
+}
+function resumeAttempt(a){
+  activeQuiz = a;
+  renderQuiz();
+  announce("Resumed your in-progress attempt.");
+}
 
-  var form = document.getElementById("quizForm"); form.innerHTML="";
-  q.questions.forEach(function(item, qi){
-    var box = document.createElement("div"); box.className="q"+(q.submitted?" locked-opts":"");
-    var opts = "";
-    item.opts.forEach(function(o, oi){
-      var cls="opt";
-      if(q.submitted){
-        if(oi===item.ans) cls+=" correct";
-        else if(q.answers[qi]===oi) cls+=" wrong";
-      } else if(q.answers[qi]===oi){ cls+=" sel"; }
-      opts += "<button class='"+cls+"' data-q='"+qi+"' data-o='"+oi+"'>"+
-                "<span class='ol'>"+String.fromCharCode(65+oi)+"</span>"+o+"</button>";
-    });
-    var expl = q.submitted ? "<div class='expl'><b>Why:</b> "+item.expl+"</div>" : "";
-    box.innerHTML = "<div class='qnum'>Q"+(qi+1)+" / "+q.questions.length+"</div>"+
-                    "<div class='qtext'>"+item.q+"</div>"+opts+expl;
-    form.appendChild(box);
+/* ---- Render ------------------------------------------------------------ */
+function attemptMeta(){
+  var q = activeQuiz;
+  var total = q.order.length;
+  var need  = q.kind === "final" ? passMarkCount(total) : Math.ceil(total*PASS_MODULE/100);
+  return { total:total, need:need,
+           title: q.kind === "final" ? "Final Examination" : getModule(q.modId).title,
+           num:   q.kind === "final" ? "FINAL EXAM" : "MODULE "+pad2(q.modId) };
+}
+function answeredCount(){
+  var q = activeQuiz, n = 0;
+  q.order.forEach(function(e){ if(q.answers[e.qid] !== undefined) n++; });
+  return n;
+}
+function scoreQuiz(){
+  var q = activeQuiz, c = 0;
+  q.order.forEach(function(e){
+    var item = lookupQ(e);
+    if(item && q.answers[e.qid] === item.ans) c++;
   });
-  if(!q.submitted){
-    form.querySelectorAll(".opt").forEach(function(b){
-      b.addEventListener("click", function(){
-        var qi=+b.dataset.q, oi=+b.dataset.o;
-        activeQuiz.answers[qi]=oi;
-        // update just this question's selected option in place — a full renderQuiz()
-        // here would rebuild every question and reset scroll position on every tap
-        form.children[qi].querySelectorAll(".opt").forEach(function(ob){
-          ob.classList.toggle("sel", +ob.dataset.o === oi);
+  return c;
+}
+
+function renderQuiz(){
+  var q = activeQuiz, meta = attemptMeta();
+  document.getElementById("qzNum").textContent = meta.num;
+  document.getElementById("qzTitle").textContent = q.submitted ? meta.title+" — Results" : meta.title;
+  document.getElementById("qzMeta").textContent =
+    meta.total+" questions · pass mark "+meta.need+" of "+meta.total+" correct";
+
+  var form = document.getElementById("quizForm");
+  form.innerHTML = "";
+
+  q.order.forEach(function(e, qi){
+    var item = lookupQ(e);
+    var chosen = q.answers[e.qid];
+
+    // Native radio group per question: a fieldset with the question as its legend.
+    var fs = document.createElement("fieldset");
+    fs.className = "q" + (q.submitted ? " locked-opts" : "");
+    var lg = document.createElement("legend");
+    lg.className = "qlegend";
+    lg.innerHTML = "<span class='qnum'>Question "+(qi+1)+" of "+meta.total+"</span>"+
+                   "<span class='qtext'>"+item.q+"</span>";
+    fs.appendChild(lg);
+
+    e.opts.forEach(function(oid, pos){
+      var label = document.createElement("label");
+      label.className = "opt";
+      if(q.submitted){
+        if(oid === item.ans) label.className += " correct";
+        else if(chosen === oid) label.className += " wrong";
+      } else if(chosen === oid){ label.className += " sel"; }
+
+      var input = document.createElement("input");
+      input.type = "radio";
+      input.name = "q_"+e.qid;
+      input.value = String(oid);
+      input.className = "optradio";
+      input.checked = (chosen === oid);
+      if(q.submitted) input.disabled = true;
+      input.addEventListener("change", function(){
+        activeQuiz.answers[e.qid] = oid;
+        saveAttempt();                       // persist immediately, every answer
+        fs.querySelectorAll(".opt").forEach(function(l){
+          l.classList.toggle("sel", l.querySelector("input").checked);
         });
         renderQuizActions();
       });
+
+      // A–D label is derived from post-shuffle position, never from the option id.
+      var tag = document.createElement("span");
+      tag.className = "ol";
+      tag.textContent = String.fromCharCode(65+pos);
+
+      var txt = document.createElement("span");
+      txt.className = "otx";
+      txt.textContent = item.opts[oid];
+
+      label.appendChild(input); label.appendChild(tag); label.appendChild(txt);
+      fs.appendChild(label);
     });
-  }
+
+    if(q.submitted){
+      var ex = document.createElement("div");
+      ex.className = "expl";
+      ex.innerHTML = "<b>Why:</b> "+item.expl;
+      fs.appendChild(ex);
+    }
+    form.appendChild(fs);
+  });
 
   document.getElementById("resultSlot").innerHTML = "";
   if(!q.submitted){
     renderQuizActions();
   } else {
     var correct = scoreQuiz();
-    var pct = Math.round(correct/q.questions.length*100);
-    var passed = pct >= need;
+    var pct = Math.round(correct/meta.total*100);
+    var passed = correct >= meta.need;
     document.getElementById("resultSlot").innerHTML =
       "<div class='result "+(passed?"pass":"fail")+"'>"+
-        "<div class='big'>"+pct+"%</div>"+
-        "<div class='rmsg'>"+correct+" of "+q.questions.length+" correct · "+
-        (passed? "Passed — "+ (q.isFinal?"course complete":"next module unlocked") : "Need "+need+"% to pass")+"</div>"+
+        "<div class='big'>"+correct+" / "+meta.total+"</div>"+
+        "<div class='rmsg'>"+pct+"% · "+
+        (passed ? "Passed — "+(q.kind==="final"?"course complete":"next module unlocked")
+                : "Need "+meta.need+" of "+meta.total+" to pass")+"</div>"+
       "</div>";
+    announce((passed?"Passed. ":"Not passed. ")+correct+" of "+meta.total+" correct.");
     var actions = document.getElementById("quizActions");
     if(passed){
-      if(q.isFinal){
+      if(q.kind === "final"){
         actions.innerHTML = "<button class='cta teal' id='toCert'>View your certificate ›</button>";
-        document.getElementById("toCert").addEventListener("click", function(){ renderCertificate(); show("cert"); });
+        document.getElementById("toCert").addEventListener("click", function(){
+          if(renderCertificate()) show("cert");
+        });
       } else {
         actions.innerHTML = "<button class='cta teal' id='backHome'>Back to modules ›</button>";
         document.getElementById("backHome").addEventListener("click", function(){ renderHome(); });
@@ -1434,52 +1806,75 @@ function renderQuiz(){
     } else {
       actions.innerHTML = "<button class='cta primary' id='retry'>Retake quiz</button>"+
                           "<button class='cta ghost' id='reread' style='margin-top:10px'>Re-read the module</button>";
+      // A retry is a NEW attempt: new id, new seed, new question and option order.
       document.getElementById("retry").addEventListener("click", function(){
-        if(q.isFinal) startFinal(); else startModuleQuiz(q.modId);
+        if(q.kind === "final") startFinal(); else startModuleQuiz(q.modId);
       });
       document.getElementById("reread").addEventListener("click", function(){
-        if(q.isFinal){ renderHome(); } else { openReader(q.modId); }
+        if(q.kind === "final"){ renderHome(); } else { openReader(q.modId); }
       });
     }
   }
   show("quiz");
 }
-// builds just the submit button / "N of M answered" panel, for the unsubmitted quiz state —
-// called on every answer tap without touching the question list or scroll position
+
 function renderQuizActions(){
-  var q = activeQuiz;
+  var meta = attemptMeta();
+  var answered = answeredCount();
   var actions = document.getElementById("quizActions");
-  var answered = q.answers.filter(function(a){return a>=0;}).length;
-  actions.innerHTML = "<button class='cta primary' id='submitQuiz'"+(answered<q.questions.length?" disabled":"")+">Submit answers</button>"+
-    "<p class='readnote'>"+answered+" of "+q.questions.length+" answered</p>";
-  var sb=document.getElementById("submitQuiz");
+  actions.innerHTML =
+    "<button class='cta primary' id='submitQuiz'"+(answered<meta.total?" disabled":"")+">Submit answers</button>"+
+    "<p class='readnote'>"+answered+" of "+meta.total+" answered · pass mark "+meta.need+"</p>";
+  var sb = document.getElementById("submitQuiz");
   if(sb) sb.addEventListener("click", submitQuiz);
+  var prog = document.getElementById("quizProgress");
+  if(prog) prog.textContent = answered+" of "+meta.total+" answered.";
 }
-function scoreQuiz(){
-  var c=0; activeQuiz.questions.forEach(function(item,i){ if(activeQuiz.answers[i]===item.ans) c++; }); return c;
-}
+
 function submitQuiz(){
+  var meta = attemptMeta();
   activeQuiz.submitted = true;
   var correct = scoreQuiz();
-  var pct = Math.round(correct/activeQuiz.questions.length*100);
-  var need = activeQuiz.isFinal ? PASS_FINAL : PASS_MODULE;
-  var passed = pct >= need;
-  if(activeQuiz.isFinal){
+  var pct = Math.round(correct/meta.total*100);
+  var passed = correct >= meta.need;
+  if(activeQuiz.kind === "final"){
     if(pct > state.finalBest) state.finalBest = pct;
-    if(passed){ state.finalPassed=true; state.completedAt = new Date().toISOString(); }
+    if(passed){ state.finalPassed = true; state.completedAt = new Date().toISOString(); }
   } else {
     var m = state.modules[activeQuiz.modId];
     if(pct > m.best) m.best = pct;
     if(passed) m.passed = true;
   }
+  state.courseVersion = COURSE_VERSION;
   saveState();
+  clearAttempt();          // the sitting is over; nothing left to resume
   updateHeader();
   renderQuiz();
 }
 
 /* ---- Certificate ---- */
+/* A certificate must never render without a real name on it. Every entry point
+   into the certificate view revalidates, so a blank/whitespace name cannot be
+   printed even if state was edited or restored from an older save. */
+function hasLearnerName(){ return (state.learnerName||"").trim().length > 0; }
+
 function renderCertificate(){
-  var name = (state.learnerName||"").trim() || "—";
+  var card = document.getElementById("certCard");
+  var printBtn = document.getElementById("printBtn");
+  var name = (state.learnerName||"").trim();
+
+  if(!name){
+    card.innerHTML =
+      "<div class='c-brand'>AMR Kansas City <b>◆</b> Clinical Education</div>"+
+      "<div class='c-kicker'>Certificate unavailable</div>"+
+      "<div class='c-body'>A certificate cannot be issued without a learner name. "+
+      "Go back to the module list, enter your name in the box at the top, and return here.</div>";
+    if(printBtn) printBtn.disabled = true;
+    announce("Certificate unavailable: no learner name entered.");
+    return false;
+  }
+  if(printBtn) printBtn.disabled = false;
+
   var dt = state.completedAt ? new Date(state.completedAt) : new Date();
   var dstr = dt.toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
   var moduleCount = MODULES.length;
@@ -1489,21 +1884,27 @@ function renderCertificate(){
     ? deviceNames.slice(0,-1).join(", ") + ", and " + deviceNames[deviceNames.length-1]
     : deviceNames.join("");
   var scoreLine = state.finalBest ? (state.finalBest+"%") : "Passed";
-  document.getElementById("certCard").innerHTML =
+  card.innerHTML =
     "<div class='c-brand'>AMR Kansas City <b>◆</b> Clinical Education</div>"+
     "<div class='c-wave'><svg viewBox='0 0 220 26' preserveAspectRatio='none'><path d='"+certWavePath()+"' fill='none' stroke='#1B63C4' stroke-width='1.6'/></svg></div>"+
-    "<div class='c-kicker'>Certificate of Completion</div>"+
+    "<div class='c-kicker'>Certificate of Knowledge-Module Completion</div>"+
     "<div class='c-of'>This certifies that</div>"+
-    "<div class='c-name'>"+escapeHtml(name)+"</div>"+
-    "<div class='c-of'>has successfully completed</div>"+
+    "<div class='c-name' id='certName'></div>"+
+    "<div class='c-of'>has successfully completed the knowledge modules of</div>"+
     "<div class='c-course'>Hemodynamic Monitoring for Critical Care &amp; Interfacility Transport</div>"+
-    "<div class='c-body'>A comprehensive "+moduleCount+"-module program covering hemodynamic physiology, arterial-line monitoring, vasoactive pharmacology, and mechanical circulatory support ("+deviceList+"), with a final examination passed at "+PASS_FINAL+"% or above.</div>"+
+    "<div class='c-body'>A "+moduleCount+"-module didactic program covering hemodynamic physiology, arterial-line monitoring, vasoactive pharmacology, and mechanical circulatory support ("+deviceList+"), with a final examination passed at "+passMarkText()+".</div>"+
+    "<div class='c-scope'>This certificate documents completion of <strong>knowledge modules only</strong>. "+
+      "It is not a determination of independent competency to operate, troubleshoot, or adjust any device named above. "+
+      "Device competency requires manufacturer-specific and institution-specific training with a practical skills check-off.</div>"+
     "<div class='c-meta'>"+
       "<div class='c-cell'><div class='cl'>Date completed</div><div class='cv'>"+dstr+"</div></div>"+
       "<div class='c-cell'><div class='cl'>Final exam score</div><div class='cv'>"+scoreLine+"</div></div>"+
+      "<div class='c-cell'><div class='cl'>Course version</div><div class='cv'>"+COURSE_VERSION+"</div></div>"+
       "<div class='c-cell'><div class='cl'>Medical Director</div><div class='cv'>A. Deshmukh, MD</div></div>"+
-      "<div class='c-cell'><div class='cl'>Clinical Education</div><div class='cv'>AMR KC</div></div>"+
     "</div>";
+  // Name is set as text, never parsed as markup.
+  document.getElementById("certName").textContent = name;
+  return true;
 }
 
 /* ============================================================================
@@ -1525,7 +1926,11 @@ document.getElementById("certBack").addEventListener("click", renderHome);
 document.getElementById("toQuizBtn").addEventListener("click", function(){
   if(currentModId) startModuleQuiz(currentModId);
 });
-document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
+document.getElementById("printBtn").addEventListener("click", function(){
+  // Revalidate at the moment of printing, not just at render time.
+  if(!hasLearnerName()){ renderCertificate(); announce("Cannot print: no learner name entered."); return; }
+  window.print();
+});
 
 var nameInput = document.getElementById("nameInput");
 nameInput.value = state.learnerName || "";
