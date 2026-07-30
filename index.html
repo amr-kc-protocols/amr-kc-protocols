@@ -85,6 +85,30 @@ padding:24px 20px 40px;max-width:540px;width:100%}
 .di-btn{display:block;width:100%;padding:15px;background:var(--teal);color:#fff;border:none;
 border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
 
+/* SIGNATURE PAD — full-screen, because a finger needs more room than a
+   strip inside the form gives it */
+#sigpad{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:10px}
+.sp{background:var(--surface);border:1px solid var(--teal);border-radius:14px;padding:12px;
+width:100%;height:100%;max-width:1100px;display:flex;flex-direction:column;gap:8px}
+.sp-bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sp-who{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal2)}
+.sp-clear{background:var(--dim);border:1px solid var(--border);color:var(--gray);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:var(--sans)}
+.sp-canvas{flex:1;min-height:0;width:100%;border:2px dashed #9aa5b1;border-radius:10px;
+touch-action:none;-ms-touch-action:none;display:block;cursor:crosshair;
+/* A signature line to sign on. It lives in the element's CSS background, not
+   the bitmap, so it guides the eye without ever being captured. */
+background-color:#fff;
+background-image:linear-gradient(to bottom,transparent calc(70% - 1px),#c9d3e0 calc(70% - 1px),#c9d3e0 70%,transparent 70%);
+background-repeat:no-repeat;background-size:calc(100% - 48px) 100%;background-position:24px 0}
+.sp-hint{font-size:11px;color:var(--gray);font-family:var(--mono);text-align:center}
+.sp-rot{display:none}
+@media (orientation:portrait) and (max-width:900px){.sp-rot{display:inline}}
+.sp-actions{display:flex;gap:8px}
+.sp-cancel{flex:1;background:var(--dim);border:1px solid var(--border);color:var(--white);padding:14px 8px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.sp-done{flex:2;background:var(--teal);color:#fff;border:none;padding:14px 8px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.sp-done:disabled{opacity:0.35;cursor:default}
+body.sp-open{overflow:hidden}
+
 /* HEADER */
 #hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg);
 border-bottom:1px solid var(--teal);box-shadow:0 4px 14px rgba(15,23,42,0.10)}
@@ -303,8 +327,13 @@ box-shadow:0 4px 12px rgba(23,58,104,0.25);margin-bottom:12px}
 .crew-hdr{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.12em;color:var(--teal);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:14px}
 .crew-fields{display:flex;flex-direction:column;gap:12px}
 .cgf-opt{font-size:11px;color:var(--gray);text-align:right;margin-bottom:4px}
-.sig-canvas{width:100%;height:120px;background:#f8f9fa;border-radius:8px;border:2px dashed #9aa5b1;touch-action:none;display:block;cursor:crosshair}
-.sig-canvas.has-sig{border:2px solid var(--teal);background:#fff}
+.sig-pad{width:100%;height:110px;background:#f8f9fa;border-radius:8px;border:2px dashed #9aa5b1;
+display:flex;align-items:center;justify-content:center;padding:6px;cursor:pointer;font-family:var(--sans)}
+.sig-pad.has-sig{border:2px solid var(--teal);background:#fff}
+.sig-ph{font-size:13px;font-weight:600;color:var(--gray)}
+.sig-preview{max-width:100%;max-height:100%;display:none}
+.sig-pad.has-sig .sig-preview{display:block}
+.sig-pad.has-sig .sig-ph{display:none}
 .sig-footer{display:flex;justify-content:space-between;align-items:center;margin-top:5px}
 .sig-hint{font-size:11px;color:var(--gray);font-family:var(--mono)}
 .sig-clear{background:none;border:1px solid var(--border);color:var(--gray);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans)}
@@ -317,6 +346,9 @@ box-shadow:0 4px 12px rgba(23,58,104,0.25);margin-bottom:12px}
 .cgf-confirm-icon{font-size:36px;margin-bottom:10px}
 .cgf-confirm-title{font-size:17px;font-weight:700;color:var(--emt);margin-bottom:6px}
 .cgf-confirm-sub{font-size:13px;color:var(--emt);line-height:1.6;margin-bottom:16px}
+.cgf-share{display:block;width:100%;padding:15px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-bottom:12px}
+.cgf-after{display:flex;gap:8px}
+.cgf-after .cgf-again{flex:1;padding:12px 8px}
 .cgf-again{background:var(--dim);border:1px solid var(--border);color:var(--white);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 
 /* MORE HUB */
@@ -594,6 +626,21 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
     All care must comply with standing orders under <strong>Dr. Ameet Deshmukh, MD</strong>, AMR Kansas City Medical Director. The official printed protocol supersedes this app in any discrepancy.<br><br>
     <strong>Authorized AMR Kansas City EMS personnel only.</strong></p>
     <button class="di-btn" id="disc-btn">I Understand &mdash; Continue</button>
+  </div>
+</div>
+
+<div id="sigpad" role="dialog" aria-modal="true" aria-labelledby="sigpad-who" style="display:none">
+  <div class="sp">
+    <div class="sp-bar">
+      <span class="sp-who" id="sigpad-who">Signature</span>
+      <button class="sp-clear" id="sigpad-clear" type="button">Clear</button>
+    </div>
+    <canvas class="sp-canvas" id="sigpad-canvas"></canvas>
+    <div class="sp-hint">Sign above with your finger<span class="sp-rot"> &mdash; turn your phone sideways for more room</span></div>
+    <div class="sp-actions">
+      <button class="sp-cancel" id="sigpad-cancel" type="button">Cancel</button>
+      <button class="sp-done" id="sigpad-done" type="button" disabled>Use This Signature</button>
+    </div>
   </div>
 </div>
 
@@ -1986,10 +2033,13 @@ function buildPCSList(items){
   return h;
 }
 // ── FORMS ──────────────────────────────────────────────────────────────────
-var CGF_HAS_SIG = [false, false, false];
+var CGF_SIGS = [null, null, null];   // captured signature per crew, as a PNG data URL
+var CGF_AMENDED = false;             // set when a form is sent back for correction
 function renderForms(){
   var c = $('lv');
-  CGF_HAS_SIG = [false, false, false];
+  CGF_SIGS = [null, null, null];
+  CGF_AMENDED = false;
+  CGF_PDF = null;
   cgfAssets();   // warm the PDF font/logo fetches while the form is being filled
   function crewSection(n, label, req){
     return [
@@ -2008,9 +2058,12 @@ function renderForms(){
       '<option value="RN">RN</option>',
       '</select></div>',
       '<div><label class="cgf-label">Signature</label>',
-      '<canvas class="sig-canvas" id="sig-canvas-'+n+'"></canvas>',
+      '<div class="sig-pad" id="sig-pad-'+n+'" role="button" tabindex="0" aria-label="Sign for crew '+n+'">',
+      '<img class="sig-preview" id="sig-preview-'+n+'" alt="Crew '+n+' signature">',
+      '<span class="sig-ph">Tap to sign</span>',
+      '</div>',
       '<div class="sig-footer">',
-      '<span class="sig-hint">Draw signature above</span>',
+      '<span class="sig-hint">Opens a full-size signing pad</span>',
       '<button class="sig-clear" id="sig-clear-'+n+'" type="button">Clear</button>',
       '</div></div>',
       '</div></div>',
@@ -2038,20 +2091,47 @@ function renderForms(){
     '</div>',
     '<div class="cgf-confirm" id="cgf-confirm">',
     '<div class="cgf-confirm-icon"><svg class="icon"><use href="#i-check-circle"></use></svg></div>',
-    '<div class="cgf-confirm-title">PDF Downloaded</div>',
-    '<div class="cgf-confirm-sub">The completed form with signatures has been saved as a PDF to your device. Share or email it as needed.</div>',
-    '<button class="cgf-again" id="cgf-again">Submit Another Form</button>',
+    '<div class="cgf-confirm-title">PDF Ready</div>',
+    '<div class="cgf-confirm-sub" id="cgf-confirm-sub">Send it now &mdash; email, Messages, or Files, whichever you file these in.</div>',
+    '<button class="cgf-share" id="cgf-share"><svg class="icon"><use href="#i-download"></use></svg> <span id="cgf-share-label">Send PDF</span></button>',
+    '<div class="cgf-after">',
+    '<button class="cgf-again" id="cgf-fix">Correct This Form</button>',
+    '<button class="cgf-again" id="cgf-again">Start New Form</button>',
+    '</div>',
     '</div>',
     '</div>',
   ].join('');
-  // Setup signature pads after DOM settles
+  // Wire the crew fields after the DOM settles
   setTimeout(function(){
-    [1,2,3].forEach(function(n){ setupSigPad(n); });
+    [1,2,3].forEach(function(n){
+      var pad = document.getElementById('sig-pad-'+n);
+      if(pad){
+        pad.addEventListener('click', function(){ cgfPadShow(n); });
+        pad.addEventListener('keydown', function(e){
+          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); cgfPadShow(n); }
+        });
+      }
+      var clr = document.getElementById('sig-clear-'+n);
+      if(clr) clr.addEventListener('click', function(){
+        CGF_SIGS[n-1] = null;
+        cgfSigShow(n);
+      });
+      cgfSigShow(n);
+    });
     var submitBtn = document.getElementById('cgf-submit');
     var statusEl  = document.getElementById('cgf-status');
     var formEl    = document.getElementById('cgf-form');
     var confirmEl = document.getElementById('cgf-confirm');
     var againBtn  = document.getElementById('cgf-again');
+    var shareBtn  = document.getElementById('cgf-share');
+    var fixBtn    = document.getElementById('cgf-fix');
+    // Name the button and the hint for what this device will actually do.
+    if(!cgfCanShare()){
+      var lbl = document.getElementById('cgf-share-label');
+      if(lbl) lbl.textContent = 'Download PDF';
+      var sub = document.getElementById('cgf-confirm-sub');
+      if(sub) sub.textContent = 'Saved to your downloads folder. Use Download again if you need another copy.';
+    }
     if(submitBtn) submitBtn.addEventListener('click', function(){
       var date     = (document.getElementById('cgf-date')||{}).value||'';
       var caseNum  = (document.getElementById('cgf-case')||{}).value.trim()||'';
@@ -2059,12 +2139,12 @@ function renderForms(){
       var cert1    = (document.getElementById('cgf-cert-1')||{}).value||'';
       if(!date){ statusEl.textContent='⚠ Date of service is required.'; statusEl.className='cgf-status err'; return; }
       if(!caseNum){ statusEl.textContent='⚠ Case number is required.'; statusEl.className='cgf-status err'; return; }
-      if(!name1||!cert1||!CGF_HAS_SIG[0]){ statusEl.textContent='⚠ Crew 1 name, certification, and signature are required.'; statusEl.className='cgf-status err'; return; }
+      if(!name1||!cert1||!CGF_SIGS[0]){ statusEl.textContent='⚠ Crew 1 name, certification, and signature are required.'; statusEl.className='cgf-status err'; return; }
       // Validate: if any crew 2/3 field is partial, flag it
       for(var i=2;i<=3;i++){
         var nm = (document.getElementById('cgf-name-'+i)||{}).value.trim()||'';
         var ct = (document.getElementById('cgf-cert-'+i)||{}).value||'';
-        var sg = CGF_HAS_SIG[i-1];
+        var sg = !!CGF_SIGS[i-1];
         if((nm||ct||sg) && !(nm&&ct&&sg)){
           statusEl.textContent='⚠ Crew '+i+': fill name, certification, and signature — or leave all blank.';
           statusEl.className='cgf-status err'; return;
@@ -2073,17 +2153,7 @@ function renderForms(){
       submitBtn.disabled = true;
       statusEl.textContent = '⏳ Generating PDF…';
       statusEl.className = 'cgf-status pending';
-      function getSig(n){
-        var canvas = document.getElementById('sig-canvas-'+n);
-        if(!CGF_HAS_SIG[n-1] || !canvas) return '';
-        var tmp = document.createElement('canvas');
-        tmp.width = canvas.width; tmp.height = canvas.height;
-        var ctx = tmp.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, tmp.width, tmp.height);
-        ctx.drawImage(canvas, 0, 0);
-        return tmp.toDataURL('image/png');
-      }
+      function getSig(n){ return CGF_SIGS[n-1] || ''; }
       function getField(id){ return (document.getElementById(id)||{}).value||''; }
       var now = new Date();
       var submittedAt = (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear()+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
@@ -2094,14 +2164,22 @@ function renderForms(){
       ];
       cgfAssets().then(function(assets){
         var doc = cgfBuildPdf(assets, date, caseNum, crew);
-        doc.save('CGF_Case'+caseNum+'_'+date.replace(/\//g,'-')+'.pdf');
+        CGF_PDF = {
+          blob: doc.output('blob'),
+          name: 'CGF_Case'+caseNum+'_'+date.replace(/\//g,'-')+'.pdf'
+        };
         formEl.style.display='none';
         confirmEl.style.display='block';
         statusEl.textContent='';
+        // Try to send straight away, while the tap that got us here may still
+        // count as user activation. If the browser declines, the Send button on
+        // the confirmation panel is a fresh tap that will be allowed.
+        cgfSendPdf();
         // Also log to sheet (no signatures — just text data)
         var payload = {
           type:'caregiver_form',
           date: date, caseNumber: caseNum, submittedAt: submittedAt,
+          amended: CGF_AMENDED ? 'yes' : '',
           crew1Name: crew[0].name, crew1Cert: crew[0].cert, crew1Sig:'',
           crew2Name: crew[1].name, crew2Cert: crew[1].cert, crew2Sig:'',
           crew3Name: crew[2].name, crew3Cert: crew[2].cert, crew3Sig:''
@@ -2113,8 +2191,24 @@ function renderForms(){
         submitBtn.disabled=false;
       });
     });
+    // Sending again from the confirmation panel: a fresh tap, so a share sheet
+    // that got refused on submit is allowed here.
+    if(shareBtn) shareBtn.addEventListener('click', function(){ cgfSendPdf(); });
+    // Correcting a form goes back to it with every field and signature still
+    // there. A typo in a case number shouldn't cost three signatures.
+    if(fixBtn) fixBtn.addEventListener('click', function(){
+      CGF_AMENDED = true;
+      CGF_PDF = null;
+      confirmEl.style.display='none';
+      formEl.style.display='block';
+      statusEl.textContent='';
+      statusEl.className='cgf-status';
+      submitBtn.disabled=false;
+    });
     if(againBtn) againBtn.addEventListener('click', function(){
-      CGF_HAS_SIG=[false,false,false];
+      CGF_SIGS = [null, null, null];
+      CGF_AMENDED = false;
+      CGF_PDF = null;
       confirmEl.style.display='none';
       formEl.style.display='block';
       ['cgf-date','cgf-case','cgf-name-1','cgf-name-2','cgf-name-3'].forEach(function(id){
@@ -2123,13 +2217,10 @@ function renderForms(){
       ['cgf-cert-1','cgf-cert-2','cgf-cert-3'].forEach(function(id){
         var el=document.getElementById(id); if(el) el.selectedIndex=0;
       });
-      [1,2,3].forEach(function(n){
-        var canvas=document.getElementById('sig-canvas-'+n);
-        if(canvas){ var ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); canvas.classList.remove('has-sig'); }
-      });
+      [1,2,3].forEach(cgfSigShow);
       statusEl.textContent='';
-      (document.getElementById('cgf-submit')||{}).disabled=false;
-      setTimeout(function(){ [1,2,3].forEach(function(n){ setupSigPad(n); }); },50);
+      statusEl.className='cgf-status';
+      submitBtn.disabled=false;
     });
   },50);
 }
@@ -2229,14 +2320,17 @@ function cgfBuildPdf(assets, date, caseNum, crew){
   value(cgfDisplayDate(date), G.metaDateX, G.metaBase, G.headSize, G.metaDateW);
   value(caseNum, G.metaCaseX, G.metaBase, G.headSize, G.metaCaseW);
   // ── Crew blocks ──
-  var blocks = crew.filter(function(c){ return c.name || c.sig; });
-  // Three filled blocks overrun the bottom margin by ~4pt in the original,
-  // which strands the last label on a second page. Take it out of the gaps
-  // between blocks instead so the form stays on one sheet.
+  // All three print whether or not they were filled in: the paper form has
+  // three blank blocks, and a crew that signed on scene should be able to file
+  // this against it line for line. Unused blocks stay blank, ready to be
+  // written on by hand.
+  // Three blocks overrun the bottom margin by ~4pt in the original, which
+  // strands the last label on a second page. Take it out of the gaps between
+  // blocks instead so the form stays on one sheet.
   var pitch = G.pitch;
-  var over = (blocks.length-1)*G.pitch + G.blockInk - G.bottom;
-  if(blocks.length > 1 && over > 0) pitch = G.pitch - (over+1)/(blocks.length-1);
-  blocks.forEach(function(c, i){
+  var over = (crew.length-1)*G.pitch + G.blockInk - G.bottom;
+  if(crew.length > 1 && over > 0) pitch = G.pitch - (over+1)/(crew.length-1);
+  crew.forEach(function(c, i){
     var dy = i*pitch;
     bold(G.headSize);
     doc.text('CREW '+c.num, G.left, G.crewBase+dy);
@@ -2261,54 +2355,265 @@ function cgfBuildPdf(assets, date, caseNum, crew){
   });
   return doc;
 }
+// The finished PDF, kept so the confirmation panel can send it again without
+// regenerating. Cleared when a new form is started.
+var CGF_PDF = null;
+// A plain download drops the file into Files > Downloads with nothing on screen
+// to say so, which is where crews lose it. Hand it to the OS share sheet
+// instead — mail, Messages, Files, AirDrop, whatever they file these in — and
+// fall back to a download on desktop and anywhere sharing isn't offered.
+function cgfSendPdf(){
+  if(!CGF_PDF) return Promise.resolve(false);
+  try {
+    var file = new File([CGF_PDF.blob], CGF_PDF.name, {type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      return navigator.share({files:[file], title:'AMR Caregiver Signature Form'})
+        .then(function(){ return true; })
+        .catch(function(err){
+          // Cancelling is a choice, not a failure — the button stays available.
+          if(err && err.name === 'AbortError') return false;
+          cgfDownloadPdf();
+          return true;
+        });
+    }
+  } catch(e){}
+  cgfDownloadPdf();
+  return Promise.resolve(true);
+}
+function cgfDownloadPdf(){
+  if(!CGF_PDF) return;
+  var url = URL.createObjectURL(CGF_PDF.blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = CGF_PDF.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+}
+function cgfCanShare(){
+  try {
+    return !!(navigator.canShare && navigator.canShare({
+      files: [new File([new Blob([''],{type:'application/pdf'})], 'x.pdf', {type:'application/pdf'})]
+    }));
+  } catch(e){ return false; }
+}
 // <input type="date"> hands back YYYY-MM-DD; the form reads as a date.
 function cgfDisplayDate(v){
   var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');
   return m ? (+m[2])+'/'+(+m[3])+'/'+m[1] : (v||'');
 }
-function setupSigPad(n){
-  var orig = document.getElementById('sig-canvas-'+n);
-  if(!orig) return;
-  // Clone first to drop any listeners left over from a previous setup
-  // (the "Submit Another" flow re-runs setupSigPad on the same elements).
-  var canvas = orig.cloneNode(false);
-  orig.parentNode.replaceChild(canvas, orig);
-
-  var dpr = window.devicePixelRatio||1;
-  canvas.width = canvas.offsetWidth*dpr;
-  canvas.height = canvas.offsetHeight*dpr;
+// ── SIGNATURE CAPTURE ──────────────────────────────────────────────────────
+// Signing legibly with a finger takes more room than a 110px strip wedged into
+// a form on a phone, so tapping the field opens a full-screen pad instead —
+// sideways, that is most of the screen. The form keeps a preview of what was
+// captured. One drawing surface for every device, so there is one code path.
+var CGF_SIG_TARGET = 0;
+var cgfPad = null;
+function cgfPadSetup(){
+  if(cgfPad) return cgfPad;
+  var canvas = document.getElementById('sigpad-canvas');
+  var doneBtn = document.getElementById('sigpad-done');
+  if(!canvas) return null;
   var ctx = canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  ctx.strokeStyle='#0d1526'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  var pts = [], drawing = false, inked = false, dpr = 1;
+  // Bumped by every fit/reset. A restore decoded after one of those is stale,
+  // and must not repaint an old signature onto a pad someone has moved on from.
+  var gen = 0;
 
-  var drawing=false;
-  function pos(e){
-    var r=canvas.getBoundingClientRect();
-    var src=e.touches?e.touches[0]:e;
-    return {x:src.clientX-r.left, y:src.clientY-r.top};
+  function style(){
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#0d1526';
+    ctx.fillStyle = '#0d1526';
+    ctx.lineWidth = 3.2;
   }
-  function start(e){ e.preventDefault(); drawing=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
-  function move(e){ e.preventDefault(); if(!drawing) return; var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); CGF_HAS_SIG[n-1]=true; canvas.classList.add('has-sig'); }
-  function end(e){ e.preventDefault(); drawing=false; }
-  canvas.addEventListener('mousedown',start);
-  canvas.addEventListener('mousemove',move);
-  canvas.addEventListener('mouseup',end);
-  canvas.addEventListener('mouseleave',end);
-  canvas.addEventListener('touchstart',start,{passive:false});
-  canvas.addEventListener('touchmove',move,{passive:false});
-  canvas.addEventListener('touchend',end,{passive:false});
+  // Size the bitmap to the box. 2x is plenty — the PDF box is ~306pt wide, so
+  // even a phone-width pad is oversampled by the time it lands there.
+  function fit(){
+    var mine = ++gen;
+    var r = canvas.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var keep = inked ? canvas.toDataURL('image/png') : null;
+    canvas.width  = Math.max(1, Math.round(r.width * dpr));
+    canvas.height = Math.max(1, Math.round(r.height * dpr));
+    style();
+    // Carry the signature across an orientation change rather than dropping it.
+    if(keep){
+      var img = new Image();
+      img.onload = function(){ if(mine === gen) ctx.drawImage(img, 0, 0, r.width, r.height); };
+      img.src = keep;
+    }
+  }
+  function at(e){
+    var r = canvas.getBoundingClientRect();
+    return {x: e.clientX - r.left, y: e.clientY - r.top};
+  }
+  function mark(){
+    if(inked) return;
+    inked = true;
+    if(doneBtn) doneBtn.disabled = false;
+  }
+  // Quadratic through the midpoints of consecutive samples. Straight lineTo
+  // segments read as a polygon when a finger moves faster than the events
+  // arrive, which is most of a signature.
+  function extend(p){
+    pts.push(p);
+    var n = pts.length;
+    if(n < 3){
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      return;
+    }
+    var a = pts[n-3], b = pts[n-2], c = pts[n-1];
+    ctx.beginPath();
+    ctx.moveTo((a.x+b.x)/2, (a.y+b.y)/2);
+    ctx.quadraticCurveTo(b.x, b.y, (b.x+c.x)/2, (b.y+c.y)/2);
+    ctx.stroke();
+  }
+  function down(e){
+    drawing = true;
+    var p = at(e);
+    pts = [p];
+    // A tap should leave a mark — dots and the dot on an i are part of a name.
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, ctx.lineWidth/2, 0, Math.PI*2);
+    ctx.fill();
+    mark();
+  }
+  function move(e){
+    if(!drawing) return;
+    // Coalesced events recover the samples the browser batched, which is what
+    // makes a fast stroke smooth instead of angular.
+    var batch = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+    if(batch && batch.length){
+      for(var i=0;i<batch.length;i++) extend(at(batch[i]));
+    } else {
+      extend(at(e));
+    }
+  }
+  function up(){ drawing = false; pts = []; }
 
-  var clearBtn=document.getElementById('sig-clear-'+n);
-  if(clearBtn){
-    var freshClear=clearBtn.cloneNode(true);
-    clearBtn.parentNode.replaceChild(freshClear,clearBtn);
-    freshClear.addEventListener('click',function(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      CGF_HAS_SIG[n-1]=false;
-      canvas.classList.remove('has-sig');
+  if(window.PointerEvent){
+    canvas.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      try { canvas.setPointerCapture(e.pointerId); } catch(_){}
+      down(e);
     });
+    canvas.addEventListener('pointermove', function(e){ if(drawing){ e.preventDefault(); move(e); } });
+    canvas.addEventListener('pointerup', up);
+    // Without this, an interrupted stroke (notification, palm, gesture) leaves
+    // drawing true and the next touch joins on with a line across the page.
+    canvas.addEventListener('pointercancel', up);
+  } else {
+    canvas.addEventListener('mousedown', function(e){ e.preventDefault(); down(e); });
+    canvas.addEventListener('mousemove', function(e){ if(drawing){ e.preventDefault(); move(e); } });
+    canvas.addEventListener('mouseup', up);
+    canvas.addEventListener('mouseleave', up);
+    canvas.addEventListener('touchstart', function(e){ e.preventDefault(); down(e.touches[0]); }, {passive:false});
+    canvas.addEventListener('touchmove', function(e){ if(drawing){ e.preventDefault(); move(e.touches[0]); } }, {passive:false});
+    canvas.addEventListener('touchend', up);
+    canvas.addEventListener('touchcancel', up);
   }
+  window.addEventListener('resize', function(){ if(cgfPadOpen()) fit(); });
+
+  cgfPad = {
+    reset: function(){
+      gen++;
+      inked = false;
+      pts = [];
+      drawing = false;
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      style();
+      if(doneBtn) doneBtn.disabled = true;
+    },
+    fit: fit,
+    inked: function(){ return inked; },
+    // Crop to the ink so a signature fills the form's box however large or
+    // small it was drawn, and so pad size never has to match the box's shape.
+    capture: function(){
+      if(!inked) return null;
+      var w = canvas.width, h = canvas.height;
+      var px = ctx.getImageData(0, 0, w, h).data;
+      var minX = w, minY = h, maxX = -1, maxY = -1;
+      for(var y=0; y<h; y++){
+        for(var x=0; x<w; x++){
+          if(px[(y*w + x)*4 + 3] > 8){
+            if(x < minX) minX = x;
+            if(x > maxX) maxX = x;
+            if(y < minY) minY = y;
+            if(y > maxY) maxY = y;
+          }
+        }
+      }
+      if(maxX < 0) return null;
+      var edge = Math.round(ctx.lineWidth * dpr);
+      minX = Math.max(0, minX - edge); minY = Math.max(0, minY - edge);
+      maxX = Math.min(w-1, maxX + edge); maxY = Math.min(h-1, maxY + edge);
+      var cw = maxX - minX + 1, ch = maxY - minY + 1;
+      var out = document.createElement('canvas');
+      out.width = cw; out.height = ch;
+      var octx = out.getContext('2d');
+      octx.fillStyle = '#ffffff';   // opaque PNG is the path jsPDF handles best
+      octx.fillRect(0, 0, cw, ch);
+      octx.drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+      return out.toDataURL('image/png');
+    }
+  };
+  return cgfPad;
 }
+function cgfPadOpen(){
+  var el = document.getElementById('sigpad');
+  return !!el && el.style.display === 'flex';
+}
+function cgfPadShow(n){
+  var el = document.getElementById('sigpad');
+  var pad = cgfPadSetup();
+  if(!el || !pad) return;
+  CGF_SIG_TARGET = n;
+  var who = document.getElementById('sigpad-who');
+  if(who) who.textContent = 'Crew ' + n + ' signature';
+  el.style.display = 'flex';
+  document.body.classList.add('sp-open');
+  // Size the bitmap after the box has been laid out, not before. Reset first so
+  // fit() has nothing from the last signature to carry over.
+  setTimeout(function(){ pad.reset(); pad.fit(); }, 0);
+}
+function cgfPadHide(){
+  var el = document.getElementById('sigpad');
+  if(el) el.style.display = 'none';
+  document.body.classList.remove('sp-open');
+}
+function cgfSigShow(n){
+  var pad = document.getElementById('sig-pad-'+n);
+  var img = document.getElementById('sig-preview-'+n);
+  var sig = CGF_SIGS[n-1];
+  // An empty src re-requests the page, so drop the attribute instead.
+  if(img){ if(sig) img.src = sig; else img.removeAttribute('src'); }
+  if(pad) pad.classList[sig ? 'add' : 'remove']('has-sig');
+}
+(function cgfPadWiring(){
+  function on(id, fn){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('click', fn);
+  }
+  on('sigpad-clear', function(){ var p = cgfPadSetup(); if(p){ p.reset(); p.fit(); } });
+  on('sigpad-cancel', cgfPadHide);
+  on('sigpad-done', function(){
+    var p = cgfPadSetup();
+    if(!p || !p.inked()) return;
+    CGF_SIGS[CGF_SIG_TARGET-1] = p.capture();
+    cgfSigShow(CGF_SIG_TARGET);
+    cgfPadHide();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && cgfPadOpen()) cgfPadHide();
+  });
+})();
 // ── MORE HUB ──────────────────────────────────────────────────────────────
 function renderMore(){
   var c = $('lv');
