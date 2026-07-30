@@ -87,7 +87,11 @@ border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var
 
 /* SIGNATURE PAD — full-screen, because a finger needs more room than a
    strip inside the form gives it */
-#sigpad{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:10px}
+/* Height comes from --vvh (the visual viewport) rather than 100%: iOS sizes
+   position:fixed to the layout viewport, which in landscape is taller than what
+   you can see, and the buttons end up under the browser toolbar. */
+#sigpad{position:fixed;top:0;left:0;right:0;height:var(--vvh,100vh);z-index:9999;
+background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:10px}
 .sp{background:var(--surface);border:1px solid var(--teal);border-radius:14px;padding:12px;
 width:100%;height:100%;max-width:1100px;display:flex;flex-direction:column;gap:8px}
 .sp-bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -103,6 +107,21 @@ background-repeat:no-repeat;background-size:calc(100% - 48px) 100%;background-po
 .sp-hint{font-size:11px;color:var(--gray);font-family:var(--mono);text-align:center}
 .sp-rot{display:none}
 @media (orientation:portrait) and (max-width:900px){.sp-rot{display:inline}}
+/* A phone in landscape has very little height, and most of it was going to
+   chrome — the point of turning the phone is a bigger pad, so put the title and
+   the buttons on one row and give everything else to the canvas. */
+@media (max-height:520px){
+  #sigpad{padding:4px}
+  /* minmax(0,...) and an explicit height, or the canvas's intrinsic bitmap size
+     sets the row height and the sheet overflows the screen. */
+  .sp{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto minmax(0,1fr);
+  gap:6px;padding:8px;border-radius:10px}
+  .sp-bar{grid-area:1 / 1 / 2 / 2}
+  .sp-actions{grid-area:1 / 2 / 2 / 3}
+  .sp-canvas{grid-area:2 / 1 / 3 / 3;height:100%;min-height:0;min-width:0}
+  .sp-hint{display:none}
+  .sp-cancel,.sp-done{flex:0 0 auto;padding:9px 16px;font-size:13px;white-space:nowrap}
+}
 .sp-actions{display:flex;gap:8px}
 .sp-cancel{flex:1;background:var(--dim);border:1px solid var(--border);color:var(--white);padding:14px 8px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 .sp-done{flex:2;background:var(--teal);color:#fff;border:none;padding:14px 8px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
@@ -2431,20 +2450,36 @@ function cgfPadSetup(){
   }
   // Size the bitmap to the box. 2x is plenty — the PDF box is ~306pt wide, so
   // even a phone-width pad is oversampled by the time it lands there.
+  var cssW = 0, cssH = 0;
   function fit(){
     var mine = ++gen;
     var r = canvas.getBoundingClientRect();
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     var keep = inked ? canvas.toDataURL('image/png') : null;
+    var wasW = cssW, wasH = cssH;
+    cssW = r.width; cssH = r.height;
     canvas.width  = Math.max(1, Math.round(r.width * dpr));
     canvas.height = Math.max(1, Math.round(r.height * dpr));
     style();
     // Carry the signature across an orientation change rather than dropping it.
-    if(keep){
+    // Scale it uniformly — portrait to landscape is a big change in shape, and
+    // stretching to fit would leave someone's name distorted.
+    if(keep && wasW && wasH){
+      var s = Math.min(r.width / wasW, r.height / wasH);
       var img = new Image();
-      img.onload = function(){ if(mine === gen) ctx.drawImage(img, 0, 0, r.width, r.height); };
+      img.onload = function(){
+        if(mine === gen) ctx.drawImage(img, 0, 0, wasW * s, wasH * s);
+      };
       img.src = keep;
     }
+  }
+  // iOS reports stale dimensions right after a rotation, so a resize-driven fit
+  // can size the bitmap to the old box — which puts the ink somewhere other than
+  // under the finger. Checking before a stroke starts is the reliable guard.
+  function ensureFit(){
+    var r = canvas.getBoundingClientRect();
+    var want = Math.min(window.devicePixelRatio || 1, 2);
+    if(Math.abs(r.width - cssW) > 1 || Math.abs(r.height - cssH) > 1 || want !== dpr) fit();
   }
   function at(e){
     var r = canvas.getBoundingClientRect();
@@ -2475,6 +2510,7 @@ function cgfPadSetup(){
     ctx.stroke();
   }
   function down(e){
+    ensureFit();
     drawing = true;
     var p = at(e);
     pts = [p];
@@ -2518,7 +2554,22 @@ function cgfPadSetup(){
     canvas.addEventListener('touchend', up);
     canvas.addEventListener('touchcancel', up);
   }
-  window.addEventListener('resize', function(){ if(cgfPadOpen()) fit(); });
+  function reflow(){
+    if(!cgfPadOpen()) return;
+    cgfPadViewport();
+    fit();
+  }
+  window.addEventListener('resize', reflow);
+  // orientationchange lands before the new layout is settled on iOS, so re-fit
+  // once things have stopped moving as well as immediately.
+  window.addEventListener('orientationchange', function(){
+    reflow();
+    setTimeout(reflow, 250);
+    setTimeout(reflow, 600);
+  });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', reflow);
+  }
 
   cgfPad = {
     reset: function(){
@@ -2568,7 +2619,15 @@ function cgfPadSetup(){
 }
 function cgfPadOpen(){
   var el = document.getElementById('sigpad');
-  return !!el && el.style.display === 'flex';
+  return !!el && el.style.display !== 'none' && el.style.display !== '';
+}
+// The sheet's height tracks the visual viewport, so what is on screen is what
+// you can reach — iOS in landscape overlays its toolbars on a taller layout
+// viewport, which otherwise pushes the buttons out of sight.
+function cgfPadViewport(){
+  var vv = window.visualViewport;
+  var h = (vv && vv.height) || window.innerHeight || 0;
+  if(h) document.documentElement.style.setProperty('--vvh', h + 'px');
 }
 function cgfPadShow(n){
   var el = document.getElementById('sigpad');
@@ -2579,6 +2638,7 @@ function cgfPadShow(n){
   if(who) who.textContent = 'Crew ' + n + ' signature';
   el.style.display = 'flex';
   document.body.classList.add('sp-open');
+  cgfPadViewport();
   // Size the bitmap after the box has been laid out, not before. Reset first so
   // fit() has nothing from the last signature to carry over.
   setTimeout(function(){ pad.reset(); pad.fit(); }, 0);
