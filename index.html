@@ -2229,14 +2229,17 @@ function cgfBuildPdf(assets, date, caseNum, crew){
   value(cgfDisplayDate(date), G.metaDateX, G.metaBase, G.headSize, G.metaDateW);
   value(caseNum, G.metaCaseX, G.metaBase, G.headSize, G.metaCaseW);
   // ── Crew blocks ──
-  var blocks = crew.filter(function(c){ return c.name || c.sig; });
-  // Three filled blocks overrun the bottom margin by ~4pt in the original,
-  // which strands the last label on a second page. Take it out of the gaps
-  // between blocks instead so the form stays on one sheet.
+  // All three print whether or not they were filled in: the paper form has
+  // three blank blocks, and a crew that signed on scene should be able to file
+  // this against it line for line. Unused blocks stay blank, ready to be
+  // written on by hand.
+  // Three blocks overrun the bottom margin by ~4pt in the original, which
+  // strands the last label on a second page. Take it out of the gaps between
+  // blocks instead so the form stays on one sheet.
   var pitch = G.pitch;
-  var over = (blocks.length-1)*G.pitch + G.blockInk - G.bottom;
-  if(blocks.length > 1 && over > 0) pitch = G.pitch - (over+1)/(blocks.length-1);
-  blocks.forEach(function(c, i){
+  var over = (crew.length-1)*G.pitch + G.blockInk - G.bottom;
+  if(crew.length > 1 && over > 0) pitch = G.pitch - (over+1)/(crew.length-1);
+  crew.forEach(function(c, i){
     var dy = i*pitch;
     bold(G.headSize);
     doc.text('CREW '+c.num, G.left, G.crewBase+dy);
