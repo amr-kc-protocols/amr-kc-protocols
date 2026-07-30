@@ -317,6 +317,9 @@ box-shadow:0 4px 12px rgba(23,58,104,0.25);margin-bottom:12px}
 .cgf-confirm-icon{font-size:36px;margin-bottom:10px}
 .cgf-confirm-title{font-size:17px;font-weight:700;color:var(--emt);margin-bottom:6px}
 .cgf-confirm-sub{font-size:13px;color:var(--emt);line-height:1.6;margin-bottom:16px}
+.cgf-share{display:block;width:100%;padding:15px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-bottom:12px}
+.cgf-after{display:flex;gap:8px}
+.cgf-after .cgf-again{flex:1;padding:12px 8px}
 .cgf-again{background:var(--dim);border:1px solid var(--border);color:var(--white);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 
 /* MORE HUB */
@@ -1987,9 +1990,12 @@ function buildPCSList(items){
 }
 // ── FORMS ──────────────────────────────────────────────────────────────────
 var CGF_HAS_SIG = [false, false, false];
+var CGF_AMENDED = false;   // set when a form is sent back for correction
 function renderForms(){
   var c = $('lv');
   CGF_HAS_SIG = [false, false, false];
+  CGF_AMENDED = false;
+  CGF_PDF = null;
   cgfAssets();   // warm the PDF font/logo fetches while the form is being filled
   function crewSection(n, label, req){
     return [
@@ -2038,9 +2044,13 @@ function renderForms(){
     '</div>',
     '<div class="cgf-confirm" id="cgf-confirm">',
     '<div class="cgf-confirm-icon"><svg class="icon"><use href="#i-check-circle"></use></svg></div>',
-    '<div class="cgf-confirm-title">PDF Downloaded</div>',
-    '<div class="cgf-confirm-sub">The completed form with signatures has been saved as a PDF to your device. Share or email it as needed.</div>',
-    '<button class="cgf-again" id="cgf-again">Submit Another Form</button>',
+    '<div class="cgf-confirm-title">PDF Ready</div>',
+    '<div class="cgf-confirm-sub" id="cgf-confirm-sub">Send it now &mdash; email, Messages, or Files, whichever you file these in.</div>',
+    '<button class="cgf-share" id="cgf-share"><svg class="icon"><use href="#i-download"></use></svg> <span id="cgf-share-label">Send PDF</span></button>',
+    '<div class="cgf-after">',
+    '<button class="cgf-again" id="cgf-fix">Correct This Form</button>',
+    '<button class="cgf-again" id="cgf-again">Start New Form</button>',
+    '</div>',
     '</div>',
     '</div>',
   ].join('');
@@ -2052,6 +2062,15 @@ function renderForms(){
     var formEl    = document.getElementById('cgf-form');
     var confirmEl = document.getElementById('cgf-confirm');
     var againBtn  = document.getElementById('cgf-again');
+    var shareBtn  = document.getElementById('cgf-share');
+    var fixBtn    = document.getElementById('cgf-fix');
+    // Name the button and the hint for what this device will actually do.
+    if(!cgfCanShare()){
+      var lbl = document.getElementById('cgf-share-label');
+      if(lbl) lbl.textContent = 'Download PDF';
+      var sub = document.getElementById('cgf-confirm-sub');
+      if(sub) sub.textContent = 'Saved to your downloads folder. Use Download again if you need another copy.';
+    }
     if(submitBtn) submitBtn.addEventListener('click', function(){
       var date     = (document.getElementById('cgf-date')||{}).value||'';
       var caseNum  = (document.getElementById('cgf-case')||{}).value.trim()||'';
@@ -2094,14 +2113,22 @@ function renderForms(){
       ];
       cgfAssets().then(function(assets){
         var doc = cgfBuildPdf(assets, date, caseNum, crew);
-        doc.save('CGF_Case'+caseNum+'_'+date.replace(/\//g,'-')+'.pdf');
+        CGF_PDF = {
+          blob: doc.output('blob'),
+          name: 'CGF_Case'+caseNum+'_'+date.replace(/\//g,'-')+'.pdf'
+        };
         formEl.style.display='none';
         confirmEl.style.display='block';
         statusEl.textContent='';
+        // Try to send straight away, while the tap that got us here may still
+        // count as user activation. If the browser declines, the Send button on
+        // the confirmation panel is a fresh tap that will be allowed.
+        cgfSendPdf();
         // Also log to sheet (no signatures — just text data)
         var payload = {
           type:'caregiver_form',
           date: date, caseNumber: caseNum, submittedAt: submittedAt,
+          amended: CGF_AMENDED ? 'yes' : '',
           crew1Name: crew[0].name, crew1Cert: crew[0].cert, crew1Sig:'',
           crew2Name: crew[1].name, crew2Cert: crew[1].cert, crew2Sig:'',
           crew3Name: crew[2].name, crew3Cert: crew[2].cert, crew3Sig:''
@@ -2113,8 +2140,26 @@ function renderForms(){
         submitBtn.disabled=false;
       });
     });
+    // Sending again from the confirmation panel: a fresh tap, so a share sheet
+    // that got refused on submit is allowed here.
+    if(shareBtn) shareBtn.addEventListener('click', function(){ cgfSendPdf(); });
+    // Correcting a form goes back to it with every field and signature still
+    // there. A typo in a case number shouldn't cost three signatures.
+    if(fixBtn) fixBtn.addEventListener('click', function(){
+      CGF_AMENDED = true;
+      CGF_PDF = null;
+      confirmEl.style.display='none';
+      formEl.style.display='block';
+      statusEl.textContent='';
+      statusEl.className='cgf-status';
+      submitBtn.disabled=false;
+      // Deliberately no setupSigPad() here — it swaps in fresh canvases, which
+      // would wipe the signatures we are trying to preserve.
+    });
     if(againBtn) againBtn.addEventListener('click', function(){
       CGF_HAS_SIG=[false,false,false];
+      CGF_AMENDED = false;
+      CGF_PDF = null;
       confirmEl.style.display='none';
       formEl.style.display='block';
       ['cgf-date','cgf-case','cgf-name-1','cgf-name-2','cgf-name-3'].forEach(function(id){
@@ -2263,6 +2308,49 @@ function cgfBuildPdf(assets, date, caseNum, crew){
     }
   });
   return doc;
+}
+// The finished PDF, kept so the confirmation panel can send it again without
+// regenerating. Cleared when a new form is started.
+var CGF_PDF = null;
+// A plain download drops the file into Files > Downloads with nothing on screen
+// to say so, which is where crews lose it. Hand it to the OS share sheet
+// instead — mail, Messages, Files, AirDrop, whatever they file these in — and
+// fall back to a download on desktop and anywhere sharing isn't offered.
+function cgfSendPdf(){
+  if(!CGF_PDF) return Promise.resolve(false);
+  try {
+    var file = new File([CGF_PDF.blob], CGF_PDF.name, {type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      return navigator.share({files:[file], title:'AMR Caregiver Signature Form'})
+        .then(function(){ return true; })
+        .catch(function(err){
+          // Cancelling is a choice, not a failure — the button stays available.
+          if(err && err.name === 'AbortError') return false;
+          cgfDownloadPdf();
+          return true;
+        });
+    }
+  } catch(e){}
+  cgfDownloadPdf();
+  return Promise.resolve(true);
+}
+function cgfDownloadPdf(){
+  if(!CGF_PDF) return;
+  var url = URL.createObjectURL(CGF_PDF.blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = CGF_PDF.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+}
+function cgfCanShare(){
+  try {
+    return !!(navigator.canShare && navigator.canShare({
+      files: [new File([new Blob([''],{type:'application/pdf'})], 'x.pdf', {type:'application/pdf'})]
+    }));
+  } catch(e){ return false; }
 }
 // <input type="date"> hands back YYYY-MM-DD; the form reads as a date.
 function cgfDisplayDate(v){
