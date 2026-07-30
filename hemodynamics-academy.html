@@ -349,6 +349,46 @@ label.opt.wrong .ol{ color:var(--red); }
 .verstamp{ font-family:var(--mono); font-size:10.5px; color:var(--lock); letter-spacing:.03em;
   text-align:center; margin:14px 0 0; }
 
+/* ── Teaching figures ───────────────────────────────────────────── */
+.fig{ margin:20px 0; }
+.fig-box{ background:var(--card-2); border:1px solid var(--rule); border-radius:12px; padding:13px 12px; overflow-x:auto; }
+.fig-cap{ font-family:var(--sans); font-size:13px; color:var(--ink-2); line-height:1.55; margin:9px 2px 0; }
+.fig-cap strong{ color:var(--ink); }
+.wfrow{ display:flex; gap:10px; flex-wrap:wrap; }
+.wf{ flex:1 1 150px; min-width:150px; }
+.wf-lab{ font-family:var(--sans); font-weight:800; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--blue-dk); margin-bottom:4px; }
+.wf-lab.ok{ color:var(--green); }
+.wf-svg{ display:block; width:100%; height:auto; background:var(--paper);
+  border:1px solid var(--rule); border-radius:8px; }
+.wf-base{ stroke:var(--rule-2); stroke-width:1; stroke-dasharray:3 3; }
+.wf-trace{ stroke:var(--blue); stroke-linejoin:round; stroke-linecap:round; }
+.wf-dot{ fill:var(--amber); }
+.wf-note{ font-family:var(--sans); font-size:11.5px; color:var(--ink-2); line-height:1.45; margin-top:5px; }
+.dia-svg{ display:block; width:100%; height:auto; background:var(--paper);
+  border:1px solid var(--rule); border-radius:8px; }
+.dia2{ display:flex; gap:10px; flex-wrap:wrap; }
+.dia2 .dia-svg{ flex:1 1 160px; min-width:160px; }
+.dia-organ{ fill:none; stroke:var(--ink-2); stroke-width:2; }
+.dia-vessel{ fill:none; stroke:var(--rule-2); stroke-width:9; stroke-linecap:round; }
+.dia-valve{ stroke:var(--amber); stroke-width:2.4; }
+.dia-cath{ fill:none; stroke:var(--blue); stroke-width:2.4; }
+.dia-drive{ fill:none; stroke:var(--navy); stroke-width:2.4; }
+.dia-native{ fill:none; stroke:var(--red); stroke-width:2.6; }
+.dia-circuit{ fill:none; stroke:var(--green); stroke-width:2.6; }
+.dia-drain{ fill:none; stroke:var(--blue); stroke-width:2.2; stroke-dasharray:4 3; }
+.dia-inlet{ fill:var(--blue); }
+.dia-outlet{ fill:var(--green); }
+.dia-mix{ fill:var(--amber-soft); stroke:var(--amber); stroke-width:1.6; }
+.dia-box{ fill:var(--card); stroke:var(--rule-2); stroke-width:1.4; }
+.dia-good{ fill:var(--green-soft); stroke:var(--green-line); stroke-width:1.4; }
+.dia-bad{ fill:var(--red-soft); stroke:var(--red-line); stroke-width:1.4; }
+.dia-arrow{ stroke:var(--ink-2); stroke-width:1.6; marker-end:none; }
+.dia-brace{ stroke:var(--amber); stroke-width:1.6; }
+.dia-lab{ font-family:var(--sans); font-size:11px; font-weight:700; fill:var(--ink); }
+.dia-sm{ font-family:var(--sans); font-size:8.5px; fill:var(--ink-2); }
+.dia-sm2{ font-family:var(--sans); font-size:8px; fill:var(--ink-2); }
+
 @media print{
   body{ background:#fff; }
   header.mon, main > *:not(#view-cert), .back, .cta-wrap, footer.adm, .print-hide{ display:none !important; }
@@ -635,7 +675,7 @@ var MODULES = [
         "<li><strong>Underdamped</strong> — the trace 'rings,' bouncing through several oscillations and overshooting. It <em>overestimates SBP</em> and <em>underestimates DBP</em>. Think of a bell that won't stop ringing. Causes: stiff or overly long tubing, catheter whip, and fast heart rates.</li>"+
         "<li><strong>Overdamped</strong> — sluggish, no oscillations, a slurred return that rounds off the waveform. It <em>underestimates SBP</em> and <em>overestimates DBP</em>. Think of ringing that same bell after wrapping it in a towel — a dull thud with no ring. Causes: air bubbles, a small clot, a kink, a loose connection, or a low flush-bag pressure.</li>"+
         "</ul>"+
-        "<div class='keybox'><span class='kt'>Anchor</span> The square-wave test is free, takes seconds, and tells you whether to trust the SBP and DBP. Run it before you titrate a drug to a systolic number.</div>"
+        ""+figDamping()+"<div class='keybox'><span class='kt'>Anchor</span> The square-wave test is free, takes seconds, and tells you whether to trust the SBP and DBP. Run it before you titrate a drug to a systolic number.</div>"
       },
       { h:"6", t:"Why MAP is the number you can trust", html:
         "<p>Damping mangles the extremes. An underdamped line inflates the peak and drops the trough; an overdamped line does the reverse. But notice what both leave alone: the middle. <strong>Mean arterial pressure is the integrated area under the curve</strong>, and averaging is remarkably resistant to distortion at the top and bottom.</p>"+
@@ -675,6 +715,9 @@ var MODULES = [
       { q:"An overdamped arterial tracing (sluggish, no oscillations) most likely results from:",
         opts:["An air bubble, clot, kink, or low flush-bag pressure","Excessively stiff tubing","A very high heart rate","Catheter whip"], ans:0,
         expl:"Overdamping is caused by things that absorb the signal — air bubbles, clots, kinks, loose connections, low flush pressure. It underestimates SBP and overestimates DBP." },
+      { q:"FIGURE — In the square-wave panel, one tracing returns to baseline slowly and smoothly with no oscillation at all. Reading that tracing, you should conclude:",
+        opts:["The system is optimally damped and the numbers are reliable","The system is overdamped: the displayed systolic is falsely LOW and the diastolic falsely high","The system is underdamped: the displayed systolic is falsely high","The transducer needs re-zeroing to atmosphere"], ans:1,
+        expl:"A sluggish, non-oscillating return is the overdamped pattern — look for an air bubble, clot, kink, loose connection, or low flush-bag pressure. Overdamping underestimates systolic and overestimates diastolic. The optimally damped trace shows 1–2 crisp oscillations; the underdamped trace rings repeatedly. In any doubt, titrate to the MAP, which resists this artifact." },
       { q:"When a waveform appears damped and you are unsure of the SBP/DBP, which value should you titrate to?",
         opts:["Systolic pressure","Diastolic pressure","Mean arterial pressure","Pulse pressure"], ans:2,
         expl:"MAP is the integrated area under the curve and is relatively resistant to damping distortion, which mangles the peak and trough. Titrate to MAP." },
@@ -928,7 +971,7 @@ var MODULES = [
         "<p>Timing is like pushing a child on a swing: push at the right instant and you add energy; push at the wrong instant and you fight the motion. The four classic errors:</p>"+
         "<ul>"+
         "<li><strong>Early inflation</strong> — the balloon inflates before the aortic valve closes, driving against a still-ejecting ventricle and <em>increasing</em> afterload. Harmful.</li>"+
-        "<li><strong>Late inflation</strong> — inflates well after the notch; you simply lose augmentation.</li>"+
+        ""+figIabpTiming()+"<li><strong>Late inflation</strong> — inflates well after the notch; you simply lose augmentation.</li>"+
         "<li><strong>Early deflation</strong> &mdash; deflates before the end of diastole. Blood does <em>not</em> enter an intact balloon; what you lose is the benefit. Augmentation ends prematurely and the afterload-reducing effect at end-diastole is diminished, so on the trace the augmented diastolic peak falls away early and the expected drop in end-diastolic pressure is blunted. Coronary perfusion time is shortened.</li>"+
         "<li><strong>Late deflation</strong> — the balloon is still inflated when systole begins, so the ventricle ejects against a balloon and afterload <em>rises</em>. Harmful.</li>"+
         "</ul>"+
@@ -979,6 +1022,9 @@ var MODULES = [
       { q:"Blood or brownish flecks appearing in the helium drive line indicate:",
         opts:["Normal operation","Balloon rupture — an emergency","A dead battery","Overdamping of the arterial line"], ans:1,
         expl:"That finding means the balloon has ruptured, risking gas embolism and clot. Stop the pump and get help immediately." },
+      { q:"FIGURE — On the IABP timing panels, one tracing shows the balloon still inflated as the next systole begins, so the ventricle must eject against an inflated balloon. Which error is that, and why does it matter most?",
+        opts:["Late inflation — only augmentation height is lost","Late deflation — afterload reduction is lost and the ventricle works against the balloon","Early deflation — blood flows back into the balloon","Correct timing — this is the expected appearance"], ans:1,
+        expl:"That is late deflation. With early inflation it forms the more dangerous family of timing errors, because both make the ventricle eject against an inflated balloon — raising afterload instead of reducing it. Late INFLATION merely loses augmentation. Note the physiology error in the third option: blood does not enter an intact balloon; early deflation costs you augmentation and end-diastolic afterload reduction, not blood volume." },
       { q:"The most common complication of an IABP is:",
         opts:["Limb ischemia","Hyperkalemia","Pulmonary embolism","Cyanide toxicity"], ans:0,
         expl:"The large femoral sheath most often causes limb ischemia; distal pulses and perfusion must be checked frequently." },
@@ -1013,7 +1059,7 @@ var MODULES = [
       { h:"3", t:"Position is everything", html:
         "<p>The whole device depends on the inlet sitting at the correct depth inside the ventricle, with the outlet above the aortic valve. <strong>That depth is model-specific, so identify the model before you interpret any number.</strong></p><div class='keybox'><span class='kt'>Identify the model first</span> Per the manufacturer's positioning guidance, the <strong>Impella CP</strong> inlet sits approximately <strong>3.5 cm</strong> from the aortic valve, while the larger <strong>Impella 5.5</strong> sits at approximately <strong>5 cm</strong>. There is no universal number &mdash; quoting 3.5 cm for every Impella will make a correctly positioned 5.5 look too deep. Confirm the model on the console and the chart, and verify the target depth against that model's instructions for use.</div><p>Two console readouts help confirm position:</p>"+
         "<ul>"+
-        "<li>The <strong>placement signal</strong> — a pressure waveform that should look <em>aortic</em> (from the outlet). If it starts reading like a <em>ventricular</em> tracing, the device has migrated.</li>"+
+        ""+figImpella()+"<li>The <strong>placement signal</strong> — a pressure waveform that should look <em>aortic</em> (from the outlet). If it starts reading like a <em>ventricular</em> tracing, the device has migrated.</li>"+
         "<li>The <strong>motor current</strong> — normally pulsatile when the device spans the valve correctly; it flattens when position is wrong.</li>"+
         "</ul>"+
         "<p>Migration is the root of most Impella alarms: pulled too far into the aorta, output falls; pushed too deep into the ventricle, it causes suction.</p>"
@@ -1076,6 +1122,9 @@ var MODULES = [
       { q:"For correct Impella function, the inlet should sit:",
         opts:["In the right atrium","In the left ventricle at a model-specific depth — about 3.5 cm from the aortic valve for a CP, about 5 cm for a 5.5 — with the outlet in the aorta","In the pulmonary artery","Exactly 3.5 cm below the valve for every Impella model"], ans:1,
         expl:"Inlet in the LV, outlet in the ascending aorta — but the depth depends on the model: approximately 3.5 cm from the aortic valve for an Impella CP and approximately 5 cm for an Impella 5.5. Identify the model before judging position, or a correctly placed 5.5 will look too deep. Migration causes reduced output (pulled up) or suction (pushed too deep)." },
+      { q:"FIGURE — The position diagram brackets the inlet-to-valve distance and gives two values. A console shows an inlet about 5 cm from the aortic valve. What do you need before calling that malpositioned?",
+        opts:["Nothing — 5 cm is too deep for any Impella","The model: ~5 cm is expected for an Impella 5.5, while ~3.5 cm is expected for a CP","The purge pressure","The patient's ejection fraction"], ans:1,
+        expl:"Depth is model-specific, which is exactly what the bracket in the figure shows. About 5 cm is the expected position for an Impella 5.5 and would be too deep only for a CP (~3.5 cm). Identify the model first and verify against that model's instructions for use — otherwise a correctly positioned 5.5 gets 'corrected' into a genuine malposition." },
       { q:"DanGer Shock (2024) was notable because it:",
         opts:["Showed IABP was superior to Impella","Was the first MCS device RCT to show a mortality benefit in AMI cardiogenic shock","Proved Impella had no complications","Studied VV-ECMO in ARDS"], ans:1,
         expl:"Impella CP reduced 180-day mortality in selected STEMI shock (45.8% vs 58.5%, HR 0.74), the first positive MCS device RCT in AMI-CS, prompting a class 2a upgrade." },
@@ -1123,7 +1172,7 @@ var MODULES = [
         "<div class='keybox'><span class='kt'>Monitor the right arm</span> Because the right radial artery is fed closest to the heart, a right-radial ABG or SpO2 is the early-warning sensor for differential hypoxia. Right-arm desaturation is the tell.</div>"
       },
       { h:"5", t:"Oxygenator failure and other complications", html:
-        "<p>Two more consequences of that mixing are worth holding onto. First, retrograde flow from a peripheral arterial return line <strong>increases the afterload the left ventricle has to eject against</strong> &mdash; peripheral VA ECMO can therefore worsen LV distension and pulmonary edema even while systemic numbers look better, which is why LV unloading strategies exist. Second, differential hypoxia (Harlequin syndrome) is a mixing phenomenon, not a circuit malfunction.</p>"+
+        ""+figEcmoMixing()+"<p>Two more consequences of that mixing are worth holding onto. First, retrograde flow from a peripheral arterial return line <strong>increases the afterload the left ventricle has to eject against</strong> &mdash; peripheral VA ECMO can therefore worsen LV distension and pulmonary edema even while systemic numbers look better, which is why LV unloading strategies exist. Second, differential hypoxia (Harlequin syndrome) is a mixing phenomenon, not a circuit malfunction.</p>"+
         "<p>The oxygenator is a consumable that gradually clots and fails. Judge it on <strong>trends, not a single glance</strong>:</p>"+
         "<ul>"+
         "<li><strong>Gas transfer across the membrane</strong> &mdash; a rising CO2 and a falling <em>post-oxygenator</em> PaO2 at unchanged sweep and flow.</li>"+
@@ -1178,6 +1227,9 @@ var MODULES = [
       { q:"On peripheral VA ECMO, which statement is correct?",
         opts:["Circuit flow completely bypasses the native heart, so native output no longer matters","Native cardiac output and circuit flow coexist and mix in the aorta, and retrograde flow can increase LV afterload","The left ventricle is always fully unloaded by the circuit","Differential hypoxia indicates the oxygenator has failed"], ans:1,
         expl:"VA ECMO supports rather than replaces: the native heart usually keeps ejecting, so native output and circuit flow mix in the aorta at a mixing zone that shifts as either changes. Retrograde flow from a peripheral return cannula increases LV afterload, which can worsen LV distension and pulmonary edema — hence LV unloading strategies. Differential hypoxia is a mixing phenomenon, not a circuit failure." },
+      { q:"FIGURE — The VA ECMO diagram marks a mixing zone in the aorta where native output meets retrograde circuit flow. Based on that, where should arterial blood be sampled to detect differential hypoxia?",
+        opts:["The left femoral artery, below the mixing zone","The RIGHT radial artery, perfused by native output above the mixing zone","Any arterial site — they are equivalent on VA ECMO","The circuit's post-oxygenator port"], ans:1,
+        expl:"Differential hypoxia (Harlequin) exists because poorly oxygenated NATIVE blood perfuses the upper body while well-oxygenated circuit blood perfuses the lower body. You must sample above the mixing zone — the right radial artery — to see it. A femoral sample reads circuit blood and looks falsely reassuring, and the post-oxygenator port only reports on the circuit." },
       { q:"ECLS-SHOCK (2023) found that routine early VA-ECMO in acute-MI cardiogenic shock:",
         opts:["Halved mortality","Did not reduce 30-day mortality and increased complications","Was beneficial only in diabetics","Eliminated the need for revascularization"], ans:1,
         expl:"No mortality reduction (~48% vs 49%), more complications, and no beneficial subgroup — shifting practice toward selective rather than routine use." },
@@ -1240,7 +1292,7 @@ var MODULES = [
         "<p>This is the highest-stakes reason the module exists. Two instincts are wrong here, in opposite directions — and the second one is the dangerous one.</p>"+
         "<p>The first wrong instinct is to call every pulseless LVAD patient an arrest. Pulselessness is <em>expected</em> with continuous flow, so an awake, perfusing patient does not get compressions.</p>"+
         "<p>The second wrong instinct — and the one that costs lives — is to treat compressions as something you earn only <em>after</em> proving the pump has failed. It is not. <strong>Pump failure is not a prerequisite for chest compressions.</strong></p>"+
-        "<div class='keybox'><span class='kt'>The rule</span> An LVAD patient who is <strong>unresponsive with inadequate perfusion</strong> gets <strong>immediate external chest compressions</strong>. Do not delay compressions to interrogate the controller, auscultate for a hum, or reach the VAD coordinator. Pump assessment happens <em>concurrently</em>, by a second rescuer, when one is available.</div>"+
+        ""+figLvad()+"<div class='keybox'><span class='kt'>The rule</span> An LVAD patient who is <strong>unresponsive with inadequate perfusion</strong> gets <strong>immediate external chest compressions</strong>. Do not delay compressions to interrogate the controller, auscultate for a hum, or reach the VAD coordinator. Pump assessment happens <em>concurrently</em>, by a second rescuer, when one is available.</div>"+
         "<p>Work it in this order:</p>"+
         "<ul>"+
         "<li><strong>Assess responsiveness and perfusion, not pulse</strong> — mentation, Doppler opening pressure, end-tidal CO2, skin.</li>"+
@@ -1289,7 +1341,10 @@ var MODULES = [
         expl:"These pumps are afterload-sensitive: high systemic pressure opposes output (a cause of low-flow alarms) and increases stroke and bleeding risk — hence a controlled MAP target." },
       { q:"An LVAD patient is unresponsive with an ETCO2 of 12 and no measurable pressure. You have a partner. What happens first?",
         opts:["Begin chest compressions immediately, while your partner assesses the pump concurrently","Interrogate the controller and check connections before compressing","Contact the VAD coordinator and await instructions","Withhold compressions because of the outflow-cannula dislodgement risk"], ans:0,
-        expl:"Unresponsive with inadequate perfusion = start compressions now. Device assessment runs in parallel with a second rescuer, not as a gate beforehand. Waiting to confirm pump failure leaves a non-perfusing patient without circulation, and the dislodgement fear is theoretical while the harm of withheld circulation is real." }
+        expl:"Unresponsive with inadequate perfusion = start compressions now. Device assessment runs in parallel with a second rescuer, not as a gate beforehand. Waiting to confirm pump failure leaves a non-perfusing patient without circulation, and the dislodgement fear is theoretical while the harm of withheld circulation is real." },
+      { q:"FIGURE — In the LVAD decision panel, what does the diagram show happening to pump assessment on the 'inadequate perfusion' branch?",
+        opts:["It is completed first, and compressions follow only if the pump has failed","It happens concurrently with compressions, which start immediately","It is skipped entirely and never performed","It replaces compressions if the controller reads normal"], ans:1,
+        expl:"The figure deliberately places compressions and pump assessment side by side on that branch: compressions begin immediately while a second rescuer assesses the pump. Pump failure is not a prerequisite — an LVAD supports only the left ventricle, so RV failure, tamponade, arrhythmia, or hemorrhage can be killing the patient while the controller reads perfectly normal." }
     ]
   }
 
@@ -1465,6 +1520,178 @@ function renderHome(){
   renderSources();
   renderVerStamp();
   show("home");
+}
+
+/* ============================================================================
+   TEACHING FIGURES
+   ----------------------------------------------------------------------------
+   Inline SVG so the course stays a single offline file. Each figure is given
+   role="img" plus an accessible name and a longer description, and every figure
+   also carries a visible text caption — so the teaching point survives even if
+   the graphic cannot be seen or rendered.
+   ==========================================================================*/
+function fig(title, desc, svg, caption){
+  var id = "fig"+(fig._n = (fig._n||0)+1);
+  return "<figure class='fig'>"+
+    "<div class='fig-box' role='img' aria-labelledby='"+id+"t' aria-describedby='"+id+"d'>"+
+      "<span class='visually-hidden' id='"+id+"t'>"+title+"</span>"+
+      "<span class='visually-hidden' id='"+id+"d'>"+desc+"</span>"+
+      svg+
+    "</div>"+
+    "<figcaption class='fig-cap'><strong>"+title+".</strong> "+caption+"</figcaption>"+
+  "</figure>";
+}
+
+/* ---- Arterial-line damping: normal, overdamped, underdamped ------------- */
+function figDamping(){
+  function trace(d, cls){ return "<path d='"+d+"' fill='none' class='"+cls+"' stroke-width='2'/>"; }
+  // square-wave test: flush plateau, release, then response
+  var normal = "M4,54 L4,14 L38,14 L38,50 L44,40 L50,52 L56,47 L62,49 L120,49";
+  var over   = "M4,54 L4,14 L38,14 L38,44 C44,50 52,49 60,49 L120,49";
+  var under  = "M4,54 L4,14 L38,14 L38,52 L43,26 L48,50 L53,32 L58,47 L63,38 L68,46 L73,43 L120,49";
+  function panel(label, d, note){
+    return "<div class='wf'><div class='wf-lab'>"+label+"</div>"+
+      "<svg viewBox='0 0 124 62' class='wf-svg' aria-hidden='true'>"+
+        "<line x1='0' y1='49' x2='124' y2='49' class='wf-base'/>"+
+        trace(d,'wf-trace')+
+      "</svg><div class='wf-note'>"+note+"</div></div>";
+  }
+  return fig("Square-wave test: three responses",
+    "Three square-wave (fast-flush) tracings. Optimally damped: the trace snaps down past baseline and returns after one or two brief oscillations. Overdamped: the trace returns slowly and smoothly with no oscillation. Underdamped: the trace oscillates several times before settling.",
+    "<div class='wfrow'>"+
+      panel("Optimally damped", normal, "1&ndash;2 quick oscillations, then baseline. Numbers trustworthy.")+
+      panel("Overdamped", over, "Sluggish, no oscillation. <em>Under</em>estimates systolic, <em>over</em>estimates diastolic.")+
+      panel("Underdamped", under, "Rings 3+ times. <em>Over</em>estimates systolic, <em>under</em>estimates diastolic.")+
+    "</div>",
+    "Pull the fast flush and watch how the trace returns. Optimal damping shows one or two crisp oscillations. An overdamped system (air bubble, clot, kink, low flush-bag pressure) rounds off the waveform and reads a falsely low systolic. An underdamped system (stiff or long tubing, catheter whip, tachycardia) rings and exaggerates the systolic. In either case the <strong>MAP is the most artifact-resistant number</strong> &mdash; titrate to it.");
+}
+
+/* ---- IABP timing: correct vs the four errors ---------------------------- */
+function figIabpTiming(){
+  function panel(label, d, marks, note, cls){
+    return "<div class='wf'><div class='wf-lab "+(cls||"")+"'>"+label+"</div>"+
+      "<svg viewBox='0 0 132 64' class='wf-svg' aria-hidden='true'>"+
+        "<line x1='0' y1='52' x2='132' y2='52' class='wf-base'/>"+
+        "<path d='"+d+"' fill='none' class='wf-trace' stroke-width='2'/>"+(marks||"")+
+      "</svg><div class='wf-note'>"+note+"</div></div>";
+  }
+  // assisted beat: systolic peak, dicrotic notch, augmented diastolic peak
+  var good = "M4,52 C10,52 12,18 20,18 C27,18 30,38 36,41 L40,43 C43,40 45,10 54,10 C64,10 70,44 80,50 L86,52 C92,52 94,20 102,20 C109,20 112,40 118,44 L128,52";
+  var early= "M4,52 C10,52 12,18 20,18 C24,18 25,26 30,22 C38,14 44,12 54,14 C64,16 70,44 80,50 L128,52";
+  var late = "M4,52 C10,52 12,18 20,18 C27,18 30,38 36,41 L48,50 C54,44 58,22 66,22 C74,22 78,44 88,50 L128,52";
+  var eDef = "M4,52 C10,52 12,18 20,18 C27,18 30,38 36,41 L40,43 C43,40 45,12 52,12 C58,12 60,40 64,52 L70,52 C76,52 80,26 88,26 L128,52";
+  var lDef = "M4,52 C10,52 12,18 20,18 C27,18 30,38 36,41 L40,43 C43,40 45,10 54,10 C66,10 74,36 84,40 C90,42 94,46 100,52 C106,52 110,24 118,24 L128,52";
+  var notch = "<circle cx='40' cy='43' r='2.6' class='wf-dot'/>";
+  return fig("IABP timing: correct and mistimed",
+    "Five arterial waveform panels. Correct timing shows inflation at the dicrotic notch producing a tall augmented diastolic peak, then a lower assisted systolic and lower end-diastolic pressure. Early inflation shows the augmentation encroaching on systole before the notch. Late inflation shows augmentation beginning well after the notch with reduced height. Early deflation shows augmentation ending prematurely with a blunted end-diastolic dip. Late deflation shows a widened augmented peak with a raised end-diastolic pressure.",
+    "<div class='wfrow'>"+
+      panel("Correct", good, notch, "Inflation at the dicrotic notch. Tall augmented peak; assisted systolic and end-diastolic both lower.", "ok")+
+      panel("Early inflation", early, "", "Inflates <em>before</em> the notch, against a still-ejecting ventricle &mdash; raises afterload. Potentially harmful.")+
+      panel("Late inflation", late, "", "Inflates well after the notch. Augmentation is smaller; coronary benefit is lost.")+
+      panel("Early deflation", eDef, "", "Augmentation ends too soon; the end-diastolic drop is blunted. No blood enters the balloon &mdash; you lose benefit.")+
+      panel("Late deflation", lDef, "", "Balloon still inflated into systole &mdash; the ventricle ejects against it. Afterload reduction is lost.")+
+    "</div>",
+    "Timing is judged against the <strong>dicrotic notch</strong> (marked on the correct panel). Correct timing inflates at the notch and deflates just before the next systole, producing a tall diastolic augmentation with a <em>lower</em> assisted systolic and <em>lower</em> end-diastolic pressure. Early inflation and late deflation both make the ventricle work against an inflated balloon and are the more dangerous errors.");
+}
+
+/* ---- Impella position, model-specific --------------------------------- */
+function figImpella(){
+  return fig("Impella position is model-specific",
+    "Diagram of the left ventricle and aorta with an Impella catheter crossing the aortic valve. The outlet sits in the ascending aorta above the valve and the inlet sits inside the left ventricle below it. A bracket marks the inlet-to-valve distance, labelled approximately 3.5 centimetres for an Impella CP and approximately 5 centimetres for an Impella 5.5.",
+    "<svg viewBox='0 0 260 150' class='dia-svg' aria-hidden='true'>"+
+      "<path d='M96,132 C60,120 52,86 66,60 C76,42 100,32 120,36' class='dia-organ'/>"+
+      "<path d='M120,36 C140,30 168,34 178,52 C188,70 184,96 170,110' class='dia-organ'/>"+
+      "<text x='84' y='112' class='dia-lab'>LV</text>"+
+      "<text x='186' y='60' class='dia-lab'>Aorta</text>"+
+      "<line x1='108' y1='58' x2='140' y2='50' class='dia-valve'/>"+
+      "<text x='104' y='46' class='dia-sm'>aortic valve</text>"+
+      "<path d='M188,44 C168,50 140,54 116,74 L104,90' class='dia-cath'/>"+
+      "<circle cx='104' cy='90' r='4' class='dia-inlet'/>"+
+      "<text x='40' y='94' class='dia-sm'>inlet</text>"+
+      "<circle cx='176' cy='47' r='3.4' class='dia-outlet'/>"+
+      "<text x='196' y='38' class='dia-sm'>outlet</text>"+
+      "<path d='M124,66 L112,84' class='dia-brace'/>"+
+      "<text x='128' y='84' class='dia-sm2'>CP &asymp; 3.5 cm</text>"+
+      "<text x='128' y='96' class='dia-sm2'>5.5 &asymp; 5 cm</text>"+
+    "</svg>",
+    "The outlet sits in the ascending aorta and the inlet inside the left ventricle &mdash; but the inlet-to-valve distance <strong>depends on the model</strong>: roughly 3.5 cm for an Impella CP and roughly 5 cm for an Impella 5.5. Identify the model before you judge depth, or a correctly positioned 5.5 will look too deep. Confirm against that model's instructions for use.");
+}
+
+/* ---- VA ECMO mixing / differential hypoxia ----------------------------- */
+function figEcmoMixing(){
+  return fig("Peripheral VA ECMO: flow mixes, it does not bypass",
+    "Diagram of peripheral veno-arterial ECMO. A drainage cannula in the right atrium leads to a pump and oxygenator, and a return cannula in the femoral artery sends oxygenated blood retrograde up the aorta. The native heart simultaneously ejects blood forward. The two flows meet at a mixing zone in the aorta. When the native lungs are failing, poorly oxygenated native blood reaches the head and right arm while well-oxygenated circuit blood supplies the lower body, which is differential hypoxia or Harlequin syndrome. Retrograde circuit flow also increases the afterload the left ventricle must eject against.",
+    "<svg viewBox='0 0 300 168' class='dia-svg' aria-hidden='true'>"+
+      "<path d='M150,26 C150,44 150,58 150,72' class='dia-vessel'/>"+
+      "<text x='120' y='20' class='dia-sm'>head / right arm</text>"+
+      "<path d='M150,72 C150,104 150,130 150,158' class='dia-vessel'/>"+
+      "<text x='120' y='166' class='dia-sm'>lower body</text>"+
+      "<path d='M116,86 C104,80 96,72 96,60' class='dia-organ'/>"+
+      "<text x='72' y='58' class='dia-lab'>LV</text>"+
+      "<path d='M104,66 C124,58 140,62 148,70' class='dia-native'/>"+
+      "<text x='58' y='84' class='dia-sm2'>native output &rarr;</text>"+
+      "<path d='M188,140 C176,132 162,128 152,124' class='dia-circuit'/>"+
+      "<path d='M152,124 C152,110 152,96 151,80' class='dia-circuit'/>"+
+      "<rect x='196' y='120' width='40' height='22' rx='4' class='dia-box'/>"+
+      "<text x='200' y='134' class='dia-sm2'>oxy</text>"+
+      "<circle cx='256' cy='131' r='11' class='dia-box'/>"+
+      "<text x='249' y='135' class='dia-sm2'>pump</text>"+
+      "<path d='M252,120 C240,96 216,86 196,84' class='dia-drain'/>"+
+      "<text x='196' y='78' class='dia-sm2'>drain (RA)</text>"+
+      "<ellipse cx='150' cy='78' rx='15' ry='7' class='dia-mix'/>"+
+      "<text x='168' y='76' class='dia-sm'>mixing zone</text>"+
+    "</svg>",
+    "Native cardiac output and circuit flow <strong>coexist and mix</strong> &mdash; VA ECMO supports the circulation, it does not replace it. The mixing zone shifts as either contribution changes. Two consequences: if the native lungs are failing, poorly oxygenated native blood can reach the head and right arm while the circuit perfuses the lower body (<em>differential hypoxia</em>, sampled from the <strong>right</strong> radial artery), and retrograde flow from a femoral return <strong>increases LV afterload</strong>, which is why unloading strategies exist.");
+}
+
+/* ---- LVAD equipment + resuscitation decision -------------------------- */
+function figLvad(){
+  return fig("LVAD equipment and the resuscitation decision",
+    "Two panels. The left panel shows LVAD equipment: the implanted pump with an inflow cannula from the left ventricle and an outflow graft to the aorta, a driveline exiting the abdomen to an external controller, and two power sources. The right panel is a decision flow: assess responsiveness and perfusion. If the patient is unresponsive with inadequate perfusion, begin chest compressions immediately, with pump assessment carried out concurrently by a second rescuer. If the patient is awake and perfusing, do not compress; treat the rhythm. Defibrillation is not contraindicated in either branch.",
+    "<div class='dia2'>"+
+    "<svg viewBox='0 0 150 150' class='dia-svg' aria-hidden='true'>"+
+      "<path d='M56,110 C30,96 26,64 42,44 C52,32 72,26 88,30' class='dia-organ'/>"+
+      "<text x='46' y='92' class='dia-lab'>LV</text>"+
+      "<path d='M88,30 C104,26 122,32 128,46' class='dia-organ'/>"+
+      "<text x='120' y='26' class='dia-sm'>aorta</text>"+
+      "<circle cx='72' cy='84' r='11' class='dia-box'/>"+
+      "<text x='63' y='88' class='dia-sm2'>pump</text>"+
+      "<path d='M66,74 C62,64 60,56 62,48' class='dia-cath'/>"+
+      "<text x='6' y='52' class='dia-sm2'>inflow</text>"+
+      "<path d='M83,80 C100,68 114,56 122,48' class='dia-cath'/>"+
+      "<text x='104' y='72' class='dia-sm2'>outflow</text>"+
+      "<path d='M74,95 C76,112 78,124 80,136' class='dia-drive'/>"+
+      "<text x='84' y='120' class='dia-sm2'>driveline</text>"+
+      "<rect x='34' y='130' width='34' height='16' rx='3' class='dia-box'/>"+
+      "<text x='37' y='141' class='dia-sm2'>ctrlr</text>"+
+      "<rect x='78' y='138' width='13' height='9' rx='2' class='dia-box'/>"+
+      "<rect x='95' y='138' width='13' height='9' rx='2' class='dia-box'/>"+
+      "<text x='112' y='146' class='dia-sm2'>batt &times;2</text>"+
+    "</svg>"+
+    "<svg viewBox='0 0 170 150' class='dia-svg' aria-hidden='true'>"+
+      "<rect x='6' y='6' width='158' height='22' rx='5' class='dia-box'/>"+
+      "<text x='14' y='20' class='dia-sm2'>Unresponsive? Assess PERFUSION</text>"+
+      "<path d='M52,28 L52,44' class='dia-arrow'/>"+
+      "<path d='M120,28 L120,44' class='dia-arrow'/>"+
+      "<rect x='4' y='44' width='78' height='34' rx='5' class='dia-bad'/>"+
+      "<text x='9' y='58' class='dia-sm2'>Inadequate</text>"+
+      "<text x='9' y='70' class='dia-sm2'>perfusion</text>"+
+      "<rect x='90' y='44' width='76' height='34' rx='5' class='dia-good'/>"+
+      "<text x='95' y='58' class='dia-sm2'>Awake &amp;</text>"+
+      "<text x='95' y='70' class='dia-sm2'>perfusing</text>"+
+      "<path d='M43,78 L43,92' class='dia-arrow'/>"+
+      "<path d='M128,78 L128,92' class='dia-arrow'/>"+
+      "<rect x='4' y='92' width='78' height='38' rx='5' class='dia-bad'/>"+
+      "<text x='9' y='106' class='dia-sm2'>COMPRESS NOW</text>"+
+      "<text x='9' y='118' class='dia-sm2'>pump check =</text>"+
+      "<text x='9' y='128' class='dia-sm2'>concurrent</text>"+
+      "<rect x='90' y='92' width='76' height='38' rx='5' class='dia-good'/>"+
+      "<text x='95' y='106' class='dia-sm2'>Do NOT</text>"+
+      "<text x='95' y='118' class='dia-sm2'>compress;</text>"+
+      "<text x='95' y='128' class='dia-sm2'>treat rhythm</text>"+
+      "<text x='16' y='145' class='dia-sm'>Defibrillation is NOT contraindicated</text>"+
+    "</svg></div>",
+    "Left: the implanted pump draws from the LV and returns to the aorta, with a driveline to an external controller and two power sources &mdash; all of which travel with the patient. Right: the decision that matters. <strong>Unresponsive with inadequate perfusion &rarr; compress immediately</strong>, with pump assessment done concurrently by a second rescuer. Pump failure is <em>not</em> a prerequisite. An awake, perfusing patient does not get compressions even without a pulse. Defibrillate a shockable rhythm either way.");
 }
 
 /* ============================================================================
