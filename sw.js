@@ -1,8 +1,10 @@
-const CACHE = 'amrkc-2026-v5';
+const CACHE = 'amrkc-2026-v6';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
-  './educator.jpg', './protocols-2026.pdf'
+  './educator.jpg', './protocols-2026.pdf',
+  // Caregiver Signature Form PDF: letterhead + Calibri-metric font subset
+  './amr-logo.png', './fonts/KCFormSans-Bold.ttf'
 ];
 
 self.addEventListener('install', e => {
