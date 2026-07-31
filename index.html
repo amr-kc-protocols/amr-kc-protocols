@@ -2094,7 +2094,7 @@ function renderForms(){
     '<div id="cgf-form">',
     '<div class="cgf-hdr">',
     '<div class="cgf-title"><svg class="icon"><use href="#i-clipboard"></use></svg> AMR Caregiver Signature Form</div>',
-    '<div class="cgf-sub">AMR Kansas City &middot; Complete all applicable crew fields</div>',
+    '<div class="cgf-sub">AMR Kansas City &middot; Fill any crew section &mdash; at least one signature required</div>',
     '</div>',
     '<div class="cgf-meta">',
     '<div class="cgf-meta-field"><label class="cgf-label" for="cgf-date">Date of Service</label>',
@@ -2154,20 +2154,25 @@ function renderForms(){
     if(submitBtn) submitBtn.addEventListener('click', function(){
       var date     = (document.getElementById('cgf-date')||{}).value||'';
       var caseNum  = (document.getElementById('cgf-case')||{}).value.trim()||'';
-      var name1    = (document.getElementById('cgf-name-1')||{}).value.trim()||'';
-      var cert1    = (document.getElementById('cgf-cert-1')||{}).value||'';
       if(!date){ statusEl.textContent='⚠ Date of service is required.'; statusEl.className='cgf-status err'; return; }
       if(!caseNum){ statusEl.textContent='⚠ Case number is required.'; statusEl.className='cgf-status err'; return; }
-      if(!name1||!cert1||!CGF_SIGS[0]){ statusEl.textContent='⚠ Crew 1 name, certification, and signature are required.'; statusEl.className='cgf-status err'; return; }
-      // Validate: if any crew 2/3 field is partial, flag it
-      for(var i=2;i<=3;i++){
+      // No crew slot is mandatory — the caregiver who signs may be the second or
+      // third on the run, and the form should take that as it comes. What has to
+      // hold: at least one section is complete, and no section is half filled in.
+      var signed = 0;
+      for(var i=1;i<=3;i++){
         var nm = (document.getElementById('cgf-name-'+i)||{}).value.trim()||'';
         var ct = (document.getElementById('cgf-cert-'+i)||{}).value||'';
         var sg = !!CGF_SIGS[i-1];
-        if((nm||ct||sg) && !(nm&&ct&&sg)){
+        if(nm && ct && sg){ signed++; continue; }
+        if(nm || ct || sg){
           statusEl.textContent='⚠ Crew '+i+': fill name, certification, and signature — or leave all blank.';
           statusEl.className='cgf-status err'; return;
         }
+      }
+      if(!signed){
+        statusEl.textContent='⚠ At least one crew member needs a name, certification, and signature.';
+        statusEl.className='cgf-status err'; return;
       }
       submitBtn.disabled = true;
       statusEl.textContent = '⏳ Generating PDF…';
