@@ -1,0 +1,49 @@
+/* Shared full-screen signature pad.
+   Colours read from the host page's palette when it defines one, and fall back
+   to the field guide's own so this looks right on a standalone page too. */
+
+/* Height comes from --vvh (the visual viewport) rather than 100%: iOS sizes
+   position:fixed to the layout viewport, which in landscape is taller than what
+   you can see, and the buttons end up under the browser toolbar. */
+#sigpad{position:fixed;top:0;left:0;right:0;height:var(--vvh,100vh);z-index:9999;
+background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:10px}
+.sp{background:var(--surface,#fff);border:1px solid var(--teal,#173a68);border-radius:14px;padding:12px;
+width:100%;height:100%;max-width:1100px;display:flex;flex-direction:column;gap:8px;
+font-family:var(--sans,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif)}
+.sp-bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sp-who{font-family:var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);font-size:11px;font-weight:700;
+letter-spacing:0.1em;text-transform:uppercase;color:var(--teal2,#1b63c4)}
+.sp-clear{background:var(--dim,#f1f4f8);border:1px solid var(--border,#e2e6ec);color:var(--gray,#66707c);
+font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:inherit}
+.sp-canvas{flex:1;min-height:0;width:100%;border:2px dashed #9aa5b1;border-radius:10px;
+touch-action:none;-ms-touch-action:none;display:block;cursor:crosshair;
+/* A signature line to sign on. It lives in the element's CSS background, not
+   the bitmap, so it guides the eye without ever being captured. */
+background-color:#fff;
+background-image:linear-gradient(to bottom,transparent calc(70% - 1px),#c9d3e0 calc(70% - 1px),#c9d3e0 70%,transparent 70%);
+background-repeat:no-repeat;background-size:calc(100% - 48px) 100%;background-position:24px 0}
+.sp-hint{font-size:11px;color:var(--gray,#66707c);font-family:var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);text-align:center}
+.sp-rot{display:none}
+@media (orientation:portrait) and (max-width:900px){.sp-rot{display:inline}}
+.sp-actions{display:flex;gap:8px}
+.sp-cancel{flex:1;background:var(--dim,#f1f4f8);border:1px solid var(--border,#e2e6ec);color:var(--white,#152238);
+padding:14px 8px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.sp-done{flex:2;background:var(--teal,#173a68);color:#fff;border:none;padding:14px 8px;border-radius:9px;
+font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.sp-done:disabled{opacity:0.35;cursor:default}
+body.sp-open{overflow:hidden}
+/* A phone in landscape has very little height, and most of it was going to
+   chrome — the point of turning the phone is a bigger pad, so put the title and
+   the buttons on one row and give everything else to the canvas. */
+@media (max-height:520px){
+  #sigpad{padding:4px}
+  /* minmax(0,...) and an explicit height, or the canvas's intrinsic bitmap size
+     sets the row height and the sheet overflows the screen. */
+  .sp{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto minmax(0,1fr);
+  gap:6px;padding:8px;border-radius:10px}
+  .sp-bar{grid-area:1 / 1 / 2 / 2}
+  .sp-actions{grid-area:1 / 2 / 2 / 3}
+  .sp-canvas{grid-area:2 / 1 / 3 / 3;height:100%;min-height:0;min-width:0}
+  .sp-hint{display:none}
+  .sp-cancel,.sp-done{flex:0 0 auto;padding:9px 16px;font-size:13px;white-space:nowrap}
+}

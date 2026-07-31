@@ -1,10 +1,12 @@
-const CACHE = 'amrkc-2026-v6';
+const CACHE = 'amrkc-2026-v7';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
   './educator.jpg', './protocols-2026.pdf',
   // Caregiver Signature Form PDF: letterhead + Calibri-metric font subset
-  './amr-logo.png', './fonts/KCFormSans-Bold.ttf'
+  './amr-logo.png', './fonts/KCFormSans-Bold.ttf',
+  // Shared signature pad — the caregiver form cannot be signed without it
+  './sigpad.js', './sigpad.css'
 ];
 
 self.addEventListener('install', e => {

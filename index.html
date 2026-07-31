@@ -50,6 +50,8 @@
 }
 </script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="sigpad.css">
+<script defer src="sigpad.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{
@@ -84,49 +86,6 @@ padding:24px 20px 40px;max-width:540px;width:100%}
 .di strong{color:var(--white)}
 .di-btn{display:block;width:100%;padding:15px;background:var(--teal);color:#fff;border:none;
 border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
-
-/* SIGNATURE PAD — full-screen, because a finger needs more room than a
-   strip inside the form gives it */
-/* Height comes from --vvh (the visual viewport) rather than 100%: iOS sizes
-   position:fixed to the layout viewport, which in landscape is taller than what
-   you can see, and the buttons end up under the browser toolbar. */
-#sigpad{position:fixed;top:0;left:0;right:0;height:var(--vvh,100vh);z-index:9999;
-background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:10px}
-.sp{background:var(--surface);border:1px solid var(--teal);border-radius:14px;padding:12px;
-width:100%;height:100%;max-width:1100px;display:flex;flex-direction:column;gap:8px}
-.sp-bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.sp-who{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal2)}
-.sp-clear{background:var(--dim);border:1px solid var(--border);color:var(--gray);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:var(--sans)}
-.sp-canvas{flex:1;min-height:0;width:100%;border:2px dashed #9aa5b1;border-radius:10px;
-touch-action:none;-ms-touch-action:none;display:block;cursor:crosshair;
-/* A signature line to sign on. It lives in the element's CSS background, not
-   the bitmap, so it guides the eye without ever being captured. */
-background-color:#fff;
-background-image:linear-gradient(to bottom,transparent calc(70% - 1px),#c9d3e0 calc(70% - 1px),#c9d3e0 70%,transparent 70%);
-background-repeat:no-repeat;background-size:calc(100% - 48px) 100%;background-position:24px 0}
-.sp-hint{font-size:11px;color:var(--gray);font-family:var(--mono);text-align:center}
-.sp-rot{display:none}
-@media (orientation:portrait) and (max-width:900px){.sp-rot{display:inline}}
-/* A phone in landscape has very little height, and most of it was going to
-   chrome — the point of turning the phone is a bigger pad, so put the title and
-   the buttons on one row and give everything else to the canvas. */
-@media (max-height:520px){
-  #sigpad{padding:4px}
-  /* minmax(0,...) and an explicit height, or the canvas's intrinsic bitmap size
-     sets the row height and the sheet overflows the screen. */
-  .sp{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto minmax(0,1fr);
-  gap:6px;padding:8px;border-radius:10px}
-  .sp-bar{grid-area:1 / 1 / 2 / 2}
-  .sp-actions{grid-area:1 / 2 / 2 / 3}
-  .sp-canvas{grid-area:2 / 1 / 3 / 3;height:100%;min-height:0;min-width:0}
-  .sp-hint{display:none}
-  .sp-cancel,.sp-done{flex:0 0 auto;padding:9px 16px;font-size:13px;white-space:nowrap}
-}
-.sp-actions{display:flex;gap:8px}
-.sp-cancel{flex:1;background:var(--dim);border:1px solid var(--border);color:var(--white);padding:14px 8px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
-.sp-done{flex:2;background:var(--teal);color:#fff;border:none;padding:14px 8px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
-.sp-done:disabled{opacity:0.35;cursor:default}
-body.sp-open{overflow:hidden}
 
 /* HEADER */
 #hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg);
@@ -645,21 +604,6 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
     All care must comply with standing orders under <strong>Dr. Ameet Deshmukh, MD</strong>, AMR Kansas City Medical Director. The official printed protocol supersedes this app in any discrepancy.<br><br>
     <strong>Authorized AMR Kansas City EMS personnel only.</strong></p>
     <button class="di-btn" id="disc-btn">I Understand &mdash; Continue</button>
-  </div>
-</div>
-
-<div id="sigpad" role="dialog" aria-modal="true" aria-labelledby="sigpad-who" style="display:none">
-  <div class="sp">
-    <div class="sp-bar">
-      <span class="sp-who" id="sigpad-who">Signature</span>
-      <button class="sp-clear" id="sigpad-clear" type="button">Clear</button>
-    </div>
-    <canvas class="sp-canvas" id="sigpad-canvas"></canvas>
-    <div class="sp-hint">Sign above with your finger<span class="sp-rot"> &mdash; turn your phone sideways for more room</span></div>
-    <div class="sp-actions">
-      <button class="sp-cancel" id="sigpad-cancel" type="button">Cancel</button>
-      <button class="sp-done" id="sigpad-done" type="button" disabled>Use This Signature</button>
-    </div>
   </div>
 </div>
 
@@ -2125,9 +2069,15 @@ function renderForms(){
     [1,2,3].forEach(function(n){
       var pad = document.getElementById('sig-pad-'+n);
       if(pad){
-        pad.addEventListener('click', function(){ cgfPadShow(n); });
+        var openPad = function(){
+          SigPad.open({
+            title: 'Crew ' + n + ' signature',
+            onDone: function(sig){ CGF_SIGS[n-1] = sig.png; cgfSigShow(n); }
+          });
+        };
+        pad.addEventListener('click', openPad);
         pad.addEventListener('keydown', function(e){
-          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); cgfPadShow(n); }
+          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPad(); }
         });
       }
       var clr = document.getElementById('sig-clear-'+n);
@@ -2247,6 +2197,15 @@ function renderForms(){
       submitBtn.disabled=false;
     });
   },50);
+}
+// Show whatever signature has been captured for a crew in its form field.
+function cgfSigShow(n){
+  var pad = document.getElementById('sig-pad-'+n);
+  var img = document.getElementById('sig-preview-'+n);
+  var sig = CGF_SIGS[n-1];
+  // An empty src re-requests the page, so drop the attribute instead.
+  if(img){ if(sig) img.src = sig; else img.removeAttribute('src'); }
+  if(pad) pad.classList[sig ? 'add' : 'remove']('has-sig');
 }
 // The generated PDF is a 1:1 reproduction of the printed AMR Caregiver
 // Signature Form. Every number below is in points, measured from the top-left
@@ -2427,258 +2386,6 @@ function cgfDisplayDate(v){
   var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');
   return m ? (+m[2])+'/'+(+m[3])+'/'+m[1] : (v||'');
 }
-// ── SIGNATURE CAPTURE ──────────────────────────────────────────────────────
-// Signing legibly with a finger takes more room than a 110px strip wedged into
-// a form on a phone, so tapping the field opens a full-screen pad instead —
-// sideways, that is most of the screen. The form keeps a preview of what was
-// captured. One drawing surface for every device, so there is one code path.
-var CGF_SIG_TARGET = 0;
-var cgfPad = null;
-function cgfPadSetup(){
-  if(cgfPad) return cgfPad;
-  var canvas = document.getElementById('sigpad-canvas');
-  var doneBtn = document.getElementById('sigpad-done');
-  if(!canvas) return null;
-  var ctx = canvas.getContext('2d');
-  var pts = [], drawing = false, inked = false, dpr = 1;
-  // Bumped by every fit/reset. A restore decoded after one of those is stale,
-  // and must not repaint an old signature onto a pad someone has moved on from.
-  var gen = 0;
-
-  function style(){
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#0d1526';
-    ctx.fillStyle = '#0d1526';
-    ctx.lineWidth = 3.2;
-  }
-  // Size the bitmap to the box. 2x is plenty — the PDF box is ~306pt wide, so
-  // even a phone-width pad is oversampled by the time it lands there.
-  var cssW = 0, cssH = 0;
-  function fit(){
-    var mine = ++gen;
-    var r = canvas.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var keep = inked ? canvas.toDataURL('image/png') : null;
-    var wasW = cssW, wasH = cssH;
-    cssW = r.width; cssH = r.height;
-    canvas.width  = Math.max(1, Math.round(r.width * dpr));
-    canvas.height = Math.max(1, Math.round(r.height * dpr));
-    style();
-    // Carry the signature across an orientation change rather than dropping it.
-    // Scale it uniformly — portrait to landscape is a big change in shape, and
-    // stretching to fit would leave someone's name distorted.
-    if(keep && wasW && wasH){
-      var s = Math.min(r.width / wasW, r.height / wasH);
-      var img = new Image();
-      img.onload = function(){
-        if(mine === gen) ctx.drawImage(img, 0, 0, wasW * s, wasH * s);
-      };
-      img.src = keep;
-    }
-  }
-  // iOS reports stale dimensions right after a rotation, so a resize-driven fit
-  // can size the bitmap to the old box — which puts the ink somewhere other than
-  // under the finger. Checking before a stroke starts is the reliable guard.
-  function ensureFit(){
-    var r = canvas.getBoundingClientRect();
-    var want = Math.min(window.devicePixelRatio || 1, 2);
-    if(Math.abs(r.width - cssW) > 1 || Math.abs(r.height - cssH) > 1 || want !== dpr) fit();
-  }
-  function at(e){
-    var r = canvas.getBoundingClientRect();
-    return {x: e.clientX - r.left, y: e.clientY - r.top};
-  }
-  function mark(){
-    if(inked) return;
-    inked = true;
-    if(doneBtn) doneBtn.disabled = false;
-  }
-  // Quadratic through the midpoints of consecutive samples. Straight lineTo
-  // segments read as a polygon when a finger moves faster than the events
-  // arrive, which is most of a signature.
-  function extend(p){
-    pts.push(p);
-    var n = pts.length;
-    if(n < 3){
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      return;
-    }
-    var a = pts[n-3], b = pts[n-2], c = pts[n-1];
-    ctx.beginPath();
-    ctx.moveTo((a.x+b.x)/2, (a.y+b.y)/2);
-    ctx.quadraticCurveTo(b.x, b.y, (b.x+c.x)/2, (b.y+c.y)/2);
-    ctx.stroke();
-  }
-  function down(e){
-    ensureFit();
-    drawing = true;
-    var p = at(e);
-    pts = [p];
-    // A tap should leave a mark — dots and the dot on an i are part of a name.
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, ctx.lineWidth/2, 0, Math.PI*2);
-    ctx.fill();
-    mark();
-  }
-  function move(e){
-    if(!drawing) return;
-    // Coalesced events recover the samples the browser batched, which is what
-    // makes a fast stroke smooth instead of angular.
-    var batch = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
-    if(batch && batch.length){
-      for(var i=0;i<batch.length;i++) extend(at(batch[i]));
-    } else {
-      extend(at(e));
-    }
-  }
-  function up(){ drawing = false; pts = []; }
-
-  if(window.PointerEvent){
-    canvas.addEventListener('pointerdown', function(e){
-      e.preventDefault();
-      try { canvas.setPointerCapture(e.pointerId); } catch(_){}
-      down(e);
-    });
-    canvas.addEventListener('pointermove', function(e){ if(drawing){ e.preventDefault(); move(e); } });
-    canvas.addEventListener('pointerup', up);
-    // Without this, an interrupted stroke (notification, palm, gesture) leaves
-    // drawing true and the next touch joins on with a line across the page.
-    canvas.addEventListener('pointercancel', up);
-  } else {
-    canvas.addEventListener('mousedown', function(e){ e.preventDefault(); down(e); });
-    canvas.addEventListener('mousemove', function(e){ if(drawing){ e.preventDefault(); move(e); } });
-    canvas.addEventListener('mouseup', up);
-    canvas.addEventListener('mouseleave', up);
-    canvas.addEventListener('touchstart', function(e){ e.preventDefault(); down(e.touches[0]); }, {passive:false});
-    canvas.addEventListener('touchmove', function(e){ if(drawing){ e.preventDefault(); move(e.touches[0]); } }, {passive:false});
-    canvas.addEventListener('touchend', up);
-    canvas.addEventListener('touchcancel', up);
-  }
-  function reflow(){
-    if(!cgfPadOpen()) return;
-    cgfPadViewport();
-    fit();
-  }
-  window.addEventListener('resize', reflow);
-  // orientationchange lands before the new layout is settled on iOS, so re-fit
-  // once things have stopped moving as well as immediately.
-  window.addEventListener('orientationchange', function(){
-    reflow();
-    setTimeout(reflow, 250);
-    setTimeout(reflow, 600);
-  });
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', reflow);
-  }
-
-  cgfPad = {
-    reset: function(){
-      gen++;
-      inked = false;
-      pts = [];
-      drawing = false;
-      ctx.setTransform(1,0,0,1,0,0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      style();
-      if(doneBtn) doneBtn.disabled = true;
-    },
-    fit: fit,
-    inked: function(){ return inked; },
-    // Crop to the ink so a signature fills the form's box however large or
-    // small it was drawn, and so pad size never has to match the box's shape.
-    capture: function(){
-      if(!inked) return null;
-      var w = canvas.width, h = canvas.height;
-      var px = ctx.getImageData(0, 0, w, h).data;
-      var minX = w, minY = h, maxX = -1, maxY = -1;
-      for(var y=0; y<h; y++){
-        for(var x=0; x<w; x++){
-          if(px[(y*w + x)*4 + 3] > 8){
-            if(x < minX) minX = x;
-            if(x > maxX) maxX = x;
-            if(y < minY) minY = y;
-            if(y > maxY) maxY = y;
-          }
-        }
-      }
-      if(maxX < 0) return null;
-      var edge = Math.round(ctx.lineWidth * dpr);
-      minX = Math.max(0, minX - edge); minY = Math.max(0, minY - edge);
-      maxX = Math.min(w-1, maxX + edge); maxY = Math.min(h-1, maxY + edge);
-      var cw = maxX - minX + 1, ch = maxY - minY + 1;
-      var out = document.createElement('canvas');
-      out.width = cw; out.height = ch;
-      var octx = out.getContext('2d');
-      octx.fillStyle = '#ffffff';   // opaque PNG is the path jsPDF handles best
-      octx.fillRect(0, 0, cw, ch);
-      octx.drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
-      return out.toDataURL('image/png');
-    }
-  };
-  return cgfPad;
-}
-function cgfPadOpen(){
-  var el = document.getElementById('sigpad');
-  return !!el && el.style.display !== 'none' && el.style.display !== '';
-}
-// The sheet's height tracks the visual viewport, so what is on screen is what
-// you can reach — iOS in landscape overlays its toolbars on a taller layout
-// viewport, which otherwise pushes the buttons out of sight.
-function cgfPadViewport(){
-  var vv = window.visualViewport;
-  var h = (vv && vv.height) || window.innerHeight || 0;
-  if(h) document.documentElement.style.setProperty('--vvh', h + 'px');
-}
-function cgfPadShow(n){
-  var el = document.getElementById('sigpad');
-  var pad = cgfPadSetup();
-  if(!el || !pad) return;
-  CGF_SIG_TARGET = n;
-  var who = document.getElementById('sigpad-who');
-  if(who) who.textContent = 'Crew ' + n + ' signature';
-  el.style.display = 'flex';
-  document.body.classList.add('sp-open');
-  cgfPadViewport();
-  // Size the bitmap after the box has been laid out, not before. Reset first so
-  // fit() has nothing from the last signature to carry over.
-  setTimeout(function(){ pad.reset(); pad.fit(); }, 0);
-}
-function cgfPadHide(){
-  var el = document.getElementById('sigpad');
-  if(el) el.style.display = 'none';
-  document.body.classList.remove('sp-open');
-}
-function cgfSigShow(n){
-  var pad = document.getElementById('sig-pad-'+n);
-  var img = document.getElementById('sig-preview-'+n);
-  var sig = CGF_SIGS[n-1];
-  // An empty src re-requests the page, so drop the attribute instead.
-  if(img){ if(sig) img.src = sig; else img.removeAttribute('src'); }
-  if(pad) pad.classList[sig ? 'add' : 'remove']('has-sig');
-}
-(function cgfPadWiring(){
-  function on(id, fn){
-    var el = document.getElementById(id);
-    if(el) el.addEventListener('click', fn);
-  }
-  on('sigpad-clear', function(){ var p = cgfPadSetup(); if(p){ p.reset(); p.fit(); } });
-  on('sigpad-cancel', cgfPadHide);
-  on('sigpad-done', function(){
-    var p = cgfPadSetup();
-    if(!p || !p.inked()) return;
-    CGF_SIGS[CGF_SIG_TARGET-1] = p.capture();
-    cgfSigShow(CGF_SIG_TARGET);
-    cgfPadHide();
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && cgfPadOpen()) cgfPadHide();
-  });
-})();
 // ── MORE HUB ──────────────────────────────────────────────────────────────
 function renderMore(){
   var c = $('lv');
