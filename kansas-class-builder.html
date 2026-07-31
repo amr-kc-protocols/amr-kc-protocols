@@ -25,9 +25,13 @@
   Then link to kansas-class-builder.html from your Tools section.
   If your folder layout differs, change TEMPLATE_BASE and the pdf-lib <script> src.
 -->
+<link rel="stylesheet" href="sigpad.css">
+<script src="sigpad.js"></script>
 <style>
 :root{--amr-red:#E2231A;--amr-navy:#003595;--ink:#171b22;--muted:#5b6472;--line:#e4e8ef;--bg:#eaedf3;--card:#fff;--field:#f4f6fa;
-  --radius:16px;--shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06)}
+  --radius:16px;--shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06);
+  /* the shared signature pad reads these */
+  --surface:#fff;--teal:#003595;--teal2:#003595;--dim:#f4f6fa;--border:#e4e8ef;--gray:#5b6472;--white:#171b22}
 *{box-sizing:border-box}
 body{margin:0;color:var(--ink);
   background:linear-gradient(180deg,#eef1f6 0%,#e7ebf2 100%);background-attachment:fixed;min-height:100vh;
@@ -97,6 +101,16 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
 .ce-stu{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:8px;display:flex;flex-direction:column;gap:7px}
 .ce-sturow{display:flex;align-items:center;gap:8px}
 .ce-sturow>input{flex:1 1 0;min-width:0}
+.ce-sig{flex:1 1 0;min-width:0;height:44px;background:#fff;border:1px dashed #9aa5b1;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:3px 8px;font-size:12.5px;color:var(--muted)}
+.ce-sig.has{border:1px solid var(--amr-navy);color:var(--ink)}
+.ce-sig img{max-height:38px;max-width:100%;display:none}
+.ce-sig.has img{display:block}
+.ce-sig.has .ce-sig-lbl{display:none}
+.ce-signed{flex:0 0 auto;font-size:11px;color:var(--muted);white-space:nowrap}
+.ce-code{width:100%;min-height:96px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+  line-height:1.45;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:11px;
+  color:var(--ink);resize:vertical;word-break:break-all}
 .ce-stusub>input{background:#fff}
 .ce-stunar{flex:0 0 86px!important}
 .ce-evalchip{font-size:12.5px;background:#eaf1fc;border:1px solid #d2e0f4;border-radius:11px;padding:9px 11px;color:var(--amr-navy);font-weight:600;line-height:1.4}
@@ -231,9 +245,40 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
       pg.drawText(t,{ x:r.x+r.width*0.5+s*0.32, y:col.y, size:s, font:helv, rotate:degrees(90) });
     }
 
+    // The "Print Student Name / Student Signature" column is split in two. The
+    // AcroForm field (despite its name) sits in the print-name half; the other
+    // half carries no field at all, which is the cell people sign by hand — so
+    // that is where a captured signature goes. Its band comes from the AMR Y/N
+    // field, which spans the row's full thickness.
+    async function drawSignature(n,sig){
+      var nameF, bandF;
+      try { nameF=form.getField(ROSTER_STU_FIELD.name+n); bandF=form.getField(ROSTER_STU_FIELD.amr+n); }
+      catch(e){ return; }
+      if(!nameF||!bandF) return;
+      var w=nameF.acroField.getWidgets()[0], r=w.getRectangle(), pg=pageOf(w);
+      var band=bandF.acroField.getWidgets()[0].getRectangle();
+      var cx0=r.x+r.width, cx1=band.x+band.width;      // the half with no field on it
+      var cy0=r.y, cy1=r.y+r.height;
+      var padX=1.2, padY=4;
+      var availLen=(cy1-cy0)-2*padY, availThick=(cx1-cx0)-2*padX;
+      if(availLen<=0||availThick<=0) return;
+      // Render the pen path at about 4x the printed size so it stays crisp.
+      var png=await doc.embedPng(SigPad.render(sig, Math.round(availLen*4)));
+      var k=Math.min(availLen/png.width, availThick/png.height);
+      var iw=png.width*k, ih=png.height*k;
+      // rotate 90 so the signature reads with the rest of the landscape form;
+      // pdf-lib turns about (x,y), so anchor at the cell's far edge.
+      pg.drawImage(png,{
+        x: cx1-padX-(availThick-ih)/2,
+        y: cy0+padY+(availLen-iw)/2,
+        width: iw, height: ih, rotate: degrees(90)
+      });
+    }
+
     var students=(D.students||[]).filter(function(s){return stuName(s).trim();});
     for(var i=0;i<students.length && i<ROSTER_MAX_STUDENTS;i++){
       var s=students[i], n=i+1;
+      if(s.sig && s.sig.strokes) await drawSignature(n,s.sig);
       setTextFit(form,ROSTER_STU_FIELD.name+n,stuName(s),9,helv);
       setTextFit(form,ROSTER_STU_FIELD.email+n,s.email,8.5,helv);
       setTextFit(form,ROSTER_STU_FIELD.dept+n,s.dept,8.5,helv);
@@ -381,13 +426,13 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     catHours:{Airway:"",Cardiovascular:"",Trauma:"",Medical:"",Operations:"",Pediatric:"",LocalFlex:""},
     competencies:[], localComp:"",
     objectives:[""], agenda:[{time:"",topic:""}], credentials:[""],
-    students:[{name:"",email:"",phone:"",dept:"",amr:"",ksbems:""}],
+    students:[{name:"",email:"",phone:"",dept:"",amr:"",ksbems:"",sig:null,signedAt:""}],
     timeIn:"", timeOut:"", hoursAwarded:"",
     evalCount:"1", evalSummary:null
   };
-  function emptyStudent(){ return {name:"",email:"",phone:"",dept:"",amr:"",ksbems:""}; }
+  function emptyStudent(){ return {name:"",email:"",phone:"",dept:"",amr:"",ksbems:"",sig:null,signedAt:""}; }
   function stuName(s){ return (s&&typeof s==="object")?(s.name||""):(s||""); }
-  var showComp=false, showPaste=false, showEvalPaste=false, busy=false, result=null;
+  var showComp=false, showPaste=false, showEvalPaste=false, showSignin=false, busy=false, result=null;
   var root=document.getElementById("kcb-root");
   var STORAGE_KEY="kcb_draft_v1", PRESETS_KEY="kcb_presets_v1";
 
@@ -497,10 +542,22 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     html+=section("Instructor credentials",'<div id="ce-credentials"></div>','<button class="ce-ghost" data-action="add-credential">+ Add</button>');
     // Roster sign-in (students + class-wide time columns)
     var stuCount=D.students.filter(function(s){return stuName(s).trim();}).length;
-    var rosterRight='<button class="ce-ghost" data-action="toggle-paste">'+(showPaste?"Close":"Paste from Excel")+'</button><button class="ce-ghost" data-action="add-student">+ Add</button>';
+    var rosterRight='<button class="ce-ghost" data-action="toggle-signin">'+(showSignin?"Close":"Add sign-ins")+'</button><button class="ce-ghost" data-action="toggle-paste">'+(showPaste?"Close":"Paste from Excel")+'</button><button class="ce-ghost" data-action="add-student">+ Add</button>';
     var rosterBody='<p class="ce-sub">Optional &mdash; fills the roster ('+stuCount+' of '+ROSTER_MAX_STUDENTS+'). Paste a roster exported from Microsoft Forms/Excel, or add rows by hand. Blank rows stay open for walk-in sign-in.</p>';
     if(showPaste){ rosterBody+='<textarea class="ce-paste" id="ce-paste" placeholder="Paste from Excel — include the header row. Columns are matched by name (Name, Email, Phone, Op/Dept, AMR, KSBEMS #). One name per line also works."></textarea>'+
       '<div class="ce-row" style="margin:8px 0 2px;gap:8px"><div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-paste">Add to roster</button></div><div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-paste">Cancel</button></div></div>'; }
+    if(showSignin){
+      var link = location.href.replace(/[^\/]*$/, "class-signin.html") +
+        "?c=" + encodeURIComponent(D.title||"") + "&d=" + encodeURIComponent(D.date||"");
+      rosterBody+='<p class="ce-sub">Send students <a href="'+esc(link)+'" target="_blank" rel="noopener">this sign-in link</a> '+
+        '(or hand them your phone). They sign, you paste the codes they send back &mdash; one per line, as many as you like.</p>'+
+        '<textarea class="ce-code" id="ce-signin" placeholder="Paste sign-in codes here, one per line. They start with AMRSIGN."></textarea>'+
+        '<div class="ce-row" style="margin:8px 0 2px;gap:8px">'+
+        '<div style="flex:0 0 auto"><button class="ce-ghost" data-action="apply-signin">Add to roster</button></div>'+
+        '<div style="flex:0 0 auto"><label class="ce-ghost" style="display:inline-block;cursor:pointer">Add from files<input type="file" id="ce-signin-files" accept=".txt,text/plain" multiple style="display:none"></label></div>'+
+        '<div style="flex:0 0 auto"><button class="ce-ghost" data-action="toggle-signin">Cancel</button></div></div>'+
+        '<p class="ce-sub" id="ce-signin-note" style="margin-top:2px"></p>';
+    }
     rosterBody+='<p class="ce-sub" style="margin-top:6px">Time IN / OUT / Hours awarded (applied to every student row; defaults to the class times &amp; total hours):</p>';
     rosterBody+='<div class="ce-row">'+field("Time IN","timeIn",{ph:milTime(D.startTime)||"0900"})+field("Time OUT","timeOut",{ph:milTime(D.endTime)||"1300"})+field("Hours awarded","hoursAwarded",{mode:"decimal",ph:D.courseHours||"4"})+'</div>';
     if(stuCount>ROSTER_MAX_STUDENTS){ rosterBody+='<p class="ce-warn">Only the first '+ROSTER_MAX_STUDENTS+' students print on the roster (template capacity). The remaining '+(stuCount-ROSTER_MAX_STUDENTS)+' won’t appear &mdash; add a second roster by hand if needed.</p>'; }
@@ -553,6 +610,17 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     }).join("");
   }
   function renderStudents(){
+    // Signatures are stored as the pen path, so a preview is rendered on demand
+    // rather than kept around as a second copy of the same thing.
+    function sigSlot(i,s){
+      if(s.sig){
+        var when = s.signedAt ? '<span class="ce-signed">signed '+esc(shortWhen(s.signedAt))+'</span>' : '';
+        return '<div class="ce-sig has" data-action="sign-student" data-i="'+i+'" role="button" tabindex="0">'+
+               '<img src="'+SigPad.render(s.sig,420)+'" alt="Signature">'+when+'</div>';
+      }
+      return '<div class="ce-sig" data-action="sign-student" data-i="'+i+'" role="button" tabindex="0">'+
+             '<span class="ce-sig-lbl">Tap to sign &mdash; or paste a sign-in code above</span></div>';
+    }
     function inp(i,sub,ph,cls){ return '<input'+(cls?' class="'+cls+'"':'')+' data-list="students" data-sub="'+sub+'" data-i="'+i+'" value="'+esc(D.students[i][sub]||"")+'" placeholder="'+esc(ph)+'" />'; }
     document.getElementById("ce-students").innerHTML = D.students.map(function(s,i){
       var rm = D.students.length>1 ? '<button class="ce-x" data-action="rm-student" data-i="'+i+'" aria-label="Remove">×</button>' : '<span class="ce-x-spacer"></span>';
@@ -561,6 +629,8 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
         '<div class="ce-sturow"><span class="ce-marker">'+(i+1)+'</span>'+inp(i,"name","Last, First")+rm+'</div>'+
         '<div class="ce-sturow ce-stusub">'+inp(i,"email","Email")+inp(i,"phone","Phone")+'</div>'+
         '<div class="ce-sturow ce-stusub">'+inp(i,"dept","Op / Dept.")+inp(i,"amr","AMR Y/N","ce-stunar")+inp(i,"ksbems","KSBEMS / Cert #")+'</div>'+
+        '<div class="ce-sturow ce-stusub">'+sigSlot(i,s)+
+          (s.sig?'<button class="ce-x" data-action="clear-sig" data-i="'+i+'" aria-label="Clear signature">×</button>':'<span class="ce-x-spacer"></span>')+'</div>'+
         '</div>';
     }).join("");
   }
@@ -648,6 +718,10 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     else if(a==="rm-credential"){ D.credentials.splice(+b.dataset.i,1); renderCredentials(); saveDraft(); }
     else if(a==="add-student"){ D.students.push(emptyStudent()); renderStudents(); saveDraft(); var ns=root.querySelector('[data-list="students"][data-sub="name"][data-i="'+(D.students.length-1)+'"]'); if(ns) ns.focus(); }
     else if(a==="rm-student"){ D.students.splice(+b.dataset.i,1); if(!D.students.length) D.students=[emptyStudent()]; renderStudents(); saveDraft(); }
+    else if(a==="toggle-signin"){ showSignin=!showSignin; render(); }
+    else if(a==="apply-signin"){ applySignins(); }
+    else if(a==="sign-student"){ signStudent(+b.dataset.i); }
+    else if(a==="clear-sig"){ var cs=D.students[+b.dataset.i]; if(cs){ cs.sig=null; cs.signedAt=""; renderStudents(); saveDraft(); } }
     else if(a==="toggle-paste"){ showPaste=!showPaste; render(); }
     else if(a==="apply-paste"){ applyPaste(); }
     else if(a==="toggle-eval-paste"){ showEvalPaste=!showEvalPaste; render(); }
@@ -703,7 +777,7 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     D.students=[emptyStudent()];D.timeIn="";D.timeOut="";D.hoursAwarded="";D.evalCount="1";D.evalSummary=null;
     D.instructor=keep.instructor;D.instructorEmail=keep.instructorEmail;D.location=keep.location;D.otherInstructors=keep.otherInstructors;
     if(result){ URL.revokeObjectURL(result.url); result=null; }
-    showComp=false; showPaste=false; showEvalPaste=false; setError(""); saveDraft(); render();
+    showComp=false; showPaste=false; showEvalPaste=false; showSignin=false; setError(""); saveDraft(); render();
   }
 
   /* ---------------- smart hours ---------------- */
@@ -761,6 +835,98 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none}
     showPaste=false; saveDraft(); render();
   }
   function applyPaste(){ var ta=document.getElementById("ce-paste"); if(ta) ingestRoster(ta.value); }
+
+  // ── Sign-ins ──────────────────────────────────────────────────────────────
+  // A student signs on their own device and sends back a code; there is nowhere
+  // to POST to, so the code is the transport. Each one carries their details and
+  // the pen path of their signature.
+  function shortWhen(iso){
+    var d=new Date(iso);
+    if(isNaN(d)) return "";
+    return (d.getMonth()+1)+"/"+d.getDate()+" "+d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+  }
+  function signinNote(msg){ var n=document.getElementById("ce-signin-note"); if(n) n.textContent=msg; }
+  // Sign on this device — for a class in the room, where the phone gets passed
+  // down the row rather than everyone messaging a code.
+  function signStudent(i){
+    var s=D.students[i]; if(!s) return;
+    SigPad.open({
+      title: (stuName(s).trim() || ("Student "+(i+1))) + " — signature",
+      onDone: function(sig){
+        s.sig={strokes:sig.strokes,h:sig.h,w:sig.w};
+        s.signedAt=new Date().toISOString();
+        renderStudents(); saveDraft();
+      }
+    });
+  }
+  // Merge a decoded sign-in. Someone who signs twice (a typo, a re-send) should
+  // land on their existing row rather than appearing on the roster twice.
+  function mergeSignin(o){
+    var name=String(o.n||"").trim(); if(!name) return false;
+    var email=String(o.e||"").trim().toLowerCase();
+    var hit=null;
+    for(var i=0;i<D.students.length;i++){
+      var t=D.students[i];
+      var sameEmail=email && String(t.email||"").trim().toLowerCase()===email;
+      var sameName=stuName(t).trim().toLowerCase()===name.toLowerCase();
+      if(sameEmail || sameName){ hit=t; break; }
+    }
+    if(!hit){
+      var blank=null;
+      for(var j=0;j<D.students.length;j++){ if(!stuName(D.students[j]).trim() && !D.students[j].sig){ blank=D.students[j]; break; } }
+      hit = blank || emptyStudent();
+      if(!blank){
+        if(D.students.length>=ROSTER_INPUT_CAP) return false;
+        D.students.push(hit);
+      }
+    }
+    hit.name=name;
+    if(o.e) hit.email=String(o.e).trim();
+    if(o.p) hit.phone=String(o.p).trim();
+    if(o.d) hit.dept=String(o.d).trim();
+    if(o.a) hit.amr=String(o.a).trim();
+    if(o.k) hit.ksbems=String(o.k).trim();
+    hit.sig={strokes:o.sig.strokes,h:o.sig.h,w:o.sig.w};
+    hit.signedAt=o.ts||new Date().toISOString();
+    return true;
+  }
+  function ingestSignins(text){
+    var codes=String(text||"").split(/[\s,]+/).filter(function(t){ return t.indexOf("AMRSIGN")===0; });
+    if(!codes.length){ signinNote("No sign-in codes found — they start with AMRSIGN."); return; }
+    signinNote("Reading "+codes.length+" code"+(codes.length===1?"":"s")+"…");
+    var added=0, failed=0;
+    Promise.all(codes.map(function(c){
+      return SigPad.decode(c).then(function(o){ if(mergeSignin(o)) added++; else failed++; },
+                                   function(){ failed++; });
+    })).then(function(){
+      var cnt=D.students.filter(function(s){return stuName(s).trim();}).length;
+      if(cnt) D.evalCount=String(Math.min(50,cnt));
+      saveDraft();
+      var note = added ? ("Added "+added+" sign-in"+(added===1?"":"s")+".") : "Nothing added.";
+      if(failed) note += " "+failed+" code"+(failed===1?"":"s")+" could not be read — ask for "+(failed===1?"it":"them")+" again.";
+      render();
+      signinNote(note);
+      if(added){
+        var ta=document.getElementById("ce-signin");
+        if(ta) ta.value="";
+      }
+    });
+  }
+  function applySignins(){ var ta=document.getElementById("ce-signin"); if(ta) ingestSignins(ta.value); }
+  // Codes sent as attachments rather than pasted into a chat.
+  root.addEventListener("change",function(e){
+    if(!e.target || e.target.id!=="ce-signin-files") return;
+    var files=[].slice.call(e.target.files||[]);
+    if(!files.length) return;
+    signinNote("Reading "+files.length+" file"+(files.length===1?"":"s")+"…");
+    Promise.all(files.map(function(f){
+      return f.text ? f.text() : new Promise(function(res){
+        var fr=new FileReader(); fr.onload=function(){ res(String(fr.result||"")); };
+        fr.onerror=function(){ res(""); }; fr.readAsText(f);
+      });
+    })).then(function(texts){ ingestSignins(texts.join("\n")); });
+    e.target.value="";
+  });
 
   // Parse Microsoft Forms results (Excel TSV) into a ratings/tallies/comments summary.
   var EVAL_META=/^(id|column\s*\d*|start ?time|completion ?time|e-?mail|name|class.*title|^title$|instructor|date|total ?points|points ?-|quiz ?feedback|feedback|last modified|submission ?(id|time)?)$/i;

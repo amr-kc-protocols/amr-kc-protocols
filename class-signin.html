@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Class Sign-In · AMR KC</title>
+<!--
+  Class Sign-In — AMR KC Field Guide
+  ----------------------------------
+  A student opens this, fills in their own details, signs, and gets a short code
+  to send back to the instructor, who pastes it into the Kansas Class Builder.
+
+  Why a code and not a POST: there is no backend. For an in-person class the
+  instructor can just hand their phone over, but a student attending remotely
+  has no way to get a signature onto the instructor's device. A code travels
+  over whatever they already use — Teams, email, a text.
+
+  The signature travels as the pen path rather than a picture: about 1KB instead
+  of 15KB, which is the difference between something you can paste into a chat
+  and something you cannot.
+
+  DROP-IN
+  -------
+    class-signin.html   (this file)
+    sigpad.js, sigpad.css
+
+  The instructor can pass the class name and date on the link so the student
+  sees what they are signing for:
+    class-signin.html?c=Ventilator%20Academy&d=2026-07-31
+-->
+<link rel="stylesheet" href="sigpad.css">
+<script defer src="sigpad.js"></script>
+<style>
+:root{--amr-red:#E2231A;--amr-navy:#003595;--ink:#171b22;--muted:#5b6472;--line:#e4e8ef;--bg:#eaedf3;--card:#fff;--field:#f4f6fa;
+  --radius:16px;--shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06);
+  /* the shared pad reads these */
+  --surface:#fff;--teal:#003595;--teal2:#003595;--dim:#f4f6fa;--border:#e4e8ef;--gray:#5b6472;--white:#171b22}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:linear-gradient(180deg,#eef1f6 0%,#e7ebf2 100%);
+  background-attachment:fixed;min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 48px}
+.head{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px}
+.bar{width:6px;align-self:stretch;min-height:42px;border-radius:3px;background:linear-gradient(var(--amr-red),var(--amr-navy))}
+.head h1{font-size:20px;margin:0;letter-spacing:-.02em;font-weight:800}
+.head p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  margin-top:16px;padding:16px 18px 18px;box-shadow:var(--shadow)}
+label{display:block;font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--muted);margin:14px 0 5px}
+label:first-child{margin-top:0}
+input,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;
+  padding:12px 12px;font-size:16px;color:var(--ink);font-family:inherit;outline:none;-webkit-appearance:none}
+input:focus,select:focus{border-color:var(--amr-navy)}
+.row{display:flex;gap:10px}
+.row>div{flex:1}
+.sig-slot{width:100%;height:120px;margin-top:5px;background:var(--field);border:2px dashed #9aa5b1;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;padding:6px;cursor:pointer}
+.sig-slot.has{border:2px solid var(--amr-navy);background:#fff}
+.sig-slot img{max-width:100%;max-height:100%;display:none}
+.sig-slot.has img{display:block}
+.sig-slot span{font-size:13.5px;font-weight:600;color:var(--muted)}
+.sig-slot.has span{display:none}
+.sig-foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.hint{font-size:11.5px;color:var(--muted)}
+.mini{background:none;border:1px solid var(--line);color:var(--muted);font-size:11.5px;padding:5px 11px;
+  border-radius:6px;cursor:pointer;font-family:inherit}
+.go{display:block;width:100%;margin-top:18px;padding:15px;background:var(--amr-navy);color:#fff;border:none;
+  border-radius:12px;font-size:15.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.go:disabled{opacity:.4;cursor:default}
+.err{color:#b00020;font-size:12.5px;margin-top:10px;min-height:16px}
+.done h2{font-size:17px;margin:0 0 6px}
+.done p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0 0 14px}
+.code{width:100%;height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+  line-height:1.45;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:11px;
+  color:var(--ink);resize:vertical;word-break:break-all}
+.acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.acts button{flex:1;min-width:130px;padding:13px 10px;border-radius:10px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;border:1px solid var(--line);background:var(--field);color:var(--ink)}
+.acts button.primary{background:var(--amr-navy);color:#fff;border-color:var(--amr-navy)}
+.ok{color:#15803d;font-size:12.5px;margin-top:10px;min-height:16px;font-weight:600}
+.foot{font-size:11.5px;color:var(--muted);margin-top:18px;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="bar"></div>
+    <div>
+      <h1>Class Sign-In</h1>
+      <p id="cls">AMR Kansas City &middot; Continuing Education</p>
+    </div>
+  </div>
+
+  <div class="card" id="form">
+    <label for="f-name">Full Name</label>
+    <input id="f-name" type="text" placeholder="Last, First" autocomplete="name" />
+
+    <label for="f-email">Email Address</label>
+    <input id="f-email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email" />
+
+    <div class="row">
+      <div>
+        <label for="f-phone">Phone</label>
+        <input id="f-phone" type="tel" placeholder="816-555-0123" autocomplete="tel" inputmode="tel" />
+      </div>
+      <div>
+        <label for="f-dept">Op / Dept.</label>
+        <input id="f-dept" type="text" placeholder="KC Metro" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="f-amr">AMR Employee</label>
+        <select id="f-amr">
+          <option value="">Select&hellip;</option>
+          <option value="Y">Yes</option>
+          <option value="N">No</option>
+        </select>
+      </div>
+      <div>
+        <label for="f-ksbems">KSBEMS / Cert #</label>
+        <input id="f-ksbems" type="text" placeholder="A-12345" />
+      </div>
+    </div>
+
+    <label>Signature</label>
+    <div class="sig-slot" id="sig" role="button" tabindex="0" aria-label="Sign here">
+      <img id="sig-img" alt="Your signature">
+      <span>Tap to sign</span>
+    </div>
+    <div class="sig-foot">
+      <span class="hint">Opens a full-size signing pad</span>
+      <button class="mini" id="sig-clear" type="button">Clear</button>
+    </div>
+
+    <button class="go" id="go">Create My Sign-In Code &rarr;</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div class="card done" id="done" style="display:none">
+    <h2>Send this to your instructor</h2>
+    <p>Copy the code below into the class chat, a text, or an email. Your instructor pastes it into the roster.</p>
+    <textarea class="code" id="code" readonly></textarea>
+    <div class="acts">
+      <button class="primary" id="copy">Copy Code</button>
+      <button id="share">Send&hellip;</button>
+      <button id="file">Save as File</button>
+    </div>
+    <div class="ok" id="ok"></div>
+    <div class="acts" style="margin-top:14px">
+      <button id="edit">Change Something</button>
+      <button id="again">Sign In Someone Else</button>
+    </div>
+  </div>
+
+  <p class="foot">Nothing is uploaded. Everything stays on this device until you send the code yourself.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var sig = null;          // {png, strokes, h, w}
+  var lastCode = "";
+
+  // The instructor can label the page through the link.
+  var qs = new URLSearchParams(location.search);
+  var cls = qs.get("c") || "", when = qs.get("d") || "";
+  if(cls || when){
+    $("cls").textContent = [cls, when].filter(Boolean).join(" · ") ||
+      "AMR Kansas City · Continuing Education";
+  }
+
+  function showSig(){
+    $("sig").classList[sig ? "add" : "remove"]("has");
+    var img = $("sig-img");
+    if(sig) img.src = sig.png; else img.removeAttribute("src");
+  }
+  function openPad(){
+    SigPad.open({
+      title: "Your signature",
+      onDone: function(s){ sig = s; showSig(); $("err").textContent = ""; }
+    });
+  }
+  $("sig").addEventListener("click", openPad);
+  $("sig").addEventListener("keydown", function(e){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openPad(); }
+  });
+  $("sig-clear").addEventListener("click", function(e){
+    e.stopPropagation();
+    sig = null;
+    showSig();
+  });
+
+  function val(id){ return ($(id).value || "").trim(); }
+
+  $("go").addEventListener("click", function(){
+    var name = val("f-name");
+    if(!name){ return fail("Your full name is required."); }
+    if(!val("f-email")){ return fail("An email address is required."); }
+    if(!sig){ return fail("A signature is required — tap the box above to sign."); }
+    $("err").textContent = "";
+    $("go").disabled = true;
+    SigPad.encode({
+      v: 1, t: "signin",
+      n: name, e: val("f-email"), p: val("f-phone"), d: val("f-dept"),
+      a: val("f-amr"), k: val("f-ksbems"),
+      c: cls, ts: new Date().toISOString(),
+      sig: { strokes: sig.strokes, h: sig.h, w: sig.w }
+    }).then(function(code){
+      lastCode = code;
+      $("code").value = code;
+      $("form").style.display = "none";
+      $("done").style.display = "block";
+      $("ok").textContent = "";
+      $("go").disabled = false;
+      window.scrollTo(0, 0);
+    }).catch(function(e){
+      $("go").disabled = false;
+      fail("Could not build the code: " + ((e && e.message) || e));
+    });
+  });
+  function fail(msg){ $("err").textContent = "⚠ " + msg; }
+
+  $("copy").addEventListener("click", function(){
+    var t = $("code");
+    t.focus();
+    t.setSelectionRange(0, t.value.length);
+    var done = function(){ $("ok").textContent = "Copied. Paste it to your instructor."; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(lastCode).then(done, function(){
+        try { document.execCommand("copy"); done(); }
+        catch(e){ $("ok").textContent = "Select the code above and copy it."; }
+      });
+    } else {
+      try { document.execCommand("copy"); done(); }
+      catch(e){ $("ok").textContent = "Select the code above and copy it."; }
+    }
+  });
+
+  $("share").addEventListener("click", function(){
+    var name = val("f-name") || "Sign-in";
+    var text = "Class sign-in — " + name + (cls ? " (" + cls + ")" : "") + "\n\n" + lastCode;
+    if(navigator.share){
+      navigator.share({ title: "Class sign-in", text: text })
+        .then(function(){ $("ok").textContent = "Sent."; })
+        .catch(function(err){ if(!err || err.name !== "AbortError") saveFile(); });
+    } else {
+      saveFile();
+    }
+  });
+
+  function saveFile(){
+    var name = (val("f-name") || "signin").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    var blob = new Blob([lastCode], {type: "text/plain"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "signin-" + name + ".txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    $("ok").textContent = "Saved — attach the file to an email or chat.";
+  }
+  $("file").addEventListener("click", saveFile);
+
+  // Back to the form with everything intact, for a typo in an email address.
+  $("edit").addEventListener("click", function(){
+    $("done").style.display = "none";
+    $("form").style.display = "block";
+    window.scrollTo(0, 0);
+  });
+  // A fresh form, for the next person in line on a shared device.
+  $("again").addEventListener("click", function(){
+    ["f-name","f-email","f-phone","f-dept","f-ksbems"].forEach(function(id){ $(id).value = ""; });
+    $("f-amr").selectedIndex = 0;
+    sig = null;
+    lastCode = "";
+    showSig();
+    $("err").textContent = "";
+    $("done").style.display = "none";
+    $("form").style.display = "block";
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
+</body>
+</html>
