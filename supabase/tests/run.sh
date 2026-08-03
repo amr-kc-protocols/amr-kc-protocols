@@ -49,21 +49,33 @@ for m in ../migrations/*.sql; do
   psql -q -v ON_ERROR_STOP=1 -f "$m" 2>&1 | grep -v 'does not exist, skipping' || true
 done
 
-echo
-echo "=== 01_merge ==="
-psql -v ON_ERROR_STOP=1 -f 01_merge.sql 2>&1 | grep -v '^SET$\|^BEGIN$\|^COMMIT$\|^DO$'
+# Each suite's output is echoed and captured, so the run stays readable while
+# the verdict below is computed from the notices rather than eyeballed.
+NOISE='^SET$|^BEGIN$|^COMMIT$|^GRANT$|^REVOKE$|^DO$|^UPDATE [0-9]'
+out=""
+
+for suite in 01_merge 02_rls 03_educator 04_vta_caregiver; do
+  echo
+  echo "=== ${suite} ==="
+  result=$(psql -v ON_ERROR_STOP=1 -f "${suite}.sql" 2>&1 | grep -Ev "$NOISE" || true)
+  echo "$result"
+  out="${out}
+${result}"
+done
+
+# The needle is assembled at runtime so this script's own source can never
+# match it — an earlier version counted its own reminder text as a failure.
+needle="NOTICE:  $(printf 'F')AIL"
+failures=$(printf '%s' "$out" | grep -c "$needle" || true)
+passes=$(printf '%s' "$out" | grep -c "NOTICE:  PASS" || true)
 
 echo
-echo "=== 02_rls ==="
-psql -v ON_ERROR_STOP=1 -f 02_rls.sql 2>&1 \
-  | grep -v '^SET$\|^BEGIN$\|^COMMIT$\|^GRANT$\|^REVOKE$\|^DO$'
+echo "-------------------------------------------------------"
+printf 'Assertions: %s passed, %s failed\n' "$passes" "$failures"
+echo "Every '-->' line above should also match the query printed before it."
 
-echo
-echo "=== 03_educator ==="
-psql -v ON_ERROR_STOP=1 -f 03_educator.sql 2>&1 \
-  | grep -v '^SET$\|^BEGIN$\|^COMMIT$\|^GRANT$\|^REVOKE$\|^DO$\|^UPDATE [0-9]'
-
-echo
-if psql -tAc "select 1" >/dev/null 2>&1; then
-  echo "Done. Review the output above: no line should read FAIL."
+if [ "$failures" -ne 0 ]; then
+  echo "FAILURES:"
+  printf '%s' "$out" | grep "$needle"
+  exit 1
 fi

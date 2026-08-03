@@ -329,6 +329,10 @@
       client_updated_at: new Date().toISOString()
     };
 
+    /* Course-specific extras (VTA's credential and certificate id). The
+       server merges these key by key, so omitting one never clears it. */
+    if (opts.meta) body.meta = opts.meta;
+
     var item = {
       key: "academy:" + courseId,
       path: "/rest/v1/academy_completions?on_conflict=user_id,course_id",
@@ -382,6 +386,61 @@
         if (isPermanent(res.status)) {
           var msg = (res.data && (res.data.message || res.data.hint)) || "Message was rejected.";
           return { ok: false, error: msg };
+        }
+        enqueue(item);
+        return { ok: true, queued: true };
+      });
+    }).catch(function () { enqueue(item); return { ok: true, queued: true }; });
+  }
+
+  /* Log a completed Caregiver Signature Form.
+     The PDF the crew generated is the deliverable and is never uploaded
+     — nor are the signature images, which stay in that PDF alone. This
+     is the text record that used to go to a Google Sheet.
+
+     Resolves { ok:true }, { ok:true, queued:true } when held for retry,
+     or { ok:false, error } when the server refused it outright. */
+  function submitCaregiverForm(form) {
+    form = form || {};
+    if (!configured()) return Promise.resolve({ ok: false, error: "Logging is not configured." });
+
+    var caseNumber = (form.caseNumber || "").trim();
+    var serviceDate = (form.serviceDate || "").trim();
+    if (!caseNumber || !serviceDate) {
+      return Promise.resolve({ ok: false, error: "Date of service and case number are required." });
+    }
+
+    var crew = [];
+    (form.crew || []).forEach(function (c) {
+      if (!c) return;
+      var name = (c.name || "").trim();
+      var cert = (c.cert || "").trim();
+      if (!name && !cert) return;
+      /* Signatures are deliberately dropped here even if the caller
+         passes them: they belong in the PDF, not in a queryable table. */
+      crew.push({ num: c.num || crew.length + 1, name: name, cert: cert });
+    });
+
+    var item = {
+      path: "/rest/v1/caregiver_forms",
+      headers: { "Prefer": "return=minimal" },
+      body: {
+        service_date: serviceDate,
+        case_number: caseNumber,
+        amended: !!form.amended,
+        submitted_at: form.submittedAt || null,
+        crew: crew
+      }
+    };
+
+    return getSession().then(function (session) {
+      if (!session) { enqueue(item); return { ok: true, queued: true }; }
+      item.body.user_id = session.user_id;
+      return sendItem(item, session).then(function (res) {
+        if (res.ok) return { ok: true };
+        if (isPermanent(res.status)) {
+          return { ok: false, error: (res.data && (res.data.message || res.data.hint)) ||
+            "The record was rejected." };
         }
         enqueue(item);
         return { ok: true, queued: true };
@@ -499,7 +558,7 @@
     return educatorSelect(
       "/rest/v1/academy_completions" +
       "?select=course_id,course_version,learner_name,learner_email,modules_passed," +
-      "modules_total,final_passed,final_best,completed_at,updated_at,user_id" +
+      "modules_total,final_passed,final_best,completed_at,updated_at,user_id,meta" +
       "&order=updated_at.desc"
     );
   }
@@ -512,6 +571,14 @@
     return educatorSelect(
       "/rest/v1/ask_educator_messages" +
       "?select=id,message,reply_email,source,created_at" +
+      "&order=created_at.desc"
+    );
+  }
+
+  function listCaregiverForms() {
+    return educatorSelect(
+      "/rest/v1/caregiver_forms" +
+      "?select=id,service_date,case_number,amended,submitted_at,crew,created_at" +
       "&order=created_at.desc"
     );
   }
@@ -534,6 +601,7 @@
   global.AMRBackend = {
     syncAcademy: syncAcademy,
     submitAsk: submitAsk,
+    submitCaregiverForm: submitCaregiverForm,
     linkEmail: linkEmail,
     flush: flush,
     status: status,
@@ -545,7 +613,8 @@
       signOut: educatorSignOut,
       status: educatorStatus,
       listCompletions: listCompletions,
-      listAskMessages: listAskMessages
+      listAskMessages: listAskMessages,
+      listCaregiverForms: listCaregiverForms
     }
   };
 })(window);

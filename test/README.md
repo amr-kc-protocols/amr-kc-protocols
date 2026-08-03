@@ -74,6 +74,7 @@ Grouped by the property being defended:
 | Degradation | With no URL/key configured, every call is a silent no-op |
 | Educator auth | Password sign-in stores its session on a **separate** key, so signing in as educator cannot clobber a learner's anonymous identity in the same browser — and signing out cannot take it with them; an expired educator session asks for re-login rather than silently becoming an anonymous user |
 | Educator reads | Queries request the right columns and ordering and use the educator token; a non-educator gets zero rows rather than an error; the Ask inbox never requests the submitter's account email |
+| Caregiver forms | Signature images **never** reach the server; blank crew slots are dropped; a form with no case number is refused before the network; an offline form queues and two forms never collapse into one; a rejected form is reported rather than swallowed |
 
 ## What's covered (`sync.e2e.mjs`)
 
@@ -90,6 +91,9 @@ Grouped by the property being defended:
 | Dashboard rendering | Completions render with humanised course names, module counts and status pills; a verified email is shown and an **unlinked** record is visibly flagged rather than left blank; filters (course, status, search on name *and* email) and two-way column sorting work |
 | Dashboard honesty | An educator who is not on the allowlist sees an explanation, not a bare empty table that reads as "nobody has done anything" |
 | Dashboard escaping | A message containing `<img src=x onerror=...>` renders as visible text — no element is created and no dialog fires |
+| VTA academy | Loads clean and resolves `../amr-backend.js` from its subdirectory; VTA's richer state flattens correctly onto the shared shape (quiz and exam scores as percentages, all nine modules); credential and certificate id ride in `meta`; `completed_at` is the certificate issue date; the certificate link prompt PUTs the address; the certificate disclaimer no longer claims records are browser-only |
+| Caregiver Form end-to-end | The record reaches Supabase with no signature in the payload; a **failed filing does not retract the PDF confirmation** and says so; offline holds the record on the device |
+| Dashboard CSV | Exports what is on screen with the verified email and VTA credential; a learner name shaped like `=cmd\|...` is prefixed so a spreadsheet treats it as text, not a formula |
 
 When you change either tool, run `npm test` and add a scenario for any new behaviour.
 

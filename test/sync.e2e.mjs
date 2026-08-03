@@ -600,6 +600,357 @@ async function openDash(page) {
   await ctx.close();
 }
 
+
+// ── VTA academy ──────────────────────────────────────────────
+{
+  console.log("\n--- VTA academy (vta/academy.html) ---");
+  received.length = 0;
+  apiHandler = null;
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  const IGNORE = /fonts\.googleapis\.com|fonts\.gstatic\.com|Failed to load resource/;
+  page.on("pageerror", (e) => errors.push(String(e)));
+  page.on("console", (m) => { if (m.type() === "error" && !IGNORE.test(m.text())) errors.push(m.text()); });
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/vta/academy.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof Store !== "undefined" && !!Store.state);
+
+  check("the VTA page loads clean", errors.length === 0, errors.join("\n"));
+  check("amr-backend.js resolves from the subdirectory",
+    await page.evaluate(() => !!window.AMRBackend && window.AMRBackend.isConfigured()));
+
+  // Drive real progress through VTA's own store.
+  await page.evaluate(() => {
+    const m = Store.mod(1);
+    MODULES[0].lessons.forEach((l) => { m.lessonsRead[l.id] = true; });
+    m.quizResults = { score: 9, total: 10, passed: true };
+    m.matchResults = { passed: true };
+    m.scenarioResults = { done: true };
+    Store.state.examResults = { score: 45, total: 50, passed: true, submittedAt: Date.parse("2026-08-01T10:00:00Z") };
+    Store.state.certificate = {
+      name: "Jane Medic", credential: "Paramedic", score: 45, total: 50,
+      issuedAt: Date.parse("2026-08-02T10:00:00Z"), certId: "VTA-2026-ABC123",
+    };
+    Store.save();
+  });
+  await page.waitForTimeout(3200);
+
+  const up = received.find((r) => r.url.startsWith("/rest/v1/academy_completions") && r.method === "POST");
+  check("a VTA completion was pushed", !!up, received.map((r) => r.method + " " + r.url).join(", "));
+  if (up) {
+    check('course_id is "vta"', up.body.course_id === "vta", up.body.course_id);
+    check("the certificate name is used as the learner name",
+      up.body.learner_name === "Jane Medic", up.body.learner_name);
+    check("final_passed carried", up.body.final_passed === true);
+    check("final score is a percentage", up.body.final_best === 90, String(up.body.final_best));
+    check("module quiz score is a percentage",
+      up.body.modules["1"] && up.body.modules["1"].best === 90,
+      JSON.stringify(up.body.modules["1"]));
+    check("module 1 counts as passed",
+      up.body.modules["1"] && up.body.modules["1"].passed === true);
+    check("all nine modules are reported",
+      up.body.modules_total === 9, String(up.body.modules_total));
+    check("credential and certId ride in meta",
+      up.body.meta && up.body.meta.credential === "Paramedic" && up.body.meta.certId === "VTA-2026-ABC123",
+      JSON.stringify(up.body.meta));
+    check("completed_at is the certificate issue date",
+      (up.body.completed_at || "").startsWith("2026-08-02"), up.body.completed_at);
+  }
+  await ctx.close();
+}
+
+{
+  console.log("\n--- VTA: certificate email link ---");
+  received.length = 0;
+  apiHandler = null;
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/vta/academy.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof Store !== "undefined" && !!Store.state);
+
+  await page.evaluate(() => {
+    Store.state.examResults = { score: 45, total: 50, passed: true, submittedAt: Date.now() };
+    Store.state.certificate = {
+      name: "Jane Medic", credential: "Paramedic", score: 45, total: 50,
+      issuedAt: Date.now(), certId: "VTA-2026-ABC123",
+    };
+    Store.save();
+    Nav.go("certificate");
+  });
+  await page.waitForSelector("#vta-link-email");
+  check("the link prompt appears on the certificate", await page.isVisible("#vta-link-email"));
+
+  await page.fill("#vta-link-email", "jane.medic@example.com");
+  await page.click("text=Send confirmation link");
+  await page.waitForTimeout(900);
+  const put = received.find((r) => r.url === "/auth/v1/user" && r.method === "PUT");
+  check("the address is PUT", !!put && put.body.email === "jane.medic@example.com");
+
+  const disclaimer = await page.textContent(".cert-disclaimer");
+  check("the disclaimer no longer claims records are browser-only",
+    !/not independently proctored or auditable/.test(disclaimer)
+    && /not independently proctored/.test(disclaimer), disclaimer.slice(0, 400));
+  await ctx.close();
+}
+
+{
+  console.log("\n--- VTA: unconfigured build ---");
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  await page.goto("http://127.0.0.1:8099/vta/academy.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof Store !== "undefined");
+  await page.evaluate(() => { Store.mod(1).lessonsRead["x"] = true; Store.save(); });
+  await page.waitForTimeout(500);
+  check("no errors with no backend configured", errors.length === 0, errors.join("\n"));
+  check("progress still saves locally",
+    await page.evaluate(() => !!localStorage.getItem("vta-pwa-state-v2")));
+  await ctx.close();
+}
+
+// ── Caregiver form ───────────────────────────────────────────
+/* jsPDF is loaded from a CDN this sandbox blocks, so PDF generation would
+   throw and the confirmation panel would never appear — hiding the thing
+   under test, which is the record logging that follows it. A minimal stub
+   stands in for the PDF layer; building the actual PDF is not what these
+   checks are about. */
+async function stubJsPdf(page) {
+  await page.addInitScript(() => {
+    const noop = function () { return this; };
+    class FakeDoc {
+      constructor() { this.internal = { pageSize: { getWidth: () => 612, getHeight: () => 792 } }; }
+      addFileToVFS() { return noop.call(this); }
+      addFont() { return noop.call(this); }
+      setFont() { return noop.call(this); }
+      setFontSize() { return noop.call(this); }
+      setTextColor() { return noop.call(this); }
+      setDrawColor() { return noop.call(this); }
+      setFillColor() { return noop.call(this); }
+      setLineWidth() { return noop.call(this); }
+      text() { return noop.call(this); }
+      line() { return noop.call(this); }
+      rect() { return noop.call(this); }
+      addImage() { return noop.call(this); }
+      addPage() { return noop.call(this); }
+      getImageProperties() { return { width: 600, height: 200, fileType: "PNG" }; }
+      splitTextToSize(t) { return [t]; }
+      getTextWidth() { return 10; }
+      output() { return new Blob(["%PDF-1.4 stub"], { type: "application/pdf" }); }
+    }
+    window.jspdf = { jsPDF: FakeDoc };
+  });
+}
+
+async function fillCaregiverForm(page) {
+  await page.evaluate(() => { window.TAB = "forms"; window.render(); });
+  await page.waitForSelector("#cgf-date");
+  await page.evaluate(() => {
+    document.getElementById("cgf-date").value = "2026-08-03";
+    document.getElementById("cgf-case").value = "KC-99812";
+    document.getElementById("cgf-name-1").value = "Jane Medic";
+    document.getElementById("cgf-cert-1").value =
+      document.getElementById("cgf-cert-1").options[1].value;
+    // Stand in for a drawn signature.
+    if (window.CGF_SIGS) window.CGF_SIGS[0] = "data:image/png;base64,iVBORw0KGgo=";
+  });
+}
+
+{
+  console.log("\n--- Caregiver Form: files a record to Supabase ---");
+  received.length = 0;
+  apiHandler = null;
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript(() => {
+    try { localStorage.setItem("amrkc_disc_v2", "1"); } catch (e) {}
+  });
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await stubJsPdf(page);
+  await page.goto("http://127.0.0.1:8099/index.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof window.render === "function");
+  await fillCaregiverForm(page);
+
+  await page.click("#cgf-submit");
+  await page.waitForSelector("#cgf-confirm", { state: "visible", timeout: 20000 });
+
+  const post = received.find((r) => r.url.startsWith("/rest/v1/caregiver_forms") && r.method === "POST");
+  check("the record was POSTed to Supabase", !!post,
+    received.map((r) => r.method + " " + r.url).join(", "));
+  if (post) {
+    check("case number carried", post.body.case_number === "KC-99812");
+    check("service date carried", post.body.service_date === "2026-08-03");
+    check("crew carried", post.body.crew.length === 1 && post.body.crew[0].name === "Jane Medic");
+    check("NO signature reached the server", !/data:image/.test(JSON.stringify(post.body)),
+      JSON.stringify(post.body));
+    check("user_id stamped", post.body.user_id === "e2e-user-uuid");
+  }
+  check("no Apps Script call remains", !received.some((r) => /script\.google\.com/.test(r.url)));
+  const log = await page.textContent("#cgf-log");
+  check("the crew is told the record filed", /filed/i.test(log), log);
+  await ctx.close();
+}
+
+{
+  console.log("\n--- Caregiver Form: logging failure does not retract the PDF ---");
+  received.length = 0;
+  apiHandler = null;
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript(() => {
+    try { localStorage.setItem("amrkc_disc_v2", "1"); } catch (e) {}
+  });
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await stubJsPdf(page);
+  await page.goto("http://127.0.0.1:8099/index.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof window.render === "function");
+  await page.route("**/rest/v1/caregiver_forms*", (r) => {
+    if (r.request().method() === "OPTIONS") return r.continue();
+    r.fulfill({ status: 400, contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ message: "violates check constraint" }) });
+  });
+  await fillCaregiverForm(page);
+  await page.click("#cgf-submit");
+  await page.waitForSelector("#cgf-confirm", { state: "visible", timeout: 20000 });
+
+  check("the PDF confirmation still shows", await page.isVisible("#cgf-confirm"));
+  check("the share button is still offered", await page.isVisible("#cgf-share"));
+  const log = await page.textContent("#cgf-log");
+  check("the filing failure is stated plainly", /could not be filed/i.test(log), log);
+  check("it still tells them to send the PDF", /send the pdf/i.test(log), log);
+  await ctx.close();
+}
+
+{
+  console.log("\n--- Caregiver Form: offline holds the record ---");
+  received.length = 0;
+  apiHandler = null;
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript(() => {
+    try { localStorage.setItem("amrkc_disc_v2", "1"); } catch (e) {}
+  });
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await stubJsPdf(page);
+  await page.goto("http://127.0.0.1:8099/index.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof window.render === "function");
+  await page.evaluate(() => window.AMRBackend.flush());
+  await page.waitForTimeout(400);
+  await page.route("**/rest/v1/**", (r) => r.abort());
+
+  await fillCaregiverForm(page);
+  await page.click("#cgf-submit");
+  await page.waitForSelector("#cgf-confirm", { state: "visible", timeout: 20000 });
+  await page.waitForTimeout(600);
+
+  const log = await page.textContent("#cgf-log");
+  check("the offline case is stated plainly", /signal|device/i.test(log), log);
+  const box = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]"));
+  check("the record is queued on the device",
+    box.some((i) => /caregiver_forms/.test(i.path)), JSON.stringify(box.map((i) => i.path)));
+  await ctx.close();
+}
+
+// ── Dashboard: caregiver tab + CSV ───────────────────────────
+{
+  console.log("\n--- dashboard: caregiver tab and CSV export ---");
+  const CGF_ROWS = [
+    { id: "f1", service_date: "2026-08-03", case_number: "KC-99812", amended: false,
+      submitted_at: "8/3/2026 09:14 AM", created_at: "2026-08-03T09:15:00Z",
+      crew: [{ num: 1, name: "Jane Medic", cert: "NRP" }] },
+    { id: "f2", service_date: "2026-08-02", case_number: "KC-11111", amended: true,
+      submitted_at: "8/2/2026 14:02 PM", created_at: "2026-08-02T14:03:00Z",
+      crew: [{ num: 1, name: "Sam Medic", cert: "EMT" }] },
+  ];
+  const VTA_ROW = {
+    course_id: "vta", course_version: null, learner_name: "=cmd|'/c calc'!A1",
+    learner_email: "jane.medic@example.com", modules_passed: 9, modules_total: 9,
+    final_passed: true, final_best: 90, completed_at: "2026-08-02T10:00:00Z",
+    updated_at: "2026-08-02T10:00:00Z", user_id: "u3",
+    meta: { credential: "Paramedic", certId: "VTA-2026-ABC123" },
+  };
+
+  apiHandler = (req) => {
+    if (req.url.startsWith("/auth/v1/token?grant_type=password")) {
+      return [200, {
+        access_token: "jwt-edu", refresh_token: "refresh-edu", expires_in: 3600,
+        user: { id: "edu-uuid", is_anonymous: false, email: "hunter@example.com" },
+      }];
+    }
+    if (req.url.startsWith("/rest/v1/academy_completions")) return [200, [VTA_ROW]];
+    if (req.url.startsWith("/rest/v1/ask_educator_messages")) return [200, []];
+    if (req.url.startsWith("/rest/v1/caregiver_forms")) return [200, CGF_ROWS];
+    return [404, null];
+  };
+
+  const ctx = await browser.newContext({ acceptDownloads: true });
+  const page = await ctx.newPage();
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/educator-dashboard.html", { waitUntil: "domcontentloaded" });
+  await page.fill("#email", "hunter@example.com");
+  await page.fill("#password", "x");
+  await page.click("#signinBtn");
+  await page.waitForSelector("#dash", { state: "visible" });
+
+  check("VTA renders with its display name",
+    (await page.textContent("#completionsBody")).includes("Ventilator Training"));
+  check("the credential column shows the VTA credential",
+    (await page.textContent("#completionsBody")).includes("Paramedic"));
+
+  await page.click("#tab-cgf");
+  await page.waitForSelector("#panel-cgf", { state: "visible" });
+  const cgfCells = await page.$$eval("#cgfBody tr", (trs) =>
+    trs.map((tr) => Array.from(tr.children).map((td) => td.textContent.trim())));
+  check("caregiver forms render", cgfCells.length === 2, JSON.stringify(cgfCells));
+  check("case number shown", cgfCells.some((c) => c[2] === "KC-99812"));
+  check("crew is summarised with certification",
+    cgfCells.some((c) => /Jane Medic \(NRP\)/.test(c[3])), JSON.stringify(cgfCells));
+  check("an amended form is flagged", cgfCells.some((c) => /Amended/.test(c[4])));
+
+  await page.fill("#cgfQ", "KC-11111");
+  await page.waitForTimeout(150);
+  const filtered = await page.$$eval("#cgfBody tr", (t) => t.length);
+  check("caregiver search filters", filtered === 1, String(filtered));
+
+  // CSV export
+  await page.click("#tab-completions");
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.click("#csvBtn"),
+  ]);
+  const stream = await download.createReadStream();
+  let csv = "";
+  for await (const chunk of stream) csv += chunk;
+
+  check("the CSV names the completions export",
+    /amrkc-completions-\d{4}-\d{2}-\d{2}\.csv/.test(download.suggestedFilename()),
+    download.suggestedFilename());
+  check("the CSV has a header row", csv.split("\r\n")[0].includes("Verified email"), csv.slice(0, 200));
+  check("the verified email is exported", csv.includes("jane.medic@example.com"));
+  check("the VTA credential is exported", csv.includes("Paramedic"));
+  check("a formula-shaped name is neutralised for spreadsheets",
+    csv.includes("\"'=cmd|'/c calc'!A1\""),
+    csv.split("\r\n")[1]);
+  await ctx.close();
+  apiHandler = null;
+}
+
 await browser.close();
 api.close(); site.close();
 console.log(`\n${PASS} passed, ${FAIL} failed\n`);

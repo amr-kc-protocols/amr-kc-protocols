@@ -365,6 +365,99 @@ await check("flush is a no-op while offline", async () => {
   assert.equal(JSON.parse(store.get("amr_backend_outbox_v1")).length, 1, "and must keep the item");
 });
 
+// ── caregiver forms ──────────────────────────────────────────
+console.log("\n=== caregiver forms ===");
+
+const CGF = {
+  serviceDate: "2026-08-03", caseNumber: "KC-99812", submittedAt: "8/3/2026 09:14 AM",
+  amended: false,
+  crew: [
+    { num: 1, name: "Jane Medic", cert: "NRP", sig: "data:image/png;base64,AAAA" },
+    { num: 2, name: "", cert: "", sig: "" },
+    { num: 3, name: "", cert: "", sig: "" },
+  ],
+};
+
+await check("a form posts the text record", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    return res(201, null);
+  });
+  const r = await win.AMRBackend.submitCaregiverForm(CGF);
+  assert.equal(r.ok, true);
+  const post = calls.find((c) => c.path.startsWith("/rest/v1/caregiver_forms"));
+  assert.ok(post, "should post to caregiver_forms");
+  assert.equal(post.body.case_number, "KC-99812");
+  assert.equal(post.body.service_date, "2026-08-03");
+  assert.equal(post.body.user_id, "user-uuid-1");
+});
+
+await check("signatures are NEVER uploaded", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    return res(201, null);
+  });
+  await win.AMRBackend.submitCaregiverForm(CGF);
+  const post = calls.find((c) => c.path.startsWith("/rest/v1/caregiver_forms"));
+  const raw = JSON.stringify(post.body);
+  assert.ok(!/data:image/.test(raw), "a signature image reached the server: " + raw);
+  assert.ok(!("sig" in post.body.crew[0]), "crew entries must carry no sig key");
+});
+
+await check("blank crew slots are dropped", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    return res(201, null);
+  });
+  await win.AMRBackend.submitCaregiverForm(CGF);
+  const post = calls.find((c) => c.path.startsWith("/rest/v1/caregiver_forms"));
+  assert.equal(post.body.crew.length, 1, "only the filled slot should be sent");
+  assert.equal(post.body.crew[0].name, "Jane Medic");
+});
+
+await check("a form missing a case number is refused before the network", async () => {
+  const { win, calls } = makeEnv(async () => res(201, null));
+  const r = await win.AMRBackend.submitCaregiverForm({ serviceDate: "2026-08-03", caseNumber: "" });
+  assert.equal(r.ok, false);
+  assert.match(r.error, /case number/i);
+  assert.equal(calls.length, 0);
+});
+
+await check("an offline form is queued, not lost", async () => {
+  const { win, store } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    throw new Error("offline");
+  });
+  const r = await win.AMRBackend.submitCaregiverForm(CGF);
+  assert.equal(r.ok, true);
+  assert.equal(r.queued, true);
+  const box = JSON.parse(store.get("amr_backend_outbox_v1"));
+  assert.equal(box.length, 1);
+  assert.match(box[0].body.case_number, /KC-99812/);
+});
+
+await check("two forms never collapse into one", async () => {
+  // Unlike an academy push, each filed form is a distinct record.
+  const { win, store } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    throw new Error("offline");
+  });
+  await win.AMRBackend.submitCaregiverForm(CGF);
+  await win.AMRBackend.submitCaregiverForm({ ...CGF, caseNumber: "KC-11111" });
+  const box = JSON.parse(store.get("amr_backend_outbox_v1"));
+  assert.equal(box.length, 2, "both forms must survive");
+});
+
+await check("a rejected form is reported, not silently swallowed", async () => {
+  const { win } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    return res(400, { message: "violates check constraint" });
+  });
+  const r = await win.AMRBackend.submitCaregiverForm(CGF);
+  assert.equal(r.ok, false);
+  assert.match(r.error, /check constraint/);
+});
+
 // ── educator API ─────────────────────────────────────────────
 console.log("\n=== educator API ===");
 
@@ -486,6 +579,30 @@ await check("reads before sign-in ask for sign-in rather than failing oddly", as
   assert.equal(r.ok, false);
   assert.equal(r.needsSignIn, true);
   assert.equal(calls.length, 0, "must not call out with no session");
+});
+
+await check("listCompletions selects meta so VTA credentials are visible", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    return res(200, []);
+  });
+  await win.AMRBackend.educator.signIn("hunter@example.com", "x");
+  await win.AMRBackend.educator.listCompletions();
+  const q = calls.find((c) => c.path.startsWith("/rest/v1/academy_completions"));
+  assert.match(q.path, /meta/);
+});
+
+await check("listCaregiverForms queries the right table and order", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    return res(200, [{ case_number: "KC-99812" }]);
+  });
+  await win.AMRBackend.educator.signIn("hunter@example.com", "x");
+  const r = await win.AMRBackend.educator.listCaregiverForms();
+  assert.equal(r.ok, true);
+  const q = calls.find((c) => c.path.startsWith("/rest/v1/caregiver_forms"));
+  assert.match(q.path, /order=created_at\.desc/);
+  assert.equal(q.headers["Authorization"], "Bearer jwt-edu");
 });
 
 await check("an expired educator session asks for re-login, never re-signs anonymously", async () => {

@@ -5,8 +5,9 @@ in a Google Sheet):
 
 | What | Table | Written by |
 |------|-------|-----------|
-| Academy module progress & completions | `academy_completions` | the four `*-academy.html` pages |
+| Academy module progress & completions | `academy_completions` | the four `*-academy.html` pages and `vta/academy.html` |
 | Ask the Educator submissions | `ask_educator_messages` | `index.html` |
+| Caregiver Signature Form records | `caregiver_forms` | `index.html` |
 
 The client is [`../amr-backend.js`](../amr-backend.js) — no dependencies, no
 build step, talking to the Supabase REST and auth endpoints directly.
@@ -70,8 +71,9 @@ supabase db push
 |------|------|
 | `20260803000000_init_academy_backend.sql` | completions + Ask tables, merge trigger, learner RLS |
 | `20260803010000_educator_access.sql` | educator allowlist, read-all policies, verified `learner_email` |
+| `20260803020000_vta_and_caregiver.sql` | VTA as a course, `meta` for course-specific extras, `caregiver_forms` |
 
-Both are idempotent — re-running them is safe.
+All are idempotent — re-running them is safe.
 
 ### 4. Point the app at the project
 
@@ -128,6 +130,19 @@ delete from public.educators where email = 'someone@example.com';
 
 Then open `educator-dashboard.html` and sign in.
 
+### What the dashboard shows
+
+Three tabs:
+
+- **Completions** — all five courses. Searchable by name *and* verified email,
+  filterable by course and status, sortable on every column, and exportable to
+  CSV. The export matches what is on screen, filters and sort included.
+- **Ask the Educator** — submissions newest first.
+- **Caregiver Forms** — filed signature-form records.
+
+A record with no verified email is flagged **"not linked"** rather than left
+blank, so a self-typed name is never mistaken for a confirmed identity.
+
 ### What the dashboard can and cannot do
 
 It is **read-only by construction**. There is no update or delete policy on
@@ -179,6 +194,12 @@ per user per hour.
 client can neither set it nor clear it. Once recorded, a later push from a
 device that has not linked an email will not drop it.
 
+**Caregiver forms are educator-read only, and hold no signatures.** The crew
+who filed a form cannot read it back — the case numbers tie those rows to
+patient care reports. Signature images are never sent: they live in the PDF
+the crew generated and nowhere else, enforced both by the client stripping
+them and by a test asserting no `data:image` reaches the server.
+
 Each of these is covered by a test — see [`tests/`](tests).
 
 ## Privacy note
@@ -210,14 +231,22 @@ this promise is one of practice, not of cryptography.
 ```bash
 cd supabase/tests && ./run.sh    # schema, triggers, RLS  (needs local Postgres)
 cd test && node backend.test.mjs # client sync logic      (no dependencies)
+cd test && node sync.e2e.mjs     # real pages in Chromium (needs playwright)
 ```
+
+`run.sh` prints an assertion tally and exits non-zero if any check fails, so it
+can gate CI. It stands up its own throwaway database — no Supabase project and
+no network required.
 
 ## Not covered yet
 
-- **VTA academy** (`vta/academy.html`) uses a different architecture and is not
-  wired up.
-- **The Caregiver Form** in `index.html` still logs to Google Apps Script via
-  `SCRIPT_URL`; only Ask the Educator was migrated. It still uses the
-  `mode:'no-cors'` pattern, so it reports success even when a write fails.
-- **Old Ask submissions** remain in the Google Sheet. Nothing migrates them.
-- **CSV export** from the dashboard.
+- **Historical rows in the Google Sheets** — Ask submissions, caregiver form
+  logs, and any VTA certifications written before this change. Nothing
+  migrates them; the old Sheets remain the record for that period. The Apps
+  Script `.gs` files are kept in the repo for reference, but nothing in the
+  app calls them any more.
+- **Deleting a learner's data on request.** There is no self-serve path; it is
+  a manual SQL delete against `academy_completions` and `ask_educator_messages`
+  by `user_id`.
+- **Certificate verification.** VTA certificate ids are stored in
+  `meta->>'certId'` but nothing looks them up.

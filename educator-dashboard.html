@@ -193,6 +193,9 @@ footer{ margin:40px 0 30px; padding-top:18px; border-top:1px solid var(--rule);
       <button class="tab" id="tab-ask" role="tab" aria-selected="false"
               aria-controls="panel-ask">Ask the Educator
         <span class="tab-count" id="count-ask"></span></button>
+      <button class="tab" id="tab-cgf" role="tab" aria-selected="false"
+              aria-controls="panel-cgf">Caregiver Forms
+        <span class="tab-count" id="count-cgf"></span></button>
     </div>
 
     <div id="loadMsg" class="msg msg-info hidden" style="margin-top:18px"></div>
@@ -207,12 +210,14 @@ footer{ margin:40px 0 30px; padding-top:18px; border-top:1px solid var(--rule);
           <option value="hemodynamics">Hemodynamics</option>
           <option value="metabolic">Metabolic &amp; Lab Data</option>
           <option value="neonate">Neonatal Resuscitation</option>
+          <option value="vta">Ventilator Training</option>
         </select>
         <select id="statusFilter" aria-label="Filter by status">
           <option value="">Any status</option>
           <option value="passed">Completed</option>
           <option value="progress">In progress</option>
         </select>
+        <button class="btn btn-sm" id="csvBtn" type="button">Export CSV</button>
       </div>
       <div class="tablewrap">
         <table id="completionsTable">
@@ -226,6 +231,7 @@ footer{ margin:40px 0 30px; padding-top:18px; border-top:1px solid var(--rule);
               <th class="sortable" data-sort="final_best">Final <span class="arrow">&#9650;&#9660;</span></th>
               <th class="sortable" data-sort="completed_at">Completed <span class="arrow">&#9650;&#9660;</span></th>
               <th class="sortable" data-sort="updated_at">Last activity <span class="arrow">&#9650;&#9660;</span></th>
+              <th>Credential</th>
               <th>Ver.</th>
             </tr>
           </thead>
@@ -260,6 +266,34 @@ footer{ margin:40px 0 30px; padding-top:18px; border-top:1px solid var(--rule);
         progress is not consent to be named on a question.
       </div>
     </section>
+
+    <!-- Caregiver Signature Forms -->
+    <section id="panel-cgf" role="tabpanel" aria-labelledby="tab-cgf" class="hidden">
+      <div class="controls">
+        <input type="search" id="cgfQ" placeholder="Search case number or crew&hellip;"
+               aria-label="Search caregiver forms">
+      </div>
+      <div class="tablewrap">
+        <table id="cgfTable">
+          <thead>
+            <tr>
+              <th>Filed</th>
+              <th>Date of service</th>
+              <th>Case number</th>
+              <th>Crew</th>
+              <th>Amended</th>
+            </tr>
+          </thead>
+          <tbody id="cgfBody"></tbody>
+        </table>
+        <div id="cgfEmpty" class="empty hidden"></div>
+      </div>
+      <div class="msg msg-warn" style="margin-top:14px">
+        Case numbers tie these rows to patient care reports, so they are visible
+        to educators only &mdash; not to the crew who filed them. Signature images
+        are never stored here; they exist solely in the PDF the crew generated.
+      </div>
+    </section>
   </div>
 
   <footer>
@@ -279,11 +313,13 @@ var COURSE_NAMES = {
   airway: "Airway & RSI",
   hemodynamics: "Hemodynamics",
   metabolic: "Metabolic & Lab Data",
-  neonate: "Neonatal Resuscitation"
+  neonate: "Neonatal Resuscitation",
+  vta: "Ventilator Training"
 };
 
 var completions = [];
 var askMessages = [];
+var caregiverForms = [];
 var sort = { key: "updated_at", dir: -1 };
 
 /* ── escaping ───────────────────────────────────────────────
@@ -343,12 +379,13 @@ function load() {
 
   return Promise.all([
     AMRBackend.educator.listCompletions(),
-    AMRBackend.educator.listAskMessages()
+    AMRBackend.educator.listAskMessages(),
+    AMRBackend.educator.listCaregiverForms()
   ]).then(function (results) {
     $("refreshBtn").disabled = false;
-    var c = results[0], a = results[1];
+    var c = results[0], a = results[1], g = results[2];
 
-    if (c.needsSignIn || a.needsSignIn) {
+    if (c.needsSignIn || a.needsSignIn || g.needsSignIn) {
       showSignedOut("Your session expired — please sign in again.");
       return;
     }
@@ -360,11 +397,12 @@ function load() {
 
     completions = c.rows || [];
     askMessages = a.ok ? (a.rows || []) : [];
+    caregiverForms = g.ok ? (g.rows || []) : [];
 
     /* An educator with no rows is ambiguous: it can mean nobody has
        finished anything yet, or that this account is not on the
        allowlist. Say so rather than showing a bare empty table. */
-    if (!completions.length && !askMessages.length) {
+    if (!completions.length && !askMessages.length && !caregiverForms.length) {
       msg.innerHTML = "";
       msg.appendChild(text(
         "No records visible. Either no one has started a module yet, or this "
@@ -372,8 +410,9 @@ function load() {
         + "adding the address to the educators table."));
       msg.className = "msg msg-warn";
       show(msg, true);
-    } else if (!a.ok) {
-      msg.textContent = "⚠ Completions loaded, but messages failed: " + a.error;
+    } else if (!a.ok || !g.ok) {
+      msg.textContent = "⚠ Completions loaded, but "
+        + (!a.ok ? "messages failed: " + a.error : "caregiver forms failed: " + g.error);
       msg.className = "msg msg-warn";
       show(msg, true);
     } else {
@@ -382,6 +421,7 @@ function load() {
 
     renderCompletions();
     renderAsk();
+    renderCaregiver();
   }).catch(function () {
     $("refreshBtn").disabled = false;
     msg.textContent = "⚠ Could not load data — check your connection.";
@@ -497,6 +537,12 @@ function renderCompletions() {
     seen.appendChild(text(fmtDate(r.updated_at)));
     tr.appendChild(seen);
 
+    /* VTA records a credential level with the certificate; the other
+       four courses do not, so this is blank for them by design. */
+    var cred = document.createElement("td");
+    cred.appendChild(text((r.meta && r.meta.credential) || "—"));
+    tr.appendChild(cred);
+
     var ver = document.createElement("td");
     ver.className = "muted mono";
     ver.appendChild(text(r.course_version || "—"));
@@ -573,6 +619,130 @@ function renderAsk() {
     "(" + rows.length + (rows.length === askMessages.length ? "" : " of " + askMessages.length) + ")";
 }
 
+/* ── caregiver forms ────────────────────────────────────────── */
+function crewSummary(crew) {
+  if (!crew || !crew.length) return "—";
+  return crew
+    .filter(function (c) { return c && (c.name || c.cert); })
+    .map(function (c) { return c.cert ? c.name + " (" + c.cert + ")" : c.name; })
+    .join(", ") || "—";
+}
+
+function renderCaregiver() {
+  var body = $("cgfBody");
+  var q = $("cgfQ").value.trim().toLowerCase();
+  var rows = caregiverForms.filter(function (f) {
+    if (!q) return true;
+    return ((f.case_number || "") + " " + crewSummary(f.crew)).toLowerCase().indexOf(q) !== -1;
+  });
+
+  body.innerHTML = "";
+  var empty = $("cgfEmpty");
+  if (!rows.length) {
+    empty.innerHTML = "";
+    var strong = document.createElement("strong");
+    strong.appendChild(text(caregiverForms.length ? "No matches" : "No forms filed"));
+    empty.appendChild(strong);
+    empty.appendChild(text(caregiverForms.length
+      ? "No forms match that search."
+      : "Caregiver signature forms filed from the app appear here."));
+    show(empty, true);
+    show($("cgfTable"), false);
+  } else {
+    show(empty, false);
+    show($("cgfTable"), true);
+  }
+
+  rows.forEach(function (f) {
+    var tr = document.createElement("tr");
+
+    var filed = document.createElement("td");
+    filed.appendChild(text(fmtDateTime(f.created_at)));
+    tr.appendChild(filed);
+
+    var svc = document.createElement("td");
+    svc.appendChild(text(f.service_date || "—"));
+    tr.appendChild(svc);
+
+    var caseNo = document.createElement("td");
+    caseNo.className = "mono";
+    caseNo.appendChild(text(f.case_number || "—"));
+    tr.appendChild(caseNo);
+
+    var crew = document.createElement("td");
+    crew.className = "wrap-cell";
+    crew.appendChild(text(crewSummary(f.crew)));
+    tr.appendChild(crew);
+
+    var amended = document.createElement("td");
+    if (f.amended) {
+      var pill = document.createElement("span");
+      pill.className = "pill pill-prog";
+      pill.appendChild(text("Amended"));
+      amended.appendChild(pill);
+    } else {
+      amended.className = "muted";
+      amended.appendChild(text("—"));
+    }
+    tr.appendChild(amended);
+
+    body.appendChild(tr);
+  });
+
+  $("count-cgf").textContent =
+    "(" + rows.length + (rows.length === caregiverForms.length ? "" : " of " + caregiverForms.length) + ")";
+}
+
+/* ── CSV export ─────────────────────────────────────────────
+   Exports exactly what the table currently shows — filters and sort
+   included — because an export that silently differs from the screen is
+   worse than none. */
+function csvCell(value) {
+  var s = value == null ? "" : String(value);
+  /* A leading =, +, - or @ makes Excel and Sheets treat the cell as a
+     formula. Learner names and crew names are free text from other
+     people, so a field beginning with one is prefixed with a single
+     quote — the value stays readable, and the spreadsheet treats it as
+     text rather than something to evaluate. */
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+function exportCsv() {
+  var rows = filteredCompletions();
+  var header = ["Learner", "Verified email", "Course", "Modules passed", "Modules total",
+    "Status", "Final score", "Completed", "Last activity", "Credential", "Course version"];
+
+  var lines = [header.map(csvCell).join(",")];
+  rows.forEach(function (r) {
+    lines.push([
+      r.learner_name || "",
+      r.learner_email || "",
+      COURSE_NAMES[r.course_id] || r.course_id,
+      r.modules_passed || 0,
+      r.modules_total || 0,
+      r.final_passed ? "Completed" : "In progress",
+      r.final_best ? r.final_best + "%" : "",
+      r.completed_at ? fmtDate(r.completed_at) : "",
+      fmtDate(r.updated_at),
+      (r.meta && r.meta.credential) || "",
+      r.course_version || ""
+    ].map(csvCell).join(","));
+  });
+
+  /* The BOM makes Excel open UTF-8 correctly; without it, accented names
+     arrive mangled. */
+  var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "amrkc-completions-" + new Date().toISOString().slice(0, 10) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
 /* ── wiring ─────────────────────────────────────────────────── */
 $("signinCard").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -613,6 +783,8 @@ $("refreshBtn").addEventListener("click", load);
   $(id).addEventListener("change", renderCompletions);
 });
 $("askQ").addEventListener("input", renderAsk);
+$("cgfQ").addEventListener("input", renderCaregiver);
+$("csvBtn").addEventListener("click", exportCsv);
 
 Array.prototype.forEach.call(document.querySelectorAll("th.sortable"), function (th) {
   th.addEventListener("click", function () {
@@ -627,14 +799,15 @@ Array.prototype.forEach.call(document.querySelectorAll("th.sortable"), function 
 });
 
 function selectTab(which) {
-  var isC = which === "completions";
-  $("tab-completions").setAttribute("aria-selected", isC ? "true" : "false");
-  $("tab-ask").setAttribute("aria-selected", isC ? "false" : "true");
-  show($("panel-completions"), isC);
-  show($("panel-ask"), !isC);
+  ["completions", "ask", "cgf"].forEach(function (name) {
+    var on = name === which;
+    $("tab-" + name).setAttribute("aria-selected", on ? "true" : "false");
+    show($("panel-" + name), on);
+  });
 }
-$("tab-completions").addEventListener("click", function () { selectTab("completions"); });
-$("tab-ask").addEventListener("click", function () { selectTab("ask"); });
+["completions", "ask", "cgf"].forEach(function (name) {
+  $("tab-" + name).addEventListener("click", function () { selectTab(name); });
+});
 
 /* ── boot ───────────────────────────────────────────────────── */
 (function boot() {

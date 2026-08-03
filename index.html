@@ -328,6 +328,10 @@ display:flex;align-items:center;justify-content:center;padding:6px;cursor:pointe
 .cgf-confirm-icon{font-size:36px;margin-bottom:10px}
 .cgf-confirm-title{font-size:17px;font-weight:700;color:var(--emt);margin-bottom:6px}
 .cgf-confirm-sub{font-size:13px;color:var(--emt);line-height:1.6;margin-bottom:16px}
+.cgf-log{font-size:12px;line-height:1.55;margin-top:12px;min-height:1px}
+.cgf-log.ok{color:var(--gray)}
+.cgf-log.pend{color:var(--warn)}
+.cgf-log.err{color:var(--danger)}
 .cgf-share{display:block;width:100%;padding:15px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-bottom:12px}
 .cgf-after{display:flex;gap:8px}
 .cgf-after .cgf-again{flex:1;padding:12px 8px}
@@ -2061,6 +2065,10 @@ function renderForms(){
     '<div class="cgf-confirm-title">PDF Ready</div>',
     '<div class="cgf-confirm-sub" id="cgf-confirm-sub">Send it now &mdash; email, Messages, or Files, whichever you file these in.</div>',
     '<button class="cgf-share" id="cgf-share"><svg class="icon"><use href="#i-download"></use></svg> <span id="cgf-share-label">Send PDF</span></button>',
+    // Whether the text record reached the log. The PDF is unaffected either
+    // way, so this reports rather than alarms — but it never claims success
+    // it did not have.
+    '<div class="cgf-log" id="cgf-log"></div>',
     '<div class="cgf-after">',
     '<button class="cgf-again" id="cgf-fix">Correct This Form</button>',
     '<button class="cgf-again" id="cgf-again">Start New Form</button>',
@@ -2153,16 +2161,24 @@ function renderForms(){
         // count as user activation. If the browser declines, the Send button on
         // the confirmation panel is a fresh tap that will be allowed.
         cgfSendPdf();
-        // Also log to sheet (no signatures — just text data)
-        var payload = {
-          type:'caregiver_form',
-          date: date, caseNumber: caseNum, submittedAt: submittedAt,
-          amended: CGF_AMENDED ? 'yes' : '',
-          crew1Name: crew[0].name, crew1Cert: crew[0].cert, crew1Sig:'',
-          crew2Name: crew[1].name, crew2Cert: crew[1].cert, crew2Sig:'',
-          crew3Name: crew[2].name, crew3Cert: crew[2].cert, crew3Sig:''
-        };
-        fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){});
+
+        // Log the text record. The PDF above is the deliverable and is what
+        // the crew actually needs, so a logging failure must not undo the
+        // confirmation — but it must not be silent either. The previous
+        // version posted with mode:'no-cors', which made every outcome look
+        // identical and lost records without a trace. Signatures are never
+        // sent: they live in the PDF alone.
+        cgfLogRecord({
+          serviceDate: date,
+          caseNumber: caseNum,
+          submittedAt: submittedAt,
+          amended: !!CGF_AMENDED,
+          crew: [
+            {num:1, name: crew[0].name, cert: crew[0].cert},
+            {num:2, name: crew[1].name, cert: crew[1].cert},
+            {num:3, name: crew[2].name, cert: crew[2].cert}
+          ]
+        });
       }).catch(function(err){
         statusEl.textContent='⚠ PDF generation failed: '+((err&&err.message)||err);
         statusEl.className='cgf-status err';
@@ -2345,6 +2361,45 @@ function cgfBuildPdf(assets, date, caseNum, crew){
 // The finished PDF, kept so the confirmation panel can send it again without
 // regenerating. Cleared when a new form is started.
 var CGF_PDF = null;
+/* Log the caregiver form's text record.
+   This replaced a fire-and-forget POST to Google Apps Script that used
+   mode:'no-cors'. That made the response opaque, so a failed write and a
+   successful one were indistinguishable and records vanished silently.
+
+   The PDF is the deliverable and has already been built by the time this
+   runs, so a logging problem must not retract the confirmation — but the
+   crew is told what actually happened, including when the record is being
+   held on the device for a later retry. */
+function cgfLogRecord(record){
+  var el = document.getElementById('cgf-log');
+  if(!el) return;
+
+  if(!window.AMRBackend || !AMRBackend.isConfigured()){
+    el.textContent = '';   // no log configured; the PDF is the whole record
+    return;
+  }
+
+  el.textContent = '⏳ Filing the record…';
+  el.className = 'cgf-log pend';
+
+  AMRBackend.submitCaregiverForm(record).then(function(result){
+    if(!result.ok){
+      el.textContent = '⚠ Your PDF is ready, but the record could not be filed: '
+        + (result.error || 'the server refused it') + '. Send the PDF as usual.';
+      el.className = 'cgf-log err';
+      return;
+    }
+    if(result.queued){
+      el.textContent = '⏳ Record saved on this device — it files itself once '
+        + 'you’re back on a signal. Your PDF is ready to send now.';
+      el.className = 'cgf-log pend';
+      return;
+    }
+    el.textContent = '✓ Record filed.';
+    el.className = 'cgf-log ok';
+  });
+}
+
 // A plain download drops the file into Files > Downloads with nothing on screen
 // to say so, which is where crews lose it. Hand it to the OS share sheet
 // instead — mail, Messages, Files, AirDrop, whatever they file these in — and
@@ -2573,7 +2628,10 @@ function renderMore(){
 }
 
 // ── ASK THE EDUCATOR ──────────────────────────────────────────────────────
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAUtgOCaEXbh-Uq42FLWzbFZi_5fXYtVIK0q8sJpvZmd2360_ujeO52zVjSlE0VXIuyw/exec';
+// The Google Apps Script endpoint that used to serve this screen and the
+// Caregiver Form is gone: both now write to Supabase through amr-backend.js,
+// which can tell a failed write from a successful one. Historical rows remain
+// in the old Sheet; nothing migrates them.
 var MAX_CHARS = 1000;
 function renderAsk(){
   var c = $('lv');
