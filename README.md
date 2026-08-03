@@ -21,4 +21,15 @@ Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.htm
 - 11 Procedure Cards
 - Reference: Vital targets, Pediatric dosing calculator, LTV 1200 alarms, GCS, Cincinnati Stroke Scale, Broselow, Rule of Nines, APGAR
 
+## Backend
+
+Academy completions and Ask the Educator submissions can be mirrored to
+Supabase so a CE record survives a lost or wiped phone. The app stays
+offline-first: `localStorage` remains the source of truth for what a learner
+sees, and writes that cannot go out are queued and retried on reconnect.
+
+Setup lives in [`supabase/README.md`](supabase/README.md). Until a project is
+configured the sync layer is an inert no-op and every page behaves as it did
+before.
+
 ## Confidential — For Authorized AMR EMS Personnel Only

@@ -52,6 +52,10 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="sigpad.css">
 <script defer src="sigpad.js"></script>
+<!-- Ask the Educator delivery. Not deferred: the submit handler needs
+     window.AMRBackend, and with no Supabase project configured this is an
+     inert no-op that leaves the rest of the app untouched. -->
+<script src="amr-backend.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{
@@ -2558,7 +2562,7 @@ function renderMore(){
     '  <div class="more-card-ico"><img class="edu-avatar-sm" src="educator.jpg" alt=""></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Ask the Educator</div>',
-    '    <div class="more-card-sub">Anonymous questions &amp; feedback to Dr. Deshmukh</div>',
+    '    <div class="more-card-sub">Questions &amp; feedback to Dr. Deshmukh &mdash; no name required</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</div>',
@@ -2579,8 +2583,8 @@ function renderAsk(){
     '<div class="ask-hero">',
     '  <img class="ask-avatar" src="educator.jpg" alt="Your clinical educator">',
     '  <div class="ask-hero-title">Ask the Educator</div>',
-    '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. No name required &mdash; submissions are completely anonymous.</div>',
-    '  <div class="ask-anon-badge"><svg class="icon"><use href="#i-lock"></use></svg> 100% Anonymous</div>',
+    '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. Your name is never asked. Messages are tagged with this app&rsquo;s account ID &mdash; enough to stop abuse, not enough to identify you &mdash; and an email is stored only if you choose to leave one.</div>',
+    '  <div class="ask-anon-badge"><svg class="icon"><use href="#i-lock"></use></svg> No name required</div>',
     '</div>',
     '<div id="ask-form">',
     '  <label class="ask-field-label" for="ask-msg">Your message</label>',
@@ -2630,33 +2634,43 @@ function renderAsk(){
       submitBtn.disabled = true;
       statusEl.textContent = '\u23F3 Sending\u2026';
       statusEl.className = 'ask-status pending';
-      var now = new Date();
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          type: 'ask_educator',
-          date: (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear(),
-          time: now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-          message: text,
-          email: email
-        })
-      }).then(function(){
-        var subEl = document.getElementById('ask-confirm-sub');
-        if(subEl){
-          subEl.textContent = email
-            ? 'Message sent. Hunter will reply to ' + email + ' if a response is needed.'
-            : 'Message submitted anonymously. Hunter reviews submissions regularly.';
-        }
-        formEl.style.display = 'none';
-        confirmEl.style.display = 'block';
-        statusEl.textContent = '';
-      }).catch(function(){
-        statusEl.textContent = '\u26A0 Submission failed \u2014 check your connection and try again.';
+
+      if(!window.AMRBackend || !AMRBackend.isConfigured()){
+        statusEl.textContent = '\u26A0 Messaging isn\u2019t set up on this build \u2014 please pass it along in person.';
         statusEl.className = 'ask-status err';
         submitBtn.disabled = false;
-      });
+        return;
+      }
+
+      /* The previous version posted with mode:'no-cors', which makes the
+         response opaque \u2014 the .then() always ran, so "Message Sent" showed
+         even when the write had failed and the question was gone. This path
+         reports what actually happened, including the offline case, where
+         the message is held on the device and sent on reconnect. */
+      AMRBackend.submitAsk({ message: text, email: email, source: 'ask' })
+        .then(function(result){
+          if(!result.ok){
+            statusEl.textContent = '\u26A0 ' + (result.error ||
+              'Submission failed \u2014 check your connection and try again.');
+            statusEl.className = 'ask-status err';
+            submitBtn.disabled = false;
+            return;
+          }
+          var subEl = document.getElementById('ask-confirm-sub');
+          if(subEl){
+            if(result.queued){
+              subEl.textContent = 'You\u2019re offline \u2014 your message is saved on this '
+                + 'device and will send by itself once you\u2019re back on a signal.';
+            } else {
+              subEl.textContent = email
+                ? 'Message sent. Hunter will reply to ' + email + ' if a response is needed.'
+                : 'Message sent. Hunter reviews submissions regularly.';
+            }
+          }
+          formEl.style.display = 'none';
+          confirmEl.style.display = 'block';
+          statusEl.textContent = '';
+        });
     });
   }
   if(againBtn){

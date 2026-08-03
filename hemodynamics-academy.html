@@ -490,6 +490,9 @@ label.opt.wrong .ol{ color:var(--red); }
   </div>
 </main>
 
+<!-- Durable mirror of module progress. Optional: with no Supabase project
+     configured it is an inert no-op and the academy runs exactly as before. -->
+<script src="amr-backend.js"></script>
 <script>
 "use strict";
 /* ============================================================================
@@ -1391,7 +1394,40 @@ function saveState(){
     var w = document.getElementById("storageWarn");
     if(w) w.classList.remove("hidden");
   }
+  queueSync();
 }
+
+/* ── Durable mirror (optional) ───────────────────────────────
+   localStorage above is what the learner sees; this pushes a copy to
+   Supabase so a wiped or lost phone does not take a CE record with
+   it. Strictly fire-and-forget: it never blocks the UI, and if the
+   backend is unconfigured or unreachable the academy is unaffected.
+   saveState() fires on every keystroke in the name field, so the push
+   is debounced rather than sent per character. */
+var COURSE_ID = "hemodynamics";
+var syncTimer = null;
+
+function queueSync(){
+  if(!window.AMRBackend || !AMRBackend.isConfigured()) return;
+  if(syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushSync, 2500);
+}
+function pushSync(){
+  if(syncTimer){ clearTimeout(syncTimer); syncTimer = null; }
+  if(!window.AMRBackend || !AMRBackend.isConfigured()) return;
+  try{
+    AMRBackend.syncAcademy(COURSE_ID, state, {
+      modulesTotal: MODULES.length,
+      courseVersion: typeof COURSE_VERSION !== "undefined" ? COURSE_VERSION : null
+    });
+  }catch(e){}
+}
+/* Someone who passes the final and immediately closes the tab must not
+   lose the record to a pending debounce, so leaving the page pushes now. */
+window.addEventListener("pagehide", pushSync);
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden) pushSync();
+});
 
 /* progression helpers */
 function isUnlocked(modId){

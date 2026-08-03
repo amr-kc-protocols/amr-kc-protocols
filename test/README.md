@@ -1,11 +1,19 @@
-# Kansas Class Builder — tests
+# Tests
 
-Automated pass-through & stress tests for [`kansas-class-builder.html`](../kansas-class-builder.html).
-They launch the real page in headless Chromium, exercise the happy path plus
-edge/stress cases, and assert that every generated packet parses as a valid PDF
-with **zero console errors**.
+Two suites live here:
 
-All test data is synthetic — no real roster or evaluation data is committed.
+- **`kcb.test.mjs`** — pass-through & stress tests for
+  [`kansas-class-builder.html`](../kansas-class-builder.html), driven through
+  headless Chromium.
+- **`backend.test.mjs`** — unit tests for the Supabase sync layer
+  ([`amr-backend.js`](../amr-backend.js)). No browser and no network: the module
+  is loaded against a fake `window` and a scripted Supabase, so the offline and
+  failure paths can be exercised directly.
+- **`sync.e2e.mjs`** — the same sync layer end-to-end, driving the real academy
+  pages and the real Ask the Educator screen in headless Chromium against a
+  scripted stand-in for Supabase.
+
+All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
 ## Run
 
@@ -13,7 +21,13 @@ All test data is synthetic — no real roster or evaluation data is committed.
 cd test
 npm install
 npx playwright install chromium   # first time only, if Chromium isn't already present
-npm test
+npm test                          # both suites
+```
+
+`backend.test.mjs` has no dependencies, so it runs on its own without `npm install`:
+
+```bash
+node backend.test.mjs
 ```
 
 `npm test` exits non-zero if any check fails, so it can gate CI.
@@ -46,4 +60,30 @@ The harness picks a Chromium in this order:
 | S14 | Reset keeps sticky fields (instructor / email / location) |
 | S15 | Generate → edit → regenerate |
 
-When you change the tool, run `npm test` and add a scenario for any new behaviour.
+## What's covered (`backend.test.mjs`)
+
+Grouped by the property being defended:
+
+| Area | Checks |
+|------|--------|
+| Auth | Anonymous sign-in on first use; expired token triggers refresh then retries; a dead refresh token re-signs in; a *transient* refresh failure keeps the existing identity rather than orphaning history |
+| Payload | `user_id` comes from the session, never the caller; module flags normalised; `modules_total` derived; over-long messages truncated to the column limit |
+| Offline | Failed writes queue instead of vanishing; the queue drains on reconnect; `flush()` is a no-op while offline and keeps its items |
+| Retry policy | 4xx dropped (never retried forever); 5xx and 429 queued; items abandoned after the attempt cap |
+| Queue safety | Academy pushes for one course collapse to the newest; Ask messages never collapse; the outbox is capped so it cannot exhaust the storage quota |
+| Degradation | With no URL/key configured, every call is a silent no-op |
+
+## What's covered (`sync.e2e.mjs`)
+
+| Area | Checks |
+|------|--------|
+| All four academies | Page loads clean; progress produces an upsert with the right `course_id`, conflict target, learner name, module state, and server-derived `user_id`; 20 rapid saves collapse to one push |
+| Offline durability | A passing record made offline is queued on the device, survives intact, and drains on reconnect |
+| Degradation | With no backend configured: no errors, no requests, and `localStorage` progress still saved |
+| Ask the Educator | The `100% Anonymous` claim is gone and the honest wording is in place; the message, reply email, `user_id`, and source all reach Supabase; no Apps Script call remains |
+| Ask failure handling | A rejected message does **not** show "Message Sent" — the reason is surfaced and the button re-enables |
+| Ask offline | The message is held on the device and the confirmation says so plainly |
+
+When you change either tool, run `npm test` and add a scenario for any new behaviour.
+
+The database side is tested separately — see [`../supabase/tests`](../supabase/tests).
