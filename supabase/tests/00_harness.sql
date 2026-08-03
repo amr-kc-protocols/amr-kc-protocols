@@ -6,9 +6,14 @@
 -- auth.users, auth.uid(), and the three roles the policies reference.
 create schema if not exists auth;
 
+-- Only the columns the migrations actually read. email_confirmed_at and
+-- is_anonymous matter: is_educator() checks both, so a test harness
+-- missing them would let the educator checks pass for the wrong reason.
 create table if not exists auth.users (
-  id uuid primary key default gen_random_uuid(),
-  email text
+  id                 uuid primary key default gen_random_uuid(),
+  email              text,
+  email_confirmed_at timestamptz,
+  is_anonymous       boolean not null default false
 );
 
 -- auth.uid() reads the request JWT claims the same way Supabase's does.

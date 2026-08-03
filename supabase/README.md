@@ -56,17 +56,22 @@ Never put the **service role** key in this repo. It bypasses RLS entirely.
 Without this, `POST /auth/v1/signup` returns 422 and every write silently
 queues in the outbox instead of landing.
 
-### 3. Apply the migration
+### 3. Apply the migrations
 
-Either paste [`migrations/20260803000000_init_academy_backend.sql`](migrations/20260803000000_init_academy_backend.sql)
-into the SQL editor and run it, or use the CLI:
+Run both files in [`migrations/`](migrations), in filename order — paste each
+into the SQL editor, or use the CLI:
 
 ```bash
 supabase link --project-ref <your-ref>
 supabase db push
 ```
 
-The migration is idempotent — re-running it is safe.
+| File | Adds |
+|------|------|
+| `20260803000000_init_academy_backend.sql` | completions + Ask tables, merge trigger, learner RLS |
+| `20260803010000_educator_access.sql` | educator allowlist, read-all policies, verified `learner_email` |
+
+Both are idempotent — re-running them is safe.
 
 ### 4. Point the app at the project
 
@@ -95,6 +100,60 @@ tab for the response body.
 
 ---
 
+## Setting up the educator dashboard
+
+`educator-dashboard.html` shows every learner's completions and the Ask the
+Educator inbox. Two steps to get in.
+
+### 1. Create the educator account
+
+*Authentication → Users → Add user*. Use a real address and tick **Auto
+Confirm User**, or confirm it from the emailed link. Confirmation is not
+optional: `is_educator()` requires `email_confirmed_at` to be set, so an
+unconfirmed account gets nothing.
+
+### 2. Add the address to the allowlist
+
+```sql
+insert into public.educators (email, note)
+values ('you@example.com', 'clinical educator');
+```
+
+That is the whole grant. To revoke, delete the row — access stops on the
+next request, with no code change and no redeploy.
+
+```sql
+delete from public.educators where email = 'someone@example.com';
+```
+
+Then open `educator-dashboard.html` and sign in.
+
+### What the dashboard can and cannot do
+
+It is **read-only by construction**. There is no update or delete policy on
+`academy_completions` beyond a learner's own row, so an educator cannot edit
+or destroy a record from the client even deliberately. Corrections belong in
+the Supabase dashboard, where they leave a trail.
+
+The page itself is a public file — anyone can open it. That is not a leak.
+Signing in as a non-allowlisted account loads a working page showing zero
+rows, because RLS decides what comes back, not the JavaScript. Nothing is
+hidden in the client as a security measure, since that would not be one.
+
+### If the dashboard shows nothing
+
+An educator who is not on the allowlist sees an empty table rather than an
+error, because that is what RLS returns. The page says as much when both
+lists come back empty. To check which case you are in:
+
+```sql
+select public.is_educator();   -- run while signed in as the educator
+```
+
+`false` means the account is not allowlisted, or its email is unconfirmed.
+
+---
+
 ## What the schema guarantees
 
 **Completions only ever move forward.** A learner may have the same course open
@@ -111,20 +170,40 @@ so a delete affects zero rows regardless of what the client sends.
 **Counters are derived server-side.** `modules_passed` is recomputed from the
 merged JSON rather than trusted from the client.
 
-**Ask messages are write-only.** The client can insert but not read them. Read
-them in the Supabase dashboard, or through a service-role view if you later
-build an educator dashboard. A trigger caps submissions at 10 per user per hour.
+**Ask messages are readable only by educators.** A learner can insert but
+cannot read any message, including their own. A trigger caps submissions at 10
+per user per hour.
+
+**`learner_email` cannot be spoofed.** It is stamped server-side from
+`auth.users` on every write and only when the address is confirmed, so the
+client can neither set it nor clear it. Once recorded, a later push from a
+device that has not linked an email will not drop it.
 
 Each of these is covered by a test — see [`tests/`](tests).
 
 ## Privacy note
 
-Ask the Educator submissions carry the submitter's anonymous `user_id`. That is
-a deliberate change: the previous Google Apps Script version stored nothing
+Ask the Educator submissions carry the submitter's `user_id`. That is a
+deliberate change: the previous Google Apps Script version stored nothing
 identifying, and the app's *"100% Anonymous"* badge was removed in the same
 commit so the interface does not overstate the privacy on offer. The badge now
-reads *"No name required"*, which is accurate — no name is collected, and the
-account id maps to a person only if that person has linked an email.
+reads *"No name required"*, which is accurate — no name is collected.
+
+Once a learner links an email to save their Academy progress, their account
+stops being anonymous, and their questions would become attributable through
+that `user_id`. Linking progress is not consent to be named on a question, so
+two things keep those separate:
+
+- The dashboard's inbox query never selects `user_id` or joins to
+  `auth.users`. It shows the message, the reply address the sender chose to
+  type, and nothing else. A test asserts this.
+- The Ask screen says so plainly, rather than implying a stronger anonymity
+  than the schema provides.
+
+That protection is at the application layer. Anyone with the **service role**
+key or SQL editor access can still join `ask_educator_messages.user_id` to
+`auth.users` — so treat that key as the sensitive thing it is, and know that
+this promise is one of practice, not of cryptography.
 
 ## Tests
 
@@ -137,7 +216,8 @@ cd test && node backend.test.mjs # client sync logic      (no dependencies)
 
 - **VTA academy** (`vta/academy.html`) uses a different architecture and is not
   wired up.
-- **Educator-facing dashboard.** Read completions and messages in the Supabase
-  dashboard for now.
 - **The Caregiver Form** in `index.html` still logs to Google Apps Script via
-  `SCRIPT_URL`; only Ask the Educator was migrated.
+  `SCRIPT_URL`; only Ask the Educator was migrated. It still uses the
+  `mode:'no-cors'` pattern, so it reports success even when a write fails.
+- **Old Ask submissions** remain in the Google Sheet. Nothing migrates them.
+- **CSV export** from the dashboard.

@@ -365,5 +365,144 @@ await check("flush is a no-op while offline", async () => {
   assert.equal(JSON.parse(store.get("amr_backend_outbox_v1")).length, 1, "and must keep the item");
 });
 
+// ── educator API ─────────────────────────────────────────────
+console.log("\n=== educator API ===");
+
+const EDU_SESSION = {
+  access_token: "jwt-edu", refresh_token: "refresh-edu", expires_in: 3600,
+  user: { id: "edu-uuid", is_anonymous: false, email: "hunter@example.com" },
+};
+
+await check("password sign-in stores a session on its own key", async () => {
+  const { win, calls, store } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    return res(404, null);
+  });
+  const r = await win.AMRBackend.educator.signIn("hunter@example.com", "hunter2");
+  assert.equal(r.ok, true);
+  assert.deepEqual(calls[0].body, { email: "hunter@example.com", password: "hunter2" });
+  assert.ok(store.get("amr_backend_educator_v1"), "educator session stored");
+  assert.equal(store.get("amr_backend_session_v1"), undefined,
+    "must NOT have touched the learner session key");
+  assert.equal(win.AMRBackend.educator.status().email, "hunter@example.com");
+});
+
+await check("educator sign-in does not clobber an existing learner session", async () => {
+  const { win, store } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    return res(201, null);
+  });
+  // Learner uses an academy first, in this same browser.
+  await win.AMRBackend.syncAcademy("hemodynamics", ACADEMY_STATE);
+  const learnerBefore = JSON.parse(store.get("amr_backend_session_v1"));
+  assert.equal(learnerBefore.user_id, "user-uuid-1");
+
+  await win.AMRBackend.educator.signIn("hunter@example.com", "hunter2");
+  const learnerAfter = JSON.parse(store.get("amr_backend_session_v1"));
+  assert.equal(learnerAfter.user_id, "user-uuid-1",
+    "the learner's anonymous identity must survive an educator login");
+  assert.equal(win.AMRBackend.status().userId, "user-uuid-1");
+  assert.equal(win.AMRBackend.educator.status().userId, "edu-uuid");
+});
+
+await check("educator sign-out leaves the learner session intact", async () => {
+  const { win, store } = makeEnv(async (path) => {
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    if (path === "/auth/v1/logout") return res(204, null);
+    return res(201, null);
+  });
+  await win.AMRBackend.syncAcademy("hemodynamics", ACADEMY_STATE);
+  await win.AMRBackend.educator.signIn("hunter@example.com", "hunter2");
+  await win.AMRBackend.educator.signOut();
+  assert.equal(win.AMRBackend.educator.status().signedIn, false);
+  assert.ok(store.get("amr_backend_session_v1"), "learner session must remain");
+  assert.equal(win.AMRBackend.status().userId, "user-uuid-1");
+});
+
+await check("bad credentials give a clear message, not a crash", async () => {
+  const { win } = makeEnv(async () => res(400, { error_description: "Invalid login credentials" }));
+  const r = await win.AMRBackend.educator.signIn("hunter@example.com", "wrong");
+  assert.equal(r.ok, false);
+  assert.match(r.error, /Invalid login credentials/);
+});
+
+await check("an unreachable server is reported as such", async () => {
+  const { win } = makeEnv(async () => { throw new Error("offline"); });
+  const r = await win.AMRBackend.educator.signIn("hunter@example.com", "hunter2");
+  assert.equal(r.ok, false);
+  assert.match(r.error, /Could not reach the server/);
+});
+
+await check("listCompletions requests the right columns and ordering", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    if (path.startsWith("/rest/v1/academy_completions")) {
+      return res(200, [{ course_id: "hemodynamics", learner_name: "Jane Medic, NRP" }]);
+    }
+    return res(404, null);
+  });
+  await win.AMRBackend.educator.signIn("hunter@example.com", "hunter2");
+  const r = await win.AMRBackend.educator.listCompletions();
+  assert.equal(r.ok, true);
+  assert.equal(r.rows.length, 1);
+  const q = calls.find((c) => c.path.startsWith("/rest/v1/academy_completions"));
+  assert.match(q.path, /learner_email/, "the verified email is what makes a record identifiable");
+  assert.match(q.path, /order=updated_at\.desc/);
+  assert.equal(q.headers["Authorization"], "Bearer jwt-edu", "must use the educator token");
+});
+
+await check("the Ask inbox never requests the submitter's account email", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    if (path.startsWith("/rest/v1/ask_educator_messages")) return res(200, []);
+    return res(404, null);
+  });
+  await win.AMRBackend.educator.signIn("hunter@example.com", "hunter2");
+  await win.AMRBackend.educator.listAskMessages();
+  const q = calls.find((c) => c.path.startsWith("/rest/v1/ask_educator_messages"));
+  assert.match(q.path, /reply_email/, "the address they chose to type is fine");
+  assert.ok(!/user_id/.test(q.path),
+    "linking an email to save progress must not deanonymise their questions");
+});
+
+await check("a non-educator gets zero rows, not an error", async () => {
+  // RLS returns an empty set rather than a failure for a signed-in
+  // non-educator, and the dashboard must render that honestly.
+  const { win } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    return res(200, []);
+  });
+  await win.AMRBackend.educator.signIn("nobody@example.com", "pw");
+  const r = await win.AMRBackend.educator.listCompletions();
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.rows, []);
+});
+
+await check("reads before sign-in ask for sign-in rather than failing oddly", async () => {
+  const { win, calls } = makeEnv(async () => res(200, []));
+  const r = await win.AMRBackend.educator.listCompletions();
+  assert.equal(r.ok, false);
+  assert.equal(r.needsSignIn, true);
+  assert.equal(calls.length, 0, "must not call out with no session");
+});
+
+await check("an expired educator session asks for re-login, never re-signs anonymously", async () => {
+  const { win, calls, store } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=refresh_token")) return res(400, { message: "bad" });
+    if (path === "/auth/v1/signup") return res(200, SESSION);
+    return res(200, []);
+  });
+  store.set("amr_backend_educator_v1", JSON.stringify({
+    access_token: "old", refresh_token: "dead", expires_at_ms: Date.now() - 1000,
+    user_id: "edu-uuid", email: "hunter@example.com",
+  }));
+  const r = await win.AMRBackend.educator.listCompletions();
+  assert.equal(r.needsSignIn, true, "should ask for a fresh sign-in");
+  assert.ok(!calls.some((c) => c.path === "/auth/v1/signup"),
+    "an educator whose session died must never silently become an anonymous user");
+});
+
 console.log(`\n${PASS} passed, ${FAIL} failed\n`);
 process.exit(FAIL ? 1 : 0);

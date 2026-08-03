@@ -28,6 +28,13 @@ Supabase so a CE record survives a lost or wiped phone. The app stays
 offline-first: `localStorage` remains the source of truth for what a learner
 sees, and writes that cannot go out are queued and retried on reconnect.
 
+Learners can optionally link an email, which turns a self-typed name into a
+verified identity and lets their progress follow them to another device.
+
+`educator-dashboard.html` shows completions and the Ask the Educator inbox to
+approved educator accounts. It is read-only: nothing there can edit or delete
+a record. Access is an allowlist in the database, not a check in the page.
+
 Setup lives in [`supabase/README.md`](supabase/README.md). Until a project is
 configured the sync layer is an inert no-op and every page behaves as it did
 before.

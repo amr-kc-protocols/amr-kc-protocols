@@ -43,9 +43,11 @@ export PGDATABASE
 echo "=== harness ==="
 psql -q -v ON_ERROR_STOP=1 -f 00_harness.sql
 
-echo "=== migration ==="
-psql -q -v ON_ERROR_STOP=1 -f ../migrations/20260803000000_init_academy_backend.sql 2>&1 \
-  | grep -v 'does not exist, skipping' || true
+echo "=== migrations ==="
+for m in ../migrations/*.sql; do
+  echo "--- $(basename "$m")"
+  psql -q -v ON_ERROR_STOP=1 -f "$m" 2>&1 | grep -v 'does not exist, skipping' || true
+done
 
 echo
 echo "=== 01_merge ==="
@@ -55,6 +57,11 @@ echo
 echo "=== 02_rls ==="
 psql -v ON_ERROR_STOP=1 -f 02_rls.sql 2>&1 \
   | grep -v '^SET$\|^BEGIN$\|^COMMIT$\|^GRANT$\|^REVOKE$\|^DO$'
+
+echo
+echo "=== 03_educator ==="
+psql -v ON_ERROR_STOP=1 -f 03_educator.sql 2>&1 \
+  | grep -v '^SET$\|^BEGIN$\|^COMMIT$\|^GRANT$\|^REVOKE$\|^DO$\|^UPDATE [0-9]'
 
 echo
 if psql -tAc "select 1" >/dev/null 2>&1; then

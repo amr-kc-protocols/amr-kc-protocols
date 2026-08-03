@@ -23,25 +23,40 @@ const SUPA = "http://127.0.0.1:54321";
 const received = [];
 
 // ── fake Supabase ────────────────────────────────────────────
+// Default behaviour serves the learner flows (anonymous sign-in, accept
+// every write). Assigning `apiHandler` swaps in a scripted response set
+// for one block of tests; set it back to null to restore the default.
+let apiHandler = null;
+
+const CORS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "*",
+};
+
 const api = http.createServer((req, res) => {
   let body = "";
   req.on("data", (c) => (body += c));
   req.on("end", () => {
-    received.push({ url: req.url, method: req.method, body: body ? JSON.parse(body) : null });
-    res.writeHead(req.url.startsWith("/auth/v1/signup") ? 200 : 201, {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "*",
-      "Access-Control-Allow-Methods": "*",
-    });
-    if (req.method === "OPTIONS") return res.end();
-    if (req.url.startsWith("/auth/v1/signup")) {
-      return res.end(JSON.stringify({
+    const parsed = body ? JSON.parse(body) : null;
+    received.push({ url: req.url, method: req.method, body: parsed });
+
+    // Preflight never carries a body and must not reach the handlers.
+    if (req.method === "OPTIONS") { res.writeHead(204, CORS); return res.end(); }
+
+    let status = 201, payload = null;
+    if (apiHandler) {
+      [status, payload] = apiHandler(req, res, parsed);
+    } else if (req.url.startsWith("/auth/v1/signup")) {
+      status = 200;
+      payload = {
         access_token: "jwt-e2e", refresh_token: "refresh-e2e", expires_in: 3600,
         user: { id: "e2e-user-uuid", is_anonymous: true, email: "" },
-      }));
+      };
     }
-    res.end("");
+    res.writeHead(status, CORS);
+    res.end(payload == null ? "" : JSON.stringify(payload));
   });
 });
 await new Promise((r) => api.listen(54321, "127.0.0.1", r));
@@ -315,6 +330,273 @@ async function openAsk(page) {
   check("the message is queued on the device", box.length === 1, "outbox " + box.length);
   check("the queued message is intact",
     box[0] && /basement with no signal/.test(box[0].body.message));
+  await ctx.close();
+}
+
+
+// ── Email linking prompt ─────────────────────────────────────
+{
+  console.log("\n--- email linking prompt (hemodynamics) ---");
+  received.length = 0;
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/hemodynamics-academy.html", { waitUntil: "domcontentloaded" });
+
+  check("the prompt is shown when a backend is configured",
+    await page.isVisible("#linkBox"));
+  check("it does not block the module list", await page.isVisible("#modList"));
+
+  await page.click("#linkToggle");
+  await page.fill("#linkEmail", "jane.medic@example.com");
+  await page.click("#linkSave");
+  await page.waitForTimeout(900);
+
+  const put = received.find((r) => r.url === "/auth/v1/user" && r.method === "PUT");
+  check("linkEmail PUTs the address", !!put,
+    received.map((r) => r.method + " " + r.url).join(", "));
+  if (put) check("the typed address is sent", put.body.email === "jane.medic@example.com");
+
+  const msg = await page.textContent("#linkMsg");
+  check("it says to check the inbox rather than claiming success",
+    /check .*jane\.medic@example\.com/i.test(msg) && /confirm/i.test(msg), msg);
+  await ctx.close();
+}
+
+{
+  console.log("\n--- email linking: hidden with no backend ---");
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  await page.goto("http://127.0.0.1:8099/hemodynamics-academy.html", { waitUntil: "domcontentloaded" });
+  check("the prompt stays hidden when unconfigured", !(await page.isVisible("#linkBox")));
+  check("no page errors", errors.length === 0, errors.join("\n"));
+  await ctx.close();
+}
+
+// ── Educator dashboard ───────────────────────────────────────
+const COMPLETION_ROWS = [
+  { course_id: "hemodynamics", course_version: "2.0", learner_name: "Jane Medic, NRP",
+    learner_email: "jane.medic@example.com", modules_passed: 8, modules_total: 8,
+    final_passed: true, final_best: 91, completed_at: "2026-08-01T10:00:00Z",
+    updated_at: "2026-08-02T10:00:00Z", user_id: "u1" },
+  { course_id: "airway", course_version: null, learner_name: "Sam Medic, EMT",
+    learner_email: null, modules_passed: 3, modules_total: 8,
+    final_passed: false, final_best: 0, completed_at: null,
+    updated_at: "2026-08-03T10:00:00Z", user_id: "u2" },
+];
+const ASK_ROWS = [
+  { id: "m1", message: "What is the MAP target after ROSC?", reply_email: "medic@example.com",
+    source: "ask", created_at: "2026-08-03T09:00:00Z" },
+  { id: "m2", message: "<img src=x onerror=alert(1)> injection attempt", reply_email: null,
+    source: "ask", created_at: "2026-08-02T09:00:00Z" },
+];
+
+function dashHandler({ signInOk = true, rows = COMPLETION_ROWS, ask = ASK_ROWS } = {}) {
+  return (req, res, body) => {
+    if (req.url.startsWith("/auth/v1/token?grant_type=password")) {
+      if (!signInOk) return [400, { error_description: "Invalid login credentials" }];
+      return [200, {
+        access_token: "jwt-edu", refresh_token: "refresh-edu", expires_in: 3600,
+        user: { id: "edu-uuid", is_anonymous: false, email: "hunter@example.com" },
+      }];
+    }
+    if (req.url.startsWith("/rest/v1/academy_completions")) return [200, rows];
+    if (req.url.startsWith("/rest/v1/ask_educator_messages")) return [200, ask];
+    if (req.url === "/auth/v1/logout") return [204, null];
+    return [404, null];
+  };
+}
+
+async function openDash(page) {
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/educator-dashboard.html", { waitUntil: "domcontentloaded" });
+}
+
+{
+  console.log("\n--- educator dashboard: sign in and read ---");
+  received.length = 0;
+  apiHandler = dashHandler();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  await openDash(page);
+
+  check("the sign-in gate is shown first", await page.isVisible("#signinCard"));
+  check("no data is visible before signing in", !(await page.isVisible("#dash")));
+
+  await page.fill("#email", "hunter@example.com");
+  await page.fill("#password", "correct-horse");
+  await page.click("#signinBtn");
+  await page.waitForSelector("#dash", { state: "visible" });
+
+  check("the dashboard appears after sign-in", await page.isVisible("#dash"));
+  check("the signed-in address is shown", (await page.textContent("#who")).includes("hunter@example.com"));
+
+  const rows = await page.$$eval("#completionsBody tr", (trs) =>
+    trs.map((tr) => Array.from(tr.children).map((td) => td.textContent.trim())));
+  check("both completions render", rows.length === 2, JSON.stringify(rows));
+  check("a verified email is shown", rows.some((r) => r[1] === "jane.medic@example.com"));
+  check("an unlinked record is flagged, not left blank",
+    rows.some((r) => /not linked/i.test(r[1])), JSON.stringify(rows.map((r) => r[1])));
+  check("course names are humanised", rows.some((r) => r[2] === "Hemodynamics"));
+  check("module counts render", rows.some((r) => r[3] === "8 / 8"));
+  check("status pills render", rows.some((r) => /Completed/.test(r[4])) && rows.some((r) => /In progress/.test(r[4])));
+
+  check("no page errors", errors.length === 0, errors.join("\n"));
+  await ctx.close();
+}
+
+{
+  console.log("\n--- educator dashboard: filters and sorting ---");
+  apiHandler = dashHandler();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await openDash(page);
+  await page.fill("#email", "hunter@example.com");
+  await page.fill("#password", "x");
+  await page.click("#signinBtn");
+  await page.waitForSelector("#dash", { state: "visible" });
+
+  await page.selectOption("#courseFilter", "airway");
+  await page.waitForTimeout(150);
+  let names = await page.$$eval("#completionsBody tr td:first-child", (t) => t.map((x) => x.textContent.trim()));
+  check("course filter narrows the table", names.length === 1 && names[0] === "Sam Medic, EMT", JSON.stringify(names));
+
+  await page.selectOption("#courseFilter", "");
+  await page.selectOption("#statusFilter", "passed");
+  await page.waitForTimeout(150);
+  names = await page.$$eval("#completionsBody tr td:first-child", (t) => t.map((x) => x.textContent.trim()));
+  check("status filter narrows the table", names.length === 1 && names[0] === "Jane Medic, NRP", JSON.stringify(names));
+
+  await page.selectOption("#statusFilter", "");
+  await page.fill("#q", "sam");
+  await page.waitForTimeout(150);
+  names = await page.$$eval("#completionsBody tr td:first-child", (t) => t.map((x) => x.textContent.trim()));
+  check("search matches on name", names.length === 1 && names[0] === "Sam Medic, EMT", JSON.stringify(names));
+
+  await page.fill("#q", "jane.medic@example.com");
+  await page.waitForTimeout(150);
+  names = await page.$$eval("#completionsBody tr td:first-child", (t) => t.map((x) => x.textContent.trim()));
+  check("search matches on verified email", names.length === 1 && names[0] === "Jane Medic, NRP");
+
+  await page.fill("#q", "");
+  await page.click('th[data-sort="learner_name"]');
+  await page.waitForTimeout(150);
+  names = await page.$$eval("#completionsBody tr td:first-child", (t) => t.map((x) => x.textContent.trim()));
+  check("sorting by name ascends", names[0] === "Jane Medic, NRP", JSON.stringify(names));
+  await page.click('th[data-sort="learner_name"]');
+  await page.waitForTimeout(150);
+  names = await page.$$eval("#completionsBody tr td:first-child", (t) => t.map((x) => x.textContent.trim()));
+  check("clicking again reverses it", names[0] === "Sam Medic, EMT", JSON.stringify(names));
+  await ctx.close();
+}
+
+{
+  console.log("\n--- educator dashboard: Ask inbox ---");
+  apiHandler = dashHandler();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const alerts = [];
+  page.on("dialog", (d) => { alerts.push(d.message()); d.dismiss(); });
+  await openDash(page);
+  await page.fill("#email", "hunter@example.com");
+  await page.fill("#password", "x");
+  await page.click("#signinBtn");
+  await page.waitForSelector("#dash", { state: "visible" });
+
+  await page.click("#tab-ask");
+  await page.waitForSelector("#panel-ask", { state: "visible" });
+  const cells = await page.$$eval("#askBody tr", (trs) =>
+    trs.map((tr) => Array.from(tr.children).map((td) => td.textContent.trim())));
+  check("messages render", cells.length === 2, JSON.stringify(cells));
+  check("the message body is shown", cells.some((c) => /MAP target after ROSC/.test(c[1])));
+  check("a reply address is shown", cells.some((c) => /medic@example\.com/.test(c[2])));
+  check("a missing reply address is stated", cells.some((c) => /no reply address/i.test(c[2])));
+
+  // The injection row must be rendered as text, never executed.
+  check("markup in a message is not executed", alerts.length === 0, JSON.stringify(alerts));
+  const injected = await page.$$eval("#askBody img", (n) => n.length);
+  check("no element is created from message content", injected === 0);
+  check("the raw text is displayed instead",
+    cells.some((c) => c[1].includes("<img src=x onerror=alert(1)>")), JSON.stringify(cells.map((c) => c[1])));
+  await ctx.close();
+}
+
+{
+  console.log("\n--- educator dashboard: wrong password ---");
+  apiHandler = dashHandler({ signInOk: false });
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await openDash(page);
+  await page.fill("#email", "hunter@example.com");
+  await page.fill("#password", "wrong");
+  await page.click("#signinBtn");
+  await page.waitForTimeout(800);
+  check("the dashboard stays closed", !(await page.isVisible("#dash")));
+  const m = await page.textContent("#signinMsg");
+  check("the failure is explained", /Invalid login credentials/.test(m), m);
+  await ctx.close();
+}
+
+{
+  console.log("\n--- educator dashboard: signed in but not an educator ---");
+  // RLS returns an empty set rather than an error. The page must not
+  // present that as "no completions exist yet" without qualification.
+  apiHandler = dashHandler({ rows: [], ask: [] });
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await openDash(page);
+  await page.fill("#email", "nobody@example.com");
+  await page.fill("#password", "x");
+  await page.click("#signinBtn");
+  await page.waitForSelector("#dash", { state: "visible" });
+  await page.waitForTimeout(500);
+  const note = await page.textContent("#loadMsg");
+  check("the empty result is explained honestly",
+    /allowlist/i.test(note), note);
+  await ctx.close();
+}
+
+{
+  console.log("\n--- educator dashboard: unconfigured build ---");
+  apiHandler = dashHandler();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  await page.goto("http://127.0.0.1:8099/educator-dashboard.html", { waitUntil: "domcontentloaded" });
+  check("it explains that no backend is set", await page.isVisible("#unconfigured"));
+  check("the sign-in form is not offered", !(await page.isVisible("#signinCard")));
+  check("no page errors", errors.length === 0, errors.join("\n"));
+  await ctx.close();
+}
+
+{
+  console.log("\n--- educator dashboard: sign out ---");
+  apiHandler = dashHandler();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await openDash(page);
+  await page.fill("#email", "hunter@example.com");
+  await page.fill("#password", "x");
+  await page.click("#signinBtn");
+  await page.waitForSelector("#dash", { state: "visible" });
+  await page.click("#signOutBtn");
+  await page.waitForSelector("#signinCard", { state: "visible" });
+  check("signing out returns to the gate", !(await page.isVisible("#dash")));
+  const left = await page.evaluate(() => localStorage.getItem("amr_backend_educator_v1"));
+  check("the educator session is cleared from storage", left === null, String(left));
+
+  // And it survives a reload as signed out.
+  await page.reload({ waitUntil: "domcontentloaded" });
+  check("still signed out after a reload", await page.isVisible("#signinCard"));
   await ctx.close();
 }
 
