@@ -130,6 +130,38 @@ assessment — the disclaimer on it says so.
 
 ---
 
+## Admin mode (unlocking every module)
+
+The **Admin** button in the footer unlocks every module and the final exam, so
+you can open any quiz, drag-and-drop, scenario, or the exam without completing
+the prerequisites first.
+
+Unlocking asks for an **educator sign-in** — the same email and password as
+`educator-dashboard.html`, checked against `is_educator()` in the database.
+Signing in successfully is not enough on its own: the account must also be on
+the educator allowlist, so a valid password for a non-allowlisted account is
+refused. Setup is in [`../supabase/README.md`](../supabase/README.md).
+
+Once unlocked, the setting persists on that device until you click **Admin ✓**
+to turn it off. It does not follow you to another device.
+
+This replaced a password constant that lived in `app.js`. That meant the secret
+shipped to every visitor of a public site and remains in the repository's
+history — if it was ever reused elsewhere, change it there. The `?admin` and
+`#admin` URL shortcuts were removed at the same time, because they bypassed the
+gate entirely and would have made the sign-in decorative.
+
+**What this gate is and is not.** The modules it unlocks contain course content
+a learner reaches anyway by progressing, so this is a workflow convenience, not
+confidentiality. The unlocked state is still a local flag that someone could set
+by hand in devtools. What changed is that there is no longer a reusable
+credential in the source to leak.
+
+If no course record system is configured, the button explains that admin mode
+is unavailable rather than falling back to something weaker.
+
+---
+
 ## Customizing
 
 The content lives entirely in `app.js` inside the `MODULES` array. Each module is a self-contained object with `lessons`, `quiz`, `match`, and `scenario` properties. To edit lesson text, quiz questions, drag-and-drop items, or scenario choices, edit `app.js` directly. No build step required — refresh the browser and you'll see the changes.

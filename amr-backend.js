@@ -534,6 +534,30 @@
     };
   }
 
+  /* Ask the database whether the signed-in account is on the educator
+     allowlist. Being signed in is not the same as being authorised: the
+     answer comes from is_educator(), which also requires a confirmed
+     email, so it cannot be faked by signing up with the right address. */
+  function educatorVerify() {
+    if (!configured()) return Promise.resolve({ ok: false, error: "Backend is not configured." });
+    return educatorStore.get().then(function (session) {
+      if (!session) return { ok: false, error: "Not signed in.", needsSignIn: true };
+      return authed("/rest/v1/rpc/is_educator", { method: "POST", body: {} }, session, educatorStore)
+        .then(function (res) {
+          if (res.ok) return { ok: true, isEducator: res.data === true };
+          if (res.status === 401 || res.status === 403) {
+            return { ok: false, error: "Your session expired — sign in again.", needsSignIn: true };
+          }
+          if (res.status === 0) {
+            return { ok: false, error: "Could not reach the server — check your connection." };
+          }
+          return { ok: false, error: (res.data && res.data.message) || "Could not verify access." };
+        });
+    }).catch(function () {
+      return { ok: false, error: "Could not reach the server — check your connection." };
+    });
+  }
+
   /* Shared read helper. Resolves { ok, rows } or { ok:false, error }. */
   function educatorSelect(path) {
     if (!configured()) return Promise.resolve({ ok: false, error: "Backend is not configured." });
@@ -612,6 +636,7 @@
       signIn: educatorSignIn,
       signOut: educatorSignOut,
       status: educatorStatus,
+      verify: educatorVerify,
       listCompletions: listCompletions,
       listAskMessages: listAskMessages,
       listCaregiverForms: listCaregiverForms

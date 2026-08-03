@@ -605,6 +605,55 @@ await check("listCaregiverForms queries the right table and order", async () => 
   assert.equal(q.headers["Authorization"], "Bearer jwt-edu");
 });
 
+await check("verify() asks the database, not the client", async () => {
+  const { win, calls } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    if (path === "/rest/v1/rpc/is_educator") return res(200, true);
+    return res(404, null);
+  });
+  await win.AMRBackend.educator.signIn("hunter@example.com", "x");
+  const r = await win.AMRBackend.educator.verify();
+  assert.equal(r.ok, true);
+  assert.equal(r.isEducator, true);
+  const rpc = calls.find((c) => c.path === "/rest/v1/rpc/is_educator");
+  assert.equal(rpc.method, "POST");
+  assert.equal(rpc.headers["Authorization"], "Bearer jwt-edu");
+});
+
+await check("signed in but not allowlisted verifies as NOT an educator", async () => {
+  // The distinction the VTA admin unlock depends on: valid credentials are
+  // not authorisation.
+  const { win } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    if (path === "/rest/v1/rpc/is_educator") return res(200, false);
+    return res(404, null);
+  });
+  await win.AMRBackend.educator.signIn("nobody@example.com", "x");
+  const r = await win.AMRBackend.educator.verify();
+  assert.equal(r.ok, true);
+  assert.equal(r.isEducator, false, "must not treat a signed-in stranger as authorised");
+});
+
+await check("verify() before sign-in asks for sign-in", async () => {
+  const { win, calls } = makeEnv(async () => res(200, true));
+  const r = await win.AMRBackend.educator.verify();
+  assert.equal(r.ok, false);
+  assert.equal(r.needsSignIn, true);
+  assert.equal(calls.length, 0);
+});
+
+await check("verify() reports an unreachable server rather than claiming access", async () => {
+  const { win } = makeEnv(async (path) => {
+    if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
+    throw new Error("offline");
+  });
+  await win.AMRBackend.educator.signIn("hunter@example.com", "x");
+  const r = await win.AMRBackend.educator.verify();
+  assert.equal(r.ok, false);
+  assert.ok(!r.isEducator, "a network failure must never read as authorised");
+  assert.match(r.error, /Could not reach the server/);
+});
+
 await check("an expired educator session asks for re-login, never re-signs anonymously", async () => {
   const { win, calls, store } = makeEnv(async (path) => {
     if (path.startsWith("/auth/v1/token?grant_type=refresh_token")) return res(400, { message: "bad" });

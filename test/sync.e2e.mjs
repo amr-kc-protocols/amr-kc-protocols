@@ -951,6 +951,156 @@ async function fillCaregiverForm(page) {
   apiHandler = null;
 }
 
+
+// ── VTA admin unlock ─────────────────────────────────────────
+{
+  console.log("\n--- VTA admin unlock: no password in the source ---");
+  const appJs = fs.readFileSync(path.join(ROOT, "vta/app.js"), "utf8");
+  check("no ADMIN_PASSWORD constant remains", !/ADMIN_PASSWORD/.test(appJs));
+  check("the old literal is gone", !/Brbull/i.test(appJs));
+  check("the ?admin URL bypass is gone",
+    !/URLSearchParams\(location\.search\)\.has\("admin"\)/.test(appJs));
+}
+
+{
+  console.log("\n--- VTA admin unlock: allowlisted educator ---");
+  received.length = 0;
+  apiHandler = (req) => {
+    if (req.url.startsWith("/auth/v1/token?grant_type=password")) {
+      return [200, {
+        access_token: "jwt-edu", refresh_token: "refresh-edu", expires_in: 3600,
+        user: { id: "edu-uuid", is_anonymous: false, email: "hunter@example.com" },
+      }];
+    }
+    if (req.url === "/rest/v1/rpc/is_educator") return [200, true];
+    if (req.url === "/auth/v1/signup") {
+      return [200, { access_token: "jwt-e2e", refresh_token: "r", expires_in: 3600,
+        user: { id: "e2e-user-uuid", is_anonymous: true, email: "" } }];
+    }
+    return [201, null];
+  };
+
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/vta/academy.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof Store !== "undefined" && !!Store.state);
+
+  check("admin is off by default",
+    await page.evaluate(() => localStorage.getItem("vta_admin") === null));
+
+  await page.click("#adminButton");
+  await page.waitForSelector(".admin-overlay", { state: "visible" });
+  check("the sign-in overlay opens", await page.isVisible("#vta-admin-email"));
+  check("the password field is masked",
+    (await page.getAttribute("#vta-admin-pw", "type")) === "password");
+
+  await page.fill("#vta-admin-email", "hunter@example.com");
+  await page.fill("#vta-admin-pw", "correct-horse");
+  await page.click("#vta-admin-submit");
+  // A successful unlock reloads the page. Wait for the footer button to come
+  // back showing the unlocked state rather than reading storage mid-navigation
+  // — and it asserts the UI actually reflects admin mode, not just the flag.
+  await page.waitForFunction(
+    () => {
+      const b = document.getElementById("adminButton");
+      return !!b && b.textContent.indexOf("\u2713") !== -1;
+    },
+    { timeout: 15000 });
+
+  check("credentials were sent to the auth endpoint",
+    received.some((r) => r.url.startsWith("/auth/v1/token?grant_type=password") && r.method === "POST"));
+  check("authorisation was checked against the database",
+    received.some((r) => r.url === "/rest/v1/rpc/is_educator" && r.method === "POST"));
+  check("admin mode is now on",
+    await page.evaluate(() => localStorage.getItem("vta_admin") === "1"));
+  check("locked modules are now reachable",
+    await page.evaluate(() => Store.isModuleUnlocked(5) === true));
+  await ctx.close();
+}
+
+{
+  console.log("\n--- VTA admin unlock: valid login, NOT allowlisted ---");
+  received.length = 0;
+  apiHandler = (req) => {
+    if (req.url.startsWith("/auth/v1/token?grant_type=password")) {
+      return [200, {
+        access_token: "jwt-edu", refresh_token: "refresh-edu", expires_in: 3600,
+        user: { id: "other-uuid", is_anonymous: false, email: "nobody@example.com" },
+      }];
+    }
+    if (req.url === "/rest/v1/rpc/is_educator") return [200, false];  // signed in, not authorised
+    return [201, null];
+  };
+
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/vta/academy.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof Store !== "undefined" && !!Store.state);
+
+  await page.click("#adminButton");
+  await page.waitForSelector(".admin-overlay", { state: "visible" });
+  await page.fill("#vta-admin-email", "nobody@example.com");
+  await page.fill("#vta-admin-pw", "correct-password");
+  await page.click("#vta-admin-submit");
+  await page.waitForTimeout(1200);
+
+  const msg = await page.textContent("#vta-admin-status");
+  check("a correct password alone does not unlock", /not on the educator allowlist/i.test(msg), msg);
+  check("admin mode stays off",
+    await page.evaluate(() => localStorage.getItem("vta_admin") === null));
+  check("the overlay stays open", await page.isVisible(".admin-overlay"));
+  await ctx.close();
+}
+
+{
+  console.log("\n--- VTA admin unlock: wrong password ---");
+  apiHandler = (req) => {
+    if (req.url.startsWith("/auth/v1/token?grant_type=password")) {
+      return [400, { error_description: "Invalid login credentials" }];
+    }
+    return [201, null];
+  };
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.addInitScript((url) => {
+    window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
+  }, SUPA);
+  await page.goto("http://127.0.0.1:8099/vta/academy.html", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof Store !== "undefined" && !!Store.state);
+
+  await page.click("#adminButton");
+  await page.waitForSelector(".admin-overlay", { state: "visible" });
+  await page.fill("#vta-admin-email", "hunter@example.com");
+  await page.fill("#vta-admin-pw", "wrong");
+  await page.click("#vta-admin-submit");
+  await page.waitForTimeout(1000);
+  const msg = await page.textContent("#vta-admin-status");
+  check("the failure is explained", /Invalid login credentials/.test(msg), msg);
+  check("admin mode stays off",
+    await page.evaluate(() => localStorage.getItem("vta_admin") === null));
+  await ctx.close();
+  apiHandler = null;
+}
+
+{
+  console.log("\n--- VTA admin unlock: ?admin no longer bypasses ---");
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto("http://127.0.0.1:8099/vta/academy.html?admin", { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => typeof Store !== "undefined" && !!Store.state);
+  check("?admin does not grant admin",
+    await page.evaluate(() => localStorage.getItem("vta_admin") === null));
+  check("module 2 stays locked",
+    await page.evaluate(() => Store.isModuleUnlocked(2) === false));
+  await ctx.close();
+}
+
 await browser.close();
 api.close(); site.close();
 console.log(`\n${PASS} passed, ${FAIL} failed\n`);

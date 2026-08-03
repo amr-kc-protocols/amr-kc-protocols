@@ -74,6 +74,7 @@ Grouped by the property being defended:
 | Degradation | With no URL/key configured, every call is a silent no-op |
 | Educator auth | Password sign-in stores its session on a **separate** key, so signing in as educator cannot clobber a learner's anonymous identity in the same browser — and signing out cannot take it with them; an expired educator session asks for re-login rather than silently becoming an anonymous user |
 | Educator reads | Queries request the right columns and ordering and use the educator token; a non-educator gets zero rows rather than an error; the Ask inbox never requests the submitter's account email |
+| Educator verify | `verify()` asks the database via `is_educator()` rather than trusting the client; a signed-in but non-allowlisted account verifies as **not** an educator; an unreachable server never reads as authorised |
 | Caregiver forms | Signature images **never** reach the server; blank crew slots are dropped; a form with no case number is refused before the network; an offline form queues and two forms never collapse into one; a rejected form is reported rather than swallowed |
 
 ## What's covered (`sync.e2e.mjs`)
@@ -94,6 +95,7 @@ Grouped by the property being defended:
 | VTA academy | Loads clean and resolves `../amr-backend.js` from its subdirectory; VTA's richer state flattens correctly onto the shared shape (quiz and exam scores as percentages, all nine modules); credential and certificate id ride in `meta`; `completed_at` is the certificate issue date; the certificate link prompt PUTs the address; the certificate disclaimer no longer claims records are browser-only |
 | Caregiver Form end-to-end | The record reaches Supabase with no signature in the payload; a **failed filing does not retract the PDF confirmation** and says so; offline holds the record on the device |
 | Dashboard CSV | Exports what is on screen with the verified email and VTA credential; a learner name shaped like `=cmd\|...` is prefixed so a spreadsheet treats it as text, not a formula |
+| VTA admin unlock | No password constant or `?admin` bypass survives in the source; an allowlisted educator unlocks and locked modules become reachable; **valid credentials that are not allowlisted do not unlock**; a wrong password is explained and leaves admin off |
 
 When you change either tool, run `npm test` and add a scenario for any new behaviour.
 
