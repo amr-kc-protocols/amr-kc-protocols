@@ -1,11 +1,13 @@
 /* Ventilator Training Academy — service worker
    Cache the app shell so it works offline once installed. */
 
-const CACHE = "vta-pwa-v9";
+const CACHE = "vta-pwa-v10";
 const ASSETS = [
   "./",
   "./academy.html",
   "./styles.css",
+  // Backend sync lives at the repo root, shared with the Field Guide.
+  "../amr-backend.js",
   "./figures.js",
   "./figures/ltv-panel.jpg",
   "./figures/course/01-path-of-a-breath.png",

@@ -1,10 +1,13 @@
 {
-  "name": "kcb-tests",
+  "name": "amrkc-tests",
   "private": true,
   "type": "module",
-  "description": "Pass-through & stress tests for the Kansas Class Builder tool",
+  "description": "Tests for the Kansas Class Builder tool and the Supabase sync layer",
   "scripts": {
-    "test": "node kcb.test.mjs"
+    "test": "node kcb.test.mjs && node backend.test.mjs && node sync.e2e.mjs",
+    "test:kcb": "node kcb.test.mjs",
+    "test:backend": "node backend.test.mjs",
+    "test:sync": "node sync.e2e.mjs"
   },
   "devDependencies": {
     "playwright": "^1.47.0",

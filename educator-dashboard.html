@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow">
+<title>Educator Dashboard &#x2014; AMR KC</title>
+<!--
+  Educator Dashboard — AMR Kansas City
+  ====================================
+  Academy completions and Ask the Educator submissions, for the clinical
+  educator.
+
+  ACCESS
+  This page is public — it is a static file on GitHub Pages and anyone can
+  open it. That is fine, and it is not the security boundary. Whether the
+  queries below return anything is decided in the database by the
+  is_educator() policy: an account must appear in the `educators`
+  allowlist AND have a confirmed email. Signing in here as anyone else
+  loads a working page showing zero rows.
+
+  So: nothing on this page is hidden as a security measure, because
+  hiding it would not be one.
+
+  READ-ONLY
+  There is no delete or edit path here, deliberately. Completions are a
+  CE record; nothing in the client can alter or destroy one. Corrections
+  are made in the Supabase dashboard, where they leave a trail.
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{
+  --navy:#173A68;
+  --ink:#152238;
+  --ink-2:#66707C;
+  --blue:#1B63C4;
+  --blue-dk:#154C8C;
+  --blue-soft:#EAF1FD;
+  --blue-line:#BFD6F5;
+  --paper:#FFFFFF;
+  --card:#F4F6F9;
+  --card-2:#F1F4F8;
+  --rule:#E2E6EC;
+  --rule-2:#D3DAE3;
+  --green:#15803D;
+  --green-soft:#EAFBF1;
+  --green-line:#BFE3D0;
+  --red:#DC2626;
+  --red-soft:#FDECEC;
+  --red-line:#F3C6C6;
+  --amber:#A1590B;
+  --amber-soft:#FEF3E2;
+  --amber-line:#E7C48A;
+  --lock:#9AA5B1;
+  --sans:'Inter', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --maxw: 1100px;
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:0 20px; }
+.hidden{ display:none !important; }
+
+/* ── header ─────────────────────────────────────────────────── */
+.top{ border-bottom:1px solid var(--rule); background:var(--paper);
+  position:sticky; top:0; z-index:10; }
+.top-in{ max-width:var(--maxw); margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.brand{ font-weight:800; font-size:17px; letter-spacing:-0.01em; }
+.brand span{ color:var(--blue); }
+.top-sp{ flex:1 1 auto; }
+.who{ font-size:13px; color:var(--ink-2); }
+.backlink{ display:inline-flex; align-items:center; gap:5px; font-size:13px;
+  color:var(--blue); text-decoration:none; font-weight:600; }
+.backlink:hover{ text-decoration:underline; }
+
+/* ── sign-in ────────────────────────────────────────────────── */
+.signin{ max-width:400px; margin:56px auto; padding:28px;
+  border:1px solid var(--rule); border-radius:14px; background:var(--card); }
+.signin h1{ font-size:20px; margin:0 0 6px; letter-spacing:-0.01em; }
+.signin p{ font-size:14px; color:var(--ink-2); margin:0 0 20px; }
+label{ display:block; font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.05em; color:var(--ink-2); margin-bottom:6px; }
+input[type=email], input[type=password], input[type=search]{
+  width:100%; padding:11px 13px; font-family:var(--sans); font-size:15px;
+  border:1.5px solid var(--rule-2); border-radius:9px; background:var(--paper);
+  color:var(--ink); outline:none; margin-bottom:16px; }
+input:focus{ border-color:var(--blue); }
+.btn{ display:inline-block; width:100%; padding:12px 18px; font-family:var(--sans);
+  font-size:15px; font-weight:700; color:#fff; background:var(--navy);
+  border:none; border-radius:9px; cursor:pointer; }
+.btn:hover:not(:disabled){ background:var(--blue-dk); }
+.btn:disabled{ opacity:0.55; cursor:default; }
+.btn-sm{ width:auto; padding:7px 14px; font-size:13px; background:var(--paper);
+  color:var(--ink); border:1.5px solid var(--rule-2); font-weight:600; }
+.btn-sm:hover:not(:disabled){ background:var(--card); }
+
+.msg{ font-size:14px; padding:11px 14px; border-radius:9px; margin-bottom:16px; }
+.msg-err{ background:var(--red-soft); border:1px solid var(--red-line); color:var(--red); }
+.msg-info{ background:var(--blue-soft); border:1px solid var(--blue-line); color:var(--blue-dk); }
+.msg-warn{ background:var(--amber-soft); border:1px solid var(--amber-line); color:var(--amber); }
+
+/* ── tabs ───────────────────────────────────────────────────── */
+.tabs{ display:flex; gap:4px; border-bottom:1px solid var(--rule); margin:22px 0 0; }
+.tab{ padding:10px 16px; font-size:14px; font-weight:600; color:var(--ink-2);
+  background:none; border:none; border-bottom:2.5px solid transparent;
+  cursor:pointer; font-family:var(--sans); }
+.tab[aria-selected=true]{ color:var(--blue); border-bottom-color:var(--blue); }
+.tab-count{ font-size:12px; color:var(--ink-2); font-weight:500; }
+
+/* ── controls ───────────────────────────────────────────────── */
+.controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:18px 0 14px; }
+.controls input[type=search]{ margin:0; flex:1 1 220px; max-width:320px; }
+select{ padding:9px 12px; font-family:var(--sans); font-size:14px;
+  border:1.5px solid var(--rule-2); border-radius:9px; background:var(--paper);
+  color:var(--ink); outline:none; }
+
+/* ── table ──────────────────────────────────────────────────── */
+.tablewrap{ overflow-x:auto; border:1px solid var(--rule); border-radius:12px; }
+table{ width:100%; border-collapse:collapse; font-size:14px; }
+th,td{ padding:11px 14px; text-align:left; border-bottom:1px solid var(--rule);
+  white-space:nowrap; }
+th{ background:var(--card); font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.04em; color:var(--ink-2); position:sticky; top:0; }
+th.sortable{ cursor:pointer; user-select:none; }
+th.sortable:hover{ color:var(--blue); }
+th .arrow{ opacity:0.4; font-size:10px; }
+th[aria-sort] .arrow{ opacity:1; color:var(--blue); }
+tbody tr:last-child td{ border-bottom:none; }
+tbody tr:hover{ background:var(--card-2); }
+td.wrap-cell{ white-space:normal; min-width:320px; max-width:560px; }
+
+.pill{ display:inline-block; padding:2px 9px; border-radius:20px; font-size:12px;
+  font-weight:700; }
+.pill-pass{ background:var(--green-soft); color:var(--green); border:1px solid var(--green-line); }
+.pill-prog{ background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber-line); }
+.mono{ font-variant-numeric:tabular-nums; }
+.muted{ color:var(--lock); }
+.email-none{ color:var(--amber); font-size:13px; }
+
+.empty{ padding:44px 20px; text-align:center; color:var(--ink-2); font-size:15px; }
+.empty strong{ display:block; color:var(--ink); font-size:16px; margin-bottom:6px; }
+
+footer{ margin:40px 0 30px; padding-top:18px; border-top:1px solid var(--rule);
+  font-size:12px; color:var(--ink-2); }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-in">
+    <div class="brand">AMR KC <span>Educator Dashboard</span></div>
+    <div class="top-sp"></div>
+    <div class="who hidden" id="who"></div>
+    <button class="btn btn-sm hidden" id="refreshBtn" type="button">Refresh</button>
+    <button class="btn btn-sm hidden" id="signOutBtn" type="button">Sign out</button>
+    <a class="backlink" href="index.html">&#x2190; Field Guide</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── not configured ───────────────────────────────────── -->
+  <div id="unconfigured" class="signin hidden">
+    <h1>Backend not configured</h1>
+    <p>This build has no Supabase project set. Add the project URL and anon
+       key to <strong>amr-backend.js</strong>, then reload. Setup steps are in
+       <strong>supabase/README.md</strong>.</p>
+  </div>
+
+  <!-- ── sign in ──────────────────────────────────────────── -->
+  <form id="signinCard" class="signin hidden" autocomplete="on">
+    <h1>Educator sign-in</h1>
+    <p>Access is limited to approved educator accounts.</p>
+    <div id="signinMsg" class="msg msg-err hidden"></div>
+    <label for="email">Email</label>
+    <input type="email" id="email" autocomplete="username" required>
+    <label for="password">Password</label>
+    <input type="password" id="password" autocomplete="current-password" required>
+    <button class="btn" id="signinBtn" type="submit">Sign in</button>
+  </form>
+
+  <!-- ── dashboard ────────────────────────────────────────── -->
+  <div id="dash" class="hidden">
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tab-completions" role="tab" aria-selected="true"
+              aria-controls="panel-completions">Completions
+        <span class="tab-count" id="count-completions"></span></button>
+      <button class="tab" id="tab-ask" role="tab" aria-selected="false"
+              aria-controls="panel-ask">Ask the Educator
+        <span class="tab-count" id="count-ask"></span></button>
+      <button class="tab" id="tab-cgf" role="tab" aria-selected="false"
+              aria-controls="panel-cgf">Caregiver Forms
+        <span class="tab-count" id="count-cgf"></span></button>
+    </div>
+
+    <div id="loadMsg" class="msg msg-info hidden" style="margin-top:18px"></div>
+
+    <!-- Completions -->
+    <section id="panel-completions" role="tabpanel" aria-labelledby="tab-completions">
+      <div class="controls">
+        <input type="search" id="q" placeholder="Search name or email&hellip;" aria-label="Search learners">
+        <select id="courseFilter" aria-label="Filter by course">
+          <option value="">All courses</option>
+          <option value="airway">Airway &amp; RSI</option>
+          <option value="hemodynamics">Hemodynamics</option>
+          <option value="metabolic">Metabolic &amp; Lab Data</option>
+          <option value="neonate">Neonatal Resuscitation</option>
+          <option value="vta">Ventilator Training</option>
+        </select>
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="">Any status</option>
+          <option value="passed">Completed</option>
+          <option value="progress">In progress</option>
+        </select>
+        <button class="btn btn-sm" id="csvBtn" type="button">Export CSV</button>
+      </div>
+      <div class="tablewrap">
+        <table id="completionsTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="learner_name">Learner <span class="arrow">&#9650;&#9660;</span></th>
+              <th class="sortable" data-sort="learner_email">Verified email <span class="arrow">&#9650;&#9660;</span></th>
+              <th class="sortable" data-sort="course_id">Course <span class="arrow">&#9650;&#9660;</span></th>
+              <th class="sortable" data-sort="modules_passed">Modules <span class="arrow">&#9650;&#9660;</span></th>
+              <th class="sortable" data-sort="final_passed">Status <span class="arrow">&#9650;&#9660;</span></th>
+              <th class="sortable" data-sort="final_best">Final <span class="arrow">&#9650;&#9660;</span></th>
+              <th class="sortable" data-sort="completed_at">Completed <span class="arrow">&#9650;&#9660;</span></th>
+              <th class="sortable" data-sort="updated_at">Last activity <span class="arrow">&#9650;&#9660;</span></th>
+              <th>Credential</th>
+              <th>Ver.</th>
+            </tr>
+          </thead>
+          <tbody id="completionsBody"></tbody>
+        </table>
+        <div id="completionsEmpty" class="empty hidden"></div>
+      </div>
+    </section>
+
+    <!-- Ask the Educator -->
+    <section id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" class="hidden">
+      <div class="controls">
+        <input type="search" id="askQ" placeholder="Search messages&hellip;" aria-label="Search messages">
+      </div>
+      <div class="tablewrap">
+        <table id="askTable">
+          <thead>
+            <tr>
+              <th>Received</th>
+              <th>Message</th>
+              <th>Reply to</th>
+              <th>From</th>
+            </tr>
+          </thead>
+          <tbody id="askBody"></tbody>
+        </table>
+        <div id="askEmpty" class="empty hidden"></div>
+      </div>
+      <div class="msg msg-info" style="margin-top:14px">
+        Submissions show only a reply address the sender chose to type. An email
+        linked to save Academy progress is never shown here &mdash; saving your
+        progress is not consent to be named on a question.
+      </div>
+    </section>
+
+    <!-- Caregiver Signature Forms -->
+    <section id="panel-cgf" role="tabpanel" aria-labelledby="tab-cgf" class="hidden">
+      <div class="controls">
+        <input type="search" id="cgfQ" placeholder="Search case number or crew&hellip;"
+               aria-label="Search caregiver forms">
+      </div>
+      <div class="tablewrap">
+        <table id="cgfTable">
+          <thead>
+            <tr>
+              <th>Filed</th>
+              <th>Date of service</th>
+              <th>Case number</th>
+              <th>Crew</th>
+              <th>Amended</th>
+            </tr>
+          </thead>
+          <tbody id="cgfBody"></tbody>
+        </table>
+        <div id="cgfEmpty" class="empty hidden"></div>
+      </div>
+      <div class="msg msg-warn" style="margin-top:14px">
+        Case numbers tie these rows to patient care reports, so they are visible
+        to educators only &mdash; not to the crew who filed them. Signature images
+        are never stored here; they exist solely in the PDF the crew generated.
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    AMR KC Field Guide &middot; Educator Dashboard &middot; read-only.
+    Records cannot be edited or deleted from this page.
+  </footer>
+</div>
+
+<script src="amr-backend.js"></script>
+<script>
+"use strict";
+
+var $ = function (id) { return document.getElementById(id); };
+function show(el, on) { el.classList.toggle("hidden", !on); }
+
+var COURSE_NAMES = {
+  airway: "Airway & RSI",
+  hemodynamics: "Hemodynamics",
+  metabolic: "Metabolic & Lab Data",
+  neonate: "Neonatal Resuscitation",
+  vta: "Ventilator Training"
+};
+
+var completions = [];
+var askMessages = [];
+var caregiverForms = [];
+var sort = { key: "updated_at", dir: -1 };
+
+/* ── escaping ───────────────────────────────────────────────
+   Learner names and message bodies are free text typed by other
+   people. They are rendered as text nodes rather than HTML, so a
+   name containing markup is shown, never executed. */
+function text(value) { return document.createTextNode(value == null ? "" : String(value)); }
+
+function fmtDate(iso) {
+  if (!iso) return "";
+  var d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+function fmtDateTime(iso) {
+  if (!iso) return "";
+  var d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleString(undefined,
+    { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+/* ── views ──────────────────────────────────────────────────── */
+function showSignedOut(message, kind) {
+  show($("dash"), false);
+  show($("signinCard"), true);
+  show($("who"), false);
+  show($("signOutBtn"), false);
+  show($("refreshBtn"), false);
+  var m = $("signinMsg");
+  if (message) {
+    m.textContent = message;
+    m.className = "msg " + (kind === "info" ? "msg-info" : "msg-err");
+    show(m, true);
+  } else {
+    show(m, false);
+  }
+}
+
+function showSignedIn() {
+  var st = AMRBackend.educator.status();
+  show($("signinCard"), false);
+  show($("dash"), true);
+  $("who").textContent = st.email;
+  show($("who"), true);
+  show($("signOutBtn"), true);
+  show($("refreshBtn"), true);
+}
+
+/* ── data ───────────────────────────────────────────────────── */
+function load() {
+  var msg = $("loadMsg");
+  msg.textContent = "Loading…";
+  msg.className = "msg msg-info";
+  show(msg, true);
+  $("refreshBtn").disabled = true;
+
+  return Promise.all([
+    AMRBackend.educator.listCompletions(),
+    AMRBackend.educator.listAskMessages(),
+    AMRBackend.educator.listCaregiverForms()
+  ]).then(function (results) {
+    $("refreshBtn").disabled = false;
+    var c = results[0], a = results[1], g = results[2];
+
+    if (c.needsSignIn || a.needsSignIn || g.needsSignIn) {
+      showSignedOut("Your session expired — please sign in again.");
+      return;
+    }
+    if (!c.ok) {
+      msg.textContent = "⚠ " + c.error;
+      msg.className = "msg msg-err";
+      return;
+    }
+
+    completions = c.rows || [];
+    askMessages = a.ok ? (a.rows || []) : [];
+    caregiverForms = g.ok ? (g.rows || []) : [];
+
+    /* An educator with no rows is ambiguous: it can mean nobody has
+       finished anything yet, or that this account is not on the
+       allowlist. Say so rather than showing a bare empty table. */
+    if (!completions.length && !askMessages.length && !caregiverForms.length) {
+      msg.innerHTML = "";
+      msg.appendChild(text(
+        "No records visible. Either no one has started a module yet, or this "
+        + "account is not on the educator allowlist — access is granted by "
+        + "adding the address to the educators table."));
+      msg.className = "msg msg-warn";
+      show(msg, true);
+    } else if (!a.ok || !g.ok) {
+      msg.textContent = "⚠ Completions loaded, but "
+        + (!a.ok ? "messages failed: " + a.error : "caregiver forms failed: " + g.error);
+      msg.className = "msg msg-warn";
+      show(msg, true);
+    } else {
+      show(msg, false);
+    }
+
+    renderCompletions();
+    renderAsk();
+    renderCaregiver();
+  }).catch(function () {
+    $("refreshBtn").disabled = false;
+    msg.textContent = "⚠ Could not load data — check your connection.";
+    msg.className = "msg msg-err";
+    show(msg, true);
+  });
+}
+
+/* ── completions table ──────────────────────────────────────── */
+function filteredCompletions() {
+  var q = $("q").value.trim().toLowerCase();
+  var course = $("courseFilter").value;
+  var st = $("statusFilter").value;
+
+  var rows = completions.filter(function (r) {
+    if (course && r.course_id !== course) return false;
+    if (st === "passed" && !r.final_passed) return false;
+    if (st === "progress" && r.final_passed) return false;
+    if (q) {
+      var hay = ((r.learner_name || "") + " " + (r.learner_email || "")).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  var k = sort.key, dir = sort.dir;
+  return rows.sort(function (a, b) {
+    var av = a[k], bv = b[k];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;   // blanks last, whichever way it is sorted
+    if (bv == null) return -1;
+    if (typeof av === "boolean") { av = av ? 1 : 0; bv = bv ? 1 : 0; }
+    if (typeof av === "number") return (av - bv) * dir;
+    return String(av).localeCompare(String(bv)) * dir;
+  });
+}
+
+function renderCompletions() {
+  var body = $("completionsBody");
+  var rows = filteredCompletions();
+  body.innerHTML = "";
+
+  var empty = $("completionsEmpty");
+  if (!rows.length) {
+    empty.innerHTML = "";
+    var strong = document.createElement("strong");
+    strong.appendChild(text(completions.length ? "No matches" : "Nothing yet"));
+    empty.appendChild(strong);
+    empty.appendChild(text(completions.length
+      ? "No records match the current filters."
+      : "Completions appear here as learners work through the modules."));
+    show(empty, true);
+    show($("completionsTable"), false);
+  } else {
+    show(empty, false);
+    show($("completionsTable"), true);
+  }
+
+  rows.forEach(function (r) {
+    var tr = document.createElement("tr");
+
+    var name = document.createElement("td");
+    if (r.learner_name) {
+      name.appendChild(text(r.learner_name));
+    } else {
+      var noName = document.createElement("span");
+      noName.className = "muted";
+      noName.appendChild(text("(no name entered)"));
+      name.appendChild(noName);
+    }
+    tr.appendChild(name);
+
+    /* The distinction that matters for an audit: a typed name is a
+       claim, a verified email is not. Make an unlinked record visibly
+       weaker rather than letting it pass as identified. */
+    var em = document.createElement("td");
+    if (r.learner_email) {
+      em.appendChild(text(r.learner_email));
+    } else {
+      var un = document.createElement("span");
+      un.className = "email-none";
+      un.appendChild(text("not linked"));
+      em.appendChild(un);
+    }
+    tr.appendChild(em);
+
+    var course = document.createElement("td");
+    course.appendChild(text(COURSE_NAMES[r.course_id] || r.course_id));
+    tr.appendChild(course);
+
+    var mods = document.createElement("td");
+    mods.className = "mono";
+    mods.appendChild(text((r.modules_passed || 0) + " / " + (r.modules_total || 0)));
+    tr.appendChild(mods);
+
+    var stat = document.createElement("td");
+    var pill = document.createElement("span");
+    pill.className = "pill " + (r.final_passed ? "pill-pass" : "pill-prog");
+    pill.appendChild(text(r.final_passed ? "Completed" : "In progress"));
+    stat.appendChild(pill);
+    tr.appendChild(stat);
+
+    var best = document.createElement("td");
+    best.className = "mono";
+    best.appendChild(text(r.final_best ? r.final_best + "%" : "—"));
+    tr.appendChild(best);
+
+    var done = document.createElement("td");
+    done.appendChild(text(fmtDate(r.completed_at) || "—"));
+    tr.appendChild(done);
+
+    var seen = document.createElement("td");
+    seen.appendChild(text(fmtDate(r.updated_at)));
+    tr.appendChild(seen);
+
+    /* VTA records a credential level with the certificate; the other
+       four courses do not, so this is blank for them by design. */
+    var cred = document.createElement("td");
+    cred.appendChild(text((r.meta && r.meta.credential) || "—"));
+    tr.appendChild(cred);
+
+    var ver = document.createElement("td");
+    ver.className = "muted mono";
+    ver.appendChild(text(r.course_version || "—"));
+    tr.appendChild(ver);
+
+    body.appendChild(tr);
+  });
+
+  $("count-completions").textContent =
+    "(" + rows.length + (rows.length === completions.length ? "" : " of " + completions.length) + ")";
+}
+
+/* ── ask inbox ──────────────────────────────────────────────── */
+function renderAsk() {
+  var body = $("askBody");
+  var q = $("askQ").value.trim().toLowerCase();
+  var rows = askMessages.filter(function (m) {
+    if (!q) return true;
+    return ((m.message || "") + " " + (m.reply_email || "")).toLowerCase().indexOf(q) !== -1;
+  });
+
+  body.innerHTML = "";
+  var empty = $("askEmpty");
+  if (!rows.length) {
+    empty.innerHTML = "";
+    var strong = document.createElement("strong");
+    strong.appendChild(text(askMessages.length ? "No matches" : "No messages"));
+    empty.appendChild(strong);
+    empty.appendChild(text(askMessages.length
+      ? "No messages match that search."
+      : "Questions and feedback submitted from the app appear here."));
+    show(empty, true);
+    show($("askTable"), false);
+  } else {
+    show(empty, false);
+    show($("askTable"), true);
+  }
+
+  rows.forEach(function (m) {
+    var tr = document.createElement("tr");
+
+    var when = document.createElement("td");
+    when.appendChild(text(fmtDateTime(m.created_at)));
+    tr.appendChild(when);
+
+    var msg = document.createElement("td");
+    msg.className = "wrap-cell";
+    msg.appendChild(text(m.message));
+    tr.appendChild(msg);
+
+    var reply = document.createElement("td");
+    if (m.reply_email) {
+      var a = document.createElement("a");
+      a.href = "mailto:" + encodeURIComponent(m.reply_email);
+      a.appendChild(text(m.reply_email));
+      reply.appendChild(a);
+    } else {
+      var none = document.createElement("span");
+      none.className = "muted";
+      none.appendChild(text("no reply address"));
+      reply.appendChild(none);
+    }
+    tr.appendChild(reply);
+
+    var src = document.createElement("td");
+    src.className = "muted";
+    src.appendChild(text(m.source || "—"));
+    tr.appendChild(src);
+
+    body.appendChild(tr);
+  });
+
+  $("count-ask").textContent =
+    "(" + rows.length + (rows.length === askMessages.length ? "" : " of " + askMessages.length) + ")";
+}
+
+/* ── caregiver forms ────────────────────────────────────────── */
+function crewSummary(crew) {
+  if (!crew || !crew.length) return "—";
+  return crew
+    .filter(function (c) { return c && (c.name || c.cert); })
+    .map(function (c) { return c.cert ? c.name + " (" + c.cert + ")" : c.name; })
+    .join(", ") || "—";
+}
+
+function renderCaregiver() {
+  var body = $("cgfBody");
+  var q = $("cgfQ").value.trim().toLowerCase();
+  var rows = caregiverForms.filter(function (f) {
+    if (!q) return true;
+    return ((f.case_number || "") + " " + crewSummary(f.crew)).toLowerCase().indexOf(q) !== -1;
+  });
+
+  body.innerHTML = "";
+  var empty = $("cgfEmpty");
+  if (!rows.length) {
+    empty.innerHTML = "";
+    var strong = document.createElement("strong");
+    strong.appendChild(text(caregiverForms.length ? "No matches" : "No forms filed"));
+    empty.appendChild(strong);
+    empty.appendChild(text(caregiverForms.length
+      ? "No forms match that search."
+      : "Caregiver signature forms filed from the app appear here."));
+    show(empty, true);
+    show($("cgfTable"), false);
+  } else {
+    show(empty, false);
+    show($("cgfTable"), true);
+  }
+
+  rows.forEach(function (f) {
+    var tr = document.createElement("tr");
+
+    var filed = document.createElement("td");
+    filed.appendChild(text(fmtDateTime(f.created_at)));
+    tr.appendChild(filed);
+
+    var svc = document.createElement("td");
+    svc.appendChild(text(f.service_date || "—"));
+    tr.appendChild(svc);
+
+    var caseNo = document.createElement("td");
+    caseNo.className = "mono";
+    caseNo.appendChild(text(f.case_number || "—"));
+    tr.appendChild(caseNo);
+
+    var crew = document.createElement("td");
+    crew.className = "wrap-cell";
+    crew.appendChild(text(crewSummary(f.crew)));
+    tr.appendChild(crew);
+
+    var amended = document.createElement("td");
+    if (f.amended) {
+      var pill = document.createElement("span");
+      pill.className = "pill pill-prog";
+      pill.appendChild(text("Amended"));
+      amended.appendChild(pill);
+    } else {
+      amended.className = "muted";
+      amended.appendChild(text("—"));
+    }
+    tr.appendChild(amended);
+
+    body.appendChild(tr);
+  });
+
+  $("count-cgf").textContent =
+    "(" + rows.length + (rows.length === caregiverForms.length ? "" : " of " + caregiverForms.length) + ")";
+}
+
+/* ── CSV export ─────────────────────────────────────────────
+   Exports exactly what the table currently shows — filters and sort
+   included — because an export that silently differs from the screen is
+   worse than none. */
+function csvCell(value) {
+  var s = value == null ? "" : String(value);
+  /* A leading =, +, - or @ makes Excel and Sheets treat the cell as a
+     formula. Learner names and crew names are free text from other
+     people, so a field beginning with one is prefixed with a single
+     quote — the value stays readable, and the spreadsheet treats it as
+     text rather than something to evaluate. */
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+function exportCsv() {
+  var rows = filteredCompletions();
+  var header = ["Learner", "Verified email", "Course", "Modules passed", "Modules total",
+    "Status", "Final score", "Completed", "Last activity", "Credential", "Course version"];
+
+  var lines = [header.map(csvCell).join(",")];
+  rows.forEach(function (r) {
+    lines.push([
+      r.learner_name || "",
+      r.learner_email || "",
+      COURSE_NAMES[r.course_id] || r.course_id,
+      r.modules_passed || 0,
+      r.modules_total || 0,
+      r.final_passed ? "Completed" : "In progress",
+      r.final_best ? r.final_best + "%" : "",
+      r.completed_at ? fmtDate(r.completed_at) : "",
+      fmtDate(r.updated_at),
+      (r.meta && r.meta.credential) || "",
+      r.course_version || ""
+    ].map(csvCell).join(","));
+  });
+
+  /* The BOM makes Excel open UTF-8 correctly; without it, accented names
+     arrive mangled. */
+  var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "amrkc-completions-" + new Date().toISOString().slice(0, 10) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+/* ── wiring ─────────────────────────────────────────────────── */
+$("signinCard").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var btn = $("signinBtn");
+  var m = $("signinMsg");
+  btn.disabled = true;
+  m.textContent = "Signing in…";
+  m.className = "msg msg-info";
+  show(m, true);
+
+  AMRBackend.educator.signIn($("email").value, $("password").value).then(function (r) {
+    btn.disabled = false;
+    if (!r.ok) {
+      m.textContent = "⚠ " + r.error;
+      m.className = "msg msg-err";
+      show(m, true);
+      return;
+    }
+    $("password").value = "";
+    show(m, false);
+    showSignedIn();
+    load();
+  });
+});
+
+$("signOutBtn").addEventListener("click", function () {
+  AMRBackend.educator.signOut().then(function () {
+    completions = [];
+    askMessages = [];
+    showSignedOut("Signed out.", "info");
+  });
+});
+
+$("refreshBtn").addEventListener("click", load);
+
+["q", "courseFilter", "statusFilter"].forEach(function (id) {
+  $(id).addEventListener("input", renderCompletions);
+  $(id).addEventListener("change", renderCompletions);
+});
+$("askQ").addEventListener("input", renderAsk);
+$("cgfQ").addEventListener("input", renderCaregiver);
+$("csvBtn").addEventListener("click", exportCsv);
+
+Array.prototype.forEach.call(document.querySelectorAll("th.sortable"), function (th) {
+  th.addEventListener("click", function () {
+    var key = th.dataset.sort;
+    sort = { key: key, dir: sort.key === key ? -sort.dir : 1 };
+    Array.prototype.forEach.call(document.querySelectorAll("th.sortable"), function (other) {
+      other.removeAttribute("aria-sort");
+    });
+    th.setAttribute("aria-sort", sort.dir === 1 ? "ascending" : "descending");
+    renderCompletions();
+  });
+});
+
+function selectTab(which) {
+  ["completions", "ask", "cgf"].forEach(function (name) {
+    var on = name === which;
+    $("tab-" + name).setAttribute("aria-selected", on ? "true" : "false");
+    show($("panel-" + name), on);
+  });
+}
+["completions", "ask", "cgf"].forEach(function (name) {
+  $("tab-" + name).addEventListener("click", function () { selectTab(name); });
+});
+
+/* ── boot ───────────────────────────────────────────────────── */
+(function boot() {
+  if (!window.AMRBackend || !AMRBackend.isConfigured()) {
+    show($("unconfigured"), true);
+    return;
+  }
+  if (AMRBackend.educator.status().signedIn) {
+    showSignedIn();
+    load();
+  } else {
+    showSignedOut();
+  }
+})();
+</script>
+</body>
+</html>

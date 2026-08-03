@@ -52,6 +52,10 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="sigpad.css">
 <script defer src="sigpad.js"></script>
+<!-- Ask the Educator delivery. Not deferred: the submit handler needs
+     window.AMRBackend, and with no Supabase project configured this is an
+     inert no-op that leaves the rest of the app untouched. -->
+<script src="amr-backend.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{
@@ -324,6 +328,10 @@ display:flex;align-items:center;justify-content:center;padding:6px;cursor:pointe
 .cgf-confirm-icon{font-size:36px;margin-bottom:10px}
 .cgf-confirm-title{font-size:17px;font-weight:700;color:var(--emt);margin-bottom:6px}
 .cgf-confirm-sub{font-size:13px;color:var(--emt);line-height:1.6;margin-bottom:16px}
+.cgf-log{font-size:12px;line-height:1.55;margin-top:12px;min-height:1px}
+.cgf-log.ok{color:var(--gray)}
+.cgf-log.pend{color:var(--warn)}
+.cgf-log.err{color:var(--danger)}
 .cgf-share{display:block;width:100%;padding:15px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-bottom:12px}
 .cgf-after{display:flex;gap:8px}
 .cgf-after .cgf-again{flex:1;padding:12px 8px}
@@ -2057,6 +2065,10 @@ function renderForms(){
     '<div class="cgf-confirm-title">PDF Ready</div>',
     '<div class="cgf-confirm-sub" id="cgf-confirm-sub">Send it now &mdash; email, Messages, or Files, whichever you file these in.</div>',
     '<button class="cgf-share" id="cgf-share"><svg class="icon"><use href="#i-download"></use></svg> <span id="cgf-share-label">Send PDF</span></button>',
+    // Whether the text record reached the log. The PDF is unaffected either
+    // way, so this reports rather than alarms — but it never claims success
+    // it did not have.
+    '<div class="cgf-log" id="cgf-log"></div>',
     '<div class="cgf-after">',
     '<button class="cgf-again" id="cgf-fix">Correct This Form</button>',
     '<button class="cgf-again" id="cgf-again">Start New Form</button>',
@@ -2149,16 +2161,24 @@ function renderForms(){
         // count as user activation. If the browser declines, the Send button on
         // the confirmation panel is a fresh tap that will be allowed.
         cgfSendPdf();
-        // Also log to sheet (no signatures — just text data)
-        var payload = {
-          type:'caregiver_form',
-          date: date, caseNumber: caseNum, submittedAt: submittedAt,
-          amended: CGF_AMENDED ? 'yes' : '',
-          crew1Name: crew[0].name, crew1Cert: crew[0].cert, crew1Sig:'',
-          crew2Name: crew[1].name, crew2Cert: crew[1].cert, crew2Sig:'',
-          crew3Name: crew[2].name, crew3Cert: crew[2].cert, crew3Sig:''
-        };
-        fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){});
+
+        // Log the text record. The PDF above is the deliverable and is what
+        // the crew actually needs, so a logging failure must not undo the
+        // confirmation — but it must not be silent either. The previous
+        // version posted with mode:'no-cors', which made every outcome look
+        // identical and lost records without a trace. Signatures are never
+        // sent: they live in the PDF alone.
+        cgfLogRecord({
+          serviceDate: date,
+          caseNumber: caseNum,
+          submittedAt: submittedAt,
+          amended: !!CGF_AMENDED,
+          crew: [
+            {num:1, name: crew[0].name, cert: crew[0].cert},
+            {num:2, name: crew[1].name, cert: crew[1].cert},
+            {num:3, name: crew[2].name, cert: crew[2].cert}
+          ]
+        });
       }).catch(function(err){
         statusEl.textContent='⚠ PDF generation failed: '+((err&&err.message)||err);
         statusEl.className='cgf-status err';
@@ -2341,6 +2361,45 @@ function cgfBuildPdf(assets, date, caseNum, crew){
 // The finished PDF, kept so the confirmation panel can send it again without
 // regenerating. Cleared when a new form is started.
 var CGF_PDF = null;
+/* Log the caregiver form's text record.
+   This replaced a fire-and-forget POST to Google Apps Script that used
+   mode:'no-cors'. That made the response opaque, so a failed write and a
+   successful one were indistinguishable and records vanished silently.
+
+   The PDF is the deliverable and has already been built by the time this
+   runs, so a logging problem must not retract the confirmation — but the
+   crew is told what actually happened, including when the record is being
+   held on the device for a later retry. */
+function cgfLogRecord(record){
+  var el = document.getElementById('cgf-log');
+  if(!el) return;
+
+  if(!window.AMRBackend || !AMRBackend.isConfigured()){
+    el.textContent = '';   // no log configured; the PDF is the whole record
+    return;
+  }
+
+  el.textContent = '⏳ Filing the record…';
+  el.className = 'cgf-log pend';
+
+  AMRBackend.submitCaregiverForm(record).then(function(result){
+    if(!result.ok){
+      el.textContent = '⚠ Your PDF is ready, but the record could not be filed: '
+        + (result.error || 'the server refused it') + '. Send the PDF as usual.';
+      el.className = 'cgf-log err';
+      return;
+    }
+    if(result.queued){
+      el.textContent = '⏳ Record saved on this device — it files itself once '
+        + 'you’re back on a signal. Your PDF is ready to send now.';
+      el.className = 'cgf-log pend';
+      return;
+    }
+    el.textContent = '✓ Record filed.';
+    el.className = 'cgf-log ok';
+  });
+}
+
 // A plain download drops the file into Files > Downloads with nothing on screen
 // to say so, which is where crews lose it. Hand it to the OS share sheet
 // instead — mail, Messages, Files, AirDrop, whatever they file these in — and
@@ -2558,7 +2617,7 @@ function renderMore(){
     '  <div class="more-card-ico"><img class="edu-avatar-sm" src="educator.jpg" alt=""></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Ask the Educator</div>',
-    '    <div class="more-card-sub">Anonymous questions &amp; feedback to Dr. Deshmukh</div>',
+    '    <div class="more-card-sub">Questions &amp; feedback to Dr. Deshmukh &mdash; no name required</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</div>',
@@ -2569,7 +2628,10 @@ function renderMore(){
 }
 
 // ── ASK THE EDUCATOR ──────────────────────────────────────────────────────
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAUtgOCaEXbh-Uq42FLWzbFZi_5fXYtVIK0q8sJpvZmd2360_ujeO52zVjSlE0VXIuyw/exec';
+// The Google Apps Script endpoint that used to serve this screen and the
+// Caregiver Form is gone: both now write to Supabase through amr-backend.js,
+// which can tell a failed write from a successful one. Historical rows remain
+// in the old Sheet; nothing migrates them.
 var MAX_CHARS = 1000;
 function renderAsk(){
   var c = $('lv');
@@ -2579,8 +2641,8 @@ function renderAsk(){
     '<div class="ask-hero">',
     '  <img class="ask-avatar" src="educator.jpg" alt="Your clinical educator">',
     '  <div class="ask-hero-title">Ask the Educator</div>',
-    '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. No name required &mdash; submissions are completely anonymous.</div>',
-    '  <div class="ask-anon-badge"><svg class="icon"><use href="#i-lock"></use></svg> 100% Anonymous</div>',
+    '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. Your name is never asked, and the Clinical Educator sees only your message and any reply address you type &mdash; not the account it came from, and not an email you linked to save Academy progress.</div>',
+    '  <div class="ask-anon-badge"><svg class="icon"><use href="#i-lock"></use></svg> No name required</div>',
     '</div>',
     '<div id="ask-form">',
     '  <label class="ask-field-label" for="ask-msg">Your message</label>',
@@ -2630,33 +2692,43 @@ function renderAsk(){
       submitBtn.disabled = true;
       statusEl.textContent = '\u23F3 Sending\u2026';
       statusEl.className = 'ask-status pending';
-      var now = new Date();
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          type: 'ask_educator',
-          date: (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear(),
-          time: now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-          message: text,
-          email: email
-        })
-      }).then(function(){
-        var subEl = document.getElementById('ask-confirm-sub');
-        if(subEl){
-          subEl.textContent = email
-            ? 'Message sent. Hunter will reply to ' + email + ' if a response is needed.'
-            : 'Message submitted anonymously. Hunter reviews submissions regularly.';
-        }
-        formEl.style.display = 'none';
-        confirmEl.style.display = 'block';
-        statusEl.textContent = '';
-      }).catch(function(){
-        statusEl.textContent = '\u26A0 Submission failed \u2014 check your connection and try again.';
+
+      if(!window.AMRBackend || !AMRBackend.isConfigured()){
+        statusEl.textContent = '\u26A0 Messaging isn\u2019t set up on this build \u2014 please pass it along in person.';
         statusEl.className = 'ask-status err';
         submitBtn.disabled = false;
-      });
+        return;
+      }
+
+      /* The previous version posted with mode:'no-cors', which makes the
+         response opaque \u2014 the .then() always ran, so "Message Sent" showed
+         even when the write had failed and the question was gone. This path
+         reports what actually happened, including the offline case, where
+         the message is held on the device and sent on reconnect. */
+      AMRBackend.submitAsk({ message: text, email: email, source: 'ask' })
+        .then(function(result){
+          if(!result.ok){
+            statusEl.textContent = '\u26A0 ' + (result.error ||
+              'Submission failed \u2014 check your connection and try again.');
+            statusEl.className = 'ask-status err';
+            submitBtn.disabled = false;
+            return;
+          }
+          var subEl = document.getElementById('ask-confirm-sub');
+          if(subEl){
+            if(result.queued){
+              subEl.textContent = 'You\u2019re offline \u2014 your message is saved on this '
+                + 'device and will send by itself once you\u2019re back on a signal.';
+            } else {
+              subEl.textContent = email
+                ? 'Message sent. Hunter will reply to ' + email + ' if a response is needed.'
+                : 'Message sent. Hunter reviews submissions regularly.';
+            }
+          }
+          formEl.style.display = 'none';
+          confirmEl.style.display = 'block';
+          statusEl.textContent = '';
+        });
     });
   }
   if(againBtn){

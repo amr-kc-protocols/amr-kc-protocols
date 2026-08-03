@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v7';
+const CACHE = 'amrkc-2026-v8';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -6,7 +6,10 @@ const ASSETS = [
   // Caregiver Signature Form PDF: letterhead + Calibri-metric font subset
   './amr-logo.png', './fonts/KCFormSans-Bold.ttf',
   // Shared signature pad — the caregiver form cannot be signed without it
-  './sigpad.js', './sigpad.css'
+  './sigpad.js', './sigpad.css',
+  // Backend sync — must be cached, or a learner who opens an academy offline
+  // loses the outbox that would have carried their completion up later
+  './amr-backend.js'
 ];
 
 self.addEventListener('install', e => {
@@ -26,6 +29,13 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+
+  // Never cache backend traffic. Writes are POSTs and already skipped above,
+  // but auth and REST reads must not be served from a stale cache either —
+  // a cached token response or query result would be wrong the moment it
+  // was replayed. amr-backend.js handles its own offline behaviour.
+  const url = new URL(e.request.url);
+  if (/\.supabase\.(co|in)$/.test(url.hostname)) return;
 
   // Network-first: always try network, fall back to cache if offline
   e.respondWith(

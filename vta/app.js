@@ -1,6 +1,7 @@
 // =====================================================================
 // Ventilator Training Academy — Virtual Academy PWA (multi-module)
-// Static · no backend · per-module progress in localStorage
+// Static · per-module progress in localStorage, optionally mirrored to
+// Supabase via ../amr-backend.js (inert when no project is configured)
 // ---------------------------------------------------------------------
 // © 2026 Jordan Hunter Jones <hunter04j@hotmail.com>. All rights reserved.
 // Original author & creator: Jordan Hunter Jones.
@@ -1922,6 +1923,85 @@ function disableAdmin() {
 // each certification to your spreadsheet. Leave "" to disable logging.
 const VTA_LOG_ENDPOINT = "";
 
+// ---------- BACKEND MIRROR (optional) ----------
+// localStorage above is what the learner sees; this pushes a durable copy
+// so a wiped or lost phone does not take a completion with it. Strictly
+// fire-and-forget: nothing here can block or break the course, and with no
+// Supabase project configured every call is an inert no-op.
+//
+// VTA's state is richer than the other academies' — lessons, quiz, match
+// and scenario per module, plus a credential and certificate id. It is
+// flattened here onto the shared { read, passed, best } shape so one table
+// and one dashboard serve all five courses.
+const VTA_COURSE_ID = "vta";
+let vtaSyncTimer = null;
+
+function backendReady() {
+  return typeof window !== "undefined" && window.AMRBackend && window.AMRBackend.isConfigured();
+}
+
+function buildSyncState() {
+  const modules = {};
+  MODULES.forEach(m => {
+    const mod = Store.mod(m.id);
+    const q = mod.quizResults;
+    // "best" is the module's quiz percentage — the only per-module score
+    // that is comparable across courses.
+    const best = q && q.total ? Math.round((q.score / q.total) * 100) : 0;
+    modules[m.id] = {
+      read: Store.isLessonsDone(m.id),
+      passed: Store.isModuleComplete(m.id),
+      best: best
+    };
+  });
+
+  const exam = Store.state.examResults;
+  const cert = Store.state.certificate;
+
+  return {
+    learnerName: cert ? cert.name : "",
+    modules: modules,
+    finalPassed: Store.isExamPassed(),
+    finalBest: exam && exam.total ? Math.round((exam.score / exam.total) * 100) : 0,
+    // The certificate's issue date is when the credit was earned; the exam
+    // timestamp is the fallback for a pass with no certificate claimed yet.
+    completedAt: cert && cert.issuedAt ? new Date(cert.issuedAt).toISOString()
+      : (exam && exam.submittedAt ? new Date(exam.submittedAt).toISOString() : null)
+  };
+}
+
+function queueSync() {
+  if (!backendReady()) return;
+  if (vtaSyncTimer) clearTimeout(vtaSyncTimer);
+  // Store.save() fires on nearly every interaction — a lesson opened, a
+  // question answered — so the push is debounced rather than sent per tap.
+  vtaSyncTimer = setTimeout(pushSync, 2500);
+}
+
+function pushSync() {
+  if (vtaSyncTimer) { clearTimeout(vtaSyncTimer); vtaSyncTimer = null; }
+  if (!backendReady()) return;
+  try {
+    const cert = Store.state.certificate;
+    const meta = {};
+    if (cert) {
+      if (cert.credential) meta.credential = cert.credential;
+      if (cert.certId) meta.certId = cert.certId;
+    }
+    window.AMRBackend.syncAcademy(VTA_COURSE_ID, buildSyncState(), {
+      modulesTotal: MODULES.length,
+      meta: meta
+    });
+  } catch (e) { /* never let logging break the course */ }
+}
+
+// Claiming a certificate and closing the tab must not lose the record to a
+// pending debounce.
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", pushSync);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) pushSync(); });
+}
+
 const defaultModuleState = () => ({
   lessonsRead: {},
   quizResults: null,
@@ -1963,6 +2043,7 @@ const Store = {
   save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); }
     catch (e) { /* ignore */ }
+    queueSync();
   },
 
   resetAll() {
@@ -3384,7 +3465,7 @@ function renderCertificate() {
       ),
       el("p", { class: "cert-id" }, "Certificate ID — " + c.certId),
       el("p", { class: "cert-disclaimer" },
-        "This is a certificate of COMPLETION for self-paced education — it is not a certification, licence, or verification of clinical competency, and it confers no scope of practice. Progress and scoring are recorded in the learner's browser and are not independently proctored or auditable. Local protocol, medical direction, and the manufacturer's operating instructions always take precedence over this course.")
+        "This is a certificate of COMPLETION for self-paced education — it is not a certification, licence, or verification of clinical competency, and it confers no scope of practice. Progress and scoring are recorded on the learner's device and, where a course record system is configured, mirrored to it; the course is self-paced and is not independently proctored. Local protocol, medical direction, and the manufacturer's operating instructions always take precedence over this course.")
     )
   );
 
@@ -3393,7 +3474,62 @@ function renderCertificate() {
     el("button", { class: "btn btn-primary", type: "button", onclick: () => window.print() }, "🖨 Print / Save as PDF")
   );
 
-  mount(el("div", { class: "cert-wrap" }, cert, buttons));
+  mount(el("div", { class: "cert-wrap" }, cert, buttons, buildLinkPrompt()));
+}
+
+// ---------- LINK AN EMAIL (optional) ----------
+// A certificate carrying only a typed name proves little, and an anonymous
+// record dies with this device's storage. Linking a verified address fixes
+// both. Offered here, where the learner has just earned something worth
+// keeping — never required, and absent entirely with no backend configured.
+function buildLinkPrompt() {
+  if (!backendReady()) return null;
+
+  const st = window.AMRBackend.status();
+  if (st.email) {
+    return el("div", { class: "card no-print", style: "margin-top:1.25rem;text-align:center;" },
+      el("p", { style: "margin:0;color:var(--muted);font-size:0.95rem;" },
+        "\u2713 This record is saved to " + st.email));
+  }
+
+  const input = el("input", { class: "cert-input", type: "email", id: "vta-link-email",
+    placeholder: "you@example.com", autocomplete: "email" });
+  const status = el("p", { class: "cert-form-status", style: "margin-top:0.6rem;" }, "");
+  const btn = el("button", { class: "btn btn-primary", type: "button" }, "Send confirmation link");
+
+  btn.addEventListener("click", () => {
+    const email = (input.value || "").trim();
+    status.className = "cert-form-status";
+    if (!email || email.indexOf("@") < 1) {
+      status.textContent = "Enter a valid email address.";
+      status.classList.add("err");
+      return;
+    }
+    btn.disabled = true;
+    status.textContent = "Sending\u2026";
+    window.AMRBackend.linkEmail(email).then(r => {
+      btn.disabled = false;
+      if (!r.ok) {
+        status.textContent = "\u26A0 " + (r.error || "Could not link that email.");
+        status.classList.add("err");
+        return;
+      }
+      // Not attached until the emailed link is clicked — do not imply it is.
+      status.textContent = "\u2713 Check " + email + " and click the confirmation link to finish.";
+      input.value = "";
+    });
+  });
+
+  return el("div", { class: "card no-print", style: "margin-top:1.25rem;" },
+    el("p", { class: "section-kicker" }, "Optional"),
+    el("h2", { class: "section-title", style: "margin-top:0.2rem;font-size:1.1rem;" },
+      "Keep this record if you change phones"),
+    el("p", { style: "color:var(--muted);margin-top:0;font-size:0.95rem;" },
+      "Right now this completion lives only on this device. Linking an email lets it "
+      + "follow you to another phone and lets the Clinical Educator confirm who finished "
+      + "the course. The Academy works fine without it."),
+    el("label", { class: "cert-label", for: "vta-link-email" }, "Your email"),
+    input, btn, status);
 }
 
 // ---------- 5. ROUTER ----------

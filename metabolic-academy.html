@@ -237,6 +237,30 @@ h2.rd-title{ font-family:var(--sans); font-weight:800; letter-spacing:-.02em; fo
 .namebox{ background:var(--card); border:1px solid transparent; border-radius:16px; padding:16px 17px; margin:0 0 20px; }
 .namebox label{ font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:block; margin-bottom:8px; }
 .namebox input{ width:100%; font-family:var(--sans); font-size:16px; padding:12px 13px; border:1.5px solid var(--rule-2); border-radius:11px; background:var(--paper); color:var(--ink); }
+
+/* ── Link an email (optional) ─────────────────────────────────────
+   Progress lives in this device's storage. Linking a verified email is
+   what lets a record survive a reset phone and lets the educator see who
+   actually completed the course, so the prompt is visible but never
+   blocking — the Academy works fully without it. */
+.linkbox{ background:var(--card); border:1px solid var(--rule); border-radius:16px; padding:14px 16px; margin:0 0 20px; }
+.linkbox-head{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.linkbox-txt{ flex:1 1 220px; min-width:0; }
+.linkbox-title{ font-weight:700; font-size:14px; color:var(--ink); }
+.linkbox-sub{ font-size:13px; color:var(--ink-2); line-height:1.45; margin-top:2px; }
+.linkbox-btn{ flex:0 0 auto; font-family:var(--sans); font-size:13px; font-weight:700; padding:8px 15px; border-radius:9px; border:1.5px solid var(--rule-2); background:var(--paper); color:var(--ink); cursor:pointer; }
+.linkbox-btn:hover{ background:var(--card-2); }
+.linkbox-form{ margin-top:12px; }
+.linkbox-form label{ font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:block; margin-bottom:7px; }
+.linkbox-form input{ width:100%; font-family:var(--sans); font-size:16px; padding:11px 13px; border:1.5px solid var(--rule-2); border-radius:11px; background:var(--paper); color:var(--ink); margin-bottom:9px; }
+.linkbox-form input:focus{ outline:none; border-color:var(--blue); }
+.linkbox-save{ font-family:var(--sans); font-size:14px; font-weight:700; padding:10px 17px; border-radius:9px; border:none; background:var(--navy); color:#fff; cursor:pointer; }
+.linkbox-save:disabled{ opacity:.55; cursor:default; }
+.linkbox-msg{ font-size:13px; margin-top:9px; line-height:1.45; }
+.linkbox-msg.ok{ color:var(--green); }
+.linkbox-msg.err{ color:var(--red); }
+.linkbox-note{ font-size:12px; color:var(--ink-2); line-height:1.5; margin-top:10px; }
+.linkbox-linked{ font-size:13px; color:var(--green); font-weight:600; }
 .namebox input:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }
 
 /* ── Certificate ───────────────────────────────────────────────── */
@@ -325,6 +349,24 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
         <label for="nameInput">Learner name (appears on your certificate)</label>
         <input id="nameInput" type="text" placeholder="First and last name" autocomplete="name" />
       </div>
+      <div class="linkbox print-hide hidden" id="linkBox">
+        <div class="linkbox-head">
+          <div class="linkbox-txt">
+            <div class="linkbox-title" id="linkTitle">Save your progress</div>
+            <div class="linkbox-sub" id="linkSub">Right now this record lives only on this device.</div>
+          </div>
+          <button class="linkbox-btn" id="linkToggle" type="button">Link an email</button>
+        </div>
+        <div class="linkbox-form hidden" id="linkForm">
+          <label for="linkEmail">Your email</label>
+          <input id="linkEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+          <button class="linkbox-save" id="linkSave" type="button">Send confirmation link</button>
+          <div class="linkbox-msg" id="linkMsg"></div>
+          <div class="linkbox-note">We send a confirmation link; your progress transfers once you click it.
+            This lets your completion follow you to another phone and lets the Clinical Educator confirm
+            who finished the course. You can keep using the Academy without linking &mdash; nothing here is required.</div>
+        </div>
+      </div>
       <p class="eyebrow">Course Modules &middot; Sequential</p>
       <ul class="modlist" id="modList"></ul>
       <div id="finalSlot"></div>
@@ -369,6 +411,9 @@ footer.adm{ border-top:1px solid var(--rule); margin-top:36px; padding:16px 0 0;
   </div>
 </main>
 
+<!-- Durable mirror of module progress. Optional: with no Supabase project
+     configured it is an inert no-op and the academy runs exactly as before. -->
+<script src="amr-backend.js"></script>
 <script>
 "use strict";
 /* ============================================================================
@@ -1356,6 +1401,111 @@ function saveState(){
     var w = document.getElementById("storageWarn");
     if(w) w.classList.remove("hidden");
   }
+  queueSync();
+}
+
+/* ── Durable mirror (optional) ───────────────────────────────
+   localStorage above is what the learner sees; this pushes a copy to
+   Supabase so a wiped or lost phone does not take a CE record with
+   it. Strictly fire-and-forget: it never blocks the UI, and if the
+   backend is unconfigured or unreachable the academy is unaffected.
+   saveState() fires on every keystroke in the name field, so the push
+   is debounced rather than sent per character. */
+var COURSE_ID = "metabolic";
+var syncTimer = null;
+
+function queueSync(){
+  if(!window.AMRBackend || !AMRBackend.isConfigured()) return;
+  if(syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushSync, 2500);
+}
+function pushSync(){
+  if(syncTimer){ clearTimeout(syncTimer); syncTimer = null; }
+  if(!window.AMRBackend || !AMRBackend.isConfigured()) return;
+  try{
+    AMRBackend.syncAcademy(COURSE_ID, state, {
+      modulesTotal: MODULES.length,
+      courseVersion: typeof COURSE_VERSION !== "undefined" ? COURSE_VERSION : null
+    });
+  }catch(e){}
+}
+/* Someone who passes the final and immediately closes the tab must not
+   lose the record to a pending debounce, so leaving the page pushes now. */
+window.addEventListener("pagehide", pushSync);
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden) pushSync();
+});
+
+/* ── Link an email (optional) ─────────────────────────────────
+   A completion tied only to a self-typed name proves very little, and an
+   anonymous identity dies with the device's storage. Linking a verified
+   address fixes both. It is offered, never forced: the Academy is fully
+   usable without it, so this block stays out of the way. */
+function initEmailLink(){
+  var box = document.getElementById("linkBox");
+  if(!box) return;
+  if(!window.AMRBackend || !AMRBackend.isConfigured()) return;  // stays hidden
+
+  var toggle = document.getElementById("linkToggle");
+  var form   = document.getElementById("linkForm");
+  var input  = document.getElementById("linkEmail");
+  var save   = document.getElementById("linkSave");
+  var msg    = document.getElementById("linkMsg");
+  var title  = document.getElementById("linkTitle");
+  var sub    = document.getElementById("linkSub");
+
+  box.classList.remove("hidden");
+  paint();
+
+  function paint(){
+    var st = AMRBackend.status();
+    if(st.email){
+      title.textContent = "Progress saved to your email";
+      sub.innerHTML = "";
+      var span = document.createElement("span");
+      span.className = "linkbox-linked";
+      span.appendChild(document.createTextNode("\u2713 " + st.email));
+      sub.appendChild(span);
+      toggle.classList.add("hidden");
+      form.classList.add("hidden");
+    } else {
+      title.textContent = "Save your progress";
+      sub.textContent = "Right now this record lives only on this device.";
+    }
+  }
+
+  toggle.addEventListener("click", function(){
+    var open = !form.classList.contains("hidden");
+    form.classList.toggle("hidden", open);
+    toggle.textContent = open ? "Link an email" : "Cancel";
+    if(!open) input.focus();
+  });
+
+  save.addEventListener("click", function(){
+    var email = (input.value || "").trim();
+    if(!email || email.indexOf("@") < 1){
+      msg.textContent = "Enter a valid email address.";
+      msg.className = "linkbox-msg err";
+      return;
+    }
+    save.disabled = true;
+    msg.textContent = "Sending\u2026";
+    msg.className = "linkbox-msg";
+
+    AMRBackend.linkEmail(email).then(function(r){
+      save.disabled = false;
+      if(!r.ok){
+        msg.textContent = "\u26A0 " + (r.error || "Could not link that email.");
+        msg.className = "linkbox-msg err";
+        return;
+      }
+      /* The address is not attached until the link in the email is
+         clicked, so do not claim it is done. */
+      msg.textContent = "\u2713 Check " + email + " and click the confirmation link to finish.";
+      msg.className = "linkbox-msg ok";
+      input.value = "";
+    });
+  });
 }
 
 /* progression helpers */
@@ -1699,6 +1849,9 @@ nameInput.value = state.learnerName || "";
 nameInput.addEventListener("input", function(){
   state.learnerName = nameInput.value; saveState(); updateHeader();
 });
+
+/* The prompt only renders when a backend is configured. */
+initEmailLink();
 
 document.getElementById("resetBtn").addEventListener("click", function(){
   if(confirm("Reset all progress and your name? This clears every module and the final exam on this device.")){

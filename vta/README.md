@@ -1,6 +1,6 @@
 # Virtual Academy PWA — Multi-Module
 
-A self-contained progressive web app that delivers the Ventilator Training Academy modules interactively. Each module includes short lessons, a knowledge check, a drag-and-drop exercise, and a branching clinical scenario. All progress is stored locally in the browser — no backend, no server, no login. Per-module progress tracks independently.
+A self-contained progressive web app that delivers the Ventilator Training Academy modules interactively. Each module includes short lessons, a knowledge check, a drag-and-drop exercise, and a branching clinical scenario. Progress is stored locally in the browser and works fully offline with no login. Where a course record system is configured, completions are also mirrored to it (see [`../supabase/README.md`](../supabase/README.md)); with none configured the course behaves exactly as before. Per-module progress tracks independently.
 
 **Features**
 - **Auto-save mid-progress.** Quiz answers, drag-and-drop placements, and scenario decisions persist to localStorage on every action. Close the browser mid-quiz and resume exactly where you left off.
@@ -111,14 +111,22 @@ Optional polish: add a channel post pinned at the top with:
 
 ---
 
-## Tracking student progress (without a backend)
+## Tracking student progress
 
-Since this is a static PWA with no backend, individual student progress lives only in their browser. Two simple options if you need to verify completion:
+**With a course record system configured** (see [`../supabase/README.md`](../supabase/README.md)),
+completions appear in `educator-dashboard.html` alongside the other four academies:
+modules passed, final score, credential, and certificate id. Learners who link an
+email get a verified identity against their record; those who do not are shown as
+**"not linked"**, so a self-typed name is never mistaken for a confirmed one.
+
+**With none configured**, progress lives only in the learner's browser. Two options
+if you need to verify completion:
 
 1. **Honor system + screenshot** — Ask students to screenshot the Summary view (all four checkmarks) and post in the channel.
 2. **Manual quiz** — Distribute the Final Exam document (in folder 5 of the main course package) at the end of the module. The PWA quiz is for practice; the docx final exam is the official record.
 
-If you later need centralized tracking, the architecture upgrades cleanly to a small backend (Azure Functions + Cosmos DB, or Firebase) — talk to your instructor before that step.
+Either way the certificate is a record of *completion*, not a proctored
+assessment — the disclaimer on it says so.
 
 ---
 

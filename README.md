@@ -21,4 +21,27 @@ Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.htm
 - 11 Procedure Cards
 - Reference: Vital targets, Pediatric dosing calculator, LTV 1200 alarms, GCS, Cincinnati Stroke Scale, Broselow, Rule of Nines, APGAR
 
+## Backend
+
+Academy completions and Ask the Educator submissions can be mirrored to
+Supabase so a CE record survives a lost or wiped phone. The app stays
+offline-first: `localStorage` remains the source of truth for what a learner
+sees, and writes that cannot go out are queued and retried on reconnect.
+
+All five academies are covered — the four in the repo root plus the Ventilator
+Training Academy. Caregiver Signature Form records go to the same place; the
+PDF stays the deliverable and signature images are never uploaded.
+
+Learners can optionally link an email, which turns a self-typed name into a
+verified identity and lets their progress follow them to another device.
+
+`educator-dashboard.html` shows completions (with CSV export), the Ask the
+Educator inbox, and filed caregiver forms to approved educator accounts. It is
+read-only: nothing there can edit or delete a record. Access is an allowlist in
+the database, not a check in the page.
+
+Setup lives in [`supabase/README.md`](supabase/README.md). Until a project is
+configured the sync layer is an inert no-op and every page behaves as it did
+before.
+
 ## Confidential — For Authorized AMR EMS Personnel Only
