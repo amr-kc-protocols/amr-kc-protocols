@@ -1902,20 +1902,118 @@ const STORAGE_KEY = "vta-pwa-state-v2";
 // ---------- ADMIN MODE ----------
 // Unlocks every module and the final exam for review — lets an educator open any
 // quiz, match, scenario, or the final exam without completing prerequisites.
-// Three ways in: the "Admin" button in the footer (password-gated, persists on
-// this device), or the ?admin / #admin URL shortcut. NOTE: this is a soft
-// convenience gate, not real security — the password lives in this client file.
-const ADMIN_PASSWORD = "Brbull1142$";
+//
+// Unlocking requires an educator sign-in: the same email and password as the
+// educator dashboard, checked against is_educator() in the database. That
+// replaced a password constant that lived in this file, which meant the secret
+// shipped to every visitor and sat in the repository's history.
+//
+// What this is and is not: the modules being unlocked hold course content the
+// learner will reach anyway by progressing, so this gate is about workflow, not
+// confidentiality. The flag below is still local and a determined person could
+// set it by hand in devtools. The point of the change is that nothing here is a
+// reusable credential any more — there is no secret left to leak or reuse.
+//
+// The ?admin / #admin URL shortcut is gone. It bypassed the gate entirely, so
+// keeping it would have made the sign-in decorative.
+const ADMIN_FLAG_KEY = "vta_admin";
 const ADMIN = (function () {
-  try {
-    if (localStorage.getItem("vta_admin") === "1") return true;
-    return new URLSearchParams(location.search).has("admin") || /(?:^|[#&])admin\b/.test(location.hash);
-  } catch (e) { return false; }
+  try { return localStorage.getItem(ADMIN_FLAG_KEY) === "1"; }
+  catch (e) { return false; }
 })();
+
 function disableAdmin() {
   if (!confirm("Turn OFF admin mode? Modules will be gated normally again.")) return;
-  try { localStorage.removeItem("vta_admin"); } catch (e) {}
-  location.href = location.pathname;   // also drops any ?admin / #admin
+  try { localStorage.removeItem(ADMIN_FLAG_KEY); } catch (e) {}
+  location.reload();
+}
+
+// Sign-in overlay for the Admin button. Built here rather than in the page so
+// the whole feature stays in one place and disappears cleanly when no backend
+// is configured.
+function promptEducatorUnlock() {
+  if (!backendReady()) {
+    alert("Admin mode needs the course record system, which is not configured on this build.");
+    return;
+  }
+
+  const email = el("input", { class: "cert-input", type: "email", id: "vta-admin-email",
+    placeholder: "you@example.com", autocomplete: "username" });
+  const password = el("input", { class: "cert-input", type: "password", id: "vta-admin-pw",
+    placeholder: "Password", autocomplete: "current-password" });
+  const status = el("p", { class: "cert-form-status", id: "vta-admin-status" }, "");
+  const submit = el("button", { class: "btn btn-primary", type: "button",
+    id: "vta-admin-submit" }, "Unlock");
+  const cancel = el("button", { class: "btn btn-ghost", type: "button",
+    id: "vta-admin-cancel" }, "Cancel");
+
+  const overlay = el("div", { class: "admin-overlay", role: "dialog", "aria-modal": "true",
+    "aria-label": "Educator sign-in" },
+    el("div", { class: "admin-dialog" },
+      el("h2", { class: "section-title", style: "margin-top:0;font-size:1.15rem;" },
+        "Educator sign-in"),
+      el("p", { style: "color:var(--muted);margin-top:0;font-size:0.95rem;" },
+        "Unlocking every module is limited to approved educator accounts \u2014 the same "
+        + "sign-in as the dashboard."),
+      el("label", { class: "cert-label", for: "vta-admin-email" }, "Email"),
+      email,
+      el("label", { class: "cert-label", for: "vta-admin-pw" }, "Password"),
+      password,
+      status,
+      el("div", { class: "button-row", style: "margin-top:0.75rem;" }, submit, cancel)
+    )
+  );
+
+  function close() { overlay.remove(); }
+  cancel.addEventListener("click", close);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  document.addEventListener("keydown", function esc(e) {
+    if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+  });
+
+  function attempt() {
+    const addr = (email.value || "").trim();
+    const pw = password.value || "";
+    status.className = "cert-form-status";
+    if (!addr || !pw) {
+      status.textContent = "Enter your email and password.";
+      status.classList.add("err");
+      return;
+    }
+    submit.disabled = true;
+    status.textContent = "Checking\u2026";
+
+    window.AMRBackend.educator.signIn(addr, pw).then((r) => {
+      if (!r.ok) {
+        submit.disabled = false;
+        status.textContent = r.error || "Sign-in failed.";
+        status.classList.add("err");
+        return;
+      }
+      // Signed in is not the same as authorised — ask the database.
+      return window.AMRBackend.educator.verify().then((v) => {
+        submit.disabled = false;
+        if (!v.ok) {
+          status.textContent = v.error || "Could not verify access.";
+          status.classList.add("err");
+          return;
+        }
+        if (!v.isEducator) {
+          status.textContent = "That account is not on the educator allowlist.";
+          status.classList.add("err");
+          return;
+        }
+        try { localStorage.setItem(ADMIN_FLAG_KEY, "1"); } catch (e) {}
+        close();
+        location.reload();
+      });
+    });
+  }
+
+  submit.addEventListener("click", attempt);
+  password.addEventListener("keydown", (e) => { if (e.key === "Enter") attempt(); });
+  document.body.appendChild(overlay);
+  email.focus();
 }
 
 // ---------- SCORE LOGGING (Google Sheets → exportable to Excel) ----------
@@ -3560,20 +3658,13 @@ function boot() {
     badge.addEventListener("click", disableAdmin);
     document.body.appendChild(badge);
   }
-  // Password-gated admin toggle (footer button) — persists on this device.
+  // Admin toggle (footer button) — unlocking needs an educator sign-in.
   const adminBtn = document.getElementById("adminButton");
   if (adminBtn) {
     adminBtn.textContent = ADMIN ? "Admin ✓" : "Admin";
     adminBtn.addEventListener("click", () => {
       if (ADMIN) { disableAdmin(); return; }
-      const pw = prompt("Enter admin password to unlock all modules:");
-      if (pw == null) return;
-      if (pw === ADMIN_PASSWORD) {
-        try { localStorage.setItem("vta_admin", "1"); } catch (e) {}
-        location.reload();
-      } else {
-        alert("Incorrect password.");
-      }
+      promptEducatorUnlock();
     });
   }
   document.getElementById("resetButton").addEventListener("click", () => {

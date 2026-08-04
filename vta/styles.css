@@ -1451,3 +1451,29 @@ select.cert-input { cursor: pointer; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Educator sign-in overlay (admin unlock) ─────────────────────────
+   Shown by the footer Admin button. Reuses .cert-input / .cert-label /
+   .cert-form-status so the form matches the certificate form. */
+.admin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  z-index: 1000;
+}
+.admin-dialog {
+  background: var(--paper, #fff);
+  border-radius: 14px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 26rem;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.admin-dialog .cert-input { width: 100%; }
+@media print { .admin-overlay { display: none !important; } }
