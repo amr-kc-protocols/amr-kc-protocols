@@ -51,6 +51,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 .pick-card.flu .pick-ico{background:#e8f0fd}
 .pick-card.hbv .pick-ico{background:#fdeaea}
 .pick-card.ppd .pick-ico{background:#e7f6ec}
+.pick-card.fit .pick-ico{background:#eef0fb}
 .pick-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .pick-t{display:block;font-size:15.5px;font-weight:700;color:var(--teal);line-height:1.25}
 .pick-s{display:block;font-size:12px;color:var(--gray);line-height:1.4}
@@ -79,6 +80,16 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row>.field{flex:1;min-width:130px}
 .hint{font-size:11px;color:var(--gray);margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip span{display:inline-block;padding:9px 14px;border:1.5px solid var(--border);
+  border-radius:999px;font-size:13px;font-weight:600;color:var(--white);
+  background:#fff;cursor:pointer;user-select:none}
+.chip input:checked+span{border-color:var(--teal2);background:#eaf1fd;color:var(--teal)}
+.chip input:focus-visible+span{outline:2px solid var(--teal2);outline-offset:2px}
+.notice{background:var(--warn-bg);border:1px solid #e7c48a;border-radius:10px;
+  padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--warn);font-weight:600}
+.notice-strong{background:var(--wrong-bg);border-color:#f3c6c6;color:var(--wrong)}
 
 .opt-row{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1.5px solid var(--border);
   border-radius:10px;margin-bottom:8px;cursor:pointer;background:#fff}
@@ -138,6 +149,11 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
     <button class="pick-card ppd" onclick="openForm('ppd')">
       <span class="pick-ico">&#x1F9EA;</span>
       <span class="pick-body"><span class="pick-t">TB / PPD Skin Test</span><span class="pick-s">Mantoux acceptance or declination statement</span></span>
+      <span class="pick-arr">&#x203A;</span>
+    </button>
+    <button class="pick-card fit" onclick="openForm('fit')">
+      <span class="pick-ico">&#x1F637;</span>
+      <span class="pick-body"><span class="pick-t">Respirator Fit Test Record</span><span class="pick-s">SR-100.03.1 &mdash; employee &amp; administrator signatures</span></span>
       <span class="pick-arr">&#x203A;</span>
     </button>
     <div class="privacy">
@@ -206,6 +222,154 @@ function fieldRow(fields){ // fields: [{id,label,req,ph,type,half}]
 }
 
 var FORMS={
+  // ─────────────────────────────────────────────────────────── FIT TEST
+  // Reproduces SR-100.03.1 (Rev 02, effective 24 FEB 2026). Field names,
+  // option lists and the two statements are taken from that form; nothing
+  // here is invented. Two signatures: the employee acknowledges the result
+  // and the instruction given, the administrator certifies the test.
+  fit:{
+    title:'Respirator Fit Test Record',
+    src:'GMR / AMR SR-100.03.1 &middot; Revision 02 &middot; Effective 24 FEB 2026',
+    render:function(){
+      return ''+
+      '<div class="card"><div class="card-lbl">Medical Clearance</div>'+
+        '<div class="notice notice-strong" style="margin-bottom:12px">'+
+          'DO NOT PROCEED until a Medical Clearance is issued.</div>'+
+        fieldRow([{id:'fit-clear',label:'Medical Clearance Date',req:true,ph:'MM/DD/YYYY'}])+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Employee Information</div>'+
+        fieldRow([{id:'fit-name',label:'Employee Name / ID',req:true}])+
+        '<div class="field"><label>Job Title <span class="req">*</span></label>'+
+          chips('fit-job',['EMT','Paramedic','Other'])+
+          '<input class="input hidden" id="fit-job-other" placeholder="If other, specify" style="margin-top:8px">'+
+        '</div>'+
+        fieldRow([{id:'fit-op',label:'Operation'},{id:'fit-loc',label:'Location'}])+
+        fieldRow([{id:'fit-date',label:'Fit Test Date',req:true,val:today()}])+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Respirator</div>'+
+        fieldRow([{id:'fit-brand',label:'Brand',req:true},{id:'fit-model',label:'Model Number'}])+
+        '<div class="field"><label>Size <span class="req">*</span></label>'+
+          chips('fit-size',['XS','S','M','L','XL',['One size fits all','One size']])+
+        '</div>'+
+        '<div class="field"><label>Respirator Style <span class="req">*</span></label>'+
+          chips('fit-style',['N95','P100','Other'])+
+          '<input class="input hidden" id="fit-style-other" placeholder="If other, specify" style="margin-top:8px">'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Qualitative Fit Test</div>'+
+        '<div class="field"><label>Fit Test Solution Type <span class="req">*</span></label>'+
+          chips('fit-sol',[['Bitrex / Saccharin','Bitrex / Saccharin'],['Smoke','Smoke']])+
+        '</div>'+
+        '<div class="field"><label>Result <span class="req">*</span></label>'+
+          chips('fit-result',['Pass','Fail'])+
+        '</div>'+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Employee Acknowledgment</div>'+
+        '<div class="statement fine"><p>I acknowledge these test results; and have been instructed in the '+
+        'proper donning and use of this respirator. I will follow all procedures, instructions and warnings '+
+        'when wearing this type of air-purifying respirator. I understand that while this respirator is '+
+        'designed to protect against some airborne pathogens, it does not provide breathing air in an '+
+        'oxygen-deficient environment.</p></div>'+
+        sigBlock('fit-empsig','Employee Signature')+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Fit Test Administrator</div>'+
+        '<div class="statement fine"><p>I certify that this Qualitative Test was performed using protocols '+
+        'required by as per: OSHA Regulations delineated in 29 CFR 1910.134 Appendix A and the '+
+        'Respirator&rsquo;s Manufacturer&rsquo;s Instructions / Fit Test Kit Instructions.</p></div>'+
+        fieldRow([{id:'fit-admin',label:'Administrator Name',req:true}])+
+        '<label class="chk" style="margin:4px 0 12px"><input type="checkbox" id="fit-trained">'+
+          '<span>I have completed the required training: <strong>GMR procedures for Respiratory '+
+          'Fit Testing</strong>. <span class="req">*</span></span></label>'+
+        sigBlock('fit-adminsig','Fit Test Administrator Signature')+
+      '</div>'+
+
+      '<div class="notice">This document MUST BE UPLOADED TO THE EMPLOYEE&rsquo;S NINTH BRAIN '+
+      'CERTIFICATION PROFILE. Certain operations may elect to store a hard copy in addition to the '+
+      'mandatory uploading.</div>';
+    },
+    init:function(){
+      setupSig('fit-empsig'); setupSig('fit-adminsig');
+      // The free-text box only appears once "Other" is chosen, so the form
+      // does not show two empty inputs nobody needs to fill in.
+      [['fit-job','fit-job-other'],['fit-style','fit-style-other']].forEach(function(pair){
+        var box=document.getElementById(pair[1]);
+        document.querySelectorAll('input[name="'+pair[0]+'"]').forEach(function(r){
+          r.addEventListener('change',function(){
+            var other=(r.value==='Other');
+            box.classList.toggle('hidden',!other);
+            if(other) box.focus(); else box.value='';
+          });
+        });
+      });
+    },
+    collect:function(st){
+      var name=val('fit-name');
+      if(!name) return err(st,'Employee name / ID is required.');
+      if(!val('fit-clear')) return err(st,'Medical clearance date is required — do not proceed without one.');
+      if(!val('fit-date')) return err(st,'Fit test date is required.');
+
+      var job=pick('fit-job');
+      if(!job) return err(st,'Select a job title.');
+      if(job==='Other'){
+        if(!val('fit-job-other')) return err(st,'Specify the job title.');
+        job='Other — '+val('fit-job-other');
+      }
+
+      if(!val('fit-brand')) return err(st,'Respirator brand is required.');
+      var size=pick('fit-size'); if(!size) return err(st,'Select a respirator size.');
+      var style=pick('fit-style');
+      if(!style) return err(st,'Select a respirator style.');
+      if(style==='Other'){
+        if(!val('fit-style-other')) return err(st,'Specify the respirator style.');
+        style='Other — '+val('fit-style-other');
+      }
+
+      var sol=pick('fit-sol'); if(!sol) return err(st,'Select the fit test solution type.');
+      var result=pick('fit-result'); if(!result) return err(st,'Record the result — Pass or Fail.');
+
+      var admin=val('fit-admin'); if(!admin) return err(st,'Administrator name is required.');
+      var trained=document.getElementById('fit-trained');
+      if(!trained||!trained.checked){
+        return err(st,'The administrator must confirm the required GMR fit-testing training.');
+      }
+      var empsig=sigDataURL('fit-empsig'); if(!empsig) return err(st,'The employee must sign.');
+      var adminsig=sigDataURL('fit-adminsig'); if(!adminsig) return err(st,'The administrator must sign.');
+
+      return {
+        title:'Respirator Fit Test Record',
+        src:'GMR / AMR SR-100.03.1 — Revision 02 — Effective 24 FEB 2026',
+        info:[
+          ['Employee Name / ID',name],
+          ['Job Title',job],
+          ['Operation',val('fit-op')||'—'],
+          ['Location',val('fit-loc')||'—'],
+          ['Medical Clearance Date',val('fit-clear')],
+          ['Fit Test Date',val('fit-date')],
+          ['Respirator Brand',val('fit-brand')],
+          ['Model Number',val('fit-model')||'—'],
+          ['Size',size],
+          ['Respirator Style',style],
+          ['Fit Test Solution Type',sol],
+          ['Result',result.toUpperCase()],
+          ['Administrator Name',admin]
+        ],
+        statements:[
+          'ADMINISTRATOR CERTIFICATION: I certify that this Qualitative Test was performed using protocols required by as per: OSHA Regulations delineated in 29 CFR 1910.134 Appendix A and the Respirator’s Manufacturer’s Instructions / Fit Test Kit Instructions. I have completed the required training: GMR procedures for Respiratory Fit Testing.',
+          'EMPLOYEE ACKNOWLEDGMENT: I acknowledge these test results; and have been instructed in the proper donning and use of this respirator. I will follow all procedures, instructions and warnings when wearing this type of air-purifying respirator. I understand that while this respirator is designed to protect against some airborne pathogens, it does not provide breathing air in an oxygen-deficient environment.',
+          'This document MUST BE UPLOADED TO THE EMPLOYEE’S NINTH BRAIN CERTIFICATION PROFILE. Certain operations may elect to store a hard copy in addition to the mandatory uploading.'
+        ],
+        sigs:[
+          ['Employee Signature',empsig,val('fit-date')],
+          ['Fit Test Administrator Signature',adminsig,val('fit-date')]
+        ]
+      };
+    }
+  },
   // ──────────────────────────────────────────────────────────────── FLU
   flu:{
     title:'Seasonal Influenza Vaccination Declination Statement',
@@ -405,6 +569,19 @@ function togglePpd(){
   var a=document.getElementById('ppd-accept-card'), d=document.getElementById('ppd-decline-card');
   if(a) a.classList.toggle('hidden', c!=='accept');
   if(d) d.classList.toggle('hidden', c!=='decline');
+}
+
+// Chip-style radio group. `opts` is [value, label] or a bare string.
+function chips(name,opts,sel){
+  return '<div class="chips">'+opts.map(function(o){
+    var v=(o instanceof Array)?o[0]:o, t=(o instanceof Array)?o[1]:o;
+    return '<label class="chip"><input type="radio" name="'+name+'" value="'+v+'"'+
+      (sel===v?' checked':'')+'><span>'+t+'</span></label>';
+  }).join('')+'</div>';
+}
+function pick(name){
+  var el=document.querySelector('input[name="'+name+'"]:checked');
+  return el?el.value:'';
 }
 
 function err(st,msg){ st.textContent='⚠ '+msg; st.className='status'; return null; }
