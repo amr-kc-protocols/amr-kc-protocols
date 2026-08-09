@@ -99,6 +99,12 @@ textarea{resize:vertical;min-height:80px;line-height:1.55}
 .confirm-title{font-size:20px;font-weight:700;color:var(--emt);margin-bottom:8px}
 .confirm-sub{font-size:14px;color:var(--subtext);line-height:1.65;margin-bottom:20px}
 .confirm-new-btn{padding:12px 28px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.confirm-new-btn.alt{background:#f8fafc;color:var(--text);border:1px solid var(--border)}
+.survey-out{width:100%;height:150px;margin-top:16px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:11px;
+  font-family:var(--mono);font-size:11px;line-height:1.5;color:var(--text);resize:vertical;text-align:left}
+.survey-acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+.survey-acts .confirm-new-btn{flex:1;min-width:110px;padding:12px 8px}
+.survey-sent{font-family:var(--mono);font-size:11.5px;color:var(--emt);margin-top:10px;min-height:16px;font-weight:600}
 
 /* REQUIRED LEGEND */
 .req-legend{font-size:12px;color:var(--lightgray);margin-bottom:16px;text-align:right}
@@ -129,8 +135,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.55}
 <div class="page-main">
   <div class="intro-card">
     <div class="intro-title">New Hire Orientation Survey</div>
-    <div class="intro-sub">Thank you for completing orientation. This survey helps us improve the program and recognize outstanding FTOs. Your responses are reviewed by the Clinical Educator and Operations leadership. Please answer honestly &mdash; this is your opportunity to shape the experience for the next new hire.</div>
-    <div class="intro-badge">&#x1F512; Responses are kept confidential within leadership</div>
+    <div class="intro-sub">Thank you for completing orientation. This survey helps us improve the program and recognize outstanding FTOs. Your responses are reviewed by the Clinical Educator and Operations leadership. Please answer honestly &mdash; this is your opportunity to shape the experience for the next new hire.<br><br>At the end you will get your answers written up to send to your educator yourself &mdash; nothing is uploaded from this page.</div>
+    <div class="intro-badge">&#x1F512; Stays on your device until you send it</div>
   </div>
 
   <div class="req-legend"><span>*</span> Required fields</div>
@@ -491,7 +497,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.55}
 
     <!-- SUBMIT -->
     <div class="submit-section">
-      <button type="button" class="submit-btn" id="submit-btn">Submit Survey &#x2192;</button>
+      <button type="button" class="submit-btn" id="submit-btn">Review &amp; Send &#x2192;</button>
       <div class="submit-status" id="submit-status"></div>
     </div>
 
@@ -499,16 +505,20 @@ textarea{resize:vertical;min-height:80px;line-height:1.55}
 
   <div class="confirm-card" id="confirm-card">
     <div class="confirm-icon">&#x2705;</div>
-    <div class="confirm-title">Survey Submitted</div>
-    <div class="confirm-sub">Thank you for taking the time to complete this survey. Your feedback helps improve the orientation experience for every new hire at AMR Kansas City.<br><br>If you have urgent questions, contact your operations supervisor directly.</div>
-    <button class="confirm-new-btn" id="confirm-new-btn">Submit Another Response</button>
+    <div class="confirm-title">Your Responses Are Ready</div>
+    <div class="confirm-sub">Thank you for taking the time. Nothing is uploaded from this page &mdash; send your responses to your clinical educator using one of the buttons below, and they will go no further than that.<br><br>If you have urgent questions, contact your operations supervisor directly.</div>
+    <textarea class="survey-out" id="survey-out" readonly></textarea>
+    <div class="survey-acts">
+      <button class="confirm-new-btn" id="survey-share">Send&hellip;</button>
+      <button class="confirm-new-btn alt" id="survey-copy">Copy</button>
+      <button class="confirm-new-btn alt" id="survey-save">Save as File</button>
+    </div>
+    <div class="survey-sent" id="survey-sent"></div>
+    <button class="confirm-new-btn alt" id="confirm-new-btn" style="margin-top:14px">Submit Another Response</button>
   </div>
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────
-// Paste your Google Apps Script Web App URL here after deploying the script
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAUtgOCaEXbh-Uq42FLWzbFZi_5fXYtVIK0q8sJpvZmd2360_ujeO52zVjSlE0VXIuyw/exec';
 
 // ── CHAR COUNTERS ─────────────────────────────────────────────────────
 var textareaCounters = [
@@ -661,21 +671,80 @@ document.getElementById('submit-btn').addEventListener('click', function(){
     additionalQuestions: getVal('additionalQuestions'),
   };
 
-  // Apps Script requires no-cors + URL-encoded body (avoids preflight/redirect issues)
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: new URLSearchParams(payload)
-  }).then(function(){
-    document.getElementById('survey-form').style.display = 'none';
-    document.getElementById('submit-status').textContent = '';
-    document.getElementById('confirm-card').style.display = 'block';
-    document.getElementById('confirm-card').scrollIntoView({behavior:'smooth'});
-  }).catch(function(){
-    document.getElementById('submit-status').className='submit-status err';
-    document.getElementById('submit-status').textContent='&#x26A0; Submission failed \u2014 check connection and try again.';
-    btn.disabled = false;
-  });
+  // Nothing is uploaded any more. The responses are written up here and the new
+  // hire sends them on themselves, so the page keeps working without a server
+  // behind it.
+  SURVEY_TEXT = surveyText(payload);
+  document.getElementById('survey-form').style.display = 'none';
+  document.getElementById('submit-status').textContent = '';
+  document.getElementById('survey-out').value = SURVEY_TEXT;
+  document.getElementById('confirm-card').style.display = 'block';
+  document.getElementById('confirm-card').scrollIntoView({behavior:'smooth'});
+});
+
+// Question text comes from the form itself rather than a second list of labels
+// that would drift out of step with it.
+function labelFor(name){
+  var el = document.querySelector('[name="'+name+'"]');
+  if(!el) return name;
+  var lab = el.id ? document.querySelector('label[for="'+el.id+'"]') : null;
+  if(!lab){
+    var block = el.closest('.q-block');
+    lab = block ? block.querySelector('.q-label') : null;
+  }
+  return lab ? lab.textContent.replace(/\*/g,'').replace(/\s+/g,' ').trim() : name;
+}
+function surveyText(payload){
+  var out = ['AMR Kansas City \u2014 New Hire Orientation Exit Survey',
+             'Submitted ' + new Date().toLocaleString(), ''];
+  for(var k in payload){
+    if(!Object.prototype.hasOwnProperty.call(payload, k)) continue;
+    if(k === 'submittedAt') continue;   // the header line already carries this
+    var v = String(payload[k] == null ? '' : payload[k]).trim();
+    if(!v) continue;
+    out.push(labelFor(k));
+    out.push('  ' + v.replace(/\n/g, '\n  '));
+    out.push('');
+  }
+  return out.join('\n');
+}
+var SURVEY_TEXT = '';
+function surveyFileName(){
+  var who = (document.querySelector('[name="fullName"]') || {}).value || 'response';
+  return 'orientation-exit-survey-' + who.replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'') + '.txt';
+}
+document.getElementById('survey-copy').addEventListener('click', function(){
+  var ta = document.getElementById('survey-out');
+  ta.focus();
+  ta.setSelectionRange(0, ta.value.length);
+  var ok = function(){ document.getElementById('survey-sent').textContent = 'Copied \u2014 paste it into an email to your educator.'; };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(SURVEY_TEXT).then(ok, function(){
+      try { document.execCommand('copy'); ok(); }
+      catch(e){ document.getElementById('survey-sent').textContent = 'Select the text above and copy it.'; }
+    });
+  } else {
+    try { document.execCommand('copy'); ok(); }
+    catch(e){ document.getElementById('survey-sent').textContent = 'Select the text above and copy it.'; }
+  }
+});
+document.getElementById('survey-save').addEventListener('click', function(){
+  var blob = new Blob([SURVEY_TEXT], {type:'text/plain'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = surveyFileName();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+  document.getElementById('survey-sent').textContent = 'Saved \u2014 attach it to an email.';
+});
+document.getElementById('survey-share').addEventListener('click', function(){
+  if(navigator.share){
+    navigator.share({title:'Orientation Exit Survey', text:SURVEY_TEXT})
+      .then(function(){ document.getElementById('survey-sent').textContent = 'Sent.'; })
+      .catch(function(){});
+  } else {
+    document.getElementById('survey-copy').click();
+  }
 });
 
 document.getElementById('confirm-new-btn').addEventListener('click', function(){

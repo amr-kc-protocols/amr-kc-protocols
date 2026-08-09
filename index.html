@@ -814,45 +814,13 @@ function escHtml(s){
 // provider-profile-AppsScript.gs). Deploy that script and paste the
 // resulting /exec URL below to enable cross-device recognition.
 // Until then, profiles are saved locally on this device only.
-var PROFILE_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyc_iU6npoA1505QJbvBdPz_8-OGreOOBF0MIu_0EyivF8rDHKQnqCIQP7DtryclN45/exec';
-
 function getProfile(){ try{ return JSON.parse(localStorage.getItem('amrkc_profile')||'null'); }catch(e){ return null; } }
 function setProfile(p){ try{ localStorage.setItem('amrkc_profile', JSON.stringify(p)); }catch(e){} }
 function clearProfile(){ try{ localStorage.removeItem('amrkc_profile'); }catch(e){} }
 
-function profileConfigured(){ return !!PROFILE_ENDPOINT && PROFILE_ENDPOINT.indexOf('PASTE_') !== 0; }
-
-// Best-effort lookup by employee number so a returning provider is
-// recognized on a new device. Always calls back — null if not found,
-// not configured, offline, or slow (4s timeout).
-function lookupProfile(empNum, cb){
-  if(!profileConfigured()){ cb(null); return; }
-  var done = false;
-  var timer = setTimeout(function(){ if(!done){ done = true; cb(null); } }, 4000);
-  fetch(PROFILE_ENDPOINT + '?employeeNumber=' + encodeURIComponent(empNum))
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if(done) return; done = true; clearTimeout(timer);
-      cb(data && data.found ? data.profile : null);
-    })
-    .catch(function(){
-      if(done) return; done = true; clearTimeout(timer);
-      cb(null);
-    });
-}
-
-// Fire-and-forget create/update — mirrors the pattern used by the
-// other Apps Script–backed features in this app (no response read).
-function saveProfileRemote(lastName, empNum){
-  if(!profileConfigured()) return;
-  var body = 'lastName=' + encodeURIComponent(lastName) + '&employeeNumber=' + encodeURIComponent(empNum);
-  fetch(PROFILE_ENDPOINT, {
-    method: 'POST', mode: 'no-cors',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-    body: body
-  }).catch(function(){});
-}
-
+// The profile is local to this device. There is no lookup by employee number
+// any more — nothing about this app leaves the phone, so a provider setting up
+// a second device just enters their name and number again.
 function getDaily5Stats(){
   try{ return JSON.parse(localStorage.getItem('d5stats')||'{}'); }catch(e){ return {}; }
 }
@@ -931,7 +899,7 @@ function renderHome(){
     h += '<input class="home-name-input" id="home-empnum-input" type="text" placeholder="Employee #" maxlength="20" autocomplete="off" inputmode="numeric">';
     h += '<button class="home-name-save" id="home-name-save-btn">Save profile</button>';
     h += '<div class="home-name-err" id="home-name-err">Enter both your last name and employee number.</div>';
-    h += '<div class="home-name-hint">Used to personalize your Field Guide &mdash; not shared outside AMR KC.</div>';
+    h += '<div class="home-name-hint">Used to personalize your Field Guide &mdash; stays on this device.</div>';
     h += '</div>';
   }
   h += '</div>';
@@ -1366,15 +1334,8 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     if(errEl) errEl.style.display = 'none';
     if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
-    lookupProfile(empNum, function(existing){
-      if(existing && existing.lastName){
-        setProfile({ lastName: existing.lastName, employeeNumber: empNum });
-      } else {
-        setProfile({ lastName: lastName, employeeNumber: empNum });
-        saveProfileRemote(lastName, empNum);
-      }
-      renderHome();
-    });
+    setProfile({ lastName: lastName, employeeNumber: empNum });
+    renderHome();
   }
 
   // Back
@@ -1997,11 +1958,9 @@ function buildPCSList(items){
 }
 // ── FORMS ──────────────────────────────────────────────────────────────────
 var CGF_SIGS = [null, null, null];   // captured signature per crew, as a PNG data URL
-var CGF_AMENDED = false;             // set when a form is sent back for correction
 function renderForms(){
   var c = $('lv');
   CGF_SIGS = [null, null, null];
-  CGF_AMENDED = false;
   CGF_PDF = null;
   cgfAssets();   // warm the PDF font/logo fetches while the form is being filled
   function crewSection(n, label, req){
@@ -2129,8 +2088,6 @@ function renderForms(){
       statusEl.className = 'cgf-status pending';
       function getSig(n){ return CGF_SIGS[n-1] || ''; }
       function getField(id){ return (document.getElementById(id)||{}).value||''; }
-      var now = new Date();
-      var submittedAt = (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear()+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
       var crew = [
         {num:1, name: getField('cgf-name-1'), cert: getField('cgf-cert-1'), sig: getSig(1)},
         {num:2, name: getField('cgf-name-2'), cert: getField('cgf-cert-2'), sig: getSig(2)},
@@ -2149,16 +2106,6 @@ function renderForms(){
         // count as user activation. If the browser declines, the Send button on
         // the confirmation panel is a fresh tap that will be allowed.
         cgfSendPdf();
-        // Also log to sheet (no signatures — just text data)
-        var payload = {
-          type:'caregiver_form',
-          date: date, caseNumber: caseNum, submittedAt: submittedAt,
-          amended: CGF_AMENDED ? 'yes' : '',
-          crew1Name: crew[0].name, crew1Cert: crew[0].cert, crew1Sig:'',
-          crew2Name: crew[1].name, crew2Cert: crew[1].cert, crew2Sig:'',
-          crew3Name: crew[2].name, crew3Cert: crew[2].cert, crew3Sig:''
-        };
-        fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){});
       }).catch(function(err){
         statusEl.textContent='⚠ PDF generation failed: '+((err&&err.message)||err);
         statusEl.className='cgf-status err';
@@ -2171,7 +2118,6 @@ function renderForms(){
     // Correcting a form goes back to it with every field and signature still
     // there. A typo in a case number shouldn't cost three signatures.
     if(fixBtn) fixBtn.addEventListener('click', function(){
-      CGF_AMENDED = true;
       CGF_PDF = null;
       confirmEl.style.display='none';
       formEl.style.display='block';
@@ -2181,7 +2127,6 @@ function renderForms(){
     });
     if(againBtn) againBtn.addEventListener('click', function(){
       CGF_SIGS = [null, null, null];
-      CGF_AMENDED = false;
       CGF_PDF = null;
       confirmEl.style.display='none';
       formEl.style.display='block';
@@ -2558,7 +2503,7 @@ function renderMore(){
     '  <div class="more-card-ico"><img class="edu-avatar-sm" src="educator.jpg" alt=""></div>',
     '  <div class="more-card-info">',
     '    <div class="more-card-title">Ask the Educator</div>',
-    '    <div class="more-card-sub">Anonymous questions &amp; feedback to Dr. Deshmukh</div>',
+    '    <div class="more-card-sub">Questions &amp; feedback, sent from your mail app</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</div>',
@@ -2569,7 +2514,9 @@ function renderMore(){
 }
 
 // ── ASK THE EDUCATOR ──────────────────────────────────────────────────────
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAUtgOCaEXbh-Uq42FLWzbFZi_5fXYtVIK0q8sJpvZmd2360_ujeO52zVjSlE0VXIuyw/exec';
+// Questions go out through the crew's own mail app. Change this to move where
+// they land.
+var ASK_EDUCATOR_EMAIL = 'hunter04j@hotmail.com';
 var MAX_CHARS = 1000;
 function renderAsk(){
   var c = $('lv');
@@ -2579,22 +2526,22 @@ function renderAsk(){
     '<div class="ask-hero">',
     '  <img class="ask-avatar" src="educator.jpg" alt="Your clinical educator">',
     '  <div class="ask-hero-title">Ask the Educator</div>',
-    '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. No name required &mdash; submissions are completely anonymous.</div>',
-    '  <div class="ask-anon-badge"><svg class="icon"><use href="#i-lock"></use></svg> 100% Anonymous</div>',
+    '  <div class="ask-hero-sub">Questions, feedback, protocol clarifications, or anything on your mind. Sends through your own mail app, so Hunter sees the address you send from.</div>',
+    '  <div class="ask-anon-badge"><svg class="icon"><use href="#i-message"></use></svg> Straight to your educator</div>',
     '</div>',
     '<div id="ask-form">',
     '  <label class="ask-field-label" for="ask-msg">Your message</label>',
     '  <textarea class="ask-textarea" id="ask-msg" maxlength="1000" placeholder="Type your question or feedback here..."></textarea>',
     '  <div class="ask-char" id="ask-char">0 / 1000</div>',
-    '  <label class="ask-field-label" for="ask-email" style="margin-top:4px">Email for reply <span style="color:var(--gray);font-weight:400;text-transform:none;letter-spacing:0">&mdash; optional, leave blank to stay anonymous</span></label>',
+    '  <label class="ask-field-label" for="ask-email" style="margin-top:4px">Email for reply <span style="color:var(--gray);font-weight:400;text-transform:none;letter-spacing:0">&mdash; optional, only if you want the reply somewhere else</span></label>',
     '  <input type="email" id="ask-email" style="width:100%;background:var(--dim);border:1.5px solid var(--border);border-radius:10px;color:var(--white);font-family:var(--sans);font-size:15px;padding:12px 14px;outline:none;-webkit-appearance:none;margin-bottom:16px" placeholder="your@email.com (optional)">',
-    '  <button class="ask-submit" id="ask-submit" disabled>Send &#x2192;</button>',
+    '  <button class="ask-submit" id="ask-submit" disabled>Open Email to Send &#x2192;</button>',
     '  <div class="ask-status" id="ask-status"></div>',
     '</div>',
     '<div class="ask-confirm" id="ask-confirm">',
     '  <div class="ask-confirm-icon"><svg class="icon"><use href="#i-check-circle"></use></svg></div>',
-    '  <div class="ask-confirm-title">Message Sent</div>',
-    '  <div class="ask-confirm-sub" id="ask-confirm-sub">Your message was submitted. Hunter reviews submissions regularly.</div>',
+    '  <div class="ask-confirm-title">Ready to Send</div>',
+    '  <div class="ask-confirm-sub" id="ask-confirm-sub">Your mail app should be open with the message ready &mdash; hit send.</div>',
     '  <button class="ask-again" id="ask-again">Send Another Message</button>',
     '</div>',
     '<div class="ask-info-box">',
@@ -2627,36 +2574,24 @@ function renderAsk(){
       if(text.length < 10) return;
       var emailEl = document.getElementById('ask-email');
       var email = emailEl ? emailEl.value.trim() : '';
-      submitBtn.disabled = true;
-      statusEl.textContent = '\u23F3 Sending\u2026';
-      statusEl.className = 'ask-status pending';
-      var now = new Date();
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          type: 'ask_educator',
-          date: (now.getMonth()+1)+'/'+now.getDate()+'/'+now.getFullYear(),
-          time: now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-          message: text,
-          email: email
-        })
-      }).then(function(){
-        var subEl = document.getElementById('ask-confirm-sub');
-        if(subEl){
-          subEl.textContent = email
-            ? 'Message sent. Hunter will reply to ' + email + ' if a response is needed.'
-            : 'Message submitted anonymously. Hunter reviews submissions regularly.';
-        }
-        formEl.style.display = 'none';
-        confirmEl.style.display = 'block';
-        statusEl.textContent = '';
-      }).catch(function(){
-        statusEl.textContent = '\u26A0 Submission failed \u2014 check your connection and try again.';
-        statusEl.className = 'ask-status err';
-        submitBtn.disabled = false;
-      });
+      // Hand the message to the phone's mail app. There is no server to post
+      // to, and a question that reaches nobody is worse than one that takes a
+      // tap to send \u2014 the app cannot send on the crew's behalf, so the last
+      // step is theirs.
+      var body = text + '\n\n\u2014\nSent from the AMR KC Field Guide';
+      if(email) body += '\nReply to: ' + email;
+      var href = 'mailto:' + ASK_EDUCATOR_EMAIL +
+        '?subject=' + encodeURIComponent('Field Guide \u2014 question from the field') +
+        '&body=' + encodeURIComponent(body);
+      var subEl = document.getElementById('ask-confirm-sub');
+      if(subEl){
+        subEl.textContent = 'Your mail app should be open with the message ready \u2014 hit send. '
+          + (email ? 'Hunter will reply to ' + email + '.' : 'Add your email in the message if you want a reply.');
+      }
+      formEl.style.display = 'none';
+      confirmEl.style.display = 'block';
+      statusEl.textContent = '';
+      window.location.href = href;
     });
   }
   if(againBtn){
