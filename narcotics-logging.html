@@ -16,9 +16,7 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 :root{
   --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
-  --surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
-  --green:#15803d;--green-bg:#eafbf1;--green-line:#bfe6cd;
-  --red:#dc2626;--red-bg:#fdecec;--warn:#a1590b;--warn-bg:#fef3e2;--warn-line:#f3d9ab;
+  --surface2:#f4f6f9;--border:#e2e6ec;
   --sans:'IBM Plex Sans',sans-serif;--mono:ui-monospace,'SF Mono',Menlo,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -56,7 +54,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 /* SECTIONS */
 .sec{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
   color:var(--gray);margin:20px 4px 9px}
-.sec:first-of-type{margin-top:4px}
+.notice + .sec{margin-top:4px}
 
 /* FEATURED VIDEO */
 .feature{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--teal);
@@ -65,7 +63,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 .feature:hover{box-shadow:0 5px 16px rgba(21,34,56,.10);transform:translateY(-1px)}
 .feature .play{width:44px;height:44px;flex-shrink:0;border-radius:11px;background:var(--teal);color:#fff;
   display:flex;align-items:center;justify-content:center}
-.feature .play svg{width:20px;height:20px}
+.feature .play svg{width:20px;height:20px;fill:currentColor}
 .feature-body{flex:1;min-width:0}
 .feature-kick{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--teal2);margin-bottom:3px}
@@ -79,16 +77,20 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 .vid:hover{border-color:var(--teal);box-shadow:0 5px 16px rgba(21,34,56,.09);transform:translateY(-1px)}
 .vid-ico{width:36px;height:36px;flex-shrink:0;border-radius:9px;background:var(--dim);color:var(--teal2);
   display:flex;align-items:center;justify-content:center}
-.vid-ico svg{width:16px;height:16px}
+.vid-ico svg{width:16px;height:16px;fill:currentColor}
 .vid-body{flex:1;min-width:0}
 .vid-t{font-size:14.5px;font-weight:600;color:var(--white);line-height:1.3}
 .vid-s{font-size:11.5px;color:var(--gray);margin-top:2px;line-height:1.45}
-.vid-arr{color:#b7c0cc;font-size:19px;flex-shrink:0}
+.vid-arr{color:#b7c0cc;font-size:15px;flex-shrink:0}
 
 .foot{font-size:11.5px;color:var(--gray);line-height:1.6;margin-top:22px;padding:0 4px;text-align:center}
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></symbol>
+</svg>
 
 <div class="hdr">
   <div class="hdr-logo">KC</div>
@@ -113,79 +115,79 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
   </div>
 
   <div class="notice info">
-    <span class="ni">&#9654;</span>
+    <span class="ni" aria-hidden="true">&#9654;</span>
     <div>Videos open on <strong>YouTube</strong> in a new tab and need a data or Wi-Fi connection &mdash;
       they are not stored in the app for offline use. New to the system? Start with the full walkthrough below.</div>
   </div>
 
-  <div class="sec">Start here</div>
+  <h2 class="sec">Start here</h2>
   <a class="feature" href="https://youtu.be/Mj-u6s4Pels" target="_blank" rel="noopener noreferrer">
-    <div class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></div>
+    <div class="play"><svg aria-hidden="true" focusable="false"><use href="#i-play"></use></svg></div>
     <div class="feature-body">
       <div class="feature-kick">Full walkthrough</div>
       <div class="feature-t">Using Frontline for Narcotic Control</div>
       <div class="feature-s">The complete process end to end &mdash; watch this one first, then use the
         short clips below as refreshers.</div>
     </div>
-    <div class="vid-arr">&#x203A;</div>
+    <div class="vid-arr" aria-hidden="true">&#x2197;</div>
   </a>
 
-  <div class="sec">On the truck &middot; Frontline app</div>
+  <h2 class="sec">On the truck &middot; Frontline app</h2>
 
   <a class="vid" href="https://youtu.be/AynYCCtIEY4" target="_blank" rel="noopener noreferrer">
-    <div class="vid-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></div>
+    <div class="vid-ico"><svg aria-hidden="true" focusable="false"><use href="#i-play"></use></svg></div>
     <div class="vid-body">
       <div class="vid-t">Crew change</div>
       <div class="vid-s">Picking up narcotics from the off-going crew in Frontline</div>
     </div>
-    <div class="vid-arr">&#x203A;</div>
+    <div class="vid-arr" aria-hidden="true">&#x2197;</div>
   </a>
 
   <a class="vid" href="https://youtu.be/MkG8YM5uJw4" target="_blank" rel="noopener noreferrer">
-    <div class="vid-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></div>
+    <div class="vid-ico"><svg aria-hidden="true" focusable="false"><use href="#i-play"></use></svg></div>
     <div class="vid-body">
       <div class="vid-t">Administering a med</div>
       <div class="vid-s">Logging a controlled-substance administration with Frontline</div>
     </div>
-    <div class="vid-arr">&#x203A;</div>
+    <div class="vid-arr" aria-hidden="true">&#x2197;</div>
   </a>
 
   <a class="vid" href="https://youtu.be/2cPBSeqjMfs" target="_blank" rel="noopener noreferrer">
-    <div class="vid-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></div>
+    <div class="vid-ico"><svg aria-hidden="true" focusable="false"><use href="#i-play"></use></svg></div>
     <div class="vid-body">
       <div class="vid-t">View &amp; audit narcotics</div>
       <div class="vid-s">Checking your inventory and running an audit in Frontline</div>
     </div>
-    <div class="vid-arr">&#x203A;</div>
+    <div class="vid-arr" aria-hidden="true">&#x2197;</div>
   </a>
 
   <a class="vid" href="https://youtu.be/c-lpTYY-fe8" target="_blank" rel="noopener noreferrer">
-    <div class="vid-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></div>
+    <div class="vid-ico"><svg aria-hidden="true" focusable="false"><use href="#i-play"></use></svg></div>
     <div class="vid-body">
       <div class="vid-t">Restocking meds</div>
       <div class="vid-s">Replacing what you used, using Frontline</div>
     </div>
-    <div class="vid-arr">&#x203A;</div>
+    <div class="vid-arr" aria-hidden="true">&#x2197;</div>
   </a>
 
-  <div class="sec">At the station &middot; Operative IQ desktop</div>
+  <h2 class="sec">At the station &middot; Operative IQ desktop</h2>
 
   <a class="vid" href="https://youtu.be/1yQcWLHYwek" target="_blank" rel="noopener noreferrer">
-    <div class="vid-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></div>
+    <div class="vid-ico"><svg aria-hidden="true" focusable="false"><use href="#i-play"></use></svg></div>
     <div class="vid-body">
       <div class="vid-t">Restocking boxes</div>
       <div class="vid-s">Restocking boxes in the Operative IQ desktop version</div>
     </div>
-    <div class="vid-arr">&#x203A;</div>
+    <div class="vid-arr" aria-hidden="true">&#x2197;</div>
   </a>
 
   <a class="vid" href="https://youtu.be/8UG-bBfiNFM" target="_blank" rel="noopener noreferrer">
-    <div class="vid-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></div>
+    <div class="vid-ico"><svg aria-hidden="true" focusable="false"><use href="#i-play"></use></svg></div>
     <div class="vid-body">
       <div class="vid-t">Mobile safe from bulk safe</div>
       <div class="vid-s">Restocking the mobile safe out of the bulk safe &mdash; audit and receive</div>
     </div>
-    <div class="vid-arr">&#x203A;</div>
+    <div class="vid-arr" aria-hidden="true">&#x2197;</div>
   </a>
 
   <div class="foot">
