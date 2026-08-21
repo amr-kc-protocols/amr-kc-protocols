@@ -132,14 +132,14 @@ const tab = (p, name) => p.click(`.tab[data-p="${name}"]`);
   await tab(p, 'quiz');
   await p.locator('.q').nth(0).locator('.opt').nth(1).click();
   ok('A4 quiz still scores with storage blocked',
-     (await p.locator('#scoreSlot .score-v').textContent()).trim() === '1 / 12');
+     (await p.locator('#scoreSlot .score-v').textContent()).trim() === '1 / 16');
   ok('A4 no uncaught error from blocked storage', errs.length === 0, errs.join('|'));
   await ctx.close(); }
 
 /* A5 — alarm accordion opens and closes independently */
 { const p = await fresh(); await tab(p, 'alarms');
   const n = await p.locator('.acc').count();
-  ok('A5 seven alarm entries', n === 7);
+  ok('A5 eleven alarm entries', n === 11);
   ok('A5 all closed initially', (await p.locator('.acc.open').count()) === 0);
   await p.locator('.acc').nth(2).click();
   ok('A5 tapped alarm opens', await p.locator('.acc').nth(2).locator('.acc-b').isVisible());
@@ -157,7 +157,7 @@ const tab = (p, name) => p.click(`.tab[data-p="${name}"]`);
 /* A6 — knowledge check scores, explains, locks and persists */
 { const p = await fresh(); await tab(p, 'quiz');
   const n = await p.locator('.q').count();
-  ok('A6 twelve questions', n === 12);
+  ok('A6 sixteen questions', n === 16);
   ok('A6 no score before the first answer', (await p.locator('#scoreSlot .score').count()) === 0);
   ok('A6 explanations hidden until answered', (await p.locator('.q-exp:visible').count()) === 0);
 
@@ -279,7 +279,7 @@ const tab = (p, name) => p.click(`.tab[data-p="${name}"]`);
   await p.locator('.q').nth(0).locator('.opt').nth(1).focus();
   await p.keyboard.press('Enter');
   ok('A9b quiz answers from the keyboard',
-     (await p.locator('#scoreSlot .score-v').textContent()).trim() === '1 / 12');
+     (await p.locator('#scoreSlot .score-v').textContent()).trim() === '1 / 16');
   ok('A9b no errors driving the page from the keyboard', p._errs.length === 0, p._errs.join('|'));
   await p.context().close(); }
 

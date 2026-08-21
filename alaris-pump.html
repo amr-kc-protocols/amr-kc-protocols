@@ -414,6 +414,29 @@ kbd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.03em;
         operationally possible. (DFU pp. 2-57 to 2-58.)</p>
     </div>
 
+    <div class="sec">Change the solution container</div>
+    <div class="card">
+      <div class="card-t">Hanging a fresh bag mid-transport</div>
+      <ol class="steps">
+        <li>Press <kbd>PAUSE</kbd> to stop the infusion.</li>
+        <li class="hot"><b>Close the roller clamp.</b> This is what stops the line while the set is open
+          to air &mdash; do not skip it because the pump is paused.</li>
+        <li>Remove the empty container.</li>
+        <li>Spike the prepared container per facility procedure and hang it about
+          <b>20 inches above the Pump Module</b>.</li>
+        <li>Press <kbd>CHANNEL SELECT</kbd>.</li>
+        <li class="hot">Press the <kbd>VTBI</kbd> soft key and enter the new volume with the numeric keys.
+          <b>The VTBI does not carry over</b> &mdash; a fresh bag on an old VTBI will stop early or run
+          past what you hung.</li>
+        <li>Open the roller clamp.</li>
+        <li class="hot">Press the <kbd>START</kbd> soft key to resume, then confirm the channel is infusing
+          and the drip chamber is flowing.</li>
+      </ol>
+      <p style="margin-top:11px;font-size:12.5px;color:var(--gray)">Hang height matters twice over: the DFU
+        says 20 inches, and the current FDA notice caps it at 21 inches above the top of the module &mdash;
+        and never below the pump. See <b>Transport &amp; safety</b>.</p>
+    </div>
+
     <div class="sec">Pause, restart, restore</div>
     <div class="card">
       <div class="card-t">Stopping temporarily</div>
@@ -433,10 +456,15 @@ kbd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.03em;
     <div class="sec">Guardrails does not verify the order</div>
     <div class="card">
       <div class="card-t">An accepted program is not a correct program</div>
-      <p><b>Soft limit:</b> can be overridden by selecting <em>Yes</em>. The <b>G</b>, <b>LLL</b> or
-        upward-arrow indicators mark an infusion running outside a soft limit &mdash; somebody chose to
-        override it, and it may or may not have been the right call.</p>
-      <p><b>Hard limit:</b> cannot be overridden. It has to be reprogrammed.</p>
+      <p><b>Soft limit:</b> an audio alert sounds and a prompt appears before programming can continue.
+        Pressing <em>Yes</em> continues; pressing <em>No</em> sends it back to be reprogrammed. So a soft
+        limit is a question, and somebody answered it &mdash; it may or may not have been the right call.</p>
+      <p><b>Hard limit:</b> cannot be overridden. The prompt offers only <kbd>Reprogram</kbd>.</p>
+      <p><b>Read the markers, then check them.</b> A dose entered outside soft limits and verified shows
+        <b>LLL</b> in the message display for a <em>low</em> dose or <b>&uarr;&uarr;&uarr;</b> for a
+        <em>high</em> one. When a soft limit has been overridden the <b>G</b> icon appears &mdash; and
+        pressing the <kbd>G</kbd> soft key lists every applicable out-of-range limit. At a handoff, that
+        is the fastest way to find out exactly what was overridden and by how much. Press it.</p>
       <p><b>Basic / non-library infusion:</b> may carry no dosing limits at all.</p>
       <p><b>Wrong patient-care profile:</b> gives you limits meant for a different population, and they will
         look just as authoritative.</p>
@@ -501,16 +529,34 @@ kbd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.03em;
         primary program. Nothing about that transition depends on anyone noticing it.</p>
     </div>
 
+    <div class="sec">Entering the secondary VTBI</div>
+    <div class="card">
+      <div class="card-t">The prepopulated number is a starting point, not the answer</div>
+      <p>The pump prepopulates VTBI with the <b>diluent volume</b> of the infusion. To change it, press the
+        <kbd>VTBI</kbd> soft key and use the numeric keys. For small volumes the entry accepts two decimal
+        places.</p>
+      <p>The manual's warning is explicit about why that number drifts from reality: <b>factory overfill</b>
+        and <b>medication added to the bag</b>. A "50 mL" minibag is rarely 50 mL. Set the VTBI against
+        what is actually hanging, not against the number printed on the label.</p>
+      <p>Then enter either <b>duration</b> (the rate is calculated for you) or <b>rate</b> via the
+        <kbd>RATE VOLUME</kbd> soft key. The pump prompts <em>"Verify Secondary Clamp Open, Then Press
+        START"</em> &mdash; that prompt is there because an open secondary clamp is the one thing the pump
+        cannot check for you.</p>
+      <p><b>Multiple doses from a single container are not possible.</b> If a second dose is due, it is a
+        new container and a new secondary program &mdash; not a re-run of the one hanging.</p>
+    </div>
+
     <div class="sec">The two ways it goes wrong</div>
     <div class="fail">
       <div class="fail-c">
-        <div class="fail-k">VTBI set too low</div>
+        <div class="fail-k">Underestimated the volume</div>
         <div class="fail-t">Medication left in the secondary bag runs at the primary rate</div>
         <div class="fail-s">The pump has already switched back. The remaining antibiotic, or pressor, keeps
-          draining at whatever the primary was programmed to run.</div>
+          draining at whatever the primary was programmed to run. Factory overfill makes this the more
+          likely of the two.</div>
       </div>
       <div class="fail-c">
-        <div class="fail-k">VTBI set too high</div>
+        <div class="fail-k">Overestimated the volume</div>
         <div class="fail-t">Primary fluid runs at the secondary rate</div>
         <div class="fail-s">The secondary bag empties, the pump keeps counting down, and it pulls primary
           fluid at the secondary's rate &mdash; often far faster than intended.</div>
@@ -547,8 +593,12 @@ kbd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.03em;
       <p>The manual rates roughly <b>six hours with one pump module</b>, or about <b>three hours with four</b>
         &mdash; but only from a new, fully charged battery under the manufacturer's test conditions. A fleet
         battery in year four is not that battery.</p>
-      <p>Use the pump's own estimate: <kbd>OPTIONS</kbd> &rarr; <kbd>PAGE DOWN</kbd> &rarr;
-        <kbd>BATTERY RUNTIME</kbd>, and run on external power whenever it is available.</p>
+      <p>Use the pump's own estimate instead: press <kbd>OPTIONS</kbd>, then the <kbd>PAGE DOWN</kbd> soft
+        key, then <kbd>Battery Runtime</kbd>. <kbd>CANCEL</kbd> or <kbd>EXIT</kbd> returns you to the main
+        screen. Run on external power whenever it is available.</p>
+      <p>Read the wording on that screen: it is the estimate <b>at current operating parameters</b>. Add a
+        module or raise a rate and the number you just read is no longer the number &mdash; check it again
+        after you change the load, not just once before you leave.</p>
     </div>
 
     <div class="card">
@@ -610,7 +660,7 @@ kbd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.03em;
 
   <!-- ══ QUIZ ═══════════════════════════════════════════════════════ -->
   <div class="pane" id="p-quiz">
-    <p class="lead">Twelve questions on the things that actually hurt patients. Every answer explains itself
+    <p class="lead">Sixteen questions on the things that actually hurt patients. Every answer explains itself
       &mdash; pick one and it tells you why.</p>
     <div id="scoreSlot"></div>
     <div id="quizList"></div>
@@ -781,28 +831,49 @@ renderChecks();
 
 /* ── ALARMS ────────────────────────────────────────────────────── */
 var ALARMS = [
-  ['red', 'Air-in-Line / Accumulated Air',
-   'The affected channel stops.',
-   'Clear the air from the line, then make sure the tubing is pushed fully to the back of the AIL detector ' +
-   'before restarting. Tubing that is not seated is the usual cause of repeat AIL alarms — and a ' +
-   'repeat alarm you keep silencing is a line you are not watching.'],
-  ['amber', 'Occluded — Fluid Side / Empty Container',
-   'The blockage is above the pump.',
-   'Check the bag for volume, every clamp above the module, the vent if the container has one, the tubing ' +
-   'for kinks, and the drip chamber for flow.'],
+  ['red', 'Air-in-Line',
+   'Air has been detected in the administration set during an infusion. The affected module stops.',
+   'Make sure the tubing is properly installed in the Air-in-Line detector — pushed fully to the back. ' +
+   'If air is present, clear it from the set. Then press RESTART, or CHANNEL SELECT then the START soft ' +
+   'key. Tubing that is not seated is the usual cause of repeat AIL alarms, and a repeat alarm you keep ' +
+   'silencing is a line you are not watching.'],
+  ['red', 'Accumulated Air-in-Line',
+   'A large number of bubbles too small to trip the air-in-line limit individually have recently passed ' +
+   'the detector. The affected module stops.',
+   'Clear the air from the line. This one does not restart the same way: press the RESET soft key first, ' +
+   'then the RESTART key. Small-bubble accumulation usually means the bag ran low, the drip chamber is ' +
+   'starved, or the spike is not seated.'],
   ['red', 'Occluded — Patient Side',
-   'The blockage is below the pump — between the module and the vein.',
-   'Check stopcock positions, tubing, the catheter and the IV site before restarting. Do not press restart ' +
-   'repeatedly without correcting the cause: pressure built up behind an occlusion can deliver as a bolus ' +
-   'when it clears.'],
-  ['amber', 'Check IV Set / Close Door / Channel Disconnected',
-   'The affected channel stops.',
-   'A physical problem: set not seated correctly, door not fully latched, or the module not seated on the ' +
-   'PC Unit. Correct it, confirm the module is latched, then restart the channel.'],
+   'Increased back pressure sensed while infusing — the blockage is below the pump, between the module ' +
+   'and the vein. The affected module stops.',
+   'Clear the occlusion: check stopcock positions, tubing, the catheter and the IV site. Then press ' +
+   'RESTART, or CHANNEL SELECT then START. Do not press restart repeatedly without correcting the cause ' +
+   '— pressure built up behind an occlusion can deliver as a bolus when it clears.'],
+  ['amber', 'Partial Occlusion — Patient Side',
+   'The Auto-Restart feature has detected a partial occlusion on the patient side of the line.',
+   'Clear the occlusion, then press RESTART, or CHANNEL SELECT then START. Treat it as an early warning ' +
+   'of the full patient-side occlusion above — find out why before you restart.'],
+  ['amber', 'Occluded — Fluid Side / Empty Container',
+   'Either an upstream occlusion or an empty container. The affected module stops.',
+   'Clear the occlusion on the fluid side of the instrument and refill the drip chamber if necessary. ' +
+   'Check the bag for volume, every clamp above the module, the vent if the container has one, and the ' +
+   'tubing for kinks. Then press RESTART, or CHANNEL SELECT then START.'],
+  ['amber', 'Check IV Set',
+   'The administration set is not properly installed. The affected module stops.',
+   'Close the roller clamp, remove and reinstall the set, close the door, open the roller clamp, then ' +
+   'press RESTART. Reinstalling is the fix — restarting without reloading the set just alarms again.'],
+  ['amber', 'Close Door',
+   'The door was opened during an infusion. The affected module stops.',
+   'Close the door, then press RESTART, or CHANNEL SELECT then START. On a moving truck, check what ' +
+   'caught the door — and confirm nothing is pinched in it.'],
+  ['amber', 'Flo-Stop Open — Close Door',
+   'The safety clamp (Flo-Stop) is in the open position while the door is open. v9.0 PC Unit only.',
+   'Close the roller clamp on the administration set, or close the door. An open safety clamp with an ' +
+   'open door is the free-flow configuration — deal with it before anything else.'],
   ['red', 'Battery Discharged',
    'All modules stop.',
-   'Connect AC power, then restart each affected channel individually. They do not all come back on their ' +
-   'own — walk the modules and confirm each one is infusing.'],
+   'Connect AC power, then restart each affected channel individually. They do not all come back on ' +
+   'their own — walk the modules and confirm each one is infusing.'],
   ['slate', 'Paused-channel prompt (about 2 minutes)',
    'A channel has been paused long enough for the pump to start prompting.',
    'Either restart it or make a deliberate decision to leave it stopped. This prompt exists because a ' +
@@ -862,6 +933,16 @@ var QUIZ = [
    'so the rest of the medication goes in at the primary rate. Overestimating the VTBI causes the opposite ' +
    'failure: primary fluid delivered at the secondary rate.'],
 
+  ['A second dose of the same antibiotic is due later in a long transport. The minibag hanging still has volume in it. What does the pump allow?',
+   ['Re-running the secondary program against the same container',
+    'Nothing — multiple doses from a single container are not possible',
+    'Doubling the VTBI to cover both doses',
+    'Switching the secondary to primary mode for the second dose'],
+   1,
+   'The manual states it plainly: multiple doses from a single container are not possible. A second dose ' +
+   'means a new container and a new secondary program. Volume left in the bag is not a dose the pump can ' +
+   'deliver on a second run.'],
+
   ['What has to be true for a secondary infusion to run correctly?',
    ['The secondary hangs below the primary so it drains last',
     'Both bags hang at the same height',
@@ -881,6 +962,17 @@ var QUIZ = [
    'The blockage is between the module and the vein. Repeated restarts without correcting the cause do ' +
    'not fix it and can deliver the pressure built up behind the occlusion as a bolus when it clears.'],
 
+  ['Accumulated Air-in-Line alarms on a channel. How is clearing it different from a plain Air-in-Line alarm?',
+   ['It clears itself once the bubbles pass',
+    'It requires the door to be opened and the set reloaded',
+    'Press the RESET soft key first, then the RESTART key',
+    'It can only be cleared by powering the module off'],
+   2,
+   'Plain Air-in-Line restarts with RESTART, or CHANNEL SELECT then START. Accumulated Air-in-Line — a ' +
+   'run of bubbles each too small to trip the limit on its own — needs the RESET soft key first, then ' +
+   'RESTART. Clear the air either way, and look for why: a low bag, a starved drip chamber, or a spike ' +
+   'that is not seated.'],
+
   ['A Guardrails soft limit was overridden on an infusion you are taking. What does that tell you?',
    ['The order was verified against the drug library',
     'Someone chose Yes to run outside the soft limit — it may or may not be clinically correct',
@@ -890,6 +982,16 @@ var QUIZ = [
    'Soft limits can be overridden by selecting Yes; the G, LLL or up-arrow markers flag it. Hard limits ' +
    'cannot be overridden and force reprogramming. A Basic or non-library infusion may carry no limits at ' +
    'all. Guardrails checks the program against a profile — it never checks the order.'],
+
+  ['The message display shows a G icon on a channel you are taking. What does pressing the G soft key get you?',
+   ['A list of every applicable out-of-range limit',
+    'A reset of the Guardrails profile to default',
+    'The drug library version number',
+    'Confirmation that the dose was pharmacist-approved'],
+   0,
+   'The G icon means a soft limit was overridden. Pressing the G soft key lists all applicable ' +
+   'out-of-range limits — the fastest way at a handoff to see exactly what was overridden and by how ' +
+   'much. LLL in the message display marks a low dose, three up-arrows a high one.'],
 
   ['A pump module was dropped during loading. It powers up and the display looks normal. What do you do?',
    ['Run a self-test and keep using it',
@@ -929,6 +1031,16 @@ var QUIZ = [
    2,
    'Verify what is left, not what was hung. The remaining VTBI drives when the pump switches modes or ' +
    'alarms, and it is the number that tells you whether the bag will outlast the transport.'],
+
+  ['The primary bag runs dry mid-transport and you hang a fresh one. Besides closing the roller clamp before you swap, what must you do before pressing START?',
+   ['Nothing — the pump carries the previous VTBI forward',
+    'Power-cycle the module so it re-reads the container',
+    'Press CHANNEL SELECT, then VTBI, and enter the new volume',
+    'Re-enter the patient weight'],
+   2,
+   'Pause, close the roller clamp, swap the container, hang it about 20 inches above the module, then ' +
+   'CHANNEL SELECT → VTBI → the new volume → open the roller clamp → START. The VTBI does not carry ' +
+   'over: a fresh bag left on the old VTBI stops early or runs past what you hung.'],
 
   ['Per the current FDA infusion-set notice, where should the container hang?',
    ['As high as the pole allows, for gravity assist',
