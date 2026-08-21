@@ -1,6 +1,6 @@
 # Tests
 
-Two suites live here:
+These suites live here:
 
 - **`kcb.test.mjs`** — pass-through & stress tests for
   [`kansas-class-builder.html`](../kansas-class-builder.html), driven through
@@ -25,6 +25,14 @@ Two suites live here:
   not all bunched at the end — and that the page is reachable from the homepage
   and precached, since training nobody can find, or can't open at a bedside
   with no signal, is the failure that matters most.
+- **`medmath.test.mjs`** — the Medication Math training
+  ([`med-math.html`](../med-math.html)) in headless Chromium. Beyond the usual
+  UI behaviour, it defends the two things that make the page safe to learn
+  from: every problem the practice widget generates is recomputed
+  independently and compared against the answer the page grades on, and every
+  dose, cap and concentration the page quotes is traced back to the formulary
+  in `index.html` — so a protocol change fails the suite instead of quietly
+  leaving last year's numbers in the training.
 
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
@@ -34,7 +42,7 @@ All test data is synthetic — no real roster, learner, or evaluation data is co
 cd test
 npm install
 npx playwright install chromium   # first time only, if Chromium isn't already present
-npm test                          # both suites
+npm test                          # all of them
 ```
 
 `backend.test.mjs` has no dependencies, so it runs on its own without `npm install`:
@@ -135,6 +143,22 @@ Grouped by the property being defended:
 | A10 | Works with `localStorage` throwing (private browsing); every control is a real button and works from a keyboard |
 | A11 | Reads on a phone: no horizontal overflow on any topic, and no paragraph longer than 55 words |
 | A12 | Reachable from the homepage feature card and the More list, and precached by the service worker |
+
+## What's covered (`medmath.test.mjs`)
+
+| # | Scenario |
+|---|----------|
+| M1 | Eight topics, every one phrased as a question, every one opens with real content |
+| M2 | Every topic carries a quick check, and checks land mid-topic with content after them |
+| M3 | Answering marks right/wrong, explains, locks, completes the topic and persists |
+| M4 | A topic counts as done only once *all* its checks are answered |
+| M5 | All 13 checks: four options, exactly one correct, each explains itself |
+| M6 | **The math** — 160 generated problems recomputed independently and matched against what the page grades on |
+| M7 | Practice grades right and wrong, shows the working either way, accepts sensible rounding, rejects a ten-fold slip, ignores an empty answer |
+| M8 | Practice score persists; Enter submits from the number pad |
+| M9 | **Protocol provenance** — every dose, cap and concentration still matches the formulary in `index.html` |
+| M10 | Phone-first: no overflow, no paragraph over 55 words, real buttons, keyboard-operable, survives blocked storage |
+| M11 | Reachable from the home tile and the More list, and precached by the service worker |
 
 When you change either tool, run `npm test` and add a scenario for any new behaviour.
 
