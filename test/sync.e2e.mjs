@@ -81,6 +81,24 @@ const check = (n, ok, extra = "") => {
   else { FAIL++; console.log("  FAIL  " + n + (extra ? "\n        " + extra : "")); }
 };
 
+// Queueing a failed write is asynchronous: the request has to be attempted and
+// rejected before the outbox is written and the UI updated. The confirmation
+// appearing on screen does not mean that has happened yet, so wait for the
+// state itself rather than for an arbitrary number of milliseconds. (This is
+// not what caused the flake these tests had — see newContext() below — but a
+// sleep long enough today is a flake waiting for a slower machine.)
+//
+// A timeout here is NOT a failure: it just means the condition never arrived,
+// and the check() that follows reports exactly what was there instead. That
+// keeps a real regression ("it never queued") reporting as a clear FAIL rather
+// than as a timeout stack trace.
+async function settle(page, fn, timeout = 10000) {
+  try { await page.waitForFunction(fn, { timeout }); }
+  catch { /* fall through and let the assertions describe the real state */ }
+}
+const outbox = (page) => page.evaluate(() =>
+  JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]"));
+
 // Portable browser launch: honour CHROMIUM_PATH, else this env's pre-installed Chromium, else Playwright default.
 async function launch() {
   const envExe = process.env.CHROMIUM_PATH;
@@ -91,6 +109,17 @@ async function launch() {
 }
 const browser = await launch();
 
+/* The app registers a service worker (index.html, vta/academy.html). The moment
+   it claims the page, requests leave through the worker instead of the page —
+   and Playwright's page.route() never sees them. That is what made the offline
+   checks below pass or fail depending on whether the worker happened to finish
+   installing first: with the worker in charge, a route meant to simulate "no
+   signal" was silently bypassed and the write really did reach the server.
+
+   This suite is about the sync layer, not the service worker, so keep the
+   worker out of it entirely and let routing be deterministic. */
+const newContext = (opts = {}) => browser.newContext({ serviceWorkers: "block", ...opts });
+
 for (const [course, file] of [
   ["hemodynamics", "hemodynamics-academy.html"],
   ["airway", "airway-academy.html"],
@@ -98,7 +127,7 @@ for (const [course, file] of [
   ["neonate", "neonate-academy.html"],
 ]) {
   received.length = 0;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const errors = [];
   const IGNORE = /fonts\.googleapis\.com|Failed to load resource/;
@@ -165,7 +194,7 @@ for (const [course, file] of [
 {
   console.log("\n--- offline durability (hemodynamics) ---");
   received.length = 0;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -194,11 +223,14 @@ for (const [course, file] of [
   await page.unroute("**/127.0.0.1:54321/**");
   const n = received.filter((r) => r.url.startsWith("/rest/v1/") && r.method === "POST").length;
   await page.evaluate(() => window.AMRBackend.flush());
-  await page.waitForTimeout(1500);
+  // Draining is a real network round trip. Wait for the outbox to empty rather
+  // than guessing how long that takes; if it never drains, settle() gives up
+  // and the checks below report what was actually left.
+  await settle(page, () =>
+    JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]").length === 0);
   check("outbox drains once back online",
     received.filter((r) => r.url.startsWith("/rest/v1/") && r.method === "POST").length === n + 1);
-  const after = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]"));
+  const after = await outbox(page);
   check("outbox is empty after drain", after.length === 0, "left " + after.length);
   await ctx.close();
 }
@@ -207,7 +239,7 @@ for (const [course, file] of [
 {
   console.log("\n--- unconfigured backend ---");
   received.length = 0;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -238,7 +270,7 @@ async function openAsk(page) {
 {
   console.log("\n--- Ask the Educator ---");
   received.length = 0;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -277,7 +309,7 @@ async function openAsk(page) {
 {
   console.log("\n--- Ask the Educator: failure is reported, not hidden ---");
   received.length = 0;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -308,7 +340,7 @@ async function openAsk(page) {
 {
   console.log("\n--- Ask the Educator: offline is held, not lost ---");
   received.length = 0;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -322,11 +354,14 @@ async function openAsk(page) {
   await page.dispatchEvent("#ask-msg", "input");
   await page.click("#ask-submit");
   await page.waitForSelector(".ask-confirm", { state: "visible" });
+  // Same race as the caregiver form: the confirmation renders before the failed
+  // POST has been queued.
+  await settle(page, () =>
+    JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]").length > 0);
 
   const confirm = await page.textContent("#ask-confirm-sub");
   check("the offline case is stated plainly", /offline/i.test(confirm), confirm);
-  const box = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]"));
+  const box = await outbox(page);
   check("the message is queued on the device", box.length === 1, "outbox " + box.length);
   check("the queued message is intact",
     box[0] && /basement with no signal/.test(box[0].body.message));
@@ -338,7 +373,7 @@ async function openAsk(page) {
 {
   console.log("\n--- email linking prompt (hemodynamics) ---");
   received.length = 0;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -367,7 +402,7 @@ async function openAsk(page) {
 
 {
   console.log("\n--- email linking: hidden with no backend ---");
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -422,7 +457,7 @@ async function openDash(page) {
   console.log("\n--- educator dashboard: sign in and read ---");
   received.length = 0;
   apiHandler = dashHandler();
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -456,7 +491,7 @@ async function openDash(page) {
 {
   console.log("\n--- educator dashboard: filters and sorting ---");
   apiHandler = dashHandler();
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await openDash(page);
   await page.fill("#email", "hunter@example.com");
@@ -501,7 +536,7 @@ async function openDash(page) {
 {
   console.log("\n--- educator dashboard: Ask inbox ---");
   apiHandler = dashHandler();
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const alerts = [];
   page.on("dialog", (d) => { alerts.push(d.message()); d.dismiss(); });
@@ -532,7 +567,7 @@ async function openDash(page) {
 {
   console.log("\n--- educator dashboard: wrong password ---");
   apiHandler = dashHandler({ signInOk: false });
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await openDash(page);
   await page.fill("#email", "hunter@example.com");
@@ -550,7 +585,7 @@ async function openDash(page) {
   // RLS returns an empty set rather than an error. The page must not
   // present that as "no completions exist yet" without qualification.
   apiHandler = dashHandler({ rows: [], ask: [] });
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await openDash(page);
   await page.fill("#email", "nobody@example.com");
@@ -567,7 +602,7 @@ async function openDash(page) {
 {
   console.log("\n--- educator dashboard: unconfigured build ---");
   apiHandler = dashHandler();
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -581,7 +616,7 @@ async function openDash(page) {
 {
   console.log("\n--- educator dashboard: sign out ---");
   apiHandler = dashHandler();
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await openDash(page);
   await page.fill("#email", "hunter@example.com");
@@ -606,7 +641,7 @@ async function openDash(page) {
   console.log("\n--- VTA academy (vta/academy.html) ---");
   received.length = 0;
   apiHandler = null;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const errors = [];
   const IGNORE = /fonts\.googleapis\.com|fonts\.gstatic\.com|Failed to load resource/;
@@ -666,7 +701,7 @@ async function openDash(page) {
   console.log("\n--- VTA: certificate email link ---");
   received.length = 0;
   apiHandler = null;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -701,7 +736,7 @@ async function openDash(page) {
 
 {
   console.log("\n--- VTA: unconfigured build ---");
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -766,7 +801,7 @@ async function fillCaregiverForm(page) {
   console.log("\n--- Caregiver Form: files a record to Supabase ---");
   received.length = 0;
   apiHandler = null;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript(() => {
     try { localStorage.setItem("amrkc_disc_v2", "1"); } catch (e) {}
@@ -803,7 +838,7 @@ async function fillCaregiverForm(page) {
   console.log("\n--- Caregiver Form: logging failure does not retract the PDF ---");
   received.length = 0;
   apiHandler = null;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript(() => {
     try { localStorage.setItem("amrkc_disc_v2", "1"); } catch (e) {}
@@ -836,7 +871,7 @@ async function fillCaregiverForm(page) {
   console.log("\n--- Caregiver Form: offline holds the record ---");
   received.length = 0;
   apiHandler = null;
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript(() => {
     try { localStorage.setItem("amrkc_disc_v2", "1"); } catch (e) {}
@@ -854,12 +889,16 @@ async function fillCaregiverForm(page) {
   await fillCaregiverForm(page);
   await page.click("#cgf-submit");
   await page.waitForSelector("#cgf-confirm", { state: "visible", timeout: 20000 });
-  await page.waitForTimeout(600);
+  // The PDF confirmation appears before the filing attempt has failed and been
+  // queued, so wait for the queue itself rather than for a fixed delay.
+  await settle(page, () => {
+    const box = JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]");
+    return box.some((i) => /caregiver_forms/.test(i.path));
+  });
 
   const log = await page.textContent("#cgf-log");
   check("the offline case is stated plainly", /signal|device/i.test(log), log);
-  const box = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]"));
+  const box = await outbox(page);
   check("the record is queued on the device",
     box.some((i) => /caregiver_forms/.test(i.path)), JSON.stringify(box.map((i) => i.path)));
   await ctx.close();
@@ -897,7 +936,7 @@ async function fillCaregiverForm(page) {
     return [404, null];
   };
 
-  const ctx = await browser.newContext({ acceptDownloads: true });
+  const ctx = await newContext({ acceptDownloads: true });
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -980,7 +1019,7 @@ async function fillCaregiverForm(page) {
     return [201, null];
   };
 
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -1035,7 +1074,7 @@ async function fillCaregiverForm(page) {
     return [201, null];
   };
 
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -1066,7 +1105,7 @@ async function fillCaregiverForm(page) {
     }
     return [201, null];
   };
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.addInitScript((url) => {
     window.AMR_BACKEND_CONFIG = { url, anonKey: "test-anon-key" };
@@ -1090,7 +1129,7 @@ async function fillCaregiverForm(page) {
 
 {
   console.log("\n--- VTA admin unlock: ?admin no longer bypasses ---");
-  const ctx = await browser.newContext();
+  const ctx = await newContext();
   const page = await ctx.newPage();
   await page.goto("http://127.0.0.1:8099/vta/academy.html?admin", { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => typeof Store !== "undefined" && !!Store.state);
