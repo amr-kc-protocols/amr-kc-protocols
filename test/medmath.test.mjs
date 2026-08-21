@@ -363,8 +363,17 @@ const PRACTICE_IDS = ['draw','peds','drip','drops'];
   await p.waitForTimeout(400);
   const gate = p.locator('text=I Understand');
   if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(400); }
-  ok('M11 home has a Med Math tile',
-     (await p.locator('.stat-tile[href="med-math.html"]').count()) === 1);
+  const feat = p.locator('.feat-card[href="med-math.html"]');
+  ok('M11 home shows the feature panel', (await feat.count()) === 1);
+  ok('M11 the panel is flagged new',
+     /new training/i.test(await feat.locator('.feat-badge').textContent()));
+  const box = await feat.boundingBox();
+  ok('M11 the panel sits high on the page', box && box.y < 1200, 'y=' + (box && Math.round(box.y)));
+  // Two featured panels now sit together; they must not read as one block.
+  const shades = await p.locator('.feat-card').evaluateAll(els =>
+    els.map(e => getComputedStyle(e).backgroundImage));
+  ok('M11 the two panels are visually distinct',
+     shades.length === 2 && shades[0] !== shades[1], shades.length + ' panels');
   await p.evaluate(() => { const b = document.querySelector('[data-goto="more"]'); if (b) b.click(); });
   await p.waitForTimeout(400);
   ok('M11 More lists it exactly once',
