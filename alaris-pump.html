@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<!--
+  Alaris IV Pump Training — AMR KC Field Guide
+  Paramedic-focused trainer for the Alaris 8015 PC Unit with the 8100 Pump
+  Module. Self-contained: no build step, no dependencies, works offline.
+  Checklist state and knowledge-check results persist in localStorage
+  (key: alaris_pump_v1).
+
+  Page references in the text are to the Alaris System DFU (v9, Model 8015
+  PC Unit / Pump and Syringe Modules section). The two FDA safety notices
+  linked at the bottom are current as of 2026 and open on fda.gov.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Alaris Pump">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Alaris IV pump training for AMR Kansas City — 8015 PC Unit and 8100 Pump Module. Handoff verification, changing rate and VTBI, Guardrails limits, the secondary infusion trap, alarms and long-transport concerns.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Alaris IV Pump Training — AMR KC Field Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
+  --green:#15803d;--green-bg:#eafbf1;--green-line:#bfe6cd;
+  --red:#dc2626;--red-bg:#fdecec;--red-line:#f3c6c6;
+  --warn:#a1590b;--warn-bg:#fef3e2;--warn-line:#f3d9ab;
+  --cyan:#0e7490;--cyan-bg:#e6f7fb;--cyan-line:#b3e2ee;
+  --sans:'IBM Plex Sans',sans-serif;--mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-height:1.5}
+/* Every tappable thing on this page is a real button so it works from a
+   keyboard; this strips the native chrome without losing the semantics. */
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-webkit-appearance:none}
+button:focus-visible{outline:2px solid var(--teal2);outline-offset:2px}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;gap:10px}
+.hdr-logo{width:34px;height:34px;border-radius:9px;background:var(--teal);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:15px;font-weight:700;color:var(--teal);line-height:1.15}
+.hdr-sub{font-size:11px;color:var(--gray)}
+.hdr-back{font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;padding:6px 10px;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface2);white-space:nowrap}
+
+.wrap{max-width:680px;margin:0 auto;padding:14px 14px 78px}
+
+/* HERO */
+.hero{background:linear-gradient(150deg,#0e4f8f,#1b63c4 55%,#0891b2);border-radius:16px;
+  padding:20px 18px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-70px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(255,255,255,.22),transparent 68%);pointer-events:none}
+.hero h1{font-size:22px;font-weight:700;line-height:1.15;margin-bottom:6px;position:relative}
+.hero p{font-size:13px;opacity:.93;line-height:1.55;position:relative}
+.hero .meta{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;position:relative}
+.hero .chip{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.04em;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:4px 10px}
+
+/* NOTICES */
+.notice{border-radius:11px;padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.5;
+  display:flex;gap:9px;align-items:flex-start}
+.notice .ni{flex-shrink:0;font-size:15px;line-height:1.3}
+.notice.info{background:#eaf1fd;border:1px solid #c9dcfb;color:#123a72}
+.notice.danger{background:var(--red-bg);border:1px solid var(--red-line);color:#8f1d1d}
+.notice.warn{background:var(--warn-bg);border:1px solid var(--warn-line);color:#7a4208}
+.notice strong{font-weight:700}
+.notice a{color:inherit;font-weight:700}
+
+/* TABS */
+.tabs{position:sticky;top:55px;z-index:50;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
+  background:var(--surface2);padding:8px 0 9px;margin-bottom:4px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:8px 14px;font-family:var(--mono);font-size:11px;font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--gray);background:#fff;
+  border:1px solid var(--border);border-radius:20px;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.pane{display:none}
+.pane.on{display:block}
+
+/* SECTIONS + CARDS */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gray);margin:18px 4px 9px}
+.pane .sec:first-child{margin-top:8px}
+.card{background:#fff;border:1px solid var(--border);border-radius:13px;padding:15px 15px;margin-bottom:11px}
+.card-t{font-size:15px;font-weight:700;line-height:1.3;margin-bottom:6px}
+.card p{font-size:13px;color:#3c4655;line-height:1.6}
+.card p + p{margin-top:8px}
+.lead{font-size:13.5px;color:#3c4655;line-height:1.62;margin-bottom:12px;padding:0 4px}
+.lead strong{color:var(--white)}
+
+/* KEY RULE STRIP */
+.rule{background:var(--teal);color:#fff;border-radius:13px;padding:15px 16px;margin-bottom:12px}
+.rule-k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:#9dc4f5;margin-bottom:6px}
+.rule-t{font-size:14.5px;font-weight:600;line-height:1.5}
+.rule-t b{color:#bfe0ff}
+
+/* STEPS */
+ol.steps{list-style:none;counter-reset:s;margin:2px 0 0}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 12px 34px;font-size:13.5px;line-height:1.55;color:#3c4655}
+ol.steps li:last-child{padding-bottom:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:23px;height:23px;
+  border-radius:50%;background:var(--dim);color:var(--teal2);font-family:var(--mono);font-size:11px;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.steps li b{color:var(--white)}
+ol.steps li.hot::before{background:var(--teal2);color:#fff}
+kbd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.03em;background:var(--dim);
+  border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--teal)}
+
+/* MODULE PANEL — tappable */
+.panel-wrap{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.module{width:190px;flex-shrink:0;margin:0 auto;background:linear-gradient(180deg,#f8fafc,#eef2f7);
+  border:1px solid #cfd8e3;border-radius:14px 14px 20px 20px;padding:12px 11px 16px}
+.leds{display:flex;justify-content:space-between;gap:5px;margin-bottom:10px}
+.led{flex:1;border:1px solid var(--border);background:#fff;border-radius:7px;padding:5px 2px 4px;
+  text-align:center;display:block}
+.led:active{transform:translateY(1px)}
+.led.sel{border-color:var(--teal2);box-shadow:0 0 0 2px rgba(27,99,196,.15)}
+.led-dot{display:block;width:9px;height:9px;border-radius:50%;margin:0 auto 3px}
+.led-l{display:block;font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:.05em;color:var(--gray)}
+.led.alarm .led-dot{background:#dc2626;box-shadow:0 0 6px rgba(220,38,38,.6)}
+.led.infuse .led-dot{background:#16a34a;box-shadow:0 0 6px rgba(22,163,74,.6)}
+.led.standby .led-dot{background:#eab308;box-shadow:0 0 6px rgba(234,179,8,.6)}
+.disp{background:#0f172a;border-radius:7px;padding:8px 9px 6px;margin-bottom:6px;
+  border:1px solid #0f172a;display:block;width:100%}
+.disp.sel{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.25)}
+.disp-v{font-family:var(--mono);font-size:17px;font-weight:700;color:#7dd3fc;letter-spacing:.04em;text-align:right}
+.disp-l{font-family:var(--mono);font-size:7.5px;color:#64748b;letter-spacing:.08em;text-transform:uppercase}
+.disp.msg .disp-v{font-size:11px;color:#a7f3d0;text-align:left;letter-spacing:.02em}
+.chid{width:26px;height:20px;border:1px solid #cfd8e3;background:#fff;border-radius:4px;margin:8px 0 9px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;
+  font-weight:700;color:var(--teal)}
+.chid.sel{border-color:var(--teal2);box-shadow:0 0 0 2px rgba(27,99,196,.15)}
+.keys{display:flex;flex-direction:column;gap:7px;align-items:center}
+.key{width:100%;border:1px solid #b9c5d3;background:linear-gradient(180deg,#fff,#e9eef4);
+  border-radius:999px;padding:8px 4px;font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.06em;color:#334155;text-align:center;line-height:1.25;display:block}
+.key:active{transform:translateY(1px)}
+.key.sel{background:linear-gradient(180deg,#1b63c4,#124a99);border-color:#124a99;color:#fff;
+  box-shadow:0 3px 10px rgba(27,99,196,.32)}
+.panel-detail{flex:1;min-width:230px}
+.pd{background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal2);border-radius:12px;
+  padding:14px 15px;min-height:150px}
+.pd-k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--teal2);margin-bottom:4px}
+.pd-t{font-size:16px;font-weight:700;line-height:1.25;margin-bottom:7px}
+.pd-b{font-size:13px;color:#3c4655;line-height:1.6}
+.pd-note{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:12.5px;
+  line-height:1.55;color:var(--warn)}
+.pd-note b{color:#7a4208}
+.taphint{font-family:var(--mono);font-size:10px;color:var(--gray);letter-spacing:.05em;
+  text-align:center;margin:9px 0 0}
+
+/* CHECKLIST */
+.ck-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ck-bar{flex:1;height:8px;background:var(--dim);border-radius:999px;overflow:hidden}
+.ck-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1b63c4,#0891b2);
+  border-radius:999px;transition:width .22s}
+.ck-count{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--teal2);white-space:nowrap}
+.ck-reset{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--gray);
+  background:#fff;border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer}
+.ck{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--border);
+  border-radius:11px;padding:12px 13px;margin-bottom:7px;width:100%;text-align:left}
+.ck.on{border-color:var(--green-line);background:var(--green-bg)}
+.ck-box{width:21px;height:21px;flex-shrink:0;border:2px solid #c3ccd8;border-radius:6px;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;
+  background:#fff}
+.ck.on .ck-box{background:var(--green);border-color:var(--green)}
+.ck-b{flex:1;min-width:0;display:block}
+.ck-t{display:block;font-size:13.5px;font-weight:600;line-height:1.35}
+.ck-s{display:block;font-size:12px;color:var(--gray);line-height:1.5;margin-top:2px}
+.ck.on .ck-t{color:#14532d}
+
+/* ACCORDION */
+.acc{background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:7px;overflow:hidden}
+.acc.open{border-color:var(--teal2)}
+.acc-h{display:flex;align-items:center;gap:11px;padding:12px 13px;width:100%;text-align:left}
+.acc-d{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.acc-d.red{background:#dc2626}.acc-d.amber{background:#d97706}.acc-d.slate{background:#64748b}
+.acc-t{flex:1;font-size:13.5px;font-weight:600;line-height:1.3}
+.acc-h .acc-t{text-align:left}
+.acc-c{color:#b7c0cc;font-size:13px;flex-shrink:0;transition:transform .2s}
+.acc.open .acc-c{transform:rotate(90deg)}
+.acc-b{display:none;padding:0 13px 13px 34px}
+.acc.open .acc-b{display:block}
+.acc-lab{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gray);margin:8px 0 3px}
+.acc-b p{font-size:13px;color:#3c4655;line-height:1.6}
+
+/* SECONDARY DIAGRAM */
+.diagram{background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:11px}
+.diagram svg{width:100%;height:auto;display:block;max-width:420px;margin:0 auto}
+.dg-cap{font-size:12px;color:var(--gray);line-height:1.55;margin-top:10px;text-align:center}
+
+/* TWO-FAILURE GRID */
+.fail{display:grid;grid-template-columns:1fr;gap:9px;margin-bottom:11px}
+@media(min-width:560px){.fail{grid-template-columns:1fr 1fr}}
+.fail-c{background:var(--red-bg);border:1px solid var(--red-line);border-radius:12px;padding:13px 14px}
+.fail-k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:#8f1d1d;margin-bottom:5px}
+.fail-t{font-size:13.5px;font-weight:700;color:#7f1d1d;line-height:1.35;margin-bottom:4px}
+.fail-s{font-size:12.5px;color:#8a3232;line-height:1.55}
+
+/* QUIZ */
+.q{background:#fff;border:1px solid var(--border);border-radius:13px;padding:15px;margin-bottom:10px}
+.q-n{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.09em;color:var(--gray);margin-bottom:5px}
+.q-t{font-size:14px;font-weight:600;line-height:1.45;margin-bottom:11px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:10px;
+  padding:11px 12px;margin-bottom:7px;font-size:13px;line-height:1.45;color:#3c4655;
+  width:100%;text-align:left;background:#fff}
+.opt:last-of-type{margin-bottom:0}
+.opt-m{width:20px;height:20px;flex-shrink:0;border:1.5px solid #c3ccd8;border-radius:50%;
+  font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gray);
+  display:flex;align-items:center;justify-content:center}
+.q.done .opt{cursor:default}
+.q.done .opt[disabled]{opacity:1}
+.opt.right{background:var(--green-bg);border-color:var(--green-line);color:#14532d}
+.opt.right .opt-m{background:var(--green);border-color:var(--green);color:#fff}
+.opt.wrong{background:var(--red-bg);border-color:var(--red-line);color:#8f1d1d}
+.opt.wrong .opt-m{background:var(--red);border-color:var(--red);color:#fff}
+.q-exp{display:none;margin-top:11px;padding-top:11px;border-top:1px dashed var(--border);
+  font-size:12.5px;line-height:1.6;color:#3c4655}
+.q.done .q-exp{display:block}
+.q-exp b{color:var(--white)}
+.score{background:var(--teal);color:#fff;border-radius:13px;padding:16px;margin-bottom:11px;text-align:center}
+.score-v{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1.1}
+.score-l{font-size:12.5px;color:#bfd8f7;margin-top:4px}
+.score-btn{margin-top:12px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em;
+  background:#fff;color:var(--teal);border:none;border-radius:999px;padding:9px 18px;cursor:pointer}
+
+.foot{font-size:11.5px;color:var(--gray);line-height:1.65;margin-top:22px;padding:0 4px}
+.foot a{color:var(--teal2);font-weight:600}
+.foot p + p{margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">KC</div>
+  <div class="hdr-txt">
+    <div class="hdr-title">Alaris IV Pump Training</div>
+    <div class="hdr-sub">8015 PC Unit &middot; 8100 Pump Module</div>
+  </div>
+  <a class="hdr-back" href="index.html">&#x2190; Field Guide</a>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Trace it. Verify it. Then press START.</h1>
+    <p>The pump does exactly what the last person programmed &mdash; including the part they got wrong.
+       This trainer covers what a paramedic actually has to do with an Alaris at handoff, in the back,
+       and when it alarms.</p>
+    <div class="meta">
+      <span class="chip">8100 PUMP MODULE</span>
+      <span class="chip">GUARDRAILS SUITE MX</span>
+      <span class="chip">IFT &amp; CRITICAL CARE</span>
+    </div>
+  </div>
+
+  <div class="notice danger">
+    <span class="ni">&#9888;</span>
+    <div><strong>Active FDA Class I safety notices on this device.</strong> Flow accuracy, occlusion-alarm
+      delay and post-occlusion bolus can be worse than the manual states with certain infusion sets, and any
+      module that has been dropped or severely jarred must come out of service. Both are covered in
+      <strong>Transport &amp; safety</strong> &mdash; read that tab before you take one on a long move.</div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-p="panel">The module</button>
+    <button class="tab" data-p="handoff">Handoff check</button>
+    <button class="tab" data-p="program">Programming</button>
+    <button class="tab" data-p="secondary">Secondary</button>
+    <button class="tab" data-p="alarms">Alarms</button>
+    <button class="tab" data-p="transport">Transport &amp; safety</button>
+    <button class="tab" data-p="quiz">Knowledge check</button>
+  </div>
+
+  <!-- ══ THE MODULE ══════════════════════════════════════════════════ -->
+  <div class="pane on" id="p-panel">
+
+    <div class="rule">
+      <div class="rule-k">The whole job in one line</div>
+      <div class="rule-t">Trace the infusion, verify the <b>complete</b> program, change only the parameter
+        you meant to change, press <b>START</b>, then confirm the fluid is actually moving.</div>
+    </div>
+
+    <div class="sec">Tap any key or indicator</div>
+    <div class="panel-wrap">
+      <div class="module" id="module">
+        <div class="leds">
+          <button type="button" class="led alarm" data-k="alarm"><span class="led-dot"></span><span class="led-l">ALARM</span></button>
+          <button type="button" class="led infuse" data-k="infuse"><span class="led-dot"></span><span class="led-l">INFUSE</span></button>
+          <button type="button" class="led standby" data-k="standby"><span class="led-dot"></span><span class="led-l">STANDBY</span></button>
+        </div>
+        <button type="button" class="disp" data-k="rate">
+          <span class="disp-v" style="display:block">12.5</span>
+          <span class="disp-l" style="display:block">Rate (mL/h)</span>
+        </button>
+        <button type="button" class="disp msg" data-k="msg">
+          <span class="disp-v" style="display:block">INFUSING</span>
+          <span class="disp-l" style="display:block">Message display</span>
+        </button>
+        <button type="button" class="chid" data-k="chid">A</button>
+        <div class="keys">
+          <button type="button" class="key" data-k="select">CHANNEL<br>SELECT</button>
+          <button type="button" class="key" data-k="pause">PAUSE</button>
+          <button type="button" class="key" data-k="off">CHANNEL<br>OFF</button>
+          <button type="button" class="key" data-k="restart">RESTART</button>
+        </div>
+        <button type="button" class="chid" data-k="latch" style="width:100%;margin:10px 0 0;font-size:9px;letter-spacing:.06em">DOOR &amp; LATCH</button>
+      </div>
+
+      <div class="panel-detail">
+        <div class="pd" id="pd">
+          <div class="pd-k">Start here</div>
+          <div class="pd-t">The 8100 Pump Module</div>
+          <div class="pd-b">Every module carries its own keypad, its own display and its own program.
+            Tap a key, a display or a status light to see what it does and where it bites.</div>
+          <div class="pd-note"><b>Before anything else:</b> confirm you are looking at the module the tubing
+            actually runs to. Channel letter and physical position are not proof &mdash; your hand on the
+            line from bag to patient is.</div>
+        </div>
+        <div class="taphint">&#9650; Tap the panel &mdash; 11 controls</div>
+      </div>
+    </div>
+
+    <div class="sec">Loading a set</div>
+    <div class="card">
+      <div class="card-t">Prime, load, latch, verify</div>
+      <ol class="steps">
+        <li>Prime a new set before loading it. Use only <b>Pump Module / Gemini</b> sets &mdash; another
+          manufacturer's set will run inaccurately in this mechanism.</li>
+        <li>Open the door. Hold the <b>upper fitment</b> above its recess and lower it in. Upper fitment
+          goes in <b>before</b> the safety clamp fitment, and the tubing must not be twisted.</li>
+        <li>Press the safety clamp fitment into the recess below the mechanism. When you reload a set,
+          leave that fitment <b>closed</b>.</li>
+        <li>With a fingertip, push the tubing firmly toward the back of the <b>Air-in-Line detector</b>.
+          Tubing that is not fully seated is the usual cause of nuisance AIL alarms &mdash; and, per the
+          current FDA notice, tubing must sit directly over the pressure sensors.</li>
+        <li class="hot">Close the door and hold it shut with one hand on the door and case, then gently lower
+          the latch. The safety clamp releases automatically as it latches. <b>Do not touch the set while
+          closing the door</b>, and make sure no bedding, glove or other tubing is caught in it &mdash; that
+          is a free-flow setup.</li>
+        <li>Open the roller clamp.</li>
+        <li class="hot"><b>Verify no fluid is flowing in the drip chamber.</b> Flow with the pump not running
+          means free flow. Stop and fix it before the patient moves.</li>
+      </ol>
+      <p style="margin-top:11px;font-size:12.5px;color:var(--gray)">On a v9.0 PC Unit the safety clamp is
+        labeled <b>Flo-Stop</b>. (DFU pp. 2-3 to 2-4.)</p>
+    </div>
+
+    <div class="notice warn">
+      <span class="ni">&#9888;</span>
+      <div>Free flow is a <strong>set-handling</strong> failure, not a pump failure. The pump cannot alarm
+        for fluid running around it.</div>
+    </div>
+  </div>
+
+  <!-- ══ HANDOFF ════════════════════════════════════════════════════ -->
+  <div class="pane" id="p-handoff">
+    <p class="lead">Before the patient moves, verify every line <strong>independently</strong> &mdash; not by
+      repeating back what the sending nurse told you. This checklist saves on this device so you can work it
+      at the bedside and clear it for the next call.</p>
+
+    <div class="ck-head">
+      <div class="ck-bar"><i id="ckFill"></i></div>
+      <div class="ck-count" id="ckCount">0 / 11</div>
+      <button class="ck-reset" id="ckReset">RESET</button>
+    </div>
+
+    <div id="ckList"></div>
+
+    <div class="notice info" style="margin-top:12px">
+      <span class="ni">&#9432;</span>
+      <div>Do not power-cycle a running infusion to "start clean." At startup, answering <strong>Yes</strong>
+        to <em>New Patient?</em> clears the stored patient information &mdash; <strong>No</strong> keeps it.
+        The Guardrails profile selected at startup is hospital-specific and sets which drug limits apply.
+        (DFU pp. 1-6 to 1-9.)</div>
+    </div>
+  </div>
+
+  <!-- ══ PROGRAMMING ════════════════════════════════════════════════ -->
+  <div class="pane" id="p-program">
+
+    <div class="rule">
+      <div class="rule-k">The commitment step</div>
+      <div class="rule-t"><b>START</b> is what changes the infusion. Typing a number changes nothing.
+        Never assume a value took because you entered it &mdash; read it back off the display.</div>
+    </div>
+
+    <div class="sec">Change rate or VTBI on a running infusion</div>
+    <div class="card">
+      <ol class="steps">
+        <li>Press <kbd>CHANNEL SELECT</kbd> on the correct module.</li>
+        <li>Press the <kbd>RATE</kbd> or <kbd>VTBI</kbd> soft key.</li>
+        <li>Enter the new value &mdash; up/down arrows to titrate, or the numeric keys.</li>
+        <li>Re-read the whole program: drug, concentration, weight, dose, rate and VTBI.</li>
+        <li class="hot">Press <kbd>START</kbd> to accept the change.</li>
+        <li class="hot">Confirm the channel is <b>infusing, not paused</b> &mdash; green INFUSE light,
+          expected drip-chamber flow, and the patient responding as you'd expect.</li>
+      </ol>
+      <p style="margin-top:11px">For a high-alert medication, get an independent double-check whenever
+        operationally possible. (DFU pp. 2-57 to 2-58.)</p>
+    </div>
+
+    <div class="sec">Change the solution container</div>
+    <div class="card">
+      <div class="card-t">Hanging a fresh bag mid-transport</div>
+      <ol class="steps">
+        <li>Press <kbd>PAUSE</kbd> to stop the infusion.</li>
+        <li class="hot"><b>Close the roller clamp.</b> This is what stops the line while the set is open
+          to air &mdash; do not skip it because the pump is paused.</li>
+        <li>Remove the empty container.</li>
+        <li>Spike the prepared container per facility procedure and hang it about
+          <b>20 inches above the Pump Module</b>.</li>
+        <li>Press <kbd>CHANNEL SELECT</kbd>.</li>
+        <li class="hot">Press the <kbd>VTBI</kbd> soft key and enter the new volume with the numeric keys.
+          <b>The VTBI does not carry over</b> &mdash; a fresh bag on an old VTBI will stop early or run
+          past what you hung.</li>
+        <li>Open the roller clamp.</li>
+        <li class="hot">Press the <kbd>START</kbd> soft key to resume, then confirm the channel is infusing
+          and the drip chamber is flowing.</li>
+      </ol>
+      <p style="margin-top:11px;font-size:12.5px;color:var(--gray)">Hang height matters twice over: the DFU
+        says 20 inches, and the current FDA notice caps it at 21 inches above the top of the module &mdash;
+        and never below the pump. See <b>Transport &amp; safety</b>.</p>
+    </div>
+
+    <div class="sec">Pause, restart, restore</div>
+    <div class="card">
+      <div class="card-t">Stopping temporarily</div>
+      <p>Press <kbd>PAUSE</kbd> to hold that channel. Resume with <kbd>RESTART</kbd>, or
+        <kbd>CHANNEL SELECT</kbd> then <kbd>START</kbd>. A paused channel starts prompting visually and
+        audibly after about two minutes &mdash; that prompt is the pump telling you a line is not running.</p>
+      <p>If an alert is already active, the PC Unit's <kbd>PAUSE</kbd> soft key will not take effect until
+        the alert is addressed.</p>
+      <p><b>Do not hold <kbd>CHANNEL OFF</kbd> unless you mean to end that channel.</b> Held until it beeps,
+        it stops the infusion, deselects the module, and powers the system down if it was the only module
+        running.</p>
+      <p><b>Restore:</b> to restart with the parameters already stored, press the <kbd>RESTORE</kbd> soft key,
+        verify what comes back, then press <kbd>START</kbd>. A bolus dose is stopped and restored through the
+        Bolus Dose procedure, not these keys.</p>
+    </div>
+
+    <div class="sec">Guardrails does not verify the order</div>
+    <div class="card">
+      <div class="card-t">An accepted program is not a correct program</div>
+      <p><b>Soft limit:</b> an audio alert sounds and a prompt appears before programming can continue.
+        Pressing <em>Yes</em> continues; pressing <em>No</em> sends it back to be reprogrammed. So a soft
+        limit is a question, and somebody answered it &mdash; it may or may not have been the right call.</p>
+      <p><b>Hard limit:</b> cannot be overridden. The prompt offers only <kbd>Reprogram</kbd>.</p>
+      <p><b>Read the markers, then check them.</b> A dose entered outside soft limits and verified shows
+        <b>LLL</b> in the message display for a <em>low</em> dose or <b>&uarr;&uarr;&uarr;</b> for a
+        <em>high</em> one. When a soft limit has been overridden the <b>G</b> icon appears &mdash; and
+        pressing the <kbd>G</kbd> soft key lists every applicable out-of-range limit. At a handoff, that
+        is the fastest way to find out exactly what was overridden and by how much. Press it.</p>
+      <p><b>Basic / non-library infusion:</b> may carry no dosing limits at all.</p>
+      <p><b>Wrong patient-care profile:</b> gives you limits meant for a different population, and they will
+        look just as authoritative.</p>
+      <p><b>Patient weight propagates.</b> A weight entered on one module can carry to calculations on
+        another, and changing it can recalculate dose or rate. Check every weight-based line after you touch
+        a weight. (DFU pp. 2-27 to 2-30, 2-50, 2-84.)</p>
+    </div>
+  </div>
+
+  <!-- ══ SECONDARY ══════════════════════════════════════════════════ -->
+  <div class="pane" id="p-secondary">
+    <p class="lead">Secondary (piggyback) delivery on this pump is <strong>partly gravity controlled</strong>.
+      That is what makes it the most common thing to find set up wrong at a bedside &mdash; and the easiest
+      thing to break by moving the patient.</p>
+
+    <div class="diagram">
+      <svg viewBox="0 0 400 262" role="img" aria-label="Secondary bag hung at least nine and a half inches above the primary bag on the same pole, with a check valve in the primary line">
+        <!-- pole -->
+        <rect x="196" y="8" width="8" height="246" fill="#e2e6ec"/>
+        <!-- hangers -->
+        <path d="M236 26 q0 -22 14 -22 q14 0 14 22" fill="none" stroke="#b7c0cc" stroke-width="3"/>
+        <path d="M144 112 q0 -22 14 -22 q14 0 14 22" fill="none" stroke="#b7c0cc" stroke-width="3"/>
+        <!-- secondary bag (high) -->
+        <rect x="234" y="26" width="52" height="62" rx="8" fill="#e6f7fb" stroke="#0e7490" stroke-width="2"/>
+        <rect x="234" y="26" width="52" height="24" rx="8" fill="#b3e2ee" stroke="none"/>
+        <text x="260" y="70" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="8" fill="#0e7490" font-weight="700">SECONDARY</text>
+        <!-- primary bag (low) -->
+        <rect x="138" y="112" width="58" height="76" rx="9" fill="#eaf1fd" stroke="#1b63c4" stroke-width="2"/>
+        <rect x="138" y="112" width="58" height="28" rx="9" fill="#c9dcfb" stroke="none"/>
+        <text x="167" y="164" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="8" fill="#1b63c4" font-weight="700">PRIMARY</text>
+        <!-- fluid-level reference lines + measurement -->
+        <line x1="286" y1="88" x2="330" y2="88" stroke="#f3d9ab" stroke-width="1.5"/>
+        <line x1="210" y1="140" x2="330" y2="140" stroke="#f3d9ab" stroke-width="1.5"/>
+        <line x1="318" y1="88" x2="318" y2="140" stroke="#a1590b" stroke-width="2"/>
+        <path d="M314 93 l4 -5 l4 5 M314 135 l4 5 l4 -5" fill="none" stroke="#a1590b" stroke-width="2"/>
+        <text x="326" y="110" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#a1590b" font-weight="700">9&#189;&#8243;</text>
+        <text x="326" y="124" font-family="ui-monospace,Menlo,monospace" font-size="8" fill="#a1590b">MINIMUM</text>
+        <!-- secondary tubing joins the primary line below the primary bag -->
+        <path d="M260 88 C272 148 218 182 172 198" fill="none" stroke="#0e7490" stroke-width="2"/>
+        <!-- primary tubing down to the patient -->
+        <path d="M167 188 L167 250" fill="none" stroke="#1b63c4" stroke-width="2"/>
+        <!-- check valve marker -->
+        <circle cx="167" cy="218" r="9" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+        <path d="M162 221 l5 -6 l5 6" fill="none" stroke="#dc2626" stroke-width="2"/>
+        <line x1="146" y1="218" x2="157" y2="218" stroke="#dc2626" stroke-width="1"/>
+        <text x="142" y="221" text-anchor="end" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#dc2626" font-weight="700">CHECK VALVE</text>
+        <text x="180" y="252" font-family="ui-monospace,Menlo,monospace" font-size="8.5" fill="#66707c">TO PATIENT</text>
+      </svg>
+      <div class="dg-cap">The secondary must hang <b>above</b> the primary &mdash; roughly 9&#189; inches
+        higher &mdash; and the primary line must contain a check valve. (DFU pp. 2-44 to 2-49.)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-t">What has to be true for a secondary to run</div>
+      <ol class="steps">
+        <li>The <b>primary line contains a check valve</b>.</li>
+        <li>The <b>secondary clamp is open</b>.</li>
+        <li>The <b>secondary bag hangs above the primary</b> &mdash; about 9&#189; inches higher.</li>
+        <li>The programmed <b>secondary VTBI matches what is actually in the bag</b>.</li>
+      </ol>
+      <p style="margin-top:11px">When the secondary VTBI reaches zero, the pump automatically returns to the
+        primary program. Nothing about that transition depends on anyone noticing it.</p>
+    </div>
+
+    <div class="sec">Entering the secondary VTBI</div>
+    <div class="card">
+      <div class="card-t">The prepopulated number is a starting point, not the answer</div>
+      <p>The pump prepopulates VTBI with the <b>diluent volume</b> of the infusion. To change it, press the
+        <kbd>VTBI</kbd> soft key and use the numeric keys. For small volumes the entry accepts two decimal
+        places.</p>
+      <p>The manual's warning is explicit about why that number drifts from reality: <b>factory overfill</b>
+        and <b>medication added to the bag</b>. A "50 mL" minibag is rarely 50 mL. Set the VTBI against
+        what is actually hanging, not against the number printed on the label.</p>
+      <p>Then enter either <b>duration</b> (the rate is calculated for you) or <b>rate</b> via the
+        <kbd>RATE VOLUME</kbd> soft key. The pump prompts <em>"Verify Secondary Clamp Open, Then Press
+        START"</em> &mdash; that prompt is there because an open secondary clamp is the one thing the pump
+        cannot check for you.</p>
+      <p><b>Multiple doses from a single container are not possible.</b> If a second dose is due, it is a
+        new container and a new secondary program &mdash; not a re-run of the one hanging.</p>
+    </div>
+
+    <div class="sec">The two ways it goes wrong</div>
+    <div class="fail">
+      <div class="fail-c">
+        <div class="fail-k">Underestimated the volume</div>
+        <div class="fail-t">Medication left in the secondary bag runs at the primary rate</div>
+        <div class="fail-s">The pump has already switched back. The remaining antibiotic, or pressor, keeps
+          draining at whatever the primary was programmed to run. Factory overfill makes this the more
+          likely of the two.</div>
+      </div>
+      <div class="fail-c">
+        <div class="fail-k">Overestimated the volume</div>
+        <div class="fail-t">Primary fluid runs at the secondary rate</div>
+        <div class="fail-s">The secondary bag empties, the pump keeps counting down, and it pulls primary
+          fluid at the secondary's rate &mdash; often far faster than intended.</div>
+      </div>
+    </div>
+
+    <div class="notice warn">
+      <span class="ni">&#9888;</span>
+      <div>Bag heights change every time you move the patient &mdash; loading, unloading, a stretcher raise,
+        a pole knocked in a hallway. <strong>Recheck the hang after every move</strong>, not just at pickup.</div>
+    </div>
+  </div>
+
+  <!-- ══ ALARMS ═════════════════════════════════════════════════════ -->
+  <div class="pane" id="p-alarms">
+    <p class="lead">Silencing an alarm suppresses the sound. It does not fix anything, and the condition is
+      still there when the tone comes back. Tap an alarm for what it means and what to do.</p>
+    <div id="alarmList"></div>
+
+    <div class="notice danger" style="margin-top:12px">
+      <span class="ni">&#9888;</span>
+      <div><strong>Infiltration is not an alarm.</strong> The pump cannot detect it &mdash; it will keep
+        pushing into the tissue at exactly the programmed rate. The only detector is you looking at the site
+        and the patient. (DFU pp. 1-46 to 1-47, 2-81, 2-116 to 2-122.)</div>
+    </div>
+  </div>
+
+  <!-- ══ TRANSPORT & SAFETY ═════════════════════════════════════════ -->
+  <div class="pane" id="p-transport">
+
+    <div class="sec">Long transports</div>
+    <div class="card">
+      <div class="card-t">Battery</div>
+      <p>The manual rates roughly <b>six hours with one pump module</b>, or about <b>three hours with four</b>
+        &mdash; but only from a new, fully charged battery under the manufacturer's test conditions. A fleet
+        battery in year four is not that battery.</p>
+      <p>Use the pump's own estimate instead: press <kbd>OPTIONS</kbd>, then the <kbd>PAGE DOWN</kbd> soft
+        key, then <kbd>Battery Runtime</kbd>. <kbd>CANCEL</kbd> or <kbd>EXIT</kbd> returns you to the main
+        screen. Run on external power whenever it is available.</p>
+      <p>Read the wording on that screen: it is the estimate <b>at current operating parameters</b>. Add a
+        module or raise a rate and the number you just read is no longer the number &mdash; check it again
+        after you change the load, not just once before you leave.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-t">Position and handling</div>
+      <p>The system must stay <b>upright</b> and securely mounted, with every module fully latched.</p>
+      <p><b>Low-rate occlusions alarm late.</b> Even the older manual allows up to 45 minutes at 1 mL/h under
+        one high-pressure setting before the occlusion alarm sounds. At low rates, your eyes on the drip
+        chamber and the site beat the alarm every time.</p>
+    </div>
+
+    <div class="sec">Current FDA safety notices</div>
+
+    <div class="notice danger">
+      <span class="ni">&#9888;</span>
+      <div><strong>Class I &mdash; infusion set performance (2025).</strong> BD's recall covers the Model 8100
+        Pump Module used with a subset of compatible pump infusion sets: real-world <strong>flow accuracy,
+        occlusion-alarm delay and post-occlusion bolus</strong> can be worse than the user manual describes.
+        Recalled July 2025, expanded in September 2025.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-t">Mitigations while those sets are in service</div>
+      <ol class="steps">
+        <li>Keep the container <b>between pump level and 21 inches above the top of the module</b> &mdash;
+          never below the pump, never higher than 21 inches.</li>
+        <li>At rates <b>below 10 mL/h</b>, do not use Selectable pressure above <b>50 mmHg</b>.</li>
+        <li>Avoid flow rates <b>below 1 mL/h</b>.</li>
+        <li>When loading, make sure the tubing lies <b>directly over the pressure sensors</b>.</li>
+        <li>Confirm all clamps are open, no kinks or collapsed tubing outside the pump, the vent is open if
+          the container has one, and <b>drops are visibly flowing in the drip chamber</b>.</li>
+      </ol>
+      <p style="margin-top:11px"><b>AMR KC has to verify its own set catalog numbers and recall-correction
+        status before these pumps go out on a truck.</b> This page cannot tell you which sets in your kit are
+        affected &mdash; that comes from fleet and clinical leadership against the current BD notice.</p>
+    </div>
+
+    <div class="notice danger">
+      <span class="ni">&#9888;</span>
+      <div><strong>Class I &mdash; dropped or jarred modules (November 2025).</strong> A drop can damage the
+        bezel assembly that holds the pumping mechanism in alignment. The damage is <strong>internal and not
+        visible</strong>, and it can cause under-infusion, over-infusion, unregulated flow or a failure to
+        calibrate. Two serious injuries were reported.</div>
+    </div>
+
+    <div class="rule" style="background:#7f1d1d">
+      <div class="rule-k" style="color:#fecaca">Non-negotiable</div>
+      <div class="rule-t">If a module is <b>dropped or severely jarred</b>, take it out of service
+        immediately. A normal-looking display is not evidence it is safe. It goes back in use only after
+        qualified service personnel test and inspect it.</div>
+    </div>
+
+    <div class="notice info">
+      <span class="ni">&#9432;</span>
+      <div>The DFU this training is built on is the 2009 v9 manual. It is the right reference for
+        <strong>how the keys work</strong>, and the wrong reference for <strong>current performance and
+        recall status</strong>. Check both.</div>
+    </div>
+  </div>
+
+  <!-- ══ QUIZ ═══════════════════════════════════════════════════════ -->
+  <div class="pane" id="p-quiz">
+    <p class="lead">Sixteen questions on the things that actually hurt patients. Every answer explains itself
+      &mdash; pick one and it tells you why.</p>
+    <div id="scoreSlot"></div>
+    <div id="quizList"></div>
+  </div>
+
+  <div class="foot">
+    <p>Built for AMR Kansas City field crews. Procedural content and page references come from the
+      <b>Alaris System DFU &mdash; with v9 Model 8015, Pump and Syringe Modules section</b>. Follow current
+      AMR policy, your medical director's direction and the sending facility's orders; this page teaches the
+      device, not the order.</p>
+    <p>FDA notices:
+      <a href="https://www.fda.gov/medical-devices/medical-device-recalls-and-early-alerts/update-alert-infusion-set-performance-issue-bd" target="_blank" rel="noopener noreferrer">Infusion set performance issue &mdash; update</a>
+      &middot;
+      <a href="https://www.fda.gov/medical-devices/medical-device-recalls-and-early-alerts/correction-alert-becton-dickinson-updates-use-instructions-bd-alaris-pump-issue" target="_blank" rel="noopener noreferrer">Correction alert &mdash; updated use instructions</a>.
+      These links need a connection; the rest of this page works offline.</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+var KEY = 'alaris_pump_v1';
+
+function load(){
+  try{ var r = localStorage.getItem(KEY); return r ? JSON.parse(r) : {}; }
+  catch(e){ return {}; }
+}
+function save(s){
+  try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){}
+}
+var state = load();
+if(!state.checks) state.checks = {};
+if(!state.answers) state.answers = {};
+
+/* ── TABS ──────────────────────────────────────────────────────── */
+var tabs = document.querySelectorAll('.tab');
+Array.prototype.forEach.call(tabs, function(t){
+  t.addEventListener('click', function(){
+    Array.prototype.forEach.call(tabs, function(x){ x.classList.remove('on'); });
+    t.classList.add('on');
+    Array.prototype.forEach.call(document.querySelectorAll('.pane'), function(p){ p.classList.remove('on'); });
+    document.getElementById('p-' + t.getAttribute('data-p')).classList.add('on');
+    window.scrollTo(0, 0);
+  });
+});
+
+/* ── MODULE PANEL ──────────────────────────────────────────────── */
+var PANEL = {
+  alarm: ['Status indicator', 'Alarm (red)',
+    'The channel has stopped and needs a person. Red means nothing is going into the patient on that ' +
+    'module right now.',
+    'Silencing the tone does not clear the condition. Find the cause before you press restart.'],
+  infuse: ['Status indicator', 'Infusing (green)',
+    'The module is actually delivering. This is the light you look for after every change you make and ' +
+    'every time you come back to the patient.',
+    'Green plus expected drip-chamber flow is confirmation. A rate on the display by itself is not.'],
+  standby: ['Status indicator', 'Standby (yellow)',
+    'The module is programmed but not infusing. The screen looks configured and populated, and no fluid ' +
+    'is moving.',
+    'A yellow channel at handoff is the classic miss — everything reads correct and the drug is not ' +
+    'running.'],
+  rate: ['Display', 'Rate display (mL/h)',
+    'What that module is set to deliver, in mL per hour. On a dose-rate program this is the pump’s ' +
+    'translation of the dose you entered.',
+    'Verify it against the written order at every handoff, and again after any change. mL/h is the number ' +
+    'that actually drives the motor.'],
+  msg: ['Display', 'Channel message display',
+    'Prompts, alarm text and program detail for that module — drug name, dose, limits and what the ' +
+    'pump wants from you next.',
+    'This is where a Guardrails override marker or an alert message shows up. Read it; do not skim past it.'],
+  chid: ['Label', 'Channel identification',
+    'Which module you are looking at — A, B, C or D, left to right on the PC Unit.',
+    'The letter tells you which module. It does not tell you which drug. Trace the tubing from the ' +
+    'container to the patient before you touch any key.'],
+  select: ['Key', 'CHANNEL SELECT',
+    'Selects that module for programming and infusion setup. It is the first key in every change you make ' +
+    'and in the alternate way to restart a paused channel.',
+    'Selecting the wrong module is how the wrong drug gets titrated. Confirm the channel before you ' +
+    'enter a value.'],
+  pause: ['Key', 'PAUSE',
+    'Temporarily stops the infusion on that module. After about two minutes the pump begins a visual and ' +
+    'audible prompt so a paused line does not stay quietly stopped.',
+    'If an alert is already active, the PC Unit’s PAUSE soft key will not take effect until the alert ' +
+    'is addressed. For a delay-programmed infusion, use the Delay Options pause procedure.'],
+  off: ['Key', 'CHANNEL OFF',
+    'Press and hold until it beeps: the infusion on that module stops, the module is deselected, and if it ' +
+    'was the only module running, the whole system powers down.',
+    'This is not a pause. Repeat it on each module to power the system off intentionally — never to ' +
+    'quiet a channel you plan to restart.'],
+  restart: ['Key', 'RESTART',
+    'Resumes a previously paused or alarmed infusion on that module. The alternate route is CHANNEL SELECT ' +
+    'then the START soft key.',
+    'Restarting into an uncorrected occlusion or air alarm just re-alarms — and on a patient-side ' +
+    'occlusion it can push a bolus. Fix the cause first.'],
+  latch: ['Mechanism', 'Door, latch & release',
+    'The door holds the set against the pumping mechanism; the latch releases the safety clamp as it ' +
+    'closes. The release latch at the bottom of the module is what frees it from the PC Unit.',
+    'A module that is not fully latched will alarm and stop — and a set pinched in the door is a ' +
+    'free-flow hazard. Check the latch every time the patient is moved.']
+};
+var pd = document.getElementById('pd');
+document.getElementById('module').addEventListener('click', function(e){
+  var el = e.target.closest('[data-k]');
+  if(!el) return;
+  var d = PANEL[el.getAttribute('data-k')];
+  if(!d) return;
+  Array.prototype.forEach.call(document.querySelectorAll('#module [data-k]'), function(x){
+    x.classList.remove('sel');
+  });
+  el.classList.add('sel');
+  pd.innerHTML =
+    '<div class="pd-k">' + d[0] + '</div>' +
+    '<div class="pd-t">' + d[1] + '</div>' +
+    '<div class="pd-b">' + d[2] + '</div>' +
+    '<div class="pd-note"><b>Watch for:</b> ' + d[3] + '</div>';
+});
+
+/* ── HANDOFF CHECKLIST ─────────────────────────────────────────── */
+var CHECKS = [
+  ['Channel and tubing traced', 'From the container, through the module, to the patient — by hand, for every running line.'],
+  ['Medication and concentration', 'Read the bag label, not the pump screen, then confirm they agree.'],
+  ['Ordered dose vs. displayed dose', 'The order in hand against what the module is actually delivering.'],
+  ['Patient weight', 'For every weight-based drug. A wrong weight makes every dose on that profile wrong.'],
+  ['Current rate in mL/h', 'The number that drives the motor.'],
+  ['Remaining VTBI', 'What is left — not the original bag volume, and not what the label says was hung.'],
+  ['Primary or secondary mode', 'And, if secondary, the bag height and the check valve.'],
+  ['IV site and patency', 'Site, stopcock positions, clamps, no air, no kinks.'],
+  ['Pump upright and mounted', 'Modules fully latched, container roughly 20 inches above the module.'],
+  ['Battery runtime checked', 'OPTIONS → PAGE DOWN → BATTERY RUNTIME, against the length of the move.'],
+  ['No drop or jar history', 'If it has been dropped or severely jarred, it does not go with the patient.']
+];
+var ckList = document.getElementById('ckList');
+var ckFill = document.getElementById('ckFill');
+var ckCount = document.getElementById('ckCount');
+
+function renderChecks(){
+  var h = '';
+  CHECKS.forEach(function(c, i){
+    var on = !!state.checks[i];
+    h += '<button type="button" class="ck' + (on ? ' on' : '') + '" data-i="' + i + '" ' +
+         'role="checkbox" aria-checked="' + on + '">' +
+         '<span class="ck-box">' + (on ? '✓' : '') + '</span>' +
+         '<span class="ck-b"><span class="ck-t">' + c[0] + '</span>' +
+         '<span class="ck-s">' + c[1] + '</span></span></button>';
+  });
+  ckList.innerHTML = h;
+  var done = 0;
+  CHECKS.forEach(function(c, i){ if(state.checks[i]) done++; });
+  ckFill.style.width = Math.round(done / CHECKS.length * 100) + '%';
+  ckCount.textContent = done + ' / ' + CHECKS.length;
+}
+function toggleCheck(i){
+  state.checks[i] = !state.checks[i];
+  save(state);
+  renderChecks();
+}
+ckList.addEventListener('click', function(e){
+  var el = e.target.closest('.ck');
+  if(el) toggleCheck(+el.getAttribute('data-i'));
+});
+document.getElementById('ckReset').addEventListener('click', function(){
+  state.checks = {};
+  save(state);
+  renderChecks();
+});
+renderChecks();
+
+/* ── ALARMS ────────────────────────────────────────────────────── */
+var ALARMS = [
+  ['red', 'Air-in-Line',
+   'Air has been detected in the administration set during an infusion. The affected module stops.',
+   'Make sure the tubing is properly installed in the Air-in-Line detector — pushed fully to the back. ' +
+   'If air is present, clear it from the set. Then press RESTART, or CHANNEL SELECT then the START soft ' +
+   'key. Tubing that is not seated is the usual cause of repeat AIL alarms, and a repeat alarm you keep ' +
+   'silencing is a line you are not watching.'],
+  ['red', 'Accumulated Air-in-Line',
+   'A large number of bubbles too small to trip the air-in-line limit individually have recently passed ' +
+   'the detector. The affected module stops.',
+   'Clear the air from the line. This one does not restart the same way: press the RESET soft key first, ' +
+   'then the RESTART key. Small-bubble accumulation usually means the bag ran low, the drip chamber is ' +
+   'starved, or the spike is not seated.'],
+  ['red', 'Occluded — Patient Side',
+   'Increased back pressure sensed while infusing — the blockage is below the pump, between the module ' +
+   'and the vein. The affected module stops.',
+   'Clear the occlusion: check stopcock positions, tubing, the catheter and the IV site. Then press ' +
+   'RESTART, or CHANNEL SELECT then START. Do not press restart repeatedly without correcting the cause ' +
+   '— pressure built up behind an occlusion can deliver as a bolus when it clears.'],
+  ['amber', 'Partial Occlusion — Patient Side',
+   'The Auto-Restart feature has detected a partial occlusion on the patient side of the line.',
+   'Clear the occlusion, then press RESTART, or CHANNEL SELECT then START. Treat it as an early warning ' +
+   'of the full patient-side occlusion above — find out why before you restart.'],
+  ['amber', 'Occluded — Fluid Side / Empty Container',
+   'Either an upstream occlusion or an empty container. The affected module stops.',
+   'Clear the occlusion on the fluid side of the instrument and refill the drip chamber if necessary. ' +
+   'Check the bag for volume, every clamp above the module, the vent if the container has one, and the ' +
+   'tubing for kinks. Then press RESTART, or CHANNEL SELECT then START.'],
+  ['amber', 'Check IV Set',
+   'The administration set is not properly installed. The affected module stops.',
+   'Close the roller clamp, remove and reinstall the set, close the door, open the roller clamp, then ' +
+   'press RESTART. Reinstalling is the fix — restarting without reloading the set just alarms again.'],
+  ['amber', 'Close Door',
+   'The door was opened during an infusion. The affected module stops.',
+   'Close the door, then press RESTART, or CHANNEL SELECT then START. On a moving truck, check what ' +
+   'caught the door — and confirm nothing is pinched in it.'],
+  ['amber', 'Flo-Stop Open — Close Door',
+   'The safety clamp (Flo-Stop) is in the open position while the door is open. v9.0 PC Unit only.',
+   'Close the roller clamp on the administration set, or close the door. An open safety clamp with an ' +
+   'open door is the free-flow configuration — deal with it before anything else.'],
+  ['red', 'Battery Discharged',
+   'All modules stop.',
+   'Connect AC power, then restart each affected channel individually. They do not all come back on ' +
+   'their own — walk the modules and confirm each one is infusing.'],
+  ['slate', 'Paused-channel prompt (about 2 minutes)',
+   'A channel has been paused long enough for the pump to start prompting.',
+   'Either restart it or make a deliberate decision to leave it stopped. This prompt exists because a ' +
+   'paused line is easy to forget in the back of a moving truck.'],
+  ['slate', 'Infiltration',
+   'There is no alarm for this.',
+   'The pump has no way to detect it and will keep delivering at the programmed rate into the tissue. ' +
+   'Inspect the site and the patient directly — that is the entire detection method.']
+];
+var aH = '';
+ALARMS.forEach(function(a, i){
+  aH += '<div class="acc" data-i="' + i + '">' +
+        '<button type="button" class="acc-h" aria-expanded="false">' +
+        '<span class="acc-d ' + a[0] + '"></span>' +
+        '<span class="acc-t">' + a[1] + '</span><span class="acc-c">›</span></button>' +
+        '<div class="acc-b">' +
+        '<div class="acc-lab">What it means</div><p>' + a[2] + '</p>' +
+        '<div class="acc-lab">What you do</div><p>' + a[3] + '</p>' +
+        '</div></div>';
+});
+var alarmList = document.getElementById('alarmList');
+alarmList.innerHTML = aH;
+alarmList.addEventListener('click', function(e){
+  var el = e.target.closest('.acc');
+  if(!el) return;
+  var open = el.classList.toggle('open');
+  el.querySelector('.acc-h').setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+
+/* ── KNOWLEDGE CHECK ───────────────────────────────────────────── */
+var QUIZ = [
+  ['You dial a new rate on a running infusion using the up arrow. What makes the change take effect?',
+   ['Entering the value — the pump applies it as you scroll',
+    'Pressing START',
+    'Pressing CHANNEL SELECT a second time',
+    'Waiting for the two-minute confirmation prompt'],
+   1,
+   'START is the commitment step. Until you press it the pump is still running the old program, no matter ' +
+   'what the entry field shows. Re-read drug, concentration, weight, dose, rate and VTBI before you press it.'],
+
+  ['After changing a rate, what confirms the drug is actually reaching the patient?',
+   ['The new rate appearing on the rate display',
+    'The absence of an alarm',
+    'A green INFUSE light plus expected drip-chamber flow',
+    'The yellow STANDBY light'],
+   2,
+   'A rate on the display only proves what was programmed. Green INFUSE plus visible flow — and the ' +
+   'patient responding as expected — proves delivery. Yellow STANDBY means programmed and not running.'],
+
+  ['A secondary is programmed with a VTBI lower than what is really in the bag. What happens?',
+   ['The pump alarms Empty Container',
+    'The remaining secondary medication runs at the primary rate',
+    'The secondary stops and clamps itself off',
+    'Primary fluid runs at the secondary rate'],
+   1,
+   'At zero VTBI the pump returns to the primary program, but gravity keeps the secondary draining — ' +
+   'so the rest of the medication goes in at the primary rate. Overestimating the VTBI causes the opposite ' +
+   'failure: primary fluid delivered at the secondary rate.'],
+
+  ['A second dose of the same antibiotic is due later in a long transport. The minibag hanging still has volume in it. What does the pump allow?',
+   ['Re-running the secondary program against the same container',
+    'Nothing — multiple doses from a single container are not possible',
+    'Doubling the VTBI to cover both doses',
+    'Switching the secondary to primary mode for the second dose'],
+   1,
+   'The manual states it plainly: multiple doses from a single container are not possible. A second dose ' +
+   'means a new container and a new secondary program. Volume left in the bag is not a dose the pump can ' +
+   'deliver on a second run.'],
+
+  ['What has to be true for a secondary infusion to run correctly?',
+   ['The secondary hangs below the primary so it drains last',
+    'Both bags hang at the same height',
+    'The secondary hangs about 9½ inches above the primary, with a check valve in the primary line',
+    'The primary line is clamped for the duration'],
+   2,
+   'Secondary delivery is partly gravity driven. The secondary must hang roughly 9½ inches higher, its ' +
+   'clamp must be open, and the primary line must contain a check valve. Recheck the hang after every ' +
+   'patient move — loading changes bag heights.'],
+
+  ['The pump alarms Occluded — Patient Side. What is the correct first action?',
+   ['Press RESTART until it clears',
+    'Raise the bag higher to overcome the resistance',
+    'Increase the pressure setting',
+    'Check stopcocks, tubing, catheter and the IV site, then restart'],
+   3,
+   'The blockage is between the module and the vein. Repeated restarts without correcting the cause do ' +
+   'not fix it and can deliver the pressure built up behind the occlusion as a bolus when it clears.'],
+
+  ['Accumulated Air-in-Line alarms on a channel. How is clearing it different from a plain Air-in-Line alarm?',
+   ['It clears itself once the bubbles pass',
+    'It requires the door to be opened and the set reloaded',
+    'Press the RESET soft key first, then the RESTART key',
+    'It can only be cleared by powering the module off'],
+   2,
+   'Plain Air-in-Line restarts with RESTART, or CHANNEL SELECT then START. Accumulated Air-in-Line — a ' +
+   'run of bubbles each too small to trip the limit on its own — needs the RESET soft key first, then ' +
+   'RESTART. Clear the air either way, and look for why: a low bag, a starved drip chamber, or a spike ' +
+   'that is not seated.'],
+
+  ['A Guardrails soft limit was overridden on an infusion you are taking. What does that tell you?',
+   ['The order was verified against the drug library',
+    'Someone chose Yes to run outside the soft limit — it may or may not be clinically correct',
+    'The pump reprogrammed itself to a safe dose',
+    'A hard limit is also in effect'],
+   1,
+   'Soft limits can be overridden by selecting Yes; the G, LLL or up-arrow markers flag it. Hard limits ' +
+   'cannot be overridden and force reprogramming. A Basic or non-library infusion may carry no limits at ' +
+   'all. Guardrails checks the program against a profile — it never checks the order.'],
+
+  ['The message display shows a G icon on a channel you are taking. What does pressing the G soft key get you?',
+   ['A list of every applicable out-of-range limit',
+    'A reset of the Guardrails profile to default',
+    'The drug library version number',
+    'Confirmation that the dose was pharmacist-approved'],
+   0,
+   'The G icon means a soft limit was overridden. Pressing the G soft key lists all applicable ' +
+   'out-of-range limits — the fastest way at a handoff to see exactly what was overridden and by how ' +
+   'much. LLL in the message display marks a low dose, three up-arrows a high one.'],
+
+  ['A pump module was dropped during loading. It powers up and the display looks normal. What do you do?',
+   ['Run a self-test and keep using it',
+    'Use it but recheck the rate every 15 minutes',
+    'Take it out of service — damage is internal and not visible',
+    'Use it only for crystalloid'],
+   2,
+   'A drop can damage the bezel assembly that holds the pumping mechanism in alignment. The damage is not ' +
+   'visible and can cause under-infusion, over-infusion, unregulated flow or a calibration failure. FDA ' +
+   'classified this as a Class I correction in November 2025. It goes back in service only after qualified ' +
+   'service personnel test and inspect it.'],
+
+  ['At startup the pump asks New Patient?. What does answering Yes do?',
+   ['Clears the stored patient information, including weight',
+    'Saves the current program as a template',
+    'Switches the Guardrails profile to adult',
+    'Nothing until you also press START'],
+   0,
+   'Yes clears stored patient information; No retains it. This is one reason not to power-cycle a running ' +
+   'infusion to “start clean” — and why the Guardrails profile selected at startup matters, ' +
+   'since it sets which drug limits apply.'],
+
+  ['You want to stop one channel for two minutes while you move the patient. Which key?',
+   ['Hold CHANNEL OFF until it beeps',
+    'PAUSE',
+    'CHANNEL SELECT then RESTORE',
+    'Open the door'],
+   1,
+   'PAUSE holds that channel and prompts after about two minutes. Holding CHANNEL OFF ends the infusion, ' +
+   'deselects the module, and powers the system down if that was the only module running — not a pause.'],
+
+  ['At handoff, which VTBI number matters?',
+   ['The original bag volume',
+    'The volume the sending nurse documented at the start',
+    'The remaining VTBI on the pump right now',
+    'The total volume ordered'],
+   2,
+   'Verify what is left, not what was hung. The remaining VTBI drives when the pump switches modes or ' +
+   'alarms, and it is the number that tells you whether the bag will outlast the transport.'],
+
+  ['The primary bag runs dry mid-transport and you hang a fresh one. Besides closing the roller clamp before you swap, what must you do before pressing START?',
+   ['Nothing — the pump carries the previous VTBI forward',
+    'Power-cycle the module so it re-reads the container',
+    'Press CHANNEL SELECT, then VTBI, and enter the new volume',
+    'Re-enter the patient weight'],
+   2,
+   'Pause, close the roller clamp, swap the container, hang it about 20 inches above the module, then ' +
+   'CHANNEL SELECT → VTBI → the new volume → open the roller clamp → START. The VTBI does not carry ' +
+   'over: a fresh bag left on the old VTBI stops early or runs past what you hung.'],
+
+  ['Per the current FDA infusion-set notice, where should the container hang?',
+   ['As high as the pole allows, for gravity assist',
+    'Between pump level and 21 inches above the top of the module',
+    'Below the pump so air rises away from the line',
+    'Level with the patient’s heart'],
+   1,
+   'Never below the pump and never more than 21 inches above the top of the module. The same notice says ' +
+   'to keep tubing directly over the pressure sensors, confirm clamps are open with no kinks, and verify ' +
+   'drops are flowing in the drip chamber.'],
+
+  ['You are running a drip at 6 mL/h on a long transport. Which setting does the FDA notice warn against?',
+   ['Selectable pressure above 50 mmHg',
+    'Any VTBI over 250 mL',
+    'Guardrails profile selection',
+    'Running on battery power'],
+   0,
+   'At rates below 10 mL/h, avoid Selectable pressure above 50 mmHg, and avoid rates below 1 mL/h entirely. ' +
+   'Low-rate occlusions also alarm very late — the older manual permits up to 45 minutes at 1 mL/h ' +
+   'under one high-pressure setting — so watch the drip chamber and the site directly.']
+];
+var LETTERS = ['A','B','C','D'];
+var quizList = document.getElementById('quizList');
+var scoreSlot = document.getElementById('scoreSlot');
+
+function renderQuiz(){
+  var h = '';
+  QUIZ.forEach(function(q, i){
+    var picked = state.answers[i];
+    var done = picked !== undefined && picked !== null;
+    h += '<div class="q' + (done ? ' done' : '') + '" data-i="' + i + '">';
+    h += '<div class="q-n">Question ' + (i + 1) + ' of ' + QUIZ.length + '</div>';
+    h += '<div class="q-t">' + q[0] + '</div>';
+    q[1].forEach(function(opt, j){
+      var cls = '';
+      if(done){
+        if(j === q[2]) cls = ' right';
+        else if(j === picked) cls = ' wrong';
+      }
+      h += '<button type="button" class="opt' + cls + '" data-j="' + j + '"' +
+           (done ? ' disabled' : '') + '>' +
+           '<span class="opt-m">' + LETTERS[j] + '</span><span>' + opt + '</span></button>';
+    });
+    h += '<div class="q-exp"><b>' + (done && picked === q[2] ? 'Correct.' : 'Answer: ' +
+         LETTERS[q[2]] + '.') + '</b> ' + q[3] + '</div>';
+    h += '</div>';
+  });
+  quizList.innerHTML = h;
+  renderScore();
+}
+function renderScore(){
+  var done = 0, right = 0;
+  QUIZ.forEach(function(q, i){
+    var p = state.answers[i];
+    if(p === undefined || p === null) return;
+    done++;
+    if(p === q[2]) right++;
+  });
+  if(!done){ scoreSlot.innerHTML = ''; return; }
+  var lbl = done < QUIZ.length
+    ? right + ' right of ' + done + ' answered — ' + (QUIZ.length - done) + ' to go'
+    : (right === QUIZ.length ? 'All twelve. Go verify a real pump.'
+       : 'Review the ones you missed — the explanations say why.');
+  scoreSlot.innerHTML =
+    '<div class="score"><div class="score-v">' + right + ' / ' + QUIZ.length + '</div>' +
+    '<div class="score-l">' + lbl + '</div>' +
+    '<button class="score-btn" id="quizReset">START OVER</button></div>';
+  document.getElementById('quizReset').addEventListener('click', function(){
+    state.answers = {};
+    save(state);
+    renderQuiz();
+    window.scrollTo(0, 0);
+  });
+}
+quizList.addEventListener('click', function(e){
+  var opt = e.target.closest('.opt');
+  if(!opt) return;
+  var qEl = opt.closest('.q');
+  if(!qEl || qEl.classList.contains('done')) return;
+  state.answers[+qEl.getAttribute('data-i')] = +opt.getAttribute('data-j');
+  save(state);
+  renderQuiz();
+});
+renderQuiz();
+
+})();
+</script>
+</body>
+</html>
