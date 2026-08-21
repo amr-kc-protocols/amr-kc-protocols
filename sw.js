@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v10';
+const CACHE = 'amrkc-2026-v11';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -12,7 +12,9 @@ const ASSETS = [
   './amr-backend.js',
   // Alaris pump training — small, and it gets opened at a bedside handoff
   // where a crew may have no signal and has never opened the page before
-  './alaris-pump.html'
+  './alaris-pump.html',
+  // Medication math — same reason: it gets opened to check a dose, not to browse
+  './med-math.html'
 ];
 
 self.addEventListener('install', e => {

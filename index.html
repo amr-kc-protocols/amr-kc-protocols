@@ -460,6 +460,27 @@ background:var(--acb,var(--dim));color:var(--ac,var(--teal2))}
 .feat-go{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;margin-top:14px;
   font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:0.04em;color:#0e4f8f;
   background:#fff;border-radius:999px;padding:8px 15px 8px 13px;box-shadow:0 4px 12px rgba(0,0,0,0.18)}
+
+/* Violet variant — two featured panels sit together, so they must not read as
+   one block of blue. Same shape, different family. */
+.feat-card.feat-violet{background:linear-gradient(135deg,#4c1d95 0%,#6d28d9 46%,#a21caf 100%);
+  box-shadow:0 10px 28px rgba(109,40,217,0.34)}
+.feat-card.feat-violet:hover{box-shadow:0 12px 32px rgba(109,40,217,0.42)}
+.feat-violet .feat-badge{color:#5b21b6}
+.feat-violet .feat-title .fa{color:#f0d5ff}
+.feat-violet .feat-sub{color:#efe4fd}
+.feat-violet .feat-chip{color:#eddcff}
+.feat-violet .feat-go{color:#6d28d9}
+/* Numbers ticking over on the calculator face */
+.feat-calc{position:absolute;top:13px;right:14px;width:44px;height:52px;pointer-events:none;opacity:0.95}
+.feat-calc .body{fill:rgba(255,255,255,0.16);stroke:rgba(255,255,255,0.55);stroke-width:1.6}
+.feat-calc .screen{fill:rgba(255,255,255,0.30)}
+.feat-calc .k{fill:rgba(255,255,255,0.55)}
+.feat-calc .digit{fill:#f7e6ff;font-family:var(--mono);font-size:7px;font-weight:700;
+  animation:featflip 3.2s steps(1) infinite}
+.feat-calc .digit:nth-of-type(2){animation-delay:.4s}
+@keyframes featflip{0%,45%{opacity:1}50%,95%{opacity:.25}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.feat-calc .digit{animation:none;opacity:1}}
 .sub-back{display:inline-flex;align-items:center;gap:5px;margin:12px 14px 4px;
 padding:7px 12px;background:var(--dim);border:1px solid var(--border);border-radius:7px;
 font-size:13px;font-weight:600;color:var(--teal2);cursor:pointer;font-family:var(--sans)}
@@ -997,6 +1018,29 @@ function renderHome(){
   h += '<div class="feat-chips"><span class="feat-chip">9 TOPICS</span>'
      + '<span class="feat-chip">~25 MIN</span>'
      + '<span class="feat-chip">INTERACTIVE</span></div>';
+  h += '<div class="feat-go">Start training &#x203A;</div></a>';
+
+  h += '<a class="feat-card feat-violet" href="med-math.html">';
+  h += '<svg class="feat-calc" viewBox="0 0 44 52" aria-hidden="true">';
+  h += '<rect class="body" x="7" y="3" width="30" height="46" rx="4"/>';
+  h += '<rect class="screen" x="11" y="7" width="22" height="10" rx="2"/>';
+  h += '<text class="digit" x="14" y="15">0.3</text>';
+  h += '<text class="digit" x="24" y="15">mL</text>';
+  h += '<rect class="k" x="11" y="21" width="6" height="5" rx="1.5"/>';
+  h += '<rect class="k" x="19" y="21" width="6" height="5" rx="1.5"/>';
+  h += '<rect class="k" x="27" y="21" width="6" height="5" rx="1.5"/>';
+  h += '<rect class="k" x="11" y="29" width="6" height="5" rx="1.5"/>';
+  h += '<rect class="k" x="19" y="29" width="6" height="5" rx="1.5"/>';
+  h += '<rect class="k" x="27" y="29" width="6" height="5" rx="1.5"/>';
+  h += '<rect class="k" x="11" y="37" width="14" height="5" rx="1.5"/>';
+  h += '<rect class="k" x="27" y="37" width="6" height="5" rx="1.5"/></svg>';
+  h += '<div class="feat-badge"><span class="dot"></span>New training</div>';
+  h += '<div class="feat-title">Medication <span class="fa">Math</span></div>';
+  h += '<div class="feat-sub">Draw-up volumes, weight-based peds doses and caps, drip rates. '
+     + 'Every number from our own formulary.</div>';
+  h += '<div class="feat-chips"><span class="feat-chip">8 TOPICS</span>'
+     + '<span class="feat-chip">PRACTICE PROBLEMS</span>'
+     + '<span class="feat-chip">OUR FORMULARY</span></div>';
   h += '<div class="feat-go">Start training &#x203A;</div></a>';
 
   // Personal stats strip
@@ -2516,6 +2560,14 @@ function renderMore(){
     '  <div class="more-card-info">',
     '    <div class="more-card-title">IFT Call Guide</div>',
     '    <div class="more-card-sub">How to run &amp; document specialty transfers — logistics, monitoring, charting</div>',
+    '  </div>',
+    '  <div class="more-card-arr">&#x203A;</div>',
+    '</a>',
+    '<a class="more-card ac-violet" href="med-math.html">',
+    '  <div class="more-card-ico"><svg class="icon"><use href="#i-syringe"></use></svg></div>',
+    '  <div class="more-card-info">',
+    '    <div class="more-card-title">Medication Math</div>',
+    '    <div class="more-card-sub">Draw-up volumes, weight-based peds doses &amp; caps, drip rates &mdash; using our own formulary</div>',
     '  </div>',
     '  <div class="more-card-arr">&#x203A;</div>',
     '</a>',

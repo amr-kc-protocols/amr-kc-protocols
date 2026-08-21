@@ -302,12 +302,11 @@ const TOPIC_IDS = ['titrate','alarms','bag','piggyback','handoff','limits','tran
   const gate = p.locator('text=I Understand');
   if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(400); }
 
-  const feat = p.locator('.feat-card');
+  // Several trainings share the featured-panel treatment, so target this one.
+  const feat = p.locator('.feat-card[href="alaris-pump.html"]');
   ok('A12 home shows the feature card', (await feat.count()) === 1);
-  ok('A12 feature card links to the training',
-     (await feat.getAttribute('href')) === 'alaris-pump.html');
   ok('A12 feature card is flagged new',
-     /new training/i.test(await p.locator('.feat-badge').textContent()));
+     /new training/i.test(await feat.locator('.feat-badge').textContent()));
   const box = await feat.boundingBox();
   ok('A12 feature card sits high on the page', box && box.y < 700, 'y=' + (box && Math.round(box.y)));
 

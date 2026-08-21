@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<!--
+  Medication Math — AMR KC Field Guide
+  Built for a phone, on shift. Eight short topics, each answering a question
+  a medic actually arrives with, each ending in a quick check. Most carry a
+  practice widget that generates fresh numbers every time.
+
+  Every drug, dose, cap and concentration referenced here comes from the AMR
+  Kansas City formulary (Section III) as carried in index.html — not from a
+  generic textbook. Vial strengths that the protocol does NOT specify are
+  labelled as examples, because stock varies: the page teaches reading the
+  label, never assuming it.
+
+  Progress persists in localStorage (key: med_math_v1).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Med Math">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Medication math training for AMR Kansas City — draw-up volumes, weight-based pediatric doses with caps, drip rates, drops per minute and push-dose epi, using the drugs in our own formulary.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Medication Math — AMR KC Field Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
+  --green:#15803d;--green-bg:#eafbf1;--green-line:#bfe6cd;
+  --red:#dc2626;--red-bg:#fdecec;--red-line:#f3c6c6;
+  --warn:#a1590b;--warn-bg:#fef3e2;--warn-line:#f3d9ab;
+  --sans:'IBM Plex Sans',sans-serif;--mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-height:1.55}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-webkit-appearance:none}
+button:focus-visible{outline:2px solid var(--teal2);outline-offset:2px}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid var(--border);
+  padding:10px 14px;display:flex;align-items:center;gap:10px}
+.hdr-logo{width:32px;height:32px;border-radius:9px;background:var(--teal);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:14.5px;font-weight:700;color:var(--teal);line-height:1.15}
+.hdr-sub{font-size:11px;color:var(--gray)}
+.hdr-back{font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;padding:6px 10px;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface2);white-space:nowrap}
+
+.wrap{max-width:620px;margin:0 auto;padding:14px 14px 80px}
+.view{display:none}
+.view.on{display:block}
+
+/* HOME HERO */
+.hero{background:linear-gradient(150deg,#0e4f8f,#1b63c4 55%,#0891b2);border-radius:16px;
+  padding:18px 17px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-70px;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(255,255,255,.22),transparent 68%)}
+.hero h1{font-size:21px;font-weight:700;line-height:1.2;margin-bottom:6px;position:relative}
+.hero p{font-size:13.5px;opacity:.94;position:relative}
+
+/* PROGRESS */
+.prog{display:flex;align-items:center;gap:10px;margin:0 2px 14px}
+.prog-bar{flex:1;height:7px;background:#e3e9f0;border-radius:999px;overflow:hidden}
+.prog-bar i{display:block;height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,#1b63c4,#0891b2);transition:width .25s}
+.prog-n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--teal2);white-space:nowrap}
+
+/* TOPIC CARDS */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gray);margin:16px 4px 8px}
+.topic{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;
+  border:1px solid var(--border);border-radius:13px;padding:13px 14px;margin-bottom:8px}
+.topic:active{transform:translateY(1px)}
+.topic.done{border-color:var(--green-line);background:var(--green-bg)}
+.topic-ico{width:38px;height:38px;flex-shrink:0;border-radius:10px;background:var(--dim);
+  display:flex;align-items:center;justify-content:center;color:var(--teal2)}
+.topic.done .topic-ico{background:var(--green);color:#fff}
+.topic-ico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.topic-b{flex:1;min-width:0}
+.topic-q{display:block;font-size:14.5px;font-weight:700;line-height:1.3}
+.topic-s{display:block;font-size:12px;color:var(--gray);margin-top:2px}
+.topic.done .topic-q{color:#14532d}
+.topic-arr{color:#b7c0cc;font-size:19px;flex-shrink:0}
+
+/* TOPIC VIEW */
+.back{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;
+  font-weight:700;letter-spacing:.05em;color:var(--teal2);padding:6px 0;margin-bottom:6px}
+.t-kick{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gray)}
+.t-title{font-size:22px;font-weight:700;line-height:1.2;margin:3px 0 14px}
+
+/* CONTENT BLOCKS */
+.blk{background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px 15px;margin-bottom:10px}
+.blk h3{font-size:14.5px;font-weight:700;line-height:1.3;margin-bottom:7px}
+.blk p{font-size:14px;color:#3c4655;margin-bottom:8px}
+.blk p:last-child{margin-bottom:0}
+.blk b{color:var(--white)}
+.intro{font-size:14px;color:#3c4655;margin:0 2px 12px}
+
+/* BIG RULE */
+.big{background:var(--teal);color:#fff;border-radius:13px;padding:16px;margin-bottom:10px;text-align:center}
+.big-t{font-size:17px;font-weight:700;line-height:1.35}
+.big-t b{color:#bfe0ff}
+.big-s{font-size:13px;color:#c3d8f2;margin-top:6px}
+
+/* STEPS */
+ol.steps{list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 11px 32px;font-size:14px;color:#3c4655}
+ol.steps li:last-child{padding-bottom:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22px;height:22px;
+  border-radius:50%;background:var(--dim);color:var(--teal2);font-family:var(--mono);font-size:11px;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.steps li.hot::before{background:var(--teal2);color:#fff}
+ol.steps li b{color:var(--white)}
+ul.plain{list-style:none}
+ul.plain li{position:relative;padding:0 0 7px 18px;font-size:14px;color:#3c4655}
+ul.plain li:last-child{padding-bottom:0}
+ul.plain li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;
+  border-radius:50%;background:var(--teal2)}
+ul.plain li b{color:var(--white)}
+kbd{font-family:var(--mono);font-size:11.5px;font-weight:700;background:var(--dim);
+  border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--teal)}
+
+/* NOTES */
+.note{border-radius:11px;padding:11px 13px;margin-bottom:10px;font-size:13.5px;display:flex;gap:9px}
+.note .ni{flex-shrink:0;font-size:15px;line-height:1.35}
+.note.warn{background:var(--warn-bg);border:1px solid var(--warn-line);color:#7a4208}
+.note.danger{background:var(--red-bg);border:1px solid var(--red-line);color:#8f1d1d}
+.note.info{background:#eaf1fd;border:1px solid #c9dcfb;color:#123a72}
+.note b{font-weight:700}
+
+/* ALARM PICKER */
+.acc{background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:7px;overflow:hidden}
+.acc.open{border-color:var(--teal2)}
+.acc-h{display:flex;align-items:center;gap:10px;padding:12px 13px;width:100%;text-align:left}
+.acc-d{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.acc-d.red{background:#dc2626}.acc-d.amber{background:#d97706}.acc-d.slate{background:#64748b}
+.acc-t{flex:1;font-size:14px;font-weight:600;text-align:left}
+.acc-c{color:#b7c0cc;font-size:13px;transition:transform .2s}
+.acc.open .acc-c{transform:rotate(90deg)}
+.acc-b{display:none;padding:0 13px 13px 33px}
+.acc.open .acc-b{display:block}
+.acc-means{font-size:13.5px;color:var(--gray);margin-bottom:8px}
+.acc-do{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--teal2);margin-bottom:4px}
+
+/* CHECKLIST */
+.ck{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--border);
+  border-radius:11px;padding:11px 12px;margin-bottom:7px;width:100%;text-align:left}
+.ck.on{border-color:var(--green-line);background:var(--green-bg)}
+.ck-box{width:20px;height:20px;flex-shrink:0;border:2px solid #c3ccd8;border-radius:6px;background:#fff;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.ck.on .ck-box{background:var(--green);border-color:var(--green)}
+.ck-t{display:block;font-size:14px;font-weight:600;line-height:1.3}
+.ck-s{display:block;font-size:12.5px;color:var(--gray);margin-top:1px}
+.ck.on .ck-t{color:#14532d}
+.ck-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ck-reset{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gray);background:#fff;
+  border:1px solid var(--border);border-radius:7px;padding:5px 9px}
+
+/* QUICK CHECK */
+.qc{background:#fff;border:2px solid var(--teal2);border-radius:14px;padding:15px;margin:14px 0 10px}
+.qc-k{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--teal2);margin-bottom:7px}
+.qc-q{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:11px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:10px;
+  padding:11px 12px;margin-bottom:7px;font-size:14px;color:#3c4655;width:100%;text-align:left;background:#fff}
+.opt:last-of-type{margin-bottom:0}
+.opt-m{width:20px;height:20px;flex-shrink:0;border:1.5px solid #c3ccd8;border-radius:50%;
+  font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gray);
+  display:flex;align-items:center;justify-content:center}
+.opt.right{background:var(--green-bg);border-color:var(--green-line);color:#14532d}
+.opt.right .opt-m{background:var(--green);border-color:var(--green);color:#fff}
+.opt.wrong{background:var(--red-bg);border-color:var(--red-line);color:#8f1d1d}
+.opt.wrong .opt-m{background:var(--red);border-color:var(--red);color:#fff}
+.qc-exp{display:none;margin-top:11px;padding-top:11px;border-top:1px dashed var(--border);
+  font-size:13.5px;color:#3c4655}
+.qc.done .qc-exp{display:block}
+.qc-exp b{color:var(--white)}
+
+/* NEXT */
+.next{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  background:var(--teal2);color:#fff;border-radius:12px;padding:14px;font-size:14.5px;font-weight:700;
+  margin-top:14px;text-align:center;line-height:1.3}
+.next.ghost{background:#fff;color:var(--teal2);border:1px solid var(--border)}
+.foot{font-size:11.5px;color:var(--gray);line-height:1.6;margin-top:20px;padding:0 4px}
+.foot a{color:var(--teal2);font-weight:600}
+.foot p+p{margin-top:7px}
+
+/* PRACTICE WIDGET */
+.prac{background:#0f2744;border-radius:14px;padding:15px;margin:14px 0 10px;color:#fff}
+.prac-k{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;color:#7dd3fc;margin-bottom:8px;display:flex;justify-content:space-between}
+.prac-score{color:#bfd8f2;letter-spacing:.04em}
+.prac-q{font-size:15px;font-weight:600;line-height:1.45;margin-bottom:12px}
+.prac-q b{color:#bdf0ff}
+.prac-row{display:flex;gap:8px;align-items:stretch}
+.prac-in{flex:1;min-width:0;background:#fff;border:2px solid #1e4b7a;border-radius:10px;
+  padding:12px 13px;font-family:var(--mono);font-size:17px;font-weight:700;color:var(--white);
+  text-align:right;-webkit-appearance:none}
+.prac-in:focus{outline:none;border-color:#7dd3fc}
+.prac-unit{display:flex;align-items:center;font-family:var(--mono);font-size:13px;
+  font-weight:700;color:#bfd8f2;padding:0 2px}
+.prac-go{background:#7dd3fc;color:#0f2744;border-radius:10px;padding:0 18px;
+  font-size:14px;font-weight:700;white-space:nowrap}
+.prac-fb{margin-top:12px;padding-top:12px;border-top:1px dashed #1e4b7a;font-size:13.5px;
+  line-height:1.6;color:#dbeafe;display:none}
+.prac.answered .prac-fb{display:block}
+.prac-verdict{font-weight:700;margin-bottom:6px}
+.prac-verdict.good{color:#86efac}
+.prac-verdict.bad{color:#fca5a5}
+.prac-work{font-family:var(--mono);font-size:12.5px;color:#bfd8f2;line-height:1.7;
+  background:#0b1d33;border-radius:8px;padding:10px 11px;margin-top:7px;overflow-x:auto}
+.prac-again{margin-top:11px;width:100%;background:transparent;border:1px solid #2c5a8c;
+  color:#bfd8f2;border-radius:10px;padding:10px;font-family:var(--mono);font-size:11px;
+  font-weight:700;letter-spacing:.06em}
+.prac.answered .prac-in{border-color:#1e4b7a}
+
+/* FORMULA CARD */
+.fx{background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal2);
+  border-radius:12px;padding:13px 14px;margin-bottom:10px}
+.fx-n{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--teal2);margin-bottom:5px}
+.fx-f{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--white);
+  background:var(--dim);border-radius:8px;padding:10px 11px;line-height:1.6;overflow-x:auto}
+.fx-e{font-size:13px;color:#3c4655;margin-top:8px}
+
+/* DRUG ROWS */
+.drug{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--border)}
+.drug:last-child{border-bottom:none}
+.drug-n{flex:1;font-size:13.5px;font-weight:600;min-width:0}
+.drug-d{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--teal2);text-align:right}
+.drug-c{font-size:12px;color:var(--gray);display:block;font-weight:400;margin-top:1px}
+</style></head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">KC</div>
+  <div class="hdr-txt">
+    <div class="hdr-title">Medication Math</div>
+    <div class="hdr-sub">AMR Kansas City &middot; our formulary</div>
+  </div>
+  <a class="hdr-back" href="index.html">&#x2190; Field Guide</a>
+</div>
+
+<div class="wrap">
+
+  <!-- ══ HOME ══════════════════════════════════════════════════════ -->
+  <div class="view on" id="v-home">
+    <div class="hero">
+      <h1>Say it out loud. Then do the math.</h1>
+      <p>Every number here is from our own formulary &mdash; the drugs on your truck, the caps in
+         our protocol. Pick a question.</p>
+    </div>
+
+    <div class="prog">
+      <div class="prog-bar"><i id="progFill"></i></div>
+      <div class="prog-n" id="progN">0 of 8</div>
+    </div>
+
+    <div class="sec">The four you do most</div>
+    <div id="listA"></div>
+
+    <div class="sec">Don't get caught out</div>
+    <div id="listB"></div>
+
+    <div class="sec">The math itself</div>
+    <div id="listC"></div>
+
+    <div class="foot">
+      <p>Doses, caps and concentrations come from the AMR KC formulary (Section III) in this app.
+         Vial strengths the protocol does not specify are shown as examples only &mdash; read your
+         own label, every time. Follow AMR policy, your medical director and the sending
+         facility's orders.</p>
+    </div>
+  </div>
+
+  <!-- ══ TOPIC ═════════════════════════════════════════════════════ -->
+  <div class="view" id="v-topic">
+    <button class="back" id="backBtn">&#x2039; ALL TOPICS</button>
+    <div class="t-kick" id="tKick"></div>
+    <h2 class="t-title" id="tTitle"></h2>
+    <div id="tBody"></div>
+    <button class="next" id="nextBtn"></button>
+  </div>
+
+</div>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-syringe" viewBox="0 0 24 24"><path d="M18 2l4 4M20 4l-9 9M15 5l4 4"/><path d="M11 8l5 5-6 6H5v-5z"/></symbol>
+  <symbol id="ic-scale" viewBox="0 0 24 24"><path d="M12 4v16M7 20h10"/><path d="M4 9h16"/><path d="M4 9l-2 5a3 3 0 0 0 6 0z"/><path d="M20 9l-2 5a3 3 0 0 0 6 0z"/></symbol>
+  <symbol id="ic-drip" viewBox="0 0 24 24"><path d="M8 3h8v9a4 4 0 0 1-8 0z"/><path d="M12 16v5"/><circle cx="12" cy="19" r="1"/></symbol>
+  <symbol id="ic-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 10a6 6 0 0 1-12 0c0-3.5 6-10 6-10z"/></symbol>
+  <symbol id="ic-mix" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7 15h10"/></symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></symbol>
+  <symbol id="ic-fx" viewBox="0 0 24 24"><path d="M4 20V8a4 4 0 0 1 4-4"/><path d="M2 12h8"/><path d="M14 10l6 8M20 10l-6 8"/></symbol>
+</svg>
+<script>
+(function(){
+'use strict';
+var KEY = 'med_math_v1';
+function load(){ try{ var r = localStorage.getItem(KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+var state = load();
+if(!state.answers) state.answers = {};
+if(!state.practice) state.practice = {};
+function $(id){ return document.getElementById(id); }
+function rnd(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+// Doses are read off a screen, not a slide rule: trim floating-point dust and
+// show the number of decimals a medic would actually draw up.
+function tidy(n){
+  var r = Math.round(n * 1000) / 1000;
+  if(Math.abs(r - Math.round(r)) < 0.0005) return String(Math.round(r));
+  if(Math.abs(r * 10 - Math.round(r * 10)) < 0.005) return r.toFixed(1);
+  return r.toFixed(2);
+}
+
+/* ── PRACTICE GENERATORS ────────────────────────────────────────
+   Every drug below is on our formulary. Where the protocol does not fix a
+   vial strength, the generator uses a common one and the question says so —
+   the skill being trained is "read the label and divide", not "memorise the
+   vial we happened to stock this year". */
+
+// Example vial strengths only: [name, amount in vial, mL in vial, unit, doses to ask for]
+var VIALS = [
+  ['Fentanyl',        100, 2,  'mcg', [25, 50, 75, 100]],
+  ['Midazolam',        10, 2,  'mg',  [2, 2.5, 5]],
+  ['Naloxone',          2, 2,  'mg',  [0.4, 1, 2]],
+  ['Diphenhydramine',  50, 1,  'mg',  [25, 50]],
+  ['Ondansetron',       4, 2,  'mg',  [4]],
+  ['Ketamine',        500, 10, 'mg',  [50, 100]]
+];
+
+// [name, per kg, unit, cap, floor]  — all from Section III
+var PEDS = [
+  ['Epinephrine 1:1,000 IM (anaphylaxis)', 0.01, 'mg',  0.3,  null],
+  ['Midazolam IV/IO (seizure)',            0.1,  'mg',  5,    null],
+  ['Amiodarone IV/IO (arrest)',            5,    'mg',  300,  null],
+  ['Ondansetron IV/IO',                    0.15, 'mg',  4,    null],
+  ['Diphenhydramine IV/IM',                1,    'mg',  50,   null],
+  ['Atropine IV/IO (bradycardia)',         0.02, 'mg',  0.5,  0.1],
+  ['Fentanyl IV/IO',                       1,    'mcg', 50,   null],
+  ['Normal saline bolus',                  20,   'mL',  null, null]
+];
+
+var PRACTICE = {
+  draw: function(){
+    var v = pick(VIALS), want = pick(v[4]);
+    var ans = want / v[1] * v[2];
+    return {
+      q: 'The vial reads <b>' + v[1] + ' ' + v[3] + ' in ' + v[2] + ' mL</b> of ' + v[0].toLowerCase() +
+         '.<br>You need <b>' + want + ' ' + v[3] + '</b>. How many mL do you draw?',
+      ans: ans, unit: 'mL',
+      work: 'want &divide; have &times; volume\n' +
+            want + ' &divide; ' + v[1] + ' &times; ' + v[2] + ' mL = <b>' + tidy(ans) + ' mL</b>'
+    };
+  },
+  peds: function(){
+    var d = pick(PEDS), wt = rnd(4, 42);
+    var raw = d[1] * wt, ans = raw, note = '';
+    if(d[3] !== null && raw > d[3]){ ans = d[3]; note = '\nover the ' + d[3] + ' ' + d[2] + ' cap &rarr; give <b>' + d[3] + ' ' + d[2] + '</b>'; }
+    if(d[4] !== null && raw < d[4]){ ans = d[4]; note = '\nunder the ' + d[4] + ' ' + d[2] + ' minimum &rarr; give <b>' + d[4] + ' ' + d[2] + '</b>'; }
+    return {
+      q: '<b>' + wt + ' kg</b> child.<br>' + d[0] + ' at <b>' + d[1] + ' ' + d[2] + '/kg</b>.<br>What do you give?',
+      ans: ans, unit: d[2],
+      work: d[1] + ' &times; ' + wt + ' kg = ' + tidy(raw) + ' ' + d[2] + note +
+            (note ? '' : '\ngive <b>' + tidy(ans) + ' ' + d[2] + '</b>')
+    };
+  },
+  drip: function(){
+    if(Math.random() < 0.6){
+      var dose = rnd(2, 10) / 100, wt = rnd(50, 110);
+      var ans = dose * wt * 60 / 16;
+      return {
+        q: 'Norepinephrine <b>4 mg in 250 mL</b> (16 mcg/mL).<br><b>' + wt + ' kg</b> patient ordered at ' +
+           '<b>' + dose + ' mcg/kg/min</b>.<br>What rate do you set?',
+        ans: ans, unit: 'mL/h',
+        work: 'dose &times; kg &times; 60 &divide; concentration\n' +
+              dose + ' &times; ' + wt + ' &times; 60 &divide; 16 = <b>' + tidy(ans) + ' mL/h</b>'
+      };
+    }
+    var kd = rnd(1, 8), kw = rnd(50, 110);
+    return {
+      q: 'Ketamine mixed <b>1:1</b> (1 mg/mL).<br><b>' + kw + ' kg</b> patient at <b>' + kd + ' mg/kg/hr</b>.' +
+         '<br>What rate do you set?',
+      ans: kd * kw, unit: 'mL/h',
+      work: 'dose &times; kg &divide; concentration\n' +
+            kd + ' &times; ' + kw + ' &divide; 1 mg/mL = <b>' + tidy(kd * kw) + ' mL/h</b>'
+    };
+  },
+  drops: function(){
+    var micro = Math.random() < 0.6, rate = pick([15, 20, 30, 42, 50, 60, 75, 90, 120]);
+    if(micro){
+      return {
+        q: 'No pump. <b>60 gtt/mL</b> micro-drip set, running at <b>' + rate + ' mL/h</b>.' +
+           '<br>How many drops per minute?',
+        ans: rate, unit: 'gtt/min',
+        work: 'mL/h &times; 60 gtt/mL &divide; 60 min\n' + rate + ' &times; 60 &divide; 60 = <b>' + rate +
+              ' gtt/min</b>\n(on a 60 set the two numbers always match)'
+      };
+    }
+    return {
+      q: 'No pump. <b>10 gtt/mL</b> set, running at <b>' + rate + ' mL/h</b>.' +
+         '<br>How many drops per minute?',
+      ans: rate / 6, unit: 'gtt/min',
+      work: 'mL/h &times; 10 gtt/mL &divide; 60 min\n' + rate + ' &times; 10 &divide; 60 = <b>' +
+            tidy(rate / 6) + ' gtt/min</b>\n(a 10 set is just mL/h &divide; 6)'
+    };
+  }
+};
+
+function practiceHtml(id){
+  var g = PRACTICE[id](), s = state.practice[id] || { right: 0, tries: 0 };
+  return '<div class="prac" data-p="' + id + '" data-ans="' + g.ans + '">' +
+    '<div class="prac-k"><span>Practice</span><span class="prac-score">' +
+      (s.tries ? s.right + '/' + s.tries + ' right' : 'fresh numbers every time') + '</span></div>' +
+    '<div class="prac-q">' + g.q + '</div>' +
+    '<div class="prac-row">' +
+      '<input class="prac-in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">' +
+      '<span class="prac-unit">' + g.unit + '</span>' +
+      '<button type="button" class="prac-go">Check</button>' +
+    '</div>' +
+    '<div class="prac-fb"><div class="prac-verdict"></div>' +
+      '<div class="prac-work">' + g.work.replace(/\n/g, '<br>') + '</div></div>' +
+    '<button type="button" class="prac-again">ANOTHER ONE &#8635;</button>' +
+  '</div>';
+}
+
+/* ── TOPICS ─────────────────────────────────────────────────────── */
+var TOPICS = [
+
+{ id:'draw', group:'A', icon:'ic-syringe',
+  q:'How much do I draw up?', sub:'Getting mL out of a vial', min:3,
+  parts:[
+    '<div class="big"><div class="big-t">What you <b>want</b>, over what you <b>have</b>,<br>times what it is <b>in</b>.</div></div>' +
+
+    '<div class="fx"><div class="fx-n">The only formula here</div>' +
+    '<div class="fx-f">mL to draw = want &divide; have &times; vial mL</div>' +
+    '<div class="fx-e">Fentanyl vial reads 100 mcg in 2 mL. You want 50 mcg.<br>' +
+    '50 &divide; 100 = 0.5, &times; 2 mL = <b>1 mL</b>.</div></div>' +
+
+    '<div class="note warn"><span class="ni">&#9888;</span><div><b>Read the vial every time.</b> Strengths ' +
+    'change between suppliers and restocks. The number in your head is not evidence.</div></div>',
+
+    '<div class="blk"><h3>The ones our protocol pins down</h3>' +
+    '<p>These are fixed by the name, so you can trust them:</p>' +
+    '<div class="drug"><span class="drug-n">Epinephrine <b>1:1,000</b><span class="drug-c">IM anaphylaxis</span></span>' +
+    '<span class="drug-d">1 mg/mL</span></div>' +
+    '<div class="drug"><span class="drug-n">Epinephrine <b>1:10,000</b><span class="drug-c">IV/IO arrest</span></span>' +
+    '<span class="drug-d">0.1 mg/mL</span></div>' +
+    '<div class="drug"><span class="drug-n">Dextrose <b>10%</b> (D10W)<span class="drug-c">10 g in 100 mL</span></span>' +
+    '<span class="drug-d">0.1 g/mL</span></div>' +
+    '<div class="drug"><span class="drug-n">Ketamine mixed <b>1:1</b><span class="drug-c">250 mg/250 mL</span></span>' +
+    '<span class="drug-d">1 mg/mL</span></div>' +
+    '</div>' +
+
+    '<div class="blk"><h3>Worth knowing cold</h3>' +
+    '<p>0.3 mg of <b>1:1,000</b> epi for anaphylaxis is <b>0.3 mL</b>. The numbers match, because it is ' +
+    '1 mg per mL.</p>' +
+    '<p>1 mg of <b>1:10,000</b> epi in arrest is <b>10 mL</b>. Ten times the volume, same drug.</p></div>',
+
+    practiceHtml('draw')
+  ],
+  checks:[
+   ['The vial reads 100 mcg in 2 mL of fentanyl. You want 75 mcg. How many mL?',
+    ['0.75 mL','1.5 mL','2 mL','0.5 mL'],
+    1,
+    '75 &divide; 100 = 0.75, &times; 2 mL = <b>1.5 mL</b>. The trap is answering 0.75 &mdash; that is the fraction of the vial, not the volume.'],
+   ['Anaphylaxis. You are giving 0.3 mg of epinephrine 1:1,000 IM. What volume is that?',
+    ['0.03 mL','3 mL','0.3 mL','30 mL'],
+    2,
+    '1:1,000 is <b>1 mg per mL</b>, so mg and mL are the same number here. If you had grabbed 1:10,000 by mistake, the same dose would be 3 mL &mdash; that mismatch is your warning.']
+  ]
+},
+
+{ id:'peds', group:'A', icon:'ic-scale',
+  q:'How do I dose a kid by weight?', sub:'mg/kg, and the cap that ends it', min:4,
+  parts:[
+    '<div class="big"><div class="big-t">Multiply by the weight.<br>Then <b>check the cap</b>.</div>' +
+    '<div class="big-s">Two steps. The second one is the one people skip.</div></div>' +
+
+    '<div class="fx"><div class="fx-n">Step one</div>' +
+    '<div class="fx-f">dose = mg/kg &times; kg</div>' +
+    '<div class="fx-e">Midazolam 0.1 mg/kg for a 40 kg kid = 4 mg.</div></div>' +
+
+    '<div class="fx"><div class="fx-n">Step two</div>' +
+    '<div class="fx-f">if it is over the cap, give the cap</div>' +
+    '<div class="fx-e">Same drug, 70 kg teenager: 0.1 &times; 70 = 7 mg. Our cap is 5 mg. You give <b>5 mg</b>.</div></div>',
+
+    '<div class="blk"><h3>The caps in our protocol</h3>' +
+    '<div class="drug"><span class="drug-n">Epinephrine 1:1,000 IM<span class="drug-c">0.01 mg/kg</span></span><span class="drug-d">max 0.3 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Midazolam IV/IO<span class="drug-c">0.1 mg/kg</span></span><span class="drug-d">max 5 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Amiodarone arrest<span class="drug-c">5 mg/kg</span></span><span class="drug-d">max 300 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Fentanyl IV/IO<span class="drug-c">1&ndash;2 mcg/kg</span></span><span class="drug-d">max 50 mcg</span></div>' +
+    '<div class="drug"><span class="drug-n">Ondansetron IV/IO<span class="drug-c">0.15 mg/kg</span></span><span class="drug-d">max 4 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Diphenhydramine<span class="drug-c">1 mg/kg</span></span><span class="drug-d">max 50 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Naloxone IN<span class="drug-c">0.1 mg/kg</span></span><span class="drug-d">max 2 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Normal saline bolus<span class="drug-c">20 mL/kg</span></span><span class="drug-d">60 mL/kg then DMO</span></div>' +
+    '</div>' +
+
+    '<div class="note warn"><span class="ni">&#9888;</span><div><b>Atropine works from both ends.</b> ' +
+    '0.02 mg/kg, but never less than <b>0.1 mg</b> and never more than <b>0.5 mg</b>. A 3 kg baby ' +
+    'calculates to 0.06 mg &mdash; you give 0.1 mg.</div></div>',
+
+    practiceHtml('peds')
+  ],
+  checks:[
+   ['A 70 kg teenager seizing. Midazolam IV at 0.1 mg/kg. What do you give?',
+    ['7 mg','5 mg','0.7 mg','10 mg'],
+    1,
+    '0.1 &times; 70 = 7 mg, but our cap is <b>5 mg</b>. The cap is part of the order, not a suggestion.'],
+   ['A 3 kg newborn needs atropine at 0.02 mg/kg. What do you give?',
+    ['0.06 mg','0.02 mg','0.1 mg','0.5 mg'],
+    2,
+    '0.02 &times; 3 = 0.06 mg &mdash; below our <b>0.1 mg minimum</b>. Atropine is the one with a floor as well as a ceiling: too little can worsen the bradycardia.']
+  ]
+},
+
+{ id:'drip', group:'A', icon:'ic-drip',
+  q:'What rate do I set for this drip?', sub:'mcg/kg/min into mL per hour', min:4,
+  parts:[
+    '<div class="fx"><div class="fx-n">Weight-based drips</div>' +
+    '<div class="fx-f">mL/h = dose &times; kg &times; 60 &divide; concentration</div>' +
+    '<div class="fx-e">The &times;60 is just minutes into an hour. The concentration is mcg per mL.</div></div>' +
+
+    '<div class="blk"><h3>Worked: norepinephrine</h3>' +
+    '<p>Standard mix <b>4 mg in 250 mL</b>. That is 4,000 mcg &divide; 250 mL = <b>16 mcg/mL</b>.</p>' +
+    '<p>80 kg patient at 0.05 mcg/kg/min:</p>' +
+    '<p style="font-family:var(--mono);font-size:13px">0.05 &times; 80 &times; 60 &divide; 16 = <b>15 mL/h</b></p></div>' +
+
+    '<div class="note danger"><span class="ni">&#9888;</span><div><b>Never assume the concentration.</b> ' +
+    'Our formulary says it plainly: hospital-supplied norepinephrine concentration <b>varies</b>. Confirm ' +
+    'it with the sending facility before you leave, and do the math on <em>their</em> number.</div></div>',
+
+    '<div class="blk"><h3>When the dose is per hour, drop the 60</h3>' +
+    '<p>Ketamine is ordered in <b>mg/kg/hr</b>, so there is no minutes step:</p>' +
+    '<p style="font-family:var(--mono);font-size:13px">mL/h = dose &times; kg &divide; concentration</p>' +
+    '<p>Mixed 1:1 that is 1 mg/mL, so an 80 kg patient at 1 mg/kg/hr runs at <b>80 mL/h</b>. Our ceiling ' +
+    'is 8 mg/kg/hr.</p></div>',
+
+    practiceHtml('drip')
+  ],
+  checks:[
+   ['Norepinephrine 4 mg in 250 mL. A 60 kg patient at 0.1 mcg/kg/min. What rate?',
+    ['22.5 mL/h','6 mL/h','360 mL/h','37.5 mL/h'],
+    0,
+    '0.1 &times; 60 &times; 60 &divide; 16 = 360 &divide; 16 = <b>22.5 mL/h</b>. Miss the &times;60 and you get 0.375 mL/h &mdash; a rate so low it looks like a typo, which is your clue you dropped the minutes step.'],
+   ['The sending nurse says the norepi is "the usual". What do you do?',
+    ['Use 16 mcg/mL, it is standard','Ask what is actually in the bag and read the label','Set it by drops instead','Halve the rate to be safe'],
+    1,
+    'Our formulary says the hospital-supplied concentration varies. "The usual" is not a concentration. Get the real number, or your rate is wrong by whatever factor their mix differs.']
+  ]
+},
+
+{ id:'drops', group:'A', icon:'ic-drop',
+  q:'No pump. How many drops?', sub:'Running it on gravity', min:2,
+  parts:[
+    '<div class="big"><div class="big-t">On a <b>60</b> set,<br>drops per minute = mL per hour.</div>' +
+    '<div class="big-s">Same number. That is the whole trick.</div></div>' +
+
+    '<div class="fx"><div class="fx-n">Why</div>' +
+    '<div class="fx-f">gtt/min = mL/h &times; drops per mL &divide; 60</div>' +
+    '<div class="fx-e">On a 60 gtt/mL set the 60s cancel. 30 mL/h is 30 drops a minute.</div></div>' +
+
+    '<div class="blk"><h3>The other set</h3>' +
+    '<p>A <b>10 gtt/mL</b> set is for volume, not precision. 10 &divide; 60 means you just divide the ' +
+    'rate by 6.</p>' +
+    '<p>120 mL/h on a 10 set = <b>20 drops a minute</b>.</p></div>',
+
+    '<div class="note warn"><span class="ni">&#9888;</span><div><b>Gravity is not a pump.</b> The rate ' +
+    'drifts when the bag empties, when you lift the cot, when the patient bends an arm. Use a pump for ' +
+    'anything titrated, and recount the chamber after every move.</div></div>',
+
+    practiceHtml('drops')
+  ],
+  checks:[
+   ['You are running 45 mL/h through a 60 gtt/mL micro-drip. Drops per minute?',
+    ['45','9','7.5','90'],
+    0,
+    'On a 60 set the numbers match: <b>45 drops a minute</b>. If you find yourself doing hard arithmetic on a 60 set, you have overcomplicated it.']
+  ]
+},
+
+{ id:'push', group:'B', icon:'ic-mix',
+  q:'Push-dose epi — how do I mix it?', sub:'One syringe, ten times weaker', min:2,
+  parts:[
+    '<div class="blk"><h3>The recipe from our protocol</h3>' +
+    '<p><b>1 mL</b> of epinephrine 1:10,000 into <b>9 mL</b> of normal saline.</p>' +
+    '<p>That gives you 10 mL of <b>10 mcg/mL</b>.</p></div>' +
+
+    '<div class="fx"><div class="fx-n">Where 10 mcg/mL comes from</div>' +
+    '<div class="fx-f">1 mL of 0.1 mg/mL = 100 mcg<br>100 mcg &divide; 10 mL = 10 mcg/mL</div></div>' +
+
+    '<div class="blk"><h3>Giving it</h3>' +
+    '<p>Dose is <b>10&ndash;20 mcg</b>, so you push <b>1&ndash;2 mL</b>, every 1&ndash;2 minutes, titrated to ' +
+    'the pressure.</p>' +
+    '<p>Paramedic scope only.</p></div>' +
+
+    '<div class="note danger"><span class="ni">&#9888;</span><div>Label the syringe the moment you mix it. ' +
+    'An unlabelled 10 mL syringe of clear fluid on a moving truck is exactly how a 100 mcg dose gets ' +
+    'pushed instead of 10.</div></div>'
+  ],
+  checks:[
+   ['You mixed push-dose epi per protocol. The patient needs 20 mcg. How much do you push?',
+    ['0.2 mL','2 mL','20 mL','10 mL'],
+    1,
+    'The mix is 10 mcg/mL, so 20 mcg is <b>2 mL</b>. Pushing 20 mL would be 200 mcg &mdash; ten times the intended dose and most of your syringe.']
+  ]
+},
+
+{ id:'fixed', group:'B', icon:'ic-lock',
+  q:'Which doses do I NOT calculate?', sub:'Adult numbers that are just numbers', min:3,
+  parts:[
+    '<div class="big"><div class="big-t">Some adult doses are <b>fixed</b>.<br>Multiplying by weight makes them wrong.</div></div>' +
+
+    '<div class="blk"><h3>Give the number, not the math</h3>' +
+    '<div class="drug"><span class="drug-n">Amiodarone &mdash; adult arrest<span class="drug-c">our protocol says do NOT calculate by weight</span></span><span class="drug-d">300 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Epinephrine &mdash; adult arrest<span class="drug-c">q3&ndash;5 min</span></span><span class="drug-d">1 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Adenosine<span class="drug-c">then 12 mg if no conversion</span></span><span class="drug-d">6 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Aspirin<span class="drug-c">chewed, once</span></span><span class="drug-d">324 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Nitroglycerin SL<span class="drug-c">q5 min &times;3, hold if SBP &lt;100</span></span><span class="drug-d">0.4 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Atropine &mdash; adult brady<span class="drug-c">q3&ndash;5 min, max 3 mg</span></span><span class="drug-d">1 mg</span></div>' +
+    '<div class="drug"><span class="drug-n">Ondansetron &mdash; adult<span class="drug-c">may repeat &times;1</span></span><span class="drug-d">4 mg</span></div>' +
+    '</div>',
+
+    '<div class="note info"><span class="ni">&#9432;</span><div>Kids are the opposite &mdash; amiodarone in ' +
+    'a pediatric arrest <em>is</em> weight-based at 5 mg/kg, capped at the same 300 mg. Same drug, different ' +
+    'rule, depending on who is in front of you.</div></div>' +
+
+    '<div class="blk"><h3>Why this matters</h3>' +
+    '<p>A 95 kg adult in arrest, amiodarone dosed "5 mg/kg" out of habit, is <b>475 mg</b> &mdash; over ' +
+    'half again the protocol dose.</p></div>'
+  ],
+  checks:[
+   ['Adult cardiac arrest, 95 kg, refractory VF. Amiodarone dose?',
+    ['475 mg','300 mg','150 mg','5 mg/kg to a max of 300 mg'],
+    1,
+    'Adults get a <b>fixed 300 mg</b>. Our formulary spells it out: do not calculate weight-based for adults. (Repeat 150 mg once if needed.)'],
+   ['Same drug, but a 20 kg child in arrest. Dose?',
+    ['300 mg fixed','100 mg','5 mg/kg = 100 mg','1 mg/kg = 20 mg'],
+    2,
+    'Peds <em>are</em> weight-based: 5 mg/kg = <b>100 mg</b>, capped at 300 mg. The rule flips with the patient, not the drug.']
+  ]
+},
+
+{ id:'safety', group:'B', icon:'ic-alert',
+  q:'How do I catch a decimal error?', sub:'The mistakes that actually happen', min:3,
+  parts:[
+    '<div class="blk"><h3>Does the volume make sense?</h3>' +
+    '<p>Most pushes are <b>small</b>. If your math says draw 8 mL of a sedative, stop &mdash; that is ' +
+    'usually a decimal in the wrong place, not a big patient.</p></div>' +
+
+    '<div class="blk"><h3>mcg is not mg</h3>' +
+    '<p>Fentanyl is ordered in <b>mcg</b>. Writing 100 mg instead of 100 mcg is a <b>thousand-fold</b> ' +
+    'error, and it reads almost the same at 3am.</p>' +
+    '<p>Say the unit out loud with the number. Every time.</p></div>',
+
+    '<div class="blk"><h3>1:1,000 or 1:10,000?</h3>' +
+    '<p>Same drug, ten times apart. The volume tells you if you grabbed wrong: 0.3 mg is <b>0.3 mL</b> of ' +
+    '1:1,000, but <b>3 mL</b> of 1:10,000.</p>' +
+    '<p>If the volume surprises you, check the box before you push.</p></div>' +
+
+    '<div class="blk"><h3>Let the cap catch you</h3>' +
+    '<p>If your pediatric number lands way past the cap, that is not a big kid &mdash; that is a wrong ' +
+    'weight or a wrong decimal. Recheck before you round down to the cap and move on.</p></div>' +
+
+    '<div class="note info"><span class="ni">&#9432;</span><div>For anything high-alert, say the whole ' +
+    'thing to your partner: <b>drug, concentration, dose, volume, route</b>. If they cannot repeat it ' +
+    'back, do not push it.</div></div>'
+  ],
+  checks:[
+   ['Your math for a fentanyl dose comes out at 6 mL from a 100 mcg/2 mL vial. What is most likely?',
+    ['A large patient','You mixed up mcg and mg somewhere','That is normal for fentanyl','The vial is weak'],
+    1,
+    '6 mL would be 300 mcg &mdash; three vials, well past the 25&ndash;100 mcg our protocol starts at. An unexpected volume is the cheapest error check you have.'],
+   ['A pediatric dose calculates to 40 mg when the cap is 5 mg. Best move?',
+    ['Give the 5 mg cap and carry on','Give the 40 mg, the math is the math','Recheck the weight and the decimal first','Split the difference'],
+    2,
+    'The cap will stop you giving 40 mg &mdash; but landing eight times past it usually means the <b>weight</b> or the <b>decimal</b> is wrong, and that same error may be feeding your other doses too.']
+  ]
+},
+
+{ id:'formulas', group:'C', icon:'ic-fx',
+  q:'What were those formulas again?', sub:'All five, one screen', min:2,
+  parts:[
+    '<div class="fx"><div class="fx-n">Drawing from a vial</div>' +
+    '<div class="fx-f">mL = want &divide; have &times; vial mL</div></div>' +
+
+    '<div class="fx"><div class="fx-n">Weight-based dose</div>' +
+    '<div class="fx-f">dose = mg/kg &times; kg<br>then apply the cap</div></div>' +
+
+    '<div class="fx"><div class="fx-n">Drip, dosed per minute</div>' +
+    '<div class="fx-f">mL/h = dose &times; kg &times; 60 &divide; concentration</div></div>' +
+
+    '<div class="fx"><div class="fx-n">Drip, dosed per hour</div>' +
+    '<div class="fx-f">mL/h = dose &times; kg &divide; concentration</div></div>' +
+
+    '<div class="fx"><div class="fx-n">Gravity</div>' +
+    '<div class="fx-f">gtt/min = mL/h &times; drops per mL &divide; 60<br>on a 60 set: same as mL/h</div></div>' +
+
+    '<div class="note info"><span class="ni">&#9432;</span><div>The Field Guide has a weight-based dose ' +
+    'calculator built in &mdash; <b>Doses</b> on the home screen. Use it to check yourself, not to replace ' +
+    'knowing whether the answer looks right.</div></div>'
+  ],
+  checks:[
+   ['Which formula needs the &times; 60?',
+    ['Drawing up from a vial','A drip ordered in mcg/kg/min','A drip ordered in mg/kg/hr','A weight-based push'],
+    1,
+    'The 60 converts <b>minutes into an hour</b>. If the order is already per hour, there is nothing to convert.']
+  ]
+}
+];
+
+var byId = {};
+TOPICS.forEach(function(t, i){ t.n = i; byId[t.id] = t; });
+
+/* ── CHECKS ─────────────────────────────────────────────────────── */
+var LETTERS = ['A','B','C','D'];
+function ansKey(tid, ci){ return tid + ':' + ci; }
+function answered(tid, ci){
+  var a = state.answers[ansKey(tid, ci)];
+  return a !== undefined && a !== null;
+}
+function topicDone(t){
+  return t.checks.every(function(c, ci){ return answered(t.id, ci); });
+}
+function doneCount(){ return TOPICS.filter(topicDone).length; }
+
+function checkHtml(t, ci){
+  var c = t.checks[ci];
+  var picked = state.answers[ansKey(t.id, ci)];
+  var done = answered(t.id, ci);
+  var h = '<div class="qc' + (done?' done':'') + '" data-t="' + t.id + '" data-c="' + ci + '">';
+  h += '<div class="qc-k">Quick check' +
+       (t.checks.length > 1 ? ' &middot; ' + (ci+1) + ' of ' + t.checks.length : '') + '</div>';
+  h += '<div class="qc-q">' + c[0] + '</div>';
+  c[1].forEach(function(opt, j){
+    var cls = '';
+    if(done){ if(j === c[2]) cls = ' right'; else if(j === picked) cls = ' wrong'; }
+    h += '<button type="button" class="opt' + cls + '" data-j="' + j + '"' + (done?' disabled':'') + '>' +
+         '<span class="opt-m">' + LETTERS[j] + '</span><span>' + opt + '</span></button>';
+  });
+  h += '<div class="qc-exp"><b>' + (done && picked === c[2] ? 'Yes.' : 'Answer: ' + LETTERS[c[2]] + '.') +
+       '</b> ' + c[3] + '</div></div>';
+  return h;
+}
+
+/* ── HOME ───────────────────────────────────────────────────────── */
+function renderHome(){
+  ['A','B','C'].forEach(function(g){
+    var h = '';
+    TOPICS.filter(function(t){ return t.group === g; }).forEach(function(t){
+      var done = topicDone(t);
+      h += '<button type="button" class="topic' + (done?' done':'') + '" data-go="' + t.id + '">' +
+           '<span class="topic-ico">' + (done
+             ? '<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>'
+             : '<svg><use href="#' + t.icon + '"></use></svg>') + '</span>' +
+           '<span class="topic-b"><span class="topic-q">' + t.q + '</span>' +
+           '<span class="topic-s">' + t.sub + ' &middot; ' + t.min + ' min</span></span>' +
+           '<span class="topic-arr">&#8250;</span></button>';
+    });
+    $('list' + g).innerHTML = h;
+  });
+  var d = doneCount();
+  $('progFill').style.width = Math.round(d / TOPICS.length * 100) + '%';
+  $('progN').textContent = d + ' of ' + TOPICS.length;
+}
+
+/* ── TOPIC ──────────────────────────────────────────────────────── */
+var current = null;
+function openTopic(id){
+  var t = byId[id]; if(!t) return;
+  current = t;
+  $('tKick').textContent = 'Topic ' + (t.n + 1) + ' of ' + TOPICS.length + ' · ' + t.min + ' min';
+  $('tTitle').innerHTML = t.q;
+
+  // Content chunk, check, content chunk, check — never a wall of questions at the end.
+  var h = '';
+  var n = Math.max(t.parts.length, t.checks.length);
+  for(var i = 0; i < n; i++){
+    if(t.parts[i]) h += t.parts[i];
+    if(t.checks[i]) h += checkHtml(t, i);
+  }
+  $('tBody').innerHTML = h;
+
+  var nx = TOPICS[t.n + 1];
+  var btn = $('nextBtn');
+  btn.textContent = nx ? 'Next: ' + nx.q : 'Back to all topics';
+  btn.className = nx ? 'next' : 'next ghost';
+  btn.setAttribute('data-next', nx ? nx.id : '');
+
+  show('topic');
+  window.scrollTo(0, 0);
+}
+function show(v){
+  $('v-home').classList.toggle('on', v === 'home');
+  $('v-topic').classList.toggle('on', v === 'topic');
+}
+function goHome(){ renderHome(); show('home'); window.scrollTo(0, 0); }
+
+/* ── PRACTICE ───────────────────────────────────────────────────── */
+function gradePractice(box){
+  if(box.classList.contains('answered')) return;
+  var input = box.querySelector('.prac-in');
+  var raw = (input.value || '').trim().replace(/[^0-9.\-]/g, '');
+  if(raw === '') { input.focus(); return; }
+  var given = parseFloat(raw);
+  if(isNaN(given)) { input.focus(); return; }
+
+  var want = parseFloat(box.getAttribute('data-ans'));
+  // Accept what a person would actually draw up or dial in: a hair of rounding
+  // either way, never an order of magnitude.
+  var tol = Math.max(Math.abs(want) * 0.02, 0.01);
+  var right = Math.abs(given - want) <= tol;
+
+  var id = box.getAttribute('data-p');
+  var s = state.practice[id] || { right: 0, tries: 0 };
+  s.tries++; if(right) s.right++;
+  state.practice[id] = s;
+  save();
+
+  box.classList.add('answered');
+  var v = box.querySelector('.prac-verdict');
+  v.className = 'prac-verdict ' + (right ? 'good' : 'bad');
+  v.innerHTML = right ? '&#10003; That is it.'
+                      : '&#10007; Not quite &mdash; it is ' + tidy(want) + ' ' +
+                        box.querySelector('.prac-unit').textContent + '.';
+  var sc = box.querySelector('.prac-score');
+  if(sc) sc.textContent = s.right + '/' + s.tries + ' right';
+  input.blur();
+}
+
+/* ── EVENTS ─────────────────────────────────────────────────────── */
+document.addEventListener('click', function(e){
+  var go = e.target.closest('[data-go]');
+  if(go){ openTopic(go.getAttribute('data-go')); return; }
+
+  if(e.target.closest('#backBtn')){ goHome(); return; }
+
+  var nb = e.target.closest('#nextBtn');
+  if(nb){
+    var n = nb.getAttribute('data-next');
+    if(n) openTopic(n); else goHome();
+    return;
+  }
+
+  var opt = e.target.closest('.qc .opt');
+  if(opt){
+    var qc = opt.closest('.qc');
+    if(qc.classList.contains('done')) return;
+    var tid = qc.getAttribute('data-t'), ci = +qc.getAttribute('data-c');
+    state.answers[ansKey(tid, ci)] = +opt.getAttribute('data-j');
+    save();
+    // Swap just this card so the page does not jump under the reader's thumb.
+    qc.outerHTML = checkHtml(byId[tid], ci);
+    return;
+  }
+
+  if(e.target.closest('.prac-go')){ gradePractice(e.target.closest('.prac')); return; }
+
+  var again = e.target.closest('.prac-again');
+  if(again){
+    var box = again.closest('.prac');
+    box.outerHTML = practiceHtml(box.getAttribute('data-p'));
+    return;
+  }
+});
+
+// Enter submits the practice answer — a number pad has a go key, not a mouse.
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Enter') return;
+  var input = e.target.closest('.prac-in');
+  if(!input) return;
+  e.preventDefault();
+  gradePractice(input.closest('.prac'));
+});
+
+renderHome();
+})();
+</script>
+</body>
+</html>
