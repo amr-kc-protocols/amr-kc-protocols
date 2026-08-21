@@ -17,12 +17,14 @@ Two suites live here:
   headless Chromium. jsPDF is stubbed (it loads from a blocked CDN here) but the
   calls it receives are captured, so the PDF's *content* is still asserted.
 - **`alaris.test.mjs`** — the Alaris IV pump training
-  ([`alaris-pump.html`](../alaris-pump.html)) in headless Chromium: tabs, the
-  tappable module panel, the handoff checklist and its `localStorage`
-  round-trip, the alarm accordion, and the knowledge check. It also checks the
-  page is reachable from the homepage feature card and the More list, and that
-  the service worker precaches it — a training page nobody can reach, or that a
-  crew can't open at a bedside with no signal, is the failure that matters most.
+  ([`alaris-pump.html`](../alaris-pump.html)) in headless Chromium: the topic
+  menu, all nine topics, the quick checks spaced through each one, the tappable
+  pump face, the alarm picker, and the handoff checklist with its
+  `localStorage` round-trip. It also defends the things that make it usable on
+  a phone on shift — no long paragraphs, no horizontal scroll, checks that are
+  not all bunched at the end — and that the page is reachable from the homepage
+  and precached, since training nobody can find, or can't open at a bedside
+  with no signal, is the failure that matters most.
 
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
@@ -121,15 +123,18 @@ Grouped by the property being defended:
 
 | # | Scenario |
 |---|----------|
-| A1 | All seven tabs open their pane, one at a time, and the FDA notice is on the landing screen |
-| A2 | Every one of the 11 module controls shows its own detail with a "watch for" note, and only one highlights |
-| A3 | Handoff checklist counts, unchecks, survives a reload, and resets — with the reset persisted too |
-| A4 | With `localStorage` throwing (private browsing), the checklist and quiz still work and nothing is thrown |
-| A5 | Each alarm opens and closes independently and carries both what it means and what to do |
-| A6 | The quiz scores, explains, reveals the right answer on a miss, locks an answered question, persists, and starts over |
-| A7 | Every question has four options and exactly one correct answer, the key is not all one letter, and the score reconciles with the marking |
-| A8 | The page reads at 390px with no horizontal overflow, links back to the Field Guide, and is reachable from the homepage feature card and the More list |
-| A9 | The service worker precaches the page, so it opens at a bedside with no signal |
+| A1 | Nine topics on the menu, every one phrased as a question, every one opens with real content |
+| A2 | Every topic carries a quick check, and in a multi-check topic a check lands mid-topic with content after it — not stacked at the end |
+| A3 | Answering marks right/wrong, reveals the explanation, locks the question, completes the topic and persists |
+| A4 | A topic counts as done only once *all* its checks are answered |
+| A5 | All 15 checks: four options each, exactly one correct, each explains itself; finishing them completes the course |
+| A6 | Every one of the 11 pump-face controls has its own plain-language detail plus a "watch for", and only one highlights |
+| A7 | The alarm picker: 11 alarms, opening independently, each with what it means and at least two steps to take |
+| A8 | Handoff checklist counts, unchecks, survives a reload and resets |
+| A9 | Next buttons walk the whole course in order and the last one returns to the menu |
+| A10 | Works with `localStorage` throwing (private browsing); every control is a real button and works from a keyboard |
+| A11 | Reads on a phone: no horizontal overflow on any topic, and no paragraph longer than 55 words |
+| A12 | Reachable from the homepage feature card and the More list, and precached by the service worker |
 
 When you change either tool, run `npm test` and add a scenario for any new behaviour.
 

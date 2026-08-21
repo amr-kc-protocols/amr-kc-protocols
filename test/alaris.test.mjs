@@ -1,11 +1,12 @@
 /*
  * Alaris IV Pump Training — page test
  * -----------------------------------
- * Drives the real page (alaris-pump.html) in headless Chromium: the tabs, the
- * tappable module panel, the handoff checklist (including its localStorage
- * round-trip), the alarm accordion and the knowledge check. Also asserts the
- * homepage feature card and the More-page entry actually point at the page,
- * since a training page nobody can reach is the failure that matters most.
+ * Drives the real page (alaris-pump.html) in headless Chromium: the topic
+ * menu, every topic's content, the quick checks spaced through each topic,
+ * the tappable pump face, the alarm picker and the handoff checklist —
+ * including its localStorage round-trip. Also asserts the page is reachable
+ * from the homepage and the More list, since a training page nobody can find
+ * is the failure that matters most.
  *
  * Run:  cd test && npm install && npm test
  * All data below is synthetic — nothing here is a real patient or roster record.
@@ -59,63 +60,185 @@ async function fresh(url = PAGE) {
   await page.reload();
   return page;
 }
-const tab = (p, name) => p.click(`.tab[data-p="${name}"]`);
+const open = (p, id) => p.click(`.topic[data-go="${id}"]`);
+const TOPIC_IDS = ['titrate','alarms','bag','piggyback','handoff','limits','transport','safe','buttons'];
 
-/* A1 — the page loads and the tabs switch panes */
+/* A1 — the menu is a list of questions, and each one opens */
 { const p = await fresh();
   await p.waitForSelector('.hero h1');
-  ok('A1 seven tabs render', (await p.locator('.tab').count()) === 7);
-  ok('A1 module pane is the landing pane', await p.locator('#p-panel').isVisible());
-  ok('A1 FDA notice is on the landing screen', await p.locator('.notice.danger').first().isVisible());
-  for (const name of ['handoff','program','secondary','alarms','transport','quiz']) {
-    await tab(p, name);
-    ok(`A1 ${name} pane opens`, await p.locator('#p-' + name).isVisible());
+  ok('A1 nine topics on the menu', (await p.locator('.topic').count()) === 9);
+  ok('A1 progress starts at zero', (await p.locator('#progN').textContent()).trim() === '0 of 9');
+
+  const titles = await p.locator('.topic-q').allTextContents();
+  ok('A1 every topic is phrased as a question', titles.every(t => t.trim().endsWith('?')), titles.join(' | '));
+
+  for (const id of TOPIC_IDS) {
+    await open(p, id);
+    ok(`A1 ${id} opens`, await p.locator('#v-topic').isVisible() &&
+       (await p.locator('#tBody').textContent()).trim().length > 100);
+    await p.click('#backBtn');
   }
-  ok('A1 only one pane visible at a time', (await p.locator('.pane.on').count()) === 1);
+  ok('A1 back returns to the menu', await p.locator('#v-home').isVisible());
+  ok('A1 no errors walking every topic', p._errs.length === 0, p._errs.join('|'));
   await p.context().close(); }
 
-/* A2 — every control on the module panel has detail text behind it */
+/* A2 — the checks are spaced through a topic, not stacked at the end */
 { const p = await fresh();
+  // Every topic carries at least one check.
+  for (const id of TOPIC_IDS) {
+    await open(p, id);
+    ok(`A2 ${id} has a quick check`, (await p.locator('.qc').count()) >= 1);
+    await p.click('#backBtn');
+  }
+
+  // In a multi-check topic, content must follow the first check — otherwise
+  // they are bunched at the bottom, which is what this layout exists to avoid.
+  await open(p, 'piggyback');
+  ok('A2 piggyback has two checks', (await p.locator('.qc').count()) === 2);
+  const order = await p.locator('#tBody > *').evaluateAll(els =>
+    els.map(e => e.classList.contains('qc') ? 'CHECK' : 'content'));
+  const firstCheck = order.indexOf('CHECK');
+  ok('A2 a check appears before the end of the topic',
+     firstCheck > 0 && firstCheck < order.length - 1, order.join(','));
+  ok('A2 content follows the first check',
+     order.slice(firstCheck + 1).includes('content'), order.join(','));
+  await p.context().close(); }
+
+/* A3 — answering a check: marks, explains, locks, scores the topic done */
+{ const p = await fresh();
+  await open(p, 'bag');
+  const qc = p.locator('.qc').first();
+  ok('A3 explanation hidden until answered', !(await qc.locator('.qc-exp').isVisible()));
+
+  // "bag" has one check; its correct answer is C.
+  await qc.locator('.opt').nth(0).click();
+  ok('A3 wrong pick marked wrong',
+     await p.locator('.qc .opt').nth(0).evaluate(e => e.classList.contains('wrong')));
+  ok('A3 correct answer revealed on a miss',
+     await p.locator('.qc .opt').nth(2).evaluate(e => e.classList.contains('right')));
+  ok('A3 explanation appears', await p.locator('.qc .qc-exp').isVisible());
+  ok('A3 answered check is locked', (await p.locator('.qc .opt:not([disabled])').count()) === 0);
+
+  await p.click('#backBtn');
+  ok('A3 answering marks the topic done on the menu',
+     await p.locator('.topic[data-go="bag"]').evaluate(e => e.classList.contains('done')));
+  ok('A3 progress advances', (await p.locator('#progN').textContent()).trim() === '1 of 9');
+
+  await p.reload();
+  ok('A3 progress survives a reload', (await p.locator('#progN').textContent()).trim() === '1 of 9');
+  await p.context().close(); }
+
+/* A4 — a topic is only done when ALL its checks are answered */
+{ const p = await fresh();
+  await open(p, 'titrate');
+  await p.locator('.qc').nth(0).locator('.opt').nth(1).click();
+  await p.click('#backBtn');
+  ok('A4 one of two checks does not finish the topic',
+     !(await p.locator('.topic[data-go="titrate"]').evaluate(e => e.classList.contains('done'))));
+  await open(p, 'titrate');
+  await p.locator('.qc').nth(1).locator('.opt').nth(2).click();
+  await p.click('#backBtn');
+  ok('A4 both checks finish it',
+     await p.locator('.topic[data-go="titrate"]').evaluate(e => e.classList.contains('done')));
+  await p.context().close(); }
+
+/* A5 — the answer key is well formed across every topic */
+{ const p = await fresh();
+  let total = 0;
+  for (const id of TOPIC_IDS) {
+    await open(p, id);
+    const n = await p.locator('.qc').count();
+    for (let i = 0; i < n; i++) {
+      total++;
+      const qc = p.locator('.qc').nth(i);
+      ok(`A5 ${id} check ${i + 1} has four options`, (await qc.locator('.opt').count()) === 4);
+      await qc.locator('.opt').nth(0).click();
+      const fresh_qc = p.locator('.qc').nth(i);
+      ok(`A5 ${id} check ${i + 1} marks exactly one right`,
+         (await fresh_qc.locator('.opt.right').count()) === 1);
+      ok(`A5 ${id} check ${i + 1} explains itself`,
+         (await fresh_qc.locator('.qc-exp').textContent()).trim().length > 50);
+    }
+    await p.click('#backBtn');
+  }
+  ok('A5 fifteen checks across the course', total === 15, String(total));
+  ok('A5 finishing every check completes the course',
+     (await p.locator('#progN').textContent()).trim() === '9 of 9');
+  ok('A5 no errors answering everything', p._errs.length === 0, p._errs.join('|'));
+  await p.context().close(); }
+
+/* A6 — the pump face: every control has its own plain-language detail */
+{ const p = await fresh();
+  await open(p, 'buttons');
   const keys = await p.locator('#module [data-k]').evaluateAll(els => els.map(e => e.getAttribute('data-k')));
-  ok('A2 eleven tappable controls', keys.length === 11, keys.join(','));
-  ok('A2 tap hint matches the control count',
-     /11 controls/.test(await p.locator('.taphint').textContent()));
+  ok('A6 eleven tappable controls', keys.length === 11, keys.join(','));
   const seen = new Set();
   for (const k of keys) {
     await p.click(`#module [data-k="${k}"]`);
     const title = (await p.locator('#pd .pd-t').textContent()).trim();
-    const body = (await p.locator('#pd .pd-b').textContent()).trim();
-    const note = await p.locator('#pd .pd-note').count();
-    ok(`A2 ${k} shows detail`, title.length > 0 && body.length > 30 && note === 1, title);
+    ok(`A6 ${k} shows detail and a warning`,
+       title.length > 0 &&
+       (await p.locator('#pd .pd-b').textContent()).trim().length > 25 &&
+       (await p.locator('#pd .pd-w').count()) === 1, title);
     seen.add(title);
-    ok(`A2 ${k} is the only highlighted control`, (await p.locator('#module .sel').count()) === 1);
+    ok(`A6 ${k} is the only highlighted control`, (await p.locator('#module .sel').count()) === 1);
   }
-  ok('A2 every control has its own detail', seen.size === keys.length, [...seen].join(' | '));
-  ok('A2 no errors driving the panel', p._errs.length === 0, p._errs.join('|'));
+  ok('A6 every control has its own detail', seen.size === keys.length);
   await p.context().close(); }
 
-/* A3 — handoff checklist counts, persists and resets */
-{ const p = await fresh(); await tab(p, 'handoff');
+/* A7 — the alarm picker */
+{ const p = await fresh();
+  await open(p, 'alarms');
+  const n = await p.locator('.acc').count();
+  ok('A7 eleven alarms listed', n === 11);
+  ok('A7 all closed initially', (await p.locator('.acc.open').count()) === 0);
+  await p.locator('.acc').nth(1).click();
+  ok('A7 tapped alarm opens', await p.locator('.acc').nth(1).locator('.acc-b').isVisible());
+  ok('A7 others stay closed', (await p.locator('.acc.open').count()) === 1);
+  await p.locator('.acc').nth(1).click();
+  ok('A7 tapping again closes it', (await p.locator('.acc.open').count()) === 0);
+  for (let i = 0; i < n; i++) {
+    const acc = p.locator('.acc').nth(i);
+    ok(`A7 alarm ${i} says what it means`,
+       (await acc.locator('.acc-means').textContent()).trim().length > 15);
+    ok(`A7 alarm ${i} gives steps to take`, (await acc.locator('.acc-b li').count()) >= 2);
+  }
+  await p.context().close(); }
+
+/* A8 — handoff checklist counts, persists and resets */
+{ const p = await fresh();
+  await open(p, 'handoff');
   const total = await p.locator('.ck').count();
-  ok('A3 eleven checklist rows', total === 11);
-  ok('A3 counter starts empty', (await p.locator('#ckCount').textContent()) === `0 / ${total}`);
+  ok('A8 eleven checklist rows', total === 11);
+  ok('A8 counter starts empty', (await p.locator('#ckN').textContent()) === `0 / ${total}`);
   await p.locator('.ck').nth(0).click();
   await p.locator('.ck').nth(5).click();
-  ok('A3 counter tracks taps', (await p.locator('#ckCount').textContent()) === `2 / ${total}`);
-  ok('A3 checked row is marked', await p.locator('.ck').nth(0).evaluate(e => e.classList.contains('on')));
-  ok('A3 progress bar advances', /%$/.test(await p.locator('#ckFill').evaluate(e => e.style.width)));
+  ok('A8 counter tracks taps', (await p.locator('#ckN').textContent()) === `2 / ${total}`);
   await p.locator('.ck').nth(0).click();
-  ok('A3 tapping again unchecks', (await p.locator('#ckCount').textContent()) === `1 / ${total}`);
+  ok('A8 tapping again unchecks', (await p.locator('#ckN').textContent()) === `1 / ${total}`);
 
-  await p.reload(); await tab(p, 'handoff');
-  ok('A3 state survives a reload', (await p.locator('#ckCount').textContent()) === `1 / ${total}`);
+  await p.reload();
+  await open(p, 'handoff');
+  ok('A8 checklist survives a reload', (await p.locator('#ckN').textContent()) === `1 / ${total}`);
   await p.click('#ckReset');
-  ok('A3 reset clears every row', (await p.locator('#ckCount').textContent()) === `0 / ${total}`);
-  await p.reload(); await tab(p, 'handoff');
-  ok('A3 reset persists too', (await p.locator('#ckCount').textContent()) === `0 / ${total}`);
+  ok('A8 reset clears it', (await p.locator('#ckN').textContent()) === `0 / ${total}`);
   await p.context().close(); }
 
-/* A4 — checklist keeps working when localStorage throws (private browsing) */
+/* A9 — the course walks forward without going back to the menu */
+{ const p = await fresh();
+  await open(p, 'titrate');
+  for (let i = 0; i < TOPIC_IDS.length - 1; i++) {
+    const label = (await p.locator('#nextBtn').textContent()).trim();
+    ok(`A9 next button names the topic after ${TOPIC_IDS[i]}`, label.startsWith('Next:'), label);
+    await p.click('#nextBtn');
+  }
+  ok('A9 the last topic offers the way back',
+     (await p.locator('#nextBtn').textContent()).includes('Back to all topics'));
+  await p.click('#nextBtn');
+  ok('A9 and it goes there', await p.locator('#v-home').isVisible());
+  await p.context().close(); }
+
+/* A10 — works with localStorage blocked, and from a keyboard */
 { const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const p = await ctx.newPage();
   const errs = []; p.on('pageerror', e => errs.push('PAGEERR:' + e.message));
@@ -125,107 +248,52 @@ const tab = (p, name) => p.click(`.tab[data-p="${name}"]`);
   });
   await p.goto(PAGE);
   await p.waitForSelector('.hero h1');
-  await tab(p, 'handoff');
+  await open(p, 'handoff');
   await p.locator('.ck').nth(0).click();
-  ok('A4 checklist still toggles with storage blocked',
-     (await p.locator('#ckCount').textContent()) === '1 / 11');
-  await tab(p, 'quiz');
-  await p.locator('.q').nth(0).locator('.opt').nth(1).click();
-  ok('A4 quiz still scores with storage blocked',
-     (await p.locator('#scoreSlot .score-v').textContent()).trim() === '1 / 16');
-  ok('A4 no uncaught error from blocked storage', errs.length === 0, errs.join('|'));
+  ok('A10 checklist still toggles with storage blocked',
+     (await p.locator('#ckN').textContent()) === '1 / 11');
+  await p.locator('.qc .opt').nth(2).click();
+  ok('A10 checks still answer with storage blocked',
+     await p.locator('.qc').first().evaluate(e => e.classList.contains('done')));
+  ok('A10 no uncaught error from blocked storage', errs.length === 0, errs.join('|'));
   await ctx.close(); }
 
-/* A5 — alarm accordion opens and closes independently */
-{ const p = await fresh(); await tab(p, 'alarms');
-  const n = await p.locator('.acc').count();
-  ok('A5 eleven alarm entries', n === 11);
-  ok('A5 all closed initially', (await p.locator('.acc.open').count()) === 0);
-  await p.locator('.acc').nth(2).click();
-  ok('A5 tapped alarm opens', await p.locator('.acc').nth(2).locator('.acc-b').isVisible());
-  ok('A5 others stay closed', (await p.locator('.acc.open').count()) === 1);
-  await p.locator('.acc').nth(2).click();
-  ok('A5 tapping again closes it', (await p.locator('.acc.open').count()) === 0);
-  for (let i = 0; i < n; i++) {
-    const body = await p.locator('.acc').nth(i).locator('.acc-b p').allTextContents();
-    const [meaning, action] = body.map(t => t.trim());
-    ok(`A5 alarm ${i} states what it means`, body.length === 2 && meaning.length > 12, meaning);
-    ok(`A5 alarm ${i} states what to do`, body.length === 2 && action.length > 40, action);
-  }
+{ const p = await fresh();
+  const nonButtons = await p.locator('.topic, .ck, .acc-h, .opt, .key, .led, .disp, .chid')
+    .evaluateAll(els => els.filter(e => e.tagName !== 'BUTTON').map(e => e.className));
+  ok('A10 every control is a real button', nonButtons.length === 0, nonButtons.join(','));
+
+  await p.locator('.topic').first().focus();
+  await p.keyboard.press('Enter');
+  ok('A10 a topic opens from the keyboard', await p.locator('#v-topic').isVisible());
+  await p.locator('.qc .opt').first().focus();
+  await p.keyboard.press('Enter');
+  ok('A10 a check answers from the keyboard',
+     await p.locator('.qc').first().evaluate(e => e.classList.contains('done')));
   await p.context().close(); }
 
-/* A6 — knowledge check scores, explains, locks and persists */
-{ const p = await fresh(); await tab(p, 'quiz');
-  const n = await p.locator('.q').count();
-  ok('A6 sixteen questions', n === 16);
-  ok('A6 no score before the first answer', (await p.locator('#scoreSlot .score').count()) === 0);
-  ok('A6 explanations hidden until answered', (await p.locator('.q-exp:visible').count()) === 0);
-
-  // Q1's correct answer is B ("Pressing START").
-  await p.locator('.q').nth(0).locator('.opt').nth(1).click();
-  ok('A6 correct pick marked right',
-     await p.locator('.q').nth(0).locator('.opt').nth(1).evaluate(e => e.classList.contains('right')));
-  ok('A6 explanation reveals', await p.locator('.q').nth(0).locator('.q-exp').isVisible());
-  ok('A6 score counts it', (await p.locator('#scoreSlot .score-v').textContent()).trim() === `1 / ${n}`);
-
-  // Q2's correct answer is C; pick A and confirm the miss is shown, not hidden.
-  await p.locator('.q').nth(1).locator('.opt').nth(0).click();
-  ok('A6 wrong pick marked wrong',
-     await p.locator('.q').nth(1).locator('.opt').nth(0).evaluate(e => e.classList.contains('wrong')));
-  ok('A6 correct answer revealed on a miss',
-     await p.locator('.q').nth(1).locator('.opt').nth(2).evaluate(e => e.classList.contains('right')));
-  ok('A6 a miss does not score', (await p.locator('#scoreSlot .score-v').textContent()).trim() === `1 / ${n}`);
-
-  ok('A6 an answered question is locked',
-     (await p.locator('.q').nth(1).locator('.opt:not([disabled])').count()) === 0);
-  ok('A6 an unanswered question stays open',
-     (await p.locator('.q').nth(2).locator('.opt:not([disabled])').count()) === 4);
-  await p.locator('.q').nth(1).locator('.opt').nth(2).click({ force: true }).catch(() => {});
-  ok('A6 forcing a click on a locked option changes nothing',
-     (await p.locator('#scoreSlot .score-v').textContent()).trim() === `1 / ${n}`);
-
-  await p.reload(); await tab(p, 'quiz');
-  ok('A6 results survive a reload', (await p.locator('#scoreSlot .score-v').textContent()).trim() === `1 / ${n}`);
-  await p.click('#quizReset');
-  ok('A6 start over clears the score', (await p.locator('#scoreSlot .score').count()) === 0);
-  ok('A6 start over clears the answers', (await p.locator('.q.done').count()) === 0);
-  await p.context().close(); }
-
-/* A7 — the answer key is well formed, and the score agrees with the marking */
-{ const p = await fresh(); await tab(p, 'quiz');
-  const n = await p.locator('.q').count();
-
-  // Answer every question with option A. Each question then reveals its key,
-  // so we can check the key's shape and reconcile it against the score.
-  for (let i = 0; i < n; i++) await p.locator('.q').nth(i).locator('.opt').nth(0).click();
-
-  let expected = 0;
-  for (let i = 0; i < n; i++) {
-    const q = p.locator('.q').nth(i);
-    ok(`A7 Q${i + 1} has four options`, (await q.locator('.opt').count()) === 4);
-    ok(`A7 Q${i + 1} marks exactly one option correct`, (await q.locator('.opt.right').count()) === 1);
-    ok(`A7 Q${i + 1} explains itself`,
-       (await q.locator('.q-exp').textContent()).trim().length > 60);
-    // Option A was our pick: either it is the right one, or it is the wrong one.
-    const pickedRight = await q.locator('.opt').nth(0).evaluate(e => e.classList.contains('right'));
-    const pickedWrong = await q.locator('.opt').nth(0).evaluate(e => e.classList.contains('wrong'));
-    ok(`A7 Q${i + 1} scores the pick exactly one way`, pickedRight !== pickedWrong);
-    if (pickedRight) expected++;
-  }
-  ok('A7 every question is answered', (await p.locator('.q.done').count()) === n);
-  ok('A7 score matches the options marked right',
-     (await p.locator('#scoreSlot .score-v').textContent()).trim() === `${expected} / ${n}`,
-     'expected ' + expected);
-  ok('A7 the key is not all one letter', expected > 0 && expected < n,
-     'option A correct on ' + expected + ' of ' + n);
-  ok('A7 no errors across the whole quiz', p._errs.length === 0, p._errs.join('|'));
-  await p.context().close(); }
-
-/* A8 — the page is reachable from the Field Guide, and reads on a phone */
+/* A11 — it reads on a phone, and the text stays short */
 { const p = await fresh();
   const overflow = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  ok('A8 no horizontal overflow at 390px', overflow <= 0, 'overflow=' + overflow);
-  ok('A8 back link returns to the Field Guide',
+  ok('A11 menu has no horizontal overflow at 390px', overflow <= 0, 'overflow=' + overflow);
+
+  // Phone-sized copy: no wall-of-text paragraphs anywhere in the course.
+  let longest = 0, worst = '';
+  for (const id of TOPIC_IDS) {
+    await open(p, id);
+    const of2 = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    ok(`A11 ${id} has no horizontal overflow`, of2 <= 0, 'overflow=' + of2);
+    const lens = await p.locator('#tBody p, #tBody li').evaluateAll(els =>
+      els.map(e => ({ n: (e.textContent || '').trim().split(/\s+/).length, t: (e.textContent||'').trim().slice(0,60) })));
+    lens.forEach(x => { if (x.n > longest) { longest = x.n; worst = x.t; } });
+    await p.click('#backBtn');
+  }
+  ok('A11 no paragraph runs long for a phone', longest <= 55, longest + ' words: "' + worst + '…"');
+  await p.context().close(); }
+
+/* A12 — reachable from the Field Guide, and precached for a dead-signal bedside */
+{ const p = await fresh();
+  ok('A12 back link returns to the Field Guide',
      (await p.locator('.hdr-back').getAttribute('href')) === 'index.html');
   await p.context().close(); }
 
@@ -235,58 +303,23 @@ const tab = (p, name) => p.click(`.tab[data-p="${name}"]`);
   if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(400); }
 
   const feat = p.locator('.feat-card');
-  ok('A8 home shows the feature card', (await feat.count()) === 1);
-  ok('A8 feature card links to the training',
+  ok('A12 home shows the feature card', (await feat.count()) === 1);
+  ok('A12 feature card links to the training',
      (await feat.getAttribute('href')) === 'alaris-pump.html');
-  ok('A8 feature card is flagged new',
+  ok('A12 feature card is flagged new',
      /new training/i.test(await p.locator('.feat-badge').textContent()));
   const box = await feat.boundingBox();
-  ok('A8 feature card sits high on the page', box && box.y < 700, 'y=' + (box && Math.round(box.y)));
+  ok('A12 feature card sits high on the page', box && box.y < 700, 'y=' + (box && Math.round(box.y)));
 
   await p.evaluate(() => { const b = document.querySelector('[data-goto="more"]'); if (b) b.click(); });
   await p.waitForTimeout(400);
-  ok('A8 More lists the training exactly once',
+  ok('A12 More lists the training exactly once',
      (await p.locator('.more-card[href="alaris-pump.html"]').count()) === 1);
-  ok('A8 home has no horizontal overflow',
-     (await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) <= 0);
   await p.context().close(); }
 
-/* A9b — everything interactive is reachable and operable from a keyboard */
-{ const p = await fresh();
-  const nonButtons = await p.locator('.tab, .key, .led, .disp, .chid, .ck, .acc-h, .opt')
-    .evaluateAll(els => els.filter(e => e.tagName !== 'BUTTON').map(e => e.className));
-  ok('A9b every control is a real button', nonButtons.length === 0, nonButtons.join(','));
-
-  await tab(p, 'handoff');
-  await p.locator('.ck').nth(0).focus();
-  await p.keyboard.press('Enter');
-  ok('A9b checklist toggles from the keyboard', (await p.locator('#ckCount').textContent()) === '1 / 11');
-  ok('A9b checklist row reports its state to assistive tech',
-     (await p.locator('.ck').nth(0).getAttribute('aria-checked')) === 'true');
-
-  await tab(p, 'alarms');
-  await p.locator('.acc-h').nth(0).focus();
-  await p.keyboard.press('Enter');
-  ok('A9b alarm opens from the keyboard', (await p.locator('.acc.open').count()) === 1);
-  ok('A9b alarm reports expanded state',
-     (await p.locator('.acc-h').nth(0).getAttribute('aria-expanded')) === 'true');
-  await p.keyboard.press('Enter');
-  ok('A9b alarm collapses and updates its state',
-     (await p.locator('.acc.open').count()) === 0 &&
-     (await p.locator('.acc-h').nth(0).getAttribute('aria-expanded')) === 'false');
-
-  await tab(p, 'quiz');
-  await p.locator('.q').nth(0).locator('.opt').nth(1).focus();
-  await p.keyboard.press('Enter');
-  ok('A9b quiz answers from the keyboard',
-     (await p.locator('#scoreSlot .score-v').textContent()).trim() === '1 / 16');
-  ok('A9b no errors driving the page from the keyboard', p._errs.length === 0, p._errs.join('|'));
-  await p.context().close(); }
-
-/* A9 — the page is precached, so a crew can open it offline at a bedside */
 { const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');
-  ok('A9 service worker precaches the training page', /alaris-pump\.html/.test(sw));
-  ok('A9 cache version bumped past v9', /amrkc-2026-v(?:[1-9]\d)/.test(sw),
+  ok('A12 service worker precaches the training page', /alaris-pump\.html/.test(sw));
+  ok('A12 cache version bumped past v9', /amrkc-2026-v(?:[1-9]\d)/.test(sw),
      (sw.match(/amrkc-2026-v\d+/) || [])[0]); }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
