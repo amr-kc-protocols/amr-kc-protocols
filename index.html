@@ -148,6 +148,7 @@ letter-spacing:0.04em;transition:color 0.12s;flex-shrink:0}
 /* MAIN */
 #main{padding-top:108px;padding-bottom:68px;min-height:100vh}
 
+
 /* SECTION LABELS */
 .sec{padding:12px 14px 4px;font-family:var(--mono);font-size:10px;font-weight:600;
 letter-spacing:0.14em;color:var(--teal);text-transform:uppercase}
@@ -598,23 +599,26 @@ display:flex;align-items:center;justify-content:center;color:var(--ac,var(--teal
 .stat-tile.ac-chip .stat-tile-ico{width:30px;height:30px;border-radius:8px;
 background:var(--acb);color:var(--ac);font-size:16px}
 .stat-tile.ac-chip:active,.stat-tile.ac-chip:hover{border-color:var(--ac)}
-.home-hero{padding:18px 16px 8px;text-align:center}
-.home-hero-title{font-size:17px;font-weight:700;color:var(--white);letter-spacing:-0.01em}
-.home-hero-sub{font-size:12px;color:var(--gray);margin-top:3px;letter-spacing:0.02em}
-.home-name-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px}
-.home-name-edit{background:none;border:none;color:var(--gray);font-size:11px;cursor:pointer;text-decoration:underline;font-family:var(--sans);padding:2px 4px}
-.home-name-form{display:flex;flex-wrap:wrap;gap:8px;max-width:320px;margin:12px auto 0;padding:0 16px}
-.home-name-form .home-name-input{flex:1 1 130px;width:auto;min-width:0}
-.home-name-form .home-name-save{flex:1 1 100%}
-.home-name-form .home-name-hint,.home-name-form .home-name-err{flex:1 1 100%}
-.home-name-input{background:var(--dim);border:1.5px solid var(--border);border-radius:8px;
-color:var(--white);font-family:var(--sans);font-size:16px;padding:9px 12px;outline:none;-webkit-appearance:none;width:100%}
-.home-name-input:focus{border-color:var(--teal)}
-.home-name-save{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 16px;
-font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}
-.home-name-save:disabled{opacity:0.5;cursor:default}
-.home-name-hint{font-size:10px;color:var(--gray);line-height:1.4;margin-top:2px}
-.home-name-err{font-size:11px;color:var(--danger);margin-top:2px;display:none}
+/* ── HOME MASTHEAD ─────────────────────────────────────────────────
+   This is the first thing a crew sees when they open the Toughbook, so it
+   has to say whose guide this is and what is inside it without being read. */
+.mast{position:relative;overflow:hidden;margin:10px 12px 12px;padding:20px 18px 30px;
+border-radius:18px;color:#fff;background:linear-gradient(135deg,#0b3f75 0%,#14406f 42%,#0e7490 100%);
+box-shadow:0 10px 30px rgba(11,63,117,0.28)}
+.mast::before{content:"";position:absolute;inset:0;pointer-events:none;
+background:radial-gradient(240px 240px at 92% -20%,rgba(255,255,255,0.22),rgba(255,255,255,0) 70%)}
+.mast-in{position:relative;z-index:1}
+.mast-eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.18em;
+text-transform:uppercase;color:#8fd3ea}
+.mast-title{font-size:30px;font-weight:800;letter-spacing:-0.025em;line-height:1.05;margin:7px 0 5px;
+text-shadow:0 2px 12px rgba(0,0,0,0.18)}
+.mast-title span{color:#8ee7ff}
+.mast-sub{font-size:13px;color:#cfe3f5;line-height:1.5;max-width:52ch}
+.mast-ecg{position:absolute;left:0;right:0;bottom:0;height:46px;width:100%;pointer-events:none;opacity:0.5}
+.mast-ecg path{fill:none;stroke:#7fe3ff;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;
+vector-effect:non-scaling-stroke;animation:mastpulse 3.6s ease-in-out infinite}
+@keyframes mastpulse{0%,100%{opacity:.35}50%{opacity:.85}}
+@media (prefers-reduced-motion:reduce){.mast-ecg path{animation:none;opacity:.5}}
 .stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 12px}
 .stat-tile{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid transparent;
 border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:border-color 0.12s}
@@ -623,6 +627,30 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
 .stat-tile-val{font-size:13px;font-weight:600;color:var(--white);line-height:1.25}
 .stat-tile-lbl{font-size:10px;color:var(--gray);letter-spacing:0.02em;margin-top:1px}
 .stat-tile.empty .stat-tile-val{color:var(--teal2)}
+
+/* ── WIDE SCREENS (Toughbook, desktop) ────────────────────────────
+   Nothing here changes the phone layout. Above 760px the single column
+   stops stretching into letterbox-shaped tiles and becomes a real grid,
+   so the tools a crew actually opens are on the first screen. */
+@media (min-width:760px){
+  #lv{max-width:1180px;margin:0 auto}
+  #hdr .ht,#hdr .sw{max-width:1180px;margin-left:auto;margin-right:auto}
+  .stat-strip{grid-template-columns:repeat(auto-fit,minmax(228px,1fr))}
+  .qa-grid{grid-template-columns:repeat(auto-fit,minmax(205px,1fr))}
+  .mast{padding:28px 26px 36px}
+  .mast-title{font-size:38px}
+  .mast-sub{font-size:14px}
+}
+@media (min-width:960px){
+  /* Two featured trainings side by side instead of two full-width bands. */
+  .home-feats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 12px 14px}
+  .home-feats .feat-card{margin:0;height:100%}
+}
+@media (min-width:1220px){
+  /* Keep the fixed tab bar's items with the content rather than at the edges. */
+  #nav{padding-left:calc((100vw - 1180px)/2);padding-right:calc((100vw - 1180px)/2)}
+}
+
 </style>
 
 </head>
@@ -875,49 +903,6 @@ function escHtml(s){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
-// Provider profile — backed by a Google Apps Script + Sheet (see
-// provider-profile-AppsScript.gs). Deploy that script and paste the
-// resulting /exec URL below to enable cross-device recognition.
-// Until then, profiles are saved locally on this device only.
-var PROFILE_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyc_iU6npoA1505QJbvBdPz_8-OGreOOBF0MIu_0EyivF8rDHKQnqCIQP7DtryclN45/exec';
-
-function getProfile(){ try{ return JSON.parse(localStorage.getItem('amrkc_profile')||'null'); }catch(e){ return null; } }
-function setProfile(p){ try{ localStorage.setItem('amrkc_profile', JSON.stringify(p)); }catch(e){} }
-function clearProfile(){ try{ localStorage.removeItem('amrkc_profile'); }catch(e){} }
-
-function profileConfigured(){ return !!PROFILE_ENDPOINT && PROFILE_ENDPOINT.indexOf('PASTE_') !== 0; }
-
-// Best-effort lookup by employee number so a returning provider is
-// recognized on a new device. Always calls back — null if not found,
-// not configured, offline, or slow (4s timeout).
-function lookupProfile(empNum, cb){
-  if(!profileConfigured()){ cb(null); return; }
-  var done = false;
-  var timer = setTimeout(function(){ if(!done){ done = true; cb(null); } }, 4000);
-  fetch(PROFILE_ENDPOINT + '?employeeNumber=' + encodeURIComponent(empNum))
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if(done) return; done = true; clearTimeout(timer);
-      cb(data && data.found ? data.profile : null);
-    })
-    .catch(function(){
-      if(done) return; done = true; clearTimeout(timer);
-      cb(null);
-    });
-}
-
-// Fire-and-forget create/update — mirrors the pattern used by the
-// other Apps Script–backed features in this app (no response read).
-function saveProfileRemote(lastName, empNum){
-  if(!profileConfigured()) return;
-  var body = 'lastName=' + encodeURIComponent(lastName) + '&employeeNumber=' + encodeURIComponent(empNum);
-  fetch(PROFILE_ENDPOINT, {
-    method: 'POST', mode: 'no-cors',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-    body: body
-  }).catch(function(){});
-}
-
 function getDaily5Stats(){
   try{ return JSON.parse(localStorage.getItem('d5stats')||'{}'); }catch(e){ return {}; }
 }
@@ -983,28 +968,26 @@ function getAirwayStats(){
 
 function renderHome(){
   var c = $('lv');
-  var profile = getProfile();
-  var h = '<div class="home-hero">';
-  if(profile && profile.lastName){
-    h += '<div class="home-hero-title">Welcome back, '+escHtml(profile.lastName)+'</div>';
-    h += '<div class="home-name-row"><button class="home-name-edit" id="home-name-edit-btn">Not '+escHtml(profile.lastName)+'?</button></div>';
-  } else {
-    h += '<div class="home-hero-title">Set up your Field Guide</div>';
-    h += '<div class="home-hero-sub">Add your name to personalize and track progress</div>';
-    h += '<div class="home-name-form">';
-    h += '<input class="home-name-input" id="home-lastname-input" type="text" placeholder="Last name" maxlength="40" autocomplete="off">';
-    h += '<input class="home-name-input" id="home-empnum-input" type="text" placeholder="Employee #" maxlength="20" autocomplete="off" inputmode="numeric">';
-    h += '<button class="home-name-save" id="home-name-save-btn">Save profile</button>';
-    h += '<div class="home-name-err" id="home-name-err">Enter both your last name and employee number.</div>';
-    h += '<div class="home-name-hint">Used to personalize your Field Guide &mdash; not shared outside AMR KC.</div>';
-    h += '</div>';
-  }
+  var h = '';
+
+  // Masthead. Deliberately just the identity — a crew opening this needs to
+  // know whose guide it is and get past it, not read inventory counts.
+  h += '<div class="mast"><div class="mast-in">';
+  h += '<div class="mast-eyebrow">AMR Kansas City &middot; EMS</div>';
+  h += '<div class="mast-title">Field Guide <span>2026</span></div>';
+  h += '<div class="mast-sub">Protocols, doses and door codes &mdash; on the truck, offline, '
+     + 'in your hand. Standing orders under Dr. Ameet Deshmukh, MD.</div>';
+  h += '</div>';
+  h += '<svg class="mast-ecg" viewBox="0 0 1200 46" preserveAspectRatio="none" aria-hidden="true">';
+  h += '<path d="M0 30 H150 l14 -18 l12 32 l11 -24 l9 10 H430 l14 -18 l12 32 l11 -24 l9 10 '
+     + 'H710 l14 -18 l12 32 l11 -24 l9 10 H990 l14 -18 l12 32 l11 -24 l9 10 H1200"/></svg>';
   h += '</div>';
 
   // Featured — newest training. Sits above the stats strip so it is the first
   // thing on the page after the greeting. When this stops being the new thing,
   // move it down to the stat strip or the More list rather than leaving a
   // "New training" badge on something crews have seen for a year.
+  h += '<div class="home-feats">';
   h += '<a class="feat-card" href="alaris-pump.html">';
   h += '<svg class="feat-drip" viewBox="0 0 38 52" aria-hidden="true">';
   h += '<path class="bag" d="M11 3h16a3 3 0 0 1 3 3v20a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"/>';
@@ -1042,6 +1025,7 @@ function renderHome(){
      + '<span class="feat-chip">PRACTICE PROBLEMS</span>'
      + '<span class="feat-chip">OUR FORMULARY</span></div>';
   h += '<div class="feat-go">Start training &#x203A;</div></a>';
+  h += '</div>';
 
   // Personal stats strip
   var d5 = getDaily5Stats();
@@ -1435,13 +1419,6 @@ document.addEventListener('DOMContentLoaded', function(){
       calcDoses();
       return;
     }
-    // Home profile capture / edit
-    if(e.target.closest('#home-name-save-btn')){ submitProfile(); return; }
-    if(e.target.closest('#home-name-edit-btn')){
-      clearProfile();
-      renderHome();
-      return;
-    }
   });
 
   // Weight input delegation (avoids re-attaching listener on every renderCalc() call)
@@ -1449,13 +1426,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(e.target && e.target.id === 'wt'){ WT = e.target.value; calcDoses(); }
   });
 
-  // Home profile inputs — save on Enter
   $('lv').addEventListener('keydown', function(e){
-    if(e.key === 'Enter' && e.target && (e.target.id === 'home-lastname-input' || e.target.id === 'home-empnum-input')){
-      e.preventDefault();
-      submitProfile();
-      return;
-    }
     // Enter on the weight field dismisses the keyboard so results are visible
     if(e.key === 'Enter' && e.target && e.target.id === 'wt'){ e.target.blur(); return; }
     // Keyboard activation for list rows exposed as role="button"
@@ -1464,29 +1435,6 @@ document.addEventListener('DOMContentLoaded', function(){
       e.target.click();
     }
   });
-
-  // Validate, look up any existing record by employee number, and save
-  function submitProfile(){
-    var lnEl = $('home-lastname-input'), enEl = $('home-empnum-input');
-    var btn = $('home-name-save-btn'), errEl = $('home-name-err');
-    if(!lnEl || !enEl) return;
-    var lastName = lnEl.value.trim(), empNum = enEl.value.trim();
-    if(!lastName || !empNum){
-      if(errEl) errEl.style.display = 'block';
-      return;
-    }
-    if(errEl) errEl.style.display = 'none';
-    if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
-    lookupProfile(empNum, function(existing){
-      if(existing && existing.lastName){
-        setProfile({ lastName: existing.lastName, employeeNumber: empNum });
-      } else {
-        setProfile({ lastName: lastName, employeeNumber: empNum });
-        saveProfileRemote(lastName, empNum);
-      }
-      renderHome();
-    });
-  }
 
   // Back
   var bkBtn = $('bk');
