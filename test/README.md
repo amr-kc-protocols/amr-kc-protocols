@@ -39,8 +39,7 @@ These suites live here:
   Defends the two things the revamp changed: that the sign-in is gone from the
   markup *and* the source (no endpoint left to post a name to), and that the
   layout becomes a real grid on a wide screen instead of stretching the phone
-  column edge to edge. Also checks the masthead's counts are read from the
-  loaded data rather than typed in, so they cannot go stale.
+  column edge to edge.
 
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
@@ -174,7 +173,7 @@ Grouped by the property being defended:
 |---|----------|
 | H1 | No name field, employee number, save button or sign-in copy anywhere on the page |
 | H2 | The profile code is gone from the source too — including the Apps Script endpoint it POSTed names to, and the `amrkc_profile` storage key |
-| H3 | The masthead renders, names the guide and the medical director, and its four counts match `D.formulary`, `D.hosp_meds` and `PCS_DATA` exactly |
+| H3 | The masthead renders and names the guide, the year and the medical director — and carries **no** inventory counts, staying compact enough to keep the trainings on the first screen |
 | H4 | Four screen sizes (1366, 1024, 820, 390): no sideways scroll anywhere; multi-column grids above 760px; content capped at 1180px and actually capped on a wider screen; still two-up on a phone |
 | H5 | The two featured trainings share a row on a Toughbook and stack on a phone |
 | H6 | Both trainings and all six quick actions are one tap away, and search still returns results |

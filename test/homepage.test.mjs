@@ -94,34 +94,24 @@ async function home(w, h) {
      !/script\.google\.com/.test(src));
   ok('H2 no profile record written to storage', !/amrkc_profile/.test(src)); }
 
-/* H3 — the masthead is there, and its numbers come from the real data */
+/* H3 — the masthead says whose guide this is, and nothing else */
 { const p = await home(1366, 768);
   ok('H3 masthead renders', await p.locator('.mast').isVisible());
   ok('H3 it names the guide', /Field Guide/.test(await p.locator('.mast-title').textContent()));
+  ok('H3 it names the year', /2026/.test(await p.locator('.mast-title').textContent()));
   ok('H3 it names the medical director',
      /Deshmukh/.test(await p.locator('.mast-sub').textContent()));
 
-  const facts = await p.locator('.mast-fact').evaluateAll(els =>
-    els.map(e => ({ n: e.querySelector('b').textContent.trim(),
-                    l: e.querySelector('span').textContent.trim() })));
-  ok('H3 four facts shown', facts.length === 4, JSON.stringify(facts));
+  // It deliberately carries no inventory counts. "96 facilities" told a crew
+  // nothing they could act on, and read as a statistic they had to decode.
+  ok('H3 no count chips', (await p.locator('.mast-fact').count()) === 0);
+  const mast = await p.locator('.mast').textContent();
+  ok('H3 no inventory numbers in the masthead',
+     !/\b\d{2,}\s*(medications|infusions|facilities)\b/i.test(mast), mast.trim().slice(0, 120));
 
-  // These must be counted from the loaded data, not typed into the markup —
-  // a hand-written "21 medications" goes stale the first time the formulary changes.
-  const real = await p.evaluate(() => ({
-    drugs: D.formulary.length,
-    hosp: D.hosp_meds.length,
-    doors: typeof PCS_DATA !== 'undefined' ? PCS_DATA.length : 0,
-  }));
-  const byLabel = (l) => (facts.find(f => f.l === l) || {}).n;
-  ok('H3 medication count matches the formulary',
-     byLabel('MEDICATIONS') === String(real.drugs), byLabel('MEDICATIONS') + ' vs ' + real.drugs);
-  ok('H3 infusion count matches the hospital meds list',
-     byLabel('HOSP INFUSIONS') === String(real.hosp), byLabel('HOSP INFUSIONS') + ' vs ' + real.hosp);
-  ok('H3 facility count matches the door-code data',
-     byLabel('FACILITIES') === String(real.doors), byLabel('FACILITIES') + ' vs ' + real.doors);
-  ok('H3 the counts are non-trivial', real.drugs > 5 && real.hosp > 5 && real.doors > 5,
-     JSON.stringify(real));
+  // Short enough that the trainings below it are on the first screen.
+  const box = await p.locator('.mast').boundingBox();
+  ok('H3 the masthead stays compact', box.height <= 260, Math.round(box.height) + 'px tall');
   await p.context().close(); }
 
 /* H4 — it lays out for the screen it is opened on */

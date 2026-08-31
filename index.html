@@ -602,7 +602,7 @@ background:var(--acb);color:var(--ac);font-size:16px}
 /* ── HOME MASTHEAD ─────────────────────────────────────────────────
    This is the first thing a crew sees when they open the Toughbook, so it
    has to say whose guide this is and what is inside it without being read. */
-.mast{position:relative;overflow:hidden;margin:10px 12px 12px;padding:20px 18px 16px;
+.mast{position:relative;overflow:hidden;margin:10px 12px 12px;padding:20px 18px 30px;
 border-radius:18px;color:#fff;background:linear-gradient(135deg,#0b3f75 0%,#14406f 42%,#0e7490 100%);
 box-shadow:0 10px 30px rgba(11,63,117,0.28)}
 .mast::before{content:"";position:absolute;inset:0;pointer-events:none;
@@ -614,11 +614,6 @@ text-transform:uppercase;color:#8fd3ea}
 text-shadow:0 2px 12px rgba(0,0,0,0.18)}
 .mast-title span{color:#8ee7ff}
 .mast-sub{font-size:13px;color:#cfe3f5;line-height:1.5;max-width:52ch}
-.mast-facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
-.mast-fact{background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.22);
-border-radius:11px;padding:7px 12px;min-width:78px}
-.mast-fact b{display:block;font-family:var(--mono);font-size:17px;font-weight:700;color:#fff;line-height:1.1}
-.mast-fact span{display:block;font-size:10px;color:#bcd8ee;letter-spacing:0.04em;margin-top:2px}
 .mast-ecg{position:absolute;left:0;right:0;bottom:0;height:46px;width:100%;pointer-events:none;opacity:0.5}
 .mast-ecg path{fill:none;stroke:#7fe3ff;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;
 vector-effect:non-scaling-stroke;animation:mastpulse 3.6s ease-in-out infinite}
@@ -642,7 +637,7 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
   #hdr .ht,#hdr .sw{max-width:1180px;margin-left:auto;margin-right:auto}
   .stat-strip{grid-template-columns:repeat(auto-fit,minmax(228px,1fr))}
   .qa-grid{grid-template-columns:repeat(auto-fit,minmax(205px,1fr))}
-  .mast{padding:26px 26px 20px}
+  .mast{padding:28px 26px 36px}
   .mast-title{font-size:38px}
   .mast-sub{font-size:14px}
 }
@@ -650,7 +645,6 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
   /* Two featured trainings side by side instead of two full-width bands. */
   .home-feats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 12px 14px}
   .home-feats .feat-card{margin:0;height:100%}
-  .mast-facts{gap:10px}
 }
 @media (min-width:1220px){
   /* Keep the fixed tab bar's items with the content rather than at the edges. */
@@ -976,22 +970,14 @@ function renderHome(){
   var c = $('lv');
   var h = '';
 
-  // Masthead. Counts come from the data actually loaded, so they cannot drift
-  // out of date the way a hand-typed "21 drugs" would.
-  var nDrugs = (D.formulary || []).length;
-  var nHosp = (D.hosp_meds || []).length;
-  var nDoors = (typeof PCS_DATA !== 'undefined' && PCS_DATA) ? PCS_DATA.length : 0;
+  // Masthead. Deliberately just the identity — a crew opening this needs to
+  // know whose guide it is and get past it, not read inventory counts.
   h += '<div class="mast"><div class="mast-in">';
   h += '<div class="mast-eyebrow">AMR Kansas City &middot; EMS</div>';
   h += '<div class="mast-title">Field Guide <span>2026</span></div>';
   h += '<div class="mast-sub">Protocols, doses and door codes &mdash; on the truck, offline, '
      + 'in your hand. Standing orders under Dr. Ameet Deshmukh, MD.</div>';
-  h += '<div class="mast-facts">';
-  h += '<div class="mast-fact"><b>' + nDrugs + '</b><span>MEDICATIONS</span></div>';
-  h += '<div class="mast-fact"><b>' + nHosp + '</b><span>HOSP INFUSIONS</span></div>';
-  if(nDoors) h += '<div class="mast-fact"><b>' + nDoors + '</b><span>FACILITIES</span></div>';
-  h += '<div class="mast-fact"><b>24/7</b><span>OFFLINE</span></div>';
-  h += '</div></div>';
+  h += '</div>';
   h += '<svg class="mast-ecg" viewBox="0 0 1200 46" preserveAspectRatio="none" aria-hidden="true">';
   h += '<path d="M0 30 H150 l14 -18 l12 32 l11 -24 l9 10 H430 l14 -18 l12 32 l11 -24 l9 10 '
      + 'H710 l14 -18 l12 32 l11 -24 l9 10 H990 l14 -18 l12 32 l11 -24 l9 10 H1200"/></svg>';
