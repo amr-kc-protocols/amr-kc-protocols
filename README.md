@@ -50,6 +50,34 @@ published, copyrighted instrument, and grading against an unapproved copy of
 it would be worse than not grading at all. A run records what the learner did
 at the unit and when, which is what a debrief is read from.
 
+### On a phone
+
+Most people open this on a phone, and the replica cannot serve them as drawn:
+it is a fixed 1083x704 chassis fitted with a single scale factor, which on a
+phone is 0.49. Measured across an iPhone SE, 12, 14 Pro Max, Pixel 7 and a
+360px Android, **26 of 27 controls came out under Apple's 44pt minimum in
+landscape on every one of them**, at a median of 21-26pt, with the smallest
+silkscreen at 8px — and portrait, which is how a phone is held, showed a
+prompt to turn it sideways into that.
+
+So below the scale where the chassis can still hold a 44pt control, the unit
+is **laid out rather than scaled**: the monitor sticks to the top of the
+screen while the controls scroll under it, in the manufacturer's own areas,
+at 56px. Held sideways it becomes two columns, monitor beside controls,
+because a phone in landscape has width to spare and no height at all.
+
+What that gives up is the millimetre geography — where a key sits relative to
+its neighbours — and that is a real loss, because it is half of what a crew
+learns from a replica. What it keeps is everything that survives: the same
+keys with the same names, the manufacturer's control areas in their own
+groups, the numbered 1-2-3 therapy path, and the screen reading as it does on
+the unit. A control geography nobody can hit teaches less than a grouping they
+can work. Above that scale — every iPad, every laptop — the replica is drawn
+exactly as before.
+
+The DOM is identical in both layouts, so there is one device and one set of
+behaviours to reason about; only the CSS differs.
+
 LIFEPAK is a trademark of Stryker. This is a training simulation and is not a
 medical device.
 

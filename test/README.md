@@ -214,9 +214,12 @@ Grouped by the property being defended:
 | L15 | Deep links (`?case=`, `?level=`, `?free`), and a name that means nothing falls back to the picker |
 | L16 | **Every control clears 44pt by real hit area** at three iPad sizes, the unit clears its own header and fits, no sideways scroll |
 | L17 | The header's height is measured, so a running case takes its room from the unit rather than from the bottom of the screen |
-| L18 | Portrait is announced rather than laid out, and the chassis is `inert` so the keyboard cannot reach SHOCK behind the notice |
-| L19 | Nothing of the two-window CES build came across — no relay, no panel channel, no panel link, no skin switcher |
-| L20 | Reachable from the home tile and the More list, and the cache version bumped so installed devices get it |
+| L18 | A portrait **tablet** is told to turn rather than given a stacked unit, and the chassis is `inert` so the keyboard cannot reach SHOCK behind the notice |
+| L19 | **Five phones, both orientations**: the laid-out unit rather than a rotate prompt, no sideways scroll, every control clears 44pt, and every control can actually be tapped at *some* scroll position — hit-tested at every offset, because a control the sticky monitor covers everywhere is a control with no path to it |
+| L20 | A whole case played through on three phones by **tapping**, with the page scrolled the way a thumb would: every tap lands on the key it aimed at, the case finishes, nothing missed |
+| L21 | Nothing of the two-window CES build came across — no relay, no panel channel, no panel link, no skin switcher |
+| L22 | Reachable from the home tile and the More list, and the cache version bumped so installed devices get it |
+| L23 | The progression bugs this page has had: a clock-driven phase that never advances (it deadlocked all three assessments), a unit left on across cases (it made the walkthrough's first instruction impossible), a step waiting on an alarm event the unit never logs (a guaranteed fail in a graded case), free play at a pointer's density on a phone, and the 12-lead at four columns on a 390px screen |
 
 When you change either tool, run `npm test` and add a scenario for any new behaviour.
 

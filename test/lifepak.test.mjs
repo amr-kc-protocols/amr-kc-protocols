@@ -417,36 +417,183 @@ for (const [w, h, name] of [[1024, 768, 'iPad 9.7 landscape'], [1180, 820, 'iPad
   await p.context().close();
 }
 
-/* L17 — the task line is measured, not assumed. A case whose task wraps has
-   to take that room from the unit rather than from the bottom of the screen. */
-{ const p = await fresh(PAGE, 820, 620);
-  await p.evaluate(() => startCase(1, 0)); await begin(p);
+/* L17 — the header's height is measured, not declared. A running case adds a
+   task line, and on a narrow screen that line wraps; a declared height would
+   hang the bottom of the unit off the screen. Checked where the chassis is
+   still drawn, and again where the phone layout is. */
+{ const p = await fresh(PAGE, 1180, 760);
+  await p.evaluate(() => startCase(2, 0)); await begin(p);
   const r = await p.evaluate(() => {
     const d = document.getElementById('device').getBoundingClientRect();
     const hh = document.getElementById('fgHdr').getBoundingClientRect().height;
-    return { top: d.top, hdr: hh, bottom: d.bottom, vh: window.innerHeight };
+    return { top: d.top, hdr: hh, bottom: d.bottom, vh: window.innerHeight,
+             phone: document.body.classList.contains('phone') };
   });
-  ok('L17 a running case still leaves the unit under its own header',
+  ok('L17 the chassis is still the chassis at this size', !r.phone);
+  ok('L17 a running case leaves the whole unit between the header and the floor',
      r.top >= r.hdr - 1 && r.bottom <= r.vh + 1, JSON.stringify(r));
   ok('L17 the header is taller while a case is running', r.hdr > 46, String(r.hdr));
   await p.context().close(); }
 
-/* L18 — portrait. The unit is not rearranged, and covering it is not enough:
-   without inert the whole chassis stays in the tab order behind the notice,
-   SHOCK included. */
-{ const p = await fresh(PAGE, 390, 844);
-  ok('L18 portrait is announced rather than laid out',
+{ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const p = await ctx.newPage();
+  await p.goto(PAGE + '?case=vf'); await p.waitForTimeout(700);
+  await p.click('#ovrBrief .ovrbtn.go'); await p.waitForTimeout(300);
+  const r = await p.evaluate(() => {
+    const d = document.getElementById('device').getBoundingClientRect();
+    const hh = document.getElementById('fgHdr').getBoundingClientRect().height;
+    const sc = document.getElementById('screenCol').getBoundingClientRect();
+    return { top: d.top, hdr: hh, screenTop: sc.top, vh: window.innerHeight };
+  });
+  ok('L17 on a phone the unit starts below its own header, however tall it grew',
+     r.top >= r.hdr - 1, JSON.stringify(r));
+  ok('L17 and the monitor is on screen before anything is scrolled',
+     r.screenTop >= r.hdr - 1 && r.screenTop < r.vh, JSON.stringify(r));
+  /* The monitor stays put while the controls scroll under it — the whole
+     reason it is sticky. A rhythm you cannot see while you press the key you
+     are pressing about it is the scenario reaching nobody. */
+  await p.evaluate(() => window.scrollTo(0, 900)); await p.waitForTimeout(400);
+  const after = await p.evaluate(() => {
+    const b = document.getElementById('screenWrap').getBoundingClientRect();
+    return { top: b.top, bottom: b.bottom, vh: window.innerHeight, y: window.scrollY };
+  });
+  ok('L17 the monitor is still on screen 900px down the controls',
+     after.y > 400 && after.bottom > 0 && after.top < after.vh, JSON.stringify(after));
+  await ctx.close(); }
+
+/* L18 — portrait on a unit-sized screen. The chassis is a landscape object
+   and is not rearranged into a column there; covering it is not enough
+   either, because without inert the whole thing stays in the tab order behind
+   the notice, SHOCK included. */
+{ const p = await fresh(PAGE, 1024, 1366);
+  ok('L18 a portrait tablet is told to turn, not given a stacked unit',
      await p.evaluate(() => document.body.classList.contains('portrait')));
   ok('L18 the unit is inert behind the notice',
      await p.evaluate(() => document.getElementById('device').hasAttribute('inert')));
   ok('L18 so the keyboard cannot reach SHOCK',
      await p.evaluate(() => { const b = document.getElementById('kSHOCK'); b.focus(); return document.activeElement !== b; }));
-  ok('L18 the picker is still readable in portrait', await p.locator('#ovrLevels').isVisible());
-  ok('L18 no sideways scroll on a phone',
-     await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   await p.context().close(); }
 
-/* L19 — nothing of the two-window CES build came across. Any of these left in
+/* L19 — the phone. Most people open this on one, and the fixed chassis cannot
+   serve them: it is drawn at 1083x704 and fitted with a single scale factor,
+   which on a phone is 0.49. Measured before this layout existed, 26 of 27
+   controls were under 44pt on every phone in landscape, and portrait showed a
+   prompt to turn the phone into that. So below the scale where the replica can
+   hold the touch floor, the unit is laid out instead of scaled. */
+const PHONES = [['iPhone SE', 375, 667], ['iPhone 12/13/14', 390, 844],
+                ['iPhone 14 Pro Max', 430, 932], ['Pixel 7', 412, 915], ['small Android', 360, 800]];
+for (const [name, w, h] of PHONES) {
+  for (const [vw, vh, orient] of [[w, h, 'portrait'], [h, w, 'landscape']]) {
+    const ctx = await browser.newContext({ viewport: { width: vw, height: vh }, isMobile: true, hasTouch: true });
+    const p = await ctx.newPage();
+    const errs = []; p.on('pageerror', e => errs.push(e.message));
+    await p.goto(PAGE); await p.waitForTimeout(700);
+    const r = await p.evaluate(() => ({
+      phone: document.body.classList.contains('phone'),
+      rotate: getComputedStyle(document.getElementById('rotate')).display !== 'none',
+      inert: document.getElementById('device').hasAttribute('inert'),
+      overflowX: document.documentElement.scrollWidth - window.innerWidth,
+      scrolls: document.documentElement.scrollHeight > window.innerHeight,
+    }));
+    ok(`L19 ${name} ${orient} gets the laid-out unit, not a rotate prompt`,
+       r.phone && !r.rotate && !r.inert, JSON.stringify(r));
+    ok(`L19 ${name} ${orient} does not scroll sideways`, r.overflowX <= 1, String(r.overflowX));
+    ok(`L19 ${name} ${orient} scrolls down to its controls`, r.scrolls);
+
+    await p.evaluate(() => { closeAllOverlays(); setPower(true); });
+    await p.waitForTimeout(2000);
+    const small = await p.evaluate(() => {
+      const out = [];
+      document.querySelectorAll('#device button,#device .dial').forEach(el => {
+        if (!el.checkVisibility || !el.checkVisibility()) return;
+        const b = el.getBoundingClientRect();
+        if (Math.min(b.width, b.height) < 44) out.push((el.id || el.className) + ' ' + Math.min(b.width, b.height).toFixed(0));
+      });
+      return out;
+    });
+    ok(`L19 ${name} ${orient} every control clears 44pt`, small.length === 0, small.join(', '));
+
+    /* A control the sticky monitor or the fixed chrome covers at every scroll
+       position is a control with no path to it, however big its box is. */
+    const unreachable = await p.evaluate(() => {
+      const ctrls = [...document.querySelectorAll('#device button,#device .dial')]
+        .filter(e => e.checkVisibility && e.checkVisibility());
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const bad = [];
+      for (const el of ctrls) {
+        let ok = false;
+        for (let y = 0; y <= max + 40 && !ok; y += 40) {
+          window.scrollTo(0, Math.min(y, max));
+          const b = el.getBoundingClientRect();
+          const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+          if (cy < 0 || cy > window.innerHeight) continue;
+          const n = document.elementFromPoint(cx, cy);
+          if (n && (n === el || el.contains(n))) ok = true;
+        }
+        if (!ok) bad.push(el.id || el.className);
+      }
+      window.scrollTo(0, 0);
+      return bad;
+    });
+    ok(`L19 ${name} ${orient} every control can actually be tapped somewhere`,
+       unreachable.length === 0, unreachable.join(', '));
+    ok(`L19 ${name} ${orient} no errors`, errs.length === 0, errs.join('|'));
+    await ctx.close();
+  }
+}
+
+/* L20 — a case played through on a phone, tapped rather than clicked, with the
+   page scrolled the way a thumb would scroll it. */
+for (const [name, w, h] of [['iPhone 14 portrait', 390, 844], ['iPhone SE portrait', 375, 667],
+                            ['iPhone 14 landscape', 844, 390]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
+  const p = await ctx.newPage();
+  const errs = []; p.on('pageerror', e => errs.push(e.message));
+  await p.goto(PAGE + '?case=vf'); await p.waitForTimeout(700);
+  const bb = await p.locator('#ovrBrief .ovrbtn.go').boundingBox();
+  await p.touchscreen.tap(bb.x + bb.width / 2, bb.y + bb.height / 2);
+  await p.waitForTimeout(300);
+  const thumb = async (id, ms) => {
+    await p.evaluate(sel => {
+      const el = document.getElementById(sel); if (!el) return;
+      const hdr = document.getElementById('fgHdr').getBoundingClientRect().bottom;
+      const sc = document.getElementById('screenCol');
+      const sb = sc ? sc.getBoundingClientRect() : null;
+      // The monitor blocks the top of the page only when it spans it; sideways
+      // it is a column beside the controls and blocks nothing.
+      const top = (sb && sb.width > window.innerWidth * 0.8) ? Math.max(hdr, sb.bottom) : hdr;
+      const r = el.getBoundingClientRect();
+      window.scrollBy(0, (r.top + r.height / 2) - (top + window.innerHeight) / 2);
+    }, id);
+    await p.waitForTimeout(90);
+    const b = await p.locator('#' + id).boundingBox();
+    if (!b) return 'no box';
+    const x = b.x + b.width / 2, y = b.y + b.height / 2;
+    const hit = await p.evaluate(([x, y, sel]) => {
+      const n = document.elementFromPoint(x, y), el = document.getElementById(sel);
+      return !!(n && el && (n === el || el.contains(n)));
+    }, [x, y, id]);
+    if (!hit) return 'covered';
+    await p.touchscreen.tap(x, y); await p.waitForTimeout(ms);
+    return 'ok';
+  };
+  const trouble = [];
+  for (const [id, ms] of [['kON', 2200], ['kANALYZE', 9500], ['kCHARGE', 6800], ['kSHOCK', 700],
+                          ['kCPR', 2600], ['kEnergyUp', 350], ['kCHARGE', 6800], ['kSHOCK', 2600],
+                          ['kNIBP', 27500], ['k12LEAD', 1400]]) {
+    const r = await thumb(id, ms); if (r !== 'ok') trouble.push(id + ':' + r);
+  }
+  await p.keyboard.press('Escape'); await p.waitForTimeout(1800);
+  ok(`L20 ${name} — every tap in a whole case landed on the key it aimed at`,
+     trouble.length === 0, trouble.join(', '));
+  ok(`L20 ${name} — the case finished and debriefed`,
+     (await p.evaluate(() => RUN === null)) && await p.locator('#ovrDebrief').isVisible());
+  ok(`L20 ${name} — with nothing missed`, (await p.locator('#ovrDebrief .dbrow.miss').count()) === 0);
+  ok(`L20 ${name} — no errors`, errs.length === 0, errs.join('|'));
+  await ctx.close();
+}
+
+/* L21 — nothing of the two-window CES build came across. Any of these left in
    would be a control with a dead path behind it. */
 { const src = await readFile(join(ROOT, 'lifepak-15.html'), 'utf8');
   for (const [pat, what] of [
@@ -456,22 +603,105 @@ for (const [w, h, name] of [[1024, 768, 'iPad 9.7 landscape'], [1180, 820, 'iPad
     [/localStorage\.getItem\('simState'\)/, "the panel's state snapshot"],
     [/simCmd12Lead/, "the panel's 12-lead command"],
     [/id="skinbar"|setSkin\('zx'\)/, 'the skin switcher'],
-  ]) ok('L19 no ' + what + ' left in the page', !pat.test(src), (src.match(pat) || [])[0]);
-  ok('L19 the page says where the unit came from', /CES simulator/.test(src));
-  ok('L19 and that it is not a medical device', /not a medical device/.test(src)); }
+  ]) ok('L21 no ' + what + ' left in the page', !pat.test(src), (src.match(pat) || [])[0]);
+  ok('L21 the page says where the unit came from', /CES simulator/.test(src));
+  ok('L21 and that it is not a medical device', /not a medical device/.test(src)); }
 
-/* L20 — reachable from the field guide, and installed devices get it */
+/* L22 — reachable from the field guide, and installed devices get it */
 { const idx = await readFile(join(ROOT, 'index.html'), 'utf8');
-  ok('L20 there is a tile on the home screen', /stat-tile[^']*'[^]*?href="lifepak-15\.html"/.test(idx)
+  ok('L22 there is a tile on the home screen', /stat-tile[^']*'[^]*?href="lifepak-15\.html"/.test(idx)
      || /href="lifepak-15\.html"/.test(idx));
-  ok('L20 and a card in the More list', (idx.match(/lifepak-15\.html/g) || []).length >= 2);
+  ok('L22 and a card in the More list', (idx.match(/lifepak-15\.html/g) || []).length >= 2);
   const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');
-  ok('L20 the cache version was bumped so installed devices see it',
+  ok('L22 the cache version was bumped so installed devices see it',
      /amrkc-2026-v(?:1[3-9]|[2-9]\d)/.test(sw), (sw.match(/amrkc-2026-v\d+/) || [])[0]);
   const p = await fresh(ORIGIN + '/index.html');
   const href = await p.locator('a[href="lifepak-15.html"]').first();
-  ok('L20 the link is really on the rendered homepage', (await p.locator('a[href="lifepak-15.html"]').count()) >= 1);
+  ok('L22 the link is really on the rendered homepage', (await p.locator('a[href="lifepak-15.html"]').count()) >= 1);
   await p.context().close(); }
+
+/* L23 — the progression bugs this page has actually had. Each of these made
+   something unfinishable, and none of them threw an error while doing it. */
+
+/* A phase that ends on the clock is advanced by the run's own tick, which
+   fires once a second; the hold before the change is 1200ms. Re-arming the
+   hold on every tick cleared it 80ms before it would have fired, every time,
+   for ever — so all three assessments could reach their last rhythm and never
+   leave it, and the debrief they are graded from was unreachable. */
+{ const p = await fresh(PAGE + '?case=a2');
+  await begin(p); await powerUp(p);
+  await p.click('#kCPR'); await p.waitForTimeout(300);
+  await p.click('#kANALYZE'); await p.waitForTimeout(9500);
+  await p.click('#kCHARGE'); await p.waitForTimeout(6500);
+  await p.click('#kSHOCK'); await p.waitForTimeout(8000);
+  ok('L23 a shock moves the case on', await p.evaluate(() => RUN.phase.id === 'asys'));
+  const t0 = Date.now();
+  await p.waitForTimeout(56000);            // past the phase's own advanceAfter
+  ok('L23 a phase that ends on the clock actually ends',
+     await p.evaluate(() => !RUN || RUN.phase.id !== 'asys'),
+     'still in asystole after ' + Math.round((Date.now() - t0) / 1000) + 's');
+  await p.context().close(); }
+
+/* ON does nothing when the unit is already on — correctly, that is the key's
+   behaviour. So a case that started on a unit left running by the last case
+   made the walkthrough's first instruction impossible to follow. */
+{ const p = await fresh(PAGE + '?case=vf');
+  await begin(p); await powerUp(p);
+  ok('L23 the unit is on at the end of a case', await p.evaluate(() => D.on));
+  await p.evaluate(() => startCase(1, 0)); await p.waitForTimeout(300);
+  ok('L23 the next case starts on a unit that is off', await p.evaluate(() => D.on === false));
+  await begin(p);
+  await p.click('#kON'); await p.waitForTimeout(2000);
+  ok('L23 so the first thing the walkthrough asks for can be done',
+     await p.evaluate(() => RUN.stepIx === 1), await p.locator('#fgTaskText').textContent());
+  await p.context().close(); }
+
+/* A step nobody can satisfy is a guaranteed miss, and in a graded case a
+   guaranteed fail. Three of these shipped, all waiting on an ALARMS ON event
+   the unit never logs because the alarms start enabled and nothing turns them
+   off. This asserts the property rather than the three instances. */
+{ const p = await fresh();
+  const suspect = await p.evaluate(() => {
+    const out = [];
+    Object.keys(LEVELS).forEach(n => LEVELS[n].cases.forEach(c => c.phases.forEach(ph =>
+      ph.steps.forEach(st => {
+        if (st.passive || !st.need) return;
+        const src = st.need.toString();
+        // The unit logs ALARMS ON only from a state it is never in.
+        if (/type===.alarms.*\/ON\//.test(src) || /\/ON\/.*type===.alarms./.test(src))
+          out.push(c.id + ':' + st.id);
+      }))));
+    return out;
+  });
+  ok('L23 no step waits on an alarm event this unit never logs', suspect.length === 0, suspect.join(', '));
+  await p.context().close(); }
+
+/* Free play is the one panel authored at a pointer's density, and the 12-lead
+   is the one document authored for a printout. Both are worked on a phone. */
+{ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const p = await ctx.newPage();
+  await p.goto(PAGE + '?free'); await p.waitForTimeout(800);
+  const small = await p.evaluate(() => [...document.querySelectorAll('#ovrFree button,#ovrFree input')]
+    .map(e => e.getBoundingClientRect())
+    .filter(b => b.width > 0 && Math.min(b.width, b.height) < 44).length);
+  ok('L23 free play is worked with a thumb on a phone', small === 0, String(small) + ' under 44pt');
+
+  await p.goto(PAGE + '?case=stemi'); await p.waitForTimeout(800);
+  await p.click('#ovrBrief .ovrbtn.go'); await p.waitForTimeout(200);
+  await p.evaluate(() => setPower(true)); await p.waitForTimeout(2100);
+  await p.evaluate(() => open12Lead()); await p.waitForTimeout(1400);
+  const g = await p.evaluate(() => {
+    const d = document.getElementById('ovr12frame').contentDocument;
+    if (!d) return null;
+    const lead = d.querySelector('.lead');
+    return { cols: getComputedStyle(d.querySelector('.grid')).gridTemplateColumns.split(' ').length,
+             leadW: Math.round(lead.getBoundingClientRect().width),
+             overflowX: d.documentElement.scrollWidth - d.documentElement.clientWidth };
+  });
+  ok('L23 the 12-lead drops to two columns on a phone', g && g.cols === 2, JSON.stringify(g));
+  ok('L23 so each lead gets enough width to read a morphology from', g && g.leadW >= 150, JSON.stringify(g));
+  ok('L23 and it does not scroll sideways', g && g.overflowX <= 1, JSON.stringify(g));
+  await ctx.close(); }
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fails.length) { console.log('\nFailures:'); fails.forEach(f => console.log(' - ' + f)); }

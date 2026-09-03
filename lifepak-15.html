@@ -640,6 +640,239 @@ body.booting #screen>*{visibility:hidden;}
 
 
 /* =====================================================================
+   Phone layout
+   =====================================================================
+   The LIFEPAK is drawn at 1083x704 and scaled to fit. That works down to a
+   landscape iPad and stops working below it: the fit is a single scale factor,
+   so at the 0.49 a phone reaches, every control comes out at 21-26pt against a
+   44pt floor and the smallest silkscreen lands at 8px. Measured on an iPhone
+   SE, 12, 14 Pro Max, Pixel 7 and a 360px Android — 26 of 27 controls under
+   44pt in landscape, on every one of them. And portrait, which is how a phone
+   is actually held, showed a prompt to turn it sideways into that.
+
+   So below the size where the chassis can hold the touch floor, the unit is
+   laid out rather than scaled. What that gives up is the millimetre geography
+   — where a key sits relative to its neighbours — and that is a real loss,
+   because it is half of what a crew learns from a replica. What it keeps is
+   everything that survives the change: the same keys with the same names, the
+   manufacturer's own control areas in their own groups, the numbered 1-2-3
+   therapy path, and the screen above it all reading exactly as it does on the
+   unit. A control geography nobody can hit teaches less than a grouping they
+   can work.
+
+   The DOM is identical in both layouts. Nothing below changes a binding, an
+   id, or what any key does — it is all layout, so there is one device and one
+   set of behaviours to reason about.
+   ===================================================================== */
+
+/* The instrument layout pins html and body to the viewport and hides the
+   overflow, because a fixed-size unit scaled to fit has nothing to scroll.
+   The phone layout is taller than the screen by design, so the document has
+   to scroll — and it has to be the document, not the body: body scrolling
+   inside a clipped html left everything below the first screenful painted
+   nowhere and made position:sticky meaningless, because sticky needs a
+   scrolling ancestor to stick inside. The class goes on both. */
+/* No overflow-x:hidden here, however tempting. Setting it on html or body
+   computes overflow-y to auto, which makes them a scroll container — and a
+   sticky descendant then sticks to that instead of to the viewport, which is
+   to say it does not stick at all. It cost the monitor its whole reason for
+   being sticky: scrolling down to SHOCK took the rhythm off the screen.
+   Nothing here overflows sideways anyway; that is measured, not assumed. */
+html.phone,html.phone body.phone{
+  height:auto;min-height:100%;overflow:visible;
+  -webkit-overflow-scrolling:touch;
+}
+/* The monitor's height on a phone, named once: the sticky block, the scroll
+   margins that keep controls clear of it, and the layout all have to agree. */
+body.phone{--scrh:min(46vh,320px);}
+body.phone.lp-skin #device{
+  position:static;transform:none;width:auto;height:auto;
+  display:block;padding:8px calc(8px + env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom));
+  background:#14161a;box-shadow:none;border-radius:0;
+  margin-top:var(--hdrh,0px);
+}
+/* The handle, the hazard strip and the printer door are the parts of the
+   chassis that carry nothing. On a screen this size they are a scroll. */
+body.phone.lp-skin #devHandle,
+body.phone.lp-skin #devFoot,
+body.phone.lp-skin #devUnder{display:none;}
+body.phone.lp-skin #devMain{display:flex;flex-direction:column;gap:10px;height:auto;}
+
+/* The screen stays on screen. Scrolling to a key you have to press must never
+   take the rhythm you are pressing it about out of sight — that is the whole
+   reason this is sticky rather than simply first. */
+body.phone.lp-skin #screenCol{
+  order:1;position:sticky;top:calc(var(--hdrh,0px) - 8px);z-index:30;
+  padding:8px 0 6px;margin:-8px 0 0;background:#14161a;
+  display:flex;flex-direction:column;gap:4px;
+}
+body.phone.lp-skin .screenLabel{height:20px;font-size:10px;}
+body.phone.lp-skin .screenLabel span{font-size:9px;}
+body.phone.lp-skin #screenWrap{
+  flex:none;height:var(--scrh);min-height:190px;border-width:3px;
+}
+/* Anything scrolled into view has to arrive somewhere it can be tapped. The
+   sticky monitor and the fixed header sit over the top of the page and the
+   audio notice over the bottom, so a control scrolled flush to either edge
+   lands underneath one of them. That is not only the browser's own scrolling:
+   it is every focus move and every scrollIntoView. */
+body.phone.lp-skin #device button,
+body.phone.lp-skin #device .dial{
+  scroll-margin-top:calc(var(--hdrh,0px) + var(--scrh) + 44px);
+  scroll-margin-bottom:78px;
+}
+/* Room under the last control for the audio notice to sit over nothing. */
+body.phone.lp-skin #chromeLeft{padding-bottom:64px;}
+/* Narrower parameter column: 138px of a 360px screen is more than a third of
+   the waveform area, and the numbers are large enough to survive the trim. */
+body.phone.lp-skin #lpNums{width:104px;}
+body.phone.lp-skin #top{left:104px;}
+body.phone.lp-skin #wavearea{left:104px;}
+body.phone.lp-skin .lpval{font-size:30px;}
+/* The screen's small print, sized for a phone rather than for a 10-inch unit
+   two feet away. Twenty-two runs on this screen sat between 8 and 10px: the
+   parameter names, their units, and the waveform scales. The big numerics
+   carry the reading, but a number whose label cannot be read is a number
+   nobody can act on. The bezel silkscreen stays small — that is what the
+   plastic on the real unit looks like, and nothing depends on reading it. */
+body.phone.lp-skin .lphd{font-size:10.5px;}
+body.phone.lp-skin .lphd .lpunit,body.phone.lp-skin #lpTu{font-size:9.5px;}
+body.phone.lp-skin .yl{font-size:9px;}
+body.phone.lp-skin .ws{font-size:10.5px;}
+body.phone.lp-skin #dSize{font-size:10px;}
+body.phone.lp-skin .diallbl{font-size:11px;}
+body.phone .fgbadge{font-size:10px;}
+body.phone .fgphase{font-size:11px;}
+
+body.phone.lp-skin #chromeRight{order:2;display:block;width:auto;}
+body.phone.lp-skin #chromeLeft{order:3;display:block;width:auto;}
+body.phone.lp-skin .lspacer{display:none;}
+
+/* Each area keeps its own identity and its own name, so the grouping the
+   manual teaches survives the loss of the geography. */
+body.phone.lp-skin .area{padding:9px;border-radius:10px;margin-bottom:10px;}
+body.phone.lp-skin .area::before{
+  content:attr(data-area);display:block;grid-column:1 / -1;
+  font:700 9px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1.4px;
+  color:#3d4144;text-transform:uppercase;margin:0 0 7px 2px;
+}
+body.phone.lp-skin .arow{display:block;}
+body.phone.lp-skin .a2,body.phone.lp-skin .a3{margin-bottom:10px;}
+
+/* Keys at a size a gloved thumb can hit, two across. */
+body.phone.lp-skin .a1left,
+body.phone.lp-skin .a1right,
+body.phone.lp-skin .a2,
+body.phone.lp-skin .a3,
+body.phone.lp-skin .a5{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+/* Area 2 is a column: the two rockers between PACER and PAUSE span the grid,
+   so a two-column rule left each of those two keys alone on its own row with
+   a hole beside it. */
+body.phone.lp-skin .a2{grid-template-columns:1fr;}
+body.phone.lp-skin .a1body{display:block;}
+body.phone.lp-skin .a1num{display:none;}
+body.phone.lp-skin .a1right{margin-top:8px;padding:8px;}
+body.phone.lp-skin .k,body.phone.lp-skin .fk,body.phone.lp-skin .rk{
+  min-height:56px;font-size:13px;padding-left:20px;
+}
+body.phone.lp-skin .krow{display:contents;}
+body.phone.lp-skin .k.half{width:auto;}
+/* ON and SHOCK are the two that must never be hunted for. */
+body.phone.lp-skin .on-k{grid-column:1 / -1;min-height:60px;}
+body.phone.lp-skin .shockrow{grid-column:1 / -1;justify-content:center;padding:4px 0;}
+body.phone.lp-skin .shock{width:88px;height:88px;}
+body.phone.lp-skin .charge-k{grid-column:1 / -1;min-height:60px;}
+body.phone.lp-skin .updown{grid-column:1 / -1;min-height:60px;}
+body.phone.lp-skin .updown .ud{flex:0 0 74px;}
+body.phone.lp-skin .arow .updown .udlbl{font-size:13px;}
+body.phone.lp-skin .updown .udlbl{font-size:13px;}
+body.phone.lp-skin .vfdose{font-size:11px;padding:5px;}
+body.phone.lp-skin .ledrow{grid-column:1 / -1;justify-content:flex-start;gap:14px;}
+
+/* Area 4: the dial is a drag target, so it gets room rather than a corner. */
+body.phone.lp-skin .a4{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:0;}
+body.phone.lp-skin .a4 .rk{flex:1;min-width:120px;}
+body.phone.lp-skin .dialwrap{flex:1 0 100%;display:flex;align-items:center;justify-content:center;gap:12px;}
+body.phone.lp-skin .dial{width:96px;height:96px;}
+
+/* The header has to hold everything it holds at 1180px in 360. It wraps
+   rather than overflowing — an EDU ONLY badge off the right-hand edge is the
+   one label on this page that has to be readable — and the fit measures what
+   that costs rather than assuming a row. */
+body.phone .fgtop{flex-wrap:wrap;row-gap:6px;}
+/* The page title goes. The unit's own LIFEPAK 15 MONITOR/DEFIBRILLATOR label
+   sits forty pixels below it, so on a phone it was the same words twice at
+   the cost of the row fitting at all. Everything else stays, EDU ONLY
+   included — that is the label that has to be readable. */
+body.phone .fgttl{display:none;}
+body.phone #fsBtn{display:none;}
+body.phone .fgbtn{padding:0 9px;font-size:11px;}
+body.phone .fgspace{flex-basis:0;}
+/* Two rows, not four: what is being asked reads across the full width, and
+   the buttons that act on the run share the line above it with the phase. */
+body.phone #fgTask{flex-wrap:wrap;row-gap:5px;}
+body.phone .fgphase{order:1;}
+body.phone .fgtick{order:2;}
+body.phone #fgTask .fgbtn,body.phone #btnSkip{order:3;}
+body.phone #btnSkip{margin-left:auto;}
+body.phone .fgtask{order:9;font-size:13px;}
+/* Only a narrow screen has to give the task line a row of its own. A phone
+   held sideways has 844px of width and needs the height far more: forcing
+   the wrap there cost 109px of a 390px screen before a single control. */
+@media (max-width:560px){ body.phone .fgtask{flex:1 1 100%;} }
+
+/* A phone held sideways: wide and very short. Stacking the monitor above the
+   controls leaves 91px of the 390 for the controls themselves, and ON, HOME
+   SCREEN, the speed dial and the display key could not be reached at any
+   scroll position — measured, by hit-testing every control at every offset.
+   Landscape has width to spend instead, so the monitor takes a column and the
+   controls scroll beside it. */
+@media (min-width:620px) and (max-height:560px){
+  body.phone{--scrh:min(66vh,290px);}
+  body.phone.lp-skin #devMain{
+    display:grid;grid-template-columns:42% 1fr;gap:10px;
+    grid-template-areas:"screen right" "screen left";align-items:start;
+  }
+  body.phone.lp-skin #screenCol{grid-area:screen;top:calc(var(--hdrh,0px) + 6px);}
+  body.phone.lp-skin #chromeRight{grid-area:right;}
+  body.phone.lp-skin #chromeLeft{grid-area:left;}
+  body.phone.lp-skin #device button,
+  body.phone.lp-skin #device .dial{scroll-margin-top:calc(var(--hdrh,0px) + 12px);}
+  /* Sideways there is no spare height at the bottom, so the audio notice goes
+     over the monitor's column — which holds no controls — rather than over
+     the keys. */
+  body.phone #armAudio{left:8px;right:auto;transform:none;max-width:40%;
+    font-size:11px;padding:0 10px;text-align:left;}
+  /* Sideways the parameter column divides about 250px between five blocks, so
+     a 30px value crowds the header above it. The number still dominates. */
+  body.phone.lp-skin .lpval{font-size:23px;}
+  body.phone.lp-skin .lphd{font-size:9.5px;}
+}
+
+/* The audio notice sits under the page header, which on a phone is directly
+   over the top of the monitor. It waits at the bottom instead, where it
+   covers a key rather than the rhythm, and it is gone on the first tap. */
+body.phone #armAudio{
+  top:auto;bottom:calc(10px + env(safe-area-inset-bottom));
+  position:fixed;z-index:96;
+}
+body.phone #fgToast{top:auto;bottom:calc(64px + env(safe-area-inset-bottom));}
+
+/* Free play is the one panel built at a pointer's density. On a phone its
+   rhythm buttons and sliders are worked with a thumb like everything else. */
+body.phone .fpb{min-height:46px;padding:0 13px;font-size:12px;}
+body.phone .fprow{gap:7px;margin-bottom:10px;}
+body.phone .fprow input[type=range]{height:46px;}
+body.phone .fprow label{width:54px;}
+body.phone .ovrbtn{min-height:50px;}
+body.phone .lvcard{min-height:62px;}
+
+/* Portrait is a layout now, not a notice. */
+body.phone.lp-skin.portrait #rotate{display:none;}
+
+/* =====================================================================
    Field guide shell
    =====================================================================
    Everything above this line is the LIFEPAK. Everything below it is the
@@ -902,7 +1135,7 @@ body.portrait .ovr{z-index:220;}
        bottom corner under it. -->
   <div id="chromeLeft">
    <div class="lspacer"></div>
-   <div class="area a5">
+   <div class="area a5" data-area="Area 5 · Records">
     <button class="fk" id="k12LEAD">12-LEAD</button>
     <button class="fk" id="kTRANSMIT">TRANSMIT</button>
     <button class="fk" id="kCODESUM">CODE<br>SUMMARY</button>
@@ -1081,7 +1314,7 @@ body.portrait .ovr{z-index:220;}
          of the LIFEPAK 15 operating instructions: the numbered 1-2-3 therapy
          path runs down the recessed sub-panel on the right, the ECG and CPR
          keys down the left. -->
-    <div class="area a1">
+    <div class="area a1" data-area="Area 1 · Defibrillation">
       <div class="vfdose">Recommended<br><b>Adult VF Dose: 200-300-360J</b></div>
       <div class="a1body">
         <div class="a1left">
@@ -1123,13 +1356,13 @@ body.portrait .ovr{z-index:220;}
          They are two separate tables in the manual, which is why they were
          stacked here first; the unit puts them shoulder to shoulder. -->
     <div class="arow">
-      <div class="area a3">
+      <div class="area a3" data-area="Area 3 · Monitoring">
         <button class="k" id="kNIBP"><i class="led" id="ledNIBP"></i>NIBP</button>
         <button class="k alarms-k" id="kALARMS"><i class="led" id="ledALARMS"></i>ALARMS</button>
         <button class="k" id="kOPTIONS">OPTIONS</button>
         <button class="k" id="kEVENT">EVENT</button>
       </div>
-      <div class="area a2">
+      <div class="area a2" data-area="Area 2 · Pacing">
         <button class="k" id="kPACER"><i class="led" id="ledPACER"></i>PACER</button>
         <div class="k updown" id="kRATE">
           <button class="ud" id="kRateDn" aria-label="Pacing rate down">▼</button><span class="udlbl">RATE</span><button class="ud" id="kRateUp" aria-label="Pacing rate up">▲</button>
@@ -1141,7 +1374,7 @@ body.portrait .ovr{z-index:220;}
       </div>
     </div>
 
-    <div class="area a4">
+    <div class="area a4" data-area="Area 4 · Display">
       <button class="rk" id="kHOME" title="Returns to Home Screen display">
         <svg viewBox="0 0 24 24"><path d="M12 3 3 11h2v9h5v-6h4v6h5v-9h2z" fill="currentColor"/></svg>
         <span>HOME<br>SCREEN</span>
@@ -2411,6 +2644,7 @@ function open12Lead(){
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>12-Lead ECG — ${rhythmKey.toUpperCase()}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -2435,6 +2669,14 @@ h2{color:#00ff00;font-size:14px;letter-spacing:2px;text-align:center;margin-bott
 .lead-name{font-size:10px;color:#aaa;letter-spacing:1px;position:absolute;top:3px;left:5px;z-index:2;}
 canvas{display:block;width:100%;height:100%;}
 .rhythm-row{grid-column:span 4;border-right:none;}
+/* On a phone, two columns and a scroll. Four across gives each lead about a
+   second of trace, and a morphology is the whole reason to look at one. */
+@media (max-width:620px){
+  .grid{grid-template-columns:1fr 1fr;}
+  .lead:nth-child(4n){border-right:1px solid #222;}
+  .lead:nth-child(2n){border-right:none;}
+  .rhythm-row{grid-column:span 2;}
+}
 .rhythm-row canvas{width:100%;height:70px;}
 .footer{text-align:center;font-size:10px;color:#555;margin-top:6px;letter-spacing:1px;}
 .rate-info{display:flex;justify-content:center;gap:30px;margin:4px 0;font-size:11px;}
@@ -3319,6 +3561,26 @@ function fitDevice(){
   const compact=vh<790;
   document.body.classList.toggle('compact',compact);
   const k=Math.min(vw/DEV_W, vh/(compact?DEV_H_COMPACT:DEV_H));
+
+  /* Below the scale at which the chassis can still hold a 44pt control, the
+     unit is laid out instead of scaled. 0.917 is where that line falls: the
+     smallest control is 48 design px, and 48 x 0.917 is 44. Above it nothing
+     changes and the replica is drawn exactly as before. */
+  const phone=k<0.917;
+  const wasPhone=document.body.classList.contains('phone');
+  document.body.classList.toggle('phone',phone);
+  document.documentElement.classList.toggle('phone',phone);
+  if(phone){
+    el.style.transform=''; el.style.width=''; el.style.height='';
+    el.removeAttribute('inert');
+    document.body.classList.remove('portrait');
+    /* Only on the way in. fitDevice() is called from renderTask(), which runs
+       once a second for the whole of a case — repainting every canvas on each
+       of those ticks is a stutter a phone can least afford. */
+    if(!wasPhone||devScale!==1){ devScale=1; invalidateCanvases(); }
+    return;
+  }
+  if(wasPhone) invalidateCanvases();
   // Portrait is not a shape this unit has. Rather than shrink it to 70% and
   // put every control below the touch minimum, say so — see #rotate.
   const portrait=vhFull>vw*1.05;
@@ -3703,7 +3965,8 @@ function buildCodeSummary(){
     const mm=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
     return `<tr><td>${mm}</td><td>${esc(e.label)}</td><td>${esc(e.detail)}</td></tr>`;
   }).join('');
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Code Summary</title>
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Code Summary</title>
 <style>body{background:#fff;color:#111;font-family:'Courier New',monospace;padding:16px;}
 h2{font-size:15px;letter-spacing:1px;margin:0 0 6px;}
 .sum{margin:6px 0 10px;font-weight:bold;}
@@ -3772,15 +4035,29 @@ function bind(id,fn){ const el=document.getElementById(id); if(el) el.addEventLi
    turns the unit off when held, PAUSE slows pacing only while held. */
 function bindHold(id,ms,onHold,onRelease,onTap){
   const el=document.getElementById(id); if(!el) return;
-  let timer=null,fired=false;
-  const down=e=>{ e.preventDefault(); ac(); fired=false; el.classList.add('held');
+  let timer=null,fired=false,pressed=false;
+  const start=e=>{ e.preventDefault(); ac(); pressed=true; fired=false; el.classList.add('held');
     timer=setTimeout(()=>{fired=true;onHold&&onHold();},ms); };
-  const up=()=>{ clearTimeout(timer); el.classList.remove('held');
-    if(fired){ onRelease&&onRelease(); } else { onTap&&onTap(); } };
-  el.addEventListener('pointerdown',down);
-  el.addEventListener('pointerup',up);
-  el.addEventListener('pointerleave',up);
-  el.addEventListener('pointercancel',up);
+  /* Leaving the key is not pressing it, and finishing is not something that
+     can happen twice. Both were true here: pointerleave ran the same handler
+     as pointerup, so sliding a thumb off ON and lifting elsewhere still
+     switched the unit on — and on a touch screen the leave arrives *after*
+     the up, so a single press ran the handler twice. What made it visible was
+     starting a case: powering the unit down moved the layout under a
+     stationary pointer, the browser sent pointerleave, and the unit switched
+     itself straight back on. A hold that has already fired still releases on
+     the way out, because that is what letting go of PAUSE means. */
+  const end=commit=>{
+    if(!pressed) return;
+    pressed=false;
+    clearTimeout(timer); el.classList.remove('held');
+    if(fired){ onRelease&&onRelease(); }
+    else if(commit){ onTap&&onTap(); }
+  };
+  el.addEventListener('pointerdown',start);
+  el.addEventListener('pointerup',()=>end(true));
+  el.addEventListener('pointerleave',()=>end(false));
+  el.addEventListener('pointercancel',()=>end(false));
 }
 
 /* ON, as the key works on the device: a press brings the unit up, and holding
@@ -4675,7 +4952,7 @@ const LEVELS={
    phases:[
     {id:'brady',tag:'UNSTABLE BRADY',tone:'warn',task:'Assess and treat.',
      steps:[
-      {id:'alarms',label:'Alarms enabled',need:e=>e.type==='alarms'&&/ON/.test(e.label)},
+      {id:'lead',label:'Rhythm confirmed in another lead before treating',need:e=>e.type==='lead'},
       {id:'nibp',label:'Blood pressure measured',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
       {id:'pacer',label:'Pacing started for an unstable bradycardia',need:e=>e.type==='pacer'&&/ON/.test(e.label)},
       {id:'capture',label:'Electrical capture achieved',need:()=>captured}
@@ -4841,7 +5118,17 @@ function startCase(levelNo,ix){
   RUN={levelNo,ix,cse,phaseIx:-1,phase:null,hits:{},times:{},faults:[],
        stepIx:0,t0:Date.now(),phaseT0:0,lastShockAt:0,log:[],
        counts:{},carried:[]};
+  clearTimeout(advanceTimer); advancePending=null;
   captured=false; paceUnder=null;
+  /* A case starts on a unit nobody has touched. CES deliberately leaves the
+     power alone when a scenario resets — there the crew and the room own it —
+     but here every brief says the unit is as a crew finds it, and the
+     walkthrough's first instruction is to switch it on. Carrying the power
+     over from the last case made that instruction impossible to follow: ON
+     does nothing when the unit is already on, and the learner sat on step one
+     of the walkthrough with no way forward but a three-second hold nobody
+     told them about. */
+  if(D.on) setPower(false);
   newCase(Object.assign({scenario:cse.title},cse.patient));
   enterPhase(0);
   document.getElementById('fgHdr').classList.add('running');
@@ -4871,12 +5158,23 @@ function enterPhase(i){
 /* Advancing is deliberately not instant. A phase that flipped the moment the
    shock landed would take the rhythm off the screen before anyone had looked
    at what the shock did, and the look is the lesson. */
-let advanceTimer=null;
+/* Arming this twice for the same phase is the bug that deadlocked every
+   assessment. A phase that ends on the clock rather than on an action is
+   advanced by the run's own tick, which fires once a second; the hold before
+   the change is 1200ms. Re-arming on each tick cleared the pending timer
+   80ms before it would have fired, every time, for ever — so a1, a2 and a3
+   could reach their last rhythm and never leave it, and the debrief they are
+   graded from was unreachable. It has to be a latch, not a timer that gets
+   reset by whatever asked for it again. */
+let advanceTimer=null, advancePending=null;
 function advancePhase(){
-  if(!RUN||RUN.phase&&RUN.phase.done) return;
+  if(!RUN||!RUN.phase||RUN.phase.done) return;
   const ph=RUN.phase;
+  if(advancePending===ph) return;          // already on its way
+  advancePending=ph;
   clearTimeout(advanceTimer);
   advanceTimer=setTimeout(()=>{
+    advancePending=null;
     if(!RUN||RUN.phase!==ph) return;
     if(ph.onAdvance) try{ ph.onAdvance(); }catch(e){}
     enterPhase(RUN.phaseIx+1);
@@ -5112,7 +5410,7 @@ function endRun(reason){
   if(!RUN) return;
   const run=RUN, lv=LEVELS[run.levelNo];
   RUN=null;
-  clearTimeout(advanceTimer);
+  clearTimeout(advanceTimer); advancePending=null;
   document.getElementById('fgHdr').classList.remove('running');
   fitDevice();
 
