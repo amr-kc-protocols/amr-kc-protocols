@@ -41,6 +41,20 @@ These suites live here:
   layout becomes a real grid on a wide screen instead of stretching the phone
   column edge to edge.
 
+- **`lifepak.test.mjs`** — the LIFEPAK 15 simulator
+  ([`lifepak-15.html`](../lifepak-15.html)) in headless Chromium: the level
+  picker, the walkthrough, every clinical case, pacing capture, the faults an
+  assessment exists to catch, the teaching card behind every control, and the
+  12-lead and code summary that used to be popup windows. Two things it
+  defends harder than the rest, because both would be silently wrong: that a
+  whole resuscitation driven through the unit moves **not one field of the
+  patient** — the crew own the device, somebody else owns the patient — and
+  that every control clears a thumb's 44pt minimum **by hit-testing the page**,
+  not by reading the box or the stylesheet. Three of the rockers are 43.5px
+  boxes at the scale a 1024x768 iPad reaches and are fine; their real target is
+  a pseudo-element four pixels larger on each side, which a box measurement
+  fails and a stylesheet check passes for the wrong reason.
+
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
 ## Run
@@ -178,6 +192,31 @@ Grouped by the property being defended:
 | H5 | The two featured trainings share a row on a Toughbook and stack on a phone |
 | H6 | Both trainings and all six quick actions are one tap away, and search still returns results |
 | H7 | Cache version bumped and the homepage still precached, so installed devices get it |
+
+## What's covered (`lifepak.test.mjs`)
+
+| # | Scenario |
+|---|----------|
+| L1 | The page opens asking nothing of anybody: picker up, unit off, nothing running |
+| L2 | Every case in every level briefs, starts, puts its own patient on the screen and asks for something |
+| L3 | **The boundary** — a whole resuscitation (CPR, analyse, lead, size, energy, charge, shock, sync, pace, alarms, SunVue, print) with the trainer's writer stubbed out moves no field of `S` |
+| L4 | The trainer, not the device, moves the patient — and only after the press, the way a facilitator does |
+| L5 | Pacing capture answers the current: spikes without capture, capture at threshold with a pressure, capture lost on backing off |
+| L6 | VF does not convert on a current dial, however far it is turned |
+| L7 | The faults an assessment exists to catch: asystole shocked, asystole paced, an unsynchronized shock on a perfusing rhythm — each reaching the debrief |
+| L8 | A step whose phase has moved on is still gradeable inside its window, so "compressions back within 15 s" is not marked down for a phase change |
+| L9 | The walkthrough advances on the right events, does not lead with the hint, offers a way past a step only once somebody is stuck, and records a skip as a miss |
+| L10 | The speed dial moves the home-screen highlight, and HOME SCREEN clears it |
+| L11 | A teaching card behind every control, no card without a control, every card complete — and learn mode opens the card *instead of* firing the key |
+| L12 | The 12-lead and the code summary open in the page, not in a popup: all 13 traces drawn, and each way out works, including the framed document's own button reaching back out |
+| L13 | Free play is the only place the patient can be set by hand, and nothing is graded there |
+| L14 | Progress survives a reload; the page still works with `localStorage` throwing |
+| L15 | Deep links (`?case=`, `?level=`, `?free`), and a name that means nothing falls back to the picker |
+| L16 | **Every control clears 44pt by real hit area** at three iPad sizes, the unit clears its own header and fits, no sideways scroll |
+| L17 | The header's height is measured, so a running case takes its room from the unit rather than from the bottom of the screen |
+| L18 | Portrait is announced rather than laid out, and the chassis is `inert` so the keyboard cannot reach SHOCK behind the notice |
+| L19 | Nothing of the two-window CES build came across — no relay, no panel channel, no panel link, no skin switcher |
+| L20 | Reachable from the home tile and the More list, and the cache version bumped so installed devices get it |
 
 When you change either tool, run `npm test` and add a scenario for any new behaviour.
 

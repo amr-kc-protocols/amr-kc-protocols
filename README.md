@@ -21,6 +21,38 @@ Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.htm
 - 11 Procedure Cards
 - Reference: Vital targets, Pediatric dosing calculator, LTV 1200 alarms, GCS, Cincinnati Stroke Scale, Broselow, Rule of Nines, APGAR
 
+## Simulators
+
+Two interactive trainers, both single self-contained pages, both reachable
+from the home screen.
+
+- **`vent-ltv1200.html`** — the LTV 1200 transport ventilator.
+- **`lifepak-15.html`** — the LIFEPAK 15 monitor/defibrillator: the whole unit,
+  with defibrillation, synchronized cardioversion, transcutaneous pacing,
+  12-lead acquisition and the code summary. Three levels — a walkthrough of
+  every control, seven clinical cases with coaching, and three multi-phase
+  assessments — plus free play and a teaching card behind every control.
+
+The LIFEPAK's unit is ported from the CES simulator, where it is half of a
+two-window system: a facilitator drives the patient from a control panel and
+the monitor never writes a field of patient state. There is no facilitator
+here, so the trainer in the page plays one — and it plays one in a
+facilitator's place. The crew own the device (energy, charge, lead, pacing
+rate and current, alarms, shocks); the patient answers to the trainer, on the
+event a press generated. So a shock is charged, delivered, announced and
+logged and the rhythm does not move until the case moves it. `test/lifepak.test.mjs`
+drives a whole resuscitation through the unit and asserts that not one field
+of the patient changed.
+
+The clinical shape of the assessment cases follows the ACLS algorithms. They
+are deliberately **not** the AHA Megacode Testing Checklist — that is a
+published, copyrighted instrument, and grading against an unapproved copy of
+it would be worse than not grading at all. A run records what the learner did
+at the unit and when, which is what a debrief is read from.
+
+LIFEPAK is a trademark of Stryker. This is a training simulation and is not a
+medical device.
+
 ## Backend
 
 Academy completions and Ask the Educator submissions can be mirrored to

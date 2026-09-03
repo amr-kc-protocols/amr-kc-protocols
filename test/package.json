@@ -2,16 +2,17 @@
   "name": "amrkc-tests",
   "private": true,
   "type": "module",
-  "description": "Tests for the Kansas Class Builder, the Supabase sync layer, the health forms, the training pages and the homepage",
+  "description": "Tests for the Kansas Class Builder, the Supabase sync layer, the health forms, the training pages, the simulators and the homepage",
   "scripts": {
-    "test": "node kcb.test.mjs && node backend.test.mjs && node sync.e2e.mjs && node fitform.test.mjs && node alaris.test.mjs && node medmath.test.mjs && node homepage.test.mjs",
+    "test": "node kcb.test.mjs && node backend.test.mjs && node sync.e2e.mjs && node fitform.test.mjs && node alaris.test.mjs && node medmath.test.mjs && node homepage.test.mjs && node lifepak.test.mjs",
     "test:kcb": "node kcb.test.mjs",
     "test:backend": "node backend.test.mjs",
     "test:sync": "node sync.e2e.mjs",
     "test:fitform": "node fitform.test.mjs",
     "test:alaris": "node alaris.test.mjs",
     "test:medmath": "node medmath.test.mjs",
-    "test:homepage": "node homepage.test.mjs"
+    "test:homepage": "node homepage.test.mjs",
+    "test:lifepak": "node lifepak.test.mjs"
   },
   "devDependencies": {
     "playwright": "^1.47.0",
