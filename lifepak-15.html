@@ -347,24 +347,32 @@ body.lp-skin #devUnder{display:flex;}
 .updown .ud{
   position:relative;
   background:none;border:none;color:#f2f2f2;font-size:13px;line-height:1;cursor:pointer;
-  flex:0 0 48px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  flex:0 0 39px;border-radius:12px;display:flex;align-items:center;justify-content:center;
   touch-action:manipulation;
 }
 /* The arrow's hit area, which is not the same thing as its box.
-   The 48px floor above was only ever the arrow's *width*: its height comes
-   from the key it sits in, which is 48px including a border, so the arrow
-   itself stretches to 46. That was fine at the scale this chassis was measured
-   at and is not fine at the ones it actually reaches — the unit is scaled to
-   fit, and k falls to 0.946 on a 1024x768 iPad and 0.886 in a 960x720 window,
-   which put ENERGY, RATE and CURRENT at 43.5pt and 40.8pt. They are the
-   controls a crew taps most.
+   The floor above was only ever the arrow's *width*: its height comes from the
+   key it sits in, which is 48px including a border, so the arrow itself
+   stretches to 46. That was fine at the scale this chassis was measured at and
+   is not fine at the ones it actually reaches — the unit is scaled to fit, and
+   k falls to 0.946 on a 1024x768 iPad and 0.886 in a 960x720 window, which put
+   ENERGY, RATE and CURRENT at 43.5pt and 40.8pt. They are the controls a crew
+   taps most.
    Growing the key would move the replica off the manufacturer's dimensions, so
-   the hit area grows instead: 4px above and below, inside the 5-6px gap
-   between rows, so no two controls end up sharing a pixel. */
-.updown .ud::after{content:'';position:absolute;left:0;right:0;top:-4px;bottom:-4px;}
+   the hit area grows instead: 4px on every side, inside the 5-6px gaps around
+   the key, so no two controls end up sharing a pixel.
+
+   The arrow's box is 39px rather than 48 for the same reason in the other
+   direction. Two arrows at 48 left 33px between them for the label, and
+   CURRENT needs 49 — so the silkscreen on the control a crew works hardest
+   during a bradycardia read CURRI. Taking 9px off each arrow's box and giving
+   it back as hit area buys the label 18px and costs the thumb nothing: the
+   target is 39 + 5 + 5 = 49, which is 46.3 at the 0.946 a 1024x768 iPad
+   scales to — measured by hit-testing the page, not by reading the rule. */
+.updown .ud::after{content:'';position:absolute;left:-5px;right:-5px;top:-4px;bottom:-4px;}
 
 .updown .ud:active{background:#000;}
-.updown .udlbl{font:700 11.5px/1.05 'Arial Narrow',Arial,sans-serif;letter-spacing:.4px;text-align:center;
+.updown .udlbl{font:700 10.5px/1.05 'Arial Narrow',Arial,sans-serif;letter-spacing:.2px;text-align:center;
   flex:1;min-width:0;align-self:center;}
 .a1right .udlbl{font-size:10px;letter-spacing:.2px;}
 
@@ -474,6 +482,14 @@ body.lp-skin #rArt{display:none;}
 #lpTop{display:none;flex:1;align-items:center;justify-content:space-between;}
 body.lp-skin #lpTop{display:flex;}
 body.lp-skin .zxseg{display:none;}
+/* CURRENT is the longest silkscreen on any rocker and the narrow column is
+   where it lives. Half a point off the label — nothing off the arrows. */
+/* Half a point under the wide column's, and no padding. The stack has to
+   survive the font fallback as well as the font: where Arial Narrow is not
+   installed these labels are set in Arial, which is materially wider, and a
+   label sized to fit exactly is a label that reads CURRI on somebody else's
+   tablet. */
+.arow .updown .udlbl{font-size:9.5px;letter-spacing:0;padding:0;}
 #lpNums{display:none;position:absolute;left:0;width:138px;flex-direction:column;background:#000;z-index:10;}
 .lpb{flex:1;display:flex;flex-direction:column;padding:0 0 2px;min-height:0;position:relative;
   border-bottom:1px solid #171c22;}

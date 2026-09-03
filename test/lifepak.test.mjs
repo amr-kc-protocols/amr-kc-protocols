@@ -394,6 +394,26 @@ for (const [w, h, name] of [[1024, 768, 'iPad 9.7 landscape'], [1180, 820, 'iPad
   ok('L16 ' + name + ' — the unit clears the page header', fit.top >= fit.hdr - 1, JSON.stringify(fit));
   ok('L16 ' + name + ' — and the whole unit is on the screen', fit.bottom <= fit.vh + 1, JSON.stringify(fit));
   ok('L16 ' + name + ' — no sideways scroll', fit.sw <= fit.iw + 1);
+  // A silkscreen that does not fit its key is a control the crew reads wrong.
+  // CURRENT is the long one, and in CES it renders as "CURRI".
+  // Measured off the rendered text with a Range — reading the computed `font`
+  // shorthand gives an empty string whenever font-size is set on its own,
+  // which silently measures everything in the body font instead.
+  const clipped = await p.evaluate(() => {
+    const out = [];
+    document.querySelectorAll('#device .udlbl').forEach(l => {
+      const box = l.getBoundingClientRect().width;
+      let need = 0;
+      l.childNodes.forEach(n => {
+        if (n.nodeType !== 3 || !n.textContent.trim()) return;
+        const r = document.createRange(); r.selectNodeContents(n);
+        for (const b of r.getClientRects()) need = Math.max(need, b.width);
+      });
+      if (need > box + 0.5) out.push(l.textContent.trim() + ' needs ' + need.toFixed(1) + ' has ' + box.toFixed(1));
+    });
+    return out;
+  });
+  ok('L16 ' + name + ' — every rocker label fits its key', clipped.length === 0, clipped.join('; '));
   await p.context().close();
 }
 
