@@ -78,8 +78,45 @@ exactly as before.
 The DOM is identical in both layouts, so there is one device and one set of
 behaviours to reason about; only the CSS differs.
 
+### What the clinical content is checked against
+
+Two sources, and they answer different questions. The device's behaviour and
+its numbers come from Stryker/Physio-Control's own documentation for the
+LIFEPAK 15 — the data sheet and the Setup Options guide. The clinical calls
+come from the **2025 AHA Guidelines for CPR and ECC**, Part 9 (Adult Advanced
+Life Support). `test/lifepak.test.mjs` asserts the published figures directly,
+so drift in any of them fails the suite rather than sitting unnoticed.
+
+Checked and matching the device: the manual-mode energy ladder (2 J to 360 J
+in the unit's own steps), the 200-300-360 J adult sequence that is its factory
+default, the lead list, pacing at 40-170 PPM with a 60 PPM default and
+0-200 mA, the 60-second disarm and the two-minute alarm silence.
+
+Checked and matching the guidelines: compressions at 100/min, inside the
+100-120 band; atropine before pacing for a symptomatic bradycardia; pacing an
+asystolic arrest taught as ineffective, which is what the 2025 evidence review
+concluded; SYNC ruled out for VF and pulseless VT; EtCO₂ as a trend of CPR
+quality rather than a threshold to hit.
+
+**One change of substance since 2020 shapes the energy content.** The 2025
+guidelines no longer name a defibrillation or cardioversion dose: they defer
+to the defibrillator's manufacturer, and to the maximum setting where the
+manufacturer is unknown. The old fixed figures — 50-100 J for SVT, 100 J for
+unstable VT — are gone from the guidelines, so they are gone from here too.
+What the trainer grades is that the learner selected from this unit's ladder
+and cardioverted rather than defibrillated; what the cards teach is to take
+the dose from the device and the local protocol. Escalation is what this unit
+is configured to do, and the cards say that rather than claiming higher energy
+is known to be better — a trial comparing fixed 150 J with 200-300-360 J found
+similar first-shock success.
+
+Not covered: double sequential external defibrillation, which the 2025
+guidelines rate Class 2b for shock-refractory VF. It needs two defibrillators
+and is outside what a single-unit trainer can teach.
+
 LIFEPAK is a trademark of Stryker. This is a training simulation and is not a
-medical device.
+medical device. Nothing here has been through clinical review by the Medical
+Director; it is checked against published sources, which is not the same thing.
 
 ## Backend
 

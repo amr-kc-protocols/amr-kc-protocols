@@ -219,6 +219,7 @@ Grouped by the property being defended:
 | L20 | A whole case played through on three phones by **tapping**, with the page scrolled the way a thumb would: every tap lands on the key it aimed at, the case finishes, nothing missed |
 | L21 | Nothing of the two-window CES build came across — no relay, no panel channel, no panel link, no skin switcher |
 | L22 | Reachable from the home tile and the More list, and the cache version bumped so installed devices get it |
+| L24 | **The numbers, against their sources**: the energy ladder, the 200-300-360 sequence and the lead list against the LIFEPAK 15 data sheet; the metronome at 100/min, pacing at 40-170 PPM from a 60 PPM default and 0-200 mA, the 60-second disarm and the two-minute silence against the same; and against the 2025 AHA guidelines, that no card quotes a fixed joule dose the AHA no longer sets, that pacing stays after atropine and is still taught as wrong in asystole, and that SYNC is still ruled out for VF and pulseless VT |
 | L23 | The progression bugs this page has had: a clock-driven phase that never advances (it deadlocked all three assessments), a unit left on across cases (it made the walkthrough's first instruction impossible), a step waiting on an alarm event the unit never logs (a guaranteed fail in a graded case), free play at a pointer's density on a phone, and the 12-lead at four columns on a 390px screen |
 
 When you change either tool, run `npm test` and add a scenario for any new behaviour.

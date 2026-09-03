@@ -703,6 +703,87 @@ for (const [name, w, h] of [['iPhone 14 portrait', 390, 844], ['iPhone SE portra
   ok('L23 and it does not scroll sideways', g && g.overflowX <= 1, JSON.stringify(g));
   await ctx.close(); }
 
+/* L24 — the numbers, against the manufacturer and against the guidelines.
+   Every value here is a published figure, not a judgement call, so drift in
+   any of them is a defect rather than a difference of opinion.
+
+   Sources: LIFEPAK 15 data sheet and Setup Options (Stryker/Physio-Control)
+   for the device figures; the 2025 AHA Guidelines for CPR and ECC, Part 9
+   (Adult Advanced Life Support), for the clinical ones. */
+{ const p = await fresh();
+  const d = await p.evaluate(() => ({
+    energies: ENERGIES,
+    leads: LEADS,
+    sizes: SIZES,
+    compression: COMPRESSION_RATE,
+    pacerRate: D.pacerRate,
+    disarm: DISARM_MS,
+    silence: SILENCE_MS,
+  }));
+
+  /* Manual-mode energy ladder, exactly as the data sheet lists it. */
+  ok('L24 the energy ladder is the unit\'s own',
+     JSON.stringify(d.energies) === JSON.stringify(
+       [2,3,4,5,6,7,8,9,10,15,20,30,50,70,100,125,150,175,200,225,250,275,300,325,360]),
+     JSON.stringify(d.energies));
+  ok('L24 it reaches this unit\'s 200-300-360 adult sequence',
+     [200,300,360].every(j => d.energies.includes(j)));
+  ok('L24 the lead list is the unit\'s own',
+     JSON.stringify(d.leads) === JSON.stringify(['I','II','III','aVR','aVL','aVF','PADDLES']),
+     JSON.stringify(d.leads));
+
+  /* The metronome guides compressions at 100/min on this unit, which is also
+     inside the 100-120 the 2025 guidelines call for. */
+  ok('L24 the metronome runs at the rate this unit runs at', d.compression === 100, String(d.compression));
+  ok('L24 and that rate is inside the guideline band',
+     d.compression >= 100 && d.compression <= 120, String(d.compression));
+
+  /* Pacing: 40-170 PPM with a 60 PPM factory default, 0-200 mA. */
+  ok('L24 the pacer starts at the unit\'s default rate', d.pacerRate === 60, String(d.pacerRate));
+  const pace = await p.evaluate(() => {
+    D.on = true; D.pacer = true;
+    for (let i = 0; i < 40; i++) nudgeMa(1);
+    const hi = D.pacerMa;
+    for (let i = 0; i < 60; i++) nudgeMa(-1);
+    const lo = D.pacerMa;
+    for (let i = 0; i < 40; i++) nudgeRate(1);
+    const rHi = D.pacerRate;
+    for (let i = 0; i < 60; i++) nudgeRate(-1);
+    return { hi, lo, rHi, rLo: D.pacerRate };
+  }).catch(() => null);
+  if (pace) {
+    ok('L24 pacing current stops at the unit\'s 0-200 mA', pace.hi === 200 && pace.lo === 0, JSON.stringify(pace));
+    ok('L24 pacing rate stays inside the unit\'s 40-170 PPM',
+       pace.rHi <= 170 && pace.rLo >= 40, JSON.stringify(pace));
+  }
+
+  ok('L24 the unit disarms after 60 seconds, as the manual says', d.disarm === 60000);
+  ok('L24 an alarm silence lasts two minutes, as the manual says', d.silence === 120000);
+  await p.context().close(); }
+
+/* The 2025 guidelines stopped naming defibrillation and cardioversion doses
+   and defer to the device. Nothing the learner reads should quote a fixed
+   joule figure as if the AHA still set one. */
+{ const src = await readFile(join(ROOT, 'lifepak-15.html'), 'utf8');
+  const cards = src.slice(src.indexOf('const CARDS={'), src.indexOf('function openCard('));
+  ok('L24 the energy card points at the device rather than a remembered dose',
+     /defer to the defibrillator manufacturer/.test(cards));
+  ok('L24 the sync card says the same about cardioversion',
+     /stopped naming cardioversion energies/.test(cards));
+  ok('L24 no card claims escalation is known to be better',
+     !/escalate rather than repeating/.test(cards));
+
+  /* Pacing an asystolic arrest does not improve ROSC or survival, and the
+     page has to keep saying so. */
+  ok('L24 pacing asystole is still taught as wrong',
+     /not for asystole/.test(cards) && /do not support pacing an asystolic arrest/.test(src));
+  /* Atropine first, then pacing. */
+  ok('L24 pacing is still placed after atropine',
+     /has not answered atropine/.test(cards));
+  /* SYNC is never for a pulseless rhythm. */
+  ok('L24 SYNC is still ruled out for VF and pulseless VT',
+     /never for VF or pulseless VT/.test(cards)); }
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fails.length) { console.log('\nFailures:'); fails.forEach(f => console.log(' - ' + f)); }
 await browser.close(); srv.close();
