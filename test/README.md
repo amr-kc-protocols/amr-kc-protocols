@@ -227,8 +227,9 @@ Grouped by the property being defended:
 | S9 | Portrait says to turn the phone, the unit is `inert` behind the notice so the keyboard cannot reach SHOCK, and nothing scrolls there either |
 | S10 | A teaching card for every key on the page and none for a key that was dropped; learn mode opens the card instead of firing the key |
 | S11 | Nothing that answers or distracts from the question is on the page — ANALYZE included — and the 12-lead renderer and code summary went with the keys that reached them |
-| S12 | The numbers against the LIFEPAK 15 documentation and the 2025 AHA guidelines, including that no card quotes a fixed joule dose the AHA no longer sets |
+| S12 | The numbers against the LIFEPAK 15 documentation and the 2025 AHA guidelines, including the split on doses: no figure quoted for defibrillation, where the AHA defers to the manufacturer, and the 200 J-or-more figure carried for cardioverting AF or flutter, where it does not |
 | S13 | The bank's clinical shape: at least one rhythm with more than one right answer, VT with three, every item explaining itself and giving the context the answer turns on |
 | S14 | A best score survives a reload; the station runs with `localStorage` throwing |
 | S15 | `?item=` pins the bank to one rhythm, for putting a particular one on the screen |
 | S16 | Reachable from the field guide, the copy describes the station rather than the old case engine, and the cache version is bumped |
+| S17 | **The tracings carry the finding the item asks about** — QRS width the same at 45/min as at 150, VT and a paced beat wide where SVT and a junctional escape are narrow, AF irregularly irregular where sinus is regular, flutter with no isoelectric baseline, complete heart block with more P waves than QRS and not a multiple of them, VF never at baseline |

@@ -401,10 +401,16 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
      card may quote a fixed joule figure as though the AHA still set one. */
   const src = await readFile(join(ROOT, 'lifepak-15.html'), 'utf8');
   const cards = src.slice(src.indexOf('const CARDS={'), src.indexOf('\nfunction openCard('));
-  ok('S12 the energy card points at the device rather than a remembered dose',
+  /* The 2025 guidelines split on doses and the cards have to split with them:
+     no named figure for defibrillation, a named one for cardioverting AF or
+     flutter. Asserting one rule for both is how the sync card ended up telling
+     learners the AHA had stopped naming cardioversion energies. */
+  ok('S12 the energy card points at the device rather than a remembered defibrillation dose',
      /defer to the defibrillator manufacturer/.test(cards));
-  ok('S12 the sync card says the same about cardioversion',
-     /stopped naming cardioversion energies/.test(cards));
+  ok('S12 the sync card carries the 2025 AF and flutter figure',
+     /atrial fibrillation and atrial flutter[^]*?200 J or more/.test(cards));
+  ok('S12 and does not still say the AHA stopped naming cardioversion energies',
+     !/stopped naming cardioversion energies/.test(cards));
   ok('S12 pacing is still placed after atropine', /has not answered atropine/.test(cards));
   ok('S12 pacing asystole is still taught as wrong', /not for asystole/.test(cards));
   ok('S12 SYNC is still ruled out for VF and pulseless VT', /never for VF or pulseless VT/.test(cards));
@@ -467,6 +473,100 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
   const p = await fresh(ORIGIN + '/index.html', 1366, 768);
   ok('S16 the link is really on the rendered homepage',
      (await p.locator('a[href="lifepak-15.html"]').count()) >= 1);
+  await p.context().close(); }
+
+/* S17 — the tracings carry the findings the items ask about. The rhythm on the
+   screen is the question, so each one is sampled the way the sweep samples it
+   and measured, rather than eyeballed. */
+{ const p = await fresh(PAGE);
+  const m = await p.evaluate(() => {
+    /* Sample a rhythm at 1 kHz, as deviation from baseline. */
+    const trace = (rhythm, hr, secs = 6) => {
+      S.patientConnected = true; S.rhythm = rhythm; S.hr = hr;
+      D.leadFromPanel = null; S.lead = 'II';
+      const out = [];
+      for (let i = 0; i < secs * 1000; i++) out.push(sEcg(i / 1000) - 0.5);
+      return out;
+    };
+    /* A pacing spike is not a complex: a deflection that comes and goes inside
+       25 ms is the pacemaker firing, and left in it swamps every measurement
+       below — it is the tallest thing on a paced strip. */
+    const deSpike = v => { const o = v.slice(), th = Math.max(...v.map(Math.abs)) * 0.35;
+      let i = 0;
+      while (i < o.length) {
+        if (Math.abs(o[i]) > th) { let j = i; while (j < o.length && Math.abs(o[j]) > th) j++;
+          if (j - i < 25) for (let k = i; k < j; k++) o[k] = 0;
+          i = j; } else i++;
+      }
+      return o; };
+    /* QRS duration, in ms: the longest run of fast deflection. Measured on the
+       slope rather than the amplitude because a QRS crosses the baseline on its
+       way from R to S — an amplitude threshold stops at that crossing and
+       reports the R wave alone, which came out the same width for a narrow SVT
+       and a wide VT. Gaps up to 25 ms are bridged so the crossing does not end
+       the run; the slow ST-T falls below the threshold and is left out. */
+    const qrsWidth = (rhythm, hr) => {
+      const v = deSpike(trace(rhythm, hr));
+      const d = v.map((_, i) => i ? Math.abs(v[i] - v[i - 1]) : 0);
+      const th = Math.max(...d) * 0.2;
+      let best = 0, i = 0;
+      while (i < d.length) {
+        if (d[i] > th) { let j = i, gap = 0;
+          while (j < d.length && gap < 25) { if (d[j] > th) gap = 0; else gap++; j++; }
+          best = Math.max(best, j - i - gap); i = j; } else i++;
+      }
+      return best;
+    };
+    /* The longest isoelectric stretch, in ms. "No baseline between complexes"
+       is about a segment you could rest a caliper on, not about the instants a
+       chaotic trace happens to cross zero. */
+    const flat = (rhythm, hr) => { const v = trace(rhythm, hr);
+      let best = 0, n = 0;
+      for (const x of v) { if (Math.abs(x) < 0.012) { n++; if (n > best) best = n; } else n = 0; }
+      return best; };
+    const peaks = v => { const hi = Math.max(...v.map(Math.abs)) * 0.6, r = [];
+      for (let i = 1; i < v.length - 1; i++)
+        if (v[i] > hi && v[i] >= v[i - 1] && v[i] > v[i + 1] && (!r.length || i - r[r.length - 1] > 200)) r.push(i);
+      return r; };
+    const rr = (rhythm, hr) => { const r = peaks(trace(rhythm, hr, 10)), d = [];
+      for (let i = 1; i < r.length; i++) d.push(r[i] - r[i - 1]); return d; };
+    return {
+      qrsSlow: qrsWidth('nsr', 45), qrsFast: qrsWidth('nsr', 150),
+      vt: qrsWidth('vtach', 180), svt: qrsWidth('svt', 200),
+      paced: qrsWidth('paced', 72), junctional: qrsWidth('junctional', 44),
+      escape: qrsWidth('hb3', 32),
+      afRR: rr('afib', 88), nsrRR: rr('nsr', 75),
+      flatNsr: flat('nsr', 75), flatFlutter: flat('aflutter', 100), flatVfib: flat('vfib', 0),
+      // Complete heart block: the atria are on their own clock, so over 20 s the
+      // P count must exceed the QRS count and not be a whole multiple of it.
+      hb3P: (() => { const v = trace('hb3', 32, 20);
+        let n = 0; for (let i = 1; i < v.length - 1; i++)
+          if (v[i] > 0.02 && v[i] < 0.12 && v[i] >= v[i - 1] && v[i] > v[i + 1]) n++;
+        return n; })(),
+      hb3R: peaks(trace('hb3', 32, 20)).length,
+    };
+  });
+  const spread = d => (Math.max(...d) - Math.min(...d)) / (d.reduce((a, b) => a + b, 0) / d.length);
+
+  ok('S17 the QRS is the same width at 45/min as at 150 — it is not stretched to fill the R-R',
+     Math.abs(m.qrsSlow - m.qrsFast) < 20, `${m.qrsSlow} vs ${m.qrsFast} ms`);
+  ok('S17 a normal QRS is inside the 120 ms a learner is taught to measure against',
+     m.qrsSlow < 120, `${m.qrsSlow} ms`);
+  ok('S17 ventricular tachycardia is wide where SVT is narrow, at nearly the same rate',
+     m.vt > m.svt * 1.4, `VT ${m.vt} vs SVT ${m.svt} ms`);
+  ok('S17 a paced beat is wide too — it is a distractor on the wide-complex items',
+     m.paced > m.svt * 1.4, `paced ${m.paced} vs SVT ${m.svt} ms`);
+  ok('S17 so is the escape in complete heart block', m.escape > m.svt * 1.4, `${m.escape} ms`);
+  ok('S17 junctional escape is narrow, which is what tells it from that block',
+     m.junctional < m.escape * 0.7, `junctional ${m.junctional} vs escape ${m.escape} ms`);
+  ok('S17 atrial fibrillation is irregularly irregular where sinus rhythm is regular',
+     spread(m.afRR) > 0.25 && spread(m.nsrRR) < 0.05,
+     `AF ${spread(m.afRR).toFixed(2)}, NSR ${spread(m.nsrRR).toFixed(2)}`);
+  ok('S17 flutter leaves no isoelectric segment, where sinus rhythm has a long one',
+     m.flatFlutter < 100 && m.flatNsr > 200, `flutter ${m.flatFlutter} ms, NSR ${m.flatNsr} ms`);
+  ok('S17 nor does ventricular fibrillation', m.flatVfib < 100, `${m.flatVfib} ms`);
+  ok('S17 in complete heart block the P waves outnumber the QRS and are not a multiple of them',
+     m.hb3P > m.hb3R && m.hb3P % m.hb3R !== 0, `${m.hb3P} P to ${m.hb3R} QRS`);
   await p.context().close(); }
 
 console.log(`\n${pass} passed, ${fail} failed`);

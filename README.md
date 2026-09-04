@@ -73,6 +73,69 @@ Held upright the page says to turn the phone rather than stacking into a
 scroll, and the unit is `inert` behind that notice — covering is only paint,
 and without it the whole chassis stays in the tab order, SHOCK included.
 
+The unit is sized against the **visual** viewport, not the layout viewport.
+Sideways in mobile Safari with the toolbars showing, the layout viewport stays
+full height while the visible area is 80–100 px shorter, so a chassis pinned to
+`bottom:0` puts CHARGE and SHOCK behind the browser chrome — the two keys the
+drill ends on. It tracks `visualViewport` instead and gives up density in tiers
+as the visible height falls, down to 285 px.
+
+### How the tracings are drawn
+
+The rhythm on the screen *is* the question, so it has to carry the finding the
+item is asking about. Most of them are built rather than replayed.
+
+The original simulator drew each rhythm as one keyframed beat stretched to fill
+the R-R interval. That is fine at 75/min and wrong everywhere else: a QRS is
+about 0.09 s wide whatever the rate, so stretching made it broad at 45/min and
+a spike at 200 — the exact feature that separates a wide-complex tachycardia
+from a narrow one, scaled away by the rate. It also cannot show a rhythm whose
+parts run on different clocks.
+
+So the station's rhythms are summed from parts measured **in seconds** — a P
+wave, a normal QRS-with-T, a ventricular complex — laid on the trace where the
+rhythm puts them, at durations that do not change with the heart rate. What
+changes with the rate is the gap between complexes.
+
+Measuring them turned up a second problem: the normal complex gave the QRS
+nearly half its length, which put a *normal* beat at about 140 ms — already
+wide by the under-120 rule the learner is being taught to apply — and left a
+fast VT barely broader than it. The QRS now takes the first quarter and the
+ST-T the rest, so a narrow complex measures about 75 ms against 165–245 ms for
+the ventricular ones, and the comparison the wide-complex items turn on is
+actually there to be made. That gets each rhythm its
+diagnosis rather than its outline:
+
+- **Atrial flutter** — the flutter waves are their own generator at 300/min and
+  run straight through the QRS, so there is no isoelectric baseline anywhere.
+  The conduction ratio falls out of the ventricular rate: 150 is 2:1, 100 is
+  3:1, without either being written down.
+- **Atrial fibrillation** — no two R-R intervals alike and no pattern to them,
+  from a closed-form sum of incommensurate terms, with the same QRS in every
+  one of them and fibrillatory waves in place of a flat line.
+- **Mobitz II** — the P waves march at a fixed P-P whether or not the ventricle
+  answers, and the PR on the conducted beats never varies. That constant PR is
+  what separates it from Wenckebach.
+- **Third-degree block** — the P waves are on their own clock at 76/min and the
+  wide escape is on the patient's, fully dissociated. A single repeating
+  keyframe cannot show that, and the dissociation is the diagnosis.
+- **Ventricular tachycardia, the paced rhythm and the third-degree escape**
+  share one wide complex with a T pointing away from the R, because they are
+  the same complex arriving for three different reasons. The paced rhythm used
+  to be a normal sinus beat with a spike in front of it — and it is a distractor
+  on the wide-complex tachycardia items, so it has to be wrong for the right
+  reason.
+- **Junctional escape** — narrow complexes at 40–60 with no P in front of them,
+  which is the whole read and what tells it from the third-degree block sitting
+  next to it in the options.
+- **Ventricular fibrillation** is not a template at all: a few incommensurate
+  sinusoids under a slow envelope, so it never repeats cycle to cycle.
+
+The lead transform is applied to the parts rather than to fixed fractions of
+the cardiac cycle. Applied by phase it cut notches into whatever happened to be
+at that fraction of the R-R — at 32/min, a visible step in the baseline a third
+of the way between escape beats, nowhere near a complex.
+
 ### The boundary
 
 The unit is ported from the CES simulator, where it is half of a two-window
@@ -97,10 +160,23 @@ sequence that is its factory default, pacing at 40–170 PPM from a 60 PPM
 default and 0–200 mA, the 60-second disarm.
 
 Matching the guidelines: atropine before pacing; pacing an asystolic arrest
-taught as ineffective, which is what the 2025 evidence review concluded; SYNC
-ruled out for VF and pulseless VT; and **no fixed joule figure quoted as
-though the AHA still set one** — the 2025 guidelines stopped naming
-defibrillation and cardioversion doses and defer to the manufacturer.
+taught as ineffective, which is what the 2025 evidence review concluded; and
+SYNC ruled out for VF and pulseless VT.
+
+On doses the 2025 guidelines split, and the station follows the split rather
+than a single rule. **Defibrillation** has no named figure — they defer to the
+manufacturer's first-shock setting, and to the maximum where the manufacturer
+is unknown, so the page points at the device rather than at a remembered
+number. **Cardioversion of atrial fibrillation or flutter does have one**:
+start at 200 J or more on a biphasic unit and escalate, a reversal of the older
+low-and-climb approach, on the grounds that 200 J converts more often on the
+first shock and is less likely to induce VF (COR 1, LOE C-LD).
+
+That second point is the one thing here taken from secondary sources rather
+than read in the guideline itself: `ahajournals.org` and `cpr.heart.org` are
+both unreachable from the environment this was written in. It is consistent
+across independent summaries and quoted with its class and level of evidence,
+but it is the first thing the Medical Director should check.
 
 LIFEPAK is a trademark of Stryker. This is a training simulation and is not a
 medical device. Nothing here has been through clinical review by the Medical

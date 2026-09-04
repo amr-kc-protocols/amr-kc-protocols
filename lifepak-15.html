@@ -669,8 +669,15 @@ body.booting #screen>*{visibility:hidden;}
 
 body.lp-skin{background:#14161a;}
 body.lp-skin #device{
-  position:fixed;left:0;right:0;top:var(--hdrh,0px);bottom:0;
-  width:auto;height:auto;transform:none;
+  /* Height from the VISUAL viewport, not `bottom:0`.
+     A fixed element's `bottom` resolves against the *layout* viewport, and on
+     iOS Safari that stays full-height while the URL bar and the tab strip are
+     showing — so the bottom of the unit, which is CHARGE and SHOCK, sat behind
+     the browser's own chrome and could not be pressed. Reported from a real
+     iPad. `dvh` is the modern answer and `--vvh`, set from visualViewport in
+     fitDevice, is the one that also covers the browsers that do not have it. */
+  position:fixed;left:0;right:0;top:var(--hdrh,0px);bottom:auto;
+  width:auto;height:calc(var(--vvh, 100dvh) - var(--hdrh, 0px));transform:none;
   display:flex;flex-direction:column;gap:0;
   padding:6px calc(6px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left));
   background:linear-gradient(180deg,#c2c4bd,#a9aca4);
@@ -822,8 +829,43 @@ body.lp-skin #lpTMPbox,body.lp-skin #lpBPbox{display:none;}
    had nothing to offer that the next second would not. */
 #armAudio{display:none!important;}
 
-/* Short screens: the vertical budget is the whole design, so the first things
-   to give are the label above the screen and the dose reminder. */
+/* Short screens. The vertical budget is the whole design, and browser chrome
+   spends it before the page does — an iPad in Safari with the URL bar and the
+   tab strip up loses about 150px of its 820, and that is what pushed CHARGE
+   and SHOCK off the bottom in the first place.
+
+   So the tiers below give things up in the order they are worth least: the
+   spacing first, then the status LEDs, then the size of the shock button, and
+   only past 340px the 44pt floor itself. That last one is a real compromise
+   and it is the right way round: a 38px key that is on the screen can be
+   pressed, and a 44px key under the browser's toolbar cannot be. */
+@media (max-height:430px){
+  /* Tighter, but the safe area is not spacing — it is the home indicator and
+     the notch, and a key underneath either is a key nobody can press. */
+  body.lp-skin #device{padding:4px calc(4px + env(safe-area-inset-right))
+    calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));}
+  body.lp-skin #devMain{gap:5px;}
+  body.lp-skin #chromeRight{gap:4px;}
+  body.lp-skin .area{padding:4px;}
+  body.lp-skin .a1,body.lp-skin .a1body,body.lp-skin .a1right,body.lp-skin .a2{gap:4px;}
+  body.lp-skin .a1right{padding:3px;}
+  body.lp-skin .ledrow{display:none;}
+  body.lp-skin .shockrow{flex:1;min-height:46px;}
+  body.lp-skin .shock{height:min(100%,56px);min-height:46px;}
+  #stn{gap:3px;}
+}
+@media (max-height:345px){
+  body.lp-skin .k,body.lp-skin .updown{min-height:38px;}
+  body.lp-skin .shockrow{min-height:40px;}
+  body.lp-skin .shock{height:min(100%,46px);min-height:40px;}
+  body.lp-skin .a1,body.lp-skin .a1body,body.lp-skin .a1right,body.lp-skin .a2,
+  body.lp-skin #chromeRight,body.lp-skin #devMain{gap:3px;}
+  body.lp-skin .a1right{padding:2px;}
+  body.lp-skin .area{padding:3px;}
+  .stnb{min-height:40px;font-size:10.5px;}
+  #stnFb{min-height:44px;font-size:11.5px;}
+  #stnFb .stnnext{min-height:40px;}
+}
 @media (max-height:400px){
   body.lp-skin .screenLabel{display:none;}
   body.lp-skin .a1 .vfdose{display:none;}
@@ -2002,10 +2044,43 @@ const CO2S_KF=[[0,0],[.04,0],[.095,.04],[.19,.28],[.3,.66],[.4,.94],[.47,.994],[
 const SPO2_KF=[[0,.038],[.02,.038],[.05,.072],[.088,.24],[.122,.52],[.152,.79],[.176,.94],[.196,.992],[.214,1],[.232,.976],[.252,.9],[.27,.8],[.284,.722],[.295,.69],[.304,.68],[.314,.688],[.326,.714],[.34,.718],[.356,.7],[.38,.658],[.42,.556],[.478,.416],[.548,.284],[.626,.176],[.704,.096],[.782,.056],[.86,.04],[.94,.038],[1,.038]];
 
 // Build LUTs
+/* ── Parts, for the rhythms that are not one beat repeated ───────────────
+   Three rhythms cannot be drawn by stretching a single beat to the heart
+   rate, and stretching one distorts the QRS as a side effect:
+
+     atrial flutter   the atrial wave runs at its own rate, straight through
+                      the QRS, and does not stop for it
+     atrial fibrillation   no two R-R intervals are the same, and the QRS is
+                      the same shape in every one of them
+     Mobitz II        the P waves march out at a fixed P-P whether or not the
+                      ventricle answers, which is the whole diagnosis
+
+   So those three are assembled from a QRS-with-T and a P wave, each a
+   deviation from baseline in seconds rather than a phase, which can be added
+   to whatever the atria are doing underneath. */
+/* The QRS occupies the first quarter of this and the ST-T the rest. It used to
+   take nearly half, which put a normal QRS at about 140 ms measured — already
+   wide by the standard the learner is being taught (under 120) — and left a
+   fast VT only marginally broader than a normal beat, which is the one
+   comparison the wide-complex items turn on. */
+const QRST=[[0,.5],[.03,.5],[.045,.476],[.065,.452],[.085,.492],[.105,.664],[.125,.856],
+  [.145,.952],[.16,.966],[.18,.872],[.205,.700],[.23,.548],[.25,.458],[.275,.482],
+  [.30,.5],[.38,.508],[.50,.53],[.62,.548],[.72,.538],[.86,.512],[1,.5]];
+const PWAVE=[[0,.5],[.16,.532],[.36,.562],[.5,.570],[.64,.556],[.86,.518],[1,.5]];
+/* A complex that started in the ventricle: no septal q, a slow wide upstroke,
+   and a T pointing the other way from the R. Used for the escape in complete
+   heart block, for ventricular tachycardia and for a paced beat, which are the
+   same complex arriving for three different reasons. */
+const VBEAT=[[0,.5],[.04,.472],[.10,.424],[.16,.560],[.24,.800],[.30,.940],
+  [.36,.862],[.42,.664],[.48,.502],[.54,.442],[.62,.392],[.72,.356],[.82,.402],
+  [.92,.466],[1,.5]];
+const QRS_SEC=0.44, P_SEC=0.11, V_SEC=0.42;
+
 const L={
   nsr:mkL(NSR),tachy:mkL(TACHY),brady:mkL(BRADY),afib:mkL(AFIB),afib_rvr:mkL(AFIBRVR),
   aflutter:mkL(AFLUTTER),svt:mkL(SVT),hb1:mkL(HB1),hb2n:mkL(HB2N),hb2d:mkL(HB2D),
   hb3:mkL(HB3),vtach:mkL(VTACH),vfib:mkL(VFIB),stemi:mkL(STEMI),junctional:mkL(JUNCTIONAL),
+  qrst:mkL(QRST),pw:mkL(PWAVE),vb:mkL(VBEAT),
   art:mkL(ART_NORMAL), artOver:mkL(ART_OVER), artUnder:mkL(ART_UNDER),
   co2:mkL(CO2_KF),co2s:mkL(CO2S_KF),spo2:mkL(SPO2_KF)
 };
@@ -2358,6 +2433,19 @@ function applyLeadCfg(raw, ph, cfg){
   return dv + 0.5;
 }
 
+/* The lead transform for a composed trace. applyLeadCfg shapes a beat by where
+   it falls in the cardiac cycle, which only holds when the whole cycle is one
+   keyframe: on a composed rhythm its P/QRS/T windows land at fixed fractions of
+   the R-R and cut notches into whatever happens to be there. At 32/min that put
+   a visible step in the baseline of a third-degree block, a third of the way
+   between escape beats and nowhere near a complex. Composed rhythms are summed
+   from named parts, so each part is scaled as it is added and this applies the
+   overall gain and, on aVR, the inversion. */
+function leadDev(dev,cfg){ return 0.5 + (cfg.inv?-dev:dev)*cfg.amp; }
+/* Signed P-wave scaling for the lead, since a composed rhythm knows which of
+   its parts is the P and does not have to guess from the phase. */
+function pGain(cfg){ return (cfg.pInv?-1:1)*(cfg.pAmp!==undefined?cfg.pAmp:1); }
+
 /* Ventricular fibrillation is chaotic, not a repeating template. The old branch
    sampled one keyframe at a fixed 5 Hz, so every cycle was identical and the
    trace read as ventricular flutter / very rapid monomorphic VT — the review
@@ -2375,6 +2463,21 @@ function vfibValue(t){
 }
 
 // Sample functions — pure math, no noise (noise added at render time)
+/* Deviation from baseline, in seconds from the start of the complex. Zero
+   outside it, so a QRS can be laid over whatever the atria are doing. */
+function qrsTDev(u){
+  if(u<0||u>QRS_SEC) return 0;
+  return sL(L.qrst,u/QRS_SEC)-0.5;
+}
+/* A ventricular complex. dur is normally V_SEC; it is squeezed only when the
+   rate is so fast the next one is already due, which is what makes 180/min VT
+   read as back-to-back wide complexes with no baseline between them. */
+function vDev(u,dur){
+  if(u<0||u>dur) return 0;
+  return sL(L.vb,u/dur)-0.5;
+}
+function pDev(u){ return (u<0||u>P_SEC)?0:sL(L.pw,u/P_SEC)-0.5; }
+
 function sEcg(t){
   // null means "draw nothing". A disconnected monitor used to show a flat green
   // line at baseline, which is the one thing on this screen a student is being
@@ -2419,21 +2522,132 @@ function sEcg(t){
   // the per-lead transform. It used to be applied only on the last branch, so
   // changing the lead did nothing at all in A-Fib, paced and Mobitz rhythms.
   const cfg=LEAD_CFG[devLead()]||LEAD_CFG['II'];
+  /* A ventricular paced rhythm is a spike followed by a complex that started in
+     the ventricle — wide, and with the T pointing away from the R. It used to
+     draw a normal sinus complex with a spike stuck in front of it, which is the
+     one thing that makes this rhythm identifiable, and it is also a distractor
+     on the wide-complex tachycardia items. */
   if(r==='paced'){
-    const ph=((t/bp)%1+1)%1;
-    if(ph>.165&&ph<.172) return .98;   // pacing spike is not a lead-dependent deflection
-    return applyLeadCfg(sL(L.nsr,ph), ph, cfg);
+    const k=Math.floor(t/bp), u=t-k*bp;
+    if(u<0.012) return .98;            // the spike is not a lead-dependent deflection
+    return leadDev(vDev(u-0.02,V_SEC)+vDev(u+bp-0.02,V_SEC), cfg);
   }
+  /* ── The three that are assembled rather than repeated ──────────────── */
+
+  /* Atrial flutter. The flutter waves are their own generator at 300/min and
+     run straight through the QRS — continuous sawtooth with no isoelectric
+     baseline anywhere, which is what tells it from a fast sinus rhythm with a
+     P before every complex. The conduction ratio falls out of the ventricular
+     rate the case set, so 150 is 2:1 and 100 is 3:1 without either being
+     written down twice. */
+  if(r==='aflutter'){
+    const F=5;                                    // 300 per minute
+    const fp=((t*F)%1+1)%1;
+    /* Negative sawtooth in II: the slow downslope, then the sharp return. */
+    const saw=(fp<0.80 ? -(fp/0.80) : -(1-(fp-0.80)/0.20))*0.130;
+    const ratio=Math.max(2,Math.round(300/Math.max(hr,40)));
+    const beat=Math.floor(t*F/ratio);
+    const u=t-beat*ratio/F;
+    return leadDev(saw+qrsTDev(u), cfg);
+  }
+
+  /* Atrial fibrillation. Irregularly irregular means no two R-R intervals the
+     same and no pattern to them — the old version modulated the phase with a
+     sine, which repeats, and stretched the QRS along with the interval. Here
+     the interval varies and the complex does not: beat starts come from a
+     closed-form cumulative sum of three incommensurate terms, so it stays a
+     pure function of t while never repeating. */
   if(r==='afib'||r==='afib_rvr'){
-    const j=r==='afib_rvr'?.28:.22;
-    const ph=((t/bp*(1+Math.sin(t*.8)*j*.5))%1+1)%1;
-    return applyLeadCfg(sL(r==='afib_rvr'?L.afib_rvr:L.afib,ph), ph, cfg);
+    const mean=bp, J=(r==='afib_rvr'?0.30:0.24)*mean;
+    const start=k=>k*mean+J*(Math.sin(k*2.399)+0.6*Math.sin(k*5.117+1.7)
+                            +0.35*Math.sin(k*11.31+2.9))*0.5;
+    let k=Math.floor(t/mean);
+    for(let i=0;i<4&&start(k)>t;i++) k--;
+    for(let i=0;i<4&&start(k+1)<=t;i++) k++;
+    const u=t-start(k);
+    /* Fibrillatory waves, and no isoelectric line anywhere between them —
+       the absence of a flat baseline is half of what identifies this. */
+    const f=0.014*(Math.sin(t*46.3)+0.7*Math.sin(t*71.9+1.2)
+                  +0.5*Math.sin(t*109.7+2.4))/2.2;
+    return leadDev(f+qrsTDev(u), cfg);
   }
+
+  /* Second-degree AV block, Mobitz II. The P waves march out at a constant
+     P-P and one of them is simply not answered — the PR on the beats that do
+     conduct never changes, which is what separates it from Wenckebach. The
+     old version swapped in a second keyframe for the dropped beat, which put
+     that cycle's P in a different place and broke the one thing a learner is
+     supposed to measure. */
   if(r==='hb2'){
-    const ph=((t/bp)%1+1)%1;
-    return applyLeadCfg(sL(Math.floor(t/bp)%3===2?L.hb2d:L.hb2n,ph), ph, cfg);
+    const CONDUCT=3, TOTAL=4;                     // 4:3 — every fourth P dropped
+    const pp=bp*CONDUCT/TOTAL;                    // P-P, from the ventricular rate
+    const PR=0.18;
+    const pIx=Math.floor(t/pp), up=t-pIx*pp;
+    const mod=(n,m)=>((n%m)+m)%m;
+    let v=pDev(up)*pGain(cfg);
+    if(mod(pIx,TOTAL)!==TOTAL-1) v+=qrsTDev(up-PR);
+    /* The complex before this P can still be running under it. */
+    if(mod(pIx-1,TOTAL)!==TOTAL-1) v+=qrsTDev(up+pp-PR);
+    return leadDev(v, cfg);
   }
-  const lm={tachy:L.tachy,brady:L.brady,aflutter:L.aflutter,svt:L.svt,hb1:L.hb1,hb3:L.hb3,vtach:L.vtach,stemi:L.stemi,junctional:L.junctional};
+  /* Sinus and the narrow-complex tachycardias are composed too, for the same
+     reason: a QRS is about 0.09s wide whatever the heart rate, and stretching
+     one beat to fill the R-R made it wide at 45/min and a spike at 200. What
+     changes with the rate is the gap between complexes, not the complexes.
+
+     SINUS carries the PR each rhythm is defined by — 0.16s normally, 0.24s in
+     first-degree block — and whether there is a P to see at all: at 200/min
+     the P of an SVT is buried in the preceding T, which is exactly why the
+     rhythm is hard to tell from sinus tachycardia and worth drawing that way. */
+  const SINUS={nsr:{pr:.16,p:1},brady:{pr:.16,p:1},tachy:{pr:.14,p:.85},
+               hb1:{pr:.26,p:1},svt:{pr:.10,p:0}};
+  if(SINUS[r]){
+    const cf=SINUS[r];
+    const k=Math.floor(t/bp), u=t-k*bp;
+    const pg=cf.p*pGain(cfg);
+    let v=cf.p?pDev(u)*pg:0;
+    v+=qrsTDev(u-cf.pr);
+    v+=qrsTDev(u+bp-cf.pr);           // the complex before this one, still running
+    if(cf.p) v+=pDev(u+bp)*pg;
+    return leadDev(v, cfg);
+  }
+
+  /* Complete heart block. The atria and the ventricles are each doing their
+     own thing at their own rate and neither waits for the other, so P waves
+     march straight through the QRS complexes at a rate that has nothing to do
+     with them. That dissociation is the diagnosis, and a single repeating
+     keyframe cannot show it — the P has to be on its own clock. */
+  if(r==='hb3'){
+    const pRate=76/60;                       // the atria carry on regardless
+    const pp=1/pRate;
+    const pIx=Math.floor(t/pp), up=t-pIx*pp;
+    const pg=pGain(cfg);
+    let v=(pDev(up)+pDev(up+pp))*pg;
+    const k=Math.floor(t/bp), u=t-k*bp;      // the escape, wide and slow
+    v+=vDev(u,V_SEC)+vDev(u+bp,V_SEC);
+    return leadDev(v, cfg);
+  }
+
+  /* Ventricular tachycardia. Wide, regular, no P waves, and the same complex
+     however fast it is going — stretching one keyframe across the R-R made the
+     complexes narrow at 190/min, which is the opposite of the finding the item
+     is asking about. */
+  if(r==='vtach'){
+    const dur=Math.min(V_SEC,bp*0.94);
+    const k=Math.floor(t/bp), u=t-k*bp;
+    return leadDev(vDev(u,dur)+vDev(u+bp,dur), cfg);
+  }
+  /* Junctional escape. The impulse starts below the atria, so the QRS is narrow
+     and normal-looking and there is no P wave in front of it — narrow complexes
+     at 40-60 with nothing preceding them is the whole read, and it is what
+     separates this from the third-degree block sitting next to it in the
+     options. */
+  if(r==='junctional'){
+    const k=Math.floor(t/bp), u=t-k*bp;
+    return leadDev(qrsTDev(u)+qrsTDev(u+bp), cfg);
+  }
+
+  const lm={aflutter:L.aflutter,vtach:L.vtach,stemi:L.stemi,junctional:L.junctional};
   const ph=((t/bp)%1+1)%1;
   return applyLeadCfg(sL(lm[r]||L.nsr,ph), ph, cfg);
 }
@@ -2660,7 +2874,12 @@ window.addEventListener('keydown',e=>{
   if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
   if(e.key==='f'||e.key==='F') toggleFullscreen();
 });
-if(window.visualViewport) window.visualViewport.addEventListener('resize',fitDevice);
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',fitDevice);
+  /* Safari slides its toolbars without firing resize — it fires scroll on the
+     visual viewport instead, and the unit has to follow it down. */
+  window.visualViewport.addEventListener('scroll',fitDevice);
+}
 window.addEventListener('orientationchange',()=>setTimeout(fitDevice,120));
 window.addEventListener('resize',()=>{
   fitDevice();
@@ -3070,6 +3289,9 @@ function fitDevice(){
   const vp=window.visualViewport;
   const vw=Math.round(vp?vp.width:window.innerWidth);
   const vh=Math.round(vp?vp.height:window.innerHeight);
+  /* What the unit is actually sized against. Anything that reads the layout
+     viewport instead puts the bottom row of keys under the browser's toolbar. */
+  document.documentElement.style.setProperty('--vvh',vh+'px');
 
   /* Portrait is not a shape this station has. The screen, the answers and the
      therapy keys have to be in view together, and stacked into a column on a
@@ -3995,12 +4217,12 @@ const CARDS={
   kSYNC:{name:'SYNC',area:'Area 1 · Defibrillation',
     what:'Arms synchronized cardioversion: the unit waits for an R wave and delivers on it. The LED flashes with each QRS the unit detects, and a marker appears on the trace at every detected complex.',
     how:'Press to arm. It clears itself after a synchronized shock, so a second cardioversion means pressing it again.',
-    watch:'Look at the markers before you shock. If they are not landing on R waves, the unit is not synchronized and a shock on the T wave can produce VF. SYNC is for a perfusing rhythm — never for VF or pulseless VT, where the unit cannot find a QRS to sync to and the shock you need is unsynchronized. On the dose: the 2025 AHA guidelines stopped naming cardioversion energies and now point you at the device and at your own protocol, so use the setting this unit and your service specify rather than a number you memorised.'},
+    watch:'Look at the markers before you shock. If they are not landing on R waves, the unit is not synchronized and a shock on the T wave can produce VF. SYNC is for a perfusing rhythm — never for VF or pulseless VT, where the unit cannot find a QRS to sync to and the shock you need is unsynchronized. On the dose: for atrial fibrillation and atrial flutter the 2025 AHA guidelines do name one — start at 200 J or more on a biphasic unit and escalate from there, a change from the old low-and-climb approach, because starting at 200 J converts more often on the first shock and is less likely to push the rhythm into VF. For the other cardioversion rhythms they point you at the device and at your own protocol, so use what this unit and your service specify rather than a number you memorised.'},
 
   kENERGY:{name:'ENERGY SELECT',area:'Area 1 · Defibrillation',
     what:'Walks the manual-mode energy ladder up and down.',
     how:'Press ▲ or ▼. Available in Manual mode only.',
-    watch:'Changing the selection throws away any charge the unit was holding — deliberately, so nobody delivers an energy they did not choose. The 2025 AHA guidelines no longer name a dose: they defer to the defibrillator manufacturer, and to the maximum setting where the manufacturer is unknown. For this unit that is the 200-300-360 J on the panel, which is also its factory default. Escalating is what this device is set up to do, but a trial comparing fixed 150 J with 200-300-360 J found similar first-shock success — so escalate because your protocol and your device say so, not because higher is known to be better.'},
+    watch:'Changing the selection throws away any charge the unit was holding — deliberately, so nobody delivers an energy they did not choose. For defibrillation the 2025 AHA guidelines do not name a dose: they defer to the defibrillator manufacturer’s first-shock setting, and to the maximum where the manufacturer is unknown. (Cardioversion of atrial fibrillation or flutter is the exception — there they do name one, 200 J or more.) For this unit that is the 200-300-360 J on the panel, which is also its factory default. Escalating is what this device is set up to do, but a trial comparing fixed 150 J with 200-300-360 J found similar first-shock success — so escalate because your protocol and your device say so, not because higher is known to be better.'},
 
   kCHARGE:{name:'CHARGE',area:'Area 1 · Defibrillation',
     what:'Charges to the selected energy. It takes about five seconds, with a rising tone, and the SHOCK button lights when the unit is armed.',
@@ -4161,7 +4383,7 @@ const ITEMS=[
    opts:['Atrial fibrillation with RVR','Atrial flutter','SVT','Multifocal atrial tachycardia'],
    context:'BP 84/52, chest pain and shortness of breath, cool peripheries.',
    therapy:'sync',
-   why:'Irregularly irregular with no P waves, fast, and the patient is unstable with it. Synchronized cardioversion — and think about how long they have been in it before you shock.'},
+   why:'Irregularly irregular with no P waves, fast, and the patient is unstable with it. Synchronized cardioversion, starting at 200 J or more — the 2025 guidelines moved off the old low-and-climb approach for AF and flutter. And think about how long they have been in it before you shock.'},
 
   {v:P('aflutter',148,126,80,97,36,16), name:'Atrial flutter',
    opts:['Atrial flutter','Atrial fibrillation','SVT','Sinus tachycardia'],
