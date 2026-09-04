@@ -8,7 +8,7 @@
    A capture comes back two ways:
 
      png     an opaque PNG data URL, cropped to the ink. What goes into a PDF.
-     strokes the pen path, normalised and quantised. ~1KB instead of ~15KB, so a
+     strokes the pen path, normalized and quantized. ~1KB instead of ~15KB, so a
              signature can travel as a pasteable code — which is the only way to
              collect one from a student attending a class remotely, with nowhere
              to POST it to.
@@ -37,7 +37,7 @@
     '</div>' +
     '</div></div>';
 
-  var UNIT = 1000;        // normalised width a captured signature is scaled to
+  var UNIT = 1000;        // normalized width a captured signature is scaled to
   var pad = null;         // the drawing engine, built on first open
   var onDone = null;
   var mounted = false;
@@ -271,7 +271,7 @@
         octx.drawImage(canvas, Math.round(x0*dpr), Math.round(y0*dpr), out.width, out.height,
                        0, 0, out.width, out.height);
 
-        // Normalise the path into a UNIT-wide box so it renders at any size.
+        // Normalize the path into a UNIT-wide box so it renders at any size.
         var k = UNIT / bw, v = [];
         for(i=0;i<strokes.length;i++){
           var s = simplify(strokes[i], 1.2 / k), flat = [];
@@ -283,7 +283,7 @@
         return {
           png: out.toDataURL('image/png'),
           strokes: v,
-          h: Math.round(bh * k),          // height in the same normalised units
+          h: Math.round(bh * k),          // height in the same normalized units
           w: Math.max(1, Math.round(lw * k))  // pen width, so a re-render matches
         };
       }
@@ -292,7 +292,7 @@
   }
 
   // Perpendicular-distance simplification. A signature arrives as hundreds of
-  // samples, most of which sit on a line between their neighbours; dropping them
+  // samples, most of which sit on a line between their neighbors; dropping them
   // is invisible and roughly halves the code someone has to paste.
   function simplify(points, eps){
     if(points.length < 3) return points.slice();

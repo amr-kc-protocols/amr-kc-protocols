@@ -27,7 +27,7 @@ const srv = http.createServer(async (q, r) => {
 await new Promise(r => srv.listen(0, r));
 const BASE = `http://localhost:${srv.address().port}/kansas-class-builder.html`;
 
-// Portable browser launch: honour CHROMIUM_PATH, else this env's pre-installed Chromium, else Playwright default.
+// Portable browser launch: honor CHROMIUM_PATH, else this env's pre-installed Chromium, else Playwright default.
 async function launch() {
   const envExe = process.env.CHROMIUM_PATH;
   const known = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';

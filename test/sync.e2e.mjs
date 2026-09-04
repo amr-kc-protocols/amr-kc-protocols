@@ -23,7 +23,7 @@ const SUPA = "http://127.0.0.1:54321";
 const received = [];
 
 // ── fake Supabase ────────────────────────────────────────────
-// Default behaviour serves the learner flows (anonymous sign-in, accept
+// Default behavior serves the learner flows (anonymous sign-in, accept
 // every write). Assigning `apiHandler` swaps in a scripted response set
 // for one block of tests; set it back to null to restore the default.
 let apiHandler = null;
@@ -99,7 +99,7 @@ async function settle(page, fn, timeout = 10000) {
 const outbox = (page) => page.evaluate(() =>
   JSON.parse(localStorage.getItem("amr_backend_outbox_v1") || "[]"));
 
-// Portable browser launch: honour CHROMIUM_PATH, else this env's pre-installed Chromium, else Playwright default.
+// Portable browser launch: honor CHROMIUM_PATH, else this env's pre-installed Chromium, else Playwright default.
 async function launch() {
   const envExe = process.env.CHROMIUM_PATH;
   const known = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -190,7 +190,7 @@ for (const [course, file] of [
   await ctx.close();
 }
 
-// ── offline behaviour ────────────────────────────────────────
+// ── offline behavior ────────────────────────────────────────
 {
   console.log("\n--- offline durability (hemodynamics) ---");
   received.length = 0;
@@ -480,7 +480,7 @@ async function openDash(page) {
   check("a verified email is shown", rows.some((r) => r[1] === "jane.medic@example.com"));
   check("an unlinked record is flagged, not left blank",
     rows.some((r) => /not linked/i.test(r[1])), JSON.stringify(rows.map((r) => r[1])));
-  check("course names are humanised", rows.some((r) => r[2] === "Hemodynamics"));
+  check("course names are humanized", rows.some((r) => r[2] === "Hemodynamics"));
   check("module counts render", rows.some((r) => r[3] === "8 / 8"));
   check("status pills render", rows.some((r) => /Completed/.test(r[4])) && rows.some((r) => /In progress/.test(r[4])));
 
@@ -958,7 +958,7 @@ async function fillCaregiverForm(page) {
     trs.map((tr) => Array.from(tr.children).map((td) => td.textContent.trim())));
   check("caregiver forms render", cgfCells.length === 2, JSON.stringify(cgfCells));
   check("case number shown", cgfCells.some((c) => c[2] === "KC-99812"));
-  check("crew is summarised with certification",
+  check("crew is summarized with certification",
     cgfCells.some((c) => /Jane Medic \(NRP\)/.test(c[3])), JSON.stringify(cgfCells));
   check("an amended form is flagged", cgfCells.some((c) => /Amended/.test(c[4])));
 
@@ -983,7 +983,7 @@ async function fillCaregiverForm(page) {
   check("the CSV has a header row", csv.split("\r\n")[0].includes("Verified email"), csv.slice(0, 200));
   check("the verified email is exported", csv.includes("jane.medic@example.com"));
   check("the VTA credential is exported", csv.includes("Paramedic"));
-  check("a formula-shaped name is neutralised for spreadsheets",
+  check("a formula-shaped name is neutralized for spreadsheets",
     csv.includes("\"'=cmd|'/c calc'!A1\""),
     csv.split("\r\n")[1]);
   await ctx.close();
@@ -1051,7 +1051,7 @@ async function fillCaregiverForm(page) {
 
   check("credentials were sent to the auth endpoint",
     received.some((r) => r.url.startsWith("/auth/v1/token?grant_type=password") && r.method === "POST"));
-  check("authorisation was checked against the database",
+  check("authorization was checked against the database",
     received.some((r) => r.url === "/rest/v1/rpc/is_educator" && r.method === "POST"));
   check("admin mode is now on",
     await page.evaluate(() => localStorage.getItem("vta_admin") === "1"));
@@ -1070,7 +1070,7 @@ async function fillCaregiverForm(page) {
         user: { id: "other-uuid", is_anonymous: false, email: "nobody@example.com" },
       }];
     }
-    if (req.url === "/rest/v1/rpc/is_educator") return [200, false];  // signed in, not authorised
+    if (req.url === "/rest/v1/rpc/is_educator") return [200, false];  // signed in, not authorized
     return [201, null];
   };
 

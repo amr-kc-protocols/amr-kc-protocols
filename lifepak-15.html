@@ -12,7 +12,7 @@
   the same one either way — the crew own the device, the patient answers to
   somebody else — which is why a shock still changes nothing about the rhythm.
 
-  Control grouping, labels, LED behaviour and the numbered 1-2-3 therapy path
+  Control grouping, labels, LED behavior and the numbered 1-2-3 therapy path
   follow Figures 3-1 to 3-5 and Tables 3-1 to 3-4 of the LIFEPAK 15 operating
   instructions. LIFEPAK is a trademark of Stryker; this is a training
   simulation and is not a medical device.
@@ -221,7 +221,7 @@ html,body{
    width at 1280 to 82% at 1920 while the buttons stayed put, which is the
    opposite of what a real unit does.
 
-   The outline is the LIFEPAK's, but not to the millimetre. The printer, the
+   The outline is the LIFEPAK's, but not to the millimeter. The printer, the
    speaker grille and the cable connectors are all inert here — nothing prints,
    nothing sounds through them and nothing plugs in — and between them they
    were spending a third of the unit's height and a tenth of its width on
@@ -248,7 +248,7 @@ body.lp-skin{background:#14161a;}
 body.lp-skin #device{
   /* Fixed, not absolute. At 1141px wide an absolutely-positioned chassis
      widens the layout viewport on a touch device, so window.innerWidth came
-     back as 1141 instead of the iPad's 834 and the fit maths concluded it
+     back as 1141 instead of the iPad's 834 and the fit math concluded it
      already fitted. A fixed element is measured against the viewport and
      cannot push it out. */
   position:fixed;inset:auto;left:0;top:0;transform-origin:0 0;
@@ -409,7 +409,7 @@ body.lp-skin #devUnder{display:flex;}
 .shock:active{transform:translateY(1px);}
 /* Never greyed. The button is red on the unit whether or not it is armed;
    pressing it unarmed does nothing but sound the reject tone, which is the
-   behaviour a crew has to learn. */
+   behavior a crew has to learn. */
 .shock.ready{animation:shockReady .4s steps(1,end) infinite;}
 @keyframes shockReady{0%,49%{box-shadow:0 0 0 3px rgba(255,120,60,.9)}50%,100%{box-shadow:0 2px 3px rgba(0,0,0,.45)}}
 
@@ -534,7 +534,7 @@ body.lp-skin .zxseg{display:none;}
 .lpsync{color:#ffd24a;font-size:11px;letter-spacing:.6px;}
 .lpsil{color:#9aa2ab;font-size:10.5px;letter-spacing:.4px;}
 
-/* Mode banner across the waveform area — charging, analysing, pacing. */
+/* Mode banner across the waveform area — charging, analyzing, pacing. */
 /* Two bands can sit under the status line: the alarm strip and the mode
    banner. They stack, and the waveform area starts below whichever are up —
    a banner drawn over the clock is a banner that hides the one number a
@@ -655,7 +655,7 @@ body.booting #screen>*{visibility:hidden;}
    The scaled chassis was exact and could not be made to fit: at the 0.49 a
    phone reaches, every control fell to 21-26pt against a 44pt floor. What is
    kept is what a crew reads the unit by — the screen, the areas, their
-   colours, the numbered 1-2-3 therapy path, and where the therapy keys sit
+   colors, the numbered 1-2-3 therapy path, and where the therapy keys sit
    relative to each other.
 
    What is dropped is everything the station does not use: the record keys on
@@ -681,14 +681,14 @@ body.lp-skin #device{
      15.8 x 12.5 inches (Stryker data sheet); left to grow, on a 2160-wide
      Toughbook the replica rendered at about twice that, which reads as a
      mockup rather than a unit — big slabs carrying small labels. Past the cap
-     it stops growing and centres instead. CSS inches are nominal (96px to the
+     it stops growing and centers instead. CSS inches are nominal (96px to the
      inch, before the panel's own DPI and the OS scaling factor), so this is
      about life size rather than calibrated to it. Phones are unaffected: a
      landscape phone is well under 15.8in, so both mins pick the viewport. */
   --devw:min(100%, 15.8in);
   --devh:min(calc(var(--vvh, 100dvh) - var(--hdrh, 0px)), 12.5in);
   position:fixed;left:0;right:0;bottom:auto;
-  /* Centred in what is left below the header once the cap has bitten. */
+  /* Centerd in what is left below the header once the cap has bitten. */
   top:calc(var(--hdrh, 0px) + (var(--vvh, 100dvh) - var(--hdrh, 0px) - var(--devh)) / 2);
   width:var(--devw);height:var(--devh);transform:none;margin-inline:auto;
   display:flex;flex-direction:column;gap:0;
@@ -1483,8 +1483,8 @@ setInterval(clk,1000);clk();
 
 /* ── Skin switcher ── */
 let currentSkin='zx';
-/* Trace colours match the parameter block each one belongs to, so a glance
-   at a waveform and a glance at its number land on the same colour. */
+/* Trace colors match the parameter block each one belongs to, so a glance
+   at a waveform and a glance at its number land on the same color. */
 const LP_Y='#e0913c', LP_B='#4aa8ff', LP_W='#e8e8e8', LP_G='#31d63a';
 
 function setSkin(skin){
@@ -1537,8 +1537,8 @@ function skinColors(){
       art:'#ff6600',
       co2:LP_Y,
       // The SpO2 row draws the pleth in every skin, and the LP label for it is
-      // blue. Colouring the trace yellow whenever an A-Line was running left
-      // the row labelled SpO2 in blue while drawing a yellow trace.
+      // blue. Coloring the trace yellow whenever an A-Line was running left
+      // the row labeled SpO2 in blue while drawing a yellow trace.
       spo2:LP_B,
       co2fill:'rgba(120,70,20,.42)',
     };
@@ -1812,7 +1812,7 @@ const BRADY=[[0,.5],[.022,.5],[.04,.514],[.06,.532],[.078,.542],[.096,.534],[.11
 //   - Irregularly irregular ventricular rate (handled by jitter in sEcg)
 //   - NO P waves — replaced by fibrillatory (f) waves
 //   - ABSENCE of isoelectric baseline — continuous chaotic low-amplitude undulation
-//   - Fine fibrillatory waves throughout (amplitude ~0.5mm = ~0.006 normalised)
+//   - Fine fibrillatory waves throughout (amplitude ~0.5mm = ~0.006 normalized)
 //   - Narrow QRS (<120ms) — normal ventricular conduction
 //   - Normal T wave — upright, slightly broad
 //
@@ -2100,7 +2100,7 @@ const L={
 
 // PA waveform: systolic 25-30mmHg, diastolic 10-15mmHg
 // Sharp upstroke, rounded peak, dicrotic notch on downstroke
-// Values normalised 0-1 where 1=systolic peak, 0=diastolic baseline
+// Values normalized 0-1 where 1=systolic peak, 0=diastolic baseline
 // ── PA Waveform Keyframes ────────────────────────────────────────────────────
 // References: PMC8894225 (Hemodynamically Guided Therapy for Cardiogenic Shock),
 //   Cardiology Clinics 2013 (The Pulmonary Artery Catheter), When the Beat Drops
@@ -2111,7 +2111,7 @@ const L={
 // PA waveform: sharp rapid upstroke → rounded systolic peak →
 //   DICROTIC NOTCH (pulmonic valve closure — key differentiator from RV) →
 //   gradual diastolic descent → flat diastolic plateau
-// Normalised: 0 = diastolic floor, 1 = systolic peak
+// Normalized: 0 = diastolic floor, 1 = systolic peak
 const PA_KF=[
   [0,.28],      // diastolic baseline (PA diastolic)
   [.02,.27],    // pre-systole flat — isoelectric
@@ -2150,7 +2150,7 @@ const PA_KF=[
 // x descent = atrial relaxation
 // v-wave = passive LA filling during ventricular systole (v > a in normal)
 // y descent = mitral valve opens, LA drains into LV
-// Normalised: baseline 0.4, a-peak 0.70, v-peak 0.78
+// Normalized: baseline 0.4, a-peak 0.70, v-peak 0.78
 const WEDGE_KF=[
   [0,.38],      // baseline
   [.04,.38],
@@ -2188,7 +2188,7 @@ const WEDGE_KF=[
 // NO dicrotic notch — distinguishes RV from PA on pullback
 // Square-wave rapid upstroke, rapid fall, low diastolic plateau
 // End-diastolic pressure (RVEDP) small bump just before systolic upstroke
-// Normalised: 0 = near-zero diastolic, 1 = systolic peak
+// Normalized: 0 = near-zero diastolic, 1 = systolic peak
 const RV_KF=[
   [0,.06],      // near-zero diastolic plateau
   [.02,.05],
@@ -2224,7 +2224,7 @@ const RV_KF=[
 //   x = atrial relaxation descent
 //   v = ventricular systole (atrial passive filling) — smaller than a in RA
 //   y = passive RV filling (tricuspid valve opens)
-// Normalised: baseline 0.35, a-peak 0.75, v-peak 0.60
+// Normalized: baseline 0.35, a-peak 0.75, v-peak 0.60
 const RA_KF=[
   [0,.35],      // baseline (between y trough and next a-wave)
   [.03,.36],
@@ -2902,9 +2902,9 @@ window.addEventListener('resize',()=>{
 });
 
 /* SunVue is the unit's high-contrast outdoor mode, and it is a display
-   setting rather than a colour theme: the ground goes white and the traces go
+   setting rather than a color theme: the ground goes white and the traces go
    dark. That means the canvases have to repaint on a different ground, so the
-   erase colour and the grid come from here rather than being hard-coded. */
+   erase color and the grid come from here rather than being hard-coded. */
 const PAPER={
   dark:{gnd:'#000000',fine:'#1c1c1c',bold:'#252525'},
   sun:{gnd:'#e9e9e4',fine:'#cfcfc9',bold:'#b6b6af'},
@@ -2964,7 +2964,7 @@ function clearBand(ctx,x0,w,W,H){
    waveform capnography, and you cannot see a shape you only get one of. */
 const CH_SPX={cCo2:0.25};
 /* The channel ceiling in mmHg. The unit scales CO2 0-50; the ZX skin's own
-   channel is 0-60, and the sample function normalises against whichever is
+   channel is 0-60, and the sample function normalizes against whichever is
    showing so a 37 sits at the same height as the printed scale says. */
 function co2Ceiling(){ return currentSkin==='lp'?50:60; }
 function chSpx(id){ return SPX*(CH_SPX[id]||1); }
@@ -3146,7 +3146,7 @@ function takeLead(){ D.leadFromPanel=S.lead||'II'; }
 /* ── Scenario reset ──────────────────────────────────────────────────────
    A new scenario is a clean unit. Everything the last crew did to the
    defibrillator — shock count, therapy mode, charged energy, the lead and
-   size they dialled, silenced alarms, a running printer, the event log —
+   size they dialed, silenced alarms, a running printer, the event log —
    would otherwise carry straight into the next scenario, which was the most
    damaging defect at review: scenario 4's first shock recorded as shock #4,
    later scenarios opening in AED or pacing mode.
@@ -3653,7 +3653,7 @@ function homeSelect(){
 }
 
 /* ── Printing ────────────────────────────────────────────────────────── */
-/* Two behaviours, because the manual gives them separately: 12-LEAD and CODE
+/* Two behaviors, because the manual gives them separately: 12-LEAD and CODE
    SUMMARY print one record and stop, while PRINT "starts and stops printer"
    (Table 3-4) — it runs the strip until it is pressed again. */
 function printerBurst(ms){
@@ -3774,7 +3774,7 @@ bind('kSYNC',()=>{ if(!D.on) return;
 
 function nudgeEnergy(d){
   if(!D.on) return;
-  if(D.analyzing){ beep(220,120,.08,'square'); return; }   // not while analysing
+  if(D.analyzing){ beep(220,120,.08,'square'); return; }   // not while analyzing
   // ENERGY SELECT is the way out of AED into Manual (Table 3-1). A crew that
   // reaches for the energy dial mid-advisory is taking manual control, so the
   // AED advisory is cleared rather than the joules changing under it.
@@ -3864,7 +3864,7 @@ function dialPress(){
     if(dragY===null) return;
     const dy=e.clientY-dragY; dragY=e.clientY;
     accum+=dy;
-    // Total distance travelled, tracked separately from the step remainder.
+    // Total distance traveled, tracked separately from the step remainder.
     // Deciding drag-vs-press on the remainder meant a drag that happened to
     // land on an exact multiple of the step size was taken as a press — and
     // in the EVENT menu that silently logged an event nobody chose.
@@ -3955,7 +3955,7 @@ function devTick(){
   set('ledCPR','on',D.cpr);
   // Illuminated while the Shock Advisory System runs; flashing when the unit
   // is asking for the next rhythm check. Two different states, and the manual
-  // gives them two different behaviours.
+  // gives them two different behaviors.
   const prompting=D.on&&!D.analyzing&&D.reanalyzeAt>0&&now>=D.reanalyzeAt;
   set('ledANALYZE','on',D.analyzing);
   set('ledANALYZE','flash',prompting);
@@ -4212,9 +4212,9 @@ function nearestCardId(node){
 }
 
 /* ── Teaching cards ──────────────────────────────────────────────────────
-   One per control. `what` is what the key does on this unit — the behaviour
+   One per control. `what` is what the key does on this unit — the behavior
    comes from Tables 3-1 to 3-4 of the operating instructions, and it is the
-   behaviour this simulation actually implements, so a card can be checked by
+   behavior this simulation actually implements, so a card can be checked by
    pressing the key it describes. `watch` is the thing that catches crews out,
    and it is clinical rather than mechanical: a card that only recited the
    manual would teach the button and not the call.
@@ -4330,7 +4330,7 @@ const ITEMS=[
    opts:['Ventricular fibrillation','Polymorphic VT','Coarse atrial fibrillation','Asystole'],
    context:'Unresponsive. No pulse. Compressions in progress.',
    therapy:'defib',
-   why:'No organised QRS and no pulse. Shock it unsynchronized — there is no R wave for the unit to synchronise to — at 200 J biphasic, and compressions go straight back on afterwards.'},
+   why:'No organized QRS and no pulse. Shock it unsynchronized — there is no R wave for the unit to synchronize to — at 200 J biphasic, and compressions go straight back on afterwards.'},
 
   {v:A('vtach',188,16), name:'Ventricular tachycardia',
    opts:['Ventricular tachycardia','SVT with aberrancy','Atrial flutter','Sinus tachycardia'],
@@ -4346,7 +4346,7 @@ const ITEMS=[
 
   {v:P('vtach',146,124,78,97,36,18), name:'Ventricular tachycardia',
    opts:['Ventricular tachycardia','Sinus tachycardia','Atrial flutter','Ventricular paced rhythm'],
-   context:'Strong radial pulse. BP 124/78, awake, orientated, no chest pain.',
+   context:'Strong radial pulse. BP 124/78, awake, oriented, no chest pain.',
    therapy:'none',
    why:'The same rhythm as the last one, and a different answer, because this patient is stable. Stable wide-complex tachycardia is an antiarrhythmic and an expert opinion, not a shock. Shocking a stable patient is a harm you chose.'},
 
@@ -4354,17 +4354,17 @@ const ITEMS=[
    opts:['Asystole','Fine ventricular fibrillation','Pulseless electrical activity','Idioventricular rhythm'],
    context:'Unresponsive, no pulse. Flat in two leads, gain already turned up.',
    therapy:'none',
-   why:'Nothing to shock and nothing to pace — pacing an asystolic arrest does not improve ROSC or survival. What this patient needs is compressions, adrenaline and a search for the cause.'},
+   why:'Nothing to shock and nothing to pace — pacing an asystolic arrest does not improve ROSC or survival. What this patient needs is compressions, epinephrine and a search for the cause.'},
 
   {v:A('junctional',44,12), name:'Junctional escape rhythm',
    opts:['Junctional escape rhythm','Third-degree AV block','Sinus bradycardia','Asystole'],
-   context:'Unresponsive. Organised complexes on the screen and no pulse with them, checked by two people.',
+   context:'Unresponsive. Organized complexes on the screen and no pulse with them, checked by two people.',
    therapy:'none',
-   why:'PEA. The electrical activity is already organised; the problem is mechanical, so no shock and no pacing will help. Compressions, adrenaline, and the H’s and T’s.'},
+   why:'PEA. The electrical activity is already organized; the problem is mechanical, so no shock and no pacing will help. Compressions, epinephrine, and the H’s and T’s.'},
 
   {v:P('brady',36,72,40,89,31,12), name:'Sinus bradycardia',
    opts:['Sinus bradycardia','Junctional escape rhythm','Second-degree AV block (Mobitz II)','Sinus rhythm'],
-   context:'BP 72/40, cold and grey, barely rousable. Atropine has been given twice with no change.',
+   context:'BP 72/40, cold and gray, barely rousable. Atropine has been given twice with no change.',
    therapy:'pace',
    why:'Symptomatic bradycardia that has not answered atropine. Pace it: set a rate that perfuses, then climb the current until you capture — and confirm the capture with a pulse, not with the spikes on the screen.'},
 
@@ -4382,7 +4382,7 @@ const ITEMS=[
 
   {v:P('svt',212,78,44,94,34,22), name:'SVT',
    opts:['SVT','Sinus tachycardia','Atrial flutter with 2:1 conduction','Ventricular tachycardia'],
-   context:'BP 78/44, pale and clammy with chest tightness. Vagal manoeuvres and adenosine have not touched it.',
+   context:'BP 78/44, pale and clammy with chest tightness. Vagal maneuvers and adenosine have not touched it.',
    therapy:'sync',
    why:'Narrow, regular, too fast for sinus, and the patient is unstable. Adenosine has failed, so this is synchronized cardioversion at 50-100 J.'},
 
@@ -4390,7 +4390,7 @@ const ITEMS=[
    opts:['SVT','Sinus tachycardia','Atrial fibrillation','Ventricular tachycardia'],
    context:'BP 118/74. Palpitations, otherwise well. Talking in full sentences.',
    therapy:'none',
-   why:'The same rhythm, a stable patient. Vagal manoeuvres first, then adenosine. Cardioversion is for the unstable one — and this patient will very likely not need it.'},
+   why:'The same rhythm, a stable patient. Vagal maneuvers first, then adenosine. Cardioversion is for the unstable one — and this patient will very likely not need it.'},
 
   {v:P('afib_rvr',164,84,52,93,34,20), name:'Atrial fibrillation with RVR',
    opts:['Atrial fibrillation with RVR','Atrial flutter','SVT','Multifocal atrial tachycardia'],
@@ -4414,7 +4414,7 @@ const ITEMS=[
    opts:['Normal sinus rhythm','Sinus bradycardia','First-degree AV block','Junctional rhythm'],
    context:'BP 124/78. Awake and comfortable, no complaints.',
    therapy:'none',
-   why:'Nothing wrong on the screen and nothing wrong with the patient. Recognising when to leave the unit alone is part of the station.'},
+   why:'Nothing wrong on the screen and nothing wrong with the patient. Recognizing when to leave the unit alone is part of the station.'},
 
   {v:P('paced',72,110,68,97,36,15), name:'Ventricular paced rhythm',
    opts:['Ventricular paced rhythm','Third-degree AV block','Idioventricular rhythm','Left bundle branch block'],

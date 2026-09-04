@@ -30,7 +30,7 @@ await new Promise(r => srv.listen(0, r));
 const ORIGIN = `http://localhost:${srv.address().port}`;
 const PAGE = ORIGIN + '/alaris-pump.html';
 
-// Portable browser launch: honour CHROMIUM_PATH, else this env's pre-installed Chromium, else Playwright default.
+// Portable browser launch: honor CHROMIUM_PATH, else this env's pre-installed Chromium, else Playwright default.
 async function launch() {
   const envExe = process.env.CHROMIUM_PATH;
   const known = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -308,7 +308,7 @@ const TOPIC_IDS = ['titrate','alarms','bag','piggyback','handoff','limits','tran
   /* It was flagged "new" when it was the new thing. The LIFEPAK simulator has
      that badge now, and this card carries the plain one — a badge three
      panels claim at once tells a crew nothing. What still has to hold is that
-     the card is labelled and reachable, not that it claims to be the newest. */
+     the card is labeled and reachable, not that it claims to be the newest. */
   ok('A12 feature card carries a training badge',
      /training/i.test(await feat.locator('.feat-badge').textContent()));
   ok('A12 and no longer claims to be the newest',

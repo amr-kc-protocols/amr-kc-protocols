@@ -14,7 +14,7 @@
      dependency and a bundler to reach them would cost more than it
      returns. The request shapes below match @supabase/auth-js 2.x.
 
-   OFFLINE BEHAVIOUR
+   OFFLINE BEHAVIOR
      Nothing in this file is allowed to break the app. Every entry
      point resolves rather than throwing, and any write that cannot
      go out now is queued in an outbox and retried on reconnect. A
@@ -535,7 +535,7 @@
   }
 
   /* Ask the database whether the signed-in account is on the educator
-     allowlist. Being signed in is not the same as being authorised: the
+     allowlist. Being signed in is not the same as being authorized: the
      answer comes from is_educator(), which also requires a confirmed
      email, so it cannot be faked by signing up with the right address. */
   function educatorVerify() {

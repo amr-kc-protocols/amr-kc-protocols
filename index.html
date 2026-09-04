@@ -1054,7 +1054,7 @@ function renderHome(){
   h += '<div class="feat-title">LIFEPAK <span class="fa">15</span> Station</div>';
   h += '<div class="feat-sub">The ACLS rhythm and electrical therapy station. Name the rhythm, '
      + 'then deliver the therapy on the unit\'s own keys &mdash; defibrillate, cardiovert, pace, '
-     + 'or recognise that none of them is the answer.</div>';
+     + 'or recognize that none of them is the answer.</div>';
   h += '<div class="feat-chips"><span class="feat-chip">16 RHYTHMS</span>'
      + '<span class="feat-chip">4 THERAPIES</span>'
      + '<span class="feat-chip">ON THE REAL KEYS</span></div>';
@@ -2354,7 +2354,7 @@ function cgfSigShow(n){
 // Signature Form. Every number below is in points, measured from the top-left
 // of a US Letter page, and comes from the Word original (1" margins, Calibri
 // bold — 14pt for the headings, 11pt for the fields). The only intentional
-// departure from that document: the three blocks are labelled CREW 1/2/3 only,
+// departure from that document: the three blocks are labeled CREW 1/2/3 only,
 // with no primary / secondary / third wording, because crews were reading the
 // ranking as an instruction about who signs where.
 var CGF_GEO = {
@@ -2535,7 +2535,7 @@ function cgfSendPdf(){
       return navigator.share({files:[file], title:'AMR Caregiver Signature Form'})
         .then(function(){ return true; })
         .catch(function(err){
-          // Cancelling is a choice, not a failure — the button stays available.
+          // Canceling is a choice, not a failure — the button stays available.
           if(err && err.name === 'AbortError') return false;
           cgfDownloadPdf();
           return true;

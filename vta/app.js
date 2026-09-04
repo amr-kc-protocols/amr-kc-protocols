@@ -1990,7 +1990,7 @@ function promptEducatorUnlock() {
         status.classList.add("err");
         return;
       }
-      // Signed in is not the same as authorised — ask the database.
+      // Signed in is not the same as authorized — ask the database.
       return window.AMRBackend.educator.verify().then((v) => {
         submit.disabled = false;
         if (!v.ok) {
@@ -3563,7 +3563,7 @@ function renderCertificate() {
       ),
       el("p", { class: "cert-id" }, "Certificate ID — " + c.certId),
       el("p", { class: "cert-disclaimer" },
-        "This is a certificate of COMPLETION for self-paced education — it is not a certification, licence, or verification of clinical competency, and it confers no scope of practice. Progress and scoring are recorded on the learner's device and, where a course record system is configured, mirrored to it; the course is self-paced and is not independently proctored. Local protocol, medical direction, and the manufacturer's operating instructions always take precedence over this course.")
+        "This is a certificate of COMPLETION for self-paced education — it is not a certification, license, or verification of clinical competency, and it confers no scope of practice. Progress and scoring are recorded on the learner's device and, where a course record system is configured, mirrored to it; the course is self-paced and is not independently proctored. Local protocol, medical direction, and the manufacturer's operating instructions always take precedence over this course.")
     )
   );
 

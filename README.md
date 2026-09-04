@@ -31,7 +31,7 @@ from the home screen.
   Electrical Therapy** station: a rhythm on the monitor, name it from four,
   then deliver the right therapy on the unit's own keys. Sixteen rhythms
   covering the ACLS set, four answers — defibrillate, cardiovert, pace, or
-  recognise that none of them is the answer — and a reason line on every one.
+  recognize that none of them is the answer — and a reason line on every one.
 
 ### Why it is a station and not a console
 
@@ -74,7 +74,7 @@ scroll, and the unit is `inert` behind that notice — covering is only paint,
 and without it the whole chassis stays in the tab order, SHOCK included.
 
 It is also capped at the size of the thing it is a picture of. A LIFEPAK 15 is
-15.8 × 12.5 inches, so past that the chassis stops growing and centres instead:
+15.8 × 12.5 inches, so past that the chassis stops growing and centers instead:
 left to fill the screen it rendered at roughly twice life size on a 2160-wide
 Toughbook, which reads as a mockup rather than a unit. CSS inches are nominal —
 96px to the inch, before the panel's own DPI and the OS scaling factor — so
@@ -159,7 +159,7 @@ asserts that not one field of the patient moved.
 
 ### What the clinical content is checked against
 
-Two sources, answering different questions. The device's behaviour and its
+Two sources, answering different questions. The device's behavior and its
 numbers come from Stryker/Physio-Control's documentation for the LIFEPAK 15 —
 the data sheet and the Setup Options guide. The clinical calls come from the
 **2025 AHA Guidelines for CPR and ECC**, Part 9. The suite asserts the

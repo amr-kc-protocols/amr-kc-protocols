@@ -1499,7 +1499,7 @@ function toggleLock(){
 function updateLockUI(){ var b=document.getElementById('btn-lock'); if(b) b.classList.toggle('locked',controlsLocked); }
 
 // ── MODE / BREATH-TYPE SELECT TOGGLES ─────────────────────────
-// Faithful LTV behaviour: pressing a Select button makes the NEXT option's
+// Faithful LTV behavior: pressing a Select button makes the NEXT option's
 // LED *flash* (pending — not yet applied). Press again to move the flash
 // along; a deliberate press on the flashing option (after a short beat), or
 // touching any other control, CONFIRMS it. A long idle also settles it.
@@ -1675,9 +1675,9 @@ window.addEventListener('resize',function(){ if(selectedControl) renderDock(); }
   });
 })();
 // Live ARIA labels/values on the control tiles + Set Value knob.
-var CTRL_UNIT={rate:'breaths per minute',vt:'millilitres',pc:'centimetres H2O',it:'seconds',
-  ps:'centimetres H2O',fio2:'percent',sens:'litres per minute',peep:'centimetres H2O',
-  hipres:'centimetres H2O',lowpres:'centimetres H2O',lowmv:'litres per minute',apnea:'seconds'};
+var CTRL_UNIT={rate:'breaths per minute',vt:'milliliters',pc:'centimeters H2O',it:'seconds',
+  ps:'centimeters H2O',fio2:'percent',sens:'liters per minute',peep:'centimeters H2O',
+  hipres:'centimeters H2O',lowpres:'centimeters H2O',lowmv:'liters per minute',apnea:'seconds'};
 function refreshA11y(){
   document.querySelectorAll('.ctrl2').forEach(function(t){
     var key=t.getAttribute('data-key'), c=vals[key]; if(!c) return;
@@ -1936,7 +1936,7 @@ var alarmSilencedUntil=0;   // performance.now() timestamp
 var _alarmTimer=null;
 
 function estMinuteVolume(){
-  // Litres/min delivered, estimated from current mode + settings
+  // Liters/min delivered, estimated from current mode + settings
   if(ventMode==='cpap'||ventMode==='nppv'){
     // Spontaneous patient generates their own tidal (~400 mL) augmented by support
     var spontRate=15;

@@ -27,7 +27,7 @@ These suites live here:
   with no signal, is the failure that matters most.
 - **`medmath.test.mjs`** — the Medication Math training
   ([`med-math.html`](../med-math.html)) in headless Chromium. Beyond the usual
-  UI behaviour, it defends the two things that make the page safe to learn
+  UI behavior, it defends the two things that make the page safe to learn
   from: every problem the practice widget generates is recomputed
   independently and compared against the answer the page grades on, and every
   dose, cap and concentration the page quotes is traced back to the formulary
@@ -128,14 +128,14 @@ Grouped by the property being defended:
 | Area | Checks |
 |------|--------|
 | Auth | Anonymous sign-in on first use; expired token triggers refresh then retries; a dead refresh token re-signs in; a *transient* refresh failure keeps the existing identity rather than orphaning history |
-| Payload | `user_id` comes from the session, never the caller; module flags normalised; `modules_total` derived; over-long messages truncated to the column limit |
+| Payload | `user_id` comes from the session, never the caller; module flags normalized; `modules_total` derived; over-long messages truncated to the column limit |
 | Offline | Failed writes queue instead of vanishing; the queue drains on reconnect; `flush()` is a no-op while offline and keeps its items |
 | Retry policy | 4xx dropped (never retried forever); 5xx and 429 queued; items abandoned after the attempt cap |
 | Queue safety | Academy pushes for one course collapse to the newest; Ask messages never collapse; the outbox is capped so it cannot exhaust the storage quota |
 | Degradation | With no URL/key configured, every call is a silent no-op |
 | Educator auth | Password sign-in stores its session on a **separate** key, so signing in as educator cannot clobber a learner's anonymous identity in the same browser — and signing out cannot take it with them; an expired educator session asks for re-login rather than silently becoming an anonymous user |
 | Educator reads | Queries request the right columns and ordering and use the educator token; a non-educator gets zero rows rather than an error; the Ask inbox never requests the submitter's account email |
-| Educator verify | `verify()` asks the database via `is_educator()` rather than trusting the client; a signed-in but non-allowlisted account verifies as **not** an educator; an unreachable server never reads as authorised |
+| Educator verify | `verify()` asks the database via `is_educator()` rather than trusting the client; a signed-in but non-allowlisted account verifies as **not** an educator; an unreachable server never reads as authorized |
 | Caregiver forms | Signature images **never** reach the server; blank crew slots are dropped; a form with no case number is refused before the network; an offline form queues and two forms never collapse into one; a rejected form is reported rather than swallowed |
 
 ## What's covered (`sync.e2e.mjs`)
@@ -150,7 +150,7 @@ Grouped by the property being defended:
 | Ask offline | The message is held on the device and the confirmation says so plainly |
 | Email linking | The prompt appears only when a backend is configured, never blocks the module list, PUTs the typed address, and says to check the inbox rather than claiming the link is already done |
 | Dashboard access | The sign-in gate comes first and no data renders before it; a wrong password keeps the dashboard closed and explains why; signing out clears the stored session and survives a reload |
-| Dashboard rendering | Completions render with humanised course names, module counts and status pills; a verified email is shown and an **unlinked** record is visibly flagged rather than left blank; filters (course, status, search on name *and* email) and two-way column sorting work |
+| Dashboard rendering | Completions render with humanized course names, module counts and status pills; a verified email is shown and an **unlinked** record is visibly flagged rather than left blank; filters (course, status, search on name *and* email) and two-way column sorting work |
 | Dashboard honesty | An educator who is not on the allowlist sees an explanation, not a bare empty table that reads as "nobody has done anything" |
 | Dashboard escaping | A message containing `<img src=x onerror=...>` renders as visible text — no element is created and no dialog fires |
 | VTA academy | Loads clean and resolves `../amr-backend.js` from its subdirectory; VTA's richer state flattens correctly onto the shared shape (quiz and exam scores as percentages, all nine modules); credential and certificate id ride in `meta`; `completed_at` is the certificate issue date; the certificate link prompt PUTs the address; the certificate disclaimer no longer claims records are browser-only |
@@ -221,7 +221,7 @@ Grouped by the property being defended:
 | S3 | **Every item is answerable** — the whole bank named and treated correctly, all four therapies exercised, ending in a summary that scores both questions per rhythm |
 | S4 | The wrong answers: defibrillating asystole, pacing asystole, an unsynchronized shock on an unstable tachycardia, SYNC armed on VF, declining to shock VF, shocking a normal sinus rhythm — each caught, each told what it should have been |
 | S5 | A wrong name is marked, the right one revealed, the miss recorded, and the item moves on to its therapy anyway |
-| S6 | Pacing answers the current: spikes without capture are not an answer, 60 mA is below threshold, 70 captures at the rate dialled in |
+| S6 | Pacing answers the current: spikes without capture are not an answer, 60 mA is below threshold, 70 captures at the rate dialed in |
 | S7 | **Nothing scrolls** — five phones, checked before the run, on the naming step, on the therapy step and with the verdict up; and every control clears 44pt by real hit area |
 | S8 | A whole item played by **tapping** on two landscape phones, every tap landing on the key it aimed at |
 | S9 | Portrait says to turn the phone, the unit is `inert` behind the notice so the keyboard cannot reach SHOCK, and nothing scrolls there either |

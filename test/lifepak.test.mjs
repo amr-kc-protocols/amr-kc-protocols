@@ -234,7 +234,7 @@ const verdict = p => p.evaluate(() => {
   ok('S6 60 mA is below this patient\'s threshold',
      await p.evaluate(() => D.pacerMa === 60 && !captured), await p.evaluate(() => String(D.pacerMa)));
   await tap(p, 'kCurUp', 400);
-  ok('S6 70 mA captures, at the rate that was dialled in',
+  ok('S6 70 mA captures, at the rate that was dialed in',
      await p.evaluate(() => captured && S.rhythm === 'paced' && S.hr === D.pacerRate));
   ok('S6 and capture is the answer', (await verdict(p)).good);
   await p.context().close(); }
@@ -627,7 +627,7 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
       return { w: Math.round(r.width), h: Math.round(r.height), l: Math.round(r.left), r: Math.round(innerWidth - r.right) }; });
     ok(`S18 ${w}x${h} the unit is never larger than the real one`,
        d.w <= 1518 && d.h <= 1201, `${d.w}x${d.h}`);
-    if (capped) ok(`S18 ${w}x${h} and is centred once the cap bites`, Math.abs(d.l - d.r) <= 2, `left ${d.l}, right ${d.r}`);
+    if (capped) ok(`S18 ${w}x${h} and is centerd once the cap bites`, Math.abs(d.l - d.r) <= 2, `left ${d.l}, right ${d.r}`);
     else ok(`S18 ${w}x${h} still fills the screen, which is what a phone needs`, d.w === w, `${d.w} of ${w}`);
     await ctx.close();
   }

@@ -86,7 +86,7 @@ await check("stamps user_id from the session, not the caller", async () => {
   assert.equal(calls[1].body.user_id, "user-uuid-1");
 });
 
-await check("derives modules_total and normalises module flags", async () => {
+await check("derives modules_total and normalizes module flags", async () => {
   const { win, calls } = makeEnv(async (path) => {
     if (path === "/auth/v1/signup") return res(200, SESSION);
     return res(201, null);
@@ -557,7 +557,7 @@ await check("the Ask inbox never requests the submitter's account email", async 
   const q = calls.find((c) => c.path.startsWith("/rest/v1/ask_educator_messages"));
   assert.match(q.path, /reply_email/, "the address they chose to type is fine");
   assert.ok(!/user_id/.test(q.path),
-    "linking an email to save progress must not deanonymise their questions");
+    "linking an email to save progress must not deanonymize their questions");
 });
 
 await check("a non-educator gets zero rows, not an error", async () => {
@@ -622,7 +622,7 @@ await check("verify() asks the database, not the client", async () => {
 
 await check("signed in but not allowlisted verifies as NOT an educator", async () => {
   // The distinction the VTA admin unlock depends on: valid credentials are
-  // not authorisation.
+  // not authorization.
   const { win } = makeEnv(async (path) => {
     if (path.startsWith("/auth/v1/token?grant_type=password")) return res(200, EDU_SESSION);
     if (path === "/rest/v1/rpc/is_educator") return res(200, false);
@@ -631,7 +631,7 @@ await check("signed in but not allowlisted verifies as NOT an educator", async (
   await win.AMRBackend.educator.signIn("nobody@example.com", "x");
   const r = await win.AMRBackend.educator.verify();
   assert.equal(r.ok, true);
-  assert.equal(r.isEducator, false, "must not treat a signed-in stranger as authorised");
+  assert.equal(r.isEducator, false, "must not treat a signed-in stranger as authorized");
 });
 
 await check("verify() before sign-in asks for sign-in", async () => {
@@ -650,7 +650,7 @@ await check("verify() reports an unreachable server rather than claiming access"
   await win.AMRBackend.educator.signIn("hunter@example.com", "x");
   const r = await win.AMRBackend.educator.verify();
   assert.equal(r.ok, false);
-  assert.ok(!r.isEducator, "a network failure must never read as authorised");
+  assert.ok(!r.isEducator, "a network failure must never read as authorized");
   assert.match(r.error, /Could not reach the server/);
 });
 

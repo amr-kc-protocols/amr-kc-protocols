@@ -5,7 +5,7 @@
 // ---------------------------------------------------------------------
 // Self-contained SVG so the app stays offline-capable with no extra
 // requests. Each figure has a `title` (rendered as the caption) and `svg`.
-// Colours come from the app palette; text uses the inherited font stack.
+// Colors come from the app palette; text uses the inherited font stack.
 // =====================================================================
 
 "use strict";
@@ -229,7 +229,7 @@ dope: {
 },
 
 // ---------- LTV control panel (captured from this project's own simulator,
-// so it carries no third-party image licence) ----------
+// so it carries no third-party image license) ----------
 ltv_panel: {
   title: "The LTV control panel — individual control windows and one scanning display",
   alt: "Ventilator control panel showing separate windows for each setting, alarm limit windows, mode and breath-type select buttons, a set value knob, and a single scanning monitored-data display.",

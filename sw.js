@@ -38,7 +38,7 @@ self.addEventListener('fetch', e => {
   // Never cache backend traffic. Writes are POSTs and already skipped above,
   // but auth and REST reads must not be served from a stale cache either —
   // a cached token response or query result would be wrong the moment it
-  // was replayed. amr-backend.js handles its own offline behaviour.
+  // was replayed. amr-backend.js handles its own offline behavior.
   const url = new URL(e.request.url);
   if (/\.supabase\.(co|in)$/.test(url.hostname)) return;
 
