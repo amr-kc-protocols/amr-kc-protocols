@@ -305,8 +305,14 @@ const TOPIC_IDS = ['titrate','alarms','bag','piggyback','handoff','limits','tran
   // Several trainings share the featured-panel treatment, so target this one.
   const feat = p.locator('.feat-card[href="alaris-pump.html"]');
   ok('A12 home shows the feature card', (await feat.count()) === 1);
-  ok('A12 feature card is flagged new',
-     /new training/i.test(await feat.locator('.feat-badge').textContent()));
+  /* It was flagged "new" when it was the new thing. The LIFEPAK simulator has
+     that badge now, and this card carries the plain one — a badge three
+     panels claim at once tells a crew nothing. What still has to hold is that
+     the card is labelled and reachable, not that it claims to be the newest. */
+  ok('A12 feature card carries a training badge',
+     /training/i.test(await feat.locator('.feat-badge').textContent()));
+  ok('A12 and no longer claims to be the newest',
+     !/new/i.test(await feat.locator('.feat-badge').textContent()));
   const box = await feat.boundingBox();
   ok('A12 feature card sits high on the page', box && box.y < 700, 'y=' + (box && Math.round(box.y)));
 

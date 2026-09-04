@@ -27,96 +27,85 @@ Two interactive trainers, both single self-contained pages, both reachable
 from the home screen.
 
 - **`vent-ltv1200.html`** — the LTV 1200 transport ventilator.
-- **`lifepak-15.html`** — the LIFEPAK 15 monitor/defibrillator: the whole unit,
-  with defibrillation, synchronized cardioversion, transcutaneous pacing,
-  12-lead acquisition and the code summary. Three levels — a walkthrough of
-  every control, seven clinical cases with coaching, and three multi-phase
-  assessments — plus free play and a teaching card behind every control.
+- **`lifepak-15.html`** — the LIFEPAK 15 as the AHA's **Rhythm Recognition and
+  Electrical Therapy** station: a rhythm on the monitor, name it from four,
+  then deliver the right therapy on the unit's own keys. Sixteen rhythms
+  covering the ACLS set, four answers — defibrillate, cardiovert, pace, or
+  recognise that none of them is the answer — and a reason line on every one.
 
-The LIFEPAK's unit is ported from the CES simulator, where it is half of a
-two-window system: a facilitator drives the patient from a control panel and
-the monitor never writes a field of patient state. There is no facilitator
-here, so the trainer in the page plays one — and it plays one in a
-facilitator's place. The crew own the device (energy, charge, lead, pacing
-rate and current, alarms, shocks); the patient answers to the trainer, on the
-event a press generated. So a shock is charged, delivered, announced and
-logged and the rhythm does not move until the case moves it. `test/lifepak.test.mjs`
-drives a whole resuscitation through the unit and asserts that not one field
-of the patient changed.
+### Why it is a station and not a console
 
-The clinical shape of the assessment cases follows the ACLS algorithms. They
-are deliberately **not** the AHA Megacode Testing Checklist — that is a
-published, copyrighted instrument, and grading against an unapproved copy of
-it would be worse than not grading at all. A run records what the learner did
-at the unit and when, which is what a debrief is read from.
+It began as the whole unit with a walkthrough, seven coached cases and three
+multi-phase assessments, and it was too much for the screen it is worked on.
+The drill is the thing that teaches, and everything around it was in the way.
 
-### On a phone
+So the page is one loop now. What decides the answer is the rhythm **and the
+patient**: monomorphic VT is in the bank three times — pulseless, unstable
+with a pulse, and stable with a pulse — and takes a different answer each
+time. A station that mapped rhythm to therapy one-to-one would be teaching a
+lookup table rather than the decision an ACLS provider makes.
 
-Most people open this on a phone, and the replica cannot serve them as drawn:
-it is a fixed 1083x704 chassis fitted with a single scale factor, which on a
-phone is 0.49. Measured across an iPhone SE, 12, 14 Pro Max, Pixel 7 and a
-360px Android, **26 of 27 controls came out under Apple's 44pt minimum in
-landscape on every one of them**, at a median of 21-26pt, with the smallest
-silkscreen at 8px — and portrait, which is how a phone is held, showed a
-prompt to turn it sideways into that.
+The two shock answers are told apart the way the real unit tells them apart:
+**whether SYNC was armed when the shock landed.** That is the thing crews get
+wrong, so it is asked of the device rather than accepted as a word.
 
-So below the scale where the chassis can still hold a 44pt control, the unit
-is **laid out rather than scaled**: the monitor sticks to the top of the
-screen while the controls scroll under it, in the manufacturer's own areas,
-at 56px. Held sideways it becomes two columns, monitor beside controls,
-because a phone in landscape has width to spare and no height at all.
+`none` is never "do nothing" — it is "nothing electrical", and the reason line
+says what the patient does need instead. A learner who reads "none" and stops
+has taken the wrong lesson from a right answer.
 
-What that gives up is the millimetre geography — where a key sits relative to
-its neighbours — and that is a real loss, because it is half of what a crew
-learns from a replica. What it keeps is everything that survives: the same
-keys with the same names, the manufacturer's control areas in their own
-groups, the numbered 1-2-3 therapy path, and the screen reading as it does on
-the unit. A control geography nobody can hit teaches less than a grouping they
-can work. Above that scale — every iPad, every laptop — the replica is drawn
-exactly as before.
+### The screen it is worked on
 
-The DOM is identical in both layouts, so there is one device and one set of
-behaviours to reason about; only the CSS differs.
+A phone held sideways, and **nothing scrolls**. A drill whose answer is below
+the fold is a drill nobody finishes.
+
+That decided the layout. The unit is laid out fluidly rather than drawn at
+1083×704 and scaled — the scaled chassis was exact and could not be made to
+fit, putting every control at 21–26pt against a 44pt floor on a phone. And it
+is down to the nine keys electrical therapy is delivered with: ON, SYNC,
+ENERGY SELECT, CHARGE, SHOCK, PACER, RATE, CURRENT, PAUSE.
+
+The record keys, the monitoring and display areas, LEAD, SIZE and the speed
+dial are gone. **ANALYZE is gone for a different reason than the rest:** it is
+a working control that would answer the question being asked. A learner
+deciding whether a rhythm is shockable could press it and be told.
+
+Held upright the page says to turn the phone rather than stacking into a
+scroll, and the unit is `inert` behind that notice — covering is only paint,
+and without it the whole chassis stays in the tab order, SHOCK included.
+
+### The boundary
+
+The unit is ported from the CES simulator, where it is half of a two-window
+system: a facilitator drives the patient from a control panel and the monitor
+never writes a field of patient state. There is no facilitator here, so the
+station plays one — in a facilitator's place, rather than by letting the keys
+reach into the patient. The crew own the device; the patient answers to the
+station, on the event a press generated. `test/lifepak.test.mjs` drives the
+whole therapy set through the unit with the station's writer stubbed out and
+asserts that not one field of the patient moved.
 
 ### What the clinical content is checked against
 
-Two sources, and they answer different questions. The device's behaviour and
-its numbers come from Stryker/Physio-Control's own documentation for the
-LIFEPAK 15 — the data sheet and the Setup Options guide. The clinical calls
-come from the **2025 AHA Guidelines for CPR and ECC**, Part 9 (Adult Advanced
-Life Support). `test/lifepak.test.mjs` asserts the published figures directly,
-so drift in any of them fails the suite rather than sitting unnoticed.
+Two sources, answering different questions. The device's behaviour and its
+numbers come from Stryker/Physio-Control's documentation for the LIFEPAK 15 —
+the data sheet and the Setup Options guide. The clinical calls come from the
+**2025 AHA Guidelines for CPR and ECC**, Part 9. The suite asserts the
+published figures directly, so drift fails rather than sits there.
 
-Checked and matching the device: the manual-mode energy ladder (2 J to 360 J
-in the unit's own steps), the 200-300-360 J adult sequence that is its factory
-default, the lead list, pacing at 40-170 PPM with a 60 PPM default and
-0-200 mA, the 60-second disarm and the two-minute alarm silence.
+Matching the device: the manual-mode energy ladder, the 200-300-360 J adult
+sequence that is its factory default, pacing at 40–170 PPM from a 60 PPM
+default and 0–200 mA, the 60-second disarm.
 
-Checked and matching the guidelines: compressions at 100/min, inside the
-100-120 band; atropine before pacing for a symptomatic bradycardia; pacing an
-asystolic arrest taught as ineffective, which is what the 2025 evidence review
-concluded; SYNC ruled out for VF and pulseless VT; EtCO₂ as a trend of CPR
-quality rather than a threshold to hit.
-
-**One change of substance since 2020 shapes the energy content.** The 2025
-guidelines no longer name a defibrillation or cardioversion dose: they defer
-to the defibrillator's manufacturer, and to the maximum setting where the
-manufacturer is unknown. The old fixed figures — 50-100 J for SVT, 100 J for
-unstable VT — are gone from the guidelines, so they are gone from here too.
-What the trainer grades is that the learner selected from this unit's ladder
-and cardioverted rather than defibrillated; what the cards teach is to take
-the dose from the device and the local protocol. Escalation is what this unit
-is configured to do, and the cards say that rather than claiming higher energy
-is known to be better — a trial comparing fixed 150 J with 200-300-360 J found
-similar first-shock success.
-
-Not covered: double sequential external defibrillation, which the 2025
-guidelines rate Class 2b for shock-refractory VF. It needs two defibrillators
-and is outside what a single-unit trainer can teach.
+Matching the guidelines: atropine before pacing; pacing an asystolic arrest
+taught as ineffective, which is what the 2025 evidence review concluded; SYNC
+ruled out for VF and pulseless VT; and **no fixed joule figure quoted as
+though the AHA still set one** — the 2025 guidelines stopped naming
+defibrillation and cardioversion doses and defer to the manufacturer.
 
 LIFEPAK is a trademark of Stryker. This is a training simulation and is not a
 medical device. Nothing here has been through clinical review by the Medical
-Director; it is checked against published sources, which is not the same thing.
+Director; it is checked against published sources, which is not the same
+thing.
 
 ## Backend
 

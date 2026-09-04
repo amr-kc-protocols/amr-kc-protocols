@@ -640,237 +640,210 @@ body.booting #screen>*{visibility:hidden;}
 
 
 /* =====================================================================
-   Phone layout
+   Station layout
    =====================================================================
-   The LIFEPAK is drawn at 1083x704 and scaled to fit. That works down to a
-   landscape iPad and stops working below it: the fit is a single scale factor,
-   so at the 0.49 a phone reaches, every control comes out at 21-26pt against a
-   44pt floor and the smallest silkscreen lands at 8px. Measured on an iPhone
-   SE, 12, 14 Pro Max, Pixel 7 and a 360px Android — 26 of 27 controls under
-   44pt in landscape, on every one of them. And portrait, which is how a phone
-   is actually held, showed a prompt to turn it sideways into that.
+   This page is one thing now: the AHA's Rhythm Recognition and Electrical
+   Therapy station. A rhythm on the screen, name it, deliver the therapy on
+   the unit's own keys, find out straight away whether you were right.
 
-   So below the size where the chassis can hold the touch floor, the unit is
-   laid out rather than scaled. What that gives up is the millimetre geography
-   — where a key sits relative to its neighbours — and that is a real loss,
-   because it is half of what a crew learns from a replica. What it keeps is
-   everything that survives the change: the same keys with the same names, the
-   manufacturer's own control areas in their own groups, the numbered 1-2-3
-   therapy path, and the screen above it all reading exactly as it does on the
-   unit. A control geography nobody can hit teaches less than a grouping they
-   can work.
+   Two constraints follow from where it is worked, and they decide the whole
+   layout. It is worked on a phone held sideways, and **nothing scrolls** — a
+   drill where the answer is below the fold is a drill nobody finishes, and
+   the scroll was costing more than the extra controls were worth.
 
-   The DOM is identical in both layouts. Nothing below changes a binding, an
-   id, or what any key does — it is all layout, so there is one device and one
-   set of behaviours to reason about.
+   So the unit is laid out fluidly rather than drawn at 1083x704 and scaled.
+   The scaled chassis was exact and could not be made to fit: at the 0.49 a
+   phone reaches, every control fell to 21-26pt against a 44pt floor. What is
+   kept is what a crew reads the unit by — the screen, the areas, their
+   colours, the numbered 1-2-3 therapy path, and where the therapy keys sit
+   relative to each other.
+
+   What is dropped is everything the station does not use: the record keys on
+   the left face (12-LEAD, TRANSMIT, CODE SUMMARY, PRINT), the monitoring and
+   display areas, LEAD and SIZE, and the speed dial. Eleven keys are left, and
+   every one of them is part of delivering electrical therapy. On a 667px-wide
+   phone that is the difference between keys a gloved thumb can hit and a
+   replica nobody can work.
    ===================================================================== */
 
-/* The instrument layout pins html and body to the viewport and hides the
-   overflow, because a fixed-size unit scaled to fit has nothing to scroll.
-   The phone layout is taller than the screen by design, so the document has
-   to scroll — and it has to be the document, not the body: body scrolling
-   inside a clipped html left everything below the first screenful painted
-   nowhere and made position:sticky meaningless, because sticky needs a
-   scrolling ancestor to stick inside. The class goes on both. */
-/* No overflow-x:hidden here, however tempting. Setting it on html or body
-   computes overflow-y to auto, which makes them a scroll container — and a
-   sticky descendant then sticks to that instead of to the viewport, which is
-   to say it does not stick at all. It cost the monitor its whole reason for
-   being sticky: scrolling down to SHOCK took the rhythm off the screen.
-   Nothing here overflows sideways anyway; that is measured, not assumed. */
-html.phone,html.phone body.phone{
-  height:auto;min-height:100%;overflow:visible;
-  -webkit-overflow-scrolling:touch;
-}
-/* The monitor's height on a phone, named once: the sticky block, the scroll
-   margins that keep controls clear of it, and the layout all have to agree. */
-body.phone{--scrh:min(46vh,320px);}
-body.phone.lp-skin #device{
-  position:static;transform:none;width:auto;height:auto;
-  display:block;padding:8px calc(8px + env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom));
-  background:#14161a;box-shadow:none;border-radius:0;
-  margin-top:var(--hdrh,0px);
-}
-/* The handle, the hazard strip and the printer door are the parts of the
-   chassis that carry nothing. On a screen this size they are a scroll. */
-body.phone.lp-skin #devHandle,
-body.phone.lp-skin #devFoot,
-body.phone.lp-skin #devUnder{display:none;}
-body.phone.lp-skin #devMain{display:flex;flex-direction:column;gap:10px;height:auto;}
 
-/* The screen stays on screen. Scrolling to a key you have to press must never
-   take the rhythm you are pressing it about out of sight — that is the whole
-   reason this is sticky rather than simply first. */
-body.phone.lp-skin #screenCol{
-  order:1;position:sticky;top:calc(var(--hdrh,0px) - 8px);z-index:30;
-  padding:8px 0 6px;margin:-8px 0 0;background:#14161a;
-  display:flex;flex-direction:column;gap:4px;
+body.lp-skin{background:#14161a;}
+body.lp-skin #device{
+  position:fixed;left:0;right:0;top:var(--hdrh,0px);bottom:0;
+  width:auto;height:auto;transform:none;
+  display:flex;flex-direction:column;gap:0;
+  padding:6px calc(6px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,#c2c4bd,#a9aca4);
+  border-radius:0;box-shadow:none;
 }
-body.phone.lp-skin .screenLabel{height:20px;font-size:10px;}
-body.phone.lp-skin .screenLabel span{font-size:9px;}
-body.phone.lp-skin #screenWrap{
-  flex:none;height:var(--scrh);min-height:190px;border-width:3px;
+/* The parts of the chassis that carry nothing. There is no room for them on
+   the screen this is worked on, and nothing is learned from them. */
+body.lp-skin #devHandle,body.lp-skin #devFoot,
+body.lp-skin #devUnder,body.lp-skin #chromeLeft{display:none!important;}
+
+body.lp-skin #devMain{
+  position:static;flex:1;min-height:0;
+  display:grid;grid-template-columns:1fr minmax(300px,40%);gap:6px;
 }
-/* Anything scrolled into view has to arrive somewhere it can be tapped. The
-   sticky monitor and the fixed header sit over the top of the page and the
-   audio notice over the bottom, so a control scrolled flush to either edge
-   lands underneath one of them. That is not only the browser's own scrolling:
-   it is every focus move and every scrollIntoView. */
-body.phone.lp-skin #device button,
-body.phone.lp-skin #device .dial{
-  scroll-margin-top:calc(var(--hdrh,0px) + var(--scrh) + 44px);
-  scroll-margin-bottom:78px;
+body.lp-skin #screenCol{
+  min-width:0;min-height:0;display:flex;flex-direction:column;gap:4px;
 }
-/* Room under the last control for the audio notice to sit over nothing. */
-body.phone.lp-skin #chromeLeft{padding-bottom:64px;}
-/* Narrower parameter column: 138px of a 360px screen is more than a third of
-   the waveform area, and the numbers are large enough to survive the trim. */
-body.phone.lp-skin #lpNums{width:104px;}
-body.phone.lp-skin #top{left:104px;}
-body.phone.lp-skin #wavearea{left:104px;}
-body.phone.lp-skin .lpval{font-size:30px;}
-/* The screen's small print, sized for a phone rather than for a 10-inch unit
-   two feet away. Twenty-two runs on this screen sat between 8 and 10px: the
-   parameter names, their units, and the waveform scales. The big numerics
-   carry the reading, but a number whose label cannot be read is a number
-   nobody can act on. The bezel silkscreen stays small — that is what the
-   plastic on the real unit looks like, and nothing depends on reading it. */
-body.phone.lp-skin .lphd{font-size:10.5px;}
-body.phone.lp-skin .lphd .lpunit,body.phone.lp-skin #lpTu{font-size:9.5px;}
-body.phone.lp-skin .yl{font-size:9px;}
-body.phone.lp-skin .ws{font-size:10.5px;}
-body.phone.lp-skin #dSize{font-size:10px;}
-body.phone.lp-skin .diallbl{font-size:11px;}
-body.phone .fgbadge{font-size:10px;}
-body.phone .fgphase{font-size:11px;}
-
-body.phone.lp-skin #chromeRight{order:2;display:block;width:auto;}
-body.phone.lp-skin #chromeLeft{order:3;display:block;width:auto;}
-body.phone.lp-skin .lspacer{display:none;}
-
-/* Each area keeps its own identity and its own name, so the grouping the
-   manual teaches survives the loss of the geography. */
-body.phone.lp-skin .area{padding:9px;border-radius:10px;margin-bottom:10px;}
-body.phone.lp-skin .area::before{
-  content:attr(data-area);display:block;grid-column:1 / -1;
-  font:700 9px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1.4px;
-  color:#3d4144;text-transform:uppercase;margin:0 0 7px 2px;
+body.lp-skin .screenLabel{
+  flex:none;height:19px;font-size:10px;letter-spacing:.5px;padding:0 8px;border-radius:3px;
 }
-body.phone.lp-skin .arow{display:block;}
-body.phone.lp-skin .a2,body.phone.lp-skin .a3{margin-bottom:10px;}
-
-/* Keys at a size a gloved thumb can hit, two across. */
-body.phone.lp-skin .a1left,
-body.phone.lp-skin .a1right,
-body.phone.lp-skin .a2,
-body.phone.lp-skin .a3,
-body.phone.lp-skin .a5{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+body.lp-skin .screenLabel span{font-size:8.5px;}
+body.lp-skin #screenWrap{
+  position:relative;inset:auto;flex:1;min-height:0;min-width:0;
+  background:#000;border:4px solid #26282a;border-radius:5px;
+  box-shadow:inset 0 0 0 1px #000,0 1px 3px rgba(0,0,0,.4);
 }
-/* Area 2 is a column: the two rockers between PACER and PAUSE span the grid,
-   so a two-column rule left each of those two keys alone on its own row with
-   a hole beside it. */
-body.phone.lp-skin .a2{grid-template-columns:1fr;}
-body.phone.lp-skin .a1body{display:block;}
-body.phone.lp-skin .a1num{display:none;}
-body.phone.lp-skin .a1right{margin-top:8px;padding:8px;}
-body.phone.lp-skin .k,body.phone.lp-skin .fk,body.phone.lp-skin .rk{
-  min-height:56px;font-size:13px;padding-left:20px;
-}
-body.phone.lp-skin .krow{display:contents;}
-body.phone.lp-skin .k.half{width:auto;}
-/* ON and SHOCK are the two that must never be hunted for. */
-body.phone.lp-skin .on-k{grid-column:1 / -1;min-height:60px;}
-body.phone.lp-skin .shockrow{grid-column:1 / -1;justify-content:center;padding:4px 0;}
-body.phone.lp-skin .shock{width:88px;height:88px;}
-body.phone.lp-skin .charge-k{grid-column:1 / -1;min-height:60px;}
-body.phone.lp-skin .updown{grid-column:1 / -1;min-height:60px;}
-body.phone.lp-skin .updown .ud{flex:0 0 74px;}
-body.phone.lp-skin .arow .updown .udlbl{font-size:13px;}
-body.phone.lp-skin .updown .udlbl{font-size:13px;}
-body.phone.lp-skin .vfdose{font-size:11px;padding:5px;}
-body.phone.lp-skin .ledrow{grid-column:1 / -1;justify-content:flex-start;gap:14px;}
-
-/* Area 4: the dial is a drag target, so it gets room rather than a corner. */
-body.phone.lp-skin .a4{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:0;}
-body.phone.lp-skin .a4 .rk{flex:1;min-width:120px;}
-body.phone.lp-skin .dialwrap{flex:1 0 100%;display:flex;align-items:center;justify-content:center;gap:12px;}
-body.phone.lp-skin .dial{width:96px;height:96px;}
-
-/* The header has to hold everything it holds at 1180px in 360. It wraps
-   rather than overflowing — an EDU ONLY badge off the right-hand edge is the
-   one label on this page that has to be readable — and the fit measures what
-   that costs rather than assuming a row. */
-body.phone .fgtop{flex-wrap:wrap;row-gap:6px;}
-/* The page title goes. The unit's own LIFEPAK 15 MONITOR/DEFIBRILLATOR label
-   sits forty pixels below it, so on a phone it was the same words twice at
-   the cost of the row fitting at all. Everything else stays, EDU ONLY
-   included — that is the label that has to be readable. */
-body.phone .fgttl{display:none;}
-body.phone #fsBtn{display:none;}
-body.phone .fgbtn{padding:0 9px;font-size:11px;}
-body.phone .fgspace{flex-basis:0;}
-/* Two rows, not four: what is being asked reads across the full width, and
-   the buttons that act on the run share the line above it with the phase. */
-body.phone #fgTask{flex-wrap:wrap;row-gap:5px;}
-body.phone .fgphase{order:1;}
-body.phone .fgtick{order:2;}
-body.phone #fgTask .fgbtn,body.phone #btnSkip{order:3;}
-body.phone #btnSkip{margin-left:auto;}
-body.phone .fgtask{order:9;font-size:13px;}
-/* Only a narrow screen has to give the task line a row of its own. A phone
-   held sideways has 844px of width and needs the height far more: forcing
-   the wrap there cost 109px of a 390px screen before a single control. */
-@media (max-width:560px){ body.phone .fgtask{flex:1 1 100%;} }
-
-/* A phone held sideways: wide and very short. Stacking the monitor above the
-   controls leaves 91px of the 390 for the controls themselves, and ON, HOME
-   SCREEN, the speed dial and the display key could not be reached at any
-   scroll position — measured, by hit-testing every control at every offset.
-   Landscape has width to spend instead, so the monitor takes a column and the
-   controls scroll beside it. */
-@media (min-width:620px) and (max-height:560px){
-  body.phone{--scrh:min(66vh,290px);}
-  body.phone.lp-skin #devMain{
-    display:grid;grid-template-columns:42% 1fr;gap:10px;
-    grid-template-areas:"screen right" "screen left";align-items:start;
-  }
-  body.phone.lp-skin #screenCol{grid-area:screen;top:calc(var(--hdrh,0px) + 6px);}
-  body.phone.lp-skin #chromeRight{grid-area:right;}
-  body.phone.lp-skin #chromeLeft{grid-area:left;}
-  body.phone.lp-skin #device button,
-  body.phone.lp-skin #device .dial{scroll-margin-top:calc(var(--hdrh,0px) + 12px);}
-  /* Sideways there is no spare height at the bottom, so the audio notice goes
-     over the monitor's column — which holds no controls — rather than over
-     the keys. */
-  body.phone #armAudio{left:8px;right:auto;transform:none;max-width:40%;
-    font-size:11px;padding:0 10px;text-align:left;}
-  /* Sideways the parameter column divides about 250px between five blocks, so
-     a 30px value crowds the header above it. The number still dominates. */
-  body.phone.lp-skin .lpval{font-size:23px;}
-  body.phone.lp-skin .lphd{font-size:9.5px;}
+body.lp-skin #chromeRight{
+  display:flex;flex-direction:column;gap:5px;width:auto;min-width:0;min-height:0;
 }
 
-/* The audio notice sits under the page header, which on a phone is directly
-   over the top of the monitor. It waits at the bottom instead, where it
-   covers a key rather than the rhythm, and it is gone on the first tap. */
-body.phone #armAudio{
-  top:auto;bottom:calc(10px + env(safe-area-inset-bottom));
-  position:fixed;z-index:96;
+/* The station's own bar, under the screen: what is being asked, and the
+   answers to it. It is part of the layout rather than an overlay, because an
+   overlay over a rhythm is a rhythm nobody can read while they answer. */
+#stn{
+  flex:none;display:flex;flex-direction:column;gap:4px;
+  font-family:'Arial Narrow',Arial,sans-serif;
 }
-body.phone #fgToast{top:auto;bottom:calc(64px + env(safe-area-inset-bottom));}
+#stnAsk{
+  display:flex;align-items:center;gap:7px;min-height:22px;
+  color:#1b1d1f;font:700 13px/1.2 'Arial Narrow',Arial,sans-serif;letter-spacing:.2px;
+}
+#stnAsk .stnstep{
+  flex:none;padding:2px 7px;border-radius:4px;background:#1b1d1f;color:#e8e8e6;
+  font:700 9.5px/1.4 'Arial Narrow',Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;
+}
+#stnAsk .stnq{flex:1;min-width:0;}
+#stnAsk .stnn{flex:none;font:700 11px/1 monospace;color:#4a4d50;letter-spacing:.5px;}
+#stnOpts{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.stnb{
+  min-height:46px;padding:5px 7px;border-radius:8px;cursor:pointer;
+  background:#eceee9;border:1px solid #8e918a;color:#1b1d1f;
+  font:700 12px/1.2 'Arial Narrow',Arial,sans-serif;letter-spacing:.2px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+}
+.stnb:active{background:#d7d9d4;}
+.stnb.right{background:#1d6b3f;border-color:#124a2b;color:#eafbf1;}
+.stnb.wrong{background:#8f1d12;border-color:#5c150d;color:#ffe1da;}
+.stnb.reveal{background:#1d6b3f;border-color:#124a2b;color:#eafbf1;}
+.stnb[disabled]{cursor:default;opacity:.55;}
+/* Two answers rather than four, on the therapy step where one of them is a
+   full-width way of saying "none of the keys". */
+#stnOpts.wide{grid-template-columns:repeat(2,1fr);}
+#stnOpts.one{grid-template-columns:1fr;}
 
-/* Free play is the one panel built at a pointer's density. On a phone its
-   rhythm buttons and sliders are worked with a thumb like everything else. */
-body.phone .fpb{min-height:46px;padding:0 13px;font-size:12px;}
-body.phone .fprow{gap:7px;margin-bottom:10px;}
-body.phone .fprow input[type=range]{height:46px;}
-body.phone .fprow label{width:54px;}
-body.phone .ovrbtn{min-height:50px;}
-body.phone .lvcard{min-height:62px;}
+/* The verdict replaces the answers rather than sitting beside them: on a
+   350px-tall screen there is room for one or the other. */
+#stnFb{
+  display:none;flex:none;gap:8px;align-items:center;
+  padding:6px 10px;border-radius:8px;min-height:56px;
+  font:400 12.5px/1.35 'Arial Narrow',Arial,sans-serif;
+}
+#stnFb.show{display:flex;}
+#stnFb.good{background:#122c1d;border:1px solid #2f6b45;color:#bff0d4;}
+#stnFb.bad{background:#2c1414;border:1px solid #a8341f;color:#ffd0c6;}
+#stnFb b{font-weight:700;}
+#stnFb .stnnext{
+  /* The button pressed once per rhythm, so the one pressed most in the whole
+     drill. It was 40px. */
+  flex:none;margin-left:auto;min-height:44px;padding:0 15px;border-radius:7px;cursor:pointer;
+  background:#eceee9;border:1px solid #8e918a;color:#1b1d1f;
+  font:700 12px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;
+  touch-action:manipulation;
+}
 
-/* Portrait is a layout now, not a notice. */
-body.phone.lp-skin.portrait #rotate{display:none;}
+/* ---- the nine keys ----
+   Two columns, one per area, because stacked they do not fit above 44pt on a
+   390px-tall screen — measured: Area 1 and Area 2 together need about 424px
+   of the 333 there are. Side by side each is five rows at most.
+
+   Area 1 keeps the numbered therapy path in the order the unit prints it:
+   1 ON, 2 ENERGY SELECT, 3 CHARGE, then SHOCK, with SYNC above them because
+   whether it is armed is the difference between the two shock answers. */
+body.lp-skin #chromeRight{
+  display:grid;grid-template-columns:1fr 1fr;gap:5px;align-items:stretch;
+}
+body.lp-skin .area{padding:5px;border-radius:6px;min-height:0;}
+body.lp-skin .a1{display:flex;flex-direction:column;gap:5px;min-height:0;}
+body.lp-skin .a1body{flex:1;min-height:0;display:flex;flex-direction:column;gap:5px;}
+body.lp-skin .a1left{display:contents;}
+body.lp-skin .a1right{
+  flex:3.2;min-height:0;display:flex;flex-direction:column;gap:5px;
+  background:#6f7376;border-radius:5px;padding:4px;
+}
+body.lp-skin #kSYNC{flex:1;}
+body.lp-skin .a2{display:flex;flex-direction:column;gap:5px;background:#2f6b45;min-height:0;}
+body.lp-skin .k,body.lp-skin .updown{flex:1;min-height:44px;}
+/* The shock button is a fixed circle in the original and overhung the bottom
+   of its sub-panel here. It sizes to the row it is in now, with a floor a
+   thumb can still find. */
+body.lp-skin .shockrow{flex:1.3;min-height:52px;align-items:center;}
+body.lp-skin .shock{width:auto;aspect-ratio:1;height:min(100%,74px);min-height:52px;}
+/* The status line carries five things across the top of the display and runs
+   out of room before the smallest phone does. */
+@media (max-width:760px){
+  body.lp-skin #lpTop{font-size:10px;gap:2px;}
+  body.lp-skin #lpTop .lpbay{display:none;}
+}
+body.lp-skin .a1 .vfdose{flex:none;font-size:10px;line-height:1.15;padding:2px;}
+body.lp-skin .ledrow{flex:none;}
+body.lp-skin .a1num{display:none;}
+
+/* Dropped. Nothing in a rhythm-and-electrical-therapy drill uses them, and
+   the room they took is the room the therapy keys needed.
+
+   ANALYZE is dropped for a different reason than the rest: it is a working
+   control that would answer the question being asked. A learner deciding
+   whether this rhythm is shockable can press it and be told, which is the
+   one thing the station cannot allow. CPR goes because a metronome is not
+   electrical therapy. */
+body.lp-skin .a3,body.lp-skin .a4,body.lp-skin .krow,
+body.lp-skin #kLEAD,body.lp-skin #kSIZE,
+body.lp-skin #kANALYZE,body.lp-skin #kCPR{display:none!important;}
+/* Areas 2 and 3 share a row on the unit. Area 3 goes; the row stays, because
+   the pacing keys are in it and pacing is one of the four answers. */
+body.lp-skin .arow{display:contents;}
+body.lp-skin .a1{grid-column:1;}
+body.lp-skin .a2{grid-column:2;}
+
+/* The station reads a rhythm, so the rhythm gets the room. The pleth and the
+   capnogram stay because a pulse you can see is half of what decides the
+   answer — but they do not need a third of the screen each. */
+body.lp-skin #rEcg{flex:2.1;}
+body.lp-skin #lpTMPbox,body.lp-skin #lpBPbox{display:none;}
+
+/* The audio notice sat across the top of the display, which on this layout is
+   across the rhythm — the one thing being read. Every key press arms the tone
+   anyway, and the first thing anybody does here is press ON, so the notice
+   had nothing to offer that the next second would not. */
+#armAudio{display:none!important;}
+
+/* Short screens: the vertical budget is the whole design, so the first things
+   to give are the label above the screen and the dose reminder. */
+@media (max-height:400px){
+  body.lp-skin .screenLabel{display:none;}
+  body.lp-skin .a1 .vfdose{display:none;}
+  #stnAsk{min-height:19px;font-size:12px;}
+  .stnb{min-height:44px;font-size:11px;}
+}
+@media (max-width:720px){
+  body.lp-skin #devMain{grid-template-columns:1fr minmax(292px,46%);}
+  .stnb{font-size:11px;padding:4px 5px;}
+}
+
+/* ---- portrait ----
+   A LIFEPAK is a landscape object and the station is a landscape drill: the
+   screen, the answers and the therapy keys have to be in view together, and
+   stacked into a column on a phone they cannot be without scrolling. So this
+   says to turn the phone rather than rearranging into something that does not
+   work. The unit is inert behind it — covering is only paint, and without
+   this the whole chassis stays in the tab order, SHOCK included. */
+body.lp-skin.portrait #device{display:none;}
+
 
 /* =====================================================================
    Field guide shell
@@ -894,7 +867,7 @@ body.phone.lp-skin.portrait #rotate{display:none;}
 .fgtop{display:flex;align-items:center;gap:8px;min-height:36px;}
 .fgback{
   display:flex;align-items:center;gap:4px;flex:none;
-  min-height:36px;padding:0 9px;border-radius:7px;
+  min-height:44px;padding:0 10px;border-radius:7px;
   background:#171b20;border:1px solid #2f363e;
   color:#c6ced6;text-decoration:none;font:700 13px/1 'Arial Narrow',Arial,sans-serif;
 }
@@ -903,12 +876,19 @@ body.phone.lp-skin.portrait #rotate{display:none;}
 .fgttl span{display:block;font-size:9px;color:#7f8993;letter-spacing:.8px;}
 .fgspace{flex:1;min-width:0;}
 .fgbtn{
-  flex:none;min-height:36px;min-width:36px;padding:0 10px;border-radius:7px;cursor:pointer;
+  flex:none;min-height:44px;min-width:44px;padding:0 10px;border-radius:7px;cursor:pointer;
   background:#171b20;border:1px solid #2f363e;color:#c6ced6;
   font:700 12px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:.7px;
   touch-action:manipulation;
 }
 .fgbtn:active{background:#232931;}
+/* 44, not 36. Growing the hit area into the header's padding was the cheaper
+   answer and it does not work here: there are only four pixels above the row
+   before the unit starts, and past that the page answers with the chassis
+   rather than the button. So the row is a thumb tall and the unit gives up
+   the eight pixels — two percent of a phone screen for a Back button a gloved
+   hand can actually hit. */
+.fgtop{min-height:44px;}
 .fgbtn.on{background:#0a3a4a;border-color:#1d7f9c;color:#8fe6ff;}
 .fgbadge{
   flex:none;padding:3px 8px;border-radius:10px;background:#7a1f14;color:#ffd9c4;
@@ -1096,21 +1076,13 @@ body.portrait .ovr{z-index:220;}
 <div id="fgHdr">
   <div class="fgtop">
     <a class="fgback" href="index.html">&#8592; Back</a>
-    <div class="fgttl"><b>LIFEPAK 15</b><span>MONITOR/DEFIBRILLATOR &middot; TRAINER</span></div>
+    <div class="fgttl"><b>Rhythm &amp; Electrical Therapy</b><span>LIFEPAK 15 &middot; ACLS STATION</span></div>
     <div class="fgspace"></div>
-    <button class="fgbtn" id="btnLevels" onclick="openLevels()">LEVELS</button>
     <button class="fgbtn" id="btnLearn" onclick="toggleLearn()" title="Learn mode — tap a control to read what it does">LEARN</button>
     <button class="fgbtn" id="btnSound" onclick="toggleSound()" title="Sound">&#128266;</button>
     <button class="fgbtn" id="fsBtn" onclick="toggleFullscreen()" title="Fullscreen (F)">&#9974;</button>
+    <button class="fgbtn" onclick="startStation()" title="Start again">RESTART</button>
     <span class="fgbadge">EDU ONLY</span>
-  </div>
-  <div id="fgTask">
-    <span class="fgphase" id="fgPhase">&mdash;</span>
-    <span class="fgtask" id="fgTaskText"></span>
-    <span class="fgtick" id="fgTick"></span>
-    <button class="fgbtn" id="btnSkip" onclick="skipStep()" title="Move past this step — it stays a miss in the debrief" hidden>SKIP</button>
-    <button class="fgbtn" onclick="showBrief()" title="The case again">CASE</button>
-    <button class="fgbtn" onclick="endRun('abandoned')">END</button>
   </div>
 </div>
 <div id="learnNote">LEARN MODE &middot; tap any control to read what it does</div>
@@ -1128,21 +1100,6 @@ body.portrait .ovr{z-index:220;}
  <!-- Carry handle across the top, as on the unit. -->
  <div id="devHandle"><span class="handlebar"></span></div>
  <div id="devMain">
-
-  <!-- Area 4 — Figure 3-5 / Table 3-4. It runs down the left of the display
-       on the unit, not under it. -->
-  <!-- Area 4 sits below the midline of the left face, with the speaker in the
-       bottom corner under it. -->
-  <div id="chromeLeft">
-   <div class="lspacer"></div>
-   <div class="area a5" data-area="Area 5 · Records">
-    <button class="fk" id="k12LEAD">12-LEAD</button>
-    <button class="fk" id="kTRANSMIT">TRANSMIT</button>
-    <button class="fk" id="kCODESUM">CODE<br>SUMMARY</button>
-    <button class="fk" id="kPRINT">PRINT</button>
-   </div>
-   <div class="lspacer low"></div>
-  </div>
 
   <div id="screenCol">
    <div class="screenLabel"><b>LIFEPAK 15</b><span>MONITOR/DEFIBRILLATOR</span></div>
@@ -1177,21 +1134,6 @@ body.portrait .ovr{z-index:220;}
       <span class="lpJ"><span id="lpEnergy">200J</span><svg viewBox="0 0 24 24"><path d="M14 2 6 13h5l-2 9 9-12h-5z" fill="currentColor"/></svg></span>
     </div>
   </div>
-</div>
-
-<div id="strip">
-  <div class="ic" style="color:#00ff00;font-size:9px;font-weight:bold;letter-spacing:.5px;">I, II,<br>III...</div>
-  <div class="ic" role="button" tabindex="0" onclick="toggle12Lead()"
-       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle12Lead();}" title="12-Lead ECG"
-       style="font-size:18px;font-weight:bold;color:#fff;background:#0a0a1e;border-bottom:1px solid #2e2e2e;position:relative;">
-    12
-    <div style="position:absolute;bottom:3px;left:0;right:0;height:3px;background:linear-gradient(90deg,#0f0,#0a0,#0f0);opacity:.6;border-radius:1px;"></div>
-  </div>
-  <div class="ic" style="color:#00dd00;font-size:10px;font-weight:bold;">CO2</div>
-  <div class="ic" style="color:#00ff88;font-size:20px;font-weight:bold;">✛</div>
-  <div class="ic" style="color:#cccccc;font-size:9px;font-weight:bold;letter-spacing:.5px;">SYNC</div>
-  <div class="ic" style="font-size:16px;">🖫</div>
-
 </div>
 
 <!-- Parameter column. Order, grouping and the per-parameter alarm bell follow
@@ -1302,6 +1244,20 @@ body.portrait .ovr{z-index:220;}
 </div>
 
    </div></div>
+
+   <!-- The station's own bar. It lives under the screen rather than over it:
+        an overlay across a rhythm is a rhythm nobody can read while they
+        answer it, and reading it is the question. -->
+   <div id="stn">
+     <div id="stnAsk">
+       <span class="stnstep" id="stnStep">Set up</span>
+       <span class="stnq" id="stnQ"></span>
+       <span class="stnn" id="stnN"></span>
+     </div>
+     <div id="stnOpts"></div>
+     <div id="stnFb"></div>
+   </div>
+
    <!-- Under the display: speaker, printer door, therapy connector. -->
    <div id="devUnder">
      <div class="printer" id="printer"><div class="printdoor"><div class="printslot"></div><div class="printgrip"></div></div></div>
@@ -1425,24 +1381,13 @@ body.portrait .ovr{z-index:220;}
      minimum size.
      --------------------------------------------------------------------- -->
 
-<div class="ovr" id="ovrLevels" hidden></div>
-<div class="ovr" id="ovrBrief" hidden></div>
 <div class="ovr" id="ovrCard" hidden onclick="if(event.target===this)closeCard()"></div>
 <div class="ovr" id="ovrDebrief" hidden></div>
-<div class="ovr" id="ovrFree" hidden></div>
 
 <!-- The acquisition and the code record. Each is a whole standalone document
      built as a string — exactly as it is built for the popup in CES — handed
      to an iframe through srcdoc rather than written into a second window. -->
-<div class="ovr frameovr" id="ovr12" hidden>
-  <!-- No Close button here: the acquisition carries its own bar across the top
-       of its document, and a second one in the corner landed on top of it. -->
-  <iframe id="ovr12frame" title="12-Lead ECG"></iframe>
-</div>
-<div class="ovr frameovr" id="ovrSum" hidden>
-  <button class="framex" onclick="closeCodeSummary()">&#10005; &nbsp;Close</button>
-  <iframe id="ovrSumframe" title="Code Summary"></iframe>
-</div>
+
 
 <div id="fgToast"></div>
 
@@ -2625,450 +2570,9 @@ function sSpo2(t){
 }
 
 /* ── 12-Lead ECG Popup ─────────────────────── */
-/* CES opens the 12-lead as a second window, because there it belongs on the
-   screen the crew reads while the facilitator keeps the panel. This page has
-   one reader on one device, and on a phone window.open() is a new tab at best
-   and a blocked popup at worst — a crew who acquire a 12-lead and get nothing
-   have no way to know the acquisition worked. It renders into an overlay in
-   this document instead.
 
-   The document itself is unchanged: it is still built as a whole standalone
-   HTML string carrying its own keyframes and its own per-lead table, and it is
-   still a snapshot rather than a live view. srcdoc takes it verbatim, so the
-   renderer below did not have to be rewritten to live in this scope. */
-let lead12Open=false;
-function open12Lead(){
-  const ov=document.getElementById('ovr12'), fr=document.getElementById('ovr12frame');
-  if(!ov||!fr) return;
-  const rhythmKey = S.rhythm;
 
-  // Build HTML with inline canvas rendering
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>12-Lead ECG — ${rhythmKey.toUpperCase()}</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#000;color:#fff;font-family:'Arial Narrow',Arial,sans-serif;padding:58px 10px 10px;}
-h2{color:#00ff00;font-size:14px;letter-spacing:2px;text-align:center;margin-bottom:4px;text-transform:uppercase;}
-/* A way out. This document had none: on a desktop you closed the window, and
-   on an iPad Safari opens it as a tab with no route back to the monitor at
-   all. Fixed to the top so it is reachable however far the leads scroll. */
-.closebar{position:fixed;top:0;left:0;right:0;height:48px;z-index:10;
-  display:flex;align-items:center;gap:12px;padding:0 12px;
-  background:#0b0b0b;border-bottom:1px solid #262626;}
-.closebar .ttl{font-size:12px;letter-spacing:2px;color:#8a8a8a;text-transform:uppercase;}
-.closebtn{margin-left:auto;min-height:40px;min-width:112px;padding:0 18px;cursor:pointer;
-  background:#7a1f14;border:1px solid #a8341f;border-radius:20px;color:#ffe7c2;
-  font:700 14px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1px;
-  touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-.closebtn:active{background:#5c150d;}
-.info{text-align:center;font-size:11px;color:#888;margin-bottom:10px;letter-spacing:1px;}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;border:1px solid #222;}
-.lead{border-right:1px solid #222;border-bottom:1px solid #222;padding:2px 4px 2px 4px;position:relative;}
-.lead:nth-child(4n){border-right:none;}
-.lead-name{font-size:10px;color:#aaa;letter-spacing:1px;position:absolute;top:3px;left:5px;z-index:2;}
-canvas{display:block;width:100%;height:100%;}
-.rhythm-row{grid-column:span 4;border-right:none;}
-/* On a phone, two columns and a scroll. Four across gives each lead about a
-   second of trace, and a morphology is the whole reason to look at one. */
-@media (max-width:620px){
-  .grid{grid-template-columns:1fr 1fr;}
-  .lead:nth-child(4n){border-right:1px solid #222;}
-  .lead:nth-child(2n){border-right:none;}
-  .rhythm-row{grid-column:span 2;}
-}
-.rhythm-row canvas{width:100%;height:70px;}
-.footer{text-align:center;font-size:10px;color:#555;margin-top:6px;letter-spacing:1px;}
-.rate-info{display:flex;justify-content:center;gap:30px;margin:4px 0;font-size:11px;}
-.rate-info span{color:#00ff00;}
-.rate-info label{color:#666;}
-</style>
-</head>
-<body>
-<div class="closebar">
-  <span class="ttl">12-Lead ECG</span>
-  <button class="closebtn" onclick="close12()">✕ &nbsp;Close</button>
-</div>
-<h2>12-Lead Electrocardiogram</h2>
-<div class="info" id="rhythmLabel">Rhythm: —</div>
-<div class="rate-info">
-  <div><label>HR: </label><span id="hrDisp">—</span> <label>bpm</label></div>
-  <div><label>PR: </label><span id="prDisp">—</span> <label>ms</label></div>
-  <div><label>QRS: </label><span id="qrsDisp">—</span> <label>ms</label></div>
-  <div><label>QT: </label><span id="qtDisp">—</span> <label>ms</label></div>
-</div>
-<div class="grid" id="leadGrid">
-  <div class="lead" style="height:90px"><div class="lead-name">I</div><canvas id="L_I"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">aVR</div><canvas id="L_aVR"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">V1</div><canvas id="L_V1"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">V4</div><canvas id="L_V4"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">II</div><canvas id="L_II"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">aVL</div><canvas id="L_aVL"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">V2</div><canvas id="L_V2"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">V5</div><canvas id="L_V5"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">III</div><canvas id="L_III"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">aVF</div><canvas id="L_aVF"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">V3</div><canvas id="L_V3"></canvas></div>
-  <div class="lead" style="height:90px"><div class="lead-name">V6</div><canvas id="L_V6"></canvas></div>
-  <div class="lead rhythm-row" style="height:70px"><div class="lead-name">II (Rhythm Strip)</div><canvas id="L_rhythm"></canvas></div>
-</div>
-<div class="footer">Patient Simulation Monitor — Auto-generated 12-Lead ECG</div>
-<div class="footer" id="metaRow" style="margin-top:3px;color:#7a7a7a;">
-  25 mm/s &nbsp;·&nbsp; 10 mm/mV &nbsp;·&nbsp; 0.05–150 Hz &nbsp;·&nbsp; <span id="acqPatient">Adult</span> &nbsp;·&nbsp; <span id="acqDate">—</span>
-</div>
-<div class="rate-info" style="margin-top:2px;"><div><label>QTc: </label><span id="qtcDisp">—</span> <label>ms (Bazett)</label> <span id="qtcTag" style="color:#888;"></span></div></div>
-<div class="footer" id="interpRow" style="display:none;margin-top:4px;font-size:12px;color:#ffd88a;letter-spacing:1px;"></div>
-<div class="footer" id="qtcRow" style="display:none;margin-top:4px;font-size:12px;color:#ff4444;letter-spacing:1px;">
-  ⚠ QTc: <span id="qtcVal">587</span> ms &nbsp;|&nbsp; PROLONGED QT — Risk of Torsades de Pointes
-</div>
-<div class="footer" id="osbornNote" style="display:none;margin-top:2px;font-size:11px;color:#00ccff;letter-spacing:1px;">
-  J waves (Osborn waves) visible — consistent with hypothermia (LITFL)
-</div>
 
-<scr\ipt>
-// Closing. window.close() is permitted for a script-opened window, but Safari
-// does not always honour it; if the document is still here a moment later,
-// say so rather than leaving someone pressing a dead button.
-function close12(){
-  try{ parent.postMessage('close12','*'); }catch(e){}
-}
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') close12(); });
-
-// Receive LUT data from parent
-const PARENT_S = ${JSON.stringify({
-  rhythm: S.rhythm, hr: S.hr, sbp: S.sbp, dbp: S.dbp,
-  spo2: S.spo2, etco2: S.etco2, rr: S.rr, patientType: S.patientType,
-  scenario: S.scenario,
-  // Per-stage ECG contract, when the scenario carries one: overrides the
-  // rhythm-derived QRS/QT and adds a device-style interpretation line, so the
-  // printout matches what the scenario text describes (inferior injury, a
-  // hyperkalaemic pattern, a genuinely long QT) instead of a generic strip.
-  ecg: S.ecg || null
-})};
-
-// Catmull-Rom spline
-const LS=2048;
-function cr(a,b,c,d,t){const t2=t*t,t3=t2*t;return.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);}
-function spAt(tbl,p){
-  const n=tbl.length;let i1=n-1;
-  for(let i=0;i<n;i++){if(tbl[i][0]>p){i1=i;break;}}
-  const i0=(i1-1+n)%n,i2=i1%n,i3=(i1+1)%n,im=(i1-2+n)%n;
-  const p1=tbl[i0][0],p2=tbl[i2][0];
-  const sl=p2>p1?p2-p1:p2-p1+1;
-  if(sl<1e-9)return tbl[i0][1];
-  return cr(tbl[im][1],tbl[i0][1],tbl[i2][1],tbl[i3][1],Math.max(0,Math.min(1,((p-p1+1)%1)/sl)));
-}
-function mkL(t){const a=new Float32Array(LS);for(let i=0;i<LS;i++)a[i]=spAt(t,i/LS);return a;}
-function sL(lut,ph){const f=((ph%1)+1)%1*(LS-1),i=Math.floor(f);return lut[i]*(1-(f-i))+lut[Math.min(i+1,LS-1)]*(f-i);}
-
-// Base ECG LUT keyframes (same as main monitor)
-const KFs={
-  nsr:[[0,.5],[.04,.5],[.058,.52],[.076,.537],[.09,.542],[.104,.537],[.118,.52],[.135,.5],[.162,.5],[.176,.488],[.184,.464],[.191,.498],[.2,.614],[.209,.828],[.214,.906],[.219,.952],[.224,.964],[.229,.924],[.236,.772],[.243,.596],[.249,.468],[.255,.484],[.264,.5],[.31,.5],[.355,.502],[.398,.51],[.436,.524],[.464,.54],[.482,.552],[.498,.556],[.514,.552],[.535,.54],[.56,.524],[.588,.51],[.622,.502],[.68,.5],[1,.5]],
-  tachy:[[0,.5],[.038,.5],[.054,.516],[.068,.528],[.08,.532],[.092,.527],[.104,.514],[.118,.5],[.138,.5],[.148,.48],[.155,.459],[.161,.494],[.169,.596],[.176,.798],[.181,.9],[.186,.94],[.191,.902],[.198,.748],[.205,.576],[.211,.468],[.218,.486],[.228,.5],[.268,.5],[.298,.503],[.328,.512],[.354,.526],[.374,.538],[.388,.544],[.402,.543],[.418,.534],[.44,.518],[.462,.505],[.5,.5],[1,.5]],
-  brady:[[0,.5],[.022,.5],[.04,.514],[.06,.532],[.078,.542],[.096,.534],[.114,.516],[.132,.5],[.172,.5],[.192,.484],[.204,.458],[.212,.496],[.222,.634],[.234,.852],[.24,.924],[.246,.958],[.252,.966],[.258,.882],[.268,.718],[.278,.562],[.286,.464],[.294,.484],[.31,.5],[.375,.5],[.425,.503],[.48,.514],[.53,.534],[.572,.556],[.598,.566],[.622,.562],[.65,.546],[.685,.524],[.722,.506],[.782,.5],[.9,.5],[1,.5]],
-  afib:[[0,.502],[.008,.494],[.016,.508],[.024,.497],[.032,.511],[.040,.495],[.048,.507],[.056,.492],[.064,.506],[.072,.496],[.080,.510],[.088,.493],[.096,.508],[.104,.494],[.112,.507],[.120,.496],[.130,.503],[.138,.491],[.145,.496],[.150,.479],[.155,.461],[.160,.494],[.167,.636],[.174,.812],[.179,.916],[.184,.958],[.188,.976],[.192,.954],[.198,.874],[.205,.746],[.212,.624],[.218,.530],[.223,.470],[.228,.492],[.234,.504],[.245,.505],[.260,.512],[.278,.524],[.295,.534],[.312,.540],[.328,.538],[.345,.528],[.364,.514],[.382,.505],[.398,.502],[.422,.508],[.446,.509],[.470,.506],[.494,.508],[.520,.507],[.548,.506],[.578,.508],[.612,.506],[.654,.507],[.704,.507],[.762,.505],[.832,.506],[.916,.504],[1,.502]],
-  afib_rvr:[[0,.503],[.008,.493],[.016,.509],[.024,.495],[.032,.510],[.040,.494],[.048,.508],[.056,.493],[.064,.507],[.072,.494],[.080,.509],[.088,.493],[.096,.507],[.104,.494],[.110,.502],[.116,.492],[.122,.494],[.127,.476],[.132,.456],[.137,.490],[.143,.628],[.149,.808],[.154,.912],[.158,.954],[.162,.974],[.166,.950],[.171,.868],[.177,.738],[.183,.616],[.189,.524],[.194,.466],[.199,.489],[.204,.501],[.213,.506],[.226,.514],[.240,.526],[.255,.536],[.268,.542],[.280,.540],[.294,.530],[.310,.516],[.326,.505],[.352,.492],[.376,.493],[.404,.493],[.434,.493],[.468,.493],[.510,.493],[.560,.493],[.624,.493],[.706,.494],[.820,.494],[.960,.495],[1,.503]],
-  aflutter:[[0,.516],[.05,.532],[.09,.536],[.12,.522],[.148,.502],[.16,.5],[.178,.516],[.2,.53],[.222,.522],[.24,.504],[.248,.5],[.254,.48],[.26,.456],[.267,.494],[.275,.678],[.283,.866],[.289,.924],[.295,.956],[.301,.912],[.309,.758],[.317,.572],[.323,.464],[.331,.485],[.345,.5],[.37,.516],[.4,.528],[.428,.534],[.45,.526],[.47,.508],[.48,.5],[.51,.514],[.54,.526],[.562,.52],[.58,.506],[.59,.5],[1,.5]],
-  svt:[[0,.5],[.018,.5],[.026,.484],[.033,.462],[.04,.498],[.048,.672],[.056,.858],[.062,.934],[.068,.952],[.074,.908],[.082,.756],[.09,.574],[.096,.464],[.103,.484],[.114,.5],[.148,.5],[.185,.504],[.215,.514],[.236,.52],[.25,.518],[.262,.508],[.278,.5],[1,.5]],
-  hb1:[[0,.5],[.028,.5],[.046,.513],[.064,.53],[.08,.54],[.096,.532],[.112,.515],[.128,.5],[.168,.5],[.21,.5],[.248,.5],[.26,.484],[.27,.458],[.278,.496],[.288,.634],[.298,.85],[.304,.922],[.31,.956],[.316,.966],[.323,.882],[.332,.718],[.341,.558],[.349,.462],[.357,.482],[.372,.5],[.42,.5],[.462,.504],[.506,.516],[.545,.533],[.572,.548],[.59,.554],[.608,.55],[.632,.536],[.66,.516],[.695,.502],[.74,.5],[1,.5]],
-  hb2:[[0,.5],[.028,.5],[.046,.513],[.064,.529],[.08,.538],[.094,.53],[.108,.515],[.122,.5],[.158,.5],[.17,.484],[.178,.46],[.186,.496],[.195,.628],[.204,.842],[.21,.914],[.216,.946],[.222,.956],[.229,.87],[.238,.704],[.247,.548],[.255,.462],[.263,.482],[.278,.5],[.322,.5],[.362,.504],[.402,.516],[.436,.532],[.461,.545],[.478,.549],[.495,.545],[.518,.531],[.545,.512],[.578,.502],[.625,.5],[1,.5]],
-  hb3:[[0,.5],[.022,.5],[.038,.51],[.054,.524],[.068,.532],[.08,.526],[.092,.512],[.104,.5],[.155,.5],[.18,.5],[.196,.508],[.212,.52],[.224,.524],[.236,.518],[.248,.502],[.26,.5],[.305,.5],[.32,.476],[.334,.442],[.346,.498],[.36,.594],[.375,.734],[.389,.836],[.4,.898],[.414,.88],[.43,.8],[.448,.682],[.464,.564],[.478,.444],[.49,.382],[.502,.358],[.516,.378],[.528,.416],[.542,.455],[.558,.488],[.576,.5],[.614,.5],[.63,.508],[.644,.518],[.656,.522],[.668,.516],[.68,.502],[.692,.5],[1,.5]],
-  vtach:[[0,.5],[.038,.5],[.058,.558],[.086,.694],[.116,.836],[.14,.926],[.16,.958],[.176,.918],[.196,.798],[.22,.622],[.246,.444],[.266,.352],[.282,.314],[.298,.34],[.318,.396],[.346,.428],[.375,.418],[.404,.388],[.432,.358],[.462,.368],[.492,.396],[.53,.426],[.568,.446],[.624,.466],[.682,.488],[.758,.498],[.9,.5],[1,.5]],
-  vfib:[[0,.5],[.055,.672],[.11,.81],[.165,.556],[.22,.304],[.275,.222],[.33,.394],[.385,.69],[.44,.814],[.495,.642],[.55,.346],[.605,.186],[.66,.258],[.715,.532],[.77,.774],[.825,.702],[.88,.524],[.94,.488],[1,.5]],
-  stemi:[[0,.5],[.030,.5],[.050,.516],[.068,.532],[.082,.540],[.096,.532],[.110,.516],[.126,.5],[.148,.5],[.165,.5],[.172,.486],[.178,.472],[.184,.460],[.188,.475],[.195,.590],[.204,.780],[.211,.910],[.216,.956],[.221,.970],[.226,.930],[.234,.780],[.242,.626],[.248,.520],[.254,.540],[.260,.556],[.272,.572],[.290,.584],[.312,.594],[.336,.600],[.360,.596],[.384,.590],[.406,.586],[.428,.580],[.446,.594],[.462,.626],[.476,.664],[.488,.698],[.498,.720],[.508,.710],[.518,.688],[.530,.654],[.544,.618],[.560,.584],[.576,.558],[.592,.536],[.610,.520],[.630,.510],[.700,.502],[1,.5]],
-  paced:[[0,.5],[.04,.5],[.058,.52],[.076,.537],[.09,.542],[.104,.537],[.118,.52],[.135,.5],[.162,.5],[.176,.488],[.184,.464],[.191,.498],[.2,.614],[.209,.828],[.214,.906],[.219,.952],[.224,.964],[.229,.924],[.236,.772],[.243,.596],[.249,.468],[.255,.484],[.264,.5],[.31,.5],[.355,.502],[.398,.51],[.436,.524],[.464,.54],[.482,.552],[.498,.556],[.514,.552],[.535,.54],[.56,.524],[.588,.51],[.622,.502],[.68,.5],[1,.5]],
-  asystole:[[0,.5],[1,.5]],
-  junctional:[[0,.5],[.025,.5],[.048,.5],[.070,.5],[.090,.492],[.097,.470],[.103,.454],[.109,.472],[.116,.534],[.124,.682],[.130,.824],[.136,.916],[.140,.960],[.144,.980],[.148,.958],[.154,.886],[.162,.758],[.170,.618],[.177,.508],[.183,.484],[.190,.5],[.210,.5],[.240,.503],[.272,.512],[.304,.526],[.330,.538],[.350,.544],[.366,.540],[.385,.528],[.408,.512],[.435,.502],[.470,.5],[.550,.5],[.700,.5],[.850,.5],[1,.5]],
-};
-
-// Lead configs: [ampScale, invert, ST_shift]
-const LEADS={
-  'I':   {a:.70, inv:false, st:0},
-  'II':  {a:1.00, inv:false, st:0},
-  'III': {a:.50, inv:false, st:0},
-  'aVR': {a:.80, inv:true,  st:0},
-  'aVL': {a:.40, inv:false, st:0},
-  'aVF': {a:.70, inv:false, st:0},
-  'V1':  {a:.65, inv:true,  st:0},
-  'V2':  {a:.90, inv:false, st:0},
-  'V3':  {a:1.00, inv:false, st:0},
-  'V4':  {a:1.10, inv:false, st:0},
-  'V5':  {a:1.00, inv:false, st:0},
-  'V6':  {a:.80, inv:false, st:0},
-};
-
-// ── Inferior STEMI 12-lead ───────────────────────────────────────────────────
-// References: LITFL (2024), SAEM, NIH StatPearls, Thoracic Key
-// RCA occlusion pattern: ST elevation III > II > aVF
-// Reciprocal: aVL (mirror image of III — most prominent), I (mild), V1-V3 (posterior)
-// Pathological Q waves: III and aVF (>0.04s, >25% R amplitude)
-// Hyperacute T waves: II, III, aVF (tall, broad, peaked)
-// T wave inversion: aVL (true reciprocal — exact mirror of III)
-if(PARENT_S.rhythm==='stemi'){
-  // ── Inferior leads — ST ELEVATION (concave morphology) ──
-  LEADS['II'].st   = +.050;  // moderate — 2-3mm
-  LEADS['III'].st  = +.085;  // LARGEST (III > II hallmark of RCA — LITFL)
-  LEADS['aVF'].st  = +.065;  // intermediate
-
-  // ── High lateral leads — RECIPROCAL ST DEPRESSION ──
-  LEADS['aVL'].st  = -.082;  // mirror of III — most prominent reciprocal change
-  LEADS['I'].st    = -.028;  // mild — I and aVL electrically contiguous
-
-  // ── Posterior/septal involvement — mild ST depression ──
-  LEADS['V1'].st   = -.035;  // V1 depression with inferior STEMI (RCA)
-  LEADS['V2'].st   = -.040;  // V2 often shows posterior reciprocal changes
-  LEADS['V3'].st   = -.015;  // subtle posterior reciprocal
-
-  // ── Amplitude scaling for Q-wave effect ──
-  // Pathological Q waves in III and aVF reduce apparent R amplitude
-  LEADS['III'].a   = 0.70;   // reduced R — prominent Q wave
-  LEADS['aVF'].a   = 0.76;   // reduced R — Q wave formation
-  LEADS['II'].a    = 0.88;   // mildly reduced R
-
-  // ── Hyperacute T wave boost — inferior leads ──
-  // Tall, broad, peaked T waves — often first ECG sign of STEMI
-  LEADS['II'].tBoost   = 1.30;
-  LEADS['III'].tBoost  = 1.40;  // most prominent hyperacute T
-  LEADS['aVF'].tBoost  = 1.25;
-
-  // ── T wave changes in reciprocal leads ──
-  LEADS['aVL'].tInv = true;   // T inversion — reciprocal of inferior hyperacute T
-  LEADS['I'].tInv   = false;  // I: ST depression but T may remain upright
-}
-
-const rhy = PARENT_S.rhythm;
-const baseLUT = mkL(KFs[rhy]||KFs.nsr);
-const hr = Math.max(PARENT_S.hr||78, .5);
-const bp = 60/hr; // seconds per beat
-
-// Interval labels
-const PR_MS  = {nsr:160,tachy:140,brady:180,afib:0,afib_rvr:0,aflutter:0,svt:80,hb1:240,hb2:200,hb3:0,vtach:0,vfib:0,stemi:165,paced:0,asystole:0};
-const QRS_MS = {nsr:90,tachy:85,brady:95,afib:90,afib_rvr:88,aflutter:90,svt:75,hb1:90,hb2:90,hb3:140,vtach:160,vfib:0,stemi:95,paced:120,asystole:0};
-const QT_MS  = {nsr:400,tachy:340,brady:440,afib:380,afib_rvr:360,aflutter:370,svt:280,hb1:410,hb2:400,hb3:480,vtach:380,vfib:0,stemi:440,paced:420,asystole:0};
-const RHYTHM_NAMES={nsr:'Normal Sinus Rhythm',tachy:'Sinus Tachycardia',brady:'Sinus Bradycardia',afib:'Atrial Fibrillation',afib_rvr:'Atrial Fibrillation with RVR',aflutter:'Atrial Flutter',svt:'Supraventricular Tachycardia',hb1:'1st Degree Heart Block',hb2:'2nd Degree Heart Block (Mobitz II)',hb3:'3rd Degree (Complete) Heart Block',vtach:'Ventricular Tachycardia',vfib:'Ventricular Fibrillation',stemi:'Inferior Wall STEMI',paced:'Ventricular Paced Rhythm',asystole:'Asystole',junctional:'Junctional Escape Rhythm'};
-
-document.getElementById('rhythmLabel').textContent='Rhythm: '+(RHYTHM_NAMES[rhy]||rhy.toUpperCase());
-document.getElementById('hrDisp').textContent=PARENT_S.hr||'---';
-document.getElementById('prDisp').textContent=PR_MS[rhy]||'---';
-document.getElementById('qrsDisp').textContent=QRS_MS[rhy]||'---';
-document.getElementById('qtDisp').textContent=QT_MS[rhy]||'---';
-
-// ── Pediatric Drowning — Osborn waves + prolonged QTc ────────────────────────
-// References: LITFL Osborn Wave (J Wave) 2025; LITFL Long QT Syndrome
-// Osborn (J) wave: positive deflection at J point, most prominent in precordial
-//   and inferior leads; negative (reciprocal) in aVR and V1 — hallmark of hypothermia
-// QTc 587ms: severely prolonged — risk of Torsades de Pointes (Long QT per LITFL)
-const isDrowning = PARENT_S.scenario === 'drowning';
-if(isDrowning){
-
-  // Osborn wave amplitude (proportional to degree of hypothermia)
-  // Moderate hypothermia (drowning scenario ~32-34°C): prominent J waves
-  // Most visible in: V3, V4, V5, V6, II, III, aVF
-  // Reciprocal negative deflection: aVR, V1
-  const oAmp = 0.18; // prominent Osborn waves for moderate hypothermia
-
-  LEADS['II'].osborn   = oAmp * 0.80;
-  LEADS['III'].osborn  = oAmp * 0.90;
-  LEADS['aVF'].osborn  = oAmp * 0.85;
-  LEADS['V2'].osborn   = oAmp * 0.70;
-  LEADS['V3'].osborn   = oAmp * 1.00;  // most prominent in mid-precordial
-  LEADS['V4'].osborn   = oAmp * 1.00;
-  LEADS['V5'].osborn   = oAmp * 0.90;
-  LEADS['V6'].osborn   = oAmp * 0.75;
-  LEADS['I'].osborn    = oAmp * 0.50;
-  LEADS['aVL'].osborn  = oAmp * 0.40;
-  // Reciprocal negative J deflection in aVR and V1
-  LEADS['aVR'].osborn  = -(oAmp * 0.75);
-  LEADS['V1'].osborn   = -(oAmp * 0.60);
-
-  // Also widen T wave (QT prolongation effect) in all leads
-  Object.keys(LEADS).forEach(k=>{ LEADS[k].qtWide = true; });
-}
-
-// Every modifier below (ST shift, T boost, T inversion, Osborn wave, QT
-// widening) is a deviation in the same normalised units as the LUT itself,
-// where the R wave is about 0.48 and the baseline is 0. They each used to be
-// multiplied by the panel height as well, and the y mapping at the bottom of
-// this function multiplies by the height again — so on a 90px panel every one
-// of them came out around thirty times too large. The result was that any lead
-// carrying an ST shift railed against the top or bottom of its box and drew as
-// a square: the 12-lead was unreadable for STEMI, which is most of what a
-// 12-lead is opened for.
-//
-// ST_GAIN converts the millimetre-ish values in LEADS[].st into that same
-// normalised space: ~2.5mm of elevation against an R wave of ~10mm.
-const ST_GAIN=1.6;
-// Panel width per cardiac cycle, shared by the twelve leads and the rhythm
-// strip so they all run at one speed.
-const PX_PER_BEAT=108;
-function drawLead(canvasId, cfg){
-  const c=document.getElementById(canvasId);
-  if(!c)return;
-  const W=c.offsetWidth||c.parentElement.clientWidth||240;
-  const H=c.offsetHeight||c.parentElement.clientHeight||90;
-  c.width=W; c.height=H;
-  const ctx=c.getContext('2d');
-  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
-
-  // Grid
-  ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=.5;
-  const gx=36;
-  for(let x=0;x<W;x+=gx/5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=H/8){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-  ctx.strokeStyle='#222'; ctx.lineWidth=.7;
-  for(let x=0;x<W;x+=gx){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=H/2){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-
-  // One paper speed for every panel. Deriving beats-per-panel from the width
-  // meant the full-width rhythm strip drew the same 2.5 beats as the quarter-
-  // width leads above it, stretched over four times the distance — the strip
-  // ran at a quarter of their speed and the morphology read as broad humps.
-  const pxPerBeat=PX_PER_BEAT;
-  ctx.strokeStyle='#00ff00'; ctx.lineWidth=1.6;
-  ctx.lineJoin='round'; ctx.lineCap='round';
-  ctx.shadowBlur=5; ctx.shadowColor='#00ff00';
-  ctx.beginPath();
-
-  const mid=H*.5;
-  const amp=(H*.38)*cfg.a;
-
-  for(let px=0;px<W;px++){
-    const ph=((px/pxPerBeat)%1+1)%1;
-    let v=sL(baseLUT,ph); // 0..1, baseline .5
-    // Apply pacing spike
-    if(rhy==='paced'&&ph>.165&&ph<.172) v=.98;
-    // Centre around 0
-    let dv=(v-.5);
-    // Apply lead inversion
-    if(cfg.inv) dv=-dv;
-    // Scale amplitude
-    dv*=cfg.a;
-    // ST elevation/depression — apply across entire ST-T segment (post J-point to end of T)
-    // ST zone: ~0.24 to 0.65 of beat cycle
-    if(cfg.st&&ph>.240&&ph<.700){
-      // Graduated effect: full in plateau, taper at edges for smooth transition
-      let stFactor=1.0;
-      if(ph<.265) stFactor=(ph-.240)/.025; // ramp up at J-point
-      if(ph>.620) stFactor=1-(ph-.620)/.080; // ramp down at T end
-      dv+=cfg.st*ST_GAIN*Math.max(0,stFactor);
-    }
-    // T wave boost for hyperacute T (inferior leads in STEMI)
-    if(cfg.tBoost&&ph>.420&&ph<.640){
-      const tCenter=.510;
-      const tShape=Math.exp(-Math.pow((ph-tCenter)/.10,2));
-      const baseT=(v-.5);
-      dv+=(cfg.tBoost-1)*Math.abs(baseT)*tShape;
-    }
-    // T wave inversion for reciprocal leads
-    if(cfg.tInv&&ph>.420&&ph<.640){
-      const tCenter=.510;
-      const tShape=Math.exp(-Math.pow((ph-tCenter)/.10,2));
-      dv-=0.08*tShape; // add downward T deflection
-    }
-    // ── Osborn (J) wave — hypothermia (Pediatric Drowning) ──
-    // Positive dome-shaped deflection immediately after J-point (ph ~0.248–0.310)
-    // "A slow deflection between QRS and ST segment resembling a domed T wave" (Tomaszewski 1938)
-    // Negative reciprocal in aVR and V1
-    if(cfg.osborn&&ph>=0.248&&ph<=0.340){
-      // Gaussian dome centered at ph 0.290 — slow, rounded deflection
-      const oCenter=0.290;
-      const oShape=Math.exp(-Math.pow((ph-oCenter)/0.030,2));
-      dv+=cfg.osborn*oShape;
-    }
-    // QT widening — T wave stretched rightward in hypothermia
-    // Shifts T wave center and broadens it when qtWide is set
-    if(cfg.qtWide&&ph>=0.380&&ph<=0.720){
-      const tCenter=0.560; // shifted right vs normal 0.510
-      const tShape=Math.exp(-Math.pow((ph-tCenter)/0.115,2));
-      const baseTv=(sL(baseLUT,ph)-.5);
-      if(Math.abs(baseTv)>0.01) dv+=baseTv*cfg.a*tShape*0.25;
-    }
-    // Asystole / vfib special
-    if(rhy==='asystole') dv=0;
-    if(rhy==='vfib') dv=(Math.random()-.5)*0.6*cfg.a;
-    const y=mid-dv*(H*.38);
-    px===0?ctx.moveTo(px,y):ctx.lineTo(px,y);
-  }
-  ctx.stroke();
-  ctx.shadowBlur=0;
-}
-
-// Draw all 12 leads + rhythm strip — deferred to window.onload so canvases are sized
-window.onload=function(){
-  // Set interval labels. A per-stage contract, where present, overrides the
-  // rhythm-derived QRS/QT so the printout matches the described findings.
-  const C=PARENT_S.ecg||{};
-  const qrsVal=C.qrs!=null?C.qrs:QRS_MS[rhy];
-  const qtVal =C.qt !=null?C.qt :QT_MS[rhy];
-  document.getElementById('rhythmLabel').textContent='Rhythm: '+(RHYTHM_NAMES[rhy]||rhy.toUpperCase());
-  document.getElementById('hrDisp').textContent=PARENT_S.hr||'---';
-  document.getElementById('prDisp').textContent=PR_MS[rhy]||'---';
-  document.getElementById('qrsDisp').textContent=qrsVal||'---';
-  document.getElementById('qtDisp').textContent=qtVal||'---';
-
-  // QTc, always, by Bazett (QT / sqrt(RR)). The review found a raw QT of 480 at
-  // HR 30 presented as "long QT" — but corrected for that rate it is normal, so
-  // showing QT alone establishes nothing. The corrected value is what a monitor
-  // prints and what the abnormality is read from.
-  const hrForQtc=PARENT_S.hr||0;
-  if(qtVal&&hrForQtc>0){
-    const rr=60/hrForQtc;                       // seconds
-    const qtc=Math.round(qtVal/Math.sqrt(rr));
-    const tag=qtc>=500?'PROLONGED — Torsades risk':qtc>=460?'borderline prolonged':qtc<350?'short':'normal';
-    const col=qtc>=500?'#ff4444':qtc>=460?'#ffd88a':'#7fe0a5';
-    const qd=document.getElementById('qtcDisp'), qt2=document.getElementById('qtcTag');
-    if(qd){ qd.textContent=qtc; qd.style.color=col; }
-    if(qt2){ qt2.textContent='('+tag+')'; qt2.style.color=col; }
-  }
-
-  // Device-style interpretation line from the contract.
-  if(C.interp){
-    const ir=document.getElementById('interpRow');
-    if(ir){ ir.textContent=C.interp; ir.style.display='block'; }
-  }
-
-  // Acquisition metadata, as a real printout carries it.
-  {const p=document.getElementById('acqPatient'); if(p) p.textContent=PARENT_S.patientType||'Adult';}
-  {const dt=document.getElementById('acqDate'); if(dt) dt.textContent=new Date().toLocaleString();}
-
-  if(isDrowning){
-    document.getElementById('qtcRow').style.display='block';
-    document.getElementById('osbornNote').style.display='block';
-    document.getElementById('qtDisp').textContent='587';
-  }
-  // Draw all leads
-  Object.keys(LEADS).forEach(name=>{ drawLead('L_'+name, LEADS[name]); });
-  drawLead('L_rhythm', {a:1.0, inv:false, st:PARENT_S.rhythm==='stemi'?.055:0, tBoost:PARENT_S.rhythm==='stemi'?1.2:1});
-};
-<\/script>
-</body>
-</html>`;
-
-  fr.srcdoc=html;
-  ov.hidden=false;
-  lead12Open=true;
-}
-
-/* Safe to call when it is not open. There are four ways out — the overlay's
-   own Close button, Escape inside it, the 12-LEAD key as a toggle, and HOME
-   SCREEN — and all four land here. */
-function close12Lead(){
-  const ov=document.getElementById('ovr12'), fr=document.getElementById('ovr12frame');
-  if(ov) ov.hidden=true;
-  if(fr) fr.srcdoc='';   // stop the frame animating behind a hidden overlay
-  lead12Open=false;
-}
-function toggle12Lead(){ if(lead12Open) close12Lead(); else open12Lead(); }
-
-/* The acquisition and the code summary are separate documents, so their own
-   Close buttons cannot reach these functions directly. */
-window.addEventListener('message',e=>{
-  if(e.data==='close12') close12Lead();
-  else if(e.data==='closeSummary') closeCodeSummary();
-});
 
 /* ── Canvas sizing ── */
 /* The canvas keeps two sizes: the logical one everything above draws in
@@ -3541,67 +3045,45 @@ const DEV_W=1083, DEV_H=740;
    difference between a 43pt key and a 45pt one on an iPad mini. */
 const DEV_H_COMPACT=704;
 let devScale=1;
+/* The unit is laid out, not scaled. The scaled chassis was exact at 1083x704
+   and could not be made to fit the screen this is worked on: at the 0.49 a
+   phone in landscape reaches, every control came out at 21-26pt against a
+   44pt floor. So there is no transform and no scale factor any more — the
+   grid does the work, `devScale` is 1 for good, and the canvases are sized in
+   real device pixels rather than resampled by the compositor.
+
+   What is left here is the two things the CSS cannot do for itself: telling
+   the layout how tall the page header actually is, and deciding portrait. */
 function fitDevice(){
   const el=document.getElementById('device');
   if(!el) return;
-  if(currentSkin!=='lp'){
-    el.style.transform=''; el.style.width=''; el.style.height='';
-    if(devScale!==1){ devScale=1; invalidateCanvases(); }
-    return;
-  }
-  // visualViewport where it exists: Safari's toolbar slides in and out and
-  // innerHeight lags behind it, which leaves the unit hanging off the bottom
-  // of the screen for as long as the animation lasts.
-  const vp=window.visualViewport;
-  const vw=Math.round(vp?vp.width:window.innerWidth);
-  const vhFull=Math.round(vp?vp.height:window.innerHeight);
-  /* The page header is measured, never assumed. It declares one row and grows
-     to two while a case is running, and on a phone the task line wraps to
-     three — the CES panel's condensed run bar taught this exact lesson, where
-     a bar declaring 52px wrapped to 116 and covered the page header under it.
-     Anything left over after the header is what the unit gets. */
+
+  /* Measured, never assumed — the header is one row and the station's own
+     line can wrap on a narrow phone. The unit is positioned under whatever it
+     comes to. */
   const hdr=document.getElementById('fgHdr');
   const hh=hdr?Math.ceil(hdr.getBoundingClientRect().height):0;
   document.documentElement.style.setProperty('--hdrh',hh+'px');
-  const vh=Math.max(vhFull-hh,120);
-  const compact=vh<790;
-  document.body.classList.toggle('compact',compact);
-  const k=Math.min(vw/DEV_W, vh/(compact?DEV_H_COMPACT:DEV_H));
 
-  /* Below the scale at which the chassis can still hold a 44pt control, the
-     unit is laid out instead of scaled. 0.917 is where that line falls: the
-     smallest control is 48 design px, and 48 x 0.917 is 44. Above it nothing
-     changes and the replica is drawn exactly as before. */
-  const phone=k<0.917;
-  const wasPhone=document.body.classList.contains('phone');
-  document.body.classList.toggle('phone',phone);
-  document.documentElement.classList.toggle('phone',phone);
-  if(phone){
-    el.style.transform=''; el.style.width=''; el.style.height='';
-    el.removeAttribute('inert');
-    document.body.classList.remove('portrait');
-    /* Only on the way in. fitDevice() is called from renderTask(), which runs
-       once a second for the whole of a case — repainting every canvas on each
-       of those ticks is a stutter a phone can least afford. */
-    if(!wasPhone||devScale!==1){ devScale=1; invalidateCanvases(); }
-    return;
-  }
-  if(wasPhone) invalidateCanvases();
-  // Portrait is not a shape this unit has. Rather than shrink it to 70% and
-  // put every control below the touch minimum, say so — see #rotate.
-  const portrait=vhFull>vw*1.05;
-  document.body.classList.toggle('portrait', portrait);
-  // #rotate covers the unit in portrait, but covering is only paint: without
-  // this the whole chassis stays in the tab order behind it, so SHOCK can be
-  // reached and fired from a keyboard while the screen says to turn the iPad
-  // round. inert takes it out of the tab order and out of hit-testing together.
+  /* visualViewport where it exists: Safari's toolbar slides in and out and
+     innerHeight lags behind it. */
+  const vp=window.visualViewport;
+  const vw=Math.round(vp?vp.width:window.innerWidth);
+  const vh=Math.round(vp?vp.height:window.innerHeight);
+
+  /* Portrait is not a shape this station has. The screen, the answers and the
+     therapy keys have to be in view together, and stacked into a column on a
+     phone they cannot be without a scroll — which is the thing this layout
+     exists to remove. So it says to turn the phone.
+
+     inert as well as hidden: covering is only paint, and without it the whole
+     chassis stays in the tab order behind the notice, SHOCK included. */
+  const portrait=vh>vw*1.02;
+  document.body.classList.toggle('portrait',portrait);
   if(portrait) el.setAttribute('inert',''); else el.removeAttribute('inert');
-  const dh=compact?DEV_H_COMPACT:DEV_H;
-  el.style.width=DEV_W+'px'; el.style.height=dh+'px';
-  el.style.transform='translate('+Math.round((vw-DEV_W*k)/2)+'px,'+Math.round(hh+(vh-dh*k)/2)+'px) scale('+k+')';
-  // Only repaint when the scale actually moved: the canvases are sized in
-  // device pixels against it, so every change means a full re-render.
-  if(Math.abs(k-devScale)>0.002){ devScale=k; invalidateCanvases(); }
+
+  if(devScale!==1){ devScale=1; }
+  invalidateCanvases();
 }
 
 /* ── Banner ──────────────────────────────────────────────────────────── */
@@ -3955,49 +3437,7 @@ function printerRun(on){
   if(k) k.classList.toggle('held',on);
 }
 
-/* ── Code summary ─────────────────────────────────────────────────────────
-   CODE SUMMARY used to log a facilitator-side event and print a blank burst —
-   nothing the trainee could read. The real key prints the code record: the
-   shocks delivered and a timestamped event list. buildCodeSummary is the pure
-   report so it can be checked; openCodeSummary puts it in a window to read or
-   print at the debrief. */
-function buildCodeSummary(){
-  const evs=D.log.slice();
-  const shocks=evs.filter(e=>e.type==='shock').length;
-  const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  const t0=evs.length?evs[0].ms:Date.now();
-  const rows=evs.map(e=>{
-    const s=Math.max(0,Math.round((e.ms-t0)/1000));
-    const mm=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-    return `<tr><td>${mm}</td><td>${esc(e.label)}</td><td>${esc(e.detail)}</td></tr>`;
-  }).join('');
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>Code Summary</title>
-<style>body{background:#fff;color:#111;font-family:'Courier New',monospace;padding:16px;}
-h2{font-size:15px;letter-spacing:1px;margin:0 0 6px;}
-.sum{margin:6px 0 10px;font-weight:bold;}
-table{border-collapse:collapse;width:100%;font-size:12px;}
-td{border-bottom:1px solid #ccc;padding:3px 6px;vertical-align:top;}
-td:first-child{width:56px;color:#555;}
-.foot{margin-top:12px;font-size:11px;color:#666;}</style></head>
-<body><h2>LIFEPAK 15 — CODE SUMMARY</h2>
-<div class="sum">Shocks delivered: ${shocks} &nbsp;·&nbsp; Events: ${evs.length} &nbsp;·&nbsp; ${new Date().toLocaleString()}</div>
-<table><tr><td>Time</td><td>Event</td><td>Detail</td></tr>${rows||'<tr><td colspan="3">No events recorded.</td></tr>'}</table>
-<div class="foot">Generated by the patient simulation monitor for debrief.</div>
-</body></html>`;
-}
-function openCodeSummary(){
-  const ov=document.getElementById('ovrSum'), fr=document.getElementById('ovrSumframe');
-  if(!ov||!fr) return false;
-  fr.srcdoc=buildCodeSummary();
-  ov.hidden=false;
-  return true;
-}
-function closeCodeSummary(){
-  const ov=document.getElementById('ovrSum'), fr=document.getElementById('ovrSumframe');
-  if(ov) ov.hidden=true;
-  if(fr) fr.srcdoc='';
-}
+
 
 /* ── Power ─────────────────────────────────────────────────────────────
    ON is a real button on a real device and it does the thing it says: press it
@@ -4154,16 +3594,11 @@ bind('kALARMS',()=>{
 });
 bind('kOPTIONS',()=>{ if(!D.on) return; clearHomeSel(); openMenu(D.menu&&D.menu.title==='OPTIONS'?null:optionsMenu()); });
 bind('kEVENT',()=>{ if(!D.on) return; clearHomeSel(); openMenu(D.menu&&D.menu.title==='EVENT'?null:eventMenu()); });
-bind('kHOME',()=>{ if(!D.on) return; closeMenu(); clearHomeSel(); close12Lead(); });
+bind('kHOME',()=>{ if(!D.on) return; closeMenu(); clearHomeSel(); });
 bind('kSUN',()=>{ if(!D.on) return; D.sunvue=!D.sunvue;
   document.body.classList.toggle('sunvue',D.sunvue); invalidateCanvases();
   logEvent('display',D.sunvue?'SunVue display':'Color display',''); });
 
-bind('k12LEAD',()=>{ if(!D.on) return; toggle12Lead(); printerBurst(2200);
-  logEvent('ecg12','12-LEAD','acquired'); });
-bind('kTRANSMIT',()=>{ if(!D.on) return; banner('TRANSMITTING…',2200);
-  setTimeout(()=>banner('TRANSMIT COMPLETE',2200),2300); logEvent('transmit','TRANSMIT','12-lead sent'); });
-bind('kCODESUM',()=>{ if(!D.on) return; printerBurst(2600); openCodeSummary(); logEvent('codeSummary','CODE SUMMARY',D.log.length+' events'); });
 bind('kPRINT',()=>{ if(!D.on) return; printerRun(!D.printing);
   logEvent('print',D.printing?'PRINT started':'PRINT stopped','continuous strip'); });
 
@@ -4557,26 +3992,6 @@ const CARDS={
     how:'Press to switch on. Press again, or hold, to switch off.',
     watch:'Powering off is not a reset. The shock count, the therapy mode, the lead you chose and the event record all survive it — exactly as they do on the unit. If you want a clean device, start a new case.'},
 
-  kCPR:{name:'CPR',area:'Area 1 · Defibrillation',
-    what:'Runs the CPR metronome. On this unit it is set up per age and airway as a compression-to-ventilation ratio — 30:2 with no advanced airway, 10:1 with one, and continuous compressions where that is configured — cueing compressions at 100/min, inside the 100–120/min the 2025 AHA guidelines call for.',
-    how:'Press to start, press again to stop. The ratio itself is a setup option, not something changed at the scene.',
-    watch:'The metronome is a rate cue and nothing more. It does not know whether anyone is compressing, how deep they are going, or whether the chest is recoiling — and the pause around a shock is the number that changes survival. Charge while compressions continue, clear only to deliver.'},
-
-  kANALYZE:{name:'ANALYZE',area:'Area 1 · Defibrillation',
-    what:'Runs the Shock Advisory System for about eight seconds and announces SHOCK ADVISED or NO SHOCK ADVISED. The LED is lit while the analysis runs and flashes when the unit is asking for the next rhythm check.',
-    how:'Press with the patient still. In AED mode a shockable rhythm charges the unit automatically.',
-    watch:'With nothing at the pads it says CONNECT ELECTRODES rather than "no shock advised" — a unit that cannot see the patient has no opinion, and treating that silence as "not shockable" is how an arrest gets missed. Motion artefact fools any analyser, so nobody touches the patient while it runs.'},
-
-  kLEAD:{name:'LEAD',area:'Area 1 · Defibrillation',
-    what:'Opens the lead list for the primary channel — I, II, III, aVR, aVL, aVF and PADDLES.',
-    how:'Press LEAD, turn the SPEED DIAL to the lead you want, then press the dial to select it. The dial reaches the same list from the ECG channel on the home screen.',
-    watch:'Lead II usually gives the clearest P wave, which is why it is the monitoring default — but a rhythm that looks like fine VF in one lead can be obvious asystole in another. Confirm asystole in a second lead before you call it.'},
-
-  kSIZE:{name:'SIZE',area:'Area 1 · Defibrillation',
-    what:'Opens the display gain list for the ECG channel.',
-    how:'Press SIZE, dial to the gain you want, press the dial to select it.',
-    watch:'This is how tall the trace is drawn, not how big the heart\'s signal is. Turning it up cannot turn a flat line into a complex, and turning it up on asystole only makes the baseline noise look like fine VF. It changes the picture, never the patient.'},
-
   kSYNC:{name:'SYNC',area:'Area 1 · Defibrillation',
     what:'Arms synchronized cardioversion: the unit waits for an R wave and delivers on it. The LED flashes with each QRS the unit detects, and a marker appears on the trace at every detected complex.',
     how:'Press to arm. It clears itself after a synchronized shock, so a second cardioversion means pressing it again.',
@@ -4596,26 +4011,6 @@ const CARDS={
     what:'Delivers the charge. It does nothing unless the unit is armed.',
     how:'Press when charged and the team is clear.',
     watch:'Say it out loud and look before you press: "I\'m clear, you\'re clear, everybody clear." Then compressions restart immediately — you do not stop to check a rhythm or a pulse after the shock, you go straight back to the chest for two minutes.'},
-
-  kNIBP:{name:'NIBP',area:'Area 3 · Monitoring',
-    what:'Starts a non-invasive blood pressure cycle. The cuff takes about 25 seconds and the reading is shown when it completes.',
-    how:'Press to start a cycle.',
-    watch:'The number that appears is a snapshot of when the cuff ran, and it ages on the screen. During compressions it measures the compressions, not the patient. And there is no reading at all until somebody takes one — the monitor does not know a blood pressure it has never measured.'},
-
-  kALARMS:{name:'ALARMS',area:'Area 3 · Monitoring',
-    what:'Enables the alarms, then silences them for two minutes on a further press. The LED is lit whenever alarms are enabled — including while they are silenced.',
-    how:'Press to enable. Press again to silence for two minutes; press again to un-silence.',
-    watch:'Silencing quiets the announcement; it does not make the value stop being out of range, and the breached number keeps flashing on the screen for exactly that reason. An alarm silenced at the start of a transport and forgotten is a patient nobody is monitoring.'},
-
-  kOPTIONS:{name:'OPTIONS',area:'Area 3 · Monitoring',
-    what:'Opens the options menu, which the speed dial scrolls and selects.',
-    how:'Press to open, turn the SPEED DIAL to move, press the dial to select. HOME SCREEN closes it.',
-    watch:'A menu open over a patient is a screen you are not reading. Get in, change the one thing, get back to the home screen.'},
-
-  kEVENT:{name:'EVENT',area:'Area 3 · Monitoring',
-    what:'Opens the event list and marks the record with the event you select, so the code record carries what happened as well as what the unit did.',
-    how:'Press to open, dial to the event, press the dial to log it.',
-    watch:'Events you mark are what the code summary is read from afterwards. A drug given and never marked did not happen as far as the record is concerned.'},
 
   kPACER:{name:'PACER',area:'Area 2 · Pacing',
     what:'Turns transcutaneous pacing on and off. The LED flashes with each current pulse it delivers, at the rate you set.',
@@ -4637,40 +4032,6 @@ const CARDS={
     how:'Hold it down. Let go and the set rate returns.',
     watch:'This is how you check what is under the pacing without switching the pacer off on a patient who depends on it.'},
 
-  k12LEAD:{name:'12-LEAD',area:'Area 5 · Records',
-    what:'Acquires and prints a 12-lead record. Here it opens the acquisition on screen.',
-    how:'Press to acquire. It covers the screen, so it has two Close buttons of its own — one on its bar and one in the corner — and Escape closes it as well.',
-    watch:'It is a snapshot of the moment you pressed it, not a live view — the same as the strip that comes out of the printer. If the picture changes, or the patient does, acquire again. Serial 12-leads catch an evolving STEMI that a single one at the door misses.'},
-
-  kTRANSMIT:{name:'TRANSMIT',area:'Area 5 · Records',
-    what:'Sends the acquired 12-lead.',
-    how:'Press after acquiring.',
-    watch:'On a suspected STEMI the transmission is what starts the clock at the receiving hospital. Acquire early, transmit early, and say so on the radio — do not wait until you are in the bay.'},
-
-  kCODESUM:{name:'CODE SUMMARY',area:'Area 5 · Records',
-    what:'Prints the critical event record — everything the unit did and everything you marked, with times.',
-    how:'Press to print. Here it opens on screen.',
-    watch:'This is the document your run gets reviewed from. Times to first shock, energies delivered, how long each pause ran — all of it is in here whether or not anyone wrote it down.'},
-
-  kPRINT:{name:'PRINT',area:'Area 5 · Records',
-    what:'Starts and stops the printer on a continuous strip.',
-    how:'Press to start, press again to stop.',
-    watch:'It is a toggle, not a one-shot — unlike the two record keys beside it. Left running it will empty the paper, and the roll you need is the one you did not have at the next arrest.'},
-
-  kHOME:{name:'HOME SCREEN',area:'Area 4 · Display',
-    what:'Clears any selection and closes any menu, returning to the home screen.',
-    how:'Press it whenever you are lost.',
-    watch:'It is a way back, never a way in. It will close a 12-lead but it will never open one — and while an acquisition is on screen it is covering this key, so close that from its own Close button first.'},
-
-  kDIAL:{name:'SPEED DIAL',area:'Area 4 · Display',
-    what:'Scrolls through and selects screen or menu items. Inside a menu it moves the selection; on the home screen it moves a highlight across the parameter blocks and the ECG channel.',
-    how:'Drag it up or down to move — or a scroll wheel, or the arrow keys once it has focus — and press it to select. Selecting the ECG channel reaches the lead and size lists; selecting a parameter shows the alarm limits actually in force.',
-    watch:'The limits it shows are read-only here. Those belong to whoever set up the monitor, and a monitor-side edit would be overwritten the moment the setup changed.'},
-
-  kSUN:{name:'DISPLAY MODE',area:'Area 4 · Display',
-    what:'Switches between the colour display and SunVue, the high-contrast outdoor mode.',
-    how:'Press to toggle.',
-    watch:'SunVue repaints the whole screen on a light ground with dark traces. On a scene in full sun it is the difference between reading the rhythm and guessing at it.'}
 };
 
 function openCard(id){
@@ -4691,936 +4052,425 @@ function openCard(id){
 function closeCard(){ const el=document.getElementById('ovrCard'); if(el){ el.hidden=true; el.innerHTML=''; } }
 function esc(t){ return String(t==null?'':t).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 
-/* ── Patients ────────────────────────────────────────────────────────────
-   A starting point per case. `patientConnected:false` is how this screen
-   draws a patient nobody has put the leads on: blank traces, not a flat line,
-   which is the one thing on this screen a student is trained to read as
-   asystole. Every case here starts with the pads and the leads already on,
-   because what is being taught is the therapy, not the application. */
-function P(o){
-  return Object.assign({
-    patientConnected:true, etco2On:true, artActive:false, sgActive:false,
-    pvcOn:false, pacOn:false, alarmOn:true, alarmMuted:false,
-    hrAlarmLow:50, hrAlarmHigh:120, spo2AlarmLow:94,
-    lead:'II', patientType:'Adult', temp:36.9, tempUnit:'C',
-    spo2Quality:'excellent', co2Shape:'normal'
-  }, o);
-}
-/* An arrest. No pressure, no saturation the probe can find, and an EtCO2 that
-   reflects the compressions rather than a perfusing rhythm — which is why it
-   is a number here and not a zero. The 2025 guidelines have it as a trend of
-   CPR quality where there is an advanced airway, rather than a threshold to
-   hit: survivors exist with an average under 20, so a low number is a prompt
-   to look at the compressions, not a verdict. An abrupt rise is still the
-   earliest sign of ROSC on this screen. */
-function ARREST(rhythm,extra){
-  return P(Object.assign({rhythm,hr:0,sbp:0,dbp:0,spo2:0,etco2:18,rr:0,
-    spo2Quality:'none'},extra||{}));
-}
 
-/* ── Cases ───────────────────────────────────────────────────────────────
-   A case is a brief, a patient, and a list of phases. A phase applies its own
-   patient state on entry, asks for one thing, and carries the critical actions
-   it is graded on. `need(ev)` is matched against the device's own event
-   stream — the same events the code summary is printed from — so a step can
-   only tick on something the learner actually did at the unit.
+/* ── The item bank ───────────────────────────────────────────────────────
+   The station's whole content. Each item is a rhythm on the screen, the
+   clinical context that decides what to do about it, and the one electrical
+   therapy that is right for the pair — because the rhythm alone does not
+   decide it. Monomorphic VT is here three times, at three different pulses
+   and pressures, and takes a different answer each time; that is the point of
+   the station rather than an accident of the bank.
 
-   `faults` are the other half of an assessment: things that are wrong to do
-   here, caught when they happen rather than inferred from what is missing.
+   The therapies are the four an ACLS provider chooses between:
 
-   The clinical shape of the assessment cases follows the ACLS algorithms —
-   cardiac arrest, bradycardia and tachycardia. They are not the AHA Megacode
-   Testing Checklist: that is a published, copyrighted instrument, and grading
-   against a copy of it that nobody approved would be worse than not grading
-   at all. What a run records is what the learner did at the unit and when. */
+     defib  unsynchronized shock   VF, pulseless VT
+     sync   synchronized shock     unstable tachycardia with a pulse
+     pace   transcutaneous pacing  symptomatic bradycardia
+     none   no electrical therapy  everything else, which is most of it
 
-const shockable=r=>r==='vfib'||r==='vtach';
+   `none` is not "do nothing" — it is "nothing electrical". The reason line
+   says what the patient does need, because a learner who reads "none" and
+   stops has taken the wrong lesson from a right answer.
 
-const LEVELS={
-1:{name:'Know the unit',sub:'Every control, one at a time',cases:[
-  {id:'l1',title:'Walk the unit',kicker:'LIFEPAK 15 · Orientation',
-   brief:'Nothing is wrong with anybody yet. This is the unit on the bench, and the point is to have worked every control on it once before the first time it matters. Work through the list in order — the task line tells you what is next.\n\nTurn LEARN on at any time to read what a control does instead of working it.',
-   patient:P({rhythm:'nsr',hr:78,sbp:124,dbp:78,spo2:97,etco2:36,rr:14}),
-   phases:[{id:'walk',tag:'ORIENTATION',task:'',sequential:true,steps:[
-     {id:'on',label:'Powered the unit on',hint:'ON is top right of the therapy column.',
-      task:'Switch the unit on.',need:e=>e.type==='power'&&e.label==='ON'},
-     {id:'alarms',label:'Silenced the alarms and brought them back',
-      hint:'ALARMS silences for two minutes; press it again to un-silence. The LED stays lit either way — the alarms are still on.',
-      task:'Silence the alarms, then bring them back.',
-      need:e=>e.type==='alarms'&&/UNSILENCED/.test(e.label)},
-     {id:'lead',label:'Changed the ECG lead',
-      hint:'LEAD opens the list — I, II, III, aVR, aVL, aVF and PADS. Drag the SPEED DIAL up or down to move through it, then press the dial to choose.',
-      task:'Change the ECG lead: press LEAD, then dial to one and press the dial.',
-      need:e=>e.type==='lead'},
-     {id:'size',label:'Changed the ECG size',
-      hint:'SIZE opens the gain list. Same again — dial to one, press the dial.',
-      task:'Change the ECG size the same way.',need:e=>e.type==='size'},
-     {id:'nibp',label:'Took a blood pressure',hint:'NIBP starts a cuff cycle. It takes about 25 seconds.',
-      task:'Take a blood pressure.',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-     {id:'dial',label:'Moved the home-screen highlight with the speed dial',
-      hint:'Drag the SPEED DIAL up or down — or focus it and use the arrow keys. A highlight moves across the parameter blocks and the ECG channel.',
-      task:'Turn the speed dial until a parameter is highlighted.',
-      need:()=>D.homeSel>=0},
-     {id:'sun',label:'Tried the SunVue display',hint:'The sun key, bottom right, next to the dial.',
-      task:'Switch to the SunVue display and back.',need:e=>e.type==='display'},
-     {id:'ecg12',label:'Acquired a 12-lead',hint:'12-LEAD, top of the left-hand column.',
-      task:'Acquire a 12-lead.',need:e=>e.type==='ecg12'},
-     {id:'transmit',label:'Transmitted the 12-lead',hint:'TRANSMIT, straight under 12-LEAD.',
-      task:'Transmit it.',need:e=>e.type==='transmit'},
-     {id:'cpr',label:'Started the CPR metronome',hint:'CPR runs a metronome at 110/min.',
-      task:'Start the CPR metronome.',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-     {id:'analyze',label:'Ran a rhythm analysis',hint:'ANALYZE takes about eight seconds. Nobody touches the patient while it runs.',
-      task:'Run an analysis.',need:e=>e.type==='advisory'},
-     {id:'energy',label:'Selected an energy',hint:'ENERGY SELECT ▲▼, in the therapy column.',
-      task:'Select a defibrillation energy.',need:e=>e.type==='energy'},
-     {id:'charge',label:'Charged the defibrillator',hint:'CHARGE takes about five seconds and the tone rises.',
-      task:'Charge.',need:e=>e.type==='charge'},
-     {id:'shock',label:'Delivered a shock',hint:'SHOCK only fires armed. Clear the patient first — say it out loud.',
-      task:'Clear everyone, and shock.',need:e=>e.type==='shock'},
-     {id:'sync',label:'Armed SYNC',hint:'SYNC marks each detected R wave on the trace.',
-      task:'Arm SYNC and watch the markers land on the R waves.',need:e=>e.type==='sync'&&/ON/.test(e.label)},
-     {id:'pacer',label:'Started the pacer',hint:'PACER, then RATE and CURRENT beside it.',
-      task:'Start the pacer.',need:e=>e.type==='pacer'&&/ON/.test(e.label)},
-     {id:'current',label:'Set a pacing current',hint:'CURRENT ▲ — spikes appear on the trace as soon as current is set.',
-      task:'Dial in some pacing current and watch for the spikes.',need:e=>e.type==='pacerCurrent'&&D.pacerMa>0},
-     {id:'summary',label:'Printed the code summary',hint:'CODE SUMMARY prints everything the unit did, with times.',
-      task:'Print the code summary and read back what you just did.',need:e=>e.type==='codeSummary'}
-   ]}]}
-]},
+   Where a shock is indicated, what the learner has to get right is not a
+   number typed into a box: it is whether SYNC is armed when they press it.
+   That is the difference between the two shock answers and it is the thing
+   crews get wrong, so it is what the unit is asked for. */
 
-2:{name:'Recognise and treat',sub:'One rhythm, one decision, with coaching',cases:[
-  {id:'vf',title:'Coarse VF',kicker:'Witnessed arrest',
-   brief:'58-year-old man, collapsed in front of his crew at the door of the truck. No pulse, no respiratory effort. Compressions are in progress and the pads are on. The monitor shows a coarse, disorganised rhythm with no identifiable QRS.',
-   vitals:[['Rhythm','Coarse VF'],['Pulse','Absent'],['EtCO2','18 mmHg'],['Down time','< 1 min']],
-   patient:ARREST('vfib',{etco2:18}),
-   phases:[
-    {id:'shock1',tag:'VF ARREST',tone:'crit',task:'Confirm the rhythm and defibrillate.',
-     steps:[
-      {id:'confirm',label:'Confirmed the rhythm before treating',need:e=>e.type==='advisory'||e.type==='lead'},
-      {id:'energy',label:'Selected an energy at or above this unit\'s first adult dose (200 J)',
-       need:e=>(e.type==='energy'||e.type==='charge')&&energy()>=200},
-      {id:'charge',label:'Charged the defibrillator',need:e=>e.type==='charge'},
-      {id:'shock',label:'Delivered the shock',need:e=>e.type==='shock'},
-      {id:'cpr',label:'Resumed compressions immediately after the shock',carry:true,
-       need:(e,c)=>e.type==='cpr'&&/ON/.test(e.label)&&c.sinceShock<15000}
-     ],
-     faults:[{id:'syncvf',label:'Armed SYNC on VF — the unit cannot synchronise to a fibrillating rhythm',
-              when:e=>e.type==='sync'&&/ON/.test(e.label)}],
-     advanceOn:'shock',
-     onAdvance:()=>toast('Rhythm check: still VF. Compressions back on.','bad')},
-    {id:'shock2',tag:'STILL VF',tone:'crit',task:'Two minutes of CPR, then shock again — escalate the energy.',
-     patient:ARREST('vfib',{etco2:22}),
-     steps:[
-      {id:'escalate',label:'Followed this unit\'s 200-300-360 J sequence to the second shock',need:e=>e.type==='shock'&&energy()>200},
-      {id:'shock2',label:'Delivered a second shock',need:e=>e.type==='shock'}
-     ],
-     advanceOn:'shock2'},
-    {id:'rosc',tag:'ROSC',tone:'',task:'Organised rhythm and a pulse. Get a pressure and a 12-lead.',
-     patient:P({rhythm:'nsr',hr:96,sbp:104,dbp:66,spo2:92,etco2:38,rr:12}),
-     steps:[
-      {id:'nibp',label:'Took a blood pressure after ROSC',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'ecg12',label:'Acquired a post-arrest 12-lead',need:e=>e.type==='ecg12'}
-     ],
-     done:true}
-   ]},
-
-  {id:'asystole',title:'Asystole',kicker:'Unwitnessed arrest',
-   brief:'71-year-old found unresponsive by family, down for an unknown period. Compressions in progress, pads on. The monitor shows a flat line.\n\nThe question is not what to give. It is whether this rhythm is shockable, and whether the flat line on the screen is the patient or the equipment.',
-   vitals:[['Rhythm','Asystole'],['Pulse','Absent'],['EtCO2','9 mmHg'],['Down time','Unknown']],
-   patient:ARREST('asystole',{etco2:9}),
-   phases:[
-    {id:'confirm',tag:'ASYSTOLE',tone:'crit',task:'Confirm the flat line, and treat it correctly.',
-     steps:[
-      {id:'lead',label:'Confirmed asystole in a second lead',need:e=>e.type==='lead'},
-      {id:'analyze',label:'Analysed the rhythm',need:e=>e.type==='advisory'},
-      {id:'cpr',label:'Kept compressions going',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'noshock',label:'Did not shock a non-shockable rhythm',passive:true}
-     ],
-     faults:[
-      {id:'shock',label:'Defibrillated asystole — there is no evidence it helps, and it costs compressions',
-       when:e=>e.type==='shock',fails:'noshock'},
-      {id:'pace',label:'Paced asystole — the guidelines do not support pacing an asystolic arrest',
-       when:e=>e.type==='pacer'&&/ON/.test(e.label)}
-     ],
-     minMs:20000,done:true}
-   ]},
-
-  {id:'chb',title:'Complete heart block',kicker:'Symptomatic bradycardia',
-   brief:'76-year-old woman, sudden weakness and near-syncope. Cool, grey and diaphoretic. Atropine has been given twice with no change. She is awake and can tell you her name.\n\nThe P waves and the QRS complexes are marching to different drums.',
-   vitals:[['Rhythm','3rd degree block'],['HR','32'],['BP','68/40'],['SpO2','90%']],
-   patient:P({rhythm:'hb3',hr:32,sbp:68,dbp:40,spo2:90,etco2:33,rr:16}),
-   pace:{threshold:70,rateMin:50},
-   phases:[
-    {id:'pace',tag:'UNSTABLE BRADY',tone:'warn',task:'Pace her, and get capture.',
-     steps:[
-      {id:'pacer',label:'Started the pacer',need:e=>e.type==='pacer'&&/ON/.test(e.label)},
-      {id:'current',label:'Climbed the current until capture',need:()=>captured},
-      {id:'margin',label:'Left a margin above the capture threshold',
-       need:()=>captured&&D.pacerMa>=RUN.cse.pace.threshold+10}
-     ],
-     faults:[
-      {id:'shock',label:'Shocked a perfusing bradycardia',when:e=>e.type==='shock'},
-      {id:'rate',label:'Left the pacing rate somewhere that will not perfuse — 60 to 80 is the usual place to start',
-       when:()=>D.pacer&&(D.pacerRate<50||D.pacerRate>100)}
-     ],
-     advanceOn:'margin'},
-    {id:'after',tag:'CAPTURED',tone:'',task:'Capture confirmed. Check a pressure and mark the record.',
-     steps:[
-      {id:'nibp',label:'Confirmed a pressure after capture',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')}
-     ],
-     done:true}
-   ]},
-
-  {id:'svt',title:'Unstable SVT',kicker:'Narrow-complex tachycardia',
-   brief:'34-year-old, sudden onset palpitations, now pale and clammy with chest tightness. Narrow QRS at 210, regular, no discernible P waves. Vagal manoeuvres and adenosine have not touched it, and the pressure is falling.\n\nShe is unstable. This is a cardioversion, not a defibrillation.',
-   vitals:[['Rhythm','SVT'],['HR','210'],['BP','78/44'],['SpO2','94%']],
-   patient:P({rhythm:'svt',hr:210,sbp:78,dbp:44,spo2:94,etco2:34,rr:22}),
-   phases:[
-    {id:'cardiovert',tag:'UNSTABLE SVT',tone:'warn',task:'Cardiovert her — synchronized.',
-     steps:[
-      {id:'sync',label:'Armed SYNC before charging',need:e=>e.type==='sync'&&/ON/.test(e.label)},
-      {id:'energy',label:'Selected a cardioversion energy from the unit\'s ladder, not a defibrillation dose',
-       need:()=>energy()>=50&&energy()<=200},
-      {id:'charge',label:'Charged with SYNC armed',need:e=>e.type==='charge'&&D.sync},
-      {id:'shock',label:'Delivered a synchronized shock',need:e=>e.type==='shock'&&/synchronized/.test(e.detail||'')}
-     ],
-     faults:[{id:'unsync',label:'Delivered an unsynchronized shock on a perfusing rhythm — a shock on the T wave can produce VF',
-              when:e=>e.type==='shock'&&!/synchronized/.test(e.detail||'')}],
-     advanceOn:'shock'},
-    {id:'after',tag:'CONVERTED',tone:'',task:'Sinus at 96 and the pressure is back. Get a 12-lead.',
-     patient:P({rhythm:'nsr',hr:96,sbp:112,dbp:70,spo2:97,etco2:36,rr:16}),
-     steps:[{id:'ecg12',label:'Acquired a 12-lead after conversion',need:e=>e.type==='ecg12'}],
-     done:true}
-   ]},
-
-  {id:'pvt',title:'Pulseless VT',kicker:'Wide-complex arrest',
-   brief:'62-year-old, crushing chest pain for an hour, then collapsed as you moved him to the cot. Wide, regular, fast complexes on the monitor — and no pulse at all, carotid or femoral.\n\nA rhythm that looks like it should perfuse, in a patient who is not perfusing.',
-   vitals:[['Rhythm','VT'],['HR','188'],['Pulse','Absent'],['EtCO2','16 mmHg']],
-   patient:ARREST('vtach',{hr:188,etco2:16}),
-   phases:[
-    {id:'shock',tag:'PULSELESS VT',tone:'crit',task:'Treat it as the arrest it is.',
-     steps:[
-      {id:'cpr',label:'Compressions in progress',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'energy',label:'Selected an energy at or above this unit\'s first adult dose (200 J)',need:()=>energy()>=200},
-      {id:'shock',label:'Delivered an unsynchronized shock',need:e=>e.type==='shock'&&!/synchronized/.test(e.detail||'')}
-     ],
-     faults:[{id:'sync',label:'Armed SYNC on pulseless VT — there is no reliable R wave to synchronise to, and the unit may never fire',
-              when:e=>e.type==='sync'&&/ON/.test(e.label)}],
-     advanceOn:'shock'},
-    {id:'rosc',tag:'ROSC',tone:'',task:'Pulse back. Pressure and a 12-lead.',
-     patient:P({rhythm:'stemi',hr:88,sbp:98,dbp:60,spo2:93,etco2:40,rr:12}),
-     steps:[
-      {id:'nibp',label:'Took a pressure after ROSC',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'ecg12',label:'Acquired a post-arrest 12-lead',need:e=>e.type==='ecg12'}
-     ],
-     done:true}
-   ]},
-
-  {id:'stemi',title:'Inferior STEMI',kicker:'Chest pain',
-   brief:'59-year-old man, 40 minutes of central crushing chest pain with nausea and sweating. Awake, talking, radial pulse present. He is not arresting and he is not going to — as long as the right thing happens in the right order.\n\nWhat this patient needs from the monitor is a document, not a shock.',
-   vitals:[['Rhythm','Sinus'],['HR','62'],['BP','128/76'],['SpO2','96%']],
-   patient:P({rhythm:'stemi',hr:62,sbp:128,dbp:76,spo2:96,etco2:35,rr:16}),
-   phases:[
-    {id:'acquire',tag:'CHEST PAIN',tone:'warn',task:'Get the 12-lead, and get it to the hospital.',
-     steps:[
-      {id:'nibp',label:'Took a blood pressure',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'ecg12',label:'Acquired a 12-lead',need:e=>e.type==='ecg12'},
-      {id:'serial',label:'Acquired a second 12-lead — serial tracings catch an infarct that is still evolving',
-       need:(e,c)=>c.counts.ecg12>=2},
-      {id:'transmit',label:'Transmitted it',need:e=>e.type==='transmit'},
-      {id:'event',label:'Marked the record',need:e=>e.type==='event'||e.type==='codeSummary'}
-     ],
-     faults:[{id:'shock',label:'Charged or shocked a conscious patient with a perfusing rhythm',
-              when:e=>e.type==='shock'}],
-     done:true}
-   ]},
-
-  {id:'pea',title:'PEA',kicker:'Organised rhythm, no pulse',
-   brief:'44-year-old, found down at a construction site. Compressions in progress. The monitor shows an organised, narrow rhythm at 48 — and there is no pulse with it, checked twice by two people.\n\nThe screen looks treatable. The patient is in arrest.',
-   vitals:[['Rhythm','Organised, 48'],['Pulse','Absent'],['EtCO2','12 mmHg'],['SpO2','No trace']],
-   patient:ARREST('junctional',{hr:48,etco2:12}),
-   phases:[
-    {id:'pea',tag:'PEA',tone:'crit',task:'Treat the patient, not the monitor.',
-     steps:[
-      {id:'cpr',label:'Compressions continued',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'analyze',label:'Confirmed the rhythm is not shockable',need:e=>e.type==='advisory'&&/NO SHOCK/.test(e.label)},
-      {id:'noshock',label:'Did not shock PEA',passive:true},
-      {id:'etco2',label:'Read the EtCO2 as a measure of compression quality',need:e=>e.type==='event'||e.type==='codeSummary'||e.type==='nibp'}
-     ],
-     faults:[
-      {id:'shock',label:'Defibrillated PEA — the electrical activity is already organised; the problem is mechanical',
-       when:e=>e.type==='shock',fails:'noshock'},
-      {id:'pace',label:'Paced PEA — pacing adds an impulse to a heart that is already receiving one',
-       when:e=>e.type==='pacer'&&/ON/.test(e.label)}
-     ],
-     minMs:20000,done:true}
-   ]}
-]},
-
-3:{name:'Assessment',sub:'Multi-phase, no coaching, graded',graded:true,cases:[
-  {id:'a1',title:'Bradycardia to arrest',kicker:'Assessment · three phases',
-   brief:'68-year-old, chest pain and syncope. He is grey, cold and barely rousable. You have him on the monitor and the pads are on.\n\nNo coaching from here. Work the case, and the debrief at the end will tell you what you did.',
-   vitals:[['Rhythm','Sinus brady'],['HR','36'],['BP','72/40'],['SpO2','89%']],
-   patient:P({rhythm:'brady',hr:36,sbp:72,dbp:40,spo2:89,etco2:31,rr:12}),
-   pace:{threshold:80,rateMin:50},
-   phases:[
-    {id:'brady',tag:'UNSTABLE BRADY',tone:'warn',task:'Assess and treat.',
-     steps:[
-      {id:'lead',label:'Rhythm confirmed in another lead before treating',need:e=>e.type==='lead'},
-      {id:'nibp',label:'Blood pressure measured',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'pacer',label:'Pacing started for an unstable bradycardia',need:e=>e.type==='pacer'&&/ON/.test(e.label)},
-      {id:'capture',label:'Electrical capture achieved',need:()=>captured}
-     ],
-     advanceOn:'capture',holdMs:8000,
-     onAdvance:()=>toast('He has deteriorated — wide complexes, and no pulse.','bad',3400)},
-    {id:'pvt',tag:'PULSELESS VT',tone:'crit',task:'He has arrested. Work it.',
-     patient:ARREST('vtach',{hr:190,etco2:15}),
-     steps:[
-      {id:'stoppace',label:'Stopped pacing once the patient arrested',need:e=>e.type==='pacer'&&/OFF/.test(e.label)},
-      {id:'cpr',label:'Compressions started',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'energy',label:'Defibrillation energy ≥ 200 J',need:()=>energy()>=200},
-      {id:'shock',label:'Unsynchronized shock delivered',need:e=>e.type==='shock'&&!/synchronized/.test(e.detail||'')},
-      {id:'resume',label:'Compressions resumed within 15 s of the shock',carry:true,
-       need:(e,c)=>e.type==='cpr'&&/ON/.test(e.label)&&c.sinceShock<15000}
-     ],
-     faults:[{id:'sync',label:'SYNC armed on a pulseless rhythm',when:e=>e.type==='sync'&&/ON/.test(e.label)}],
-     advanceOn:'shock',holdMs:6000,
-     onAdvance:()=>toast('Rhythm check: organised at 50. Still no pulse.','bad',3400)},
-    {id:'pea',tag:'PEA',tone:'crit',task:'Organised rhythm, no pulse. Work it.',
-     patient:ARREST('junctional',{hr:50,etco2:20}),
-     steps:[
-      {id:'analyze',label:'Rhythm confirmed as non-shockable',need:e=>e.type==='advisory'&&/NO SHOCK/.test(e.label)},
-      {id:'cpr2',label:'Compressions continued through PEA',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'noshock',label:'PEA not defibrillated',passive:true}
-     ],
-     faults:[{id:'shockpea',label:'PEA defibrillated',when:e=>e.type==='shock',fails:'noshock'}],
-     minMs:25000,advanceAfter:45000,
-     onAdvance:()=>toast('Pulse back. EtCO2 has jumped to 42.','good',3400)},
-    {id:'pcac',tag:'POST-ARREST',tone:'',task:'Pulse back. Finish the job.',
-     patient:P({rhythm:'nsr',hr:92,sbp:96,dbp:58,spo2:91,etco2:42,rr:12}),
-     steps:[
-      {id:'nibp2',label:'Post-arrest blood pressure measured',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'ecg12',label:'Post-arrest 12-lead acquired',need:e=>e.type==='ecg12'},
-      {id:'transmit',label:'12-lead transmitted',need:e=>e.type==='transmit'},
-      {id:'summary',label:'Code summary printed',need:e=>e.type==='codeSummary'}
-     ],
-     done:true}
-   ]},
-
-  {id:'a2',title:'VF to asystole',kicker:'Assessment · three phases',
-   brief:'55-year-old, collapsed at home. Bystander CPR for six minutes before you arrived. Pads on, compressions in progress.\n\nNo coaching. Work it.',
-   vitals:[['Rhythm','VF'],['Pulse','Absent'],['EtCO2','14 mmHg'],['Down time','~6 min']],
-   patient:ARREST('vfib',{etco2:14}),
-   phases:[
-    {id:'vf',tag:'VF ARREST',tone:'crit',task:'Work the arrest.',
-     steps:[
-      {id:'cpr',label:'Compressions started',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'analyze',label:'Rhythm confirmed as shockable',need:e=>e.type==='advisory'&&/SHOCK ADVISED/.test(e.label)&&!/NO SHOCK/.test(e.label)},
-      {id:'energy',label:'Energy ≥ 200 J selected',need:()=>energy()>=200},
-      {id:'shock',label:'Shock delivered',need:e=>e.type==='shock'},
-      {id:'resume',label:'Compressions resumed within 15 s of the shock',carry:true,
-       need:(e,c)=>e.type==='cpr'&&/ON/.test(e.label)&&c.sinceShock<15000}
-     ],
-     advanceOn:'shock',holdMs:6000,
-     onAdvance:()=>toast('Rhythm check: the trace has gone flat.','bad',3400)},
-    {id:'asys',tag:'ASYSTOLE',tone:'crit',task:'The trace has changed. Work it.',
-     patient:ARREST('asystole',{etco2:8}),
-     steps:[
-      {id:'lead',label:'Asystole confirmed in a second lead',need:e=>e.type==='lead'},
-      {id:'analyze2',label:'Rhythm confirmed as non-shockable',need:e=>e.type==='advisory'&&/NO SHOCK/.test(e.label)},
-      {id:'cpr2',label:'Compressions continued through asystole',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'noshock',label:'Asystole not defibrillated',passive:true}
-     ],
-     faults:[
-      {id:'shockasys',label:'Asystole defibrillated',when:e=>e.type==='shock',fails:'noshock'},
-      {id:'paceasys',label:'Asystole paced',when:e=>e.type==='pacer'&&/ON/.test(e.label)}
-     ],
-     minMs:25000,advanceAfter:50000,
-     onAdvance:()=>toast('EtCO2 has risen sharply — check for a pulse.','good',3400)},
-    {id:'pcac',tag:'POST-ARREST',tone:'',task:'Pulse back. Finish the job.',
-     patient:P({rhythm:'nsr',hr:104,sbp:88,dbp:52,spo2:90,etco2:45,rr:10}),
-     steps:[
-      {id:'nibp',label:'Post-arrest blood pressure measured',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'ecg12',label:'Post-arrest 12-lead acquired',need:e=>e.type==='ecg12'},
-      {id:'nibp2',label:'Blood pressure rechecked — post-arrest hypotension is the rule, not the exception',
-       need:(e,c)=>c.counts.nibp>=2},
-      {id:'summary',label:'Code summary printed',need:e=>e.type==='codeSummary'}
-     ],
-     done:true}
-   ]},
-
-  {id:'a3',title:'Tachycardia to arrest',kicker:'Assessment · three phases',
-   brief:'47-year-old, palpitations and chest pain, now hypotensive and confused. Wide, regular complexes at 180 with a weak radial pulse that you can just about find.\n\nNo coaching. Work it.',
-   vitals:[['Rhythm','Wide-complex, 180'],['BP','84/54'],['SpO2','92%'],['Pulse','Weak, present']],
-   patient:P({rhythm:'vtach',hr:180,sbp:84,dbp:54,spo2:92,etco2:32,rr:24}),
-   phases:[
-    {id:'vt',tag:'UNSTABLE VT',tone:'warn',task:'Assess and treat.',
-     steps:[
-      {id:'nibp',label:'Blood pressure measured',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'sync',label:'SYNC armed for a perfusing tachycardia',need:e=>e.type==='sync'&&/ON/.test(e.label)},
-      {id:'energy',label:'Cardioversion energy selected before charging',need:()=>energy()>=100},
-      {id:'shock',label:'Synchronized shock delivered',need:e=>e.type==='shock'&&/synchronized/.test(e.detail||'')}
-     ],
-     faults:[{id:'unsync',label:'Unsynchronized shock delivered on a perfusing rhythm',
-              when:e=>e.type==='shock'&&!/synchronized/.test(e.detail||'')}],
-     advanceOn:'shock',holdMs:5000,
-     onAdvance:()=>toast('He has arrested — the rhythm is now VF.','bad',3400)},
-    {id:'vf',tag:'VF ARREST',tone:'crit',task:'Work it.',
-     patient:ARREST('vfib',{etco2:20}),
-     steps:[
-      {id:'cpr',label:'Compressions started',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'syncoff',label:'SYNC cleared before defibrillating',need:()=>!D.sync},
-      {id:'energy2',label:'Defibrillation energy ≥ 200 J',need:()=>energy()>=200},
-      {id:'shock2',label:'Unsynchronized shock delivered',need:e=>e.type==='shock'&&!/synchronized/.test(e.detail||'')},
-      {id:'resume',label:'Compressions resumed within 15 s of the shock',carry:true,
-       need:(e,c)=>e.type==='cpr'&&/ON/.test(e.label)&&c.sinceShock<15000}
-     ],
-     advanceOn:'shock2',holdMs:6000,
-     onAdvance:()=>toast('Rhythm check: organised at 60. No pulse.','bad',3400)},
-    {id:'pea',tag:'PEA',tone:'crit',task:'Work it.',
-     patient:ARREST('nsr',{hr:60,etco2:24}),
-     steps:[
-      {id:'analyze',label:'Rhythm confirmed as non-shockable',need:e=>e.type==='advisory'&&/NO SHOCK/.test(e.label)},
-      {id:'cpr2',label:'Compressions continued through PEA',need:e=>e.type==='cpr'&&/ON/.test(e.label)},
-      {id:'noshock',label:'PEA not defibrillated',passive:true}
-     ],
-     faults:[{id:'shockpea',label:'PEA defibrillated',when:e=>e.type==='shock',fails:'noshock'}],
-     minMs:25000,advanceAfter:45000,
-     onAdvance:()=>toast('Pulse back at 88.','good',3400)},
-    {id:'pcac',tag:'POST-ARREST',tone:'',task:'Pulse back. Finish the job.',
-     patient:P({rhythm:'nsr',hr:88,sbp:102,dbp:64,spo2:94,etco2:40,rr:12}),
-     steps:[
-      {id:'nibp2',label:'Post-arrest blood pressure measured',need:e=>e.type==='nibp'&&/mmHg/.test(e.detail||'')},
-      {id:'ecg12',label:'Post-arrest 12-lead acquired',need:e=>e.type==='ecg12'},
-      {id:'transmit',label:'12-lead transmitted',need:e=>e.type==='transmit'},
-      {id:'summary',label:'Code summary printed',need:e=>e.type==='codeSummary'}
-     ],
-     done:true}
-   ]}
-]}
+const THERAPY={
+  defib:{name:'Defibrillation',    how:'an unsynchronized shock'},
+  sync: {name:'Synchronized cardioversion', how:'a shock with SYNC armed'},
+  pace: {name:'Transcutaneous pacing',      how:'the pacer, with enough current to capture'},
+  none: {name:'No electrical therapy',      how:'nothing from this unit'},
 };
 
+/* Vitals shorthand. An arrest has no pressure and no saturation the probe can
+   find; EtCO2 is a number rather than a zero because compressions are in
+   progress and it is what they are worth. */
+const A=(rhythm,hr,etco2)=>({rhythm,hr,sbp:0,dbp:0,spo2:0,etco2:etco2||16,rr:0,spo2Quality:'none'});
+const P=(rhythm,hr,sbp,dbp,spo2,etco2,rr)=>({rhythm,hr,sbp,dbp,spo2,etco2:etco2||35,rr:rr||16,spo2Quality:'excellent'});
+
+const ITEMS=[
+  {v:A('vfib',0,18), name:'Ventricular fibrillation',
+   opts:['Ventricular fibrillation','Polymorphic VT','Coarse atrial fibrillation','Asystole'],
+   context:'Unresponsive. No pulse. Compressions in progress.',
+   therapy:'defib',
+   why:'No organised QRS and no pulse. Shock it unsynchronized — there is no R wave for the unit to synchronise to, and compressions go straight back on afterwards.'},
+
+  {v:A('vtach',188,16), name:'Ventricular tachycardia',
+   opts:['Ventricular tachycardia','SVT with aberrancy','Atrial flutter','Sinus tachycardia'],
+   context:'Unresponsive. No pulse at the carotid or the femoral.',
+   therapy:'defib',
+   why:'Wide, regular and fast, with no pulse. Pulseless VT is treated as VF: an unsynchronized shock. SYNC on this rhythm may never fire at all.'},
+
+  {v:P('vtach',168,84,54,92,32,24), name:'Ventricular tachycardia',
+   opts:['Ventricular tachycardia','SVT','Atrial fibrillation with RVR','Junctional tachycardia'],
+   context:'Weak radial pulse. BP 84/54, confused and clammy. Chest pain.',
+   therapy:'sync',
+   why:'Wide-complex tachycardia with a pulse, and unstable — hypotensive, altered and in pain. That is synchronized cardioversion. Arm SYNC, watch the markers land on the R waves, then shock.'},
+
+  {v:P('vtach',146,124,78,97,36,18), name:'Ventricular tachycardia',
+   opts:['Ventricular tachycardia','Sinus tachycardia','Atrial flutter','Ventricular paced rhythm'],
+   context:'Strong radial pulse. BP 124/78, awake, orientated, no chest pain.',
+   therapy:'none',
+   why:'The same rhythm as the last one, and a different answer, because this patient is stable. Stable wide-complex tachycardia is an antiarrhythmic and an expert opinion, not a shock. Shocking a stable patient is a harm you chose.'},
+
+  {v:A('asystole',0,8), name:'Asystole',
+   opts:['Asystole','Fine ventricular fibrillation','Pulseless electrical activity','Idioventricular rhythm'],
+   context:'Unresponsive, no pulse. Flat in two leads, gain already turned up.',
+   therapy:'none',
+   why:'Nothing to shock and nothing to pace — pacing an asystolic arrest does not improve ROSC or survival. What this patient needs is compressions, adrenaline and a search for the cause.'},
+
+  {v:A('junctional',44,12), name:'Junctional escape rhythm',
+   opts:['Junctional escape rhythm','Third-degree AV block','Sinus bradycardia','Asystole'],
+   context:'Unresponsive. Organised complexes on the screen and no pulse with them, checked by two people.',
+   therapy:'none',
+   why:'PEA. The electrical activity is already organised; the problem is mechanical, so no shock and no pacing will help. Compressions, adrenaline, and the H’s and T’s.'},
+
+  {v:P('brady',36,72,40,89,31,12), name:'Sinus bradycardia',
+   opts:['Sinus bradycardia','Junctional escape rhythm','Second-degree AV block (Mobitz II)','Sinus rhythm'],
+   context:'BP 72/40, cold and grey, barely rousable. Atropine has been given twice with no change.',
+   therapy:'pace',
+   why:'Symptomatic bradycardia that has not answered atropine. Pace it: set a rate that perfuses, then climb the current until you capture — and confirm the capture with a pulse, not with the spikes on the screen.'},
+
+  {v:P('hb3',32,68,38,90,33,14), name:'Third-degree AV block',
+   opts:['Third-degree AV block','Sinus bradycardia','Second-degree AV block (Mobitz I)','Junctional escape rhythm'],
+   context:'BP 68/38, near-syncope, cool and diaphoretic. Atropine has not touched it.',
+   therapy:'pace',
+   why:'Complete block — the P waves and the QRS complexes are marching to different drums. Atropine rarely works on a block this high, so this is a pacing patient. Sedate as you go: capture hurts.'},
+
+  {v:P('hb2',42,80,48,92,34,15), name:'Second-degree AV block (Mobitz II)',
+   opts:['Second-degree AV block (Mobitz II)','First-degree AV block','Sinus bradycardia with PACs','Third-degree AV block'],
+   context:'BP 80/48, lightheaded and short of breath on standing. Atropine given.',
+   therapy:'pace',
+   why:'Mobitz II drops beats without warning and progresses to complete block. Symptomatic, and atropine is unreliable here, so get the pacer on and the pads ready early.'},
+
+  {v:P('svt',212,78,44,94,34,22), name:'SVT',
+   opts:['SVT','Sinus tachycardia','Atrial flutter with 2:1 conduction','Ventricular tachycardia'],
+   context:'BP 78/44, pale and clammy with chest tightness. Vagal manoeuvres and adenosine have not touched it.',
+   therapy:'sync',
+   why:'Narrow, regular, too fast for sinus, and the patient is unstable. Adenosine has failed, so this is synchronized cardioversion.'},
+
+  {v:P('svt',186,118,74,98,36,18), name:'SVT',
+   opts:['SVT','Sinus tachycardia','Atrial fibrillation','Ventricular tachycardia'],
+   context:'BP 118/74. Palpitations, otherwise well. Talking in full sentences.',
+   therapy:'none',
+   why:'The same rhythm, a stable patient. Vagal manoeuvres first, then adenosine. Cardioversion is for the unstable one — and this patient will very likely not need it.'},
+
+  {v:P('afib_rvr',164,84,52,93,34,20), name:'Atrial fibrillation with RVR',
+   opts:['Atrial fibrillation with RVR','Atrial flutter','SVT','Multifocal atrial tachycardia'],
+   context:'BP 84/52, chest pain and shortness of breath, cool peripheries.',
+   therapy:'sync',
+   why:'Irregularly irregular with no P waves, fast, and the patient is unstable with it. Synchronized cardioversion — and think about how long they have been in it before you shock.'},
+
+  {v:P('aflutter',148,126,80,97,36,16), name:'Atrial flutter',
+   opts:['Atrial flutter','Atrial fibrillation','SVT','Sinus tachycardia'],
+   context:'BP 126/80. Aware of a fast heartbeat, no pain, no shortness of breath.',
+   therapy:'none',
+   why:'Sawtooth flutter waves, and a stable patient. Rate control and a cardiology opinion, not electricity.'},
+
+  {v:P('tachy',124,112,70,97,37,20), name:'Sinus tachycardia',
+   opts:['Sinus tachycardia','SVT','Atrial flutter','Atrial fibrillation with RVR'],
+   context:'BP 112/70. Febrile, unwell for three days, dry mucous membranes.',
+   therapy:'none',
+   why:'A P wave before every QRS and a rate that fits the story. Sinus tachycardia is a symptom — treat the fever and the fluid deficit. Cardioverting it treats the monitor.'},
+
+  {v:P('nsr',78,124,78,98,37,14), name:'Normal sinus rhythm',
+   opts:['Normal sinus rhythm','Sinus bradycardia','First-degree AV block','Junctional rhythm'],
+   context:'BP 124/78. Awake and comfortable, no complaints.',
+   therapy:'none',
+   why:'Nothing wrong on the screen and nothing wrong with the patient. Recognising when to leave the unit alone is part of the station.'},
+
+  {v:P('paced',72,110,68,97,36,15), name:'Ventricular paced rhythm',
+   opts:['Ventricular paced rhythm','Third-degree AV block','Idioventricular rhythm','Left bundle branch block'],
+   context:'BP 110/68. Pacemaker in situ, capturing. Awake and comfortable.',
+   therapy:'none',
+   why:'A spike before every wide QRS, capturing, and a pulse to go with it. The pacemaker is doing its job — nothing for this unit to add.'},
+];
+
 /* ── Progress ────────────────────────────────────────────────────────────
-   Kept under the amrkc.* prefix the rest of the field guide uses. Every read
-   and write is guarded: private browsing throws on the first touch of
-   localStorage, and losing your progress is not a reason to lose the page. */
-const PROG_KEY='amrkc.lp15.progress';
-let progress={done:{},cards:{}};
-let cardsSeen={};
+   Kept under the amrkc.* prefix the rest of the field guide uses, and every
+   read and write is guarded: private browsing throws on the first touch of
+   localStorage, and losing a best score is not a reason to lose the page. */
+const PROG_KEY='amrkc.lp15.station';
+let best=null, cardsSeen={};
 (function(){
   try{
     const j=localStorage.getItem(PROG_KEY);
-    if(j){ const p=JSON.parse(j)||{}; progress={done:p.done||{},cards:p.cards||{}}; }
+    if(j){ const o=JSON.parse(j)||{}; best=o.best||null; cardsSeen=o.cards||{}; }
   }catch(e){}
-  cardsSeen=progress.cards;
 })();
 function saveProgress(){
-  try{ localStorage.setItem(PROG_KEY,JSON.stringify({done:progress.done,cards:cardsSeen})); }catch(e){}
+  try{ localStorage.setItem(PROG_KEY,JSON.stringify({best,cards:cardsSeen})); }catch(e){}
 }
 
 /* ── The run ─────────────────────────────────────────────────────────────
-   One case at a time. RUN carries what has been ticked, what went wrong, and
-   when each of those happened — the times are what a debrief is actually read
-   from, and they come off the same clock the code summary is stamped with. */
+   One pass through a shuffled set. Each item is two questions — name it, then
+   treat it — and both are scored, because the station is called Rhythm
+   Recognition *and* Electrical Therapy and a crew can be good at one and not
+   the other. */
 let RUN=null;
 let captured=false, paceUnder=null;
+const PACE_THRESHOLD=70;   // mA. Most adults capture between about 40 and 100.
 
-function startCase(levelNo,ix){
-  const lv=LEVELS[levelNo]; if(!lv) return;
-  const cse=lv.cases[ix]; if(!cse) return;
-  closeAllOverlays();
-  RUN={levelNo,ix,cse,phaseIx:-1,phase:null,hits:{},times:{},faults:[],
-       stepIx:0,t0:Date.now(),phaseT0:0,lastShockAt:0,log:[],
-       counts:{},carried:[]};
-  clearTimeout(advanceTimer); advancePending=null;
+/* Fisher-Yates. The order is shuffled so a second run is not the first one
+   from memory, but the whole bank is used: this is a drill, not a quiz that
+   samples. */
+function shuffled(a){
+  const r=a.slice();
+  for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]]; }
+  return r;
+}
+
+function startStation(){
+  RUN={items:shuffled(ITEMS),ix:-1,step:'boot',right:0,asked:0,misses:[],t0:Date.now()};
   captured=false; paceUnder=null;
-  /* A case starts on a unit nobody has touched. CES deliberately leaves the
-     power alone when a scenario resets — there the crew and the room own it —
-     but here every brief says the unit is as a crew finds it, and the
-     walkthrough's first instruction is to switch it on. Carrying the power
-     over from the last case made that instruction impossible to follow: ON
-     does nothing when the unit is already on, and the learner sat on step one
-     of the walkthrough with no way forward but a three-second hold nobody
-     told them about. */
+  closeCard();
+  setPatient({...P('nsr',78,124,78,98,37,14),patientConnected:false,etco2On:false,
+              scenario:'Rhythm & Electrical Therapy',deviceReset:(S.deviceReset||0)+1});
   if(D.on) setPower(false);
-  newCase(Object.assign({scenario:cse.title},cse.patient));
-  enterPhase(0);
-  document.getElementById('fgHdr').classList.add('running');
-  showBrief();
+  render();
+}
+
+/* The unit is off when a crew reaches it, and switching it on is the one
+   thing that is asked before any rhythm appears. It is the only reason ON is
+   still on this panel, and it is worth one question. */
+function bootStep(){
+  RUN.step='boot';
+  ask('Set up','Switch the unit on.',[]);
+}
+
+function nextItem(){
+  RUN.ix++;
+  if(RUN.ix>=RUN.items.length){ finish(); return; }
+  const it=RUN.items[RUN.ix];
+  captured=false; paceUnder=null;
+  /* A clean unit for every rhythm. Without this the charge, the armed SYNC
+     and the pacing current from the last item walk into the next one, and the
+     answer to the next one becomes whatever was left lying around. */
+  setPatient({...it.v,patientConnected:true,etco2On:true,
+              /* Alarms off. The banner they raise sits across the top of the
+                 display, which on this layout is across the rhythm — and the
+                 rhythm is the question. A flashing red rate is a hint the
+                 station has not been asked to give either. */
+              alarmOn:false,alarmMuted:false,hrAlarmLow:50,hrAlarmHigh:120,spo2AlarmLow:94,
+              lead:'II',patientType:'Adult',co2Shape:'normal',
+              artActive:false,sgActive:false,pvcOn:false,pacOn:false,
+              scenario:'Rhythm & Electrical Therapy',
+              deviceReset:(S.deviceReset||0)+1});
+  RUN.step='name';
+  render();
+}
+
+/* ── Asking ──────────────────────────────────────────────────────────── */
+function ask(step,question,options,cls){
+  const bar=document.getElementById('stn');
+  const fb=document.getElementById('stnFb');
+  fb.className=''; fb.innerHTML='';
+  document.getElementById('stnStep').textContent=step;
+  document.getElementById('stnQ').innerHTML=question;
+  document.getElementById('stnN').textContent=
+    RUN&&RUN.ix>=0?((RUN.ix+1)+' / '+RUN.items.length):'';
+  const opts=document.getElementById('stnOpts');
+  opts.className=cls||'';
+  opts.innerHTML=options.map((o,i)=>
+    '<button class="stnb" data-i="'+i+'">'+esc(o)+'</button>').join('');
+  opts.style.display=options.length?'':'none';
+}
+
+function render(){
+  if(!RUN) return;
+  if(RUN.step==='boot'){ bootStep(); return; }
+  const it=RUN.items[RUN.ix];
+  if(RUN.step==='name'){
+    ask('Rhythm','What is this rhythm?',shuffled(it.opts.slice()));
+  }else if(RUN.step==='treat'){
+    ask('Therapy',
+        '<b>'+esc(it.name)+'.</b> '+esc(it.context)+' &nbsp;What electrical therapy?',
+        ['No electrical therapy indicated'],'one');
+  }
   fitDevice();
 }
 
-function enterPhase(i){
-  const ph=RUN.cse.phases[i];
-  if(!ph){ endRun('complete'); return; }
-  /* Steps marked carry outlive their phase. "Compressions back within fifteen
-     seconds of the shock" is the case in point: the phase advances on the
-     shock, so without this the step it is graded on comes off the board a
-     second after the shock lands and the learner is marked down for something
-     they were given no time to do. Twenty seconds is the window a fifteen
-     second rule needs to be judged inside. */
-  if(RUN.phase){
-    RUN.phase.steps.forEach(st=>{
-      if(st.carry&&!RUN.hits[st.id]) RUN.carried.push({st,until:Date.now()+20000});
-    });
-  }
-  RUN.phaseIx=i; RUN.phase=ph; RUN.phaseT0=Date.now(); RUN.stepIx=0;
-  if(ph.patient) setPatient(ph.patient);
-  renderTask();
+/* The rhythm answers are buttons; the therapy answer is the unit, with one
+   button for the case where the answer is that the unit stays out of it. */
+document.getElementById('stnOpts').addEventListener('click',e=>{
+  const b=e.target.closest('.stnb'); if(!b||!RUN||b.disabled) return;
+  if(RUN.step==='name') answerName(b);
+  else if(RUN.step==='treat') answerTherapy('none');
+});
+
+function answerName(btn){
+  const it=RUN.items[RUN.ix];
+  const picked=btn.textContent.trim();
+  const right=picked===it.name;
+  RUN.asked++;
+  document.querySelectorAll('#stnOpts .stnb').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===it.name) b.classList.add('reveal');
+    else if(b===btn) b.classList.add('wrong');
+  });
+  if(right){ RUN.right++; if(soundOn) beep(1180,90,.06,'sine'); }
+  else { RUN.misses.push({n:RUN.ix+1,what:'Named it '+picked,should:it.name});
+         if(soundOn) beep(320,180,.06,'square'); }
+  setTimeout(()=>{ if(RUN){ RUN.step='treat'; render(); } }, right?520:1250);
 }
 
-/* Advancing is deliberately not instant. A phase that flipped the moment the
-   shock landed would take the rhythm off the screen before anyone had looked
-   at what the shock did, and the look is the lesson. */
-/* Arming this twice for the same phase is the bug that deadlocked every
-   assessment. A phase that ends on the clock rather than on an action is
-   advanced by the run's own tick, which fires once a second; the hold before
-   the change is 1200ms. Re-arming on each tick cleared the pending timer
-   80ms before it would have fired, every time, for ever — so a1, a2 and a3
-   could reach their last rhythm and never leave it, and the debrief they are
-   graded from was unreachable. It has to be a latch, not a timer that gets
-   reset by whatever asked for it again. */
-let advanceTimer=null, advancePending=null;
-function advancePhase(){
-  if(!RUN||!RUN.phase||RUN.phase.done) return;
-  const ph=RUN.phase;
-  if(advancePending===ph) return;          // already on its way
-  advancePending=ph;
-  clearTimeout(advanceTimer);
-  advanceTimer=setTimeout(()=>{
-    advancePending=null;
-    if(!RUN||RUN.phase!==ph) return;
-    if(ph.onAdvance) try{ ph.onAdvance(); }catch(e){}
-    enterPhase(RUN.phaseIx+1);
-  }, ph.holdMs||1200);
+/* ── The therapy answer ──────────────────────────────────────────────────
+   Delivered on the unit, not picked from a list. Which of the two shock
+   answers it is comes from whether SYNC was armed when the shock landed —
+   that is the distinction crews get wrong, so it is the one the station asks
+   the device for rather than accepting as a word. */
+function answerTherapy(given,detail){
+  if(!RUN||RUN.step!=='treat') return;
+  const it=RUN.items[RUN.ix];
+  RUN.step='done';
+  RUN.asked++;
+  const right=given===it.therapy;
+  if(right) RUN.right++;
+  else RUN.misses.push({n:RUN.ix+1,
+    what:(THERAPY[given]?THERAPY[given].name:given)+' on '+it.name,
+    should:THERAPY[it.therapy].name});
+
+  const opts=document.getElementById('stnOpts');
+  opts.innerHTML=''; opts.style.display='none';
+  const fb=document.getElementById('stnFb');
+  fb.className='show '+(right?'good':'bad');
+  fb.innerHTML='<span><b>'+(right?'Correct.':THERAPY[it.therapy].name+'.')+'</b> '
+    +(right?'':'You gave '+esc(THERAPY[given]?THERAPY[given].name.toLowerCase():given)+'. ')
+    +esc(it.why)+'</span>'
+    +'<button class="stnnext" id="stnNext">'
+    +(RUN.ix>=RUN.items.length-1?'Finish':'Next rhythm')+'</button>';
+  document.getElementById('stnNext').onclick=()=>nextItem();
+  if(soundOn) beep(right?1320:320,right?200:260,.07,right?'sine':'square');
+  fitDevice();
 }
 
-/* ── Grading ─────────────────────────────────────────────────────────────
-   Every device event the unit logs comes through here. This is the only path
-   from a key press to anything about the patient, and it is the same path a
-   facilitator would take: they watch what the crew did, and they decide what
-   the patient does next. */
+/* ── What the unit reports ───────────────────────────────────────────────
+   Every key press the device logs comes through here. It is the only path
+   from a key to anything the station knows, and the boundary the CES build
+   defends still holds: nothing here lets a press change the rhythm. */
 function trainerEvent(ev){
-  if(ev.type==='shock') lastShockAt=Date.now();
   if(!RUN) return;
-  if(ev.type==='shock') RUN.lastShockAt=Date.now();
-  RUN.log.push(ev);
-
-  RUN.counts[ev.type]=(RUN.counts[ev.type]||0)+1;
-
-  const ph=RUN.phase; if(!ph) return;
-  const ctx=stepCtx();
-
-  // Pacing capture is answered on presses at the pacer and nowhere else — not
-  // on a timer. A run moved to its next phase with the pacer still going would
-  // otherwise hand capture back the moment compressions restarted.
+  if(RUN.step==='boot'){
+    if(ev.type==='power'&&ev.label==='ON'){ nextItem(); }
+    return;
+  }
   if(/^pacer/.test(ev.type)) paceCheck();
-
-  (ph.faults||[]).forEach(f=>{
-    if(RUN.faults.some(x=>x.id===f.id)) return;
-    let hit=false;
-    try{ hit=f.when(ev,ctx); }catch(e){}
-    if(!hit) return;
-    RUN.faults.push({id:f.id,label:f.label,at:Date.now()-RUN.t0});
-    if(f.fails) RUN.hits[f.fails]=false;
-    if(!LEVELS[RUN.levelNo].graded) toast(f.label,'bad',4200);
-  });
-
-  scoreSteps(ev,ctx);
-  renderTask();
-}
-
-/* Steps are re-tested on every event rather than only on the one that looks
-   relevant, because several of them are conditions rather than presses — an
-   energy that is high enough, a SYNC that is cleared — and a condition can
-   become true on a press that has nothing to do with it. */
-function stepCtx(){
-  return {sinceShock:RUN.lastShockAt?Date.now()-RUN.lastShockAt:Infinity,
-          counts:RUN.counts};
-}
-/* Not every step is a press. Several are conditions — an energy high enough,
-   a SYNC cleared, a pacing rate in range, a highlight the speed dial moved —
-   and a condition can become true on something that logs no event at all. The
-   speed dial is the plain case: it logs nothing of its own, so a step waiting
-   on an event could only ever have been ticked by pressing a different key.
-   So the run's own clock re-tests them once a second against a sentinel event
-   that matches nothing, and steps that want a real press simply do not fire. */
-const TICK_EV={type:'',label:'',detail:''};
-function scoreSteps(ev,ctx){
-  const ph=RUN.phase; if(!ph) return;
-  const seq=!!ph.sequential;
-
-  // Carried steps first: they belong to a phase that has already been left.
-  RUN.carried=RUN.carried.filter(c=>{
-    if(RUN.hits[c.st.id]) return false;
-    if(Date.now()>c.until) return false;
-    let ok=false;
-    try{ ok=c.st.need?c.st.need(ev,ctx):false; }catch(e){}
-    if(ok){
-      RUN.hits[c.st.id]=true; RUN.times[c.st.id]=Date.now()-RUN.t0; bumpHint();
-      if(!LEVELS[RUN.levelNo].graded) toast('✓ '+c.st.label,'good',1800);
-      return false;
-    }
-    return true;
-  });
-  ph.steps.forEach((st,i)=>{
-    if(RUN.hits[st.id]||st.passive) return;
-    if(seq&&i!==RUN.stepIx) return;      // one at a time, in order
-    let ok=false;
-    try{ ok=st.need?st.need(ev,ctx):false; }catch(e){}
-    if(!ok) return;
-    RUN.hits[st.id]=true;
-    RUN.times[st.id]=Date.now()-RUN.t0;
-    bumpHint();
-    if(seq){
-      RUN.stepIx=i+1;
-      if(soundOn) beep(1180,90,.06,'sine');
-      if(RUN.stepIx>=ph.steps.length){ advancePhase(); }
-    }else{
-      if(!LEVELS[RUN.levelNo].graded) toast('✓ '+st.label,'good',1800);
-      if(ph.advanceOn===st.id) advancePhase();
-      else if(!ph.advanceOn&&allRequiredHit(ph)) advancePhase();
-    }
-  });
-  if(!seq&&ph.done&&allRequiredHit(ph)&&Date.now()-RUN.phaseT0>=(ph.minMs||0)) endRun('complete');
-}
-function allRequiredHit(ph){
-  return ph.steps.every(st=>st.passive||RUN.hits[st.id]);
+  if(RUN.step!=='treat') return;
+  if(ev.type==='shock'){
+    answerTherapy(/synchronized/.test(ev.detail||'')?'sync':'defib',ev.detail);
+  }
 }
 
 /* ── Pacing capture ──────────────────────────────────────────────────────
    Capture is the patient answering the impulse, so it belongs to whoever owns
-   the patient — here, the trainer. The unit's job stops at the spike, which is
-   why the spikes are drawn from D.pacerMa up in the device code and capture is
-   decided down here.
+   the patient — here, the station. The unit's job stops at the spike, which
+   is why the spikes are drawn from D.pacerMa up in the device code and this
+   is decided down here. Evaluated on presses at the pacer and nowhere else,
+   never on a timer.
 
-   The threshold is the case's. Most adults capture somewhere between about 40
-   and 100 mA, so the default sits at 70; a case that wants a harder patient
-   raises it. Pacing does nothing to VF, pulseless VT or asystole, and a
-   simulator that converted those on a current dial would teach the wrong
-   thing, so the current is only answered where pacing is indicated at all. */
+   Pacing does nothing to VF, pulseless VT or asystole, and a trainer that
+   converted those on a current dial would teach the wrong thing — so the
+   current is only answered where pacing is indicated at all. Turning the
+   pacer on and reaching capture is what counts as the answer; spikes without
+   capture are not treatment and are not accepted as one. */
 const PACE_RESPONSIVE=['brady','hb1','hb2','hb3','junctional','nsr'];
 function paceCheck(){
-  if(!RUN||!RUN.cse.pace) return;
-  const cfg=RUN.cse.pace;
+  if(!RUN||RUN.step!=='treat') return;
+  const it=RUN.items[RUN.ix];
   const under=paceUnder||{rhythm:S.rhythm,hr:S.hr,sbp:S.sbp,dbp:S.dbp,spo2:S.spo2,etco2:S.etco2};
-  if(!PACE_RESPONSIVE.includes(under.rhythm)) return;
+  const want=D.pacer&&!D.pacePaused&&D.pacerMa>=PACE_THRESHOLD&&D.pacerRate>=40;
 
-  const want=D.pacer&&!D.pacePaused&&D.pacerMa>=cfg.threshold&&D.pacerRate>=(cfg.rateMin||40);
   if(want&&!captured){
-    paceUnder=under;
-    captured=true;
-    /* Capture at the rate they dialled in, and a pressure that follows from
-       it — a paced rhythm the patient is not perfusing on is a different
-       lesson, and not this one. */
+    if(!PACE_RESPONSIVE.includes(under.rhythm)){
+      /* Pacing something that cannot answer is still an answer, and it is
+         the wrong one. It is graded here rather than ignored. */
+      answerTherapy('pace');
+      return;
+    }
+    paceUnder=under; captured=true;
     setPatient({rhythm:'paced',hr:D.pacerRate,
       sbp:Math.round(96+(D.pacerRate-60)*0.35),dbp:Math.round(58+(D.pacerRate-60)*0.2),
       spo2:Math.min(98,(under.spo2||90)+6),etco2:Math.max(under.etco2||33,35)});
-    banner('CAPTURE  '+D.pacerRate+' ppm',3000);
-    toast('Electrical capture at '+D.pacerMa+' mA. Confirm a pulse — the spike is the unit, the pulse is the patient.','good',5200);
+    banner('CAPTURE  '+D.pacerRate+' ppm',2600);
+    answerTherapy('pace');
   }else if(!want&&captured){
     captured=false;
     setPatient({rhythm:paceUnder.rhythm,hr:paceUnder.hr,sbp:paceUnder.sbp,
       dbp:paceUnder.dbp,spo2:paceUnder.spo2,etco2:paceUnder.etco2});
-    toast('Capture lost.','bad',3000);
   }
 }
 
-/* A shock timestamp outside a run, so the 15-second rule still has something
-   to measure against in free play. */
-let lastShockAt=0;
+/* ── The end of a run ────────────────────────────────────────────────────
+   There is no pass mark. The station is a drill and what it records is what
+   the learner got right and what they would do differently — a score with a
+   line under it invites arguing with the number instead of reading the
+   misses. The misses are the whole output. */
+function finish(){
+  const run=RUN; RUN=null;
+  const pct=Math.round(run.right/run.asked*100);
+  if(best===null||pct>best){ best=pct; saveProgress(); }
 
-/* ── The task line ───────────────────────────────────────────────────────
-   One line in the page header, because the unit needs every pixel under it
-   and a panel beside the chassis would cost the controls their size. The
-   header's height is measured after every change to it — a task that wraps to
-   three lines on a phone has to take that room from the unit, not from the
-   bottom of the screen. */
-let hintAt=Date.now();
-function renderTask(){
-  const hdr=document.getElementById('fgHdr');
-  if(!RUN){ hdr.classList.remove('running'); fitDevice(); return; }
-  const ph=RUN.phase; if(!ph) return;
-  const tagEl=document.getElementById('fgPhase');
-  tagEl.textContent=ph.tag||'';
-  tagEl.className='fgphase'+(ph.tone?' '+ph.tone:'');
+  let h='<div class="ovrcard wide">'
+    +'<div class="ovrk">Rhythm &amp; Electrical Therapy</div>'
+    +'<div class="ovrh">'+run.right+' of '+run.asked+' correct</div>'
+    +'<div class="ovrp">'+run.items.length+' rhythms, named and treated, in <b>'
+    +Math.round((Date.now()-run.t0)/60000)+' min</b>.'
+    +(best!==null?' Best so far <b>'+best+'%</b>.':'')+'</div>';
 
-  let task='', hint='';
-  if(ph.sequential){
-    const st=ph.steps[RUN.stepIx];
-    task=st?st.task:'Done.';
-    hint=st?st.hint:'';
+  if(run.misses.length){
+    h+='<div class="ovrk" style="margin-top:4px">What to go back over</div>';
+    run.misses.forEach(m=>{
+      h+='<div class="dbrow miss"><span class="dbm">&#10007;</span>'
+        +'<span class="dbl">'+esc(m.what)+' &mdash; it was <b>'+esc(m.should)+'</b></span></div>';
+    });
   }else{
-    task=ph.task||'';
-    const next=ph.steps.find(s=>!s.passive&&!RUN.hits[s.id]);
-    if(next&&next.hint) hint=next.hint;
+    h+='<div class="dbrow hit"><span class="dbm">&#10003;</span>'
+      +'<span class="dbl">Every rhythm named and every therapy right.</span></div>';
   }
-  const graded=!!LEVELS[RUN.levelNo].graded;
-  const showHint=!graded&&hint&&Date.now()-hintAt>14000;
-  document.getElementById('fgTaskText').innerHTML=
-    esc(task)+(showHint?' <em>'+esc(hint)+'</em>':'');
-
-  /* Only offered on a walkthrough, and only once somebody has been on the
-     same step long enough for the hint to have appeared and not helped. */
-  const skip=document.getElementById('btnSkip');
-  if(skip) skip.hidden=!(ph.sequential&&showHint);
-
-  const total=ph.steps.length;
-  const hit=ph.steps.filter(s=>RUN.hits[s.id]||(s.passive&&!RUN.faults.some(f=>f.fails===s.id))).length;
-  document.getElementById('fgTick').textContent=
-    (ph.sequential?(RUN.stepIx+' / '+total):(hit+' / '+total));
-  fitDevice();
-}
-/* The hint clock restarts on progress, so it only ever speaks to somebody who
-   is actually stuck rather than to somebody working steadily. */
-function bumpHint(){ hintAt=Date.now(); }
-
-function skipStep(){
-  if(!RUN||!RUN.phase||!RUN.phase.sequential) return;
-  const ph=RUN.phase;
-  RUN.stepIx++;
-  bumpHint();
-  if(RUN.stepIx>=ph.steps.length) advancePhase(); else renderTask();
+  h+='<div class="ovrrow">'
+   +'<button class="ovrbtn go" onclick="startStation()">Run it again</button>'
+   +'<button class="ovrbtn" onclick="location.href=\'index.html\'">Done</button>'
+   +'</div></div>';
+  const el=document.getElementById('ovrDebrief');
+  el.innerHTML=h; el.hidden=false;
+  if(soundOn) beep(run.misses.length?520:1320,260,.08,'sine');
 }
 
 /* ── Overlays ────────────────────────────────────────────────────────── */
 function closeAllOverlays(){
-  ['ovrLevels','ovrBrief','ovrCard','ovrDebrief','ovrFree'].forEach(id=>{
+  ['ovrCard','ovrDebrief'].forEach(id=>{
     const el=document.getElementById(id); if(el){ el.hidden=true; el.innerHTML=''; }
   });
 }
 
-function showBrief(){
-  if(!RUN) return;
-  const c=RUN.cse;
-  const v=(c.vitals||[]).map(([k,val])=>
-    '<div class="vcell"><i>'+esc(k)+'</i><b>'+esc(val)+'</b></div>').join('');
-  const el=document.getElementById('ovrBrief');
-  el.innerHTML='<div class="ovrcard">'
-    +'<div class="ovrk">'+esc(c.kicker||'')+'</div>'
-    +'<div class="ovrh">'+esc(c.title)+'</div>'
-    +(v?'<div class="vgrid">'+v+'</div>':'')
-    +'<div class="ovrp">'+esc(c.brief).replace(/\n/g,'<br>')+'</div>'
-    +'<div class="ovrrow">'
-    +'<button class="ovrbtn go" onclick="dismissBrief()">Start</button>'
-    +'<button class="ovrbtn" onclick="openLevels()">Pick another</button>'
-    +'</div></div>';
-  el.hidden=false;
-}
-function dismissBrief(){
-  const el=document.getElementById('ovrBrief'); if(el){ el.hidden=true; el.innerHTML=''; }
-  bumpHint(); renderTask();
-  if(RUN&&!D.on) toast('The unit is off. It is on the shelf the way a crew finds it.',null,3600);
-}
-
-/* ── Debrief ─────────────────────────────────────────────────────────────
-   Every step of every phase that was reached, hit or missed, with the time it
-   happened at. There is no score: what a run records is what the learner did,
-   which is what a debrief is read from. A graded case gets a verdict because
-   an assessment has to say something — and it says it on the two things that
-   can be judged from a device: was every critical action performed, and was
-   anything done that should not have been. */
-function endRun(reason){
-  if(!RUN) return;
-  const run=RUN, lv=LEVELS[run.levelNo];
-  RUN=null;
-  clearTimeout(advanceTimer); advancePending=null;
-  document.getElementById('fgHdr').classList.remove('running');
-  fitDevice();
-
-  const reached=run.cse.phases.slice(0,run.phaseIx+1);
-  const rows=[];
-  reached.forEach(ph=>{
-    ph.steps.forEach(st=>{
-      const failed=st.passive&&run.faults.some(f=>f.fails===st.id);
-      const hit=st.passive?!failed:!!run.hits[st.id];
-      rows.push({hit,label:st.label,t:run.times[st.id]});
-    });
-  });
-  const missed=rows.filter(r=>!r.hit).length;
-  const complete=reason==='complete'&&run.phaseIx>=run.cse.phases.length-1;
-  const clean=missed===0&&run.faults.length===0;
-
-  if(complete&&clean){ progress.done[run.levelNo+':'+run.cse.id]=1; saveProgress(); }
-
-  const fmt=ms=>ms==null?'—':(Math.floor(ms/60000)+':'+String(Math.floor(ms%60000/1000)).padStart(2,'0'));
-  let h='<div class="ovrcard wide">';
-  if(lv.graded){
-    h+='<div class="dbverdict '+(complete&&clean?'pass':'fail')+'">'
-      +(complete&&clean?'ALL CRITICAL ACTIONS PERFORMED':(complete?'NEEDS REVIEW':'RUN ENDED EARLY'))+'</div>';
-  }else{
-    h+='<div class="ovrk">Debrief</div><div class="ovrh">'+esc(run.cse.title)+'</div>';
-  }
-  h+='<div class="ovrp">'+(complete
-      ?'You reached the end of the case in <b>'+fmt(Date.now()-run.t0)+'</b>.'
-      :'The run was ended before the case finished.')
-    +' Ticks below are what the unit recorded you doing.</div>';
-
-  rows.forEach(r=>{
-    h+='<div class="dbrow '+(r.hit?'hit':'miss')+'"><span class="dbm">'+(r.hit?'✓':'✗')+'</span>'
-      +'<span class="dbl">'+esc(r.label)+'</span><span class="dbt">'+fmt(r.t)+'</span></div>';
-  });
-  run.faults.forEach(f=>{
-    h+='<div class="dbrow miss"><span class="dbm">!</span>'
-      +'<span class="dbl">'+esc(f.label)+'</span><span class="dbt">'+fmt(f.at)+'</span></div>';
-  });
-
-  if(run.log.length){
-    h+='<div class="dblog">'+run.log.map(e=>
-      '<div><b>'+fmt(e.ms-run.t0)+'</b> &nbsp;'+esc(e.label)+(e.detail?' — '+esc(e.detail):'')+'</div>'
-    ).join('')+'</div>';
-  }
-
-  h+='<div class="ovrrow">'
-   +'<button class="ovrbtn go" onclick="startCase('+run.levelNo+','+run.ix+')">Run it again</button>'
-   +(LEVELS[run.levelNo].cases[run.ix+1]
-      ?'<button class="ovrbtn" onclick="startCase('+run.levelNo+','+(run.ix+1)+')">Next case</button>':'')
-   +'<button class="ovrbtn" onclick="openLevels()">Levels</button>'
-   +'</div></div>';
-
-  const el=document.getElementById('ovrDebrief');
-  el.innerHTML=h; el.hidden=false;
-  if(soundOn) beep(complete&&clean?1320:520,complete&&clean?260:420,.08,'sine');
-}
-
-/* ── Level select ────────────────────────────────────────────────────── */
-function openLevels(){
-  closeAllOverlays();
-  let h='<div class="ovrcard">'
-    +'<div class="ovrk">LIFEPAK 15 Trainer</div>'
-    +'<div class="ovrh">Pick a case</div>';
-  Object.keys(LEVELS).forEach(n=>{
-    const lv=LEVELS[n];
-    h+='<div class="lvsec">Level '+n+' &middot; '+esc(lv.name)+' &mdash; '+esc(lv.sub||'')+'</div>';
-    lv.cases.forEach((c,i)=>{
-      const done=progress.done[n+':'+c.id];
-      h+='<button class="lvcard'+(done?' done':'')+'" onclick="startCase('+n+','+i+')">'
-        +'<span class="lvn">'+(done?'✓':(i+1))+'</span>'
-        +'<span class="lvt"><b>'+esc(c.title)+'</b><span>'+esc(c.kicker||'')+'</span></span>'
-        +'<span class="lvp">'+(done?'DONE':'')+'</span></button>';
-    });
-  });
-  const seen=Object.keys(cardsSeen).length, all=Object.keys(CARDS).length;
-  h+='<div class="lvsec">Anything else</div>'
-    +'<button class="lvcard" onclick="startFree()">'
-    +'<span class="lvn">∞</span><span class="lvt"><b>Free play</b>'
-    +'<span>Set the patient yourself and work the unit with nothing being asked of you</span></span></button>'
-    +'<button class="lvcard" onclick="closeAllOverlays();if(!learnOn)toggleLearn();">'
-    +'<span class="lvn">?</span><span class="lvt"><b>Learn mode</b>'
-    +'<span>Tap any control to read what it does &middot; '+seen+' of '+all+' read</span></span></button>'
-    +'</div>';
-  const el=document.getElementById('ovrLevels');
-  el.innerHTML=h; el.hidden=false;
-}
-
-/* ── Free play ───────────────────────────────────────────────────────────
-   In CES this is a whole second window on a facilitator's laptop. Here it is
-   one panel for one person, and it is deliberately the same boundary: this is
-   the only place a learner can change the patient, and nothing they do at the
-   unit reaches it. */
-const FP_RHYTHMS=[['nsr','Sinus'],['brady','Brady'],['tachy','Sinus tach'],['afib','A-Fib'],
-  ['afib_rvr','AF RVR'],['aflutter','Flutter'],['svt','SVT'],['junctional','Junctional'],
-  ['hb1','1° block'],['hb2','Mobitz II'],['hb3','3° block'],['vtach','VT'],
-  ['vfib','VF'],['asystole','Asystole'],['paced','Paced'],['stemi','Inferior STEMI']];
-
-function startFree(){
-  closeAllOverlays();
-  RUN=null;
-  document.getElementById('fgHdr').classList.remove('running');
-  newCase(P({rhythm:'nsr',hr:78,sbp:124,dbp:78,spo2:97,etco2:36,rr:14,scenario:'Free play'}));
-  fitDevice();
-  openFree();
-  toast('Free play. The unit starts off, the way it sits on the shelf.',null,3600);
-}
-function openFree(){
-  const el=document.getElementById('ovrFree');
-  const rb=FP_RHYTHMS.map(([k,n])=>
-    '<button class="fpb'+(S.rhythm===k?' on':'')+'" onclick="fpSet({rhythm:\''+k+'\'})">'+esc(n)+'</button>').join('');
-  el.innerHTML='<div class="ovrcard">'
-    +'<div class="ovrk">Free play</div><div class="ovrh">The patient</div>'
-    +'<div class="ovrp">You are the facilitator now. Nothing you do at the unit changes any of this &mdash; that is the same boundary a real megacode station is run on.</div>'
-    +'<div class="fpsec">Rhythm</div><div class="fpgrid">'+rb+'</div>'
-    +'<div class="fpsec">Vitals</div>'
-    +fpSlider('hr','Rate',0,220,S.hr)
-    +fpSlider('sbp','Systolic',0,220,S.sbp)
-    +fpSlider('dbp','Diastolic',0,140,S.dbp)
-    +fpSlider('spo2','SpO2',0,100,S.spo2)
-    +fpSlider('etco2','EtCO2',0,60,S.etco2)
-    +fpSlider('rr','Resp',0,40,S.rr)
-    +'<div class="fpsec">The patient is</div><div class="fpgrid">'
-    +'<button class="fpb'+(S.patientConnected?' on':'')+'" onclick="fpSet({patientConnected:!S.patientConnected});openFree()">Leads on</button>'
-    +'<button class="fpb'+(S.etco2On?' on':'')+'" onclick="fpSet({etco2On:!S.etco2On});openFree()">Capnography</button>'
-    +'<button class="fpb'+(S.artActive?' on':'')+'" onclick="fpSet({artActive:!S.artActive,artSbp:S.sbp,artDbp:S.dbp});openFree()">Arterial line</button>'
-    +'<button class="fpb'+(S.pvcOn?' on':'')+'" onclick="fpSet({pvcOn:!S.pvcOn});openFree()">Ectopics</button>'
-    +'</div>'
-    +'<div class="ovrrow">'
-    +'<button class="ovrbtn go" onclick="closeAllOverlays()">Back to the unit</button>'
-    +'<button class="ovrbtn" onclick="openLevels()">Levels</button>'
-    +'</div></div>';
-  el.hidden=false;
-}
-function fpSlider(key,label,min,max,val){
-  return '<div class="fprow"><label>'+esc(label)+'</label>'
-    +'<input type="range" min="'+min+'" max="'+max+'" value="'+val+'" '
-    +'oninput="fpSet({'+key+':+this.value});this.nextElementSibling.value=this.value">'
-    +'<output>'+val+'</output></div>';
-}
-/* Free play has no physiology lock: the point of it is to be able to put any
-   combination on the screen, including ones a patient could not produce, so a
-   crew can be shown what an artefact looks like. A graded case never routes
-   through here. */
-function fpSet(patch){ setPatient(patch); }
-
-/* ── The clock the run is measured on ────────────────────────────────────
-   Phases that end on time rather than on an action need something to notice
-   that, and the hint needs to know how long somebody has been stuck. Once a
-   second is plenty — nothing here is drawn on this tick. */
-setInterval(()=>{
-  if(!RUN||!RUN.phase) return;
-  const ph=RUN.phase, el=Date.now()-RUN.phaseT0;
-  scoreSteps(TICK_EV,stepCtx());
-  if(!RUN||RUN.phase!==ph) return;
-  if(ph.advanceAfter&&el>=ph.advanceAfter&&!ph.done){ advancePhase(); return; }
-  if(ph.done&&allRequiredHit(ph)&&el>=(ph.minMs||0)){ endRun('complete'); return; }
-  renderTask();
-},1000);
-
 /* ── Ways in ─────────────────────────────────────────────────────────────
-   ?level=2 opens a level, ?case=svt opens one case by name (which is how the
-   academy pages elsewhere in the guide deep-link into a single scenario), and
-   ?free goes straight to free play. With none of them, the unit sits on the
-   shelf and the level picker is up — nothing is running, so nothing is being
-   asked of anybody until they choose. */
+   One mode, so there is one way in and nothing to choose before starting.
+   ?item=<n> opens the bank at one rhythm, which is how an instructor puts a
+   particular one on the screen without working through to it. */
 (function boot(){
-  let q;
-  try{ q=new URLSearchParams(location.search); }catch(e){ q=new URLSearchParams(''); }
-  const wantCase=(q.get('case')||'').trim();
-  const wantLevel=parseInt(q.get('level')||'',10);
-  if(q.get('free')!==null){ startFree(); return; }
-  if(wantCase){
-    for(const n of Object.keys(LEVELS)){
-      const i=LEVELS[n].cases.findIndex(c=>c.id===wantCase);
-      if(i>=0){ startCase(+n,i); return; }
-    }
+  let n=NaN;
+  try{ n=parseInt(new URLSearchParams(location.search).get('item')||'',10); }catch(e){}
+  startStation();
+  if(n>=1&&n<=ITEMS.length){
+    RUN.items=[ITEMS[n-1]];
   }
-  if(LEVELS[wantLevel]){ startCase(wantLevel,0); return; }
-  openLevels();
 })();
 
-/* Escape backs out of whatever is on top, in the order somebody would expect:
-   the card first, then the 12-lead, then the brief. It never ends a run —
-   that is what END is for, and losing a case to a stray key press on a
-   Toughbook would be its own defect. */
+/* Escape closes the teaching card, and nothing else — losing a run to a stray
+   key press on a Toughbook would be its own defect. */
 window.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  const cardEl=document.getElementById('ovrCard');
-  if(cardEl&&!cardEl.hidden){ closeCard(); return; }
-  if(lead12Open){ close12Lead(); return; }
-  const sum=document.getElementById('ovrSum');
-  if(sum&&!sum.hidden){ closeCodeSummary(); return; }
-  const br=document.getElementById('ovrBrief');
-  if(br&&!br.hidden){ dismissBrief(); return; }
+  const c=document.getElementById('ovrCard');
+  if(c&&!c.hidden){ closeCard(); return; }
 });
+
+/* The window changing shape changes the layout rather than a scale factor
+   now, but the header still has to be measured and portrait still has to be
+   caught. */
+if(window.visualViewport) window.visualViewport.addEventListener('resize',fitDevice);
+window.addEventListener('orientationchange',()=>setTimeout(fitDevice,120));
 
 </script>
 </body>

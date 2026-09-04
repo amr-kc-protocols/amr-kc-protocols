@@ -41,6 +41,25 @@ These suites live here:
   layout becomes a real grid on a wide screen instead of stretching the phone
   column edge to edge.
 
+- **`lifepak.test.mjs`** — the LIFEPAK 15 station
+  ([`lifepak-15.html`](../lifepak-15.html)) in headless Chromium: the whole
+  item bank played correctly, every wrong answer it is meant to catch, pacing
+  capture, the teaching cards, and the layout at five phone sizes. Four things
+  it defends harder than the rest, because each would be silently wrong rather
+  than visibly broken: that driving the whole therapy set through the unit
+  moves **not one field of the patient**; that **every item in the bank can
+  actually be answered** on the keys that are on the page; that **nothing
+  scrolls** at any phone size in either step; and that every control clears
+  44pt **by hit-testing the page**, since the rocker arrows are 39px boxes
+  whose real target is a pseudo-element larger on each side.
+
+- **`homepage.test.mjs`** — the homepage ([`index.html`](../index.html)) in
+  headless Chromium at four screen sizes, two of them Toughbook resolutions.
+  Defends the two things the revamp changed: that the sign-in is gone from the
+  markup *and* the source (no endpoint left to post a name to), and that the
+  layout becomes a real grid on a wide screen instead of stretching the phone
+  column edge to edge.
+
 - **`lifepak.test.mjs`** — the LIFEPAK 15 simulator
   ([`lifepak-15.html`](../lifepak-15.html)) in headless Chromium: the level
   picker, the walkthrough, every clinical case, pacing capture, the faults an
@@ -197,31 +216,19 @@ Grouped by the property being defended:
 
 | # | Scenario |
 |---|----------|
-| L1 | The page opens asking nothing of anybody: picker up, unit off, nothing running |
-| L2 | Every case in every level briefs, starts, puts its own patient on the screen and asks for something |
-| L3 | **The boundary** — a whole resuscitation (CPR, analyse, lead, size, energy, charge, shock, sync, pace, alarms, SunVue, print) with the trainer's writer stubbed out moves no field of `S` |
-| L4 | The trainer, not the device, moves the patient — and only after the press, the way a facilitator does |
-| L5 | Pacing capture answers the current: spikes without capture, capture at threshold with a pressure, capture lost on backing off |
-| L6 | VF does not convert on a current dial, however far it is turned |
-| L7 | The faults an assessment exists to catch: asystole shocked, asystole paced, an unsynchronized shock on a perfusing rhythm — each reaching the debrief |
-| L8 | A step whose phase has moved on is still gradeable inside its window, so "compressions back within 15 s" is not marked down for a phase change |
-| L9 | The walkthrough advances on the right events, does not lead with the hint, offers a way past a step only once somebody is stuck, and records a skip as a miss |
-| L10 | The speed dial moves the home-screen highlight, and HOME SCREEN clears it |
-| L11 | A teaching card behind every control, no card without a control, every card complete — and learn mode opens the card *instead of* firing the key |
-| L12 | The 12-lead and the code summary open in the page, not in a popup: all 13 traces drawn, and each way out works, including the framed document's own button reaching back out |
-| L13 | Free play is the only place the patient can be set by hand, and nothing is graded there |
-| L14 | Progress survives a reload; the page still works with `localStorage` throwing |
-| L15 | Deep links (`?case=`, `?level=`, `?free`), and a name that means nothing falls back to the picker |
-| L16 | **Every control clears 44pt by real hit area** at three iPad sizes, the unit clears its own header and fits, no sideways scroll |
-| L17 | The header's height is measured, so a running case takes its room from the unit rather than from the bottom of the screen |
-| L18 | A portrait **tablet** is told to turn rather than given a stacked unit, and the chassis is `inert` so the keyboard cannot reach SHOCK behind the notice |
-| L19 | **Five phones, both orientations**: the laid-out unit rather than a rotate prompt, no sideways scroll, every control clears 44pt, and every control can actually be tapped at *some* scroll position — hit-tested at every offset, because a control the sticky monitor covers everywhere is a control with no path to it |
-| L20 | A whole case played through on three phones by **tapping**, with the page scrolled the way a thumb would: every tap lands on the key it aimed at, the case finishes, nothing missed |
-| L21 | Nothing of the two-window CES build came across — no relay, no panel channel, no panel link, no skin switcher |
-| L22 | Reachable from the home tile and the More list, and the cache version bumped so installed devices get it |
-| L24 | **The numbers, against their sources**: the energy ladder, the 200-300-360 sequence and the lead list against the LIFEPAK 15 data sheet; the metronome at 100/min, pacing at 40-170 PPM from a 60 PPM default and 0-200 mA, the 60-second disarm and the two-minute silence against the same; and against the 2025 AHA guidelines, that no card quotes a fixed joule dose the AHA no longer sets, that pacing stays after atropine and is still taught as wrong in asystole, and that SYNC is still ruled out for VF and pulseless VT |
-| L23 | The progression bugs this page has had: a clock-driven phase that never advances (it deadlocked all three assessments), a unit left on across cases (it made the walkthrough's first instruction impossible), a step waiting on an alarm event the unit never logs (a guaranteed fail in a graded case), free play at a pointer's density on a phone, and the 12-lead at four columns on a 390px screen |
-
-When you change either tool, run `npm test` and add a scenario for any new behaviour.
-
-The database side is tested separately — see [`../supabase/tests`](../supabase/tests).
+| S1 | It opens as one thing: a run going, the unit off, and the first thing asked is to switch it on. Nothing left of the case engine's overlays |
+| S2 | **The boundary** — SYNC, energy, charge, shock, pacer and rate driven through the unit with the station's writer stubbed out, and no field of the patient moves |
+| S3 | **Every item is answerable** — the whole bank named and treated correctly, all four therapies exercised, ending in a summary that scores both questions per rhythm |
+| S4 | The wrong answers: defibrillating asystole, pacing asystole, an unsynchronized shock on an unstable tachycardia, SYNC armed on VF, declining to shock VF, shocking a normal sinus rhythm — each caught, each told what it should have been |
+| S5 | A wrong name is marked, the right one revealed, the miss recorded, and the item moves on to its therapy anyway |
+| S6 | Pacing answers the current: spikes without capture are not an answer, 60 mA is below threshold, 70 captures at the rate dialled in |
+| S7 | **Nothing scrolls** — five phones, checked before the run, on the naming step, on the therapy step and with the verdict up; and every control clears 44pt by real hit area |
+| S8 | A whole item played by **tapping** on two landscape phones, every tap landing on the key it aimed at |
+| S9 | Portrait says to turn the phone, the unit is `inert` behind the notice so the keyboard cannot reach SHOCK, and nothing scrolls there either |
+| S10 | A teaching card for every key on the page and none for a key that was dropped; learn mode opens the card instead of firing the key |
+| S11 | Nothing that answers or distracts from the question is on the page — ANALYZE included — and the 12-lead renderer and code summary went with the keys that reached them |
+| S12 | The numbers against the LIFEPAK 15 documentation and the 2025 AHA guidelines, including that no card quotes a fixed joule dose the AHA no longer sets |
+| S13 | The bank's clinical shape: at least one rhythm with more than one right answer, VT with three, every item explaining itself and giving the context the answer turns on |
+| S14 | A best score survives a reload; the station runs with `localStorage` throwing |
+| S15 | `?item=` pins the bank to one rhythm, for putting a particular one on the screen |
+| S16 | Reachable from the field guide, the copy describes the station rather than the old case engine, and the cache version is bumped |
