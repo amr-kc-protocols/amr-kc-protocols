@@ -365,15 +365,22 @@ const PRACTICE_IDS = ['draw','peds','drip','drops'];
   if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(400); }
   const feat = p.locator('.feat-card[href="med-math.html"]');
   ok('M11 home shows the feature panel', (await feat.count()) === 1);
-  ok('M11 the panel is flagged new',
-     /new training/i.test(await feat.locator('.feat-badge').textContent()));
+  /* "New training" moved to the LIFEPAK station when that shipped — one badge,
+     on the newest thing, or it stops meaning anything. Med Math keeps a
+     Training badge. */
+  ok('M11 the panel is badged as training',
+     /training/i.test(await feat.locator('.feat-badge').textContent()));
+  ok('M11 and the "new" flag sits on the newest trainer, not this one',
+     /new training/i.test(await p.locator('.feat-card[href="lifepak-15.html"] .feat-badge').textContent())
+       && !/new/i.test(await feat.locator('.feat-badge').textContent()));
   const box = await feat.boundingBox();
   ok('M11 the panel sits high on the page', box && box.y < 1200, 'y=' + (box && Math.round(box.y)));
-  // Two featured panels now sit together; they must not read as one block.
+  // Three featured panels now sit together; they must not read as one block.
   const shades = await p.locator('.feat-card').evaluateAll(els =>
     els.map(e => getComputedStyle(e).backgroundImage));
-  ok('M11 the two panels are visually distinct',
-     shades.length === 2 && shades[0] !== shades[1], shades.length + ' panels');
+  ok('M11 the three panels are each visually distinct',
+     shades.length === 3 && new Set(shades).size === 3,
+     shades.length + ' panels, ' + new Set(shades).size + ' distinct');
   await p.evaluate(() => { const b = document.querySelector('[data-goto="more"]'); if (b) b.click(); });
   await p.waitForTimeout(400);
   ok('M11 More lists it exactly once',
