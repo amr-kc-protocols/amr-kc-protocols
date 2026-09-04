@@ -173,20 +173,33 @@ Matching the guidelines: atropine before pacing; pacing an asystolic arrest
 taught as ineffective, which is what the 2025 evidence review concluded; and
 SYNC ruled out for VF and pulseless VT.
 
-On doses the 2025 guidelines split, and the station follows the split rather
-than a single rule. **Defibrillation** has no named figure — they defer to the
-manufacturer's first-shock setting, and to the maximum where the manufacturer
-is unknown, so the page points at the device rather than at a remembered
-number. **Cardioversion of atrial fibrillation or flutter does have one**:
-start at 200 J or more on a biphasic unit and escalate, a reversal of the older
-low-and-climb approach, on the grounds that 200 J converts more often on the
-first shock and is less likely to induce VF (COR 1, LOE C-LD).
+On doses, the station teaches **the standing orders these learners are actually
+held to**, not a reading of the guidelines. `protocols-2026.pdf` in this repo
+names them in four places — V-15 (Synchronized Cardioversion), the LIFEPAK 15
+device operation page, the II-2/II-3/II-4 tachycardia protocols, and the
+tachycardia reference — and they agree:
 
-That second point is the one thing here taken from secondary sources rather
-than read in the guideline itself: `ahajournals.org` and `cpr.heart.org` are
-both unreachable from the environment this was written in. It is consistent
-across independent summaries and quoted with its class and level of evidence,
-but it is the first thing the Medical Director should check.
+| Therapy | AMR Kansas City 2026 |
+|---|---|
+| Manual defibrillation, VF / pulseless VT | 200 J biphasic |
+| Synchronized cardioversion, SVT | 50–100 J |
+| Synchronized cardioversion, atrial fibrillation | 200 J biphasic *(cites AHA 2025)* |
+| Synchronized cardioversion, VT with a pulse | 100 J |
+
+Every item whose answer is a shock names the joules for that rhythm, and the
+suite asserts it.
+
+This corrects two earlier mistakes of mine, in opposite directions. I first
+stripped the fixed figures out on the grounds that the 2025 AHA no longer sets
+them. That was wrong twice over: the AHA *does* set the atrial fibrillation one
+— 200 J or more on a biphasic unit, a reversal of the older low-and-climb
+approach, because a 200 J first shock converts more often and is less likely to
+induce VF — and the service sets all of them regardless of what the AHA does.
+The protocol's own citation of AHA 2025 for the A-fib figure is what confirmed
+it; `ahajournals.org` and `cpr.heart.org` are both unreachable from the
+environment this was written in, so the guideline could not be read directly.
+The protocol is the better authority here anyway: it is what the students are
+examined and employed against.
 
 LIFEPAK is a trademark of Stryker. This is a training simulation and is not a
 medical device. Nothing here has been through clinical review by the Medical

@@ -401,16 +401,33 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
      card may quote a fixed joule figure as though the AHA still set one. */
   const src = await readFile(join(ROOT, 'lifepak-15.html'), 'utf8');
   const cards = src.slice(src.indexOf('const CARDS={'), src.indexOf('\nfunction openCard('));
-  /* The 2025 guidelines split on doses and the cards have to split with them:
-     no named figure for defibrillation, a named one for cardioverting AF or
-     flutter. Asserting one rule for both is how the sync card ended up telling
-     learners the AHA had stopped naming cardioversion energies. */
-  ok('S12 the energy card points at the device rather than a remembered defibrillation dose',
-     /defer to the defibrillator manufacturer/.test(cards));
-  ok('S12 the sync card carries the 2025 AF and flutter figure',
-     /atrial fibrillation and atrial flutter[^]*?200 J or more/.test(cards));
+  /* Doses come from the standing orders these learners are actually held to,
+     not from a reading of the guidelines. AMR Kansas City 2026 names them in
+     four places (V-15, the LIFEPAK 15 device page, II-2/II-3/II-4, and the
+     tachycardia reference): defibrillation 200 J biphasic; cardioversion SVT
+     50-100 J, A-fib 200 J biphasic, VT with a pulse 100 J. Stripping the
+     figures out on the grounds that the AHA no longer sets them was wrong
+     twice over — the AHA does set the A-fib one, and the service sets all of
+     them. */
+  ok('S12 the energy card carries the protocol defibrillation dose',
+     /200 J biphasic/.test(cards) && /defer to the manufacturer/.test(cards));
+  ok('S12 the sync card carries all three cardioversion doses, which are not one number',
+     /SVT 50-100 J/.test(cards) && /atrial fibrillation 200 J biphasic/.test(cards)
+       && /VT with a pulse 100 J/.test(cards));
+  ok('S12 the sync card says to come out of SYNC if it degenerates to VF',
+     /deteriorates to VF, come out of SYNC and defibrillate/.test(cards));
   ok('S12 and does not still say the AHA stopped naming cardioversion energies',
      !/stopped naming cardioversion energies/.test(cards));
+  ok('S12 pacing carries the protocol technique: anterior-posterior pads, 5 mA steps, sedation',
+     /anterior-posterior/.test(cards) && /5 mA steps/.test(cards) && /midazolam/.test(cards));
+  ok('S12 the cards cite the protocol they come from',
+     (cards.match(/AMR Kansas City 2026/g) || []).length >= 3);
+  /* Every item whose answer is a shock names the dose for that rhythm. */
+  { const doses = { 0: /200 J biphasic/, 1: /200 J biphasic/, 2: /100 J/, 9: /50-100 J/, 11: /200 J biphasic/ };
+    const bankWhy = await p.evaluate(() => ITEMS.map(x => x.why));
+    const missing = Object.entries(doses).filter(([i, re_]) => !re_.test(bankWhy[i])).map(([i]) => i);
+    ok('S12 every item answered with a shock names the joules for that rhythm',
+       missing.length === 0, 'items missing a dose: ' + missing.join(',')); }
   ok('S12 pacing is still placed after atropine', /has not answered atropine/.test(cards));
   ok('S12 pacing asystole is still taught as wrong', /not for asystole/.test(cards));
   ok('S12 SYNC is still ruled out for VF and pulseless VT', /never for VF or pulseless VT/.test(cards));
