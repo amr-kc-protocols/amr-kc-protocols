@@ -233,3 +233,4 @@ Grouped by the property being defended:
 | S15 | `?item=` pins the bank to one rhythm, for putting a particular one on the screen |
 | S16 | Reachable from the field guide, the copy describes the station rather than the old case engine, and the cache version is bumped |
 | S17 | **The tracings carry the finding the item asks about** — QRS width the same at 45/min as at 150, VT and a paced beat wide where SVT and a junctional escape are narrow, AF irregularly irregular where sinus is regular, flutter with no isoelectric baseline, complete heart block with more P waves than QRS and not a multiple of them, VF never at baseline |
+| S18 | **A laptop** — four desktop viewports including a 4:3 Toughbook and a half-screen window, and a whole item played with a mouse rather than a finger. Every other scenario runs at 844x390 with touch emulation on, so laptop use was being assumed rather than tested |

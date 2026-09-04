@@ -569,6 +569,59 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
      m.hb3P > m.hb3R && m.hb3P % m.hb3R !== 0, `${m.hb3P} P to ${m.hb3R} QRS`);
   await p.context().close(); }
 
+/* S18 — a laptop. Students open this on a Toughbook as well as a phone, and
+   every other scenario here runs at 844x390 with touch emulation on, so a
+   mouse and a desktop-sized viewport were being assumed rather than tested. */
+{ const SIZES = [[1024, 624, 'CF-31 4:3'], [1366, 640, 'laptop'], [1920, 950, 'FZ-55'], [800, 600, 'half window']];
+  for (const [w, h, label] of SIZES) {
+    // No isMobile, no hasTouch: a real pointer.
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+    const p = await ctx.newPage(); const errs = [];
+    p.on('pageerror', e => errs.push(e.message));
+    await p.goto(PAGE); await p.waitForTimeout(700);
+    const r = await p.evaluate(() => {
+      const vw = innerWidth, vh = innerHeight;
+      const ids = ['kON','kSYNC','kEnergyUp','kEnergyDn','kCHARGE','kSHOCK','kPACER','kRateUp','kRateDn','kCurUp','kCurDn','kPAUSE'];
+      const bad = [];
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (!el) { bad.push(id + ':missing'); continue; }
+        const b = el.getBoundingClientRect();
+        if (b.bottom > vh + 0.5 || b.right > vw + 0.5 || b.top < -0.5 || b.left < -0.5) bad.push(id + ':offscreen');
+        const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+        if (!hit || (hit !== el && !el.contains(hit))) bad.push(id + ':covered');
+      }
+      return { portrait: document.body.classList.contains('portrait'), bad,
+        oy: document.documentElement.scrollHeight - vh, ox: document.documentElement.scrollWidth - vw };
+    });
+    ok(`S18 ${label} shows the unit rather than the turn-your-phone notice`, !r.portrait);
+    ok(`S18 ${label} nothing scrolls`, r.oy <= 0 && r.ox <= 0, `y=${r.oy} x=${r.ox}`);
+    ok(`S18 ${label} every therapy key is on screen and clickable`, r.bad.length === 0, r.bad.join(','));
+    ok(`S18 ${label} no errors`, errs.length === 0, errs.join('|'));
+    await ctx.close();
+  }
+  /* And a whole item played with the mouse, end to end. */
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 640 } });
+  const p = await ctx.newPage(); const errs = [];
+  p.on('pageerror', e => errs.push(e.message));
+  await p.goto(PAGE + '?item=1'); await p.waitForTimeout(800);
+  await p.click('#kON'); await p.waitForTimeout(2300);
+  const named = await p.evaluate(() => {
+    const nm = RUN.items[RUN.ix].name;
+    const b = [...document.querySelectorAll('#stnOpts .stnb')].find(x => x.textContent.trim() === nm);
+    if (!b) return false; b.click(); return true;
+  });
+  await p.waitForTimeout(950);
+  await p.click('#kCHARGE'); await p.waitForTimeout(6200);
+  await p.click('#kSHOCK'); await p.waitForTimeout(900);
+  const end = await p.evaluate(() => ({ step: RUN.step, shocks: D.shocks,
+    good: document.getElementById('stnFb').classList.contains('good') }));
+  ok('S18 the naming options are clickable with a mouse', named);
+  ok('S18 an item plays through to a verdict on a laptop', end.step === 'done', JSON.stringify(end));
+  ok('S18 the shock was delivered by mouse and graded right', end.shocks === 1 && end.good, JSON.stringify(end));
+  ok('S18 no errors through the mouse playthrough', errs.length === 0, errs.join('|'));
+  await ctx.close(); }
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fails.length) { console.log('\nFailures:'); fails.forEach(f => console.log(' - ' + f)); }
 await browser.close(); srv.close();
