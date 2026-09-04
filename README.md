@@ -73,6 +73,16 @@ Held upright the page says to turn the phone rather than stacking into a
 scroll, and the unit is `inert` behind that notice — covering is only paint,
 and without it the whole chassis stays in the tab order, SHOCK included.
 
+It is also capped at the size of the thing it is a picture of. A LIFEPAK 15 is
+15.8 × 12.5 inches, so past that the chassis stops growing and centres instead:
+left to fill the screen it rendered at roughly twice life size on a 2160-wide
+Toughbook, which reads as a mockup rather than a unit. CSS inches are nominal —
+96px to the inch, before the panel's own DPI and the OS scaling factor — so
+this is about life size, not calibrated to it. Phones are unaffected, being
+well under 15.8in wide. The keys are still larger in proportion than the real
+unit's, because the station shows nine of them where the device has far more;
+that is the cost of dropping the keys the drill does not use.
+
 The unit is sized against the **visual** viewport, not the layout viewport.
 Sideways in mobile Safari with the toolbars showing, the layout viewport stays
 full height while the visible area is 80–100 px shorter, so a chassis pinned to

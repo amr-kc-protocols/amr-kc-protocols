@@ -600,6 +600,21 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
     ok(`S18 ${label} no errors`, errs.length === 0, errs.join('|'));
     await ctx.close();
   }
+  /* The chassis stops at the size of the unit it is a picture of: 15.8 x 12.5
+     inches, which is 1517 x 1200 CSS px at 96/in. Left uncapped it rendered at
+     roughly twice that on a 2160-wide Toughbook. */
+  for (const [w, h, capped] of [[844, 390, false], [1366, 640, false], [2160, 1290, true], [2560, 1400, true]]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: w < 1000, hasTouch: w < 1000 });
+    const p = await ctx.newPage(); await p.goto(PAGE); await p.waitForTimeout(700);
+    const d = await p.evaluate(() => { const r = document.getElementById('device').getBoundingClientRect();
+      return { w: Math.round(r.width), h: Math.round(r.height), l: Math.round(r.left), r: Math.round(innerWidth - r.right) }; });
+    ok(`S18 ${w}x${h} the unit is never larger than the real one`,
+       d.w <= 1518 && d.h <= 1201, `${d.w}x${d.h}`);
+    if (capped) ok(`S18 ${w}x${h} and is centred once the cap bites`, Math.abs(d.l - d.r) <= 2, `left ${d.l}, right ${d.r}`);
+    else ok(`S18 ${w}x${h} still fills the screen, which is what a phone needs`, d.w === w, `${d.w} of ${w}`);
+    await ctx.close();
+  }
+
   /* And a whole item played with the mouse, end to end. */
   const ctx = await browser.newContext({ viewport: { width: 1366, height: 640 } });
   const p = await ctx.newPage(); const errs = [];

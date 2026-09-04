@@ -675,9 +675,22 @@ body.lp-skin #device{
      showing — so the bottom of the unit, which is CHARGE and SHOCK, sat behind
      the browser's own chrome and could not be pressed. Reported from a real
      iPad. `dvh` is the modern answer and `--vvh`, set from visualViewport in
-     fitDevice, is the one that also covers the browsers that do not have it. */
-  position:fixed;left:0;right:0;top:var(--hdrh,0px);bottom:auto;
-  width:auto;height:calc(var(--vvh, 100dvh) - var(--hdrh, 0px));transform:none;
+     fitDevice, is the one that also covers the browsers that do not have it.
+
+     Capped at the size of the thing it is a picture of. A LIFEPAK 15 is
+     15.8 x 12.5 inches (Stryker data sheet); left to grow, on a 2160-wide
+     Toughbook the replica rendered at about twice that, which reads as a
+     mockup rather than a unit — big slabs carrying small labels. Past the cap
+     it stops growing and centres instead. CSS inches are nominal (96px to the
+     inch, before the panel's own DPI and the OS scaling factor), so this is
+     about life size rather than calibrated to it. Phones are unaffected: a
+     landscape phone is well under 15.8in, so both mins pick the viewport. */
+  --devw:min(100%, 15.8in);
+  --devh:min(calc(var(--vvh, 100dvh) - var(--hdrh, 0px)), 12.5in);
+  position:fixed;left:0;right:0;bottom:auto;
+  /* Centred in what is left below the header once the cap has bitten. */
+  top:calc(var(--hdrh, 0px) + (var(--vvh, 100dvh) - var(--hdrh, 0px) - var(--devh)) / 2);
+  width:var(--devw);height:var(--devh);transform:none;margin-inline:auto;
   display:flex;flex-direction:column;gap:0;
   padding:6px calc(6px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left));
   background:linear-gradient(180deg,#c2c4bd,#a9aca4);
