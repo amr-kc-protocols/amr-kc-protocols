@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v12';
+const CACHE = 'amrkc-2026-v13';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',

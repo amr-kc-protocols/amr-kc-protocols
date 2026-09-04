@@ -41,6 +41,39 @@ These suites live here:
   layout becomes a real grid on a wide screen instead of stretching the phone
   column edge to edge.
 
+- **`lifepak.test.mjs`** — the LIFEPAK 15 station
+  ([`lifepak-15.html`](../lifepak-15.html)) in headless Chromium: the whole
+  item bank played correctly, every wrong answer it is meant to catch, pacing
+  capture, the teaching cards, and the layout at five phone sizes. Four things
+  it defends harder than the rest, because each would be silently wrong rather
+  than visibly broken: that driving the whole therapy set through the unit
+  moves **not one field of the patient**; that **every item in the bank can
+  actually be answered** on the keys that are on the page; that **nothing
+  scrolls** at any phone size in either step; and that every control clears
+  44pt **by hit-testing the page**, since the rocker arrows are 39px boxes
+  whose real target is a pseudo-element larger on each side.
+
+- **`homepage.test.mjs`** — the homepage ([`index.html`](../index.html)) in
+  headless Chromium at four screen sizes, two of them Toughbook resolutions.
+  Defends the two things the revamp changed: that the sign-in is gone from the
+  markup *and* the source (no endpoint left to post a name to), and that the
+  layout becomes a real grid on a wide screen instead of stretching the phone
+  column edge to edge.
+
+- **`lifepak.test.mjs`** — the LIFEPAK 15 simulator
+  ([`lifepak-15.html`](../lifepak-15.html)) in headless Chromium: the level
+  picker, the walkthrough, every clinical case, pacing capture, the faults an
+  assessment exists to catch, the teaching card behind every control, and the
+  12-lead and code summary that used to be popup windows. Two things it
+  defends harder than the rest, because both would be silently wrong: that a
+  whole resuscitation driven through the unit moves **not one field of the
+  patient** — the crew own the device, somebody else owns the patient — and
+  that every control clears a thumb's 44pt minimum **by hit-testing the page**,
+  not by reading the box or the stylesheet. Three of the rockers are 43.5px
+  boxes at the scale a 1024x768 iPad reaches and are fine; their real target is
+  a pseudo-element four pixels larger on each side, which a box measurement
+  fails and a stylesheet check passes for the wrong reason.
+
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
 ## Run
@@ -179,6 +212,25 @@ Grouped by the property being defended:
 | H6 | Both trainings and all six quick actions are one tap away, and search still returns results |
 | H7 | Cache version bumped and the homepage still precached, so installed devices get it |
 
-When you change either tool, run `npm test` and add a scenario for any new behaviour.
+## What's covered (`lifepak.test.mjs`)
 
-The database side is tested separately — see [`../supabase/tests`](../supabase/tests).
+| # | Scenario |
+|---|----------|
+| S1 | It opens as one thing: a run going, the unit off, and the first thing asked is to switch it on. Nothing left of the case engine's overlays |
+| S2 | **The boundary** — SYNC, energy, charge, shock, pacer and rate driven through the unit with the station's writer stubbed out, and no field of the patient moves |
+| S3 | **Every item is answerable** — the whole bank named and treated correctly, all four therapies exercised, ending in a summary that scores both questions per rhythm |
+| S4 | The wrong answers: defibrillating asystole, pacing asystole, an unsynchronized shock on an unstable tachycardia, SYNC armed on VF, declining to shock VF, shocking a normal sinus rhythm — each caught, each told what it should have been |
+| S5 | A wrong name is marked, the right one revealed, the miss recorded, and the item moves on to its therapy anyway |
+| S6 | Pacing answers the current: spikes without capture are not an answer, 60 mA is below threshold, 70 captures at the rate dialled in |
+| S7 | **Nothing scrolls** — five phones, checked before the run, on the naming step, on the therapy step and with the verdict up; and every control clears 44pt by real hit area |
+| S8 | A whole item played by **tapping** on two landscape phones, every tap landing on the key it aimed at |
+| S9 | Portrait says to turn the phone, the unit is `inert` behind the notice so the keyboard cannot reach SHOCK, and nothing scrolls there either |
+| S10 | A teaching card for every key on the page and none for a key that was dropped; learn mode opens the card instead of firing the key |
+| S11 | Nothing that answers or distracts from the question is on the page — ANALYZE included — and the 12-lead renderer and code summary went with the keys that reached them |
+| S12 | The numbers against the LIFEPAK 15 documentation and the 2025 AHA guidelines, including the split on doses: no figure quoted for defibrillation, where the AHA defers to the manufacturer, and the 200 J-or-more figure carried for cardioverting AF or flutter, where it does not |
+| S13 | The bank's clinical shape: at least one rhythm with more than one right answer, VT with three, every item explaining itself and giving the context the answer turns on |
+| S14 | A best score survives a reload; the station runs with `localStorage` throwing |
+| S15 | `?item=` pins the bank to one rhythm, for putting a particular one on the screen |
+| S16 | Reachable from the field guide, the copy describes the station rather than the old case engine, and the cache version is bumped |
+| S17 | **The tracings carry the finding the item asks about** — QRS width the same at 45/min as at 150, VT and a paced beat wide where SVT and a junctional escape are narrow, AF irregularly irregular where sinus is regular, flutter with no isoelectric baseline, complete heart block with more P waves than QRS and not a multiple of them, VF never at baseline |
+| S18 | **A laptop** — four desktop viewports including a 4:3 Toughbook and a half-screen window, and a whole item played with a mouse rather than a finger. Every other scenario runs at 844x390 with touch emulation on, so laptop use was being assumed rather than tested |

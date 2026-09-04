@@ -149,24 +149,48 @@ for (const [label, w, h] of SCREENS) {
   await p.context().close();
 }
 
-/* H5 — the featured trainings sit side by side once there is room for them */
+/* H5 — three featured panels, and they are not equals. The newest takes the
+   full width above the other two, which share the row beneath it; on a phone
+   all three stack. The badge that says "new" belongs to one of them. */
 { const wide = await home(1366, 768);
-  const pos = await wide.locator('.feat-card').evaluateAll(els =>
-    els.map(e => Math.round(e.getBoundingClientRect().top)));
-  ok('H5 both featured panels render', pos.length === 2, JSON.stringify(pos));
-  ok('H5 they share a row on a Toughbook', pos.length === 2 && pos[0] === pos[1], JSON.stringify(pos));
+  const cards = await wide.locator('.feat-card').evaluateAll(els => els.map(e => {
+    const b = e.getBoundingClientRect();
+    return { href: e.getAttribute('href'), top: Math.round(b.top),
+             w: Math.round(b.width), h: Math.round(b.height) };
+  }));
+  ok('H5 all three featured panels render', cards.length === 3, JSON.stringify(cards));
+  const hero = cards.find(c => c.href === 'lifepak-15.html');
+  const rest = cards.filter(c => c !== hero);
+  ok('H5 the newest is the hero', !!hero && cards[0] === hero, JSON.stringify(cards));
+  ok('H5 it takes the full width on a Toughbook',
+     hero && rest.every(c => hero.w > c.w * 1.7), JSON.stringify(cards));
+  ok('H5 it is the tallest of them', hero && rest.every(c => hero.h > c.h), JSON.stringify(cards));
+  ok('H5 the other two share the row underneath it',
+     rest.length === 2 && rest[0].top === rest[1].top && rest[0].top > hero.top,
+     JSON.stringify(cards));
+  ok('H5 nothing overflows sideways',
+     await wide.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+
+  /* One "new" badge. This page already warned against leaving that on
+     something a crew has had for a year, and three at once means none. */
+  const badges = await wide.locator('.feat-badge').allTextContents();
+  ok('H5 exactly one panel claims to be new',
+     badges.filter(t => /new/i.test(t)).length === 1, JSON.stringify(badges));
   await wide.context().close();
 
   const narrow = await home(390, 844);
   const stacked = await narrow.locator('.feat-card').evaluateAll(els =>
     els.map(e => Math.round(e.getBoundingClientRect().top)));
-  ok('H5 they stack on a phone', stacked.length === 2 && stacked[0] !== stacked[1],
-     JSON.stringify(stacked));
+  ok('H5 all three stack on a phone',
+     stacked.length === 3 && new Set(stacked).size === 3, JSON.stringify(stacked));
+  const heroFirst = await narrow.locator('.feat-card').first().getAttribute('href');
+  ok('H5 and the hero is the first thing a crew sees', heroFirst === 'lifepak-15.html', heroFirst);
   await narrow.context().close(); }
 
 /* H6 — the things a crew opens are still one tap away */
 { const p = await home(1366, 768);
   for (const [label, sel] of [
+    ['LIFEPAK 15 sim',   '.feat-card[href="lifepak-15.html"]'],
     ['Alaris training',  '.feat-card[href="alaris-pump.html"]'],
     ['Medication Math',  '.feat-card[href="med-math.html"]'],
     ['dose calculator',  '.qa-tile[data-goto="calc"]'],
