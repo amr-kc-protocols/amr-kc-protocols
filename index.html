@@ -92,7 +92,11 @@ padding:24px 20px 40px;max-width:540px;width:100%}
 border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans)}
 
 /* HEADER */
+/* viewport-fit=cover plus apple-mobile-web-app-capable means an installed
+   copy draws under the status bar, so the header takes the top inset the same
+   way the detail header already does. */
 #hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg);
+padding-top:env(safe-area-inset-top,0px);
 border-bottom:1px solid var(--teal);box-shadow:0 4px 14px rgba(15,23,42,0.10)}
 .ht{display:flex;align-items:center;gap:10px;padding:11px 14px 7px}
 .hbadge{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
@@ -121,14 +125,21 @@ color:var(--gray);font-size:16px;cursor:pointer;display:none;line-height:1;paddi
 /* NAV */
 #nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);
 border-top:1px solid var(--border);display:flex;
+box-shadow:0 -2px 14px rgba(15,23,42,0.06);
 padding-bottom:env(safe-area-inset-bottom,0px)}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
-padding:9px 3px 6px;cursor:pointer;border:none;background:none;
-color:var(--gray);font-size:10px;font-family:var(--sans);transition:color 0.12s;
-border-top:2px solid transparent;letter-spacing:0.01em}
+/* Seven labels share the width of one phone. Given a content-based flex basis
+   they came out unequal, and "Hosp Meds" wrapped onto a second line, which
+   made that one tab taller than its neighbours and knocked the whole row out
+   of alignment. Equal zero-basis columns plus type that scales with the
+   viewport keep every label on one line down to a 320px screen. */
+.nb{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;
+padding:9px 1px 6px;cursor:pointer;border:none;background:none;
+color:var(--gray);font-size:clamp(8px,2.42vw,10px);font-family:var(--sans);transition:color 0.12s;
+border-top:2px solid transparent;letter-spacing:-0.01em;
+white-space:nowrap}
 .nb.on{color:var(--ac,var(--teal2));border-top-color:var(--ac,var(--teal2))}
 .nb-ic{font-size:22px;line-height:1;color:var(--ac,inherit)}
-.nb-home{flex:0 0 60px;border-top:none;padding:0 3px 6px;justify-content:flex-start}
+.nb-home{flex:0 0 clamp(46px,13.5vw,58px);border-top:none;padding:0 1px 6px;justify-content:flex-start}
 .nb-home-circle{width:50px;height:50px;border-radius:50%;background:var(--teal);
 display:flex;align-items:center;justify-content:center;color:#fff;margin-top:-22px;
 box-shadow:0 4px 14px rgba(23,58,104,0.45),0 0 0 4px var(--bg);transition:transform 0.12s,background 0.12s}
@@ -146,7 +157,11 @@ letter-spacing:0.04em;transition:color 0.12s;flex-shrink:0}
 .hlinks{display:flex;gap:6px;align-items:center;margin-left:6px;flex-shrink:0}
 
 /* MAIN */
-#main{padding-top:108px;padding-bottom:68px;min-height:100vh}
+/* The tab bar is 64px plus whatever the home indicator claims, so the bottom
+   pad has to carry the inset too — without it the last row of a list sits
+   under the bar on a notched phone. The top pad is measured from the real
+   header by updatePad(); this is only the pre-script value. */
+#main{padding-top:108px;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));min-height:100vh}
 
 
 /* SECTION LABELS */
@@ -166,6 +181,10 @@ text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:
 color:var(--white);font-family:var(--mono);font-size:18px;font-weight:600;
 padding:8px 10px;width:80px;outline:none;text-align:center;-webkit-appearance:none}
 .ci-inp:focus{border-color:var(--teal)}
+/* The field renders at 18px bold and centred, which made a "kg" placeholder
+   read as an entered value. The unit already sits beside the box, so the
+   placeholder is styled back down to a hint. */
+.ci-inp::placeholder,.ibw-input::placeholder{font-weight:400;font-size:13px;color:var(--gray);opacity:1}
 .ci-inp::-webkit-inner-spin-button,.ci-inp::-webkit-outer-spin-button,
 .ibw-input::-webkit-inner-spin-button,.ibw-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .ci-unit{font-family:var(--mono);font-size:12px;color:var(--gray)}
@@ -182,6 +201,24 @@ font-family:var(--sans);transition:all 0.12s}
 .dose-tbl .dn{color:var(--white);width:52%;line-height:1.4}
 .dose-tbl .dv{font-family:var(--mono);font-weight:700;color:var(--teal2);text-align:right;width:48%;font-size:16px}
 .dose-tbl .dnote{font-size:11px;color:var(--gray);display:block;margin-top:2px;line-height:1.3}
+
+/* ── SIDEWAYS SCROLLERS ───────────────────────────────────────────────
+   Both of these strips scroll horizontally with the scrollbar hidden, so a
+   card or a tab sliced off by the viewport edge read as a rendering fault
+   rather than as "there is more this way". The fades below are painted with
+   background-attachment:local for the two covers and scroll for the two
+   shadows, which means each shadow is only uncovered on the side that still
+   has somewhere to scroll to — no script, and no fade on a strip that fits. */
+.vt-grid,.v6-tabs{
+  background-image:
+    linear-gradient(to right,var(--bg) 42%,rgba(255,255,255,0)),
+    linear-gradient(to left,var(--bg) 42%,rgba(255,255,255,0)),
+    linear-gradient(to right,rgba(15,23,42,0.11),rgba(15,23,42,0)),
+    linear-gradient(to left,rgba(15,23,42,0.11),rgba(15,23,42,0));
+  background-position:left center,right center,left center,right center;
+  background-repeat:no-repeat;
+  background-size:30px 100%,30px 100%,11px 100%,11px 100%;
+  background-attachment:local,local,scroll,scroll}
 
 /* VITAL TARGETS */
 .vt-grid{display:flex;gap:7px;overflow-x:auto;padding:2px 14px 10px;scrollbar-width:none}
@@ -694,6 +731,26 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
   .mast{padding:28px 26px 36px}
   .mast-title{font-size:38px}
   .mast-sub{font-size:14px}
+
+  /* There is room for the whole vital-target strip, so it stops being a
+     scroller holding six of seven cards off-screen and becomes the row it
+     always wanted to be. The fades go with the scrolling. */
+  .vt-grid{flex-wrap:wrap;overflow:visible;background-image:none}
+  .vtc{flex:1 1 128px}
+
+  /* The calculator was a 1180px band containing one input, four chips and a
+     line of placeholder text — the width was carrying nothing. The doses come
+     up beside the controls instead of a screen below them. The four rows are
+     explicit so the controls keep their natural heights in rows 2 and 3 and
+     the dose table's length lands on the 1fr filler, rather than being shared
+     out over the rows the chips sit in. */
+  .calc-card{display:grid;grid-template-columns:minmax(230px,300px) 1fr;
+    grid-template-rows:auto auto auto 1fr;column-gap:26px;align-items:start}
+  .calc-title{grid-column:1/-1;grid-row:1}
+  .calc-inputs{grid-column:1;grid-row:2;margin-bottom:12px}
+  .age-row{grid-column:1;grid-row:3}
+  #calc-out{grid-column:2;grid-row:2/-1;margin-top:0}
+  .calc-empty{padding:8px 0}
 }
 @media (min-width:960px){
   /* The headline takes the full width; the two older trainings share the row
@@ -930,7 +987,7 @@ function renderCalc(){
     h += '<button type="button" class="age-btn' + (AGE===a?' on':'') + '" data-age="'+a+'" aria-pressed="'+(AGE===a)+'">'+labels[a]+'</button>';
   });
   h += '</div>';
-  h += '<div id="calc-out"><div class="calc-empty">Enter weight above</div></div>';
+  h += '<div id="calc-out"><div class="calc-empty">Enter a weight to see doses</div></div>';
   h += '</div>';
 
   // Vital targets strip
@@ -1166,7 +1223,7 @@ function calcDoses(){
   // Clear error style first
   wtEl.style.borderColor = '';
   if(!raw || isNaN(w) || w <= 0){
-    outEl.innerHTML='<div class="calc-empty">Enter weight above</div>';
+    outEl.innerHTML='<div class="calc-empty">Enter a weight to see doses</div>';
     return;
   }
   if(w < 0.5){

@@ -215,6 +215,135 @@ for (const [label, w, h] of SCREENS) {
      (sw.match(/amrkc-2026-v\d+/) || [])[0]);
   ok('H7 the homepage is still precached', /'\.\/index\.html'/.test(sw)); }
 
+/* H8 — the tab bar. Seven labels share the width of one phone, and a label
+   that wraps makes its tab taller than the six beside it, which knocks the
+   whole row out of line. Nothing may wrap and nothing may be cut off, down to
+   the narrowest screen the guide is opened on. */
+for (const [label, w] of [['320', 320], ['360', 360], ['390', 390], ['430', 430]]) {
+  const p = await home(w, 844);
+  const tabs = await p.evaluate(() => [...document.querySelectorAll('#nav .nb')].map(n => {
+    // Measure the label itself. On six tabs it is a bare text node beside the
+    // icon; on the home key it is a span under the raised circle.
+    const t = [...n.childNodes].find(c =>
+      (c.nodeType === 3 && c.textContent.trim()) ||
+      (c.nodeType === 1 && !c.classList.contains('nb-ic')
+                        && !c.classList.contains('nb-home-circle')
+                        && c.textContent.trim()));
+    const r = document.createRange(); r.selectNodeContents(t);
+    const rects = [...r.getClientRects()];
+    const cs = getComputedStyle(n);
+    const inner = n.getBoundingClientRect().width
+                - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return { label: t.textContent.trim(), lines: rects.length,
+             text: rects[0] ? rects[0].width : 0, inner };
+  }));
+  ok(`H8 phone ${label}: every tab label stays on one line`,
+     tabs.every(t => t.lines === 1),
+     tabs.filter(t => t.lines !== 1).map(t => t.label).join(','));
+  ok(`H8 phone ${label}: no tab label is cut off`,
+     tabs.every(t => t.text <= t.inner + 0.5),
+     tabs.filter(t => t.text > t.inner + 0.5)
+         .map(t => `${t.label} ${t.text.toFixed(1)}>${t.inner.toFixed(1)}`).join(','));
+
+  // The home key is lifted above the bar on a negative margin. Clipping its
+  // tab to contain a label would slice the circle in half.
+  const circle = await p.evaluate(() => {
+    const c = document.querySelector('.nb-home-circle');
+    const b = c.getBoundingClientRect();
+    const nav = document.getElementById('nav').getBoundingClientRect();
+    return { top: b.top, h: b.height, navTop: nav.top,
+             clip: getComputedStyle(c.parentElement).overflow };
+  });
+  ok(`H8 phone ${label}: the home key is not clipped by its tab`,
+     circle.clip === 'visible' && circle.top < circle.navTop,
+     `overflow=${circle.clip} top=${Math.round(circle.top)} navTop=${Math.round(circle.navTop)}`);
+  await p.context().close();
+}
+
+/* H9 — insets. An installed copy draws under the status bar and over the home
+   indicator, so the fixed chrome has to take both. The detail header already
+   did; the main header and the content pad did not. */
+{ const src = await readFile(join(ROOT, 'index.html'), 'utf8');
+  const rule = (sel) => {
+    const m = src.match(new RegExp('\\n' + sel.replace(/[#.]/g, '\\$&') + '\\{[^}]*\\}'));
+    return m ? m[0] : '';
+  };
+  ok('H9 the fixed header takes the top inset',
+     /env\(safe-area-inset-top/.test(rule('#hdr')), rule('#hdr').slice(0, 120));
+  ok('H9 content clears the home indicator as well as the tab bar',
+     /padding-bottom:calc\([^)]*env\(safe-area-inset-bottom/.test(rule('#main')),
+     rule('#main').slice(0, 160));
+  ok('H9 the tab bar still takes the bottom inset',
+     /env\(safe-area-inset-bottom/.test(rule('#nav'))); }
+
+/* H10 — the sideways-scrolling strips say that they scroll. The scrollbar is
+   hidden on both, so a card sliced by the viewport edge read as a rendering
+   fault rather than as "there is more this way". */
+{ const p = await home(390, 844);
+  await p.click('.nb[data-tab="calc"]'); await p.waitForTimeout(400);
+  const vt = await p.evaluate(() => {
+    const g = document.querySelector('.vt-grid'); const cs = getComputedStyle(g);
+    return { scrolls: g.scrollWidth > g.clientWidth + 1,
+             layers: (cs.backgroundImage.match(/linear-gradient\(/g) || []).length,
+             attach: cs.backgroundAttachment,
+             padLeft: parseFloat(cs.paddingLeft),
+             scrollLeft: g.scrollLeft };
+  });
+  ok('H10 the vital-target strip does scroll on a phone', vt.scrolls);
+  ok('H10 and it is painted with edge fades', vt.layers === 4, vt.layers + ' layers');
+  ok('H10 the fades are local/scroll, so each shows only where there is more',
+     /local, *local, *scroll, *scroll/.test(vt.attach), vt.attach);
+  // Nothing may auto-scroll the strip off its own left padding on load.
+  ok('H10 the strip starts at its first card, not past it', vt.scrollLeft === 0, vt.scrollLeft);
+
+  await p.click('.nb[data-tab="vent"]'); await p.waitForTimeout(400);
+  const tabsBg = await p.evaluate(() => {
+    const t = document.querySelector('.v6-tabs'); const cs = getComputedStyle(t);
+    return { scrolls: t.scrollWidth > t.clientWidth + 1,
+             layers: (cs.backgroundImage.match(/linear-gradient\(/g) || []).length };
+  });
+  ok('H10 the ventilator tab strip scrolls too', tabsBg.scrolls);
+  ok('H10 and carries the same fades', tabsBg.layers === 4, tabsBg.layers + ' layers');
+  await p.context().close(); }
+
+/* H11 — the dose calculator on the screen it is opened on. On a Toughbook it
+   was a 1180px band holding one input, four chips and a line of placeholder
+   text, with the doses a screen below. The width now carries the doses. */
+for (const [label, w, h] of SCREENS) {
+  const p = await home(w, h);
+  await p.click('.nb[data-tab="calc"]'); await p.waitForTimeout(400);
+  await p.fill('#wt', '80'); await p.waitForTimeout(500);
+  const m = await p.evaluate(() => {
+    const box = (s) => { const e = document.querySelector(s); if (!e) return null;
+      const b = e.getBoundingClientRect();
+      return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }; };
+    return { inputs: box('.calc-inputs'), chips: box('.age-row'), out: box('#calc-out'),
+             chipCount: document.querySelectorAll('.age-btn').length,
+             rows: document.querySelectorAll('.dose-tbl tr').length,
+             vtScroll: (() => { const g = document.querySelector('.vt-grid');
+               return g ? g.scrollWidth - g.clientWidth : -1; })(),
+             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+  });
+  ok(`H11 ${label}: doses render for the weight`, m.rows > 5, m.rows + ' rows');
+  ok(`H11 ${label}: the age chips survive the layout`, m.chipCount === 4, m.chipCount + ' chips');
+  ok(`H11 ${label}: the chips sit under the weight, not on top of it`,
+     m.chips.y >= m.inputs.y + m.inputs.h - 1 && m.chips.x === m.inputs.x,
+     JSON.stringify({ inputs: m.inputs, chips: m.chips }));
+  ok(`H11 ${label}: no sideways scroll`, m.overflow <= 0, 'overflow=' + m.overflow);
+  if (w >= 760) {
+    ok(`H11 ${label}: the doses come up beside the controls`,
+       m.out.x > m.inputs.x + m.inputs.w && m.out.y <= m.inputs.y + 2,
+       JSON.stringify({ inputs: m.inputs, out: m.out }));
+    ok(`H11 ${label}: the vital targets stop being a scroller`,
+       m.vtScroll <= 0, 'overflow=' + m.vtScroll);
+  } else {
+    ok(`H11 ${label}: the doses stack under the controls`,
+       m.out.y > m.chips.y, JSON.stringify({ chips: m.chips, out: m.out }));
+  }
+  ok(`H11 ${label}: no errors`, p._errs.length === 0, p._errs.join('|'));
+  await p.context().close();
+}
+
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));
 await browser.close(); srv.close();
