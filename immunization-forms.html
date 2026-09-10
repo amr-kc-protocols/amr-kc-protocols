@@ -729,10 +729,14 @@ var FORMS={
       }
 
       // Section II
+      // Q1 is check-all-that-apply on the sheet — it carries no Yes/No boxes,
+      // so nothing is derived for the answer column. A derived "Yes" counted
+      // N/A as a condition and printed "Yes" beside "diagnosed with a chronic
+      // condition" for an employee who had said none of them applied. The
+      // list underneath is the answer.
       var conds=checkedVals('ppd-cond');
-      var i2=[{q:'1. Have you been diagnosed with a chronic condition that may impair your immune system?',
-               a:conds.length?'Yes':'None checked'},
-              {list:'Conditions checked',items:conds}];
+      var i2=[{q:'1. Have you been diagnosed with a chronic condition that may impair your immune system?',a:''},
+              {list:'Conditions checked',items:conds,empty:'None checked'}];
       TB_QUESTIONS.filter(function(q){return q.sec==='Section II' && q.n>1;}).forEach(function(q){
         i2.push({q:q.n+'. '+q.text,a:pick(q.grp)});
       });
@@ -897,7 +901,7 @@ function buildPdf(st){
       doc.setDrawColor(225,229,238); doc.line(m,y,W-m,y); y+=13;
       sec.items.forEach(function(it){
         if(it.list!==undefined){
-          var txt=(it.items&&it.items.length)?it.items.join(' \u00B7 '):'None reported';
+          var txt=(it.items&&it.items.length)?it.items.join(' \u00B7 '):(it.empty||'None reported');
           doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(90,96,110);
           ensure(16); doc.text(it.list.toUpperCase(),m+14,y); y+=11;
           doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(20,34,56);

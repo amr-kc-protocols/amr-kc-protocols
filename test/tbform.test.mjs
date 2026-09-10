@@ -300,6 +300,72 @@ const CONDITIONS = ["Chronic steroid use", "Crohn’s disease", "HIV infection",
   check("T6 no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
+/* T6b — Section II Q1 is check-all-that-apply, and prints as one.
+   The sheet carries no Yes/No boxes on it, so nothing may be derived for the
+   answer column. A derived "Yes" counted N/A as a condition and printed "Yes"
+   beside "diagnosed with a chronic condition" for an employee who had said
+   none of them applied — a false positive on a medical screening record. */
+{ const p = await open(true);
+  await p.click(".pick-card.ppd"); await p.waitForSelector("#ppd-name");
+  await p.fill("#ppd-name", "Jordan Jones");
+  await p.fill("#ppd-empid", "19959195");
+  await answerAll(p, "No");
+  await box(p, "ppd-cond", "N/A");
+  await p.click('.opt-row:has(input[value="decline"])');
+  await sign(p, "ppd-sig");
+  await p.click("#f-share"); await p.waitForTimeout(600);
+
+  const lines = await p.evaluate(() => window.__pdf.text);
+  const q1 = lines.findIndex((l) => /diagnosed with a chronic condition/.test(l));
+  check("T6b Section II Q1 reaches the PDF", q1 !== -1, lines.join("|").slice(0, 200));
+  // The renderer draws the answer as its own text call right after the
+  // question, so a Yes or No for this question would sit in the next line.
+  const after = lines.slice(q1 + 1, q1 + 3).join(" ");
+  check("T6b it carries no derived Yes", !/\bYes\b/.test(after), after);
+  check("T6b and no derived No either", !/\bNo\b/.test(after), after);
+  check("T6b what it does carry is the selection", /CONDITIONS CHECKED/.test(after), after);
+  check("T6b which is N/A", /N\/A/.test(lines.slice(q1 + 1, q1 + 4).join(" ")),
+    lines.slice(q1 + 1, q1 + 4).join(" "));
+  // The evaluation already filtered N/A, and must keep doing so.
+  const text = lines.join("\n");
+  check("T6b N/A alone still reads as a clear screen",
+    /“No” selected in Sections I and II/.test(text) && !/Tb evaluation required/.test(text),
+    text.slice(0, 200));
+  check("T6b the Yes/No questions still print their answers",
+    /Have you ever received the BCG vaccine\?/.test(text) && lines.includes("No"),
+    text.slice(0, 200));
+  check("T6b no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* T6c — a real condition still prints, and nothing checked says so plainly */
+{ const p = await open(true);
+  await p.click(".pick-card.ppd"); await p.waitForSelector("#ppd-name");
+  await p.fill("#ppd-name", "Dana Wu");
+  await answerAll(p, "No");
+  await box(p, "ppd-cond", "HIV infection");
+  await box(p, "ppd-cond", "Organ transplant");
+  await p.click('.opt-row:has(input[value="decline"])');
+  await sign(p, "ppd-sig");
+  await p.click("#f-share"); await p.waitForTimeout(600);
+  let text = (await p.evaluate(() => window.__pdf.text)).join("\n");
+  check("T6c both checked conditions are listed",
+    /HIV infection/.test(text) && /Organ transplant/.test(text), text.slice(0, 200));
+  check("T6c and they still require an evaluation", /Tb evaluation required/.test(text));
+  await p.context().close();
+
+  const q = await open(true);
+  await q.click(".pick-card.ppd"); await q.waitForSelector("#ppd-name");
+  await q.fill("#ppd-name", "Lee Park");
+  await answerAll(q, "No");
+  await q.click('.opt-row:has(input[value="decline"])');
+  await sign(q, "ppd-sig");
+  await q.click("#f-share"); await q.waitForTimeout(600);
+  text = (await q.evaluate(() => window.__pdf.text)).join("\n");
+  check("T6c nothing checked reads as None checked", /None checked/.test(text), text.slice(0, 200));
+  check("T6c and is not asserted as none reported", !/None reported/.test(text.split("Conditions")[1] || ""));
+  check("T6c no errors", q._errs.length === 0, q._errs.join("|"));
+  await q.context().close(); }
+
 /* T7 — the acceptance path, and the clinic record that only it collects */
 { const p = await open(true);
   await p.click(".pick-card.ppd"); await p.waitForSelector("#ppd-name");
