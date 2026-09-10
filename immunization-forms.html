@@ -100,6 +100,22 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 
 .chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5}
 .chk input{margin-top:2px;width:18px;height:18px;flex-shrink:0;accent-color:var(--teal2)}
+.chk-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:520px){.chk-grid.two{grid-template-columns:1fr 1fr;column-gap:18px}}
+
+/* A numbered question and the controls that answer it. The rule separates one
+   question from the next, so it hangs on the gap rather than on every .qa —
+   the first one sits under the card label, which draws its own. */
+.qa+.qa{border-top:1px solid var(--border);margin-top:14px;padding-top:14px}
+.qa-q{display:flex;gap:8px;font-size:13px;line-height:1.5;margin-bottom:9px}
+.qa-n{font-weight:700;color:var(--teal2);flex-shrink:0}
+/* "If yes" detail, the symptom list, the accept/decline statements: shown
+   only once the answer that calls for them has been chosen. */
+.reveal{display:none}
+.reveal.on{display:block}
+.sub{margin-top:10px}
+.notice-ok{background:var(--correct-bg);border-color:#b7e3c6;color:#14663a}
+.notice-mute{background:var(--surface2);border-color:var(--border);color:var(--gray);font-weight:500}
 
 /* SIGNATURE */
 .sig-wrap{margin-top:6px}
@@ -124,7 +140,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
   <div class="hdr-logo">KC</div>
   <div class="hdr-txt">
     <div class="hdr-title" id="hdr-title">Health &amp; Immunization Forms</div>
-    <div class="hdr-sub">AMR Kansas City &middot; Sign &amp; download</div>
+    <div class="hdr-sub">AMR Kansas City &middot; Sign &amp; send</div>
   </div>
   <a class="hdr-back" id="hdr-back" href="index.html">&#x2190; Field Guide</a>
 </div>
@@ -134,7 +150,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
   <!-- HOME -->
   <div id="screen-home">
     <div class="home-intro">
-      Complete, sign, and download any of the forms below as a <strong>PDF</strong> you can email to your supervisor or HR. The form is filled out and signed <strong>on this device only</strong> &mdash; nothing you enter (including SSN or date of birth) is uploaded or transmitted anywhere.
+      Complete and sign any of the forms below, then <strong>send the PDF straight from your phone</strong> &mdash; email, text, or wherever your supervisor and HR want it. The form is filled out and signed <strong>on this device only</strong>; nothing you enter (including SSN or date of birth) is uploaded or transmitted anywhere.
     </div>
     <button class="pick-card flu" onclick="openForm('flu')">
       <span class="pick-ico">&#x1F489;</span>
@@ -148,7 +164,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
     </button>
     <button class="pick-card ppd" onclick="openForm('ppd')">
       <span class="pick-ico">&#x1F9EA;</span>
-      <span class="pick-body"><span class="pick-t">TB / PPD Skin Test</span><span class="pick-s">Mantoux acceptance or declination statement</span></span>
+      <span class="pick-body"><span class="pick-t">TB Risk &amp; Symptom Assessment</span><span class="pick-s">SR100.21.1 Appendix A &mdash; screening, risk, and Mantoux acceptance / declination</span></span>
       <span class="pick-arr">&#x203A;</span>
     </button>
     <button class="pick-card fit" onclick="openForm('fit')">
@@ -167,9 +183,10 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
     <div class="form-src" id="f-src"></div>
     <div id="f-body"></div>
     <div class="status" id="f-status"></div>
-    <button class="btn" id="f-submit">Download Signed PDF</button>
+    <button class="btn hidden" id="f-share">Send signed PDF &mdash; email or text</button>
+    <button class="btn" id="f-submit" style="margin-top:10px">Download signed PDF</button>
     <button class="btn secondary" id="f-back" style="margin-top:10px">&#x2190; Choose a different form</button>
-    <div class="privacy">Generated on your device. Nothing is uploaded. Save or email the PDF to your supervisor / HR.</div>
+    <div class="privacy">The PDF is built on your device and handed straight to your own mail or messaging app. Nothing is uploaded to us at any point.</div>
   </div>
 
 </div>
@@ -219,6 +236,90 @@ function fieldRow(fields){ // fields: [{id,label,req,ph,type,half}]
     return '<div class="field"><label>'+f.label+(f.req?' <span class="req">*</span>':'')+'</label>'+
       '<input class="input" id="'+f.id+'" type="'+(f.type||'text')+'" placeholder="'+(f.ph||'')+'" '+(f.val?('value="'+f.val+'"'):'')+'></div>';
   }).join('')+'</div>';
+}
+
+// ── SR100.21.1 APPENDIX A DATA ────────────────────────────────────────────
+// Verbatim from the sheet, including its own spelling of the condition list.
+var TB_SYMPTOMS=['Cough >3 weeks','Productive cough','Coughing up blood (hemoptysis)',
+  'Night sweats','Unexplained weight loss / loss of appetite','Chest pain',
+  'Fatigue, lethargy, or weakness','Low body weight (>10% below Ideal Body Weight)'];
+var TB_CONDITIONS=['Chronic steroid use','Crohn\u2019s disease','HIV infection',
+  'Rheumatoid arthritis','Organ transplant','Kidney disease',
+  'Diabetes mellitus','Leukemia, lymphoma, Hodgkin\u2019s','N/A'];
+// The questions that carry a Yes/No, in the order the sheet asks them. Section
+// III reads this list, and so does the check for an unanswered question.
+var TB_QUESTIONS=[
+  {sec:'Section I', n:1, grp:'ppd-i1',  text:'Do you have a history of tuberculosis, latent TB infection, or treatment for tuberculosis?'},
+  {sec:'Section I', n:2, grp:'ppd-i2',  text:'Do you currently have any of the following symptoms?'},
+  {sec:'Section II',n:1, grp:null,      text:'Have you been diagnosed with a chronic condition that may impair your immune system?'},
+  {sec:'Section II',n:2, grp:'ppd-ii2', text:'Are you currently in close contact with someone who has or is suspected of having Tb?'},
+  {sec:'Section II',n:3, grp:'ppd-ii3', text:'Have you previously resided, worked, or volunteered in a correctional facility or homeless shelter?'},
+  {sec:'Section II',n:4, grp:'ppd-ii4', text:'Have you lived for two months or more in Africa, Asia, or Latin America in the last 5 years?'},
+  {sec:'Section II',n:5, grp:'ppd-ii5', text:'Have you ever had contact with a person known to have active tuberculosis infection?'},
+  {sec:'Section II',n:6, grp:'ppd-ii6', text:'Have you ever received the BCG vaccine?'},
+  {sec:'Section II',n:7, grp:'ppd-ii7', text:'Have you ever had a positive (reactive) Tb skin test?'}
+];
+
+var TB_EVAL_PROMPT='Answer every question in Sections I and II to see the evaluation.';
+
+// A numbered question with its answer controls underneath it.
+function qa(n,question,bodyHtml){
+  return '<div class="qa"><div class="qa-q"><span class="qa-n">'+n+'.</span><span>'+question+'</span></div>'+bodyHtml+'</div>';
+}
+// Checkbox group. Values are read back by group name, not by element id.
+function checks(group,opts,cls){
+  return '<div class="chk-grid'+(cls?' '+cls:'')+'">'+opts.map(function(o){
+    return '<label class="chk"><input type="checkbox" data-group="'+group+'" value="'+o.replace(/"/g,'&quot;')+'"><span>'+o+'</span></label>';
+  }).join('')+'</div>';
+}
+function ppdExclusiveNA(el){
+  var boxes=[].slice.call(document.querySelectorAll('input[data-group="ppd-cond"]'));
+  var na=boxes.filter(function(b){return b.value==='N/A';})[0];
+  if(!na) return;
+  if(el===na){ if(na.checked) boxes.forEach(function(b){ if(b!==na) b.checked=false; }); }
+  else if(el.checked){ na.checked=false; }
+}
+function checkedVals(group){
+  return [].slice.call(document.querySelectorAll('input[data-group="'+group+'"]:checked'))
+    .map(function(e){return e.value;});
+}
+// The "if yes" blocks, and the symptom list, only appear once Yes is chosen.
+function ppdReveals(){
+  [['rev-ppd-i1','ppd-i1'],['rev-ppd-i2','ppd-i2'],['rev-ppd-ii7','ppd-ii7']].forEach(function(r){
+    var el=document.getElementById(r[0]);
+    if(el) el.classList.toggle('on', pick(r[1])==='Yes');
+  });
+}
+// Section III. "Yes" to any question in Section I or II — or any immune
+// condition other than N/A — means a Tb evaluation is required. N/A is on the
+// condition list as the way to say "none of these", so it is not a risk.
+function ppdEvaluate(){
+  var flags=[];
+  TB_QUESTIONS.forEach(function(q){
+    if(q.grp && pick(q.grp)==='Yes') flags.push(q.sec+' Q'+q.n);
+  });
+  var conds=checkedVals('ppd-cond').filter(function(c){return c!=='N/A';});
+  if(conds.length) flags.push('Section II Q1');
+  var answered=TB_QUESTIONS.filter(function(q){return q.grp;}).every(function(q){return !!pick(q.grp);});
+  var ev;
+  if(flags.length){
+    ev={risk:true, headline:'\u201CYes\u201D answers in Sections I or II \u2014 Tb evaluation required.',
+        bullets:['Please contact your immediate supervisor for further instructions.',
+                 'Flagged by: '+flags.join(', ')+'.']};
+  } else if(answered){
+    ev={risk:false, headline:'\u201CNo\u201D selected in Sections I and II.',
+        bullets:['New employees will receive a TB Test unless the employee is a known previous positive or can produce official documentation of a negative test or chest x-ray from another employer within the past 365 days.',
+                 'Existing employees = no annual TB Test is required.']};
+  } else {
+    ev={risk:null, headline:TB_EVAL_PROMPT, bullets:[]};
+  }
+  var box=document.getElementById('ppd-eval');
+  if(box){
+    box.className = ev.risk===true ? 'notice notice-strong' : (ev.risk===false ? 'notice notice-ok' : 'notice notice-mute');
+    box.innerHTML='<div style="font-weight:700;margin-bottom:'+(ev.bullets.length?'6px':'0')+'">'+ev.headline+'</div>'+
+      (ev.bullets.length?('<ul style="margin:0 0 0 16px;font-weight:500">'+ev.bullets.map(function(b){return '<li style="margin-bottom:4px">'+b+'</li>';}).join('')+'</ul>'):'');
+  }
+  return ev;
 }
 
 var FORMS={
@@ -483,69 +584,190 @@ var FORMS={
       };
     }
   },
-  // ──────────────────────────────────────────────────────────────── PPD
+  // ──────────────────────────────────────────────────────────────── TB
+  // Reproduces GMR SR100.21.1 Appendix A, "TB Risk & Symptom Assessment"
+  // (Revision 02, 18 JUN 2025). The demographics block, the seven risk
+  // questions, the symptom list, the immune-condition list and the two
+  // Section III outcomes are taken verbatim from that sheet.
+  //
+  // Section IV is not on the paper sheet. It is the Mantoux acceptance /
+  // declination this form carried before, kept because Section III sends a
+  // clear screen to a TB test and OSHA's 1997 interpretation letter still
+  // lets an employee decline one in writing. Nothing else was invented.
   ppd:{
-    title:'Mantoux Skin Test (PPD) — TB Acceptance / Declination',
-    src:'AMR TB Exposure Prevention &amp; Skin Testing Policy &middot; v1.2 (Eff. 10/31/2017) &middot; SRM #1215',
+    file:'TB_RISK',
+    title:'TB Risk &amp; Symptom Assessment',
+    src:'GMR SR100.21.1 &middot; Appendix A &middot; Revision 02 (18 JUN 2025)',
     render:function(){
       return ''+
-      '<div class="card"><div class="card-lbl">Employee Information</div>'+
-        fieldRow([{id:'ppd-name',label:'Print Name',req:true}])+
-        fieldRow([{id:'ppd-ssn',label:'Social Security #',ph:'___-__-____'}])+
-        '<div class="hint">OSHA requires social security numbers on this medical record.</div>'+
-      '</div>'+
-      '<div class="card"><div class="card-lbl">Notice</div><div class="statement fine">'+
-        '<p>Tuberculosis (TB) poses an occupational health threat. While TB is usually treatable, some forms are multi-drug resistant (MDR-TB). This disease is an airborne pathogen and is spread from one person to another through the air.</p>'+
-        '<p>To protect yourself, use an N-95 respirator that you were fit tested for. Also, get a Mantoux skin test for early detection of the disease. Paramedics, EMTs and Transportation Service Personnel should receive a Mantoux test every year.</p>'+
-        '<p>According to OSHA&rsquo;s Standard Interpretation Letter dated September 23, 1997, &ldquo;OSHA does not require that employees participate in TB skin testing.&rdquo; If you decline the offer, you must sign the declination statement below.</p>'+
+      '<div class="card"><div class="card-lbl">Purpose of Form</div><div class="statement fine">'+
+        '<p>The TB Risk Assessment Form is a tool to assess and document TB symptoms and/or risk factors. This form is used to assess your previous exposure risk to tuberculosis (Tb) and to help guide decision making in the event your Tb skin test has been positive.</p>'+
       '</div></div>'+
-      '<div class="card"><div class="card-lbl">Choose one <span style="color:var(--wrong)">*</span></div>'+
+
+      '<div class="card"><div class="card-lbl">Employee Demographics</div>'+
+        fieldRow([{id:'ppd-date',label:'Date',req:true,val:today()}])+
+        fieldRow([{id:'ppd-name',label:'Name',req:true},{id:'ppd-empid',label:'Employee ID'}])+
+        fieldRow([{id:'ppd-email',label:'Email',type:'email'},{id:'ppd-phone',label:'Contact Phone',type:'tel'}])+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Section I &mdash; Screen for TB Symptoms</div>'+
+        qa(1,'Do you have a history of tuberculosis, latent TB infection, or treatment for tuberculosis?',
+          chips('ppd-i1',['Yes','No'])+
+          '<div class="reveal sub" id="rev-ppd-i1">'+
+            fieldRow([{id:'ppd-i1-when',label:'If yes, when (date)'},{id:'ppd-i1-reg',label:'Regimen'}])+
+            fieldRow([{id:'ppd-i1-dur',label:'Duration of Rx'},{id:'ppd-i1-cxr',label:'Date of last chest x-ray'}])+
+          '</div>')+
+        qa(2,'Do you currently have any of the following symptoms?',
+          chips('ppd-i2',['Yes','No'])+
+          '<div class="hint">If no, skip to Section II.</div>'+
+          '<div class="reveal sub" id="rev-ppd-i2">'+ checks('ppd-sym',TB_SYMPTOMS) +'</div>')+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Section II &mdash; Assess Risk for Acquiring or Developing Tb</div>'+
+        qa(1,'Have you been diagnosed with a chronic condition that may impair your immune system?',
+          '<div class="hint" style="margin-bottom:8px">Check all that apply.</div>'+
+          checks('ppd-cond',TB_CONDITIONS,'two'))+
+        qa(2,'Are you currently in close contact with someone who has or is suspected of having Tb?',
+          chips('ppd-ii2',['Yes','No']))+
+        qa(3,'Have you previously resided, worked, or volunteered in a correctional facility or homeless shelter?',
+          chips('ppd-ii3',['Yes','No']))+
+        qa(4,'Have you lived for two months or more in Africa, Asia, or Latin America in the last 5 years?',
+          chips('ppd-ii4',['Yes','No']))+
+        qa(5,'Have you ever had contact with a person known to have active tuberculosis infection?',
+          chips('ppd-ii5',['Yes','No']))+
+        qa(6,'Have you ever received the BCG vaccine?',
+          chips('ppd-ii6',['Yes','No']))+
+        qa(7,'Have you ever had a positive (reactive) Tb skin test?',
+          chips('ppd-ii7',['Yes','No'])+
+          '<div class="reveal sub" id="rev-ppd-ii7">'+
+            fieldRow([{id:'ppd-ii7-when',label:'If yes, when (date)'},{id:'ppd-ii7-mm',label:'Size of induration (mm)'}])+
+          '</div>')+
+      '</div>'+
+
+      // Section III is a pure function of the answers above — the sheet has an
+      // assessor tick one of two boxes, and getting that wrong is the one
+      // error on this form that changes what happens to the employee. So it
+      // is computed and shown live rather than left as a box to tick.
+      '<div class="card"><div class="card-lbl">Section III &mdash; Screening and Risk Assessment Evaluation</div>'+
+        '<div id="ppd-eval" class="notice notice-mute"><div style="font-weight:700">'+TB_EVAL_PROMPT+'</div></div>'+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Section IV &mdash; Mantoux Skin Test (PPD) <span style="color:var(--wrong)">*</span></div>'+
+        '<div class="statement fine" style="margin-bottom:12px">'+
+          '<p>Tuberculosis is an airborne pathogen and poses an occupational health threat; some forms are multi-drug resistant (MDR-TB). Use an N-95 respirator you were fit tested for, and get a Mantoux skin test for early detection. Paramedics, EMTs and Transportation Service Personnel should receive a Mantoux test every year.</p>'+
+          '<p>According to OSHA&rsquo;s Standard Interpretation Letter dated September 23, 1997, &ldquo;OSHA does not require that employees participate in TB skin testing.&rdquo; If you decline the offer, you must sign the declination below.</p>'+
+        '</div>'+
         ppdOpt('accept','I ACCEPT the offer for a free Mantoux Skin Test.')+
         ppdOpt('decline','I DECLINE the offer at this time.')+
-      '</div>'+
-      '<div class="card" id="ppd-accept-card"><div class="card-lbl">Acceptance Statement</div><div class="statement fine">'+
-        '<p>I accept the offer for free Mantoux Skin Test. The Mantoux is administered using intermediate tuberculin purified protein derivative (PPD). I understand that the test occurs in two visits. During the first visit, a small injection is made in the arm. A second visit is scheduled for 48 to 72 hours later. During the second visit, the PPD plant is examined and interpreted, and the results are documented.</p>'+
-        '<p>I consent to having the PPD planted during the first visit. I agree that I&rsquo;m responsible for attending the second visit, as scheduled. I recognize that failure to attend the second visit precludes the opportunity to document test results.</p>'+
+        '<div class="reveal sub" id="ppd-accept-card"><div class="statement fine">'+
+          '<p>The Mantoux is administered using intermediate tuberculin purified protein derivative (PPD). I understand the test occurs in two visits: a small injection is made in the arm, and a second visit is scheduled 48 to 72 hours later, at which the site is examined, interpreted and documented.</p>'+
+          '<p>I consent to having the PPD planted during the first visit. I agree that I&rsquo;m responsible for attending the second visit, as scheduled. I recognize that failure to attend the second visit precludes the opportunity to document test results.</p>'+
         '</div>'+
-        fieldRow([{id:'ppd-accdate',label:'Date',val:today()}])+
-        sigBlock('ppd-accsig','Employee Signature (acceptance)')+
         '<div class="card-lbl" style="margin-top:16px">For Clinic / Administrator Use (optional)</div>'+
         fieldRow([{id:'ppd-mfr',label:'PPD Manufacturer'},{id:'ppd-lot',label:'Lot Number'}])+
-        fieldRow([{id:'ppd-planted',label:'1st Visit — Date Planted'},{id:'ppd-site',label:'Site'}])+
+        fieldRow([{id:'ppd-planted',label:'1st Visit &mdash; Date Planted'},{id:'ppd-site',label:'Site'}])+
         fieldRow([{id:'ppd-plantedby',label:'Planted by'}])+
-        fieldRow([{id:'ppd-examdate',label:'2nd Visit — Date Examined'},{id:'ppd-results',label:'Results'}])+
+        fieldRow([{id:'ppd-examdate',label:'2nd Visit &mdash; Date Examined'},{id:'ppd-results',label:'Results'}])+
         fieldRow([{id:'ppd-interpby',label:'Interpreted by'}])+
-      '</div>'+
-      '<div class="card" id="ppd-decline-card"><div class="card-lbl">Declination Statement</div><div class="statement fine">'+
-        '<p>Thank you for offering me a free Mantoux Skin (PPD) test. However, I decline the offer at this time. I will notify a supervisor if I decide to change my mind at a later date.</p>'+
         '</div>'+
-        fieldRow([{id:'ppd-decdate',label:'Date',val:today()}])+
-        sigBlock('ppd-decsig','Employee Signature (declination)')+
+        '<div class="reveal sub" id="ppd-decline-card"><div class="statement fine">'+
+          '<p>Thank you for offering me a free Mantoux Skin (PPD) test. However, I decline the offer at this time. I will notify a supervisor if I decide to change my mind at a later date.</p>'+
+        '</div></div>'+
+      '</div>'+
+
+      '<div class="card"><div class="card-lbl">Employee Attestation</div>'+
+        '<div class="statement fine" style="margin-bottom:12px">'+
+          '<p>I certify that the answers I have given in Sections I and II are true and complete to the best of my knowledge, and that the choice recorded in Section IV is mine.</p>'+
+        '</div>'+
+        sigBlock('ppd-sig','Employee Signature')+
       '</div>';
     },
-    init:function(){ setupSig('ppd-accsig'); setupSig('ppd-decsig'); togglePpd(); },
+    init:function(){
+      setupSig('ppd-sig');
+      // Every answer can move Section III, so re-evaluate on any change. The
+      // listener goes on #f-body, whose markup openForm replaces but whose
+      // element it does not — so it is attached once, not once per open.
+      var body=document.getElementById('f-body');
+      if(!body.__ppdWired){
+        body.__ppdWired=true;
+        body.addEventListener('change',function(e){
+          if(CURRENT!=='ppd') return;
+          if(e.target && e.target.getAttribute('data-group')==='ppd-cond') ppdExclusiveNA(e.target);
+          togglePpd(); ppdReveals(); ppdEvaluate();
+        });
+      }
+      togglePpd(); ppdReveals(); ppdEvaluate();
+    },
     collect:function(st){
       var name=val('ppd-name');
-      var choice=(document.querySelector('input[name="ppd-choice"]:checked')||{}).value;
-      if(!name){return err(st,'Print name is required.');}
-      if(!choice){return err(st,'Please choose Accept or Decline.');}
-      var info=[['Print Name',name],['Social Security #',val('ppd-ssn')||'—']];
-      var statements=[]; var sigs=[];
-      if(choice==='accept'){
-        var accsig=sigDataURL('ppd-accsig'); if(!accsig){return err(st,'Please sign the acceptance statement.');}
-        statements.push('ACCEPTANCE: I accept the offer for a free Mantoux Skin Test (intermediate tuberculin PPD). I understand the test occurs in two visits (injection, then read at 48-72 hours). I consent to the PPD being planted at the first visit, agree I am responsible for attending the scheduled second visit, and recognize that failing to attend precludes documenting the result.');
-        var clinic=[['PPD Manufacturer',val('ppd-mfr')],['Lot Number',val('ppd-lot')],['1st Visit Date Planted',val('ppd-planted')],['Site',val('ppd-site')],['Planted by',val('ppd-plantedby')],['2nd Visit Date Examined',val('ppd-examdate')],['Results',val('ppd-results')],['Interpreted by',val('ppd-interpby')]].filter(function(r){return r[1];});
-        info=info.concat(clinic);
-        sigs.push(['Employee Signature (Acceptance)',accsig,val('ppd-accdate')]);
-      } else {
-        var decsig=sigDataURL('ppd-decsig'); if(!decsig){return err(st,'Please sign the declination statement.');}
-        statements.push('DECLINATION: Thank you for offering me a free Mantoux Skin (PPD) test. However, I decline the offer at this time. I will notify a supervisor if I decide to change my mind at a later date.');
-        sigs.push(['Employee Signature (Declination)',decsig,val('ppd-decdate')]);
+      if(!name){return err(st,'Name is required.');}
+      if(!val('ppd-date')){return err(st,'Date is required.');}
+      var unanswered=TB_QUESTIONS.filter(function(q){ return q.grp && !pick(q.grp); });
+      if(unanswered.length){
+        return err(st,'Please answer '+unanswered[0].sec+' question '+unanswered[0].n+' before sending.');
       }
+      var choice=(document.querySelector('input[name="ppd-choice"]:checked')||{}).value;
+      if(!choice){return err(st,'Section IV: please choose Accept or Decline.');}
+      var sig=sigDataURL('ppd-sig'); if(!sig){return err(st,'Please sign the employee attestation.');}
+
+      var ev=ppdEvaluate();
+      var info=[['Name',name],['Employee ID',val('ppd-empid')||'—'],
+                ['Email',val('ppd-email')||'—'],['Contact Phone',val('ppd-phone')||'—'],
+                ['Assessment Date',val('ppd-date')]];
+
+      // Section I
+      var i1=[{q:'1. Do you have a history of tuberculosis, latent TB infection, or treatment for tuberculosis?',a:pick('ppd-i1')}];
+      if(pick('ppd-i1')==='Yes'){
+        i1.push({k:'When',v:val('ppd-i1-when')||'not stated'});
+        i1.push({k:'Regimen',v:val('ppd-i1-reg')||'not stated'});
+        i1.push({k:'Duration of Rx',v:val('ppd-i1-dur')||'not stated'});
+        i1.push({k:'Date of last chest x-ray',v:val('ppd-i1-cxr')||'not stated'});
+      }
+      i1.push({q:'2. Do you currently have any of the following symptoms?',a:pick('ppd-i2')});
+      if(pick('ppd-i2')==='Yes'){
+        i1.push({list:'Symptoms reported',items:checkedVals('ppd-sym')});
+      }
+
+      // Section II
+      var conds=checkedVals('ppd-cond');
+      var i2=[{q:'1. Have you been diagnosed with a chronic condition that may impair your immune system?',
+               a:conds.length?'Yes':'None checked'},
+              {list:'Conditions checked',items:conds}];
+      TB_QUESTIONS.filter(function(q){return q.sec==='Section II' && q.n>1;}).forEach(function(q){
+        i2.push({q:q.n+'. '+q.text,a:pick(q.grp)});
+      });
+      if(pick('ppd-ii7')==='Yes'){
+        i2.push({k:'Positive test when',v:val('ppd-ii7-when')||'not stated'});
+        i2.push({k:'Size of induration',v:(val('ppd-ii7-mm')?val('ppd-ii7-mm')+' mm':'not stated')});
+      }
+
+      var sections=[
+        {label:'Section I — Screen for TB Symptoms',items:i1},
+        {label:'Section II — Assess Risk for Acquiring or Developing Tb',items:i2},
+        {label:'Section III — Screening and Risk Assessment Evaluation',
+         items:[{q:ev.headline,a:''}].concat(ev.bullets.map(function(b){return {note:b};}))}
+      ];
+
+      var statements=[];
+      var clinic=[];
+      if(choice==='accept'){
+        statements.push('SECTION IV — ACCEPTANCE: I accept the offer for a free Mantoux Skin Test (intermediate tuberculin PPD). I understand the test occurs in two visits (injection, then read at 48-72 hours). I consent to the PPD being planted at the first visit, agree I am responsible for attending the scheduled second visit, and recognize that failing to attend precludes documenting the result.');
+        clinic=[['PPD Manufacturer',val('ppd-mfr')],['Lot Number',val('ppd-lot')],
+                ['1st Visit Date Planted',val('ppd-planted')],['Site',val('ppd-site')],
+                ['Planted by',val('ppd-plantedby')],['2nd Visit Date Examined',val('ppd-examdate')],
+                ['Results',val('ppd-results')],['Interpreted by',val('ppd-interpby')]]
+               .filter(function(r){return r[1];});
+      } else {
+        statements.push('SECTION IV — DECLINATION: Thank you for offering me a free Mantoux Skin (PPD) test. However, I decline the offer at this time. I will notify a supervisor if I decide to change my mind at a later date. (OSHA Standard Interpretation Letter, September 23, 1997: "OSHA does not require that employees participate in TB skin testing.")');
+      }
+      statements.push('ATTESTATION: I certify that the answers given in Sections I and II are true and complete to the best of my knowledge, and that the choice recorded in Section IV is mine.');
+      if(clinic.length) sections.push({label:'Clinic / Administrator Record',items:clinic.map(function(r){return {k:r[0],v:r[1]};})});
+
       return {
-        title:'Mantoux Skin Test (PPD) — TB '+(choice==='accept'?'Acceptance':'Declination'),
-        src:'AMR TB Exposure Prevention & Skin Testing Policy v1.2 (Eff. 10/31/2017) — SRM #1215',
-        info:info, statements:statements, sigs:sigs
+        title:'TB Risk & Symptom Assessment — Mantoux '+(choice==='accept'?'Acceptance':'Declination'),
+        src:'GMR SR100.21.1 Appendix A — Revision 02 (18 JUN 2025)',
+        info:info, sections:sections, statements:statements,
+        sigs:[['Employee Signature',sig,val('ppd-date')]]
       };
     }
   }
@@ -567,8 +789,8 @@ function toggleHbvRefusal(){
 function togglePpd(){
   var c=(document.querySelector('input[name="ppd-choice"]:checked')||{}).value;
   var a=document.getElementById('ppd-accept-card'), d=document.getElementById('ppd-decline-card');
-  if(a) a.classList.toggle('hidden', c!=='accept');
-  if(d) d.classList.toggle('hidden', c!=='decline');
+  if(a) a.classList.toggle('on', c==='accept');
+  if(d) d.classList.toggle('on', c==='decline');
 }
 
 // Chip-style radio group. `opts` is [value, label] or a bare string.
@@ -619,12 +841,24 @@ function goHome(){
 }
 document.getElementById('f-back').onclick=goHome;
 
+// On a phone the share sheet is the point of this page, so it leads. Where a
+// file cannot be shared — most desktop browsers — the button stays hidden and
+// the download is the primary action rather than a second-choice one.
+(function(){
+  var share=document.getElementById('f-share'), dl=document.getElementById('f-submit');
+  if(canSharePdf()){
+    share.classList.remove('hidden');
+    dl.className='btn secondary';
+  }
+})();
+
 // ── PDF GENERATION ────────────────────────────────────────────────────────
-document.getElementById('f-submit').onclick=function(){
-  var st=document.getElementById('f-status');
+// Returns {doc, name} or null; the caller decides whether that becomes a
+// download or a share sheet.
+function buildPdf(st){
   var data=FORMS[CURRENT].collect(st);
-  if(!data) return;
-  try{
+  if(!data) return null;
+  {
     var jsPDF=window.jspdf.jsPDF;
     var doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
     var W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
@@ -652,6 +886,50 @@ document.getElementById('f-submit').onclick=function(){
       y+=Math.max(16,doc.getTextDimensions(vlines).h+4);
     });
     y+=6; doc.setDrawColor(210,215,225); doc.line(m,y,W-m,y); y+=16;
+    // Sections — a questionnaire does not fit the label:value shape above, so
+    // each item is drawn as the question it was asked as, with the answer
+    // right-aligned on its first line where a reader scans for it.
+    (data.sections||[]).forEach(function(sec){
+      ensure(40);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(23,58,104);
+      var hl=doc.splitTextToSize(sec.label,W-2*m);
+      doc.text(hl,m,y); y+=doc.getTextDimensions(hl).h+4;
+      doc.setDrawColor(225,229,238); doc.line(m,y,W-m,y); y+=13;
+      sec.items.forEach(function(it){
+        if(it.list!==undefined){
+          var txt=(it.items&&it.items.length)?it.items.join(' \u00B7 '):'None reported';
+          doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(90,96,110);
+          ensure(16); doc.text(it.list.toUpperCase(),m+14,y); y+=11;
+          doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(20,34,56);
+          var ll=doc.splitTextToSize(txt,W-2*m-14);
+          ensure(doc.getTextDimensions(ll).h+6); doc.text(ll,m+14,y);
+          y+=doc.getTextDimensions(ll).h+8;
+        } else if(it.note!==undefined){
+          doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(105,110,122);
+          var nl=doc.splitTextToSize('\u2022 '+it.note,W-2*m-14);
+          ensure(doc.getTextDimensions(nl).h+6); doc.text(nl,m+14,y);
+          y+=doc.getTextDimensions(nl).h+6;
+        } else if(it.k!==undefined){
+          doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(90,96,110);
+          ensure(16); doc.text(it.k+':',m+14,y);
+          doc.setFont('helvetica','bold'); doc.setTextColor(20,34,56);
+          doc.text(String(it.v),m+14+doc.getTextWidth(it.k+': ')+2,y); y+=15;
+        } else {
+          var ans=String(it.a||'');
+          var aw=ans?doc.getTextWidth(ans)+14:0;
+          doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(30,30,40);
+          var ql=doc.splitTextToSize(it.q,W-2*m-aw);
+          ensure(doc.getTextDimensions(ql).h+8);
+          doc.text(ql,m,y);
+          if(ans){
+            doc.setFont('helvetica','bold'); doc.setTextColor(23,58,104);
+            doc.text(ans,W-m,y,{align:'right'});
+          }
+          y+=doc.getTextDimensions(ql).h+8;
+        }
+      });
+      y+=6;
+    });
     // Statements
     doc.setFontSize(9.5); doc.setTextColor(30,30,40);
     data.statements.forEach(function(p){
@@ -677,16 +955,72 @@ document.getElementById('f-submit').onclick=function(){
     ensure(30); y+=6; doc.setDrawColor(210,215,225); doc.line(m,y,W-m,y); y+=14;
     doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(120,120,130);
     doc.text(doc.splitTextToSize('Generated '+new Date().toLocaleString()+' via the AMR KC Field Guide app as a supplemental signed record. Verify against your employer’s official form and HR process.',W-2*m),m,y);
-    // Save
     var safe=(data.info[0]&&data.info[0][1]?data.info[0][1]:'employee').replace(/[^a-z0-9]+/gi,'_');
-    var fname=CURRENT.toUpperCase()+'_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf';
-    doc.save(fname);
-    st.textContent='✓ Signed PDF downloaded. Email or hand it to your supervisor / HR.';
-    st.className='status ok';
-  }catch(e){
-    st.textContent='⚠ Could not generate the PDF ('+e.message+'). Check your connection and try again.';
-    st.className='status';
+    var prefix=FORMS[CURRENT].file||CURRENT.toUpperCase();
+    return {doc:doc, name:prefix+'_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf'};
   }
+}
+
+function pdfFail(st,e){
+  st.textContent='\u26A0 Could not generate the PDF ('+e.message+'). Check your connection and try again.';
+  st.className='status';
+}
+
+document.getElementById('f-submit').onclick=function(){
+  var st=document.getElementById('f-status');
+  try{
+    var out=buildPdf(st); if(!out) return;
+    out.doc.save(out.name);
+    st.textContent='\u2713 Signed PDF downloaded. Email or hand it to your supervisor / HR.';
+    st.className='status ok';
+  }catch(e){ pdfFail(st,e); }
+};
+
+// A download drops the file into Files > Downloads with nothing on screen to
+// say so, and a crew member on a phone then has to go find it before they can
+// send it anywhere. Hand it to the OS share sheet instead — Mail, Messages,
+// AirDrop, whatever they send these with — and keep the download button for
+// desktop, where sharing a file is not offered.
+function canSharePdf(){
+  try{
+    return !!(navigator.canShare && navigator.canShare({
+      files:[new File([new Blob([''],{type:'application/pdf'})],'x.pdf',{type:'application/pdf'})]
+    }));
+  }catch(e){ return false; }
+}
+
+document.getElementById('f-share').onclick=function(){
+  var st=document.getElementById('f-status');
+  var out;
+  try{
+    out=buildPdf(st); if(!out) return;
+  }catch(e){ return pdfFail(st,e); }
+  var file;
+  try{
+    file=new File([out.doc.output('blob')],out.name,{type:'application/pdf'});
+  }catch(e){ // No blob output on this browser — a download still gets it there.
+    try{ out.doc.save(out.name); st.textContent='\u2713 Signed PDF downloaded. Attach it from your Files app.'; st.className='status ok'; }
+    catch(e2){ pdfFail(st,e2); }
+    return;
+  }
+  if(!(navigator.canShare && navigator.canShare({files:[file]}))){
+    out.doc.save(out.name);
+    st.textContent='\u2713 Signed PDF downloaded. Attach it from your Files app.';
+    st.className='status ok';
+    return;
+  }
+  navigator.share({files:[file],title:'AMR KC — signed form',text:out.name})
+    .then(function(){
+      st.textContent='\u2713 Sent. Keep a copy for yourself if your supervisor asks for one later.';
+      st.className='status ok';
+    })
+    .catch(function(err){
+      // Cancelling the share sheet is a choice, not a failure.
+      if(err && err.name==='AbortError'){ st.textContent=''; return; }
+      out.doc.save(out.name);
+      st.textContent='\u2713 Sharing was unavailable, so the PDF was downloaded instead.';
+      st.className='status ok';
+    });
 };
 </script>
 </body>
