@@ -16,6 +16,17 @@ These suites live here:
   [`immunization-forms.html`](../immunization-forms.html), filled and signed in
   headless Chromium. jsPDF is stubbed (it loads from a blocked CDN here) but the
   calls it receives are captured, so the PDF's *content* is still asserted.
+- **`tbform.test.mjs`** — the TB Risk & Symptom Assessment in
+  [`immunization-forms.html`](../immunization-forms.html), which reproduces GMR
+  SR100.21.1 Appendix A (Rev 02, 18 JUN 2025). It checks that every question on
+  the sheet is on the screen in the sheet's own words, that Section III is
+  *derived* from the answers rather than left as a box to tick — a "Yes"
+  anywhere in Sections I or II means an evaluation is required, and getting
+  that wrong is the one error on this form that changes what happens to the
+  employee — and that the finished PDF is handed to the OS share sheet so it
+  can be mailed or texted, falling back to a download where a browser cannot
+  share a file. jsPDF and `navigator.share` are both stubbed; what they were
+  handed is asserted.
 - **`alaris.test.mjs`** — the Alaris IV pump training
   ([`alaris-pump.html`](../alaris-pump.html)) in headless Chromium: the topic
   menu, all nine topics, the quick checks spaced through each one, the tappable
