@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v14';
+const CACHE = 'amrkc-2026-v15';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -14,7 +14,14 @@ const ASSETS = [
   // where a crew may have no signal and has never opened the page before
   './alaris-pump.html',
   // Medication math — same reason: it gets opened to check a dose, not to browse
-  './med-math.html'
+  './med-math.html',
+  // AEMT series — a study block is opened on a post-run window in a bay, and
+  // the whole point of the queue is that it runs client-side with no network.
+  // The shell, the content and the scheduler all have to be here already.
+  './aemt-series.html',
+  './aemt/series-preparatory.json',
+  './aemt/fsrs-5.4.2.umd.js',
+  './aemt/seed-tpopp-placeholder.svg'
 ];
 
 self.addEventListener('install', e => {

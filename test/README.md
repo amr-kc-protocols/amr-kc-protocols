@@ -45,6 +45,18 @@ These suites live here:
   in `index.html` — so a protocol change fails the suite instead of quietly
   leaving last year's numbers in the training.
 
+- **`aemt.test.mjs`** — the AEMT Series Phase 1 engine
+  ([`aemt-series.html`](../aemt-series.html)), built to the Clinical Education
+  build framework for Chapters 1–4. Nothing is stubbed: it drives the real page
+  against the real seed content and the real vendored FSRS build, because the
+  whole point of Phase 1 is that the engine works, and a test that mocks the
+  scheduler tests nothing. It covers all seven NREMT item types rendering and
+  scoring dichotomously, the fixed seven-step block sequence with its deferred
+  pretest feedback, the three scheduler overrides FSRS does not handle
+  (confidently-wrong re-queue, course-date anchor, 45-day lapse floor), the
+  four-part mastery rule, and the two things this product must never do —
+  merge completion into mastery, or make a learner drag something to answer.
+
 - **`homepage.test.mjs`** — the homepage ([`index.html`](../index.html)) in
   headless Chromium at four screen sizes, two of them Toughbook resolutions.
   Defends the two things the revamp changed: that the sign-in is gone from the
