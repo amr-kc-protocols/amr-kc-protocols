@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<!--
+  AMR KC Field Guide — AEMT Series
+  Phase 1 engine, built to "AEMT Series — Build Framework, Chapters 1–4" v1.0
+  (Clinical Education, AMR KC). Section references in the comments below point
+  at that spec.
+
+  This file is the ENGINE ONLY. The content it renders lives in
+  aemt/series-preparatory.json and is throwaway seed data whose job is to
+  exercise every renderer, the scheduler and the mastery model (spec §12,
+  Phase 1). It is not reviewed instructional content.
+
+  Application © 2026 Jordan Hunter Jones. Scheduling by ts-fsrs 5.4.2 (MIT),
+  vendored at aemt/fsrs-5.4.2.umd.js.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AEMT Series">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<title>AEMT Series — AMR KC Field Guide</title>
+<meta name="description" content="AEMT Preparatory series — retrieval-driven blocks with a spaced review queue. Works offline.">
+<style>
+:root{
+  --teal:#173a68;--teal2:#1b63c4;--ink:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --bg:#f4f6f9;--surface:#ffffff;--border:#e2e6ec;
+  --ok:#15803d;--ok-bg:#eafbf1;--ok-br:#b7e3c6;
+  --no:#dc2626;--no-bg:#fdecec;--no-br:#f3c6c6;
+  --warn:#a1590b;--warn-bg:#fef3e2;--warn-br:#e7c48a;
+  --sans:'IBM Plex Sans',-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.hidden{display:none!important}
+
+/* ── CHROME ───────────────────────────────────────────────────────────── */
+.hdr{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border);
+  padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));
+  display:flex;align-items:center;gap:10px}
+.hdr-logo{width:34px;height:34px;border-radius:9px;background:var(--teal);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:15px;font-weight:700;color:var(--teal);line-height:1.15}
+.hdr-sub{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-back{font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;padding:8px 11px;
+  border:1px solid var(--border);border-radius:8px;background:var(--bg);white-space:nowrap;
+  cursor:pointer;font-family:var(--sans)}
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px calc(48px + env(safe-area-inset-bottom,0px))}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:16px;margin-bottom:14px}
+.card-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--teal2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.seed-banner{background:var(--warn-bg);border:1px solid var(--warn-br);color:var(--warn);
+  border-radius:10px;padding:11px 13px;font-size:12px;font-weight:600;line-height:1.5;margin-bottom:14px}
+
+/* ── HOME: due-count first (spec §4.3, §10) ───────────────────────────── */
+.due-hero{background:linear-gradient(135deg,#0b3f75,#14406f 45%,#0e7490);color:#fff;
+  border-radius:16px;padding:22px 20px;margin-bottom:14px;text-align:center}
+.due-n{font-size:54px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.due-lbl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#bfe0f2;margin-top:6px;font-weight:600}
+.due-sub{font-size:12.5px;color:#d6e7f5;margin-top:10px;line-height:1.5}
+.btn{display:block;width:100%;padding:15px;border-radius:11px;border:none;font-size:16px;
+  font-weight:700;cursor:pointer;font-family:var(--sans);background:var(--teal);color:#fff;
+  margin-top:10px;min-height:48px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.light{background:#fff;color:var(--teal)}
+.btn.secondary{background:var(--dim);color:var(--teal);border:1px solid var(--border)}
+.btn.tiny{padding:10px 12px;font-size:13px;min-height:44px;margin-top:0}
+.btn-row{display:flex;gap:10px;margin-top:10px}
+.btn-row .btn{margin-top:0}
+
+.next-block{display:flex;gap:12px;align-items:center;text-align:left;width:100%;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:15px;
+  cursor:pointer;font-family:var(--sans);margin-bottom:10px;min-height:48px}
+.next-block:hover{border-color:var(--teal)}
+.nb-ch{width:44px;height:44px;border-radius:11px;background:var(--dim);color:var(--teal2);
+  font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nb-t{display:block;font-size:15px;font-weight:700;color:var(--ink);line-height:1.25}
+.nb-s{display:block;font-size:12px;color:var(--gray);margin-top:3px}
+.nb-arr{margin-left:auto;color:#b7c0cc;font-size:20px;font-weight:700}
+
+/* Two bars, never merged (spec §9, §10). */
+.bar-row{margin-bottom:14px}
+.bar-row:last-child{margin-bottom:0}
+.bar-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.bar-lbl{font-size:12.5px;font-weight:600}
+.bar-val{font-size:12px;color:var(--gray);font-variant-numeric:tabular-nums}
+.bar{height:9px;border-radius:5px;background:var(--dim);overflow:hidden}
+.bar-fill{height:100%;border-radius:5px;transition:width .3s}
+.bar-fill.completion{background:#94a3b8}
+.bar-fill.mastery{background:var(--ok)}
+.bar-note{font-size:11px;color:var(--gray);margin-top:8px;line-height:1.5}
+
+/* ── ITEM RENDERERS (spec §5.1) ───────────────────────────────────────── */
+.stimulus{background:var(--dim);border-left:3px solid var(--teal2);border-radius:0 10px 10px 0;
+  padding:13px 14px;font-size:13.5px;line-height:1.6;margin-bottom:14px}
+.stimulus img,.stimulus svg{max-width:100%;height:auto;display:block;border-radius:8px;background:#fff}
+.stem{font-size:15.5px;font-weight:600;line-height:1.5;margin-bottom:6px}
+.stem-hint{font-size:12px;color:var(--gray);margin-bottom:12px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border:1.5px solid var(--border);
+  border-radius:11px;background:#fff;cursor:pointer;font-size:14px;line-height:1.45;
+  text-align:left;width:100%;font-family:var(--sans);color:var(--ink);min-height:48px}
+.opt:hover{border-color:#b9c6d8}
+.opt.sel{border-color:var(--teal2);background:#eaf1fd}
+.opt-box{width:22px;height:22px;flex-shrink:0;border:2px solid #b9c6d8;background:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;margin-top:1px}
+.opt-box.radio{border-radius:50%}
+.opt-box.check{border-radius:6px}
+.opt.sel .opt-box{border-color:var(--teal2);background:var(--teal2)}
+.opt[disabled]{cursor:default;opacity:1}
+.opt.was-correct,.dd-chip.was-correct{border-color:var(--ok-br);background:var(--ok-bg)}
+.opt.was-wrong-pick{border-color:var(--no-br);background:var(--no-bg)}
+
+/* build_list — reorder by button. Dragging alone would fail WCAG 2.2 SC 2.5.7,
+   which the spec's accessibility constraint pulls in, so the buttons are the
+   primary control and pointer drag is the enhancement. */
+.ord{display:flex;flex-direction:column;gap:9px}
+.ord-row{display:flex;gap:10px;align-items:center;padding:11px 12px;border:1.5px solid var(--border);
+  border-radius:11px;background:#fff;font-size:14px;line-height:1.4}
+.ord-n{width:26px;height:26px;border-radius:7px;background:var(--dim);color:var(--teal2);
+  font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ord-t{flex:1;min-width:0}
+.ord-btns{display:flex;gap:4px;flex-shrink:0}
+.ord-btn{width:40px;height:40px;border-radius:9px;border:1px solid var(--border);background:var(--bg);
+  color:var(--teal);font-size:15px;cursor:pointer;font-family:var(--sans);line-height:1}
+.ord-btn:disabled{opacity:.3;cursor:default}
+
+/* drag_drop — tap an option, then tap a bin. Same accessibility reasoning. */
+.dd-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:48px}
+.dd-chip{padding:11px 14px;border:1.5px solid var(--border);border-radius:999px;background:#fff;
+  font-size:13.5px;cursor:pointer;font-family:var(--sans);color:var(--ink);min-height:44px}
+.dd-chip.armed{border-color:var(--teal2);background:#eaf1fd;font-weight:700}
+.dd-bins{display:grid;gap:10px}
+@media(min-width:520px){.dd-bins{grid-template-columns:1fr 1fr}}
+.dd-bin{border:1.5px dashed #b9c6d8;border-radius:12px;padding:12px;background:#fff;min-height:96px}
+.dd-bin.target{border-color:var(--teal2);background:#f5f9ff}
+.dd-bin-h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--teal2);margin-bottom:9px}
+.dd-bin .dd-chip{margin:0 6px 6px 0;display:inline-block}
+.dd-drop{margin-top:6px;padding:9px;border-radius:9px;border:1px dashed var(--teal2);
+  color:var(--teal2);font-size:12px;font-weight:700;text-align:center;background:#f5f9ff}
+
+/* options_box — a row per stem, a picker per row */
+.ob{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff}
+.ob-row{padding:12px 13px;border-bottom:1px solid var(--border)}
+.ob-row:last-child{border-bottom:none}
+.ob-lbl{font-size:13.5px;line-height:1.45;margin-bottom:9px}
+.ob-picks{display:flex;gap:7px;flex-wrap:wrap}
+.ob-pick{padding:9px 13px;border:1.5px solid var(--border);border-radius:999px;background:#fff;
+  font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--ink);min-height:44px}
+.ob-pick.sel{border-color:var(--teal2);background:#eaf1fd;color:var(--teal)}
+.ob-row.graded-ok{background:var(--ok-bg)}
+.ob-row.graded-no{background:var(--no-bg)}
+
+/* ── FEEDBACK (spec §10) ──────────────────────────────────────────────── */
+.fb{margin-top:14px;border-radius:12px;padding:14px;border:1px solid}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok-br)}
+.fb.no{background:var(--no-bg);border-color:var(--no-br)}
+.fb-banner{font-size:14px;font-weight:800;margin-bottom:8px}
+.fb.ok .fb-banner{color:var(--ok)}
+.fb.no .fb-banner{color:var(--no)}
+.fb-exp{font-size:13.5px;line-height:1.6}
+.fb-toggle{margin-top:11px;background:none;border:none;color:var(--teal2);font-weight:700;
+  font-size:13px;cursor:pointer;font-family:var(--sans);padding:8px 0;min-height:44px;text-align:left}
+.fb-rats{margin-top:4px;display:flex;flex-direction:column;gap:9px}
+.fb-rat{font-size:12.5px;line-height:1.55;padding-left:12px;border-left:2px solid #cbd5e1}
+.fb-rat.r-ok{border-left-color:var(--ok)}
+.fb-rat b{color:var(--ink)}
+.fb-src{margin-top:11px;font-size:10.5px;color:var(--gray);font-style:italic}
+
+/* Confidence — high-stakes items only (spec §10) */
+.conf{margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.conf-q{font-size:13.5px;font-weight:600;margin-bottom:10px}
+.conf-btns{display:flex;gap:10px}
+.conf-btns .btn{margin-top:0}
+
+/* ── BLOCK FLOW ───────────────────────────────────────────────────────── */
+.step{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--teal2);margin-bottom:9px}
+.cold{font-size:15px;line-height:1.65}
+.cold-dp{margin-top:12px;font-weight:700;color:var(--teal)}
+.screen-body{font-size:14.5px;line-height:1.68}
+.screen-body p{margin-bottom:11px}
+.screen-body p:last-child{margin-bottom:0}
+.screen-body strong{color:var(--teal)}
+.progress-dots{display:flex;gap:5px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#cfd8e3}
+.dot.on{background:var(--teal2)}
+.dot.done{background:var(--ok)}
+.wordcount{font-size:10px;color:var(--gray);text-align:right;margin-top:8px}
+
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;background:var(--dim);color:var(--teal2)}
+.pill.hs{background:var(--warn-bg);color:var(--warn)}
+.empty{text-align:center;color:var(--gray);font-size:13.5px;padding:22px 10px;line-height:1.6}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">KC</div>
+  <div class="hdr-txt">
+    <div class="hdr-title" id="hdr-title">AEMT Series</div>
+    <div class="hdr-sub" id="hdr-sub">Section 1 · Preparatory</div>
+  </div>
+  <a class="hdr-back" id="hdr-back" href="index.html">&#x2190; Field Guide</a>
+</div>
+
+<div class="wrap">
+  <div id="boot" class="empty">Loading the series&hellip;</div>
+  <div id="screen-home" class="hidden"></div>
+  <div id="screen-session" class="hidden"></div>
+  <div id="screen-progress" class="hidden"></div>
+</div>
+
+<script src="aemt/fsrs-5.4.2.umd.js"></script>
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════════════════
+   AEMT SERIES ENGINE — Phase 1
+   Spec: "AEMT Series — Build Framework, Chapters 1–4" v1.0
+   ════════════════════════════════════════════════════════════════════════ */
+
+var SERIES=null, STATE=null, VIEW='home';
+var SERIES_URL='aemt/series-preparatory.json';
+
+/* ── §8.2 parameters ──────────────────────────────────────────────────── */
+var DEFAULTS={
+  request_retention:0.90,   // spec §8.2
+  max_new_per_day:20,       // learner-adjustable 5–40
+  session_cap:15,           // learner-set session length
+  course_dates:{}           // chapter number -> ISO date, drives override #2
+};
+var LAPSE_FLOOR_DAYS=45;    // §8.3 rule 3 — high-stakes items never exceed this
+
+/* ── STORAGE — IndexedDB, local-first (spec §7.3) ─────────────────────────
+   The whole learner document is one record. At ~280 items the document is
+   tens of kilobytes, and keeping it whole makes the required JSON export and
+   import a read and a write rather than a migration. */
+var DB={
+  name:'amrkc-aemt', store:'kv', key:'learner', _db:null,
+  open:function(){
+    var self=this;
+    if(self._db) return Promise.resolve(self._db);
+    return new Promise(function(res,rej){
+      if(!window.indexedDB) return rej(new Error('IndexedDB unavailable'));
+      var rq=indexedDB.open(self.name,1);
+      rq.onupgradeneeded=function(e){
+        var db=e.target.result;
+        if(!db.objectStoreNames.contains(self.store)) db.createObjectStore(self.store);
+      };
+      rq.onsuccess=function(){ self._db=rq.result; res(self._db); };
+      rq.onerror=function(){ rej(rq.error); };
+    });
+  },
+  get:function(){
+    var self=this;
+    return self.open().then(function(db){
+      return new Promise(function(res,rej){
+        var tx=db.transaction(self.store,'readonly').objectStore(self.store).get(self.key);
+        tx.onsuccess=function(){ res(tx.result||null); };
+        tx.onerror=function(){ rej(tx.error); };
+      });
+    });
+  },
+  put:function(v){
+    var self=this;
+    return self.open().then(function(db){
+      return new Promise(function(res,rej){
+        var tx=db.transaction(self.store,'readwrite').objectStore(self.store).put(v,self.key);
+        tx.onsuccess=function(){ res(true); };
+        tx.onerror=function(){ rej(tx.error); };
+      });
+    });
+  }
+};
+
+function uuid(){
+  if(window.crypto&&crypto.randomUUID) return crypto.randomUUID();
+  return 'local-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+}
+function freshState(){
+  return { user_id:uuid(), items:{}, objectives:{}, blocks:{},
+           streak_days:0, last_active:null, new_today:{date:null,count:0},
+           settings:JSON.parse(JSON.stringify(DEFAULTS)), schema_version:1 };
+}
+function saveState(){ return DB.put(STATE).catch(function(e){ console.error('save failed',e); }); }
+
+/* ── DATES ────────────────────────────────────────────────────────────── */
+function startOfDay(d){ var x=new Date(d); x.setHours(0,0,0,0); return x; }
+function addDays(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function dayKey(d){ return startOfDay(d).toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.round((startOfDay(b)-startOfDay(a))/86400000); }
+
+/* ── §8 SCHEDULER — FSRS plus the three domain overrides ──────────────── */
+function stateToEnum(v){
+  var S=window.FSRS.State;
+  if(typeof v==='number') return v;
+  var k=String(v||'new');
+  k=k.charAt(0).toUpperCase()+k.slice(1).toLowerCase();
+  return S[k]!==undefined?S[k]:S.New;
+}
+var Sched={
+  _f:null,
+  engine:function(){
+    if(!this._f){
+      var P=window.FSRS;
+      this._f=P.fsrs(P.generatorParameters({
+        request_retention:(STATE&&STATE.settings?STATE.settings:DEFAULTS).request_retention
+      }));
+    }
+    return this._f;
+  },
+  emptyCard:function(now){ return window.FSRS.createEmptyCard(now); },
+  // Confidence is captured for triage, not for scoring (spec §2.2: "use it to
+  // prioritize the queue, not to score"), so the grade is a function of
+  // correctness alone. Confidence acts only through override #1 below.
+  grade:function(correct){ var R=window.FSRS.Rating; return correct?R.Good:R.Again; },
+
+  // §7.3 writes the state as a lowercase string; the FSRS enum is capitalised.
+  toCard:function(rec,now){
+    if(!rec) return this.emptyCard(now);
+    var S=window.FSRS.State;
+    return { due:new Date(rec.due), stability:rec.stability, difficulty:rec.difficulty,
+             elapsed_days:rec.elapsed_days||0, scheduled_days:rec.scheduled_days||0,
+             learning_steps:rec.learning_steps||0,
+             reps:rec.reps||0, lapses:rec.lapses||0,
+             state:stateToEnum(rec.state),
+             last_review:rec.last_review?new Date(rec.last_review):undefined };
+  },
+
+  /* Returns the record to store for this item after an answer. */
+  review:function(item,prev,correct,confidence,now){
+    now=now||new Date();
+    var card=this.toCard(prev,now);
+    var out=this.engine().next(card,now,this.grade(correct)).card;
+    var due=new Date(out.due);
+
+    // ── Override 2 — course-date anchor (spec §8.3.2) ───────────────────
+    // Compress so every item in a chapter gets at least two successful
+    // reviews before the chapter's classroom or exam date.
+    var anchor=(STATE.settings.course_dates||{})[String(item.chapter)];
+    if(anchor){
+      var courseDay=startOfDay(new Date(anchor));
+      var successes=(prev&&prev.successes?prev.successes:0)+(correct?1:0);
+      var needed=Math.max(0,2-successes);
+      if(needed>0 && courseDay>startOfDay(now)){
+        var latest=addDays(courseDay,-needed);
+        if(latest<=startOfDay(now)) latest=addDays(startOfDay(now),1);
+        if(due>latest) due=latest;
+      }
+    }
+    // ── Override 3 — lapse floor (spec §8.3.3) ──────────────────────────
+    // Legal and exposure content decays into a liability quietly.
+    if(item.high_stakes){
+      var ceiling=addDays(now,LAPSE_FLOOR_DAYS);
+      if(due>ceiling) due=ceiling;
+    }
+    // ── Override 1 — confidently wrong (spec §8.3.1) ────────────────────
+    // Applied last: it wins over FSRS and over the other two.
+    if(item.high_stakes && confidence==='sure' && !correct){
+      due=addDays(startOfDay(now),1);
+    }
+
+    var St=window.FSRS.State;
+    var stateName=Object.keys(St).filter(function(k){ return St[k]===out.state && isNaN(+k); })[0]||'review';
+    return {
+      stability:out.stability, difficulty:out.difficulty,
+      elapsed_days:out.elapsed_days, scheduled_days:out.scheduled_days,
+      learning_steps:out.learning_steps||0,
+      last_review:now.toISOString(), due:due.toISOString(),
+      reps:out.reps, lapses:out.lapses, state:stateName.toLowerCase(),
+      last_confidence:confidence||null, last_correct:!!correct,
+      successes:(prev&&prev.successes?prev.successes:0)+(correct?1:0),
+      last_interval_days:prev&&prev.last_review?daysBetween(new Date(prev.last_review),now):0
+    };
+  }
+};
+
+/* ── §9 MASTERY — deterministic and auditable ─────────────────────────── */
+var Mastery={
+  // An objective is mastered when ALL of: ≥3 correct across ≥3 distinct items,
+  // at ≥2 distinct spacing intervals, most recent correct at ≥7 days, and no
+  // lapse in the last 2 attempts.
+  objective:function(rec){
+    if(!rec) return 'not_started';
+    var distinctItems=(rec.correct_items||[]).length;
+    var intervals=rec.correct_intervals||[];
+    var distinctIntervals={}; intervals.forEach(function(d){ distinctIntervals[Math.round(d)]=1; });
+    var lastInterval=intervals.length?intervals[intervals.length-1]:0;
+    var last2=(rec.last_attempts||[]).slice(-2);
+    var noLapse=last2.length>=2 && last2.every(Boolean);
+    var ok=(rec.successes||0)>=3 && distinctItems>=3 &&
+           Object.keys(distinctIntervals).length>=2 && lastInterval>=7 && noLapse;
+    if(ok) return 'mastered';
+    return (rec.attempts||0)>0?'practicing':'not_started';
+  },
+  objectiveStatuses:function(){
+    var out={};
+    (SERIES.objectives||[]).forEach(function(o){
+      out[o.id]=Mastery.objective(STATE.objectives[o.id]);
+    });
+    return out;
+  },
+  // A chapter is mastered when ≥90% of its objectives are mastered.
+  chapter:function(n){
+    var objs=(SERIES.objectives||[]).filter(function(o){ return o.chapter===n; });
+    if(!objs.length) return {pct:0,mastered:false,total:0,done:0};
+    var done=objs.filter(function(o){ return Mastery.objective(STATE.objectives[o.id])==='mastered'; }).length;
+    var pct=done/objs.length;
+    return {pct:pct,mastered:pct>=0.9,total:objs.length,done:done};
+  },
+  // Completion is not mastery and is never merged into one number (spec §9).
+  completion:function(){
+    var total=(SERIES.blocks||[]).length;
+    var done=(SERIES.blocks||[]).filter(function(b){
+      var r=STATE.blocks[b.id]; return r&&r.completed_at;
+    }).length;
+    return {done:done,total:total,pct:total?done/total:0};
+  },
+  masteryOverall:function(){
+    var objs=SERIES.objectives||[];
+    var done=objs.filter(function(o){ return Mastery.objective(STATE.objectives[o.id])==='mastered'; }).length;
+    return {done:done,total:objs.length,pct:objs.length?done/objs.length:0};
+  }
+};
+
+/* Record one answer against the item record and its objective. */
+function recordAnswer(item,correct,confidence,now){
+  now=now||new Date();
+  var prev=STATE.items[item.id]||null;
+  var interval=prev&&prev.last_review?daysBetween(new Date(prev.last_review),now):0;
+  STATE.items[item.id]=Sched.review(item,prev,correct,confidence,now);
+
+  if(item.objective){
+    var o=STATE.objectives[item.objective]||
+      {status:'not_started',successes:0,attempts:0,distinct_intervals:0,
+       correct_items:[],correct_intervals:[],last_attempts:[]};
+    o.attempts=(o.attempts||0)+1;
+    o.last_attempts=(o.last_attempts||[]).concat([!!correct]).slice(-2);
+    if(correct){
+      o.successes=(o.successes||0)+1;
+      if(o.correct_items.indexOf(item.id)===-1) o.correct_items.push(item.id);
+      o.correct_intervals=(o.correct_intervals||[]).concat([interval]);
+      var seen={}; o.correct_intervals.forEach(function(d){ seen[Math.round(d)]=1; });
+      o.distinct_intervals=Object.keys(seen).length;
+    }
+    STATE.objectives[item.objective]=o;
+    o.status=Mastery.objective(o);
+  }
+  touchStreak(now);
+}
+function touchStreak(now){
+  var today=dayKey(now);
+  if(STATE.last_active===today) return;
+  var y=dayKey(addDays(now,-1));
+  STATE.streak_days=(STATE.last_active===y)?(STATE.streak_days||0)+1:1;
+  STATE.last_active=today;
+}
+
+/* ── QUEUE (spec §4.3, §8.2) ──────────────────────────────────────────── */
+function itemById(id){ return (SERIES.items||[]).filter(function(i){ return i.id===id; })[0]||null; }
+function blockById(id){ return (SERIES.blocks||[]).filter(function(b){ return b.id===id; })[0]||null; }
+function attemptedChapters(){
+  var set={};
+  (SERIES.blocks||[]).forEach(function(b){ if(STATE.blocks[b.id]) set[b.chapter]=1; });
+  return set;
+}
+/* Items due now, interleaved across every attempted chapter and shuffled. */
+function dueItems(now){
+  now=now||new Date();
+  var chapters=attemptedChapters();
+  var due=(SERIES.items||[]).filter(function(i){
+    if(i.type==='scenario') return false;            // parents are containers
+    if(!chapters[i.chapter]) return false;
+    var r=STATE.items[i.id];
+    return r && new Date(r.due)<=now;
+  });
+  return shuffle(due);
+}
+function shuffle(a){
+  a=a.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function nextBlock(){
+  var list=SERIES.blocks||[];
+  for(var i=0;i<list.length;i++){
+    var r=STATE.blocks[list[i].id];
+    if(!r||!r.completed_at) return list[i];
+  }
+  return null;
+}
+function drillItems(chapter,n){
+  var pool=(SERIES.items||[]).filter(function(i){
+    return i.type!=='scenario' && (!chapter||i.chapter===chapter);
+  });
+  return shuffle(pool).slice(0,n||10);
+}
+
+/* ── §5.1 ITEM RENDERERS ──────────────────────────────────────────────────
+   Every renderer returns { el, read, grade, showAnswer }:
+     read()       -> the learner's response
+     grade(resp)  -> boolean, dichotomous, no partial credit (spec §5.1)
+     showAnswer() -> paint the correct answer onto the rendered item
+   graphical delegates to a base type; scenario is handled by the runner. */
+var Render={};
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+/* Deliberately tiny: bold, italic, and paragraph breaks. Content is authored
+   by clinical staff, not by the public, but it is still escaped first. */
+function md(s){
+  return esc(s).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+               .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+               .split(/\n\n+/).map(function(p){ return '<p>'+p.replace(/\n/g,'<br>')+'</p>'; }).join('');
+}
+function el(tag,cls,html){
+  var e=document.createElement(tag);
+  if(cls) e.className=cls;
+  if(html!=null) e.innerHTML=html;
+  return e;
+}
+function correctIds(item){
+  return (item.options||[]).filter(function(o){ return o.correct; }).map(function(o){ return o.id; });
+}
+function sameSet(a,b){
+  if(a.length!==b.length) return false;
+  var s={}; a.forEach(function(x){ s[x]=1; });
+  return b.every(function(x){ return s[x]; });
+}
+
+/* mc — 1 of 4 */
+Render.mc=function(item){
+  var wrap=el('div','opts'), picked=null, buttons=[];
+  (item.options||[]).forEach(function(o){
+    var b=el('button','opt');
+    b.type='button'; b.setAttribute('data-opt',o.id);
+    b.innerHTML='<span class="opt-box radio" aria-hidden="true">&#10003;</span><span>'+esc(o.text)+'</span>';
+    b.onclick=function(){
+      picked=o.id;
+      buttons.forEach(function(x){ x.classList.toggle('sel',x===b); });
+      wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+    };
+    buttons.push(b); wrap.appendChild(b);
+  });
+  return { el:wrap,
+    read:function(){ return picked; },
+    grade:function(r){ return !!r && correctIds(item).indexOf(r)!==-1; },
+    showAnswer:function(){
+      buttons.forEach(function(b){
+        var id=b.getAttribute('data-opt');
+        b.disabled=true;
+        if(correctIds(item).indexOf(id)!==-1) b.classList.add('was-correct');
+        else if(id===picked) b.classList.add('was-wrong-pick');
+      });
+    }};
+};
+
+/* mr — 2–3 of 5–6, scored dichotomously */
+Render.mr=function(item){
+  var wrap=el('div','opts'), sel={}, buttons=[];
+  (item.options||[]).forEach(function(o){
+    var b=el('button','opt');
+    b.type='button'; b.setAttribute('data-opt',o.id); b.setAttribute('aria-pressed','false');
+    b.innerHTML='<span class="opt-box check" aria-hidden="true">&#10003;</span><span>'+esc(o.text)+'</span>';
+    b.onclick=function(){
+      sel[o.id]=!sel[o.id];
+      b.classList.toggle('sel',!!sel[o.id]);
+      b.setAttribute('aria-pressed',sel[o.id]?'true':'false');
+      wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+    };
+    buttons.push(b); wrap.appendChild(b);
+  });
+  return { el:wrap,
+    read:function(){ return Object.keys(sel).filter(function(k){ return sel[k]; }); },
+    grade:function(r){ return sameSet(r||[],correctIds(item)); },
+    showAnswer:function(){
+      buttons.forEach(function(b){
+        var id=b.getAttribute('data-opt'); b.disabled=true;
+        if(correctIds(item).indexOf(id)!==-1) b.classList.add('was-correct');
+        else if(sel[id]) b.classList.add('was-wrong-pick');
+      });
+    }};
+};
+
+/* build_list — order matters. Correct order is the authored option order. */
+Render.build_list=function(item){
+  var correct=(item.options||[]).map(function(o){ return o.id; });
+  var order=shuffle(correct);
+  if(order.length>1 && order.join()===correct.join()) order.push(order.shift());
+  var wrap=el('div','ord');
+  function paint(){
+    wrap.innerHTML='';
+    order.forEach(function(id,idx){
+      var o=(item.options||[]).filter(function(x){ return x.id===id; })[0];
+      var row=el('div','ord-row');
+      row.setAttribute('data-opt',id);
+      row.appendChild(el('span','ord-n',String(idx+1)));
+      row.appendChild(el('span','ord-t',esc(o.text)));
+      var btns=el('div','ord-btns');
+      var up=el('button','ord-btn','&#9650;'); up.type='button';
+      up.setAttribute('aria-label','Move "'+o.text+'" up'); up.disabled=idx===0;
+      up.onclick=function(){ var t=order[idx-1]; order[idx-1]=order[idx]; order[idx]=t; paint(); };
+      var dn=el('button','ord-btn','&#9660;'); dn.type='button';
+      dn.setAttribute('aria-label','Move "'+o.text+'" down'); dn.disabled=idx===order.length-1;
+      dn.onclick=function(){ var t=order[idx+1]; order[idx+1]=order[idx]; order[idx]=t; paint(); };
+      btns.appendChild(up); btns.appendChild(dn); row.appendChild(btns);
+      wrap.appendChild(row);
+    });
+    wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+  }
+  paint();
+  return { el:wrap,
+    read:function(){ return order.slice(); },
+    grade:function(r){ return (r||[]).join()===correct.join(); },
+    showAnswer:function(){
+      wrap.innerHTML='';
+      correct.forEach(function(id,idx){
+        var o=(item.options||[]).filter(function(x){ return x.id===id; })[0];
+        var row=el('div','ord-row was-correct');
+        row.style.borderColor='var(--ok-br)'; row.style.background='var(--ok-bg)';
+        row.appendChild(el('span','ord-n',String(idx+1)));
+        row.appendChild(el('span','ord-t',esc(o.text)));
+        wrap.appendChild(row);
+      });
+    }};
+};
+
+/* drag_drop — tap a chip, then tap a bin */
+Render.drag_drop=function(item){
+  var wrap=el('div'), placed={}, armed=null;
+  var pool=el('div','dd-pool'), bins=el('div','dd-bins');
+  function paint(){
+    pool.innerHTML='';
+    (item.options||[]).forEach(function(o){
+      if(placed[o.id]) return;
+      var c=el('button','dd-chip'+(armed===o.id?' armed':''),esc(o.text));
+      c.type='button'; c.setAttribute('data-opt',o.id);
+      c.setAttribute('aria-pressed',armed===o.id?'true':'false');
+      c.onclick=function(){ armed=(armed===o.id)?null:o.id; paint(); };
+      pool.appendChild(c);
+    });
+    bins.innerHTML='';
+    var armedText=armed?((item.options||[]).filter(function(o){return o.id===armed;})[0]||{}).text:'';
+    (item.categories||[]).forEach(function(cat){
+      var bin=el('div','dd-bin'+(armed?' target':''));
+      bin.setAttribute('data-cat',cat.id);
+      if(armed) bin.setAttribute('aria-label','Place "'+armedText+'" in '+cat.label);
+      bin.appendChild(el('div','dd-bin-h',esc(cat.label)));
+      (item.options||[]).forEach(function(o){
+        if(placed[o.id]!==cat.id) return;
+        var c=el('button','dd-chip',esc(o.text));
+        c.type='button'; c.setAttribute('data-opt',o.id);
+        c.setAttribute('aria-label','Remove "'+o.text+'" from '+cat.label);
+        // While something is armed the whole bin is a drop target, so a chip
+        // already sitting in it must not swallow the tap. A filled bin's
+        // centre lands on a chip, and without this a learner aiming at the bin
+        // removes the last thing they placed instead of placing the next one.
+        c.onclick=function(ev){
+          if(armed) return;                       // let it bubble to the bin
+          ev.stopPropagation(); delete placed[o.id]; paint();
+        };
+        bin.appendChild(c);
+      });
+      if(armed) bin.appendChild(el('div','dd-drop','Tap to place here'));
+      bin.onclick=function(){
+        if(!armed) return;
+        placed[armed]=cat.id; armed=null; paint();
+      };
+      bins.appendChild(bin);
+    });
+    wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+  }
+  wrap.appendChild(pool); wrap.appendChild(bins); paint();
+  return { el:wrap,
+    read:function(){ return JSON.parse(JSON.stringify(placed)); },
+    grade:function(r){
+      r=r||{};
+      var map=item.answer_map||{};
+      var ids=(item.options||[]).map(function(o){ return o.id; });
+      return ids.every(function(id){ return r[id]===map[id]; });
+    },
+    showAnswer:function(){
+      armed=null; placed=JSON.parse(JSON.stringify(item.answer_map||{}));
+      paint();
+      pool.innerHTML='';
+      [].slice.call(bins.querySelectorAll('.dd-chip')).forEach(function(c){
+        c.disabled=true; c.classList.add('was-correct');
+      });
+    }};
+};
+
+/* options_box — classify each row using the column set */
+Render.options_box=function(item){
+  var wrap=el('div','ob'), picks={}, rowEls={};
+  (item.rows||[]).forEach(function(row){
+    var r=el('div','ob-row'); rowEls[row.id]=r;
+    r.appendChild(el('div','ob-lbl',esc(row.label)));
+    var picksEl=el('div','ob-picks');
+    (item.columns||[]).forEach(function(col){
+      var b=el('button','ob-pick',esc(col.label));
+      b.type='button'; b.setAttribute('data-row',row.id); b.setAttribute('data-col',col.id);
+      b.setAttribute('aria-label',row.label+': '+col.label);
+      b.onclick=function(){
+        picks[row.id]=col.id;
+        [].slice.call(picksEl.children).forEach(function(x){ x.classList.toggle('sel',x===b); });
+        wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+      };
+      picksEl.appendChild(b);
+    });
+    r.appendChild(picksEl); wrap.appendChild(r);
+  });
+  return { el:wrap,
+    read:function(){ return JSON.parse(JSON.stringify(picks)); },
+    grade:function(r){
+      r=r||{};
+      return (item.rows||[]).every(function(row){ return r[row.id]===row.answer; });
+    },
+    showAnswer:function(){
+      (item.rows||[]).forEach(function(row){
+        var r=rowEls[row.id];
+        r.classList.add(picks[row.id]===row.answer?'graded-ok':'graded-no');
+        [].slice.call(r.querySelectorAll('.ob-pick')).forEach(function(b){
+          b.disabled=true;
+          if(b.getAttribute('data-col')===row.answer){
+            b.classList.add('sel'); b.style.borderColor='var(--ok)'; b.style.color='var(--ok)';
+          }
+        });
+      });
+    }};
+};
+
+/* graphical — a stimulus plus any of the types above (default mc) */
+Render.graphical=function(item){
+  var base=Render[item.base_type||'mc'](item);
+  return base;   // the stimulus itself is painted by renderItem()
+};
+
+function makeRenderer(item){
+  var fn=Render[item.type];
+  if(!fn) throw new Error('no renderer for item type: '+item.type);
+  return fn(item);
+}
+
+/* Stimulus block, shared by graphical/scenario and anything that declares one. */
+function stimulusEl(item){
+  var s=item.stimulus;
+  if(!s||s.kind==='none'||(!s.ref&&!s.text)) return null;
+  var box=el('div','stimulus');
+  if(s.kind==='image'&&s.ref){
+    var img=el('img'); img.src=s.ref; img.alt=s.alt||'Item figure'; img.loading='lazy';
+    box.appendChild(img);
+  } else if(s.text){
+    box.innerHTML=md(s.text);
+  }
+  return box;
+}
+
+/* ── FEEDBACK (spec §10) ──────────────────────────────────────────────── */
+function feedbackEl(item,correct){
+  var fb=el('div','fb '+(correct?'ok':'no'));
+  fb.appendChild(el('div','fb-banner',correct?'&#10003; Correct':'&#10007; Not quite'));
+  if(item.explanation_md) fb.appendChild(el('div','fb-exp',md(item.explanation_md)));
+  var rats=(item.options||[]).filter(function(o){ return o.rationale; });
+  if(rats.length){
+    var toggle=el('button','fb-toggle','Why not the others? &#9662;');
+    toggle.type='button'; toggle.setAttribute('aria-expanded','false');
+    var box=el('div','fb-rats'); box.hidden=true;
+    rats.forEach(function(o){
+      box.appendChild(el('div','fb-rat'+(o.correct?' r-ok':''),
+        '<b>'+esc(o.text)+'</b> &mdash; '+esc(o.rationale)));
+    });
+    toggle.onclick=function(){
+      box.hidden=!box.hidden;
+      toggle.setAttribute('aria-expanded',box.hidden?'false':'true');
+      toggle.innerHTML=(box.hidden?'Why not the others? &#9662;':'Hide the rationales &#9652;');
+    };
+    fb.appendChild(toggle); fb.appendChild(box);
+  }
+  if(item.source_ref) fb.appendChild(el('div','fb-src','Source: '+esc(item.source_ref)));
+  return fb;
+}
+
+/* ── ITEM RUNNER ──────────────────────────────────────────────────────────
+   Renders one item, takes an answer, grades it, asks for confidence on
+   high-stakes items only (spec §10), then commits to the queue.
+   opts.defer  — pretest: grade silently, show nothing until the callback.
+   opts.commit — false for the pretest's first pass, which is re-shown later. */
+function runItem(host,item,opts,done){
+  opts=opts||{};
+  host.innerHTML='';
+  var card=el('div','card');
+
+  if(item.high_stakes) card.appendChild(el('div','pill hs','High stakes'));
+  var stim=stimulusEl(item);
+  if(stim) card.appendChild(stim);
+  if(item.stem) card.appendChild(el('div','stem',esc(item.stem)));
+
+  var hint='';
+  if(item.type==='mr'){
+    var sc=item.select_count||[2,3];
+    hint='Select '+(sc[0]===sc[1]?sc[0]:sc[0]+'–'+sc[1])+'. All of them must be right &mdash; no partial credit.';
+  } else if(item.type==='build_list'){ hint='Put these in order using the arrows.'; }
+  else if(item.type==='drag_drop'){ hint='Tap an option, then tap the group it belongs in.'; }
+  else if(item.type==='options_box'){ hint='Choose one for every row.'; }
+  if(hint) card.appendChild(el('div','stem-hint',hint));
+
+  var r=makeRenderer(item);
+  card.appendChild(r.el);
+
+  var submit=el('button','btn','Check answer');
+  submit.type='button'; submit.disabled=true;
+  card.appendChild(submit);
+  // build_list opens with a complete ordering, so it is answerable from the
+  // first frame. Its renderer announces that while it is being constructed,
+  // before this listener exists — so the state is read once directly rather
+  // than waiting for a change that may never come.
+  function refreshSubmit(){
+    var v=r.read();
+    var empty=v==null||(Array.isArray(v)&&!v.length)||
+      (typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length);
+    submit.disabled=empty;
+  }
+  card.addEventListener('answerchange',refreshSubmit);
+  refreshSubmit();
+
+  submit.onclick=function(){
+    var resp=r.read();
+    var correct=r.grade(resp);
+    submit.remove();
+    r.showAnswer();
+
+    function finish(confidence){
+      if(opts.commit!==false){ recordAnswer(item,correct,confidence,new Date()); saveState(); }
+      if(!opts.defer) card.appendChild(feedbackEl(item,correct));
+      var next=el('button','btn',opts.nextLabel||'Continue');
+      next.type='button';
+      next.onclick=function(){ done({correct:correct,confidence:confidence,response:resp}); };
+      card.appendChild(next);
+      next.scrollIntoView({block:'nearest',behavior:'smooth'});
+    }
+
+    // Confidence is asked only on high-stakes items — the friction cost is
+    // not worth it elsewhere (spec §10).
+    if(item.high_stakes){
+      var conf=el('div','conf');
+      conf.appendChild(el('div','conf-q','How sure were you?'));
+      var row=el('div','conf-btns');
+      ['sure','not sure'].forEach(function(label){
+        var b=el('button','btn '+(label==='sure'?'':'secondary'),label==='sure'?'Sure':'Not sure');
+        b.type='button';
+        b.onclick=function(){ conf.remove(); finish(label==='sure'?'sure':'unsure'); };
+        row.appendChild(b);
+      });
+      conf.appendChild(row); card.appendChild(conf);
+      conf.scrollIntoView({block:'nearest',behavior:'smooth'});
+    } else {
+      finish(null);
+    }
+  };
+
+  host.appendChild(card);
+  window.scrollTo(0,0);
+}
+
+/* ── §4.2 BLOCK RUNNER — the fixed seven-step sequence ────────────────── */
+function runBlock(block){
+  VIEW='block';
+  var host=$('screen-session');
+  show('screen-session');
+  var pretestResult=null;
+  var quizIds=(block.quiz||[]).slice();
+  var seq=[];
+
+  // 1 cold open
+  if(block.cold_open) seq.push({kind:'cold'});
+  // 2 pretest — answered before instruction, feedback deferred to step 6
+  if(block.pretest_item) seq.push({kind:'pretest',id:block.pretest_item});
+  // 3+4 content screens with inline checks woven between them
+  var checks=(block.inline_checks||[]).slice();
+  (block.screens||[]).forEach(function(scr,i){
+    seq.push({kind:'screen',screen:scr,i:i});
+    if(checks.length && i>0 && i%2===0) seq.push({kind:'check',id:checks.shift()});
+  });
+  checks.forEach(function(id){ seq.push({kind:'check',id:id}); });
+  // 5 block quiz
+  quizIds.forEach(function(id){ seq.push({kind:'quiz',id:id}); });
+  // 6 callback
+  seq.push({kind:'callback'});
+
+  var at=0;
+  STATE.blocks[block.id]=STATE.blocks[block.id]||{attempted:false,completed_at:null};
+  STATE.blocks[block.id].attempted=true;
+  saveState();
+
+  function dots(){
+    var d=el('div','progress-dots');
+    seq.forEach(function(s,i){
+      d.appendChild(el('span','dot'+(i<at?' done':(i===at?' on':''))));
+    });
+    return d;
+  }
+  function header(label){
+    var h=el('div');
+    h.appendChild(dots());
+    h.appendChild(el('div','step',label));
+    return h;
+  }
+  function step(){
+    if(at>=seq.length) return finishBlock();
+    var s=seq[at];
+    host.innerHTML='';
+    var top=el('div');
+
+    if(s.kind==='cold'){
+      var c=el('div','card');
+      c.appendChild(header('Cold open'));
+      c.appendChild(el('div','cold',md(block.cold_open.text)));
+      if(block.cold_open.decision_point)
+        c.appendChild(el('div','cold-dp',esc(block.cold_open.decision_point)));
+      var go=el('button','btn','Start'); go.type='button';
+      go.onclick=function(){ at++; step(); };
+      c.appendChild(go); top.appendChild(c); host.appendChild(top);
+      window.scrollTo(0,0); return;
+    }
+
+    if(s.kind==='pretest'){
+      var pc=el('div');
+      pc.appendChild(el('div','card',
+        '<div class="step">Before we start</div>'+
+        '<div style="font-size:13.5px;line-height:1.6;color:var(--gray)">'+
+        'One question first, before any of the content. <strong>Guessing is fine</strong> &mdash; '+
+        'being asked before you are taught is what makes the teaching stick. '+
+        'You will see this question again at the end, with the full reasoning.</div>'));
+      host.appendChild(pc);
+      var slot=el('div'); host.appendChild(slot);
+      var pit=itemById(s.id);
+      // Graded and queued now; the feedback is held back until the callback.
+      runItem(slot,pit,{defer:true,nextLabel:'Now the content'},function(res){
+        pretestResult=res; at++; step();
+      });
+      return;
+    }
+
+    if(s.kind==='screen'){
+      var sc=el('div','card');
+      sc.appendChild(header('Content'));
+      sc.appendChild(el('div','screen-body',md(s.screen.body_md)));
+      var words=String(s.screen.body_md||'').split(/\s+/).filter(Boolean).length;
+      sc.appendChild(el('div','wordcount',words+' words'));
+      var nx=el('button','btn','Next'); nx.type='button';
+      nx.onclick=function(){ at++; step(); };
+      sc.appendChild(nx); host.appendChild(sc);
+      window.scrollTo(0,0); return;
+    }
+
+    if(s.kind==='check'||s.kind==='quiz'){
+      var lbl=el('div');
+      lbl.appendChild(header(s.kind==='check'?'Quick check':'Block quiz'));
+      host.appendChild(lbl);
+      var slot2=el('div'); host.appendChild(slot2);
+      var it=itemById(s.id);
+      if(!it){ at++; return step(); }
+      if(it.type==='scenario') return runScenario(it,slot2,function(){ at++; step(); });
+      runItem(slot2,it,{},function(){ at++; step(); });
+      return;
+    }
+
+    if(s.kind==='callback'){
+      var cb=el('div','card');
+      cb.appendChild(header('Callback'));
+      if(block.cold_open)
+        cb.appendChild(el('div','stimulus',md(block.cold_open.text)));
+      cb.appendChild(el('div','screen-body',md(block.callback_md||'')));
+      host.appendChild(cb);
+
+      // Re-show the pretest item with the reasoning that was withheld.
+      if(block.pretest_item && pretestResult){
+        var pit2=itemById(block.pretest_item);
+        var pc2=el('div','card');
+        pc2.appendChild(el('div','card-lbl','The question from the start'));
+        pc2.appendChild(el('div','stem',esc(pit2.stem)));
+        pc2.appendChild(el('div','stem-hint',
+          pretestResult.correct?'You got this one before the content.':'You answered this before the content — here is the reasoning.'));
+        pc2.appendChild(feedbackEl(pit2,pretestResult.correct));
+        host.appendChild(pc2);
+      }
+      var doneBtn=el('button','btn','Finish block'); doneBtn.type='button';
+      doneBtn.onclick=finishBlock;
+      host.appendChild(doneBtn);
+      window.scrollTo(0,0); return;
+    }
+  }
+
+  function finishBlock(){
+    // Step 7 — queue commit. Every item entered the queue as it was answered;
+    // the block is marked attempted and completed, never mastered (spec §9).
+    STATE.blocks[block.id].completed_at=new Date().toISOString();
+    saveState().then(function(){
+      host.innerHTML='';
+      var c=el('div','card');
+      c.appendChild(el('div','card-lbl','Block complete'));
+      c.appendChild(el('div','screen-body',
+        '<p><strong>'+esc(block.learner_title||block.title)+'</strong> is done and every item you '+
+        'answered is in the review queue.</p><p>Completing a block is not the same as mastering it. '+
+        'Mastery is earned by getting these back right, later, after you have had time to forget them.</p>'));
+      host.appendChild(c);
+      var b=el('button','btn','Back to home'); b.type='button'; b.onclick=goHome;
+      host.appendChild(b);
+      window.scrollTo(0,0);
+    });
+  }
+  step();
+}
+
+/* scenario — one stimulus, 2–4 linked items (spec §5.1) */
+function runScenario(item,host,done){
+  var kids=(item.children||[]).map(itemById).filter(Boolean);
+  var i=0;
+  function step(){
+    if(i>=kids.length) return done();
+    host.innerHTML='';
+    var s=stimulusEl(item);
+    if(s){ var c=el('div','card'); c.appendChild(el('div','card-lbl','Scenario')); c.appendChild(s); host.appendChild(c); }
+    var slot=el('div'); host.appendChild(slot);
+    runItem(slot,kids[i],{nextLabel:i<kids.length-1?'Next question':'Continue'},function(){ i++; step(); });
+  }
+  step();
+}
+
+/* ── SESSIONS: due queue and drill (spec §4.3) ────────────────────────── */
+function runQueue(list,title){
+  VIEW='session';
+  var host=$('screen-session'); show('screen-session');
+  var i=0, right=0;
+  function step(){
+    if(i>=list.length){
+      host.innerHTML='';
+      var c=el('div','card');
+      c.appendChild(el('div','card-lbl',title+' complete'));
+      c.appendChild(el('div','screen-body','<p>'+right+' of '+list.length+' correct.</p>'+
+        '<p style="color:var(--gray);font-size:13px">Everything you answered has been rescheduled. '+
+        'The ones you missed will come back sooner.</p>'));
+      host.appendChild(c);
+      var b=el('button','btn','Back to home'); b.type='button'; b.onclick=goHome;
+      host.appendChild(b); window.scrollTo(0,0); return;
+    }
+    host.innerHTML='';
+    var head=el('div','card');
+    head.appendChild(el('div','card-lbl',title+' &mdash; '+(i+1)+' of '+list.length));
+    var d=el('div','progress-dots');
+    list.forEach(function(_,n){ d.appendChild(el('span','dot'+(n<i?' done':(n===i?' on':'')))); });
+    head.appendChild(d);
+    host.appendChild(head);
+    var slot=el('div'); host.appendChild(slot);
+    runItem(slot,list[i],{nextLabel:'Next'},function(res){ if(res.correct) right++; i++; step(); });
+  }
+  step();
+}
+
+/* ── HOME (spec §4.3 default ordering, §10) ───────────────────────────── */
+function renderHome(){
+  VIEW='home'; show('screen-home');
+  var c=$('screen-home'); c.innerHTML='';
+
+  if(SERIES.seed_throwaway){
+    c.appendChild(el('div','seed-banner',
+      esc(SERIES.notice||'')));
+  }
+
+  var due=dueItems(new Date());
+  var cap=STATE.settings.session_cap||DEFAULTS.session_cap;
+
+  // Due-count first, next block second. That ordering is the spacing
+  // principle expressed as UI (spec §4.3) — review outranks new material.
+  var hero=el('div','due-hero');
+  hero.appendChild(el('div','due-n',String(due.length)));
+  hero.appendChild(el('div','due-lbl','Due for review'));
+  hero.appendChild(el('div','due-sub',due.length
+    ? 'Reviewing what is due beats starting something new. Session capped at '+cap+' items.'
+    : 'Nothing is due right now. Starting a new block will fill the queue.'));
+  var rev=el('button','btn light','Review '+Math.min(due.length,cap)+' items');
+  rev.type='button'; rev.id='btn-review'; rev.disabled=!due.length;
+  rev.onclick=function(){ runQueue(due.slice(0,cap),'Review'); };
+  hero.appendChild(rev);
+  c.appendChild(hero);
+
+  var nb=nextBlock();
+  var sec=el('div','card');
+  sec.appendChild(el('div','card-lbl','Next block'));
+  if(nb){
+    var b=el('button','next-block'); b.type='button'; b.id='btn-next-block';
+    b.innerHTML='<span class="nb-ch">Ch '+nb.chapter+'</span>'+
+      '<span><span class="nb-t">'+esc(nb.learner_title||nb.title)+'</span>'+
+      '<span class="nb-s">'+(nb.est_minutes||6)+' min &middot; block '+esc(nb.id)+'</span></span>'+
+      '<span class="nb-arr">&#8250;</span>';
+    b.onclick=function(){ runBlock(nb); };
+    sec.appendChild(b);
+  } else {
+    sec.appendChild(el('div','empty','Every block in this series has been attempted. Keep the queue clear.'));
+  }
+  var drill=el('button','btn secondary','Drill &mdash; 10 rapid items');
+  drill.type='button'; drill.id='btn-drill';
+  drill.onclick=function(){ runQueue(drillItems(null,10),'Drill'); };
+  sec.appendChild(drill);
+  c.appendChild(sec);
+
+  // Two bars. Never merged — completion implying mastery is the standard
+  // failure mode of every EMS LMS these crews have already been through.
+  var comp=Mastery.completion(), mast=Mastery.masteryOverall();
+  var pcard=el('div','card');
+  pcard.appendChild(el('div','card-lbl','Progress'));
+  pcard.appendChild(bar('Blocks completed',comp.done+' of '+comp.total,comp.pct,'completion'));
+  pcard.appendChild(bar('Objectives mastered',mast.done+' of '+mast.total,mast.pct,'mastery'));
+  pcard.appendChild(el('div','bar-note',
+    'These are two different things. A block is complete when you have been through it. '+
+    'An objective is mastered only after three correct answers on three different items, '+
+    'spread over at least two intervals, the most recent of them a week or more apart.'));
+  var det=el('button','btn secondary tiny','Progress detail &amp; export');
+  det.type='button'; det.id='btn-progress'; det.style.marginTop='12px';
+  det.onclick=renderProgress;
+  pcard.appendChild(det);
+  c.appendChild(pcard);
+
+  if(STATE.streak_days){
+    c.appendChild(el('div','card','<div class="card-lbl">Streak</div>'+
+      '<div style="font-size:13.5px">'+STATE.streak_days+' day'+(STATE.streak_days===1?'':'s')+
+      ' in a row. <span style="color:var(--gray)">Shown because it supports turning up, '+
+      'not because it measures learning.</span></div>'));
+  }
+  window.scrollTo(0,0);
+}
+function bar(label,val,pct,cls){
+  var row=el('div','bar-row');
+  var top=el('div','bar-top');
+  top.appendChild(el('span','bar-lbl',esc(label)));
+  top.appendChild(el('span','bar-val',esc(val)));
+  row.appendChild(top);
+  var b=el('div','bar');
+  var f=el('div','bar-fill '+cls); f.style.width=Math.round(pct*100)+'%';
+  b.appendChild(f); row.appendChild(b);
+  return row;
+}
+
+/* ── PROGRESS + INSTRUCTOR EXPORT (spec §7.3, §9) ─────────────────────── */
+function renderProgress(){
+  VIEW='progress'; show('screen-progress');
+  var c=$('screen-progress'); c.innerHTML='';
+  var back=el('button','btn secondary','&#8592; Home'); back.type='button'; back.onclick=goHome;
+  c.appendChild(back);
+
+  var statuses=Mastery.objectiveStatuses();
+  var byCh={};
+  (SERIES.objectives||[]).forEach(function(o){ (byCh[o.chapter]=byCh[o.chapter]||[]).push(o); });
+
+  (SERIES.chapters||[]).forEach(function(ch){
+    var objs=byCh[ch.n]||[]; if(!objs.length) return;
+    var m=Mastery.chapter(ch.n);
+    var card=el('div','card');
+    card.appendChild(el('div','card-lbl','Chapter '+ch.n+' &mdash; '+esc(ch.title)));
+    card.appendChild(bar('Objectives mastered',m.done+' of '+m.total,m.pct,'mastery'));
+    if(m.mastered) card.appendChild(el('div','bar-note','<strong style="color:var(--ok)">Chapter mastered</strong> &mdash; at or above the 90% threshold.'));
+    var list=el('div'); list.style.marginTop='12px';
+    objs.forEach(function(o){
+      var st=statuses[o.id];
+      var colour=st==='mastered'?'var(--ok)':(st==='practicing'?'var(--teal2)':'var(--gray)');
+      list.appendChild(el('div','',
+        '<div style="display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--border);font-size:13px">'+
+        '<span style="width:9px;height:9px;border-radius:50%;background:'+colour+';flex-shrink:0"></span>'+
+        '<span style="flex:1">'+esc(o.text)+'</span>'+
+        '<span style="font-size:11px;color:'+colour+';font-weight:700;text-transform:uppercase;letter-spacing:.05em">'+
+        esc(st.replace('_',' '))+'</span></div>'));
+    });
+    card.appendChild(list);
+    c.appendChild(card);
+  });
+
+  // The confidently-wrong log — per spec §9 the most operationally useful
+  // report in the product, because it names what to spend classroom time on.
+  var cw=[];
+  Object.keys(STATE.items).forEach(function(id){
+    var r=STATE.items[id];
+    if(r.last_confidence==='sure' && r.last_correct===false){
+      var it=itemById(id);
+      if(it) cw.push({item:it,rec:r});
+    }
+  });
+  var cwCard=el('div','card');
+  cwCard.appendChild(el('div','card-lbl','Confidently wrong'));
+  if(cw.length){
+    cwCard.appendChild(el('div','bar-note',
+      'Answered with confidence and still missed. These are re-queued for tomorrow regardless of what the scheduler would otherwise say.'));
+    cw.forEach(function(x){
+      cwCard.appendChild(el('div','',
+        '<div style="padding:9px 0;border-top:1px solid var(--border);font-size:13px;line-height:1.5">'+
+        '<span class="pill hs">Ch '+x.item.chapter+'</span> '+esc(x.item.stem.slice(0,110))+
+        (x.item.stem.length>110?'&hellip;':'')+'</div>'));
+    });
+  } else {
+    cwCard.appendChild(el('div','empty','Nothing yet. This fills up as you answer high-stakes items.'));
+  }
+  c.appendChild(cwCard);
+
+  var ex=el('div','card');
+  ex.appendChild(el('div','card-lbl','Your record'));
+  ex.appendChild(el('div','bar-note',
+    'Everything is stored on this device. Export to move to a new phone, or to hand your instructor a progress file &mdash; there is no server holding any of this.'));
+  var row=el('div','btn-row');
+  var expBtn=el('button','btn secondary','Export JSON'); expBtn.type='button'; expBtn.id='btn-export';
+  expBtn.onclick=exportState;
+  var impBtn=el('button','btn secondary','Import JSON'); impBtn.type='button'; impBtn.id='btn-import';
+  impBtn.onclick=importState;
+  row.appendChild(expBtn); row.appendChild(impBtn);
+  ex.appendChild(row);
+  c.appendChild(ex);
+  window.scrollTo(0,0);
+}
+
+function exportState(){
+  var payload={ exported_at:new Date().toISOString(), series:SERIES.id,
+                series_version:SERIES.version, state:STATE };
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var name='aemt-progress-'+dayKey(new Date())+'.json';
+  var file=null;
+  try{ file=new File([blob],name,{type:'application/json'}); }catch(e){}
+  if(file && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:'AEMT progress'}).catch(function(err){
+      if(!err||err.name!=='AbortError') downloadBlob(blob,name);
+    });
+    return;
+  }
+  downloadBlob(blob,name);
+}
+function downloadBlob(blob,name){
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); },60000);
+}
+function importState(){
+  var inp=document.createElement('input');
+  inp.type='file'; inp.accept='application/json,.json';
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0]; if(!f) return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      try{
+        var p=JSON.parse(rd.result);
+        var s=p.state||p;
+        if(!s||!s.items||!s.schema_version) throw new Error('not an AEMT progress file');
+        STATE=s;
+        STATE.settings=STATE.settings||JSON.parse(JSON.stringify(DEFAULTS));
+        saveState().then(function(){ alert('Progress imported.'); renderProgress(); });
+      }catch(e){ alert('Could not import that file: '+e.message); }
+    };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+
+/* ── SHELL ────────────────────────────────────────────────────────────── */
+function $(id){ return document.getElementById(id); }
+function show(id){
+  ['boot','screen-home','screen-session','screen-progress'].forEach(function(s){
+    var e=$(s); if(e) e.classList.toggle('hidden',s!==id);
+  });
+}
+function goHome(){ renderHome(); }
+
+function boot(){
+  if(!window.FSRS){
+    $('boot').textContent='The scheduler failed to load. Reload the page.';
+    return;
+  }
+  Promise.all([
+    fetch(SERIES_URL,{cache:'no-cache'}).then(function(r){
+      if(!r.ok) throw new Error('series '+r.status);
+      return r.json();
+    }),
+    DB.get().catch(function(){ return null; })
+  ]).then(function(res){
+    SERIES=res[0];
+    STATE=res[1]||freshState();
+    STATE.settings=STATE.settings||JSON.parse(JSON.stringify(DEFAULTS));
+    STATE.items=STATE.items||{}; STATE.objectives=STATE.objectives||{}; STATE.blocks=STATE.blocks||{};
+    $('hdr-sub').textContent=SERIES.section?('Section '+SERIES.section):'Preparatory';
+    renderHome();
+    window.__AEMT_READY=true;
+  }).catch(function(e){
+    $('boot').textContent='Could not load the series: '+e.message;
+    window.__AEMT_ERROR=String(e.message||e);
+  });
+}
+
+// Exposed for the test suite to drive the scheduler and the mastery model
+// directly, without having to click through a week of reviews.
+window.AEMT={
+  get series(){ return SERIES; }, get state(){ return STATE; },
+  set state(v){ STATE=v; },
+  Sched:Sched, Mastery:Mastery, Render:Render,
+  recordAnswer:recordAnswer, dueItems:dueItems, drillItems:drillItems,
+  nextBlock:nextBlock, itemById:itemById, blockById:blockById,
+  freshState:freshState, saveState:saveState, renderHome:renderHome,
+  DEFAULTS:DEFAULTS, LAPSE_FLOOR_DAYS:LAPSE_FLOOR_DAYS, addDays:addDays, dayKey:dayKey
+};
+
+boot();
+</script>
+</body>
+</html>
