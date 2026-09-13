@@ -188,7 +188,7 @@ async function answerItem(page, itemId, how) {
   check("A11 and flags them as not yet instructor-reviewed",
     /not yet instructor-reviewed/i.test(about));
   check("A12 and names the chapters that are still placeholder",
-    /Placeholder so far/i.test(about) && /Ch 4/.test(about));
+    /Placeholder so far/i.test(about) && /Ch 7/.test(about));
   // A chapter that records in its own file what it deliberately left out is
   // only being honest if the learner can read it.
   const notices = await p.locator(".about-n").count();
@@ -235,7 +235,7 @@ async function answerItem(page, itemId, how) {
   const r = await p.evaluate(() => {
     const A = window.AEMT;
     const hs = A.itemById("itm-3.5.001");      // high_stakes
-    const lo = A.itemById("itm-seed.016");     // not high_stakes
+    const lo = A.itemById("itm-4.1.001");      // not high_stakes
     // Build a real history forward in time, then branch at one moment so the
     // three outcomes are compared from identical state.
     let prev = null, d = new Date("2026-01-01T12:00:00Z");
@@ -280,7 +280,7 @@ async function answerItem(page, itemId, how) {
       return { gaps, stability: prev.stability };
     }
     return { high: drive(A.itemById("itm-3.5.001"), 12),
-             low:  drive(A.itemById("itm-seed.016"), 12),
+             low:  drive(A.itemById("itm-4.1.001"), 12),
              floor: A.LAPSE_FLOOR_DAYS };
   });
   // If intervals never expand, the scheduler is running but spacing is not —
@@ -1562,6 +1562,131 @@ async function answerItem(page, itemId, how) {
       .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
     JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
   check("Z no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AA. Chapter 4, Communications and Documentation ───────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch4 = (x) => x.chapter === 4;
+    return { blocks: A.series.blocks.filter(ch4).length,
+             items: A.series.items.filter(ch4).length,
+             objectives: A.series.objectives.filter(ch4).length,
+             seedLeft: A.series.blocks.filter((b) => ch4(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch4(i) && i.seed_throwaway).length,
+             meta: A.series.chapter_meta[4],
+             noEnables: A.series.objectives.filter(ch4).filter((o) => !o.enables).map((o) => o.id),
+             noSource: A.series.items.filter(ch4).filter((i) => !i.source_ref).map((i) => i.id) };
+  });
+  check("AA1 nine teaching blocks and an integration block", r.blocks === 10, String(r.blocks));
+  check("AA2 eighty-one items", r.items === 81, String(r.items));
+  check("AA3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("AA4 the chapter is not marked seed", r.meta.seed === false);
+  check("AA5 it declares its review status honestly",
+    r.meta.review_status === "unreviewed", r.meta.review_status);
+  check("AA6 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("AA7 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+
+  // 4.5 was written without a decision on which named handover format this
+  // service uses. It must teach the structure and claim no more than the
+  // evidence supports, and it must not quietly adopt one.
+  const hand = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const b = A.series.blocks.find((x) => x.id === "4.5");
+    const text = b.callback_md + " " + b.screens.map((s) => s.body_md).join(" ");
+    return { claim: right("itm-4.5.001"), text,
+             notice: (A.series.chapter_meta[4] || {}).notice || "",
+             namesTool: /\bSBAR\b|\bIMIST\b|\bAMBO\b|\bMIST\b/.test(text) };
+  });
+  check("AA8 the handover claim is structure, not a named tool",
+    /Structure reduces information loss/i.test(hand.claim[0]) &&
+    /weak/i.test(hand.claim[0]), JSON.stringify(hand.claim));
+  check("AA9 the block does not adopt a named format of its own", hand.namesTool === false);
+  check("AA10 and says the choice is a local one",
+    /local layer|local overlay/i.test(hand.text), hand.text.slice(-200));
+  check("AA11 the chapter notice records the undecided choice",
+    /local-overlay decision|local overlay/i.test(hand.notice), hand.notice.slice(0, 140));
+
+  // The documentation answers that decide whether a record is evidence or a
+  // liability. Softening any of these would make the chapter worse than silent.
+  const doc = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const hs = (id) => A.itemById(id).high_stakes;
+    return { correction: right("itm-4.8.001"), correctionHs: hs("itm-4.8.001"),
+             falsify: right("itm-4.8.002"), audit: right("itm-4.8.008"),
+             objective: right("itm-4.7.001"), objectiveHs: hs("itm-4.7.001"),
+             unrecorded: right("itm-4.6.006"),
+             refusal: right("itm-4.9.001"), restraint: right("itm-4.9.002") };
+  });
+  check("AA12 a correction shows the original entry, not a clean rewrite",
+    /shows the original entry/i.test(doc.correction[0]) && doc.correctionHs === true,
+    JSON.stringify(doc.correction));
+  check("AA13 falsification is defined by intent to misrepresent",
+    /did not happen|conceal/i.test(doc.falsify[0]), JSON.stringify(doc.falsify));
+  check("AA14 and the audit trail is stated plainly",
+    /logged/i.test(doc.audit[0]), JSON.stringify(doc.audit));
+  check("AA15 objective means observed, measured or quoted",
+    /observed or measured/i.test(doc.objective[0]) && doc.objectiveHs === true,
+    JSON.stringify(doc.objective));
+  check("AA16 unrecorded care is treated as not having happened",
+    /not having happened/i.test(doc.unrecorded[0]), JSON.stringify(doc.unrecorded));
+  check("AA17 a refusal record is a conversation, not a signature",
+    /capacity assessment as a conversation/i.test(doc.refusal[0]), JSON.stringify(doc.refusal));
+  check("AA18 restraint documentation includes the monitoring",
+    /circulation and respiration/i.test(doc.restraint[0]), JSON.stringify(doc.restraint));
+
+  // 4.2 rests on a real finding about interpreters. If it ever softens into
+  // "use a family member if the patient agrees", the block has lost its point.
+  const barrier = await p.evaluate(() => {
+    const A = window.AEMT;
+    const it = A.itemById("itm-4.2.001");
+    return { right: (it.options || []).filter((o) => o.correct).map((o) => o.text),
+             hs: it.high_stakes, src: it.source_ref };
+  });
+  check("AA19 family interpreters are flagged for error rate and reticence",
+    /more clinically significant errors/i.test(barrier.right[0]) &&
+    /withhold/i.test(barrier.right[0]) && barrier.hs === true, JSON.stringify(barrier.right));
+  check("AA20 and the claim is cited to the review it comes from",
+    /Flores/i.test(barrier.src), barrier.src);
+
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 4)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length, screens: b.screens.length })));
+  check("AA21 every block opens on a decision point and answers it",
+    shape.every((b) => b.dp && b.cb), JSON.stringify(shape.filter((b) => !b.dp || !b.cb)));
+  check("AA22 every teaching block runs three to five screens and quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id))
+      .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
+  check("AA no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AB. Chapters 1-5 are written; the Phase 1 seed is down to 6-9 ─────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const written = [1, 2, 3, 4, 5];
+    const meta = A.series.chapter_meta;
+    return { writtenSeed: written.filter((n) => (meta[n] || {}).seed !== false),
+             pendingSeed: [6, 7, 8, 9].filter((n) => (meta[n] || {}).seed !== true),
+             throwawayLeft: A.series.items.filter((i) => i.seed_throwaway)
+               .map((i) => i.chapter).filter((c, k, a) => a.indexOf(c) === k).sort(),
+             itemsByChapter: written.map((n) => A.series.items.filter((i) => i.chapter === n).length),
+             reviewed: written.filter((n) => (meta[n] || {}).review_status !== "unreviewed") };
+  });
+  check("AB1 chapters 1 to 5 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
+  check("AB2 chapters 6 to 9 are still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
+  check("AB3 no throwaway content remains outside chapters 6 to 9",
+    r.throwawayLeft.every((c) => c >= 6), JSON.stringify(r.throwawayLeft));
+  check("AB4 every authored chapter carries a real item bank",
+    r.itemsByChapter.every((n) => n >= 55), JSON.stringify(r.itemsByChapter));
+  // None of this has been through a second instructor, and the app has to keep
+  // saying so for as long as that is true.
+  check("AB5 and none of them claims to be reviewed",
+    r.reviewed.length === 0, r.reviewed.join(","));
+  check("AB no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();
