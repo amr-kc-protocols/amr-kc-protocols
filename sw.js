@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v16';
+const CACHE = 'amrkc-2026-v17';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -19,10 +19,13 @@ const ASSETS = [
   // the whole point of the queue is that it runs client-side with no network.
   // The shell, the content and the scheduler all have to be here already.
   './aemt-series.html',
+  './aemt/series.json',
+  './aemt/ch05-terminology.json',
   './aemt/series-preparatory.json',
   './aemt/fsrs-5.4.2.umd.js',
   './aemt/seed-tpopp-placeholder.svg',
-  './aemt/seed-airway-placeholder.svg'
+  './aemt/seed-airway-placeholder.svg',
+  './aemt/fig-abdominal-quadrants.svg'
 ];
 
 self.addEventListener('install', e => {

@@ -59,6 +59,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
   color:var(--teal2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .seed-banner{background:var(--warn-bg);border:1px solid var(--warn-br);color:var(--warn);
   border-radius:10px;padding:11px 13px;font-size:12px;font-weight:600;line-height:1.5;margin-bottom:14px}
+.about{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px;margin-bottom:14px}
+.about-t{font-size:13.5px;font-weight:700;color:var(--teal);margin-bottom:6px}
+.about-b{font-size:12px;color:var(--gray);line-height:1.55;margin-top:7px}
+.about-b strong{color:var(--ink)}
+.about-flag{color:var(--warn);font-weight:700}
 
 /* ── HOME: due-count first (spec §4.3, §10) ───────────────────────────── */
 .due-hero{background:linear-gradient(135deg,#0b3f75,#14406f 45%,#0e7490);color:#fff;
@@ -309,7 +315,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
    ════════════════════════════════════════════════════════════════════════ */
 
 var SERIES=null, STATE=null, VIEW='home';
-var SERIES_URL='aemt/series-preparatory.json';
+/* The series is a manifest plus one file per chapter. 755 items in a single
+   document would be neither reviewable in a diff nor replaceable a chapter at
+   a time, and chapters arrive in build order rather than chapter order. */
+var SERIES_URL='aemt/series.json';
 
 /* ── §8.2 parameters ──────────────────────────────────────────────────── */
 var DEFAULTS={
@@ -1065,7 +1074,10 @@ Render.graphical=function(item){
 var PART_KINDS=[['prefix','Prefix'],['root','Root'],['suffix','Suffix'],['vowel','Combining vowel']];
 
 /* §5 note: build and recall only once the learner has seen a card twice. */
-function termMode(rec){
+function termMode(rec,card){
+  // A word-part card is one morpheme — nothing to split and nothing to
+  // assemble, so it is production from the first showing.
+  if(card && (!card.parts || card.parts.length<2)) return 'recall';
   var reps=(rec&&rec.reps)||0;
   if(reps<2) return 'decompose';
   if(reps<4) return 'build';
@@ -1663,7 +1675,7 @@ function runTerms(list){
       host.appendChild(b); window.scrollTo(0,0); return;
     }
     var card=list[i];
-    var mode=termMode(STATE.terms[card.id]);
+    var mode=termMode(STATE.terms[card.id],card);
     host.innerHTML='';
     var head=el('div','card');
     head.appendChild(el('div','card-lbl','Term bank &mdash; '+(i+1)+' of '+list.length));
@@ -1722,10 +1734,29 @@ function renderHome(){
   VIEW='home'; show('screen-home');
   var c=$('screen-home'); c.innerHTML='';
 
-  if(SERIES.seed_throwaway){
-    c.appendChild(el('div','seed-banner',
-      esc(SERIES.notice||'')));
+  // What this is, and which chapters are real. A single series-wide banner
+  // stopped being true the moment one chapter was authored.
+  var meta=SERIES.chapter_meta||{};
+  var built=(SERIES.chapters||[]).filter(function(ch){ return meta[ch.n] && !meta[ch.n].seed; });
+  var pending=(SERIES.chapters||[]).filter(function(ch){ return !meta[ch.n] || meta[ch.n].seed; });
+  var about=el('div','about');
+  about.innerHTML='<div class="about-t">A study tool, not a course of record.</div>'+
+    '<div class="about-b">Preparation before a course, or revision alongside one. It does not '+
+    'certify anything, and it cannot teach a psychomotor skill &mdash; those are learned and '+
+    'checked in person.</div>';
+  if(built.length){
+    about.appendChild(el('div','about-b','<strong>Written:</strong> '+
+      built.map(function(ch){
+        return 'Ch '+ch.n+' '+esc(ch.title)+
+          (meta[ch.n].review_status==='unreviewed'?' <span class="about-flag">not yet instructor-reviewed</span>':'');
+      }).join(' &middot; ')));
   }
+  if(pending.length){
+    about.appendChild(el('div','about-b','<strong>Placeholder so far:</strong> '+
+      pending.map(function(ch){ return 'Ch '+ch.n; }).join(', ')+
+      ' &mdash; seed content that exercises the engine, not teaching material.'));
+  }
+  c.appendChild(about);
 
   var due=dueItems(new Date());
   var cap=STATE.settings.session_cap||DEFAULTS.session_cap;
@@ -1980,6 +2011,47 @@ function show(id){
 }
 function goHome(){ renderHome(); }
 
+/* Fetch every source the manifest lists and fold them into one series.
+   Placeholder content yields to real content: once a chapter has an authored
+   file, the seed's blocks, items, objectives and terms for that chapter are
+   dropped rather than sitting alongside it. */
+function loadSources(manifest){
+  var srcs=manifest.sources||[];
+  return Promise.all(srcs.map(function(src){
+    return fetch(src.file,{cache:'no-cache'}).then(function(r){
+      if(!r.ok) throw new Error(src.file+' '+r.status);
+      return r.json();
+    }).then(function(doc){ return {src:src,doc:doc}; });
+  })).then(function(loaded){
+    var authored={};
+    loaded.forEach(function(l){
+      if(!l.src.seed) (l.src.chapters||[]).forEach(function(n){ authored[n]=1; });
+    });
+    var out={ id:manifest.id, title:manifest.title, section:manifest.section,
+              version:manifest.version, schema_version:manifest.schema_version,
+              chapters:manifest.chapters||[], chapter_meta:{},
+              objectives:[], blocks:[], items:[], terms:[] };
+    loaded.forEach(function(l){
+      var seed=!!l.src.seed;
+      var keep=function(x){ return !(seed && authored[x.chapter]); };
+      ['objectives','blocks','items','terms'].forEach(function(k){
+        out[k]=out[k].concat((l.doc[k]||[]).filter(keep));
+      });
+      (l.src.chapters||[]).forEach(function(n){
+        out.chapter_meta[n]={ seed:seed,
+          review_status:l.doc.review_status||(seed?'placeholder':'unreviewed'),
+          sources:l.doc.sources||null, file:l.src.file };
+      });
+    });
+    (out.chapters||[]).forEach(function(c){
+      if(!out.chapter_meta[c.n]) out.chapter_meta[c.n]={seed:true,review_status:'not built',file:null};
+    });
+    out.seed_throwaway=Object.keys(out.chapter_meta).some(function(n){
+      return out.chapter_meta[n].seed; });
+    return out;
+  });
+}
+
 function boot(){
   if(!window.FSRS){
     $('boot').textContent='The scheduler failed to load. Reload the page.';
@@ -1989,7 +2061,7 @@ function boot(){
     fetch(SERIES_URL,{cache:'no-cache'}).then(function(r){
       if(!r.ok) throw new Error('series '+r.status);
       return r.json();
-    }),
+    }).then(loadSources),
     DB.get().catch(function(){ return null; })
   ]).then(function(res){
     SERIES=res[0];
@@ -2010,7 +2082,7 @@ window.AEMT={
   set state(v){ STATE=v; },
   Sched:Sched, Mastery:Mastery, Render:Render,
   recordAnswer:recordAnswer, dueItems:dueItems, drillItems:drillItems,
-  Term:Term, termMode:termMode, termMatches:termMatches, levenshtein:levenshtein,
+  Term:Term, termMode:termMode, termMatches:termMatches, levenshtein:levenshtein, loadSources:loadSources,
   makeTermRenderer:makeTermRenderer, dueTerms:dueTerms, recordTerm:recordTerm, termById:termById,
   objectiveTier:objectiveTier, isQueued:isQueued, gateFor:gateFor,
   recordVerification:recordVerification, verificationFor:verificationFor,
