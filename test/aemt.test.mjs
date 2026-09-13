@@ -160,9 +160,13 @@ async function answerItem(page, itemId, how) {
       .filter((i) => i.seed_throwaway === true).map((i) => i.id),
   }));
   // §12 asked for 20 throwaway items for the Phase 1 engine. v1.1 adds its own
-  // on top, so the v1.0 portion is what that number refers to.
-  check("A3 the Phase 1 seed still carries its 20 items",
-    s.v10Items === 20, String(s.v10Items) + " of " + String(s.items));
+  // on top, so the v1.0 portion is what that number refers to. Read it from the
+  // seed file rather than from what is loaded: an authored chapter drops its
+  // seed, so the loaded count falls as chapters are written.
+  const seedDoc = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series-preparatory.json"), "utf8"));
+  check("A3 the Phase 1 seed file still carries its 20 items",
+    seedDoc.items.filter((i) => i.chapter <= 4).length === 20,
+    String(seedDoc.items.length) + " in file, " + String(s.items) + " loaded");
   check("A4 every NREMT item type is represented",
     ["build_list", "drag_drop", "graphical", "mc", "mr", "options_box", "scenario"]
       .every((t) => s.types.includes(t)), s.types.join(","));
@@ -191,7 +195,7 @@ async function answerItem(page, itemId, how) {
 /* ── B. The seven renderers, right and wrong (§5.1) ────────────────────── */
 { const p = await open();
   const cases = [
-    ["mc", "itm-seed.002"], ["mr", "itm-seed.004"], ["build_list", "itm-seed.006"],
+    ["mc", "itm-1.1.001"], ["mr", "itm-seed.004"], ["build_list", "itm-seed.006"],
     ["drag_drop", "itm-seed.008"], ["options_box", "itm-seed.010"], ["graphical", "itm-seed.011"],
   ];
   for (const [type, id] of cases) {
@@ -294,7 +298,7 @@ async function answerItem(page, itemId, how) {
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const item = A.itemById("itm-seed.002");   // chapter 1, not high stakes
+    const item = A.itemById("itm-1.1.001");    // chapter 1, not high stakes
     const now = new Date("2026-09-11T12:00:00Z");
     const noAnchor = A.Sched.review(item, null, true, null, now).due;
     A.state.settings.course_dates = { "1": "2026-09-25" };
@@ -1309,6 +1313,77 @@ async function answerItem(page, itemId, how) {
   check("W7 and it is original rather than third-party",
     /Original schematic/i.test(hs.licence || ""), hs.licence);
   check("W no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── X. Chapter 1, EMS Systems ─────────────────────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch1 = (x) => x.chapter === 1;
+    return { blocks: A.series.blocks.filter(ch1).length,
+             items: A.series.items.filter(ch1).length,
+             objectives: A.series.objectives.filter(ch1).length,
+             seedLeft: A.series.blocks.filter((b) => ch1(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch1(i) && i.seed_throwaway).length,
+             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 3 && b.seed_throwaway).length,
+             meta: A.series.chapter_meta[1],
+             tiers: [...new Set(A.series.objectives.filter(ch1).map((o) => o.tier))].sort(),
+             noEnables: A.series.objectives.filter(ch1).filter((o) => !o.enables).map((o) => o.id) };
+  });
+  check("X1 seven teaching blocks and an integration block",
+    r.blocks === 8, String(r.blocks));
+  check("X2 sixty-eight items", r.items === 68, String(r.items));
+  check("X3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("X4 while other chapters keep theirs", r.otherSeedKept > 0, String(r.otherSeedKept));
+  check("X5 the chapter is not marked seed", r.meta.seed === false);
+  check("X6 it declares its review status honestly",
+    r.meta.review_status === "unreviewed", r.meta.review_status);
+  check("X7 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("X8 and the tiers are set", r.tiers.join(",") === "context,core", r.tiers.join(","));
+
+  // v1.0 §11.2 — nothing traces to the textbook, and Kansas/AMR specifics are
+  // deliberately absent: the base module has to stay portable.
+  const src = await p.evaluate(() => {
+    const A = window.AEMT;
+    const refs = A.series.items.filter((i) => i.chapter === 1).map((i) => i.source_ref);
+    const text = A.series.blocks.filter((b) => b.chapter === 1)
+      .map((b) => b.callback_md + b.screens.map((x) => x.body_md).join(" ")).join(" ");
+    return { missing: refs.filter((x) => !x).length,
+             textbook: refs.filter((x) => /jones|bartlett|emergency care and transportation/i.test(x || "")).length,
+             localClaim: /Kansas AEMT scope is|KC standing order (?:is|says)/i.test(text) };
+  });
+  check("X9 every item cites a source", src.missing === 0, String(src.missing));
+  check("X10 none of them is the textbook", src.textbook === 0, String(src.textbook));
+  check("X11 no unsourced Kansas or AMR KC specifics are asserted", src.localClaim === false);
+
+  // 1.2 is the block the chapter is built around: scope is a legal ceiling
+  // nobody on scene can move. Wrong answers here are the ones that end licences.
+  const scope = await p.evaluate(() => {
+    const A = window.AEMT;
+    const pick = (id) => { const it = A.itemById(id);
+      return { hs: it.high_stakes, correct: (it.options || []).filter((o) => o.correct).map((o) => o.text) }; };
+    return { partner: pick("itm-1.1.005"), narrower: pick("itm-1.2.003"), order: pick("itm-1.4.004") };
+  });
+  check("X12 a paramedic cannot widen your scope",
+    /Decline/i.test(scope.partner.correct[0]) && scope.partner.hs === true,
+    JSON.stringify(scope.partner));
+  check("X13 protocol narrower than scope governs",
+    /^No/.test(scope.narrower.correct[0]) && scope.narrower.hs === true,
+    JSON.stringify(scope.narrower));
+  check("X14 and neither can a physician on the radio",
+    scope.order.correct.length === 1 && scope.order.hs === true, JSON.stringify(scope.order));
+
+  // §4.2 — every block opens on a decision point and closes by answering it.
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 1)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length })));
+  check("X15 every block opens on a decision point", shape.every((b) => b.dp),
+    JSON.stringify(shape.filter((b) => !b.dp)));
+  check("X16 and closes by answering it", shape.every((b) => b.cb));
+  check("X17 every teaching block quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id)).every((b) => b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.quiz)));
+  check("X no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();

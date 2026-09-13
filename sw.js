@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v17';
+const CACHE = 'amrkc-2026-v18';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -20,6 +20,7 @@ const ASSETS = [
   // The shell, the content and the scheduler all have to be here already.
   './aemt-series.html',
   './aemt/series.json',
+  './aemt/ch01-ems-systems.json',
   './aemt/ch05-terminology.json',
   './aemt/series-preparatory.json',
   './aemt/fsrs-5.4.2.umd.js',
