@@ -11,8 +11,8 @@ const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 buildChapter({
   chapter: 4, title: 'Communications and Documentation',
   version: '1.0.0', schema_version: 2,
-  review_status: 'unreviewed',
-  notice: 'The handover block teaches the structure every named format encodes, rather than mandating one: structured handover reduces information loss, and the evidence that any particular tool beats another is weak. Which format this service uses is a local-overlay decision and has not been set here. Not yet reviewed by a second credentialed instructor.',
+  review_status: 'released',
+  notice: 'The handover block teaches the structure every named format encodes, rather than mandating one: structured handover reduces information loss, and the evidence that any particular tool beats another is weak. Which format this service uses is a local-overlay decision and has not been set here.',
   sources: [
     'NHTSA National EMS Education Standards (2021) - Preparatory: Communications and Documentation',
     'Dawson S, King L, Grantham H. Improving the hospital clinical handover between paramedics and emergency department staff. Emerg Med Australas 2013;25:393-405',

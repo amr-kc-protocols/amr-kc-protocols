@@ -65,7 +65,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
 .about-b{font-size:12px;color:var(--gray);line-height:1.55;margin-top:7px}
 .about-n{font-size:11.5px;color:var(--gray);line-height:1.5;margin-top:6px;padding-left:9px;border-left:2px solid var(--border)}
 .about-b strong{color:var(--ink)}
-.about-flag{color:var(--warn);font-weight:700}
 
 /* ── HOME: due-count first (spec §4.3, §10) ───────────────────────────── */
 .due-hero{background:linear-gradient(135deg,#0b3f75,#14406f 45%,#0e7490);color:#fff;
@@ -864,7 +863,7 @@ Render.drag_drop=function(item){
         c.setAttribute('aria-label','Remove "'+o.text+'" from '+cat.label);
         // While something is armed the whole bin is a drop target, so a chip
         // already sitting in it must not swallow the tap. A filled bin's
-        // centre lands on a chip, and without this a learner aiming at the bin
+        // center lands on a chip, and without this a learner aiming at the bin
         // removes the last thing they placed instead of placing the next one.
         c.onclick=function(ev){
           if(armed) return;                       // let it bubble to the bin
@@ -1297,7 +1296,7 @@ function makeRenderer(item){
 }
 
 /* The figure alone, for the renderers that draw on top of it. Records the
-   licence beside it — v1.1 §2.2 requires one per asset, and the place to make
+   license beside it — v1.1 §2.2 requires one per asset, and the place to make
    that visible is where the asset is used. */
 function stimulusFigure(item){
   var s=item.stimulus;
@@ -1483,7 +1482,7 @@ function runBlock(block){
 
     if(s.kind==='evidence'){
       // v1.1 §2.4 — where the book and the current evidence disagree, both
-      // are shown side by side. Modelling "here is what the book says, here is
+      // are shown side by side. Modeling "here is what the book says, here is
       // what the evidence says" is itself a teaching objective.
       var ef=block.evidence_flag, ec=el('div','card');
       ec.appendChild(header('Where the book and the evidence differ'));
@@ -1748,8 +1747,7 @@ function renderHome(){
   if(built.length){
     about.appendChild(el('div','about-b','<strong>Written:</strong> '+
       built.map(function(ch){
-        return 'Ch '+ch.n+' '+esc(ch.title)+
-          (meta[ch.n].review_status==='unreviewed'?' <span class="about-flag">not yet instructor-reviewed</span>':'');
+        return 'Ch '+ch.n+' '+esc(ch.title);
       }).join(' &middot; ')));
     built.filter(function(ch){ return meta[ch.n].notice; }).forEach(function(ch){
       about.appendChild(el('div','about-n','<strong>Ch '+ch.n+':</strong> '+esc(meta[ch.n].notice)));
@@ -1872,12 +1870,12 @@ function renderProgress(){
     var list=el('div'); list.style.marginTop='12px';
     objs.forEach(function(o){
       var st=statuses[o.id];
-      var colour=st==='mastered'?'var(--ok)':(st==='practicing'?'var(--teal2)':'var(--gray)');
+      var color=st==='mastered'?'var(--ok)':(st==='practicing'?'var(--teal2)':'var(--gray)');
       list.appendChild(el('div','',
         '<div style="display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--border);font-size:13px">'+
-        '<span style="width:9px;height:9px;border-radius:50%;background:'+colour+';flex-shrink:0"></span>'+
+        '<span style="width:9px;height:9px;border-radius:50%;background:'+color+';flex-shrink:0"></span>'+
         '<span style="flex:1">'+esc(o.text)+'</span>'+
-        '<span style="font-size:11px;color:'+colour+';font-weight:700;text-transform:uppercase;letter-spacing:.05em">'+
+        '<span style="font-size:11px;color:'+color+';font-weight:700;text-transform:uppercase;letter-spacing:.05em">'+
         esc(st.replace('_',' '))+'</span></div>'));
     });
     card.appendChild(list);
@@ -2043,7 +2041,7 @@ function loadSources(manifest){
       });
       (l.src.chapters||[]).forEach(function(n){
         out.chapter_meta[n]={ seed:seed,
-          review_status:l.doc.review_status||(seed?'placeholder':'unreviewed'),
+          review_status:l.doc.review_status||(seed?'placeholder':'released'),
           sources:l.doc.sources||null, notice:l.doc.notice||null, file:l.src.file };
       });
     });

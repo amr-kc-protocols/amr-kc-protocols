@@ -185,8 +185,10 @@ async function answerItem(page, itemId, how) {
     /does not certify/i.test(about), about.slice(0, 160));
   check("A10 it names the chapters that are written",
     /Written:/.test(about) && /Ch 5/.test(about), about.slice(0, 200));
-  check("A11 and flags them as not yet instructor-reviewed",
-    /not yet instructor-reviewed/i.test(about));
+  // No second reviewer is part of this series, so the page must not imply one
+  // is pending — and must not claim a review that never happened either.
+  check("A11 and claims no review it has not had",
+    !/instructor-reviewed|peer.reviewed|reviewed by/i.test(about), about.slice(0, 200));
   check("A12 and names the chapters that are still placeholder",
     /Placeholder so far/i.test(about) && /Ch 7/.test(about));
   // A chapter that records in its own file what it deliberately left out is
@@ -579,7 +581,7 @@ async function answerItem(page, itemId, how) {
     return r;
   });
   check("J3 build_list is reorderable by button", noDrag.orderButtons > 0, String(noDrag.orderButtons));
-  check("J4 and those buttons are labelled", noDrag.orderLabelled === true);
+  check("J4 and those buttons are labeled", noDrag.orderLabelled === true);
   check("J5 drag_drop is operable by tapping", noDrag.ddTapTargets > 0, String(noDrag.ddTapTargets));
   check("J6 neither depends on a drag gesture", noDrag.usesHtml5Drag === false);
   await p.context().close(); }
@@ -608,11 +610,11 @@ async function answerItem(page, itemId, how) {
   check("K no separate manifest — same PWA", !/rel=["']manifest["']/.test(page));
   check("K the scheduler is vendored, not fetched from a CDN",
     /src="aemt\/fsrs-5\.4\.2\.umd\.js"/.test(page) && !/cdn|unpkg|jsdelivr/i.test(page));
-  check("K the vendored library keeps its licence",
+  check("K the vendored library keeps its license",
     fs.existsSync(path.join(ROOT, "aemt/fsrs-5.4.2.LICENSE.txt"))); }
 
 /* ── L. A filled bin still accepts the next placement ──────────────────────
-   Once a bin holds a chip, that chip covers the bin's centre. Before this was
+   Once a bin holds a chip, that chip covers the bin's center. Before this was
    fixed, a learner aiming at the bin to place their second item hit the chip
    already in it and removed it instead — so the bin could never hold more
    than one, and the item became unanswerable. */
@@ -892,7 +894,7 @@ async function answerItem(page, itemId, how) {
     return out;
   });
   check("O12 decompose refuses an unlabelled split", render.emptyRead === true);
-  check("O13 a correct split and labelling grades correct", render.decomposeRight === true);
+  check("O13 a correct split and labeling grades correct", render.decomposeRight === true);
   check("O14 and the answer shows what each part means", render.decomposeShowsMeaning === true);
   check("O15 build grades a correctly assembled term", render.buildRight === true);
   check("O16 and rejects the right parts in the wrong order", render.buildWrong === false);
@@ -956,9 +958,9 @@ async function answerItem(page, itemId, how) {
     const roles = regions.every((x) => x.getAttribute("role") === "button");
     r.showAnswer();
     const painted = host.querySelectorAll(".hs-right").length;
-    const licence = /SEED PLACEHOLDER/.test(host.textContent);
+    const license = /SEED PLACEHOLDER/.test(host.textContent);
     host.remove();
-    return { right, wrong, labels, focusable, roles, painted, licence };
+    return { right, wrong, labels, focusable, roles, painted, license };
   });
   check("P1 hotspot grades the right region correct", hs.right === true);
   check("P2 and any other region wrong", hs.wrong === false);
@@ -968,8 +970,8 @@ async function answerItem(page, itemId, how) {
   check("P5 the accessible names are neutral, not the answers",
     hs.labels.every((l) => /^Region \d+$/.test(l)), JSON.stringify(hs.labels));
   check("P6 showAnswer marks the right region", hs.painted === 1, String(hs.painted));
-  // §2.2 — every figure's licence is recorded and shown where it is used.
-  check("P7 the figure carries its licence", hs.licence === true);
+  // §2.2 — every figure's license is recorded and shown where it is used.
+  check("P7 the figure carries its license", hs.license === true);
 
   const kb = await p.evaluate(() => {
     const A = window.AEMT;
@@ -1151,7 +1153,7 @@ async function answerItem(page, itemId, how) {
   check("T5 while other chapters keep theirs", r.otherSeedKept > 0, String(r.otherSeedKept));
   check("T6 the chapter is not marked seed", r.meta.seed === false);
   check("T7 it declares its review status honestly",
-    r.meta.review_status === "unreviewed", r.meta.review_status);
+    r.meta.review_status === "released", r.meta.review_status);
   check("T8 and names its sources", (r.meta.sources || []).length >= 3,
     JSON.stringify(r.meta.sources));
 
@@ -1301,11 +1303,11 @@ async function answerItem(page, itemId, how) {
       .dispatchEvent(new MouseEvent("click", { bubbles: true }));
     pick("luq"); const wrong = r.grade(r.read());
     pick("rlq"); const right = r.grade(r.read());
-    const licence = host.querySelector(".fig-lic");
+    const license = host.querySelector(".fig-lic");
     const names = [...host.querySelectorAll(".hs-region")].map((x) => x.getAttribute("aria-label"));
     host.remove();
     return { right, wrong, answer: item.answer_region, names,
-             licence: licence ? licence.textContent : null,
+             license: license ? license.textContent : null,
              regions: item.regions.length };
   });
   check("W1 the appendix is in the right lower quadrant", hs.answer === "rlq", hs.answer);
@@ -1314,10 +1316,10 @@ async function answerItem(page, itemId, how) {
   check("W4 all four quadrants are targets", hs.regions === 4, String(hs.regions));
   check("W5 the region names do not give the answer away",
     hs.names.every((n) => /^Region \d+$/.test(n)), JSON.stringify(hs.names));
-  // §2.2 — original work, and the licence recorded where the figure is used.
-  check("W6 the figure declares its licence", !!hs.licence, String(hs.licence));
+  // §2.2 — original work, and the license recorded where the figure is used.
+  check("W6 the figure declares its license", !!hs.license, String(hs.license));
   check("W7 and it is original rather than third-party",
-    /Original schematic/i.test(hs.licence || ""), hs.licence);
+    /Original schematic/i.test(hs.license || ""), hs.license);
   check("W no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
@@ -1343,7 +1345,7 @@ async function answerItem(page, itemId, how) {
   check("X4 while other chapters keep theirs", r.otherSeedKept > 0, String(r.otherSeedKept));
   check("X5 the chapter is not marked seed", r.meta.seed === false);
   check("X6 it declares its review status honestly",
-    r.meta.review_status === "unreviewed", r.meta.review_status);
+    r.meta.review_status === "released", r.meta.review_status);
   check("X7 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
   check("X8 and the tiers are set", r.tiers.join(",") === "context,core", r.tiers.join(","));
 
@@ -1363,7 +1365,7 @@ async function answerItem(page, itemId, how) {
   check("X11 no unsourced Kansas or AMR KC specifics are asserted", src.localClaim === false);
 
   // 1.2 is the block the chapter is built around: scope is a legal ceiling
-  // nobody on scene can move. Wrong answers here are the ones that end licences.
+  // nobody on scene can move. Wrong answers here are the ones that end licenses.
   const scope = await p.evaluate(() => {
     const A = window.AEMT;
     const pick = (id) => { const it = A.itemById(id);
@@ -1411,7 +1413,7 @@ async function answerItem(page, itemId, how) {
   check("Y3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
   check("Y4 the chapter is not marked seed", r.meta.seed === false);
   check("Y5 it declares its review status honestly",
-    r.meta.review_status === "unreviewed", r.meta.review_status);
+    r.meta.review_status === "released", r.meta.review_status);
   check("Y6 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
   check("Y7 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
 
@@ -1493,7 +1495,7 @@ async function answerItem(page, itemId, how) {
   check("Z3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
   check("Z4 the chapter is not marked seed", r.meta.seed === false);
   check("Z5 it declares its review status honestly",
-    r.meta.review_status === "unreviewed", r.meta.review_status);
+    r.meta.review_status === "released", r.meta.review_status);
   check("Z6 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
   check("Z7 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
 
@@ -1543,7 +1545,7 @@ async function answerItem(page, itemId, how) {
   check("Z17 the chapter notice names what was left to the overlay",
     /local overlay/i.test(local.notice), local.notice.slice(0, 120));
 
-  // The figure is original work, and the licence travels with it.
+  // The figure is original work, and the license travels with it.
   const fig = await p.evaluate(() => window.AEMT.itemById("itm-3.6.002").stimulus);
   check("Z18 the portable-order figure is an original schematic",
     /Original schematic/i.test(fig.asset_license), String(fig.asset_license));
@@ -1583,7 +1585,7 @@ async function answerItem(page, itemId, how) {
   check("AA3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
   check("AA4 the chapter is not marked seed", r.meta.seed === false);
   check("AA5 it declares its review status honestly",
-    r.meta.review_status === "unreviewed", r.meta.review_status);
+    r.meta.review_status === "released", r.meta.review_status);
   check("AA6 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
   check("AA7 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
 
@@ -1674,7 +1676,7 @@ async function answerItem(page, itemId, how) {
              throwawayLeft: A.series.items.filter((i) => i.seed_throwaway)
                .map((i) => i.chapter).filter((c, k, a) => a.indexOf(c) === k).sort(),
              itemsByChapter: written.map((n) => A.series.items.filter((i) => i.chapter === n).length),
-             reviewed: written.filter((n) => (meta[n] || {}).review_status !== "unreviewed") };
+             status: written.map((n) => (meta[n] || {}).review_status) };
   });
   check("AB1 chapters 1 to 5 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
   check("AB2 chapters 6 to 9 are still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
@@ -1682,12 +1684,73 @@ async function answerItem(page, itemId, how) {
     r.throwawayLeft.every((c) => c >= 6), JSON.stringify(r.throwawayLeft));
   check("AB4 every authored chapter carries a real item bank",
     r.itemsByChapter.every((n) => n >= 55), JSON.stringify(r.itemsByChapter));
-  // None of this has been through a second instructor, and the app has to keep
-  // saying so for as long as that is true.
-  check("AB5 and none of them claims to be reviewed",
-    r.reviewed.length === 0, r.reviewed.join(","));
+  // Released, not reviewed: there is no second-reviewer step in this series, so
+  // no chapter may carry a status that asserts one happened.
+  check("AB5 every authored chapter is released",
+    r.status.every((x) => x === "released"), r.status.join(","));
+  check("AB6 and none of them claims to have been reviewed",
+    r.status.every((x) => !/review/i.test(x)), r.status.join(","));
   check("AB no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
+
+/* ── AC. American English ──────────────────────────────────────────────── */
+{ // The audience is a Kansas City service and the sources are American. A
+  // British spelling in the content reads as an import, and in a terminology
+  // chapter it is wrong rather than merely foreign.
+  const BRITISH = new RegExp("\\b(" + [
+    "paediatric[a-z]*", "haemo[a-z]+", "anaesthe[a-z]+", "oesophag[a-z]+", "foet(al|us)",
+    "dyspnoea", "apnoea", "diarrhoea", "oedema", "an-?aemi[ac]", "isch-?aemi[ac]",
+    "hypoglycaemi[ac]", "hyperglycaemi[ac]",
+    "colour[a-z]*", "behaviour[a-z]*", "favour[a-z]*", "odour[a-z]*", "neighbour[a-z]*",
+    "laboured", "honour[a-z]*", "licence[sd]?", "defence", "offence[s]?",
+    "practis(e|es|ed|ing)", "centre[sd]?", "metre[s]?", "litre[s]?", "fibre[s]?",
+    "judgement[s]?", "programme[s]?", "storey[s]?", "manoeuvr[a-z]*", "grey",
+    "(recogni|reali|randomi|memori|summari|standardi|categori|critici|characteri|",
+    "aerosoli|authori|organi|sterili|immuni|utili|prioriti|minimi|maximi|normali|",
+    "emphasi|apologi|hospitali|saniti|traumati)s(e|es|ed|ing|ation|ations|able|ably)",
+    "travell(ing|ed|er)", "modell(ing|ed)", "labell(ing|ed)", "cancell(ing|ed)",
+    "whilst", "amongst", "learnt", "spelt", "fulfil", "enrol", "skilful",
+    "sulphur", "aluminium", "analys(e|ed|es|ing)"
+  ].join("|").replace(/\|\|/g, "|") + ")\\b", "gi");
+  const files = ["aemt/ch01-ems-systems.json", "aemt/ch02-workforce-safety.json",
+                 "aemt/ch03-medical-legal-ethical.json",
+                 "aemt/ch04-communications-documentation.json",
+                 "aemt/ch05-terminology.json", "aemt/series-preparatory.json",
+                 "aemt-series.html", "aemt/fig-portable-medical-order.svg",
+                 "aemt/fig-abdominal-quadrants.svg"];
+  for (const f of files) {
+    const text = fs.readFileSync(path.join(ROOT, f), "utf8");
+    const hits = [...new Set(text.match(BRITISH) || [])];
+    check(`AC ${f} is written in American English`, hits.length === 0, hits.join(", "));
+  }
+}
+
+/* ── AD. Settled source decisions are recorded, not remembered ─────────── */
+{ const dec = fs.readFileSync(path.join(ROOT, "aemt/src/DECISIONS.md"), "utf8");
+  // Pediatric ranges blocked 9.6 until a source was named. The source is the
+  // 2025 AHA/AAP guidelines; the file has to say which parts are verified and
+  // which still have to be transcribed, or it is just a note saying "PALS".
+  check("AD1 the pediatric vitals source is recorded",
+    /2025 American Heart Association\s+and\s+American Academy of\s+Pediatrics/i.test(dec));
+  check("AD2 with the hypotension thresholds that are safe to author",
+    /70 \+ \(2 × age in years\)/.test(dec) && /< 90 mmHg/.test(dec));
+  check("AD3 and an explicit warning not to author the normal ranges from memory",
+    /do not author from memory|not yet verified/i.test(dec) &&
+    /transcrib/i.test(dec));
+  check("AD4 the second-instructor requirement is recorded as closed",
+    /Second-instructor review[\s\S]{0,80}Not part of this series/i.test(dec));
+
+  // And chapter 9 has to still be seed until those tables are transcribed.
+  const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"));
+  const seedSrc = manifest.sources.find((x) => x.seed);
+  check("AD5 chapter 9 is still placeholder",
+    (seedSrc.chapters || []).indexOf(9) !== -1, JSON.stringify(seedSrc.chapters));
+  const seedDoc = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series-preparatory.json"), "utf8"));
+  const b = seedDoc.blocks.find((x) => x.id === "9.6");
+  check("AD6 and its block points at the decision rather than claiming ranges",
+    /DECISIONS\.md/.test(b.callback_md) && /SEED PLACEHOLDER/.test(b.callback_md),
+    b.callback_md.slice(0, 120));
+}
 
 await browser.close();
 site.close();

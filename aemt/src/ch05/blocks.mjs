@@ -9,8 +9,8 @@ const ANAT='Standard anatomical position and directional terminology, as used th
 const opt=(id,text,correct,rationale)=>({id,text,correct,rationale});
 const base=(o)=>({
   stimulus:{kind:'none',ref:null}, bloom:'apply', nremt_domain:'ems_operations',
-  cj_step:null, difficulty_seed:0.5, high_stakes:false, reviewed_by:null,
-  review_status:'unreviewed', version:'1.0.0', ...o
+  cj_step:null, difficulty_seed:0.5, high_stakes:false,
+  version:'1.0.0', ...o
 });
 
 export const objectives=[
@@ -95,10 +95,10 @@ base({id:'itm-5.1.007',type:'mc',chapter:5,block:'5.1',objective:'obj-5.1.a',
 base({id:'itm-5.1.008',type:'mc',chapter:5,block:'5.1',objective:'obj-5.1.a',bloom:'analyze',
   stem:'Roughly 120 word parts generate several thousand medical terms. What follows for how you should study this chapter?',
   options:[opt('a','Learn the parts; the vocabulary follows from them',true,'Learning the generative system lets you read terms that were never on any list.'),
-    opt('b','Memorise a list of the most common whole terms',false,'A finite list leaves you stuck the first time a term is not on it.'),
+    opt('b','Memorize a list of the most common whole terms',false,'A finite list leaves you stuck the first time a term is not on it.'),
     opt('c','Learn only the terms in your own protocols',false,'Handoffs come from hospital staff who are not working from your protocols.'),
     opt('d','Look each term up when you meet it',false,'Reasonable at a desk. Not while a receiving physician is talking.')],
-  explanation_md:'This is why the term bank drills parts rather than a vocabulary list, and why it asks you to produce rather than recognise.',
+  explanation_md:'This is why the term bank drills parts rather than a vocabulary list, and why it asks you to produce rather than recognize.',
   source_ref:STD}),
 
 // ── 5.2 Suffixes ───────────────────────────────────────────────────────── 8
@@ -297,12 +297,12 @@ base({id:'itm-5.4.006',type:'mc',chapter:5,block:'5.4',objective:'obj-5.4.a',
   source_ref:STD}),
 base({id:'itm-5.4.007',type:'options_box',chapter:5,block:'5.4',objective:'obj-5.4.a',
   bloom:'remember',
-  stem:'Which colour does each root name?',
+  stem:'Which color does each root name?',
   columns:[{id:'blue',label:'Blue'},{id:'red',label:'Red'},{id:'white',label:'White'}],
   rows:[{id:'r1',label:'cyan/o',answer:'blue'},{id:'r2',label:'erythr/o',answer:'red'},
         {id:'r3',label:'leuk/o',answer:'white'}],
   options:[],
-  explanation_md:'Colour roots describe findings you can see — cyanosis — and cells you cannot — erythrocytes, leukocytes.',
+  explanation_md:'Color roots describe findings you can see — cyanosis — and cells you cannot — erythrocytes, leukocytes.',
   source_ref:STD}),
 base({id:'itm-5.4.008',type:'mc',chapter:5,block:'5.4',objective:'obj-5.4.a',bloom:'analyze',
   stem:'A term you have never seen reads "myocarditis". Which system is it in, and what is wrong?',
@@ -310,7 +310,7 @@ base({id:'itm-5.4.008',type:'mc',chapter:5,block:'5.4',objective:'obj-5.4.a',blo
     opt('b','Musculoskeletal — inflammation of a skeletal muscle',false,'The root card places it in the heart, not the skeleton.'),
     opt('c','Cardiovascular — enlargement of the heart',false,'That would be -megaly.'),
     opt('d','Respiratory — inflammation of the diaphragm',false,'Neither root names the diaphragm or the respiratory system.')],
-  explanation_md:'Two roots and a suffix, none of which you had to memorise as a whole word.',
+  explanation_md:'Two roots and a suffix, none of which you had to memorize as a whole word.',
   source_ref:STD}),
 
 // ── 5.5 Where you are on the body ──────────────────────────────────────── 10
@@ -415,7 +415,7 @@ base({id:'itm-5.6.001',type:'mc',chapter:5,block:'5.6',objective:'obj-5.6.a',hig
   stem:'Why is "U" prohibited as an abbreviation for unit?',
   options:[opt('a','It can be misread as a zero or a four, multiplying the dose',true,'A handwritten U next to a number reads as another digit — 4U becomes 40.'),
     opt('b','It is ambiguous between units and micrograms',false,'That confusion belongs to µg, which is also discouraged.'),
-    opt('c','It is not recognised internationally',false,'Recognition is not the issue; misreading is.'),
+    opt('c','It is not recognized internationally',false,'Recognition is not the issue; misreading is.'),
     opt('d','It is too short to be legible',false,'Length is not the problem. The shape is.')],
   explanation_md:'Write "unit" in full. This appears on the Joint Commission Do Not Use list precisely because the failure mode is a tenfold overdose.',
   source_ref:TJC}),
@@ -551,7 +551,7 @@ base({id:'itm-5.INT.006',type:'mc',chapter:5,block:'5.INT',objective:'obj-5.INT.
 base({id:'itm-5.INT.007',type:'mr',chapter:5,block:'5.INT',objective:'obj-5.INT.a',parent:'itm-5.INT.000',
   select_count:[2,3], cj_step:'define_hypothesis',
   stem:'Which findings in this handoff would you carry into your own report as directly relevant?',
-  options:[opt('a','Recent abdominal surgery three days ago',true,'It is a recognised risk factor for the diagnosis being treated.'),
+  options:[opt('a','Recent abdominal surgery three days ago',true,'It is a recognized risk factor for the diagnosis being treated.'),
     opt('b','New rapid breathing with low blood oxygen',true,'The presentation that prompted the working diagnosis.'),
     opt('c','Low urine output overnight',true,'It speaks to perfusion, and it changes what you watch on the way.'),
     opt('d','The absence of coughing up blood',false,'Worth recording, but a negative finding is not what you lead with.'),
@@ -568,13 +568,13 @@ export const blocks=[
  pretest_item:'itm-5.1.001',
  screens:[
   {id:'scr-5.1.1',body_md:'**A medical term is a machine, not a memory.** Around 120 word parts generate several thousand terms. Learn the parts and you can read a word you have never met.\n\nFour kinds of part do all the work. A **prefix** goes on the front and modifies. A **root** carries the core meaning. A **suffix** goes on the end and says what kind of condition, procedure or quality. A **combining vowel** — nearly always *o* — sits between parts so the word can be said.',figure:null},
-  {id:'scr-5.1.2',body_md:'Take **pericarditis** apart:\n\n*peri-* (around) + *card* (heart) + *-itis* (inflammation) = inflammation around the heart.\n\nNow change one part at a time. *Myo*carditis is inflammation of the heart **muscle**. Cardio*megaly* is an **enlarged** heart. Cardi*ectomy* would be its **removal**.\n\nOne root, three different words, none of which you memorised.',figure:null},
+  {id:'scr-5.1.2',body_md:'Take **pericarditis** apart:\n\n*peri-* (around) + *card* (heart) + *-itis* (inflammation) = inflammation around the heart.\n\nNow change one part at a time. *Myo*carditis is inflammation of the heart **muscle**. Cardio*megaly* is an **enlarged** heart. Cardi*ectomy* would be its **removal**.\n\nOne root, three different words, none of which you memorized.',figure:null},
   {id:'scr-5.1.3',body_md:'**The combining vowel has no meaning.** It exists only so the join can be pronounced.\n\n*Cardiomyopathy* is cardi + **o** + my + **o** + pathy. Without the vowels it would be *cardimypathy*, which nobody can say.\n\nA useful habit: read a term back to front. The suffix tells you what kind of thing it is, then the root tells you where, then the prefix tells you how much or which way.',figure:null},
   {id:'scr-5.1.4',body_md:'**Not every term has every part.** *Nephritis* is root plus suffix. *Gastroenteritis* carries two roots. *Melena* and *syncope* have no usable parts at all and simply have to be learned.\n\nThose irregular ones are the minority, and they are the reason the term bank in this app carries some whole words alongside the parts.',figure:null},
-  {id:'scr-5.1.5',body_md:'**Where this pays off is a handoff you cannot pause.** A receiving clinician will not stop and define *hepatomegaly* for you, and asking twice costs credibility you would rather keep.\n\nThe term bank in this app drills the parts rather than a word list, and it asks you to **produce** them rather than pick them from four options. Recognising a definition you have just been shown feels like learning and is not. Building the word yourself, from nothing, is the part that sticks.',figure:null}],
+  {id:'scr-5.1.5',body_md:'**Where this pays off is a handoff you cannot pause.** A receiving clinician will not stop and define *hepatomegaly* for you, and asking twice costs credibility you would rather keep.\n\nThe term bank in this app drills the parts rather than a word list, and it asks you to **produce** them rather than pick them from four options. Recognizing a definition you have just been shown feels like learning and is not. Building the word yourself, from nothing, is the part that sticks.',figure:null}],
  inline_checks:['itm-5.1.003','itm-5.1.005'],
  quiz:['itm-5.1.002','itm-5.1.004','itm-5.1.006','itm-5.1.007','itm-5.1.008'],
- callback_md:'**Bradycardic**: brady (slow) + card (heart) + -ic = a slow heart rate. **Hemothorax**: hemo (blood) + thorax (chest) = blood in the chest cavity. **Hemoptysis**: hemo (blood) + -ptysis (spitting) = coughing up blood, which the nurse is telling you is absent.\n\nYou did not memorise any of the three. You took them apart.',
+ callback_md:'**Bradycardic**: brady (slow) + card (heart) + -ic = a slow heart rate. **Hemothorax**: hemo (blood) + thorax (chest) = blood in the chest cavity. **Hemoptysis**: hemo (blood) + -ptysis (spitting) = coughing up blood, which the nurse is telling you is absent.\n\nYou did not memorize any of the three. You took them apart.',
  local_overlay:'ks-amr-kc',version:'1.0.0'},
 
 {id:'5.2',chapter:5,title:'Suffixes',learner_title:'The ending tells you what kind',

@@ -10,8 +10,8 @@ const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../ch
 buildChapter({
   chapter: 1, title: 'EMS Systems',
   version: '1.0.0', schema_version: 2,
-  review_status: 'unreviewed',
-  notice: 'Written from the National EMS Scope of Practice Model and the Education Standards. Kansas scope and AMR KC standing orders are not included — they belong in the local overlay. Not yet reviewed by a second credentialed instructor.',
+  review_status: 'released',
+  notice: 'Written from the National EMS Scope of Practice Model and the Education Standards. Kansas scope and AMR KC standing orders are not included — they belong in the local overlay.',
   sources: [
     'National EMS Scope of Practice Model (NHTSA, 2019; 2021 update)',
     'NHTSA National EMS Education Standards (2021) — Preparatory: EMS Systems',

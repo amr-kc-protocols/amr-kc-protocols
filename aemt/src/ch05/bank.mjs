@@ -10,7 +10,7 @@ const PREFIX=[
   ['an-','prefix','without, absence of',['absence of','without','no']],
   ['brady-','prefix','slow',['slowed','slowly']],
   ['tachy-','prefix','fast, rapid',['rapid','fast','quick']],
-  ['dys-','prefix','difficult, painful, abnormal',['difficult','painful','abnormal','laboured','labored']],
+  ['dys-','prefix','difficult, painful, abnormal',['difficult','painful','abnormal','labored','labored']],
   ['eu-','prefix','normal, good',['normal','good','well']],
   ['hyper-','prefix','above normal, excessive',['above normal','high','excessive','too much','increased']],
   ['hypo-','prefix','below normal, deficient',['below normal','low','deficient','too little','decreased']],
@@ -211,8 +211,8 @@ const TERMS=[
    ['fast breathing','rapid breathing','rapid respiratory rate'],true],
   ['apnea','absence of breathing',[['a','prefix','without'],['pnea','suffix','breathing']],
    ['not breathing','absence of breathing','no breathing'],true],
-  ['dyspnea','difficult or laboured breathing',[['dys','prefix','difficult'],['pnea','suffix','breathing']],
-   ['shortness of breath','difficulty breathing','laboured breathing','labored breathing'],true],
+  ['dyspnea','difficult or labored breathing',[['dys','prefix','difficult'],['pnea','suffix','breathing']],
+   ['shortness of breath','difficulty breathing','labored breathing','labored breathing'],true],
   ['orthopnea','breathlessness when lying flat',[['ortho','prefix','straight, upright'],['pnea','suffix','breathing']],
    ['breathless lying flat','difficulty breathing when lying down'],true],
   ['hypoxia','too little oxygen in the tissues',[['hyp','prefix','below normal (hypo- before a vowel)'],['ox','root','oxygen'],['ia','suffix','condition of']],
@@ -242,7 +242,7 @@ const TERMS=[
   ['bradyarrhythmia','a slow, irregular heart rhythm',[['brady','prefix','slow'],['a','prefix','without'],['rrhythm','root','rhythm'],['ia','suffix','condition of']],
    ['slow irregular rhythm','slow irregular heartbeat'],false],
   ['hemorrhage','bursting forth of blood; heavy bleeding',[['hemo','root','blood'],['rrhage','suffix','bursting forth']],
-   ['heavy bleeding','severe bleeding','haemorrhage'],true],
+   ['heavy bleeding','severe bleeding','hemorrhage'],true],
   ['hematemesis','vomiting blood',[['hemat','root','blood'],['emesis','suffix','vomiting']],
    ['vomiting blood','blood in vomit'],true],
   ['hemoptysis','coughing up blood',[['hemo','root','blood'],['ptysis','suffix','spitting']],
@@ -274,7 +274,7 @@ const TERMS=[
   ['necrosis','tissue death',[['necr','root','death'],['osis','suffix','abnormal condition']],
    ['tissue death','dead tissue'],false],
   ['edema','swelling from fluid in the tissues',[],
-   ['swelling','fluid in the tissues','oedema'],false],
+   ['swelling','fluid in the tissues','edema'],false],
   ['diaphoresis','profuse sweating',[['dia','prefix','through'],['phoresis','suffix','carrying']],
    ['profuse sweating','heavy sweating','sweating'],true],
   ['epistaxis','nosebleed',[],['nosebleed','bleeding from the nose'],false],
@@ -307,7 +307,7 @@ const TERMS=[
   ['thrombosis','formation of a clot in a vessel',[['thromb','root','clot'],['osis','suffix','abnormal condition']],
    ['clot formation','blood clot in a vessel'],false],
   ['embolism','blockage of a vessel by material carried in the blood',[],
-   ['blockage of a vessel','vessel blockage by a travelling clot'],true],
+   ['blockage of a vessel','vessel blockage by a traveling clot'],true],
   ['polyuria','passing large volumes of urine',[['poly','prefix','many, much'],['uria','suffix','urine condition']],
    ['excessive urination','passing a lot of urine','large volumes of urine'],false],
   ['oliguria','passing very little urine',[['olig','prefix','few, scanty'],['uria','suffix','urine condition']],
@@ -345,8 +345,7 @@ export function buildBank(){
       term:text, definition:meaning,
       synonyms:syn||[],
       prompt:'Which '+kindLabel[kind]+' means this?',
-      source_ref:SRC_MORPH,
-      review_status:'unreviewed'
+      source_ref:SRC_MORPH
     });
   });
   TERMS.forEach(([term,def,parts,syn,hs])=>{
@@ -364,8 +363,7 @@ export function buildBank(){
       synonyms:syn||[],
       distractor_parts:distract,
       high_stakes:!!hs,
-      source_ref:SRC_MORPH,
-      review_status:'unreviewed'
+      source_ref:SRC_MORPH
     });
   });
   // build and decompose both require the parts to spell the term. A card that

@@ -15,8 +15,8 @@ const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../ch
 buildChapter({
   chapter: 5, title: 'Medical Terminology',
   version: '1.0.0', schema_version: 2,
-  review_status: 'unreviewed',
-  notice: 'Written from the National EMS Education Standards and the published error-prone abbreviation lists. Not yet reviewed by a second credentialed instructor.',
+  review_status: 'released',
+  notice: 'Written from the National EMS Education Standards and the published error-prone abbreviation lists.',
   sources: [
     'NHTSA National EMS Education Standards (2021) — Preparatory: Medical Terminology',
     'The Joint Commission Official "Do Not Use" List',

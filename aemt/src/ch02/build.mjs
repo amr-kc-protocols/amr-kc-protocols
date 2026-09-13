@@ -10,8 +10,8 @@ const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../ch
 buildChapter({
   chapter: 2, title: 'Workforce Safety and Wellness',
   version: '1.0.0', schema_version: 2,
-  review_status: 'unreviewed',
-  notice: 'Written from OSHA, CDC/HICPAC, NIOSH, the Education Standards and the primary literature. Two blocks deliberately set the traditionally taught position beside the current evidence: 2.5 (the stage model of grief) and 2.8 (single-session debriefing). Kansas and AMR KC specifics belong in the local overlay. Not yet reviewed by a second credentialed instructor.',
+  review_status: 'released',
+  notice: 'Written from OSHA, CDC/HICPAC, NIOSH, the Education Standards and the primary literature. Two blocks deliberately set the traditionally taught position beside the current evidence: 2.5 (the stage model of grief) and 2.8 (single-session debriefing). Kansas and AMR KC specifics belong in the local overlay.',
   sources: [
     'OSHA Bloodborne Pathogens Standard, 29 CFR 1910.1030',
     'CDC/HICPAC Guideline for Isolation Precautions (2007, with subsequent updates)',
