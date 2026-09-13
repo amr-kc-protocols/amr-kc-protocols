@@ -1727,29 +1727,39 @@ async function answerItem(page, itemId, how) {
 
 /* ── AD. Settled source decisions are recorded, not remembered ─────────── */
 { const dec = fs.readFileSync(path.join(ROOT, "aemt/src/DECISIONS.md"), "utf8");
-  // Pediatric ranges blocked 9.6 until a source was named. The source is the
-  // 2025 AHA/AAP guidelines; the file has to say which parts are verified and
-  // which still have to be transcribed, or it is just a note saying "PALS".
-  check("AD1 the pediatric vitals source is recorded",
-    /2025 American Heart Association\s+and\s+American Academy of\s+Pediatrics/i.test(dec));
-  check("AD2 with the hypotension thresholds that are safe to author",
-    /70 \+ \(2 × age in years\)/.test(dec) && /< 90 mmHg/.test(dec));
-  check("AD3 and an explicit warning not to author the normal ranges from memory",
-    /do not author from memory|not yet verified/i.test(dec) &&
-    /transcrib/i.test(dec));
-  check("AD4 the second-instructor requirement is recorded as closed",
+  // Pediatric ranges blocked 9.6 until a source was named. Two sources landed,
+  // and they disagree — so the file has to carry both, the actual numbers, and
+  // the reason for preferring one for rate and the other for pressure.
+  check("AD1 the heart and respiratory rate source is the primary study",
+    /Fleming S, Thompson M, Stevens R/.test(dec) && /Lancet\s*2011;377:1011/.test(dec));
+  check("AD2 not the database it was read out of",
+    /citation of record is Fleming, not UpToDate/i.test(dec));
+  check("AD3 the centile table is transcribed, not summarized",
+    /\| 2 to <3 years \| 18 \| 22–34 \| 38 \| 76 \| 92–128 \| 142 \|/.test(dec) &&
+    /\| 15 to 18 years \| 11 \| 13–19 \| 22 \| 43 \| 58–92 \| 104 \|/.test(dec));
+  check("AD4 blood pressure stays with the 2025 guidelines",
+    /70 \+ \(2 × age in years\)/.test(dec) && /< 90 mmHg/.test(dec) &&
+    /Pediatric Advanced\s+Life Support/i.test(dec));
+  // The weaker half of the paper must not be presented as the stronger half.
+  check("AD5 the respiratory-rate evidence base is flagged as the weaker one",
+    /3,881 children against 143,346/.test(dec) && /weaker half/i.test(dec));
+  check("AD6 and the ranges are not offered as a verdict on the child",
+    /awake, healthy children at rest/i.test(dec) && /one finding/i.test(dec));
+  check("AD7 the disagreement with the course table is recorded, not smoothed over",
+    /striking\s+disagreement/i.test(dec) && /crossed the observed median/i.test(dec));
+  check("AD8 the second-instructor requirement is recorded as closed",
     /Second-instructor review[\s\S]{0,80}Not part of this series/i.test(dec));
 
-  // And chapter 9 has to still be seed until those tables are transcribed.
+  // Chapter 9 is unblocked but unwritten, and must not claim otherwise.
   const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"));
   const seedSrc = manifest.sources.find((x) => x.seed);
-  check("AD5 chapter 9 is still placeholder",
+  check("AD9 chapter 9 is still placeholder",
     (seedSrc.chapters || []).indexOf(9) !== -1, JSON.stringify(seedSrc.chapters));
   const seedDoc = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series-preparatory.json"), "utf8"));
   const b = seedDoc.blocks.find((x) => x.id === "9.6");
-  check("AD6 and its block points at the decision rather than claiming ranges",
-    /DECISIONS\.md/.test(b.callback_md) && /SEED PLACEHOLDER/.test(b.callback_md),
-    b.callback_md.slice(0, 120));
+  check("AD10 and its block says sourced-but-unwritten rather than teaching a range",
+    /SEED PLACEHOLDER/.test(b.callback_md) && /DECISIONS\.md/.test(b.callback_md) &&
+    /has not been written/i.test(b.callback_md), b.callback_md.slice(0, 140));
 }
 
 await browser.close();
