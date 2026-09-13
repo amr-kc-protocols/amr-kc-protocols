@@ -59,6 +59,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
   color:var(--teal2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .seed-banner{background:var(--warn-bg);border:1px solid var(--warn-br);color:var(--warn);
   border-radius:10px;padding:11px 13px;font-size:12px;font-weight:600;line-height:1.5;margin-bottom:14px}
+.about{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px;margin-bottom:14px}
+.about-t{font-size:13.5px;font-weight:700;color:var(--teal);margin-bottom:6px}
+.about-b{font-size:12px;color:var(--gray);line-height:1.55;margin-top:7px}
+.about-b strong{color:var(--ink)}
+.about-flag{color:var(--warn);font-weight:700}
 
 /* ── HOME: due-count first (spec §4.3, §10) ───────────────────────────── */
 .due-hero{background:linear-gradient(135deg,#0b3f75,#14406f 45%,#0e7490);color:#fff;
@@ -201,6 +207,83 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
   letter-spacing:.06em;text-transform:uppercase;background:var(--dim);color:var(--teal2)}
 .pill.hs{background:var(--warn-bg);color:var(--warn)}
 .empty{text-align:center;color:var(--gray);font-size:13.5px;padding:22px 10px;line-height:1.6}
+/* ── v1.1 §2.2 FIGURES, HOTSPOT, LABEL_DRAG ───────────────────────────── */
+.fig{position:relative;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--border)}
+.fig img{display:block;width:100%;height:auto}
+.fig-lic{font-size:9.5px;color:var(--gray);padding:5px 8px;background:var(--dim);
+  border-top:1px solid var(--border);line-height:1.4}
+.hs-wrap{position:relative}
+.hs-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hs-region{fill:rgba(27,99,196,0.06);stroke:rgba(27,99,196,0.55);stroke-width:.5;
+  vector-effect:non-scaling-stroke;pointer-events:all;cursor:pointer;transition:fill .12s}
+.hs-region:hover{fill:rgba(27,99,196,0.16)}
+.hs-region:focus{outline:none;fill:rgba(27,99,196,0.22);stroke-width:1.5}
+.hs-region.sel{fill:rgba(27,99,196,0.30);stroke-width:1.5}
+.hs-region.hs-right{fill:rgba(21,128,61,0.30);stroke:#15803d;stroke-width:1.5}
+.hs-region.hs-wrong{fill:rgba(220,38,38,0.26);stroke:#dc2626;stroke-width:1.5}
+.hs-key{font-size:12.5px;font-weight:700;color:var(--ok);margin-top:9px}
+.ld-fig{position:relative}
+.ld-markers{position:absolute;inset:0}
+.ld-pin{position:absolute;transform:translate(-50%,-50%);min-width:44px;min-height:44px;
+  border-radius:999px;border:2px solid var(--teal2);background:rgba(255,255,255,.94);
+  color:var(--teal);font-family:var(--sans);font-weight:800;font-size:12px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 9px;gap:1px}
+.ld-pin.target{border-style:dashed;background:#eaf1fd}
+.ld-pin.was-correct{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.ld-n{line-height:1}
+.ld-placed{font-size:10px;font-weight:600;max-width:110px;line-height:1.15}
+.ld-bank{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:48px}
+.ld-done{font-size:12.5px;color:var(--gray);padding:12px 0}
+
+/* ── v1.1 §2.1 TERM CARDS ─────────────────────────────────────────────── */
+.tc-word{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;
+  padding:14px 6px;background:var(--dim);border-radius:11px;margin-bottom:12px;overflow-x:auto;
+  scrollbar-width:none}
+.tc-word::-webkit-scrollbar{display:none}
+.tc-l{font-size:26px;font-weight:700;letter-spacing:.01em;line-height:1.1;flex-shrink:0}
+.tc-word.len-m .tc-l{font-size:21px}
+.tc-word.len-l .tc-l{font-size:17px}
+.tc-gap{width:14px;min-height:44px;border:none;background:none;cursor:pointer;padding:0;
+  position:relative;flex-shrink:0}
+.tc-word.len-m .tc-gap{width:11px}
+.tc-word.len-l .tc-gap{width:9px}
+.tc-gap::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:2px;height:26px;border-radius:2px;background:#c3cddb}
+.tc-gap.on::after{background:var(--teal2);width:3px;height:34px}
+.tc-hint{font-size:12.5px;color:var(--gray);line-height:1.5;margin-bottom:9px}
+.tc-row{display:flex;flex-direction:column;gap:7px;padding:10px 0;border-top:1px solid var(--border)}
+.tc-seg{font-size:17px;font-weight:700;color:var(--teal)}
+.tc-picks{display:flex;flex-wrap:wrap;gap:6px}
+.tc-build{display:flex;flex-wrap:wrap;gap:7px;align-items:center;min-height:52px;padding:10px;
+  background:var(--dim);border-radius:11px;margin-bottom:12px}
+.tc-input{font-size:18px;font-weight:600;text-align:center;letter-spacing:.01em;
+  width:100%;padding:13px 12px;border:1.5px solid var(--border);border-radius:10px;
+  font-family:var(--sans);color:var(--ink);background:#fff}
+.tc-input:focus{outline:none;border-color:var(--teal2)}
+.tc-answer{display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:var(--ok-bg);
+  border:1px solid var(--ok-br);border-radius:11px}
+.tc-part{display:flex;flex-direction:column;gap:2px;font-size:15px;color:var(--ink)}
+.tc-part small{font-size:10.5px;color:var(--gray);font-weight:500}
+
+/* ── v1.1 §2.4 EVIDENCE FLAG ──────────────────────────────────────────── */
+.ev-topic{font-size:16px;font-weight:700;color:var(--teal);margin-bottom:12px}
+.ev-row{padding:12px 13px;border-radius:10px;background:var(--dim);margin-bottom:9px;
+  font-size:13.5px;line-height:1.6}
+.ev-row p{margin-bottom:7px}.ev-row p:last-child{margin-bottom:0}
+.ev-h{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gray);margin-bottom:6px}
+.ev-now{background:#eaf4fc;border-left:3px solid var(--teal2)}
+.ev-now .ev-h{color:var(--teal2)}
+.ev-unc{background:var(--warn-bg);border-left:3px solid var(--warn)}
+.ev-unc .ev-h{color:var(--warn)}
+
+/* ── v1.1 §2.3 LAB GATES ──────────────────────────────────────────────── */
+.lg-row{padding:11px 0;border-top:1px solid var(--border)}
+.lg-t{font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.lg-ck{font-size:10px;color:var(--gray);font-weight:500}
+.lg-s{font-size:12px;color:var(--warn);font-weight:700;margin-top:3px}
+.lg-s.ok{color:var(--ok)}
+
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
   clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>
@@ -232,12 +315,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
    ════════════════════════════════════════════════════════════════════════ */
 
 var SERIES=null, STATE=null, VIEW='home';
-var SERIES_URL='aemt/series-preparatory.json';
+/* The series is a manifest plus one file per chapter. 755 items in a single
+   document would be neither reviewable in a diff nor replaceable a chapter at
+   a time, and chapters arrive in build order rather than chapter order. */
+var SERIES_URL='aemt/series.json';
 
 /* ── §8.2 parameters ──────────────────────────────────────────────────── */
 var DEFAULTS={
   request_retention:0.90,   // spec §8.2
   max_new_per_day:20,       // learner-adjustable 5–40
+  // v1.1 §5 — terms run on their own cap so a 200-card term bank cannot
+  // crowd the reasoning items out of the queue.
+  max_new_terms_per_day:15,
   session_cap:15,           // learner-set session length
   course_dates:{}           // chapter number -> ISO date, drives override #2
 };
@@ -290,11 +379,30 @@ function uuid(){
   return 'local-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
 }
 function freshState(){
-  return { user_id:uuid(), items:{}, objectives:{}, blocks:{},
+  return { user_id:uuid(), items:{}, terms:{}, objectives:{}, blocks:{},
+           verifications:{},          // v1.1 §2.3 — lab-gate sign-offs
            streak_days:0, last_active:null, new_today:{date:null,count:0},
-           settings:JSON.parse(JSON.stringify(DEFAULTS)), schema_version:1 };
+           settings:JSON.parse(JSON.stringify(DEFAULTS)), schema_version:2 };
 }
 function saveState(){ return DB.put(STATE).catch(function(e){ console.error('save failed',e); }); }
+
+/* v1 -> v2. A learner who studied on the Phase 1 build has no term bank and no
+   verification record, and the home screen reads both before it draws. Bring
+   the document forward rather than trusting every later reader to guard. */
+function migrateState(st){
+  if(!st) return st;
+  st.settings=st.settings||JSON.parse(JSON.stringify(DEFAULTS));
+  if(st.settings.max_new_terms_per_day==null)
+    st.settings.max_new_terms_per_day=DEFAULTS.max_new_terms_per_day;
+  st.items=st.items||{};
+  st.objectives=st.objectives||{};
+  st.blocks=st.blocks||{};
+  st.terms=st.terms||{};                       // v1.1 §2.1
+  st.verifications=st.verifications||{};       // v1.1 §2.3
+  st.new_terms_today=st.new_terms_today||{date:null,count:0};
+  st.schema_version=2;
+  return st;
+}
 
 /* ── DATES ────────────────────────────────────────────────────────────── */
 function startOfDay(d){ var x=new Date(d); x.setHours(0,0,0,0); return x; }
@@ -392,7 +500,7 @@ var Mastery={
   // An objective is mastered when ALL of: ≥3 correct across ≥3 distinct items,
   // at ≥2 distinct spacing intervals, most recent correct at ≥7 days, and no
   // lapse in the last 2 attempts.
-  objective:function(rec){
+  objective:function(rec,objId){
     if(!rec) return 'not_started';
     var distinctItems=(rec.correct_items||[]).length;
     var intervals=rec.correct_intervals||[];
@@ -402,13 +510,17 @@ var Mastery={
     var noLapse=last2.length>=2 && last2.every(Boolean);
     var ok=(rec.successes||0)>=3 && distinctItems>=3 &&
            Object.keys(distinctIntervals).length>=2 && lastInterval>=7 && noLapse;
+    // v1.1 §2.3 — knowing the steps is not the same as being able to do it.
+    // An objective carried by a lab-gated block stops at practicing until an
+    // instructor has signed the checklist.
+    if(ok && objId && gateFor(objId).unverified.length) return 'practicing';
     if(ok) return 'mastered';
     return (rec.attempts||0)>0?'practicing':'not_started';
   },
   objectiveStatuses:function(){
     var out={};
     (SERIES.objectives||[]).forEach(function(o){
-      out[o.id]=Mastery.objective(STATE.objectives[o.id]);
+      out[o.id]=Mastery.objective(STATE.objectives[o.id],o.id);
     });
     return out;
   },
@@ -416,7 +528,7 @@ var Mastery={
   chapter:function(n){
     var objs=(SERIES.objectives||[]).filter(function(o){ return o.chapter===n; });
     if(!objs.length) return {pct:0,mastered:false,total:0,done:0};
-    var done=objs.filter(function(o){ return Mastery.objective(STATE.objectives[o.id])==='mastered'; }).length;
+    var done=objs.filter(function(o){ return Mastery.objective(STATE.objectives[o.id],o.id)==='mastered'; }).length;
     var pct=done/objs.length;
     return {pct:pct,mastered:pct>=0.9,total:objs.length,done:done};
   },
@@ -428,19 +540,72 @@ var Mastery={
     }).length;
     return {done:done,total:total,pct:total?done/total:0};
   },
+  gateFor:function(objId){ return gateFor(objId); },
   masteryOverall:function(){
     var objs=SERIES.objectives||[];
-    var done=objs.filter(function(o){ return Mastery.objective(STATE.objectives[o.id])==='mastered'; }).length;
+    var done=objs.filter(function(o){ return Mastery.objective(STATE.objectives[o.id],o.id)==='mastered'; }).length;
     return {done:done,total:objs.length,pct:objs.length?done/objs.length:0};
   }
 };
+
+/* ── v1.1 §2.4 TIER ───────────────────────────────────────────────────────
+   core     — required, generates spaced items
+   context  — presented once, never queued
+   reference— links out to the field guide, never queued
+   Without this Chapter 7 alone produces 300 items nobody finishes reviewing.
+   Objectives authored before v1.1 carry no tier and are treated as core. */
+function objectiveById(id){
+  return (SERIES.objectives||[]).filter(function(o){ return o.id===id; })[0]||null;
+}
+function objectiveTier(objId){
+  var o=objectiveById(objId);
+  return (o&&o.tier)||'core';
+}
+function isQueued(item){ return objectiveTier(item.objective)==='core'; }
+
+/* ── v1.1 §2.3 LAB GATES ──────────────────────────────────────────────────
+   A lab_gate block reaches practicing on app work alone and cannot reach
+   mastered without an instructor verification event. The app's honest claim
+   is that the learner knows what to do and in what order; whether they can do
+   it is verified in lab. */
+function blocksForObjective(objId){
+  return (SERIES.blocks||[]).filter(function(b){
+    return (b.objectives||[]).indexOf(objId)!==-1;
+  });
+}
+function verificationFor(blockId){ return (STATE.verifications||{})[blockId]||null; }
+function gateFor(objId){
+  var gated=blocksForObjective(objId).filter(function(b){ return b.lab_gate; });
+  return { gated:gated, unverified:gated.filter(function(b){ return !verificationFor(b.id); }) };
+}
+function recordVerification(blockId,entry){
+  STATE.verifications=STATE.verifications||{};
+  var b=blockById(blockId)||{};
+  STATE.verifications[blockId]={
+    instructor_id:entry.instructor_id,
+    verified_at:new Date().toISOString(),
+    checklist_ref:(b.verification&&b.verification.checklist_ref)||null,
+    checklist_version:entry.checklist_version||null,
+    verifier_role:(b.verification&&b.verification.verifier_role)||'credentialed_instructor',
+    method:(b.verification&&b.verification.method)||'instructor_checklist'
+  };
+  return saveState();
+}
 
 /* Record one answer against the item record and its objective. */
 function recordAnswer(item,correct,confidence,now){
   now=now||new Date();
   var prev=STATE.items[item.id]||null;
   var interval=prev&&prev.last_review?daysBetween(new Date(prev.last_review),now):0;
-  STATE.items[item.id]=Sched.review(item,prev,correct,confidence,now);
+  if(isQueued(item)){
+    STATE.items[item.id]=Sched.review(item,prev,correct,confidence,now);
+  } else {
+    // Answered and reported on, but never scheduled — a context or reference
+    // objective is presented, not drilled.
+    STATE.items[item.id]={ queued:false, last_review:now.toISOString(),
+      last_correct:!!correct, last_confidence:confidence||null,
+      successes:(prev&&prev.successes?prev.successes:0)+(correct?1:0) };
+  }
 
   if(item.objective){
     var o=STATE.objectives[item.objective]||
@@ -456,7 +621,7 @@ function recordAnswer(item,correct,confidence,now){
       o.distinct_intervals=Object.keys(seen).length;
     }
     STATE.objectives[item.objective]=o;
-    o.status=Mastery.objective(o);
+    o.status=Mastery.objective(o,item.objective);
   }
   touchStreak(now);
 }
@@ -483,8 +648,9 @@ function dueItems(now){
   var due=(SERIES.items||[]).filter(function(i){
     if(i.type==='scenario') return false;            // parents are containers
     if(!chapters[i.chapter]) return false;
+    if(!isQueued(i)) return false;                   // v1.1 §2.4
     var r=STATE.items[i.id];
-    return r && new Date(r.due)<=now;
+    return r && r.queued!==false && new Date(r.due)<=now;
   });
   return shuffle(due);
 }
@@ -501,6 +667,38 @@ function nextBlock(){
   }
   return null;
 }
+function termById(id){ return (SERIES.terms||[]).filter(function(t){ return t.id===id; })[0]||null; }
+/* The term bank runs as a permanent background process from week 1 to
+   graduation (§3, Ch 5), on its own daily cap so it cannot crowd out the
+   reasoning items. */
+function dueTerms(now){
+  now=now||new Date();
+  var seen=[], fresh=[];
+  (SERIES.terms||[]).forEach(function(t){
+    var r=STATE.terms[t.id];
+    if(r){ if(new Date(r.due)<=now) seen.push(t); }
+    else fresh.push(t);
+  });
+  var cap=(STATE.settings.max_new_terms_per_day||DEFAULTS.max_new_terms_per_day);
+  var today=dayKey(now);
+  var nt=STATE.new_terms_today||{date:null,count:0};
+  var room=(nt.date===today)?Math.max(0,cap-nt.count):cap;
+  return shuffle(seen).concat(shuffle(fresh).slice(0,room));
+}
+function recordTerm(card,correct,now){
+  now=now||new Date();
+  var prev=STATE.terms[card.id]||null;
+  if(!prev){
+    var today=dayKey(now);
+    var nt=STATE.new_terms_today||{date:null,count:0};
+    STATE.new_terms_today=(nt.date===today)?{date:today,count:nt.count+1}:{date:today,count:1};
+  }
+  STATE.terms[card.id]=Sched.review(
+    {id:card.id,chapter:card.chapter,high_stakes:!!card.high_stakes},
+    prev,correct,null,now);
+  touchStreak(now);
+}
+
 function drillItems(chapter,n){
   var pool=(SERIES.items||[]).filter(function(i){
     return i.type!=='scenario' && (!chapter||i.chapter===chapter);
@@ -741,16 +939,373 @@ Render.options_box=function(item){
     }};
 };
 
+/* ── v1.1 §2.2 hotspot — tap a region on a diagram ────────────────────────
+   Regions are polygons in percentage coordinates over the figure, so the
+   browser does the hit-testing and the target scales with the image. Each is
+   also a focusable element with a neutral label, so the item is answerable
+   from a keyboard without the labels giving the answer away. */
+Render.hotspot=function(item){
+  var wrap=el('div','hs-wrap'), picked=null;
+  var fig=stimulusFigure(item);
+  if(fig) wrap.appendChild(fig);
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 100 100');
+  svg.setAttribute('preserveAspectRatio','none');
+  svg.setAttribute('class','hs-layer');
+  var shapes=[];
+  (item.regions||[]).forEach(function(reg,idx){
+    var poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points',(reg.polygon||[]).map(function(pt){ return pt[0]+','+pt[1]; }).join(' '));
+    poly.setAttribute('class','hs-region');
+    poly.setAttribute('tabindex','0');
+    poly.setAttribute('role','button');
+    poly.setAttribute('data-region',reg.id);
+    // Neutral label on purpose — "Region 3" is operable, "Trachea" is a giveaway.
+    poly.setAttribute('aria-label','Region '+(idx+1));
+    function choose(){
+      picked=reg.id;
+      shapes.forEach(function(x){ x.classList.toggle('sel',x===poly); });
+      wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+    }
+    poly.addEventListener('click',choose);
+    poly.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); choose(); }
+    });
+    shapes.push(poly); svg.appendChild(poly);
+  });
+  wrap.appendChild(svg);
+  return { el:wrap,
+    read:function(){ return picked; },
+    grade:function(r){ return !!r && r===item.answer_region; },
+    showAnswer:function(){
+      shapes.forEach(function(sh){
+        var id=sh.getAttribute('data-region');
+        sh.setAttribute('tabindex','-1');
+        if(id===item.answer_region) sh.classList.add('hs-right');
+        else if(id===picked) sh.classList.add('hs-wrong');
+      });
+      var name=((item.regions||[]).filter(function(r){ return r.id===item.answer_region; })[0]||{}).label;
+      if(name) wrap.appendChild(el('div','hs-key','Correct region: '+esc(name)));
+    }};
+};
+
+/* ── v1.1 §2.2 label_drag — labels onto numbered pointers ─────────────────
+   Tap a label, tap a pointer. Dichotomous: every label right, or the item is
+   wrong. Same single-pointer operation as drag_drop, for the same reason. */
+Render.label_drag=function(item){
+  var wrap=el('div'), placed={}, armed=null;
+  var figBox=el('div','ld-fig');
+  var fig=stimulusFigure(item);
+  if(fig) figBox.appendChild(fig);
+  var markers=el('div','ld-markers');
+  figBox.appendChild(markers);
+  var bank=el('div','ld-bank');
+  wrap.appendChild(figBox); wrap.appendChild(bank);
+
+  function labelText(id){
+    return ((item.labels||[]).filter(function(l){ return l.id===id; })[0]||{}).text||'';
+  }
+  function paint(){
+    markers.innerHTML='';
+    (item.pointers||[]).forEach(function(pt){
+      var m=el('button','ld-pin'+(armed?' target':''));
+      m.type='button';
+      m.style.left=pt.x+'%'; m.style.top=pt.y+'%';
+      m.setAttribute('data-pointer',pt.id);
+      var here=Object.keys(placed).filter(function(l){ return placed[l]===pt.id; })[0];
+      m.innerHTML='<span class="ld-n">'+esc(pt.label||pt.id)+'</span>'+
+        (here?'<span class="ld-placed">'+esc(labelText(here))+'</span>':'');
+      m.setAttribute('aria-label',armed
+        ? ('Place "'+labelText(armed)+'" on pointer '+(pt.label||pt.id))
+        : ('Pointer '+(pt.label||pt.id)+(here?(': '+labelText(here)):': empty')));
+      m.onclick=function(){
+        if(armed){ 
+          Object.keys(placed).forEach(function(l){ if(placed[l]===pt.id) delete placed[l]; });
+          placed[armed]=pt.id; armed=null;
+        } else if(here){ delete placed[here]; }
+        paint();
+      };
+      markers.appendChild(m);
+    });
+    bank.innerHTML='';
+    (item.labels||[]).forEach(function(l){
+      if(placed[l.id]) return;
+      var c=el('button','dd-chip'+(armed===l.id?' armed':''),esc(l.text));
+      c.type='button'; c.setAttribute('data-label',l.id);
+      c.setAttribute('aria-pressed',armed===l.id?'true':'false');
+      c.onclick=function(){ armed=(armed===l.id)?null:l.id; paint(); };
+      bank.appendChild(c);
+    });
+    if(!bank.children.length && !armed) bank.appendChild(el('div','ld-done','All labels placed.'));
+    wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+  }
+  paint();
+  return { el:wrap,
+    read:function(){ return JSON.parse(JSON.stringify(placed)); },
+    grade:function(r){
+      r=r||{};
+      var map=item.answer_map||{};                    // pointerId -> labelId
+      var ptrs=(item.pointers||[]).map(function(p){ return p.id; });
+      return ptrs.every(function(pid){ return r[map[pid]]===pid; });
+    },
+    showAnswer:function(){
+      armed=null; placed={};
+      var map=item.answer_map||{};
+      Object.keys(map).forEach(function(pid){ placed[map[pid]]=pid; });
+      paint();
+      [].slice.call(markers.querySelectorAll('.ld-pin')).forEach(function(m){
+        m.disabled=true; m.classList.add('was-correct');
+      });
+    }};
+};
+
 /* graphical — a stimulus plus any of the types above (default mc) */
 Render.graphical=function(item){
   var base=Render[item.base_type||'mc'](item);
   return base;   // the stimulus itself is painted by renderItem()
 };
 
+/* ══ v1.1 §2.1 TERM CARDS ═════════════════════════════════════════════════
+   Medical terminology is the one topic where spaced repetition is
+   unambiguously the right tool and multiple choice is the wrong interface.
+   Three modes, cycled by how often the card has been seen. Recognition is
+   deliberately not one of them — a "match 40 terms" drill feels productive
+   and produces nothing (§5). */
+var PART_KINDS=[['prefix','Prefix'],['root','Root'],['suffix','Suffix'],['vowel','Combining vowel']];
+
+/* §5 note: build and recall only once the learner has seen a card twice. */
+function termMode(rec,card){
+  // A word-part card is one morpheme — nothing to split and nothing to
+  // assemble, so it is production from the first showing.
+  if(card && (!card.parts || card.parts.length<2)) return 'recall';
+  var reps=(rec&&rec.reps)||0;
+  if(reps<2) return 'decompose';
+  if(reps<4) return 'build';
+  return 'recall';
+}
+function normTerm(x){ return String(x==null?'':x).toLowerCase().replace(/\s+/g,' ').trim(); }
+function levenshtein(a,b){
+  if(a===b) return 0;
+  if(!a.length) return b.length;
+  if(!b.length) return a.length;
+  var prev=[],cur=[],i,j;
+  for(j=0;j<=b.length;j++) prev[j]=j;
+  for(i=1;i<=a.length;i++){
+    cur[0]=i;
+    for(j=1;j<=b.length;j++){
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));
+    }
+    prev=cur.slice();
+  }
+  return prev[b.length];
+}
+/* Normalize case and whitespace, accept documented synonyms, and allow a
+   Levenshtein distance of 2 on targets over 8 characters (§2.1).
+   
+   Two guards on top of that rule, because taken literally it is unsafe.
+   "hyperglycemia" is two edits from "hypoglycemia", so the plain rule accepts
+   the opposite of the term being asked for — and that particular pair is the
+   difference between giving dextrose and not. §2.1 itself flags terms that are
+   "clinically dangerous to confuse", so:
+
+     1. A fuzzy match may not change the term's first word part. Prefixes are
+        where the meaning flips — hypo/hyper, brady/tachy, a-/an-. Typos in the
+        tail are forgiven; a different prefix is a different term.
+     2. A fuzzy match is refused if the answer is at least as close to some
+        other term in the bank.
+
+   Exact matches and documented synonyms bypass both. */
+function termFirstPart(card){
+  var p=(card.parts||[])[0];
+  return p&&p.text?normTerm(p.text):null;
+}
+function termMatches(card,answer,bank){
+  var a=normTerm(answer);
+  if(!a) return false;
+  var cands=[card.term].concat(card.synonyms||[]);
+  var best=Infinity, i, c;
+  for(i=0;i<cands.length;i++){
+    c=normTerm(cands[i]);
+    if(a===c) return true;                                   // exact, or a synonym
+    if(c.length>8){ var d=levenshtein(a,c); if(d<best) best=d; }
+  }
+  if(best>2) return false;
+
+  var head=termFirstPart(card);
+  if(head && a.indexOf(head)!==0) return false;               // guard 1
+
+  var others=(bank||SERIES.terms||[]).filter(function(t){ return t.id!==card.id; });
+  for(i=0;i<others.length;i++){
+    var o=normTerm(others[i].term);
+    if(a===o) return false;                                   // guard 2
+    if(o.length>8 && levenshtein(a,o)<=best) return false;
+  }
+  return true;
+}
+
+var Term={};
+
+/* decompose — split the term, then name each part. Teaches the system. */
+Term.decompose=function(card){
+  var parts=card.parts||[];
+  var letters=card.term.split('');
+  var cuts={}, kinds={};
+  var wrap=el('div','tc');
+  var sizeCls=letters.length>14?' len-l':(letters.length>9?' len-m':'');
+  var word=el('div','tc-word'+sizeCls), lab=el('div','tc-labels');
+  function segments(){
+    var out=[],cur='';
+    for(var i=0;i<letters.length;i++){
+      cur+=letters[i];
+      if(cuts[i]||i===letters.length-1){ out.push(cur); cur=''; }
+    }
+    return out;
+  }
+  function paint(){
+    word.innerHTML='';
+    letters.forEach(function(ch,i){
+      word.appendChild(el('span','tc-l',esc(ch)));
+      if(i<letters.length-1){
+        var g=el('button','tc-gap'+(cuts[i]?' on':''));
+        g.type='button';
+        g.setAttribute('aria-label',(cuts[i]?'Remove split after ':'Split after ')+'letter '+(i+1));
+        g.setAttribute('aria-pressed',cuts[i]?'true':'false');
+        g.onclick=function(){ if(cuts[i]) delete cuts[i]; else cuts[i]=1; paint(); };
+        word.appendChild(g);
+      }
+    });
+    lab.innerHTML='';
+    var segs=segments();
+    if(segs.length>1){
+      lab.appendChild(el('div','tc-hint','Now name each part.'));
+      segs.forEach(function(seg,si){
+        var row=el('div','tc-row');
+        row.appendChild(el('span','tc-seg',esc(seg)));
+        var picks=el('div','tc-picks');
+        PART_KINDS.forEach(function(k){
+          var b=el('button','ob-pick'+(kinds[si]===k[0]?' sel':''),k[1]);
+          b.type='button'; b.setAttribute('data-seg',si); b.setAttribute('data-kind',k[0]);
+          b.onclick=function(){ kinds[si]=k[0]; paint(); };
+          picks.appendChild(b);
+        });
+        row.appendChild(picks); lab.appendChild(row);
+      });
+    } else {
+      lab.appendChild(el('div','tc-hint','Tap between the letters to split this term into its parts.'));
+    }
+    wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+  }
+  wrap.appendChild(word); wrap.appendChild(lab); paint();
+  return { el:wrap,
+    read:function(){
+      var segs=segments();
+      if(segs.length<2) return null;
+      if(segs.some(function(_,i){ return !kinds[i]; })) return null;
+      return segs.map(function(t,i){ return {text:t,kind:kinds[i]}; });
+    },
+    grade:function(r){
+      if(!r||r.length!==parts.length) return false;
+      return parts.every(function(p,i){
+        return r[i] && r[i].text===p.text && r[i].kind===p.kind;
+      });
+    },
+    showAnswer:function(){
+      wrap.innerHTML='';
+      var row=el('div','tc-answer');
+      parts.forEach(function(p){
+        row.appendChild(el('span','tc-part',
+          '<b>'+esc(p.text)+'</b><small>'+esc(p.kind)+' &middot; '+esc(p.meaning||'')+'</small>'));
+      });
+      wrap.appendChild(row);
+    }};
+};
+
+/* build — produce the term from its parts, given the definition. */
+Term.build=function(card){
+  var parts=(card.parts||[]).map(function(p){ return p.text; });
+  var bank=shuffle(parts.concat(card.distractor_parts||[]));
+  var chosen=[];
+  var wrap=el('div','tc');
+  var line=el('div','tc-build'), pool=el('div','dd-pool');
+  function paint(){
+    line.innerHTML='';
+    if(chosen.length){
+      chosen.forEach(function(t,i){
+        var c=el('button','dd-chip',esc(t));
+        c.type='button'; c.setAttribute('aria-label','Remove "'+t+'"');
+        c.onclick=function(){ chosen.splice(i,1); paint(); };
+        line.appendChild(c);
+      });
+    } else {
+      line.appendChild(el('span','tc-hint','Tap the parts in order to build the term.'));
+    }
+    pool.innerHTML='';
+    bank.forEach(function(t,i){
+      var used=chosen.filter(function(x){ return x===t; }).length;
+      var avail=bank.filter(function(x){ return x===t; }).length;
+      if(used>=avail) return;
+      if(pool.querySelector('[data-part="'+t+'"]')) return;
+      var c=el('button','dd-chip',esc(t));
+      c.type='button'; c.setAttribute('data-part',t);
+      c.onclick=function(){ chosen.push(t); paint(); };
+      pool.appendChild(c);
+    });
+    wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+  }
+  wrap.appendChild(line); wrap.appendChild(pool); paint();
+  return { el:wrap,
+    read:function(){ return chosen.length?chosen.slice():null; },
+    grade:function(r){ return !!r && r.join('')===card.term; },
+    showAnswer:function(){
+      wrap.innerHTML='';
+      wrap.appendChild(el('div','tc-answer','<span class="tc-part"><b>'+esc(card.term)+'</b></span>'));
+    }};
+};
+
+/* recall — free text, the hardest retrieval and the highest value. */
+Term.recall=function(card){
+  var wrap=el('div','tc');
+  wrap.appendChild(el('div','tc-hint','Type the term. Spelling is shown on the answer either way.'));
+  var inp=el('input','input tc-input');
+  inp.type='text'; inp.autocapitalize='none'; inp.autocomplete='off';
+  inp.spellcheck=false; inp.setAttribute('aria-label','The term for: '+card.definition);
+  inp.addEventListener('input',function(){
+    wrap.dispatchEvent(new CustomEvent('answerchange',{bubbles:true}));
+  });
+  wrap.appendChild(inp);
+  return { el:wrap,
+    read:function(){ return inp.value.trim()||null; },
+    grade:function(r){ return termMatches(card,r); },
+    showAnswer:function(){
+      inp.disabled=true;
+      // Spelling matters in a legal record, so the exact spelling is shown
+      // every time, right or wrong (§2.1).
+      wrap.appendChild(el('div','tc-answer','<span class="tc-part"><b>'+esc(card.term)+'</b>'+
+        '<small>'+esc(card.definition)+'</small></span>'));
+    }};
+};
+
+function makeTermRenderer(card,mode){
+  return Term[mode](card);
+}
+
 function makeRenderer(item){
   var fn=Render[item.type];
   if(!fn) throw new Error('no renderer for item type: '+item.type);
   return fn(item);
+}
+
+/* The figure alone, for the renderers that draw on top of it. Records the
+   licence beside it — v1.1 §2.2 requires one per asset, and the place to make
+   that visible is where the asset is used. */
+function stimulusFigure(item){
+  var s=item.stimulus;
+  if(!s||s.kind!=='image'||!s.ref) return null;
+  var box=el('div','fig');
+  var img=el('img'); img.src=s.ref; img.alt=s.alt||'Item figure'; img.loading='lazy';
+  box.appendChild(img);
+  if(s.asset_license) box.appendChild(el('div','fig-lic',esc(s.asset_license)));
+  return box;
 }
 
 /* Stimulus block, shared by graphical/scenario and anything that declares one. */
@@ -885,6 +1440,8 @@ function runBlock(block){
 
   // 1 cold open
   if(block.cold_open) seq.push({kind:'cold'});
+  // A declared divergence is shown before the content it qualifies.
+  if(block.evidence_flag) seq.push({kind:'evidence'});
   // 2 pretest — answered before instruction, feedback deferred to step 6
   if(block.pretest_item) seq.push({kind:'pretest',id:block.pretest_item});
   // 3+4 content screens with inline checks woven between them
@@ -922,6 +1479,24 @@ function runBlock(block){
     var s=seq[at];
     host.innerHTML='';
     var top=el('div');
+
+    if(s.kind==='evidence'){
+      // v1.1 §2.4 — where the book and the current evidence disagree, both
+      // are shown side by side. Modelling "here is what the book says, here is
+      // what the evidence says" is itself a teaching objective.
+      var ef=block.evidence_flag, ec=el('div','card');
+      ec.appendChild(header('Where the book and the evidence differ'));
+      ec.appendChild(el('div','ev-topic',esc(ef.topic)));
+      ec.appendChild(el('div','ev-row','<div class="ev-h">The textbook says</div>'+md(ef.textbook_position)));
+      ec.appendChild(el('div','ev-row ev-now','<div class="ev-h">Current guidance</div>'+md(ef.current_evidence)));
+      if(ef.uncertainty)
+        ec.appendChild(el('div','ev-row ev-unc','<div class="ev-h">What is still uncertain</div>'+md(ef.uncertainty)));
+      if(ef.source_ref) ec.appendChild(el('div','fb-src','Source: '+esc(ef.source_ref)));
+      var eg=el('button','btn','Got it'); eg.type='button';
+      eg.onclick=function(){ at++; step(); };
+      ec.appendChild(eg); host.appendChild(ec);
+      window.scrollTo(0,0); return;
+    }
 
     if(s.kind==='cold'){
       var c=el('div','card');
@@ -1016,6 +1591,18 @@ function runBlock(block){
         'answered is in the review queue.</p><p>Completing a block is not the same as mastering it. '+
         'Mastery is earned by getting these back right, later, after you have had time to forget them.</p>'));
       host.appendChild(c);
+      // Lab-gated content gets no badge claiming the skill is done. The app's
+      // claim is that the learner knows the steps and their order — nothing
+      // about whether they can perform them (§2.3).
+      if(block.lab_gate){
+        var g=el('div','card');
+        g.appendChild(el('div','card-lbl','This one is verified in lab'));
+        g.appendChild(el('div','notice','<strong>What you have shown is that you know what to do '+
+          'and in what order.</strong> Whether you can do it is checked in lab by an instructor '+
+          'against '+esc((block.verification&&block.verification.checklist_ref)||'the skill checklist')+
+          '. This block cannot reach mastered until that is signed.'));
+        host.appendChild(g);
+      }
       var b=el('button','btn','Back to home'); b.type='button'; b.onclick=goHome;
       host.appendChild(b);
       window.scrollTo(0,0);
@@ -1069,15 +1656,107 @@ function runQueue(list,title){
   step();
 }
 
+/* Run a list of term cards. The mode is chosen per card by how often it has
+   been seen, so the same card hardens from decompose to build to recall. */
+function runTerms(list){
+  VIEW='session';
+  var host=$('screen-session'); show('screen-session');
+  var i=0, right=0;
+  function step(){
+    if(i>=list.length){
+      host.innerHTML='';
+      var c=el('div','card');
+      c.appendChild(el('div','card-lbl','Terms complete'));
+      c.appendChild(el('div','screen-body','<p>'+right+' of '+list.length+' correct.</p>'+
+        '<p style="color:var(--gray);font-size:13px">Word parts generate thousands of terms. '+
+        'These come back on their own schedule, separate from the reasoning items.</p>'));
+      host.appendChild(c);
+      var b=el('button','btn','Back to home'); b.type='button'; b.onclick=goHome;
+      host.appendChild(b); window.scrollTo(0,0); return;
+    }
+    var card=list[i];
+    var mode=termMode(STATE.terms[card.id],card);
+    host.innerHTML='';
+    var head=el('div','card');
+    head.appendChild(el('div','card-lbl','Term bank &mdash; '+(i+1)+' of '+list.length));
+    var d=el('div','progress-dots');
+    list.forEach(function(_,n){ d.appendChild(el('span','dot'+(n<i?' done':(n===i?' on':'')))); });
+    head.appendChild(d);
+    host.appendChild(head);
+
+    var box=el('div','card');
+    box.appendChild(el('div','pill',mode));
+    box.appendChild(el('div','stem',
+      mode==='decompose' ? esc(card.term)
+                         : esc(card.definition)));
+    if(mode==='decompose') box.appendChild(el('div','stem-hint','Split it, then name each part.'));
+    if(mode==='build')     box.appendChild(el('div','stem-hint','Build the term for this definition.'));
+
+    var r=makeTermRenderer(card,mode);
+    box.appendChild(r.el);
+    var submit=el('button','btn','Check answer'); submit.type='button'; submit.disabled=true;
+    box.appendChild(submit);
+    function refresh(){
+      var v=r.read();
+      submit.disabled=(v==null||(Array.isArray(v)&&!v.length));
+    }
+    box.addEventListener('answerchange',refresh); refresh();
+
+    submit.onclick=function(){
+      var resp=r.read(), correct=r.grade(resp);
+      submit.remove(); r.showAnswer();
+      recordTerm(card,correct,new Date()); saveState();
+      if(correct) right++;
+      var fb=el('div','fb '+(correct?'ok':'no'));
+      fb.appendChild(el('div','fb-banner',correct?'&#10003; Correct':'&#10007; Not quite'));
+      fb.appendChild(el('div','fb-exp','<strong>'+esc(card.term)+'</strong> &mdash; '+esc(card.definition)));
+      if((card.parts||[]).length){
+        fb.appendChild(el('div','fb-rats',(card.parts||[]).map(function(pt){
+          return '<div class="fb-rat"><b>'+esc(pt.text)+'</b> &mdash; '+esc(pt.kind)+
+                 (pt.meaning?(', '+esc(pt.meaning)):'')+'</div>';
+        }).join('')));
+      }
+      if(card.source_ref) fb.appendChild(el('div','fb-src','Source: '+esc(card.source_ref)));
+      box.appendChild(fb);
+      var next=el('button','btn','Next'); next.type='button';
+      next.onclick=function(){ i++; step(); };
+      box.appendChild(next);
+      next.scrollIntoView({block:'nearest',behavior:'smooth'});
+    };
+    host.appendChild(box);
+    window.scrollTo(0,0);
+  }
+  step();
+}
+
 /* ── HOME (spec §4.3 default ordering, §10) ───────────────────────────── */
 function renderHome(){
   VIEW='home'; show('screen-home');
   var c=$('screen-home'); c.innerHTML='';
 
-  if(SERIES.seed_throwaway){
-    c.appendChild(el('div','seed-banner',
-      esc(SERIES.notice||'')));
+  // What this is, and which chapters are real. A single series-wide banner
+  // stopped being true the moment one chapter was authored.
+  var meta=SERIES.chapter_meta||{};
+  var built=(SERIES.chapters||[]).filter(function(ch){ return meta[ch.n] && !meta[ch.n].seed; });
+  var pending=(SERIES.chapters||[]).filter(function(ch){ return !meta[ch.n] || meta[ch.n].seed; });
+  var about=el('div','about');
+  about.innerHTML='<div class="about-t">A study tool, not a course of record.</div>'+
+    '<div class="about-b">Preparation before a course, or revision alongside one. It does not '+
+    'certify anything, and it cannot teach a psychomotor skill &mdash; those are learned and '+
+    'checked in person.</div>';
+  if(built.length){
+    about.appendChild(el('div','about-b','<strong>Written:</strong> '+
+      built.map(function(ch){
+        return 'Ch '+ch.n+' '+esc(ch.title)+
+          (meta[ch.n].review_status==='unreviewed'?' <span class="about-flag">not yet instructor-reviewed</span>':'');
+      }).join(' &middot; ')));
   }
+  if(pending.length){
+    about.appendChild(el('div','about-b','<strong>Placeholder so far:</strong> '+
+      pending.map(function(ch){ return 'Ch '+ch.n; }).join(', ')+
+      ' &mdash; seed content that exercises the engine, not teaching material.'));
+  }
+  c.appendChild(about);
 
   var due=dueItems(new Date());
   var cap=STATE.settings.session_cap||DEFAULTS.session_cap;
@@ -1095,6 +1774,21 @@ function renderHome(){
   rev.onclick=function(){ runQueue(due.slice(0,cap),'Review'); };
   hero.appendChild(rev);
   c.appendChild(hero);
+
+  var terms=dueTerms(new Date());
+  if((SERIES.terms||[]).length){
+    var tc=el('div','card');
+    tc.appendChild(el('div','card-lbl','Term bank'));
+    tc.appendChild(el('div','bar-note',
+      'Word parts, not a vocabulary list. '+(SERIES.terms||[]).length+' cards running on their own '+
+      'daily cap so they never crowd out the reasoning items.'));
+    var tb=el('button','btn secondary','Terms &mdash; '+terms.length+' ready');
+    tb.type='button'; tb.id='btn-terms'; tb.disabled=!terms.length;
+    tb.style.marginTop='12px';
+    tb.onclick=function(){ runTerms(terms.slice(0,STATE.settings.session_cap||15)); };
+    tc.appendChild(tb);
+    c.appendChild(tc);
+  }
 
   var nb=nextBlock();
   var sec=el('div','card');
@@ -1212,6 +1906,36 @@ function renderProgress(){
   }
   c.appendChild(cwCard);
 
+  // v1.1 §2.3 — the exportable artifact that satisfies program and state
+  // psychomotor verification now that NREMT no longer runs that exam.
+  var gated=(SERIES.blocks||[]).filter(function(b){ return b.lab_gate; });
+  if(gated.length){
+    var lg=el('div','card');
+    lg.appendChild(el('div','card-lbl','Lab verification'));
+    lg.appendChild(el('div','bar-note',
+      'These blocks are signed off in lab, not in the app. Knowing the steps is not the '+
+      'same as being able to perform them, so their objectives stop at practicing until an '+
+      'instructor signs the checklist.'));
+    gated.forEach(function(b){
+      var v=verificationFor(b.id);
+      var row=el('div','lg-row');
+      row.innerHTML='<div class="lg-t">'+esc(b.learner_title||b.title)+
+        '<span class="lg-ck">'+esc((b.verification&&b.verification.checklist_ref)||'checklist')+'</span></div>'+
+        '<div class="lg-s '+(v?'ok':'')+'">'+(v
+          ? ('Verified '+esc(dayKey(new Date(v.verified_at)))+' &middot; '+esc(v.instructor_id))
+          : 'Not yet verified')+'</div>';
+      if(!v){
+        var btn=el('button','btn secondary tiny','Record instructor sign-off');
+        btn.type='button'; btn.setAttribute('data-verify',b.id);
+        btn.style.marginTop='8px';
+        btn.onclick=function(){ promptVerification(b); };
+        row.appendChild(btn);
+      }
+      lg.appendChild(row);
+    });
+    c.appendChild(lg);
+  }
+
   var ex=el('div','card');
   ex.appendChild(el('div','card-lbl','Your record'));
   ex.appendChild(el('div','bar-note',
@@ -1225,6 +1949,16 @@ function renderProgress(){
   ex.appendChild(row);
   c.appendChild(ex);
   window.scrollTo(0,0);
+}
+
+/* The signing workflow itself — who signs, on what, and where the record
+   lives — is an open question for Clinical Education (v1.1 §5.2). This records
+   the entry the mechanism needs; it deliberately does not invent the process. */
+function promptVerification(block){
+  var who=prompt('Instructor ID or name signing '+(block.learner_title||block.title)+':');
+  if(!who) return;
+  var ver=prompt('Checklist version (optional):')||null;
+  recordVerification(block.id,{instructor_id:who.trim(),checklist_version:ver}).then(renderProgress);
 }
 
 function exportState(){
@@ -1259,8 +1993,7 @@ function importState(){
         var p=JSON.parse(rd.result);
         var s=p.state||p;
         if(!s||!s.items||!s.schema_version) throw new Error('not an AEMT progress file');
-        STATE=s;
-        STATE.settings=STATE.settings||JSON.parse(JSON.stringify(DEFAULTS));
+        STATE=migrateState(s);
         saveState().then(function(){ alert('Progress imported.'); renderProgress(); });
       }catch(e){ alert('Could not import that file: '+e.message); }
     };
@@ -1278,6 +2011,47 @@ function show(id){
 }
 function goHome(){ renderHome(); }
 
+/* Fetch every source the manifest lists and fold them into one series.
+   Placeholder content yields to real content: once a chapter has an authored
+   file, the seed's blocks, items, objectives and terms for that chapter are
+   dropped rather than sitting alongside it. */
+function loadSources(manifest){
+  var srcs=manifest.sources||[];
+  return Promise.all(srcs.map(function(src){
+    return fetch(src.file,{cache:'no-cache'}).then(function(r){
+      if(!r.ok) throw new Error(src.file+' '+r.status);
+      return r.json();
+    }).then(function(doc){ return {src:src,doc:doc}; });
+  })).then(function(loaded){
+    var authored={};
+    loaded.forEach(function(l){
+      if(!l.src.seed) (l.src.chapters||[]).forEach(function(n){ authored[n]=1; });
+    });
+    var out={ id:manifest.id, title:manifest.title, section:manifest.section,
+              version:manifest.version, schema_version:manifest.schema_version,
+              chapters:manifest.chapters||[], chapter_meta:{},
+              objectives:[], blocks:[], items:[], terms:[] };
+    loaded.forEach(function(l){
+      var seed=!!l.src.seed;
+      var keep=function(x){ return !(seed && authored[x.chapter]); };
+      ['objectives','blocks','items','terms'].forEach(function(k){
+        out[k]=out[k].concat((l.doc[k]||[]).filter(keep));
+      });
+      (l.src.chapters||[]).forEach(function(n){
+        out.chapter_meta[n]={ seed:seed,
+          review_status:l.doc.review_status||(seed?'placeholder':'unreviewed'),
+          sources:l.doc.sources||null, file:l.src.file };
+      });
+    });
+    (out.chapters||[]).forEach(function(c){
+      if(!out.chapter_meta[c.n]) out.chapter_meta[c.n]={seed:true,review_status:'not built',file:null};
+    });
+    out.seed_throwaway=Object.keys(out.chapter_meta).some(function(n){
+      return out.chapter_meta[n].seed; });
+    return out;
+  });
+}
+
 function boot(){
   if(!window.FSRS){
     $('boot').textContent='The scheduler failed to load. Reload the page.';
@@ -1287,13 +2061,11 @@ function boot(){
     fetch(SERIES_URL,{cache:'no-cache'}).then(function(r){
       if(!r.ok) throw new Error('series '+r.status);
       return r.json();
-    }),
+    }).then(loadSources),
     DB.get().catch(function(){ return null; })
   ]).then(function(res){
     SERIES=res[0];
-    STATE=res[1]||freshState();
-    STATE.settings=STATE.settings||JSON.parse(JSON.stringify(DEFAULTS));
-    STATE.items=STATE.items||{}; STATE.objectives=STATE.objectives||{}; STATE.blocks=STATE.blocks||{};
+    STATE=migrateState(res[1]||freshState());
     $('hdr-sub').textContent=SERIES.section?('Section '+SERIES.section):'Preparatory';
     renderHome();
     window.__AEMT_READY=true;
@@ -1310,6 +2082,11 @@ window.AEMT={
   set state(v){ STATE=v; },
   Sched:Sched, Mastery:Mastery, Render:Render,
   recordAnswer:recordAnswer, dueItems:dueItems, drillItems:drillItems,
+  Term:Term, termMode:termMode, termMatches:termMatches, levenshtein:levenshtein, loadSources:loadSources,
+  makeTermRenderer:makeTermRenderer, dueTerms:dueTerms, recordTerm:recordTerm, termById:termById,
+  objectiveTier:objectiveTier, isQueued:isQueued, gateFor:gateFor,
+  recordVerification:recordVerification, verificationFor:verificationFor,
+  migrateState:migrateState,
   nextBlock:nextBlock, itemById:itemById, blockById:blockById,
   freshState:freshState, saveState:saveState, renderHome:renderHome,
   DEFAULTS:DEFAULTS, LAPSE_FLOOR_DAYS:LAPSE_FLOOR_DAYS, addDays:addDays, dayKey:dayKey

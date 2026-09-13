@@ -145,15 +145,24 @@ async function answerItem(page, itemId, how) {
   check("A2 the vendored FSRS build loaded", await p.evaluate(() => typeof window.FSRS.fsrs === "function"));
   const s = await p.evaluate(() => ({
     items: window.AEMT.series.items.length,
+    v10Items: window.AEMT.series.items.filter((i) => i.chapter <= 4).length,
     blocks: window.AEMT.series.blocks.length,
     types: [...new Set(window.AEMT.series.items.map((i) => i.type))].sort(),
     noRationale: window.AEMT.series.items.filter((i) =>
       (i.options || []).some((o) => !o.rationale)).map((i) => i.id),
     noSource: window.AEMT.series.items.filter((i) => !i.source_ref).map((i) => i.id),
-    seed: window.AEMT.series.seed_throwaway,
-    allSeed: window.AEMT.series.items.every((i) => i.seed_throwaway === true),
+    // Placeholder chapters must still be flagged; authored ones must not be.
+    placeholderUnflagged: window.AEMT.series.items
+      .filter((i) => (window.AEMT.series.chapter_meta[i.chapter] || {}).seed)
+      .filter((i) => i.seed_throwaway !== true).map((i) => i.id),
+    authoredFlagged: window.AEMT.series.items
+      .filter((i) => !(window.AEMT.series.chapter_meta[i.chapter] || {}).seed)
+      .filter((i) => i.seed_throwaway === true).map((i) => i.id),
   }));
-  check("A3 the seed carries 20 items, as §12 specifies", s.items === 20, String(s.items));
+  // §12 asked for 20 throwaway items for the Phase 1 engine. v1.1 adds its own
+  // on top, so the v1.0 portion is what that number refers to.
+  check("A3 the Phase 1 seed still carries its 20 items",
+    s.v10Items === 20, String(s.v10Items) + " of " + String(s.items));
   check("A4 every NREMT item type is represented",
     ["build_list", "drag_drop", "graphical", "mc", "mr", "options_box", "scenario"]
       .every((t) => s.types.includes(t)), s.types.join(","));
@@ -161,10 +170,21 @@ async function answerItem(page, itemId, how) {
   check("A5 every option carries a rationale", s.noRationale.length === 0, s.noRationale.join(","));
   // §5.2 rule 7: cite the source on every item.
   check("A6 every item carries a source_ref", s.noSource.length === 0, s.noSource.join(","));
-  check("A7 the seed is flagged as throwaway at both levels",
-    s.seed === true && s.allSeed === true);
-  check("A8 and the page says so on screen",
-    /Phase 1|not reviewed/i.test(await p.textContent(".seed-banner")));
+  check("A7 every item in a placeholder chapter is still flagged throwaway",
+    s.placeholderUnflagged.length === 0, s.placeholderUnflagged.join(","));
+  check("A8 and nothing in an authored chapter is",
+    s.authoredFlagged.length === 0, s.authoredFlagged.join(","));
+  // The claim on the home screen is the honest one for a study supplement.
+  const about = await p.textContent(".about");
+  check("A9 the page says what it is, and what it is not",
+    /study tool, not a course of record/i.test(about) &&
+    /does not certify/i.test(about), about.slice(0, 160));
+  check("A10 it names the chapters that are written",
+    /Written:/.test(about) && /Ch 5/.test(about), about.slice(0, 200));
+  check("A11 and flags them as not yet instructor-reviewed",
+    /not yet instructor-reviewed/i.test(about));
+  check("A12 and names the chapters that are still placeholder",
+    /Placeholder so far/i.test(about) && /Ch 3/.test(about));
   check("A9 no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
@@ -346,6 +366,15 @@ async function answerItem(page, itemId, how) {
 /* ── G. The block sequence (§4.2) and completion ≠ mastery (§9) ────────── */
 { const p = await open();
   check("G1 the home screen offers a block", await p.isVisible("#btn-next-block"));
+  // Pin to the block this was written against rather than whichever happens to
+  // be first — the running order changes every time a chapter is authored.
+  await p.evaluate(() => {
+    const A = window.AEMT;
+    const i = A.series.blocks.findIndex((b) => b.id === "3.5");
+    A.series.blocks.unshift(A.series.blocks.splice(i, 1)[0]);
+    A.state.blocks = {};
+    A.renderHome();
+  });
   await p.click("#btn-next-block");
   await p.waitForSelector("#screen-session .cold");
   check("G2 it opens on the cold open", /gas-station|parking lot/i.test(await p.textContent(".cold")));
@@ -497,12 +526,12 @@ async function answerItem(page, itemId, how) {
     const back = JSON.parse(json).state;
     return { roundTripped: back.streak_days === 9,
              mastery: A.Mastery.objective(back.objectives["obj-seed.a"]),
-             hasSchema: back.schema_version === 1,
+             hasSchema: back.schema_version === 2, schema: String(back.schema_version),
              hasUser: typeof back.user_id === "string" && back.user_id.length > 0 };
   });
   check("I1 state survives a JSON round trip", round.roundTripped);
   check("I2 the mastery model reads the imported record", round.mastery === "mastered", round.mastery);
-  check("I3 the export carries a schema version", round.hasSchema);
+  check("I3 the export carries the current schema version", round.hasSchema, round.schema);
   check("I4 and a local user id", round.hasUser);
   check("I5 the export and import controls exist",
     await p.evaluate(() => { document.getElementById("btn-progress").click();
@@ -548,9 +577,22 @@ async function answerItem(page, itemId, how) {
 
 /* ── K. It ships inside the existing PWA, not beside it (§10) ──────────── */
 { const sw = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
-  for (const asset of ["aemt-series.html", "aemt/series-preparatory.json", "aemt/fsrs-5.4.2.umd.js"]) {
+  // Every source the manifest names has to be precached, or an authored
+  // chapter simply does not exist in a bay with no signal.
+  for (const asset of ["aemt-series.html", "aemt/series.json", "aemt/ch05-terminology.json",
+                       "aemt/series-preparatory.json", "aemt/fsrs-5.4.2.umd.js",
+                       "aemt/seed-tpopp-placeholder.svg", "aemt/seed-airway-placeholder.svg",
+                       "aemt/fig-abdominal-quadrants.svg"]) {
     check(`K precached: ${asset}`, sw.includes(asset), "not in sw.js ASSETS");
   }
+  const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"));
+  const unprecached = manifest.sources.map((x) => x.file).filter((f) => !sw.includes(f));
+  check("K every chapter file in the manifest is precached",
+    unprecached.length === 0, unprecached.join(","));
+  const missingFile = manifest.sources.map((x) => x.file)
+    .filter((f) => !fs.existsSync(path.join(ROOT, f)));
+  check("K and every one of them exists", missingFile.length === 0, missingFile.join(","));
+
   const idx = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
   check("K the field guide links to the series", /aemt-series\.html/.test(idx));
   const page = fs.readFileSync(path.join(ROOT, "aemt-series.html"), "utf8");
@@ -613,6 +655,660 @@ async function answerItem(page, itemId, how) {
   check("L3 a placed chip is still removable when nothing is armed",
     rm.after === 1 && rm.removed === 0, JSON.stringify(rm));
   check("L no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ══ v1.1 (Chapters 5–9) ═══════════════════════════════════════════════════
+   The three engine additions §2 requires before that batch can ship, plus the
+   schema fields in §2.4. Content for Ch 5–9 is blocked on the five decisions
+   in §5, so what is tested here is the machinery, seeded. */
+
+/* ── M. §2.4 tier — the volume-control valve ───────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    return { core: A.objectiveTier("obj-seed.a1"),
+             context: A.objectiveTier("obj-seed.a2"),
+             reference: A.objectiveTier("obj-seed.a3"),
+             legacy: A.objectiveTier("obj-seed.a"),
+             coreQueued: A.isQueued(A.itemById("itm-seed.101")),
+             contextQueued: A.isQueued(A.itemById("itm-seed.103")) };
+  });
+  check("M1 tiers read off the objective", r.core === "core" && r.context === "context" &&
+    r.reference === "reference", JSON.stringify(r));
+  check("M2 an objective authored before v1.1 is treated as core", r.legacy === "core", r.legacy);
+  check("M3 a core objective's items are queued", r.coreQueued === true);
+  check("M4 a context objective's items are not", r.contextQueued === false);
+
+  // Answering a context item records progress but schedules nothing — that is
+  // what stops Ch 7 producing 300 items nobody finishes reviewing.
+  const after = await p.evaluate(() => {
+    const A = window.AEMT;
+    A.state.blocks["7.7"] = { attempted: true, completed_at: null };
+    A.recordAnswer(A.itemById("itm-seed.103"), true, null, new Date());
+    A.recordAnswer(A.itemById("itm-seed.101"), true, null, new Date());
+    const ctx = A.state.items["itm-seed.103"], core = A.state.items["itm-seed.101"];
+    const past = new Date(Date.now() + 40 * 86400000);
+    return { ctxQueued: ctx.queued, ctxHasDue: !!ctx.due, coreHasDue: !!core.due,
+             ctxRecorded: ctx.last_correct === true,
+             dueIds: A.dueItems(past).map((i) => i.id) };
+  });
+  check("M5 a context item is recorded", after.ctxRecorded === true);
+  check("M6 but never given a due date", after.ctxQueued === false && after.ctxHasDue === false,
+    JSON.stringify(after));
+  check("M7 while a core item is scheduled", after.coreHasDue === true);
+  check("M8 and only the core item ever reaches the queue",
+    after.dueIds.indexOf("itm-seed.101") !== -1 && after.dueIds.indexOf("itm-seed.103") === -1,
+    JSON.stringify(after.dueIds));
+  check("M no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── N. §2.3 lab gates ─────────────────────────────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const earned = { successes: 3, attempts: 3, correct_items: ["a", "b", "c"],
+                     correct_intervals: [1, 9, 14], last_attempts: [true, true] };
+    const gatedBefore = A.Mastery.objective(earned, "obj-seed.m1");
+    const ungated = A.Mastery.objective(earned, "obj-seed.a1");
+    const gate = A.gateFor("obj-seed.m1");
+    return { gatedBefore, ungated, gatedBlocks: gate.gated.map((b) => b.id),
+             unverified: gate.unverified.map((b) => b.id) };
+  });
+  // Knowing the steps is not being able to perform them.
+  check("N1 a lab-gated objective stops at practicing however well it is answered",
+    r.gatedBefore === "practicing", r.gatedBefore);
+  check("N2 an ungated objective with the same record is mastered",
+    r.ungated === "mastered", r.ungated);
+  check("N3 the gate names the block holding it",
+    JSON.stringify(r.unverified) === JSON.stringify(["6.2"]), JSON.stringify(r));
+
+  const signed = await p.evaluate(async () => {
+    const A = window.AEMT;
+    await A.recordVerification("6.2", { instructor_id: "J. Jones NRP", checklist_version: "v2" });
+    const earned = { successes: 3, attempts: 3, correct_items: ["a", "b", "c"],
+                     correct_intervals: [1, 9, 14], last_attempts: [true, true] };
+    const rec = A.verificationFor("6.2");
+    return { status: A.Mastery.objective(earned, "obj-seed.m1"),
+             instructor: rec.instructor_id, version: rec.checklist_version,
+             checklist: rec.checklist_ref, role: rec.verifier_role, dated: !!rec.verified_at,
+             unverified: A.gateFor("obj-seed.m1").unverified.length };
+  });
+  check("N4 an instructor sign-off releases the gate", signed.status === "mastered", signed.status);
+  check("N5 the record carries who signed", signed.instructor === "J. Jones NRP");
+  check("N6 which checklist, and its version",
+    signed.checklist === "chk-6.2" && signed.version === "v2", JSON.stringify(signed));
+  check("N7 the verifier role and a date", signed.role === "credentialed_instructor" && signed.dated);
+  check("N8 and the gate is clear", signed.unverified === 0);
+
+  // It has to survive a reload and leave in the export — this is the artifact
+  // the program and the state need now NREMT no longer runs the psychomotor exam.
+  await p.reload({ waitUntil: "domcontentloaded" });
+  await p.waitForFunction(() => window.__AEMT_READY);
+  const persisted = await p.evaluate(() => ({
+    kept: !!window.AEMT.verificationFor("6.2"),
+    inExport: JSON.stringify({ state: window.AEMT.state }).includes("J. Jones NRP"),
+  }));
+  check("N9 the sign-off survives a reload", persisted.kept === true);
+  check("N10 and travels in the export", persisted.inExport === true);
+
+  // What the learner is actually shown at the end of a lab-gated block.
+  await p.evaluate(() => {
+    const A = window.AEMT;
+    A.state.blocks = {}; A.state.verifications = {};
+    const i = A.series.blocks.findIndex((b) => b.id === "6.2");
+    A.series.blocks.unshift(A.series.blocks.splice(i, 1)[0]);
+    A.renderHome();
+  });
+  await p.click("#btn-next-block");
+  await p.waitForSelector('#screen-session button.btn:text-is("Start")');
+  await p.click('#screen-session button.btn:text-is("Start")');
+  await p.waitForTimeout(200);
+  for (let n = 0; n < 40; n++) {
+    if (await p.locator("#screen-home:not(.hidden)").count()) break;
+    const chk = p.locator('#screen-session button.btn:text-is("Check answer")');
+    if (await chk.count()) {
+      await p.evaluate(() => {
+        const h = document.querySelector("#screen-session");
+        h.querySelectorAll(".opt").forEach((o) => o.click());   // mr: select everything
+      });
+      await p.waitForTimeout(60);
+      if (!(await chk.isDisabled())) await chk.click();
+      await p.waitForTimeout(120);
+      const conf = p.locator('.conf button.btn:text-is("Not sure")');
+      if (await conf.count()) { await conf.click(); await p.waitForTimeout(100); }
+    }
+    let moved = false;
+    for (const label of ["Got it", "Next", "Continue", "Finish block"]) {
+      const b = p.locator(`#screen-session button.btn:text-is("${label}")`);
+      if (await b.count()) { await b.first().click(); moved = true; break; }
+    }
+    await p.waitForTimeout(140);
+    if (!moved && !(await chk.count())) break;
+  }
+  const shown = await p.textContent("#screen-session");
+  check("N11 the app never claims the skill is done",
+    !/skill complete|competent to perform|certified to perform/i.test(shown), shown.slice(0, 200));
+  check("N12 and says plainly what it does claim",
+    /know what to do and in what order/i.test(shown), shown.slice(-300));
+  check("N13 naming the checklist it is verified against",
+    /chk-6\.2/.test(shown), shown.slice(-300));
+  check("N no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── O. §2.1 term cards ────────────────────────────────────────────────── */
+{ const p = await open();
+  const modes = await p.evaluate(() => {
+    const A = window.AEMT;
+    return { fresh: A.termMode(null), once: A.termMode({ reps: 1 }), twice: A.termMode({ reps: 2 }),
+             thrice: A.termMode({ reps: 3 }), four: A.termMode({ reps: 4 }), many: A.termMode({ reps: 9 }) };
+  });
+  // §5: build and recall only once the learner has seen a card twice.
+  check("O1 a new card starts on decompose", modes.fresh === "decompose" && modes.once === "decompose",
+    JSON.stringify(modes));
+  check("O2 it hardens to build after two exposures",
+    modes.twice === "build" && modes.thrice === "build", JSON.stringify(modes));
+  check("O3 and to free recall after four", modes.four === "recall" && modes.many === "recall",
+    JSON.stringify(modes));
+
+  const fuzzy = await p.evaluate(() => {
+    const A = window.AEMT;
+    const card = A.termById("trm-hypoglycemia");     // hypoglycemia
+    return { exact: A.termMatches(card, "hypoglycemia"),
+             caseSpace: A.termMatches(card, "  HypoGlycemia  "),
+             synonym: A.termMatches(card, "low blood sugar"),
+             oneTypo: A.termMatches(card, "hypoglycemi"),
+             twoTypos: A.termMatches(card, "hypoglycemai"),
+             oppositePrefix: A.termMatches(card, "hyperglycemia"),
+             wrongPrefix: A.termMatches(A.termById("trm-bradycardia"), "tachycardia"),
+             shortWord: A.termMatches({ term: "apnea", synonyms: [] }, "apnee"),
+             empty: A.termMatches(card, "   ") };
+  });
+  check("O4 an exact answer matches", fuzzy.exact === true);
+  check("O5 case and whitespace are normalized", fuzzy.caseSpace === true);
+  check("O6 documented synonyms are accepted", fuzzy.synonym === true);
+  check("O7 typos within two edits are forgiven",
+    fuzzy.oneTypo === true && fuzzy.twoTypos === true, JSON.stringify(fuzzy));
+  // The spec's rule taken literally accepts the opposite term: hyperglycemia
+  // is two edits from hypoglycemia, and that pair is dextrose or no dextrose.
+  check("O8 a flipped prefix is NOT forgiven, however close",
+    fuzzy.oppositePrefix === false, "hyperglycemia matched hypoglycemia");
+  check("O9 nor brady- for tachy-", fuzzy.wrongPrefix === false);
+  check("O10 words of 8 characters or fewer get no fuzz at all", fuzzy.shortWord === false);
+  check("O11 an empty answer is not a match", fuzzy.empty === false);
+
+  // Each mode renders, grades dichotomously, and shows the exact spelling.
+  const render = await p.evaluate(() => {
+    const A = window.AEMT;
+    const card = A.termById("trm-bradycardia");     // brady | card | ia
+    const host = document.createElement("div"); document.body.appendChild(host);
+    const out = {};
+
+    // decompose: split after "brady" and after "card", then name each part
+    const d = A.makeTermRenderer(card, "decompose");
+    host.appendChild(d.el);
+    out.emptyRead = d.read() === null;
+    const gaps = [...host.querySelectorAll(".tc-gap")];
+    gaps[4].click();                                   // brady|cardia
+    [...host.querySelectorAll(".tc-gap")][8].click();   // brady|card|ia
+    const kinds = ["prefix", "root", "suffix"];
+    kinds.forEach((k, i) => {
+      const b = host.querySelector(`.ob-pick[data-seg="${i}"][data-kind="${k}"]`);
+      if (b) b.click();
+    });
+    out.decomposeRight = d.grade(d.read());
+    d.showAnswer();
+    out.decomposeShowsMeaning = /slow/.test(host.textContent);
+    host.innerHTML = "";
+
+    // build: assemble from the part bank
+    const b2 = A.makeTermRenderer(card, "build");
+    host.appendChild(b2.el);
+    ["brady", "card", "ia"].forEach((t) => {
+      const c = host.querySelector(`.dd-chip[data-part="${t}"]`); if (c) c.click();
+    });
+    out.buildRight = b2.grade(b2.read());
+    out.buildWrong = b2.grade(["card", "brady", "ia"]);
+    host.innerHTML = "";
+
+    // recall: free text, and the exact spelling shows either way
+    const r3 = A.makeTermRenderer(card, "recall");
+    host.appendChild(r3.el);
+    const inp = host.querySelector(".tc-input");
+    inp.value = "bradycardai"; inp.dispatchEvent(new Event("input"));
+    out.recallFuzzy = r3.grade(r3.read());
+    r3.showAnswer();
+    out.recallShowsSpelling = host.textContent.indexOf("bradycardia") !== -1;
+    host.remove();
+    return out;
+  });
+  check("O12 decompose refuses an unlabelled split", render.emptyRead === true);
+  check("O13 a correct split and labelling grades correct", render.decomposeRight === true);
+  check("O14 and the answer shows what each part means", render.decomposeShowsMeaning === true);
+  check("O15 build grades a correctly assembled term", render.buildRight === true);
+  check("O16 and rejects the right parts in the wrong order", render.buildWrong === false);
+  check("O17 recall accepts a near-miss spelling", render.recallFuzzy === true);
+  // Spelling matters in a legal record, so it is shown every time (§2.1).
+  check("O18 and shows the exact spelling regardless", render.recallShowsSpelling === true);
+
+  // The term bank runs on its own cap so it cannot crowd out reasoning items.
+  const cap = await p.evaluate(() => {
+    const A = window.AEMT;
+    A.state.settings.max_new_terms_per_day = 2;
+    A.state.terms = {}; A.state.new_terms_today = { date: null, count: 0 };
+    const first = A.dueTerms(new Date()).length;
+    // Spend the day's allowance on whichever two the queue actually offered.
+    A.dueTerms(new Date()).slice(0, 2).forEach((t) => A.recordTerm(t, true, new Date()));
+    const afterTwo = A.dueTerms(new Date()).filter((t) => !A.state.terms[t.id]).length;
+    A.state.settings.max_new_terms_per_day = 15;
+    return { first, afterTwo, total: A.series.terms.length,
+             capSeparateFromItems: A.state.settings.max_new_per_day !== 2 };
+  });
+  // A term that wraps mid-word reads as two words, which is the opposite of
+  // what decompose is teaching.
+  const wrapping = await p.evaluate(() => {
+    const A = window.AEMT, host = document.getElementById("screen-home");
+    return A.series.terms.filter((t) => (t.parts || []).length > 1).map((t) => {
+      const d = A.makeTermRenderer(t, "decompose");
+      host.appendChild(d.el);
+      const word = d.el.querySelector(".tc-word");
+      const rows = new Set([...word.querySelectorAll(".tc-l")]
+        .map((x) => Math.round(x.getBoundingClientRect().top))).size;
+      d.el.remove();
+      return { term: t.term, rows };
+    });
+  });
+  check("O19 every term stays on one line",
+    wrapping.every((w) => w.rows === 1),
+    JSON.stringify(wrapping.filter((w) => w.rows !== 1)));
+  check("O20 new terms are capped per day", cap.first === 2, String(cap.first));
+  check("O21 and the cap is spent once they are seen", cap.afterTwo === 0, String(cap.afterTwo));
+  check("O22 the term cap is separate from the item cap", cap.capSeparateFromItems === true);
+  check("O no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── P. §2.2 hotspot and label_drag ────────────────────────────────────── */
+{ const p = await open();
+  const hs = await p.evaluate(() => {
+    const A = window.AEMT;
+    const item = A.itemById("itm-seed.101");
+    const host = document.createElement("div"); document.body.appendChild(host);
+    const r = A.Render.hotspot(item); host.appendChild(r.el);
+    const regions = [...host.querySelectorAll(".hs-region")];
+    const pick = (id) => regions.find((x) => x.getAttribute("data-region") === id)
+      .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    pick("trachea");
+    const wrong = r.grade(r.read());
+    pick(item.answer_region);
+    const right = r.grade(r.read());
+    // Keyboard operable, and the labels must not give the answer away.
+    const labels = regions.map((x) => x.getAttribute("aria-label"));
+    const focusable = regions.every((x) => x.getAttribute("tabindex") === "0");
+    const roles = regions.every((x) => x.getAttribute("role") === "button");
+    r.showAnswer();
+    const painted = host.querySelectorAll(".hs-right").length;
+    const licence = /SEED PLACEHOLDER/.test(host.textContent);
+    host.remove();
+    return { right, wrong, labels, focusable, roles, painted, licence };
+  });
+  check("P1 hotspot grades the right region correct", hs.right === true);
+  check("P2 and any other region wrong", hs.wrong === false);
+  check("P3 every region is keyboard focusable", hs.focusable === true);
+  check("P4 with a button role", hs.roles === true);
+  // "Trachea" as an accessible name would hand the answer to a screen reader.
+  check("P5 the accessible names are neutral, not the answers",
+    hs.labels.every((l) => /^Region \d+$/.test(l)), JSON.stringify(hs.labels));
+  check("P6 showAnswer marks the right region", hs.painted === 1, String(hs.painted));
+  // §2.2 — every figure's licence is recorded and shown where it is used.
+  check("P7 the figure carries its licence", hs.licence === true);
+
+  const kb = await p.evaluate(() => {
+    const A = window.AEMT;
+    const host = document.createElement("div"); document.body.appendChild(host);
+    const r = A.Render.hotspot(A.itemById("itm-seed.101")); host.appendChild(r.el);
+    const reg = host.querySelector('.hs-region[data-region="cricoid"]');
+    reg.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    const viaEnter = r.grade(r.read());
+    host.remove();
+    return viaEnter;
+  });
+  check("P8 and is answerable from the keyboard", kb === true);
+
+  const ld = await p.evaluate(() => {
+    const A = window.AEMT;
+    const item = A.itemById("itm-seed.102");
+    const host = document.createElement("div"); document.body.appendChild(host);
+    const r = A.Render.label_drag(item); host.appendChild(r.el);
+    const place = (pid, lid) => {
+      host.querySelector(`.dd-chip[data-label="${lid}"]`).click();
+      host.querySelector(`.ld-pin[data-pointer="${pid}"]`).click();
+    };
+    const map = item.answer_map;
+    Object.keys(map).forEach((pid) => place(pid, map[pid]));
+    const right = r.grade(r.read());
+    const noDrag = !host.querySelector("[draggable]");
+    // One label wrong makes the whole item wrong — dichotomous (§2.2).
+    const ids = Object.keys(map);
+    const swapped = r.grade(Object.assign({}, (() => {
+      const m = {}; ids.forEach((pid) => { m[map[pid]] = pid; });
+      const a = map[ids[0]], b = map[ids[1]];
+      m[a] = ids[1]; m[b] = ids[0];
+      return m;
+    })()));
+    r.showAnswer();
+    const painted = host.querySelectorAll(".ld-pin.was-correct").length;
+    host.remove();
+    return { right, swapped, noDrag, painted, pointers: item.pointers.length };
+  });
+  check("P9 label_drag grades a fully correct placement", ld.right === true);
+  check("P10 two labels swapped fails the whole item", ld.swapped === false);
+  check("P11 it needs no drag gesture", ld.noDrag === true);
+  check("P12 showAnswer places every label", ld.painted === ld.pointers, `${ld.painted}/${ld.pointers}`);
+  check("P no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── Q. §2.4 evidence_flag, and the enables rule ───────────────────────── */
+{ const p = await open();
+  await p.evaluate(() => {
+    const b = window.AEMT.series.blocks.findIndex((x) => x.id === "6.7");
+    window.AEMT.series.blocks.unshift(window.AEMT.series.blocks.splice(b, 1)[0]);
+    window.AEMT.state.blocks = {};
+    window.AEMT.renderHome();
+  });
+  await p.click("#btn-next-block");
+  await p.waitForSelector('#screen-session button.btn:text-is("Start")');
+  await p.click('#screen-session button.btn:text-is("Start")');
+  await p.waitForTimeout(250);
+  const ev = await p.textContent("#screen-session");
+  check("Q1 a declared divergence is shown before the content",
+    /Where the book and the evidence differ/i.test(ev), ev.slice(0, 160));
+  check("Q2 it gives the textbook position", /The textbook says/i.test(ev));
+  check("Q3 alongside the current guidance", /Current guidance/i.test(ev));
+  check("Q4 and is honest about what is still uncertain",
+    /still uncertain/i.test(ev) && /without definitive evidence/i.test(ev));
+  check("Q5 with its source", /Fischer|NAEMSP/.test(ev));
+
+  // §1: A&P is instrumental, never terminal. An objective that cannot name the
+  // decision it enables does not ship.
+  const enables = await p.evaluate(() => {
+    const A = window.AEMT;
+    const v11 = A.series.objectives.filter((o) => o.chapter >= 5);
+    return { total: v11.length,
+             missing: v11.filter((o) => !o.enables || !o.enables.trim()).map((o) => o.id),
+             tiers: [...new Set(v11.map((o) => o.tier))].sort() };
+  });
+  check("Q6 every Chapter 5+ objective names what it enables",
+    enables.missing.length === 0, enables.missing.join(","));
+  check("Q7 and carries a tier",
+    JSON.stringify(enables.tiers) === JSON.stringify(["context", "core", "reference"]),
+    JSON.stringify(enables.tiers));
+  check("Q no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── S. A Phase 1 learner's saved progress survives the v1.1 upgrade ──────
+   v1.1 added the term bank and the verification record. A learner who studied
+   on the Phase 1 build has neither key, and the home screen reads both before
+   it draws — so without a migration their next session is a blank page. */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    // Exactly the shape Phase 1 wrote: no terms, no verifications, schema 1.
+    const v1 = { user_id: "local-old", schema_version: 1,
+      items: { "itm-seed.002": { due: new Date().toISOString(), stability: 3, difficulty: 5,
+                                 reps: 2, lapses: 0, state: "review",
+                                 last_review: new Date().toISOString() } },
+      objectives: { "obj-seed.b": { successes: 1, attempts: 1, correct_items: ["itm-seed.002"],
+                                    correct_intervals: [0], last_attempts: [true] } },
+      blocks: { "3.5": { attempted: true, completed_at: new Date().toISOString() } },
+      streak_days: 5, last_active: null, new_today: { date: null, count: 0 },
+      settings: { request_retention: 0.9, max_new_per_day: 20, session_cap: 15, course_dates: {} } };
+    const m = A.migrateState(JSON.parse(JSON.stringify(v1)));
+    return { schema: m.schema_version, terms: !!m.terms, verifications: !!m.verifications,
+             termCap: m.settings.max_new_terms_per_day,
+             keptItems: Object.keys(m.items).length, keptStreak: m.streak_days,
+             keptBlock: !!m.blocks["3.5"].completed_at };
+  });
+  check("S1 the migration brings the document to schema 2", r.schema === 2, String(r.schema));
+  check("S2 it adds the term bank", r.terms === true);
+  check("S3 and the verification record", r.verifications === true);
+  check("S4 and the term cap the settings never had", r.termCap === 15, String(r.termCap));
+  check("S5 without losing scheduled items", r.keptItems === 1, String(r.keptItems));
+  check("S6 the streak", r.keptStreak === 5, String(r.keptStreak));
+  check("S7 or block completion", r.keptBlock === true);
+
+  // And the whole thing renders rather than throwing on the missing stores.
+  const rendered = await p.evaluate(() => {
+    const A = window.AEMT;
+    const v1 = { user_id: "local-old", schema_version: 1, items: {}, objectives: {},
+                 blocks: { "3.5": { attempted: true, completed_at: null } },
+                 streak_days: 2, settings: {} };
+    A.state = A.migrateState(v1);
+    A.renderHome();
+    return { terms: A.dueTerms(new Date()).length,
+             homeDrew: !!document.querySelector(".due-hero") };
+  });
+  check("S8 the term queue works on a migrated document", rendered.terms > 0, String(rendered.terms));
+  check("S9 and the home screen draws", rendered.homeDrew === true);
+  check("S no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── R. The v1.1 seed is still flagged as throwaway ────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const placeholder = (x) => (A.series.chapter_meta[x.chapter] || {}).seed;
+    return { terms: A.series.terms.length,
+             termsFlagged: A.series.terms.filter(placeholder).every((t) => t.seed_throwaway === true),
+             itemsFlagged: A.series.items.filter(placeholder).every((i) => i.seed_throwaway === true),
+             blocksFlagged: A.series.blocks.filter(placeholder).every((b) => b.seed_throwaway === true),
+             figuresLicensed: A.series.items
+               .filter((i) => i.stimulus && i.stimulus.kind === "image")
+               .every((i) => !!i.stimulus.asset_license) };
+  });
+  check("R1 the term bank is seeded", r.terms >= 5, String(r.terms));
+  check("R2 placeholder term cards are flagged throwaway", r.termsFlagged === true);
+  check("R3 so are placeholder items and blocks",
+    r.itemsFlagged === true && r.blocksFlagged === true);
+  // §2.2 — do not let licensing get decided informally at build time.
+  check("R4 every figure records an asset_license", r.figuresLicensed === true);
+  check("R no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ══ CHAPTER 5 — MEDICAL TERMINOLOGY ══════════════════════════════════════
+   The first authored chapter. Structural conformance to §4.2 and §5.2 is
+   enforced when the file is built; what is checked here is that the chapter
+   loads, replaces its placeholder, and that the safety content is right. */
+
+/* ── T. The chapter loads and supersedes its seed ──────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch5 = (x) => x.chapter === 5;
+    return { blocks: A.series.blocks.filter(ch5).length,
+             items: A.series.items.filter(ch5).length,
+             objectives: A.series.objectives.filter(ch5).length,
+             terms: A.series.terms.length,
+             seedLeft: A.series.blocks.filter((b) => ch5(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch5(i) && i.seed_throwaway).length +
+                       A.series.terms.filter((t) => t.seed_throwaway).length,
+             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 3 && b.seed_throwaway).length,
+             meta: A.series.chapter_meta[5] };
+  });
+  check("T1 seven blocks, as the framework specifies", r.blocks === 7, String(r.blocks));
+  check("T2 fifty-nine items", r.items === 59, String(r.items));
+  check("T3 and the term bank", r.terms > 200, String(r.terms));
+  // An authored chapter replaces its placeholder rather than sitting beside it.
+  check("T4 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("T5 while other chapters keep theirs", r.otherSeedKept > 0, String(r.otherSeedKept));
+  check("T6 the chapter is not marked seed", r.meta.seed === false);
+  check("T7 it declares its review status honestly",
+    r.meta.review_status === "unreviewed", r.meta.review_status);
+  check("T8 and names its sources", (r.meta.sources || []).length >= 3,
+    JSON.stringify(r.meta.sources));
+
+  // v1.1 §1 — an objective that cannot name what it enables does not ship.
+  const objs = await p.evaluate(() => window.AEMT.series.objectives.filter((o) => o.chapter === 5)
+    .map((o) => ({ id: o.id, enables: o.enables, tier: o.tier })));
+  check("T9 every objective names what it enables",
+    objs.every((o) => o.enables && o.enables.length > 20), JSON.stringify(objs.filter((o) => !o.enables)));
+  check("T10 and carries a tier", objs.every((o) => o.tier === "core"));
+
+  // v1.0 §11.2 — nothing may trace to the textbook.
+  const src = await p.evaluate(() => {
+    const A = window.AEMT;
+    const refs = A.series.items.filter((i) => i.chapter === 5).map((i) => i.source_ref)
+      .concat(A.series.terms.map((t) => t.source_ref));
+    return { missing: refs.filter((r) => !r).length,
+             textbook: refs.filter((r) => /jones|bartlett|emergency care and transportation/i.test(r || "")).length,
+             distinct: [...new Set(refs)].length };
+  });
+  check("T11 every item and term cites a source", src.missing === 0, String(src.missing));
+  check("T12 none of them is the textbook", src.textbook === 0, String(src.textbook));
+  check("T no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── U. The safety block. These answers are the point of Chapter 5.6. ──── */
+{ const p = await open();
+  const facts = await p.evaluate(() => {
+    const A = window.AEMT;
+    const byId = {}; A.series.items.forEach((i) => { byId[i.id] = i; });
+    const correctOf = (id) => (byId[id].options || []).filter((o) => o.correct).map((o) => o.text);
+    const rowsOf = (id) => (byId[id].rows || []).map((r) => r.label + "=" + r.answer);
+    return { u: correctOf("itm-5.6.001")[0],
+             tjc: correctOf("itm-5.6.002"),
+             zeros: rowsOf("itm-5.6.003"),
+             ms: correctOf("itm-5.6.004")[0],
+             errorProne: correctOf("itm-5.6.008") };
+  });
+  // U for unit is read as a zero or a four — the failure mode is a tenfold dose.
+  check("U1 U is prohibited because it is misread as a digit",
+    /misread as a zero or a four/i.test(facts.u), facts.u);
+  check("U2 the Do Not Use answers are U, IU and MS",
+    facts.tjc.length === 3 && facts.tjc.join("|").includes("U for unit") &&
+    facts.tjc.join("|").includes("IU") && facts.tjc.join("|").includes("MS"),
+    JSON.stringify(facts.tjc));
+  // Leading zero required, trailing zero prohibited. Both fail by ten.
+  check("U3 a leading zero is required and a bare decimal is not acceptable",
+    facts.zeros.includes("0.5 mg=ok") && facts.zeros.includes(".5 mg=no"),
+    JSON.stringify(facts.zeros));
+  check("U4 a trailing zero is not acceptable and a bare integer is",
+    facts.zeros.includes("5 mg=ok") && facts.zeros.includes("5.0 mg=no"),
+    JSON.stringify(facts.zeros));
+  check("U5 MS is prohibited because it names two different drugs",
+    /morphine sulfate or magnesium sulfate/i.test(facts.ms), facts.ms);
+  check("U6 the error-prone symbols are @, cc and microgram",
+    facts.errorProne.length === 3 && facts.errorProne.join("|").includes("@") &&
+    facts.errorProne.join("|").includes("cc") && facts.errorProne.join("|").includes("µg"),
+    JSON.stringify(facts.errorProne));
+  check("U no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── V. The term bank as built, in all three modes ─────────────────────── */
+{ const p = await open();
+  const bank = await p.evaluate(() => {
+    const A = window.AEMT;
+    const parts = A.series.terms.filter((t) => t.card_kind === "part");
+    const whole = A.series.terms.filter((t) => t.card_kind === "term");
+    // build and decompose both require the parts to spell the term.
+    const broken = whole.filter((t) => (t.parts || []).length &&
+      t.parts.map((x) => x.text).join("") !== t.term).map((t) => t.term);
+    return { parts: parts.length, whole: whole.length, broken,
+             partModeIsRecall: A.termMode({ reps: 0 }, parts[0]),
+             wholeModeStarts: A.termMode({ reps: 0 }, whole.find((t) => (t.parts || []).length > 1)),
+             kinds: [...new Set(parts.map((x) => x.part_kind))].sort() };
+  });
+  check("V1 the bank is mostly word parts, as the framework asks",
+    bank.parts > 120, String(bank.parts));
+  check("V2 with whole terms alongside them", bank.whole > 40, String(bank.whole));
+  check("V3 every whole term spells out from its parts",
+    bank.broken.length === 0, bank.broken.join(","));
+  check("V4 a one-morpheme card goes straight to production",
+    bank.partModeIsRecall === "recall", bank.partModeIsRecall);
+  check("V5 while a whole term starts by being taken apart",
+    bank.wholeModeStarts === "decompose", bank.wholeModeStarts);
+  check("V6 all four kinds of part are represented",
+    JSON.stringify(bank.kinds) === JSON.stringify(["prefix", "root", "suffix", "vowel"]),
+    JSON.stringify(bank.kinds));
+
+  // The guard that matters, now against the real bank where both terms exist.
+  const guard = await p.evaluate(() => {
+    const A = window.AEMT;
+    const hypo = A.termById("trm-hypoglycemia");
+    const brady = A.termById("trm-bradycardia");
+    return { exact: A.termMatches(hypo, "hypoglycemia"),
+             typo: A.termMatches(hypo, "hypoglycemi"),
+             synonym: A.termMatches(hypo, "low blood sugar"),
+             opposite: A.termMatches(hypo, "hyperglycemia"),
+             oppositeBack: A.termMatches(A.termById("trm-hyperglycemia"), "hypoglycemia"),
+             bradyTachy: A.termMatches(brady, "tachycardia"),
+             apnea: A.termMatches(A.termById("trm-apnea"), "dyspnea") };
+  });
+  check("V7 an exact answer matches", guard.exact === true);
+  check("V8 a tail typo is forgiven", guard.typo === true);
+  check("V9 a documented synonym is accepted", guard.synonym === true);
+  // Two edits apart, and the difference is whether you give dextrose.
+  check("V10 hyperglycemia is never accepted for hypoglycemia", guard.opposite === false);
+  check("V11 nor the other way round", guard.oppositeBack === false);
+  check("V12 nor tachycardia for bradycardia", guard.bradyTachy === false);
+  check("V13 nor dyspnea for apnea", guard.apnea === false);
+
+  // Each mode renders and grades against a real card.
+  const modes = await p.evaluate(() => {
+    const A = window.AEMT;
+    const card = A.termById("trm-bradycardia");   // brady | card | ia
+    const host = document.createElement("div"); document.body.appendChild(host);
+    const out = {};
+    const b = A.makeTermRenderer(card, "build");
+    host.appendChild(b.el);
+    ["brady", "card", "ia"].forEach((t) => {
+      const c = host.querySelector(`.dd-chip[data-part="${t}"]`); if (c) c.click();
+    });
+    out.build = b.grade(b.read());
+    host.innerHTML = "";
+    const r = A.makeTermRenderer(card, "recall");
+    host.appendChild(r.el);
+    const inp = host.querySelector(".tc-input");
+    inp.value = "bradycardia"; inp.dispatchEvent(new Event("input"));
+    out.recall = r.grade(r.read());
+    r.showAnswer();
+    out.spelling = host.textContent.indexOf("bradycardia") !== -1;
+    host.remove();
+    return out;
+  });
+  check("V14 build assembles a real card", modes.build === true);
+  check("V15 recall grades a real card", modes.recall === true);
+  check("V16 and shows the exact spelling", modes.spelling === true);
+  check("V no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── W. The quadrants hotspot, on an original figure ───────────────────── */
+{ const p = await open();
+  const hs = await p.evaluate(() => {
+    const A = window.AEMT;
+    const item = A.itemById("itm-5.5.002");
+    const host = document.createElement("div"); document.body.appendChild(host);
+    const r = A.Render.hotspot(item); host.appendChild(r.el);
+    const pick = (id) => host.querySelector(`.hs-region[data-region="${id}"]`)
+      .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    pick("luq"); const wrong = r.grade(r.read());
+    pick("rlq"); const right = r.grade(r.read());
+    const licence = host.querySelector(".fig-lic");
+    const names = [...host.querySelectorAll(".hs-region")].map((x) => x.getAttribute("aria-label"));
+    host.remove();
+    return { right, wrong, answer: item.answer_region, names,
+             licence: licence ? licence.textContent : null,
+             regions: item.regions.length };
+  });
+  check("W1 the appendix is in the right lower quadrant", hs.answer === "rlq", hs.answer);
+  check("W2 tapping it grades correct", hs.right === true);
+  check("W3 another quadrant does not", hs.wrong === false);
+  check("W4 all four quadrants are targets", hs.regions === 4, String(hs.regions));
+  check("W5 the region names do not give the answer away",
+    hs.names.every((n) => /^Region \d+$/.test(n)), JSON.stringify(hs.names));
+  // §2.2 — original work, and the licence recorded where the figure is used.
+  check("W6 the figure declares its licence", !!hs.licence, String(hs.licence));
+  check("W7 and it is original rather than third-party",
+    /Original schematic/i.test(hs.licence || ""), hs.licence);
+  check("W no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();

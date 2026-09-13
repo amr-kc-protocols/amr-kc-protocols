@@ -57,6 +57,24 @@ These suites live here:
   four-part mastery rule, and the two things this product must never do —
   merge completion into mastery, or make a learner drag something to answer.
 
+  From Chapter 5 onward it also covers authored content: that an authored
+  chapter supersedes its placeholder rather than sitting beside it, that the
+  home screen states plainly what the app is and which chapters are written,
+  that every objective names the decision it enables, that no item traces to
+  the textbook, and that the Chapter 5.6 safety answers are right — U, IU and
+  MS prohibited, leading zero required, trailing zero not. Structural
+  conformance to the framework (screen counts, word budgets, quiz composition,
+  item-writing rules) is enforced when the chapter file is built, so a block
+  that drifts out of spec fails the build rather than the suite.
+
+  It also covers the v1.1 additions for Chapters 5–9: the `tier` valve that
+  keeps context and reference objectives out of the queue, lab gates (an
+  objective carried by a lab-gated block stops at practicing until an
+  instructor signs the checklist, and the app never claims the skill is done),
+  term cards in all three modes with their fuzzy matching, `hotspot` and
+  `label_drag`, the declared book-versus-evidence divergence, and the v1→v2
+  migration that keeps a Phase 1 learner's saved progress working.
+
 - **`homepage.test.mjs`** — the homepage ([`index.html`](../index.html)) in
   headless Chromium at four screen sizes, two of them Toughbook resolutions.
   Defends the two things the revamp changed: that the sign-in is gone from the
