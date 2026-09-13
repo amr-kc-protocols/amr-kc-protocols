@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v19';
+const CACHE = 'amrkc-2026-v20';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -22,11 +22,13 @@ const ASSETS = [
   './aemt/series.json',
   './aemt/ch01-ems-systems.json',
   './aemt/ch02-workforce-safety.json',
+  './aemt/ch03-medical-legal-ethical.json',
   './aemt/ch05-terminology.json',
   './aemt/series-preparatory.json',
   './aemt/fsrs-5.4.2.umd.js',
   './aemt/seed-tpopp-placeholder.svg',
   './aemt/seed-airway-placeholder.svg',
+  './aemt/fig-portable-medical-order.svg',
   './aemt/fig-abdominal-quadrants.svg'
 ];
 

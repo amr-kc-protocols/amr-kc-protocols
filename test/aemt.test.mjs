@@ -188,15 +188,20 @@ async function answerItem(page, itemId, how) {
   check("A11 and flags them as not yet instructor-reviewed",
     /not yet instructor-reviewed/i.test(about));
   check("A12 and names the chapters that are still placeholder",
-    /Placeholder so far/i.test(about) && /Ch 3/.test(about));
+    /Placeholder so far/i.test(about) && /Ch 4/.test(about));
+  // A chapter that records in its own file what it deliberately left out is
+  // only being honest if the learner can read it.
+  const notices = await p.locator(".about-n").count();
+  check("A13 each authored chapter's notice is shown, not just stored",
+    notices >= 3, String(notices));
   check("A9 no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 /* ── B. The seven renderers, right and wrong (§5.1) ────────────────────── */
 { const p = await open();
   const cases = [
-    ["mc", "itm-1.1.001"], ["mr", "itm-seed.004"], ["build_list", "itm-seed.006"],
-    ["drag_drop", "itm-seed.008"], ["options_box", "itm-seed.010"], ["graphical", "itm-seed.011"],
+    ["mc", "itm-1.1.001"], ["mr", "itm-2.1.004"], ["build_list", "itm-3.4.001"],
+    ["drag_drop", "itm-3.2.002"], ["options_box", "itm-3.3.004"], ["graphical", "itm-3.6.002"],
   ];
   for (const [type, id] of cases) {
     const right = await answerItem(p, id, "right");
@@ -207,7 +212,7 @@ async function answerItem(page, itemId, how) {
   }
   // mr is dichotomous — a subset of the correct options is still wrong (§5.1).
   const partial = await p.evaluate(() => {
-    const it = window.AEMT.itemById("itm-seed.004");
+    const it = window.AEMT.itemById("itm-2.1.004");
     const r = window.AEMT.Render.mr(it);
     const correct = it.options.filter((o) => o.correct).map((o) => o.id);
     return r.grade(correct.slice(0, correct.length - 1));
@@ -215,7 +220,7 @@ async function answerItem(page, itemId, how) {
   check("B mr: a partly-right selection earns nothing", partial === false);
   // scenario children are separate items and are not themselves queued
   const sc = await p.evaluate(() => {
-    const parent = window.AEMT.itemById("itm-seed.012");
+    const parent = window.AEMT.itemById("itm-3.INT.000");
     return { kids: parent.children.length,
              kidsExist: parent.children.every((c) => !!window.AEMT.itemById(c)),
              parentInDue: window.AEMT.drillItems(null, 99).some((i) => i.type === "scenario") };
@@ -229,7 +234,7 @@ async function answerItem(page, itemId, how) {
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const hs = A.itemById("itm-seed.001");     // high_stakes
+    const hs = A.itemById("itm-3.5.001");      // high_stakes
     const lo = A.itemById("itm-seed.016");     // not high_stakes
     // Build a real history forward in time, then branch at one moment so the
     // three outcomes are compared from identical state.
@@ -274,7 +279,7 @@ async function answerItem(page, itemId, how) {
       }
       return { gaps, stability: prev.stability };
     }
-    return { high: drive(A.itemById("itm-seed.001"), 12),
+    return { high: drive(A.itemById("itm-3.5.001"), 12),
              low:  drive(A.itemById("itm-seed.016"), 12),
              floor: A.LAPSE_FLOOR_DAYS };
   });
@@ -381,7 +386,7 @@ async function answerItem(page, itemId, how) {
   });
   await p.click("#btn-next-block");
   await p.waitForSelector("#screen-session .cold");
-  check("G2 it opens on the cold open", /gas-station|parking lot/i.test(await p.textContent(".cold")));
+  check("G2 it opens on the cold open", /blood glucose was 39/i.test(await p.textContent(".cold")));
   check("G3 which ends on a decision point", (await p.locator(".cold-dp").count()) === 1);
   await p.click('#screen-session button.btn:text-is("Start")');
   await p.waitForTimeout(250);
@@ -393,7 +398,7 @@ async function answerItem(page, itemId, how) {
   await p.click("#screen-session .opt");
   await p.click('#screen-session button.btn:text-is("Check answer")');
   await p.waitForTimeout(200);
-  // itm-seed.001 is high-stakes, so confidence is asked.
+  // The pretest item for block 3.5 is high-stakes, so confidence is asked.
   check("G6 a high-stakes item asks for confidence",
     (await p.locator(".conf").count()) === 1);
   await p.click('.conf button.btn:text-is("Sure")');
@@ -563,8 +568,8 @@ async function answerItem(page, itemId, how) {
   // SC 2.5.7, which the spec's own accessibility constraint pulls in.
   const noDrag = await p.evaluate(() => {
     const A = window.AEMT;
-    const bl = A.Render.build_list(A.itemById("itm-seed.006"));
-    const dd = A.Render.drag_drop(A.itemById("itm-seed.008"));
+    const bl = A.Render.build_list(A.itemById("itm-3.4.001"));
+    const dd = A.Render.drag_drop(A.itemById("itm-3.2.002"));
     document.body.appendChild(bl.el); document.body.appendChild(dd.el);
     const r = { orderButtons: bl.el.querySelectorAll(".ord-btn").length,
                 orderLabelled: [...bl.el.querySelectorAll(".ord-btn")].every((b) => b.getAttribute("aria-label")),
@@ -614,7 +619,7 @@ async function answerItem(page, itemId, how) {
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const it = A.itemById("itm-seed.008");
+    const it = A.itemById("itm-3.2.002");
     const host = document.createElement("div");
     document.body.appendChild(host);
     const rend = A.Render.drag_drop(it);
@@ -643,7 +648,7 @@ async function answerItem(page, itemId, how) {
   // And removing still works when nothing is armed.
   const rm = await p.evaluate(() => {
     const A = window.AEMT;
-    const it = A.itemById("itm-seed.008");
+    const it = A.itemById("itm-3.2.002");
     const host = document.createElement("div");
     document.body.appendChild(host);
     const rend = A.Render.drag_drop(it);
@@ -673,7 +678,8 @@ async function answerItem(page, itemId, how) {
     return { core: A.objectiveTier("obj-seed.a1"),
              context: A.objectiveTier("obj-seed.a2"),
              reference: A.objectiveTier("obj-seed.a3"),
-             legacy: A.objectiveTier("obj-seed.a"),
+             legacy: (() => { A.series.objectives.push({ id: "obj-test.untiered", chapter: 9 });
+               const t = A.objectiveTier("obj-test.untiered"); A.series.objectives.pop(); return t; })(),
              coreQueued: A.isQueued(A.itemById("itm-seed.101")),
              contextQueued: A.isQueued(A.itemById("itm-seed.103")) };
   });
@@ -1134,7 +1140,7 @@ async function answerItem(page, itemId, how) {
              seedLeft: A.series.blocks.filter((b) => ch5(b) && b.seed_throwaway).length +
                        A.series.items.filter((i) => ch5(i) && i.seed_throwaway).length +
                        A.series.terms.filter((t) => t.seed_throwaway).length,
-             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 3 && b.seed_throwaway).length,
+             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 7 && b.seed_throwaway).length,
              meta: A.series.chapter_meta[5] };
   });
   check("T1 seven blocks, as the framework specifies", r.blocks === 7, String(r.blocks));
@@ -1325,7 +1331,7 @@ async function answerItem(page, itemId, how) {
              objectives: A.series.objectives.filter(ch1).length,
              seedLeft: A.series.blocks.filter((b) => ch1(b) && b.seed_throwaway).length +
                        A.series.items.filter((i) => ch1(i) && i.seed_throwaway).length,
-             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 3 && b.seed_throwaway).length,
+             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 7 && b.seed_throwaway).length,
              meta: A.series.chapter_meta[1],
              tiers: [...new Set(A.series.objectives.filter(ch1).map((o) => o.tier))].sort(),
              noEnables: A.series.objectives.filter(ch1).filter((o) => !o.enables).map((o) => o.id) };
@@ -1466,6 +1472,96 @@ async function answerItem(page, itemId, how) {
       .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
     JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
   check("Y no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── Z. Chapter 3, Medical, Legal and Ethical Issues ───────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch3 = (x) => x.chapter === 3;
+    return { blocks: A.series.blocks.filter(ch3).length,
+             items: A.series.items.filter(ch3).length,
+             objectives: A.series.objectives.filter(ch3).length,
+             seedLeft: A.series.blocks.filter((b) => ch3(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch3(i) && i.seed_throwaway).length,
+             meta: A.series.chapter_meta[3],
+             noEnables: A.series.objectives.filter(ch3).filter((o) => !o.enables).map((o) => o.id),
+             noSource: A.series.items.filter(ch3).filter((i) => !i.source_ref).map((i) => i.id) };
+  });
+  check("Z1 eight teaching blocks and an integration block", r.blocks === 9, String(r.blocks));
+  check("Z2 seventy-four items", r.items === 74, String(r.items));
+  check("Z3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("Z4 the chapter is not marked seed", r.meta.seed === false);
+  check("Z5 it declares its review status honestly",
+    r.meta.review_status === "unreviewed", r.meta.review_status);
+  check("Z6 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("Z7 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+
+  // The four answers in this chapter that decide whether someone lives, gets
+  // resuscitated against their wishes, or is left at home with a condition
+  // nobody named. If a rewrite softens any of these, it is a defect.
+  const law = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const hs = (id) => A.itemById(id).high_stakes;
+    return { blank: right("itm-3.6.002"), blankHs: hs("itm-3.6.002"),
+             dnr: right("itm-3.6.003"), dnrHs: hs("itm-3.6.003"),
+             unverified: right("itm-3.6.007"),
+             capacity: right("itm-3.3.003"), capacityHs: hs("itm-3.3.003"),
+             refusal: right("itm-3.5.001"), refusalHs: hs("itm-3.5.001"),
+             abilities: (A.itemById("itm-3.3.002").options || [])
+               .filter((o) => o.correct).length,
+             agree: (A.itemById("itm-3.3.002").options || [])
+               .filter((o) => /agree/i.test(o.text)).map((o) => o.correct) };
+  });
+  check("Z8 an unmarked section on a portable order means full treatment",
+    /Full treatment/i.test(law.blank[0]) && law.blankHs === true, JSON.stringify(law.blank));
+  check("Z9 a DNR is not do-not-treat",
+    /not all care/i.test(law.dnr[0]) && law.dnrHs === true, JSON.stringify(law.dnr));
+  check("Z10 an unverifiable order defaults to resuscitating",
+    /Begin resuscitation/i.test(law.unverified[0]), JSON.stringify(law.unverified));
+  check("Z11 capacity is about the process, not the wisdom of the decision",
+    /not the wisdom/i.test(law.capacity[0]) && law.capacityHs === true, JSON.stringify(law.capacity));
+  check("Z12 capacity is exactly four abilities", law.abilities === 4, String(law.abilities));
+  check("Z13 and agreeing with the clinician is not one of them",
+    law.agree.length === 1 && law.agree[0] === false, JSON.stringify(law.agree));
+  check("Z14 a refusal needs capacity and informed risks, not a signature",
+    /capacity/i.test(law.refusal[0]) && /informed of the risks/i.test(law.refusal[0]) &&
+    law.refusalHs === true, JSON.stringify(law.refusal));
+
+  // State law is what this module must not assert. The chapter has to say so.
+  const local = await p.evaluate(() => {
+    const A = window.AEMT;
+    const text = A.series.blocks.filter((b) => b.chapter === 3)
+      .map((b) => b.callback_md + " " + b.screens.map((s) => s.body_md).join(" ")).join(" ");
+    return { saysStateLaw: /state law/i.test(text),
+             namesKansas: /\bKansas\b/i.test(text),
+             notice: (A.series.chapter_meta[3] || {}).notice || "" };
+  });
+  check("Z15 the chapter says plainly that the local rules are state law", local.saysStateLaw);
+  check("Z16 and asserts no Kansas specifics of its own", local.namesKansas === false);
+  check("Z17 the chapter notice names what was left to the overlay",
+    /local overlay/i.test(local.notice), local.notice.slice(0, 120));
+
+  // The figure is original work, and the licence travels with it.
+  const fig = await p.evaluate(() => window.AEMT.itemById("itm-3.6.002").stimulus);
+  check("Z18 the portable-order figure is an original schematic",
+    /Original schematic/i.test(fig.asset_license), String(fig.asset_license));
+  check("Z19 and is not presented as a reproduction of a real form",
+    /Not a reproduction/i.test(fig.asset_license), String(fig.asset_license));
+  check("Z20 it carries alt text describing what is marked",
+    /unmarked/i.test(fig.alt), String(fig.alt).slice(0, 80));
+
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 3)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length, screens: b.screens.length })));
+  check("Z21 every block opens on a decision point and answers it",
+    shape.every((b) => b.dp && b.cb), JSON.stringify(shape.filter((b) => !b.dp || !b.cb)));
+  check("Z22 every teaching block runs three to five screens and quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id))
+      .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
+  check("Z no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();

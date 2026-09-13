@@ -63,6 +63,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
   padding:14px;margin-bottom:14px}
 .about-t{font-size:13.5px;font-weight:700;color:var(--teal);margin-bottom:6px}
 .about-b{font-size:12px;color:var(--gray);line-height:1.55;margin-top:7px}
+.about-n{font-size:11.5px;color:var(--gray);line-height:1.5;margin-top:6px;padding-left:9px;border-left:2px solid var(--border)}
 .about-b strong{color:var(--ink)}
 .about-flag{color:var(--warn);font-weight:700}
 
@@ -1750,6 +1751,9 @@ function renderHome(){
         return 'Ch '+ch.n+' '+esc(ch.title)+
           (meta[ch.n].review_status==='unreviewed'?' <span class="about-flag">not yet instructor-reviewed</span>':'');
       }).join(' &middot; ')));
+    built.filter(function(ch){ return meta[ch.n].notice; }).forEach(function(ch){
+      about.appendChild(el('div','about-n','<strong>Ch '+ch.n+':</strong> '+esc(meta[ch.n].notice)));
+    });
   }
   if(pending.length){
     about.appendChild(el('div','about-b','<strong>Placeholder so far:</strong> '+
@@ -2040,7 +2044,7 @@ function loadSources(manifest){
       (l.src.chapters||[]).forEach(function(n){
         out.chapter_meta[n]={ seed:seed,
           review_status:l.doc.review_status||(seed?'placeholder':'unreviewed'),
-          sources:l.doc.sources||null, file:l.src.file };
+          sources:l.doc.sources||null, notice:l.doc.notice||null, file:l.src.file };
       });
     });
     (out.chapters||[]).forEach(function(c){
