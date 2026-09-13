@@ -70,7 +70,7 @@ monitoring, so both are outside AEMT scope: diastolic targets during CPR of
 ≥ 25 mmHg in infants and ≥ 30 mmHg in older children, and a post-arrest goal of
 systolic and mean arterial pressure above the 10th percentile for age.
 
-### How 9.6 should teach it
+### How 9.6 teaches it — written, and shipped in chapter 9
 
 The divergence gets the evidence-flag treatment the series already uses in 2.5
 and 2.8: here is what the resuscitation card says, here is what the systematic
@@ -78,6 +78,13 @@ review measured, here is why they differ. A learner who has to recognize a sick
 child needs the empirical centiles; a learner sitting a course that tests the
 card needs to know the card exists and where it departs. Both, side by side,
 with the caveats above stated rather than buried.
+
+Done. Chapter 9 was written from this section: 9.6 carries the anchors, the
+hypotension formula, and an `evidence_flag` that puts the course tables and
+the measured centiles beside each other with both caveats in the uncertainty
+panel. Tests pin the transcribed values, the attribution of each item to the
+right source, and the fact that the flag reaches the screen before the
+content.
 
 ## Still open
 

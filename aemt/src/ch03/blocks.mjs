@@ -92,7 +92,7 @@ base({id:'itm-3.1.007',type:'mc',chapter:3,block:'3.1',objective:'obj-3.1.a',blo
  explanation_md:'Bystanders stand back. Another vehicle passes. The patient is now relying on you, and that reliance is what makes walking away different from never having stopped.',source_ref:STD}),
 base({id:'itm-3.1.008',type:'mc',chapter:3,block:'3.1',objective:'obj-3.1.a',
  stem:'A hospital tells you to take a patient elsewhere because they are on diversion, and the patient is unstable. What governs?',
- options:[opt('a','A hospital with an emergency department must provide a medical screening examination to anyone who presents, regardless of diversion',true,'Federal law requires screening and stabilisation once a patient presents.'),
+ options:[opt('a','A hospital with an emergency department must provide a medical screening examination to anyone who presents, regardless of diversion',true,'Federal law requires screening and stabilization once a patient presents.'),
   opt('b','Diversion is binding and you must go elsewhere',false,'Diversion is a resource signal, and it does not override the screening obligation for a patient who presents.'),
   opt('c','The patient’s insurance decides',false,'Insurance status may not be used to decide whether the patient is screened.'),
   opt('d','Whichever hospital is nearest must be used',false,'That is not what the obligation says.')],

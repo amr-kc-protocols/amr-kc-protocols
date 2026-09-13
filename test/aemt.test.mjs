@@ -1665,23 +1665,23 @@ async function answerItem(page, itemId, how) {
   check("AA no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
-/* ── AB. Chapters 1-5 are written; the Phase 1 seed is down to 6-9 ─────── */
+/* ── AB. Chapters 1-5 and 9 are written; the seed is down to 6-8 ───────── */
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const written = [1, 2, 3, 4, 5];
+    const written = [1, 2, 3, 4, 5, 9];
     const meta = A.series.chapter_meta;
     return { writtenSeed: written.filter((n) => (meta[n] || {}).seed !== false),
-             pendingSeed: [6, 7, 8, 9].filter((n) => (meta[n] || {}).seed !== true),
+             pendingSeed: [6, 7, 8].filter((n) => (meta[n] || {}).seed !== true),
              throwawayLeft: A.series.items.filter((i) => i.seed_throwaway)
                .map((i) => i.chapter).filter((c, k, a) => a.indexOf(c) === k).sort(),
              itemsByChapter: written.map((n) => A.series.items.filter((i) => i.chapter === n).length),
              status: written.map((n) => (meta[n] || {}).review_status) };
   });
-  check("AB1 chapters 1 to 5 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
-  check("AB2 chapters 6 to 9 are still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
-  check("AB3 no throwaway content remains outside chapters 6 to 9",
-    r.throwawayLeft.every((c) => c >= 6), JSON.stringify(r.throwawayLeft));
+  check("AB1 chapters 1 to 5 and 9 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
+  check("AB2 chapters 6 to 8 are still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
+  check("AB3 no throwaway content remains outside chapters 6 to 8",
+    r.throwawayLeft.every((c) => c >= 6 && c <= 8), JSON.stringify(r.throwawayLeft));
   check("AB4 every authored chapter carries a real item bank",
     r.itemsByChapter.every((n) => n >= 55), JSON.stringify(r.itemsByChapter));
   // Released, not reviewed: there is no second-reviewer step in this series, so
@@ -1707,7 +1707,7 @@ async function answerItem(page, itemId, how) {
     "judgement[s]?", "programme[s]?", "storey[s]?", "manoeuvr[a-z]*", "grey",
     "(recogni|reali|randomi|memori|summari|standardi|categori|critici|characteri|",
     "aerosoli|authori|organi|sterili|immuni|utili|prioriti|minimi|maximi|normali|",
-    "emphasi|apologi|hospitali|saniti|traumati)s(e|es|ed|ing|ation|ations|able|ably)",
+    "emphasi|apologi|hospitali|saniti|traumati|stabili|immobili)s(e|es|ed|ing|ation|ations|able|ably)",
     "travell(ing|ed|er)", "modell(ing|ed)", "labell(ing|ed)", "cancell(ing|ed)",
     "whilst", "amongst", "learnt", "spelt", "fulfil", "enrol", "skilful",
     "sulphur", "aluminium", "analys(e|ed|es|ing)"
@@ -1715,7 +1715,8 @@ async function answerItem(page, itemId, how) {
   const files = ["aemt/ch01-ems-systems.json", "aemt/ch02-workforce-safety.json",
                  "aemt/ch03-medical-legal-ethical.json",
                  "aemt/ch04-communications-documentation.json",
-                 "aemt/ch05-terminology.json", "aemt/series-preparatory.json",
+                 "aemt/ch05-terminology.json", "aemt/ch09-life-span-development.json",
+                 "aemt/series-preparatory.json",
                  "aemt-series.html", "aemt/fig-portable-medical-order.svg",
                  "aemt/fig-abdominal-quadrants.svg"];
   for (const f of files) {
@@ -1750,17 +1751,148 @@ async function answerItem(page, itemId, how) {
   check("AD8 the second-instructor requirement is recorded as closed",
     /Second-instructor review[\s\S]{0,80}Not part of this series/i.test(dec));
 
-  // Chapter 9 is unblocked but unwritten, and must not claim otherwise.
-  const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"));
-  const seedSrc = manifest.sources.find((x) => x.seed);
-  check("AD9 chapter 9 is still placeholder",
-    (seedSrc.chapters || []).indexOf(9) !== -1, JSON.stringify(seedSrc.chapters));
-  const seedDoc = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series-preparatory.json"), "utf8"));
-  const b = seedDoc.blocks.find((x) => x.id === "9.6");
-  check("AD10 and its block says sourced-but-unwritten rather than teaching a range",
-    /SEED PLACEHOLDER/.test(b.callback_md) && /DECISIONS\.md/.test(b.callback_md) &&
-    /has not been written/i.test(b.callback_md), b.callback_md.slice(0, 140));
+  // Chapter 9 has since been written from this decision, and the chapter file
+  // must carry the same two sources rather than a remembered version of them.
+  const ch9 = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/ch09-life-span-development.json"), "utf8"));
+  check("AD9 chapter 9 cites both sources it was built on",
+    ch9.sources.some((x) => /Fleming/.test(x)) &&
+    ch9.sources.some((x) => /Pediatric Advanced Life Support/.test(x)),
+    JSON.stringify(ch9.sources));
+  check("AD10 and the seed no longer supplies chapter 9",
+    !(JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"))
+      .sources.find((x) => x.seed).chapters || []).includes(9));
 }
+
+/* ── AE. Chapter 9, Life Span Development ──────────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch9 = (x) => x.chapter === 9;
+    return { blocks: A.series.blocks.filter(ch9).length,
+             items: A.series.items.filter(ch9).length,
+             objectives: A.series.objectives.filter(ch9).length,
+             seedLeft: A.series.blocks.filter((b) => ch9(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch9(i) && i.seed_throwaway).length,
+             meta: A.series.chapter_meta[9],
+             noEnables: A.series.objectives.filter(ch9).filter((o) => !o.enables).map((o) => o.id),
+             noSource: A.series.items.filter(ch9).filter((i) => !i.source_ref).map((i) => i.id) };
+  });
+  check("AE1 eight teaching blocks and an integration block", r.blocks === 9, String(r.blocks));
+  check("AE2 seventy-five items", r.items === 75, String(r.items));
+  check("AE3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("AE4 the chapter is not marked seed", r.meta.seed === false);
+  check("AE5 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("AE6 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+
+  // 9.6 is the reason this chapter waited on a decision. The numbers have to be
+  // the measured centiles, attributed to the study, and the block has to carry
+  // the disagreement with the course tables rather than quietly picking a side.
+  const vit = await p.evaluate(() => {
+    const A = window.AEMT;
+    const b = A.series.blocks.find((x) => x.id === "9.6");
+    const text = b.callback_md + " " + b.screens.map((s) => s.body_md).join(" ");
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const srcOf = (id) => A.itemById(id).source_ref;
+    return { text, ef: b.evidence_flag || null,
+             anchors: right("itm-9.6.003"), hypo: right("itm-9.6.004"),
+             hypoSrc: srcOf("itm-9.6.004"), rangeSrc: srcOf("itm-9.6.002"),
+             inRange: right("itm-9.6.001"), inRangeHs: A.itemById("itm-9.6.001").high_stakes,
+             falling: right("itm-9.6.009"), weak: right("itm-9.6.007"),
+             quiz: b.quiz.length };
+  });
+  check("AE7 the block carries an evidence flag on the two sets of ranges",
+    !!vit.ef && /divergence/.test(vit.ef.teach_as), JSON.stringify(vit.ef && vit.ef.teach_as));
+  check("AE8 which names the study and its size",
+    /143,346/.test(vit.ef.current_evidence) && /Fleming/.test(vit.ef.source_ref),
+    String(vit.ef.source_ref));
+  check("AE9 and states the disagreement it found",
+    /striking disagreement/i.test(vit.ef.current_evidence) &&
+    /crossed the observed median/i.test(vit.ef.current_evidence));
+  check("AE10 the weaker half of the paper is flagged in the uncertainty, not hidden",
+    /weaker half/i.test(vit.ef.uncertainty) && /awake, healthy children at rest/i.test(vit.ef.uncertainty));
+  // The transcribed anchors must match the source table exactly.
+  check("AE11 the heart rate anchors are the measured centiles",
+    /123–164/.test(vit.text) && /98–135/.test(vit.text) &&
+    /74–111/.test(vit.text) && /58–92/.test(vit.text), vit.text.slice(0, 80));
+  check("AE12 and the respiratory anchors too",
+    /34–57/.test(vit.text) && /22–34/.test(vit.text) && /16–22/.test(vit.text));
+  check("AE13 rate items are cited to Fleming", /Fleming/.test(vit.rangeSrc), vit.rangeSrc);
+  check("AE14 and the pressure item to the 2025 guidelines",
+    /Pediatric Advanced Life Support/.test(vit.hypoSrc), vit.hypoSrc);
+  check("AE15 the hypotension formula resolves for a 6-year-old",
+    /Below 82 mmHg/.test(vit.hypo[0]), JSON.stringify(vit.hypo));
+  // The two readings that get children killed.
+  check("AE16 a rate inside range is not treated as reassurance",
+    /still be abnormal for this child/i.test(vit.inRange[0]) && vit.inRangeHs === true,
+    JSON.stringify(vit.inRange));
+  check("AE17 and a falling rate in a tiring infant is deterioration",
+    /precedes arrest/i.test(vit.falling[0]), JSON.stringify(vit.falling));
+  check("AE18 the respiratory evidence base is flagged in an item too",
+    /far smaller pool/i.test(vit.weak[0]), JSON.stringify(vit.weak));
+  check("AE19 the block quizzes the full seven", vit.quiz === 7, String(vit.quiz));
+
+  // The habit the chapter is actually built on, and the state-law boundary.
+  const rest = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const text = A.series.blocks.filter((b) => b.chapter === 9)
+      .map((b) => b.callback_md + " " + b.screens.map((s) => s.body_md).join(" ")).join(" ");
+    return { baseline: right("itm-9.5.003"), habit: right("itm-9.8.008"),
+             stages: right("itm-9.7.001"), atypical: right("itm-9.5.001"),
+             saysStateLaw: /state law/i.test(text), namesKansas: /\bKansas\b/.test(text) };
+  });
+  check("AE20 the baseline question is the geriatric answer",
+    /how he usually is|normally like/i.test(rest.baseline[0]), JSON.stringify(rest.baseline));
+  check("AE21 and it is named as the habit the chapter asks for",
+    /what is normal for this patient/i.test(rest.habit[0]), JSON.stringify(rest.habit));
+  check("AE22 atypical presentation is the expectation in late adulthood",
+    /without chest pain/i.test(rest.atypical[0]), JSON.stringify(rest.atypical));
+  // Same treatment the five stages of grief got in 2.5.
+  check("AE23 the stage models are taught as vocabulary, not a validated sequence",
+    /not validated as a fixed sequence/i.test(rest.stages[0]), JSON.stringify(rest.stages));
+  check("AE24 minor consent is left to state law", rest.saysStateLaw === true);
+  check("AE25 and no Kansas specific is asserted", rest.namesKansas === false);
+
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 9)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length, screens: b.screens.length })));
+  check("AE26 every block opens on a decision point and answers it",
+    shape.every((b) => b.dp && b.cb), JSON.stringify(shape.filter((b) => !b.dp || !b.cb)));
+  check("AE27 every teaching block runs three to five screens and quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id))
+      .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
+  check("AE no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AF. 9.6 actually shows the divergence to a learner ────────────────── */
+{ // The flag is only worth anything if it reaches the screen before the content.
+  const p = await open();
+  await p.evaluate(() => {
+    const A = window.AEMT;
+    const i = A.series.blocks.findIndex((x) => x.id === "9.6");
+    A.series.blocks.unshift(A.series.blocks.splice(i, 1)[0]);
+    A.state.blocks = {};
+    A.renderHome();
+  });
+  await p.click("#btn-next-block");
+  await p.waitForSelector("#screen-session .cold");
+  check("AF1 the block opens on the two laminated cards",
+    /both of them are holding real cards/i.test(await p.textContent(".cold")));
+  await p.click('#screen-session button.btn:text-is("Start")');
+  await p.waitForTimeout(250);
+  const ev = await p.textContent("#screen-session");
+  check("AF2 the divergence is shown before any content",
+    /Where the book and the evidence differ/i.test(ev), ev.slice(0, 160));
+  check("AF3 it names the conventional tables as the textbook position",
+    /resuscitation-course tables/i.test(ev));
+  check("AF4 and the measured centiles as the current position",
+    /143,346 children/.test(ev) && /striking disagreement/i.test(ev));
+  check("AF5 the uncertainty section carries both caveats",
+    /weaker half/i.test(ev) && /awake, healthy children at rest/i.test(ev));
+  check("AF6 with the study cited on screen", /Fleming/.test(ev) && /Lancet 2011/.test(ev));
+  check("AF no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
 
 await browser.close();
 site.close();

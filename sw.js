@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v23';
+const CACHE = 'amrkc-2026-v24';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -25,6 +25,7 @@ const ASSETS = [
   './aemt/ch03-medical-legal-ethical.json',
   './aemt/ch04-communications-documentation.json',
   './aemt/ch05-terminology.json',
+  './aemt/ch09-life-span-development.json',
   './aemt/series-preparatory.json',
   './aemt/fsrs-5.4.2.umd.js',
   './aemt/seed-tpopp-placeholder.svg',
