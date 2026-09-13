@@ -1386,6 +1386,88 @@ async function answerItem(page, itemId, how) {
   check("X no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
+/* ── Y. Chapter 2, Workforce Safety and Wellness ───────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch2 = (x) => x.chapter === 2;
+    return { blocks: A.series.blocks.filter(ch2).length,
+             items: A.series.items.filter(ch2).length,
+             objectives: A.series.objectives.filter(ch2).length,
+             seedLeft: A.series.blocks.filter((b) => ch2(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch2(i) && i.seed_throwaway).length,
+             meta: A.series.chapter_meta[2],
+             noEnables: A.series.objectives.filter(ch2).filter((o) => !o.enables).map((o) => o.id),
+             noSource: A.series.items.filter(ch2).filter((i) => !i.source_ref).map((i) => i.id) };
+  });
+  check("Y1 eight teaching blocks and an integration block", r.blocks === 9, String(r.blocks));
+  check("Y2 seventy-two items", r.items === 72, String(r.items));
+  check("Y3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("Y4 the chapter is not marked seed", r.meta.seed === false);
+  check("Y5 it declares its review status honestly",
+    r.meta.review_status === "unreviewed", r.meta.review_status);
+  check("Y6 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("Y7 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+
+  // The point of this chapter is that two widely taught practices do not hold
+  // up. If a rewrite ever softens these, the learner is being told the
+  // comfortable thing rather than the supported one.
+  const ev = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const block = (id) => { const b = A.series.blocks.find((x) => x.id === id);
+      return b.callback_md + " " + b.screens.map((s) => s.body_md).join(" "); };
+    return { debrief: right("itm-2.8.001"), mandatory: right("itm-2.8.002"),
+             treat: right("itm-2.8.006"), stages: right("itm-2.5.008"),
+             presence: right("itm-2.5.006"),
+             b28: block("2.8"), b25: block("2.5"), b27: block("2.7") };
+  });
+  check("Y8 single-session debriefing is reported as not preventing PTSD",
+    /no prevention of PTSD/i.test(ev.debrief[0]), JSON.stringify(ev.debrief));
+  check("Y9 and mandatory attendance is not the supported position",
+    /do not compel|not compel/i.test(ev.mandatory[0]), JSON.stringify(ev.mandatory));
+  check("Y10 the block states the limit of that evidence honestly",
+    /individual debriefing/i.test(ev.b28) && /studied less/i.test(ev.b28));
+  check("Y11 and names what is supported instead",
+    /trauma-focused/i.test(ev.treat[0]) && /watchful waiting/i.test(ev.b28),
+    JSON.stringify(ev.treat));
+  check("Y12 the five stages are flagged as taught but unsupported",
+    /not supported as a sequence/i.test(ev.stages[0]), JSON.stringify(ev.stages));
+  check("Y13 while family presence is reported as supported",
+    /fewer PTSD-related symptoms/i.test(ev.presence[0]), JSON.stringify(ev.presence));
+  // A guideline quoted without its evidence grade is the failure mode 1.6 warns about.
+  check("Y14 the fatigue guideline is quoted with its evidence grade",
+    /conditional/i.test(ev.b27) && /low to very low/i.test(ev.b27));
+
+  // The exposure clock and the scope of the roadway risk are the two facts in
+  // this chapter that change what someone does in the next ten minutes.
+  const facts = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    return { report: right("itm-2.2.002"), first: right("itm-2.2.001"),
+             fatal: right("itm-2.3.001"), stick: A.itemById("itm-2.2.001").high_stakes,
+             confined: A.itemById("itm-2.3.005").high_stakes };
+  });
+  check("Y15 the prophylaxis window is stated, not implied",
+    /72 hours/.test(facts.report[0]), JSON.stringify(facts.report));
+  check("Y16 washing comes before anything else after a needlestick",
+    /soap and running water/i.test(facts.first[0]), JSON.stringify(facts.first));
+  check("Y17 transportation events are named as the leading cause of death",
+    /Transportation/i.test(facts.fatal[0]), JSON.stringify(facts.fatal));
+  check("Y18 and both are marked high stakes", facts.stick === true && facts.confined === true);
+
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 2)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length, screens: b.screens.length })));
+  check("Y19 every block opens on a decision point and answers it",
+    shape.every((b) => b.dp && b.cb), JSON.stringify(shape.filter((b) => !b.dp || !b.cb)));
+  check("Y20 every teaching block runs three to five screens and quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id))
+      .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
+  check("Y no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
 await browser.close();
 site.close();
 console.log(`\n==== ${PASS} passed, ${FAIL} failed ====`);
