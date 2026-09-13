@@ -57,6 +57,14 @@ These suites live here:
   four-part mastery rule, and the two things this product must never do —
   merge completion into mastery, or make a learner drag something to answer.
 
+  It also covers the v1.1 additions for Chapters 5–9: the `tier` valve that
+  keeps context and reference objectives out of the queue, lab gates (an
+  objective carried by a lab-gated block stops at practicing until an
+  instructor signs the checklist, and the app never claims the skill is done),
+  term cards in all three modes with their fuzzy matching, `hotspot` and
+  `label_drag`, the declared book-versus-evidence divergence, and the v1→v2
+  migration that keeps a Phase 1 learner's saved progress working.
+
 - **`homepage.test.mjs`** — the homepage ([`index.html`](../index.html)) in
   headless Chromium at four screen sizes, two of them Toughbook resolutions.
   Defends the two things the revamp changed: that the sign-in is gone from the
