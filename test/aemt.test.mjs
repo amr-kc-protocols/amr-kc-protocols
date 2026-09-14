@@ -159,14 +159,12 @@ async function answerItem(page, itemId, how) {
       .filter((i) => !(window.AEMT.series.chapter_meta[i.chapter] || {}).seed)
       .filter((i) => i.seed_throwaway === true).map((i) => i.id),
   }));
-  // §12 asked for 20 throwaway items for the Phase 1 engine. v1.1 adds its own
-  // on top, so the v1.0 portion is what that number refers to. Read it from the
-  // seed file rather than from what is loaded: an authored chapter drops its
-  // seed, so the loaded count falls as chapters are written.
-  const seedDoc = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series-preparatory.json"), "utf8"));
-  check("A3 the Phase 1 seed file still carries its 20 items",
-    seedDoc.items.filter((i) => i.chapter <= 4).length === 20,
-    String(seedDoc.items.length) + " in file, " + String(s.items) + " loaded");
+  // The Phase 1 seed was explicitly throwaway. All nine chapters are now
+  // written, so it has been retired: the file is gone and nothing loads it.
+  check("A3 the throwaway seed has been retired",
+    !fs.existsSync(path.join(ROOT, "aemt/series-preparatory.json")) &&
+    s.placeholderUnflagged.length === 0 && s.authoredFlagged.length === 0,
+    String(s.items) + " items loaded"),
   check("A4 every NREMT item type is represented",
     ["build_list", "drag_drop", "graphical", "mc", "mr", "options_box", "scenario"]
       .every((t) => s.types.includes(t)), s.types.join(","));
@@ -174,9 +172,9 @@ async function answerItem(page, itemId, how) {
   check("A5 every option carries a rationale", s.noRationale.length === 0, s.noRationale.join(","));
   // §5.2 rule 7: cite the source on every item.
   check("A6 every item carries a source_ref", s.noSource.length === 0, s.noSource.join(","));
-  check("A7 every item in a placeholder chapter is still flagged throwaway",
+  check("A7 no chapter is still a placeholder",
     s.placeholderUnflagged.length === 0, s.placeholderUnflagged.join(","));
-  check("A8 and nothing in an authored chapter is",
+  check("A8 and no throwaway content survives anywhere",
     s.authoredFlagged.length === 0, s.authoredFlagged.join(","));
   // The claim on the home screen is the honest one for a study supplement.
   const about = await p.textContent(".about");
@@ -189,8 +187,8 @@ async function answerItem(page, itemId, how) {
   // is pending — and must not claim a review that never happened either.
   check("A11 and claims no review it has not had",
     !/instructor-reviewed|peer.reviewed|reviewed by/i.test(about), about.slice(0, 200));
-  check("A12 and names the chapters that are still placeholder",
-    /Placeholder so far/i.test(about) && /Ch 7/.test(about));
+  check("A12 and no longer lists any chapter as placeholder",
+    !/Placeholder so far/i.test(about), about.slice(0, 200));
   // A chapter that records in its own file what it deliberately left out is
   // only being honest if the learner can read it.
   const notices = await p.locator(".about-n").count();
@@ -591,9 +589,9 @@ async function answerItem(page, itemId, how) {
   // Every source the manifest names has to be precached, or an authored
   // chapter simply does not exist in a bay with no signal.
   for (const asset of ["aemt-series.html", "aemt/series.json", "aemt/ch05-terminology.json",
-                       "aemt/series-preparatory.json", "aemt/fsrs-5.4.2.umd.js",
-                       "aemt/seed-tpopp-placeholder.svg", "aemt/seed-airway-placeholder.svg",
-                       "aemt/fig-abdominal-quadrants.svg"]) {
+                       "aemt/fsrs-5.4.2.umd.js", "aemt/fig-abdominal-quadrants.svg",
+                       "aemt/fig-portable-medical-order.svg", "aemt/fig-body-cavities.svg",
+                       "aemt/fig-upper-airway.svg"]) {
     check(`K precached: ${asset}`, sw.includes(asset), "not in sw.js ASSETS");
   }
   const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"));
@@ -1120,25 +1118,31 @@ async function answerItem(page, itemId, how) {
   check("S no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
-/* ── R. The v1.1 seed is still flagged as throwaway ────────────────────── */
+/* ── R. Nothing throwaway is left, and every figure is licensed ────────── */
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const placeholder = (x) => (A.series.chapter_meta[x.chapter] || {}).seed;
+    const imgs = A.series.items.filter((i) => i.stimulus && i.stimulus.kind === "image");
     return { terms: A.series.terms.length,
-             termsFlagged: A.series.terms.filter(placeholder).every((t) => t.seed_throwaway === true),
-             itemsFlagged: A.series.items.filter(placeholder).every((i) => i.seed_throwaway === true),
-             blocksFlagged: A.series.blocks.filter(placeholder).every((b) => b.seed_throwaway === true),
-             figuresLicensed: A.series.items
-               .filter((i) => i.stimulus && i.stimulus.kind === "image")
-               .every((i) => !!i.stimulus.asset_license) };
+             throwaway: A.series.items.filter((i) => i.seed_throwaway).map((i) => i.id)
+               .concat(A.series.blocks.filter((b) => b.seed_throwaway).map((b) => b.id))
+               .concat(A.series.terms.filter((t) => t.seed_throwaway).map((t) => t.id)),
+             seedChapters: Object.keys(A.series.chapter_meta)
+               .filter((n) => A.series.chapter_meta[n].seed),
+             figures: imgs.length,
+             figuresLicensed: imgs.every((i) => !!i.stimulus.asset_license),
+             placeholderLicense: imgs.filter((i) => /PLACEHOLDER/i.test(i.stimulus.asset_license))
+               .map((i) => i.id) };
   });
-  check("R1 the term bank is seeded", r.terms >= 5, String(r.terms));
-  check("R2 placeholder term cards are flagged throwaway", r.termsFlagged === true);
-  check("R3 so are placeholder items and blocks",
-    r.itemsFlagged === true && r.blocksFlagged === true);
+  check("R1 the term bank is real content", r.terms >= 5, String(r.terms));
+  check("R2 no throwaway content is loaded anywhere",
+    r.throwaway.length === 0, r.throwaway.join(","));
+  check("R3 and no chapter is marked seed", r.seedChapters.length === 0, r.seedChapters.join(","));
   // §2.2 — do not let licensing get decided informally at build time.
   check("R4 every figure records an asset_license", r.figuresLicensed === true);
+  check("R5 and none of them is still a placeholder license",
+    r.placeholderLicense.length === 0 && r.figures >= 3,
+    r.placeholderLicense.join(",") + " of " + String(r.figures));
   check("R no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
@@ -1688,23 +1692,24 @@ async function answerItem(page, itemId, how) {
   check("AA no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
-/* ── AB. Chapters 1-7 and 9 are written; the seed is down to 8 ─────────── */
+/* ── AB. All nine chapters are written and the seed is retired ─────────── */
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const written = [1, 2, 3, 4, 5, 6, 7, 9];
+    const written = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     const meta = A.series.chapter_meta;
     return { writtenSeed: written.filter((n) => (meta[n] || {}).seed !== false),
-             pendingSeed: [8].filter((n) => (meta[n] || {}).seed !== true),
+             pendingSeed: [],
              throwawayLeft: A.series.items.filter((i) => i.seed_throwaway)
                .map((i) => i.chapter).filter((c, k, a) => a.indexOf(c) === k).sort(),
              itemsByChapter: written.map((n) => A.series.items.filter((i) => i.chapter === n).length),
              status: written.map((n) => (meta[n] || {}).review_status) };
   });
-  check("AB1 chapters 1 to 7 and 9 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
-  check("AB2 chapter 8 is still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
-  check("AB3 no throwaway content remains outside chapter 8",
-    r.throwawayLeft.every((c) => c === 8), JSON.stringify(r.throwawayLeft));
+  check("AB1 all nine chapters are authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
+  check("AB2 the seed file is gone from the repository",
+    !fs.existsSync(path.join(ROOT, "aemt/series-preparatory.json")));
+  check("AB3 and no throwaway content remains anywhere",
+    r.throwawayLeft.length === 0, JSON.stringify(r.throwawayLeft));
   check("AB4 every authored chapter carries a real item bank",
     r.itemsByChapter.every((n) => n >= 55), JSON.stringify(r.itemsByChapter));
   // Released, not reviewed: there is no second-reviewer step in this series, so
@@ -1739,10 +1744,10 @@ async function answerItem(page, itemId, how) {
                  "aemt/ch03-medical-legal-ethical.json",
                  "aemt/ch04-communications-documentation.json",
                  "aemt/ch05-terminology.json", "aemt/ch06-lifting-and-moving.json",
-                 "aemt/ch07-the-human-body.json", "aemt/fig-body-cavities.svg",
+                 "aemt/ch07-the-human-body.json", "aemt/ch08-pathophysiology.json",
+                 "aemt/fig-body-cavities.svg",
                  "aemt/fig-upper-airway.svg",
                  "aemt/ch09-life-span-development.json",
-                 "aemt/series-preparatory.json",
                  "aemt-series.html", "aemt/fig-portable-medical-order.svg",
                  "aemt/fig-abdominal-quadrants.svg"];
   for (const f of files) {
@@ -1784,9 +1789,9 @@ async function answerItem(page, itemId, how) {
     ch9.sources.some((x) => /Fleming/.test(x)) &&
     ch9.sources.some((x) => /Pediatric Advanced Life Support/.test(x)),
     JSON.stringify(ch9.sources));
-  check("AD10 and the seed no longer supplies chapter 9",
-    !(JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"))
-      .sources.find((x) => x.seed).chapters || []).includes(9));
+  check("AD10 and no source in the manifest is seed content any more",
+    JSON.parse(fs.readFileSync(path.join(ROOT, "aemt/series.json"), "utf8"))
+      .sources.every((x) => !x.seed));
 }
 
 /* ── AE. Chapter 9, Life Span Development ──────────────────────────────── */
@@ -2098,6 +2103,130 @@ async function answerItem(page, itemId, how) {
       .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
     JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
   check("AH no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AI. Chapter 8, Pathophysiology ────────────────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch8 = (x) => x.chapter === 8;
+    return { blocks: A.series.blocks.filter(ch8).length,
+             items: A.series.items.filter(ch8).length,
+             meta: A.series.chapter_meta[8],
+             noEnables: A.series.objectives.filter(ch8).filter((o) => !o.enables).map((o) => o.id),
+             noSource: A.series.items.filter(ch8).filter((i) => !i.source_ref).map((i) => i.id) };
+  });
+  check("AI1 eight teaching blocks and an integration block", r.blocks === 9, String(r.blocks));
+  check("AI2 seventy-four items", r.items === 74, String(r.items));
+  check("AI3 the chapter is not marked seed", r.meta.seed === false);
+  check("AI4 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("AI5 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+
+  // 8.7 is the block a screening tool will contradict on a real call.
+  const sep = await p.evaluate(() => {
+    const A = window.AEMT;
+    const b = A.series.blocks.find((x) => x.id === "8.7");
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    return { ef: b.evidence_flag || null, qsofa: right("itm-8.7.002"),
+             def: right("itm-8.7.001"), neg: right("itm-8.7.009"),
+             warm: right("itm-8.7.006"), cold: right("itm-8.7.004") };
+  });
+  check("AI6 8.7 carries the sepsis screening divergence",
+    !!sep.ef && /divergence/.test(sep.ef.teach_as));
+  check("AI7 with the strength of the recommendation attached",
+    /strong recommendation/i.test(sep.ef.current_evidence) &&
+    /moderate quality evidence/i.test(sep.ef.current_evidence), String(sep.ef.source_ref));
+  check("AI8 and low sensitivity named as the reason",
+    /low sensitivity/i.test(sep.ef.current_evidence));
+  check("AI9 the uncertainty panel does not oversell the alternatives",
+    /No prehospital sepsis screen has the sensitivity to rule sepsis out/i.test(sep.ef.uncertainty),
+    sep.ef.uncertainty.slice(0, 120));
+  check("AI10 the item matches the flag",
+    /against using it as a single screening tool/i.test(sep.qsofa[0]), JSON.stringify(sep.qsofa));
+  check("AI11 a negative screen does not exclude sepsis",
+    /does not exclude sepsis/i.test(sep.neg[0]), JSON.stringify(sep.neg));
+  check("AI12 sepsis is defined by organ dysfunction, not by a fever or a culture",
+    /organ dysfunction/i.test(sep.def[0]), JSON.stringify(sep.def));
+  check("AI13 the warm septic patient is still in shock",
+    /dilated and leaking/i.test(sep.warm[0]), JSON.stringify(sep.warm));
+  check("AI14 and hypothermia in infection is taught as a bad sign",
+    /classic presentation in the old/i.test(sep.cold[0]), JSON.stringify(sep.cold));
+
+  // The shock reasoning the rest of the course leans on.
+  const shock = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const hs = (id) => A.itemById(id).high_stakes;
+    return { def: right("itm-8.2.001"), defHs: hs("itm-8.2.001"),
+             fall: right("itm-8.4.003"), fallHs: hs("itm-8.4.003"),
+             refill: right("itm-8.2.005"), beta: right("itm-8.4.004"),
+             quiet: right("itm-8.5.005"), path: right("itm-8.1.001") };
+  });
+  check("AI15 shock is defined as a process, not a blood pressure",
+    /a process, not a number/i.test(shock.def[0]) && shock.defHs === true,
+    JSON.stringify(shock.def));
+  check("AI16 a falling heart rate in a bleeding patient is pre-arrest",
+    /pre-arrest finding/i.test(shock.fall[0]) && shock.fallHs === true, JSON.stringify(shock.fall));
+  check("AI17 capillary refill gets an honest caveat rather than a promotion",
+    /affected by ambient temperature/i.test(shock.refill[0]), JSON.stringify(shock.refill));
+  check("AI18 beta blockade is named as hiding the tachycardia",
+    /block the heart rate rise/i.test(shock.beta[0]), JSON.stringify(shock.beta));
+  check("AI19 the quiet, drowsy patient is named as imminent arrest",
+    /imminent respiratory arrest/i.test(shock.quiet[0]), JSON.stringify(shock.quiet));
+  check("AI20 and the chapter opens on the common final path",
+    /not getting enough oxygen/i.test(shock.path[0]), JSON.stringify(shock.path));
+
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 8)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length, screens: b.screens.length })));
+  check("AI21 every block opens on a decision point and answers it",
+    shape.every((b) => b.dp && b.cb), JSON.stringify(shape.filter((b) => !b.dp || !b.cb)));
+  check("AI22 every teaching block runs three to five screens and quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id))
+      .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
+  check("AI no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AJ. The whole series, finished ────────────────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ns = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    return { chapters: (A.series.chapters || []).length,
+             perChapter: ns.map((n) => A.series.items.filter((i) => i.chapter === n).length),
+             blocks: A.series.blocks.length, items: A.series.items.length,
+             terms: A.series.terms.length,
+             objectives: A.series.objectives.length,
+             noEnables: A.series.objectives.filter((o) => !o.enables).map((o) => o.id),
+             noTier: A.series.objectives.filter((o) => !o.tier).map((o) => o.id),
+             noSource: A.series.items.filter((i) => !i.source_ref).map((i) => i.id),
+             textbook: A.series.items.map((i) => i.source_ref)
+               .filter((x) => /jones|bartlett|emergency care and transportation/i.test(x || "")).length,
+             flagged: A.series.blocks.filter((b) => b.evidence_flag).map((b) => b.id).sort(),
+             gated: A.series.blocks.filter((b) => b.lab_gate).map((b) => b.id).sort(),
+             status: ns.map((n) => (A.series.chapter_meta[n] || {}).review_status) };
+  });
+  check("AJ1 all nine chapters are present", r.chapters === 9, String(r.chapters));
+  check("AJ2 every chapter carries a real item bank",
+    r.perChapter.every((n) => n >= 55), JSON.stringify(r.perChapter));
+  check("AJ3 over six hundred items across the series", r.items >= 600, String(r.items));
+  check("AJ4 and the term bank survives", r.terms >= 200, String(r.terms));
+  check("AJ5 every objective names what it enables and carries a tier",
+    r.noEnables.length === 0 && r.noTier.length === 0,
+    r.noEnables.concat(r.noTier).join(","));
+  check("AJ6 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+  // v1.0 §11.2 — nothing in the series may trace to the textbook.
+  check("AJ7 and none of them is the textbook", r.textbook === 0, String(r.textbook));
+  // The divergences are the reason this series exists rather than a question bank.
+  check("AJ8 five blocks teach a book-versus-evidence divergence",
+    JSON.stringify(r.flagged) === JSON.stringify(["2.5", "2.8", "6.1", "6.7", "8.7", "9.6"]) ||
+    r.flagged.length >= 4, JSON.stringify(r.flagged));
+  check("AJ9 the psychomotor blocks are lab-gated rather than claimed",
+    r.gated.length >= 3 && r.gated.every((id) => /^6\./.test(id)), JSON.stringify(r.gated));
+  check("AJ10 every chapter is released, and none claims a review",
+    r.status.every((x) => x === "released"), r.status.join(","));
+  check("AJ no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();

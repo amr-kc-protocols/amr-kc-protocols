@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v26';
+const CACHE = 'amrkc-2026-v27';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -27,11 +27,9 @@ const ASSETS = [
   './aemt/ch05-terminology.json',
   './aemt/ch06-lifting-and-moving.json',
   './aemt/ch07-the-human-body.json',
+  './aemt/ch08-pathophysiology.json',
   './aemt/ch09-life-span-development.json',
-  './aemt/series-preparatory.json',
   './aemt/fsrs-5.4.2.umd.js',
-  './aemt/seed-tpopp-placeholder.svg',
-  './aemt/seed-airway-placeholder.svg',
   './aemt/fig-portable-medical-order.svg',
   './aemt/fig-body-cavities.svg',
   './aemt/fig-upper-airway.svg',
