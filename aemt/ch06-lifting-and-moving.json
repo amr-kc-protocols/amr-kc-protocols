@@ -1,0 +1,4184 @@
+{
+  "chapter": 6,
+  "title": "Lifting and Moving Patients",
+  "version": "1.0.0",
+  "schema_version": 2,
+  "review_status": "released",
+  "notice": "Two blocks set the taught position beside the measured one. 6.1 carries the Cochrane finding that manual handling training does not prevent back injury, against the before-and-after EMS evidence that powered stretchers do reduce it, with the design difference between the two stated. 6.7 carries the joint ACS-COT/ACEP/NAEMSP position on spinal motion restriction, including that there is no role for it in penetrating trauma, and the honest note that the practice itself lacks definitive evidence of benefit. 6.2, 6.3 and 6.7 are lab-gated: the psychomotor skill is checked in person and this module does not substitute for that.",
+  "sources": [
+    "NHTSA National EMS Education Standards (2021) - Preparatory: Lifting and Moving Patients",
+    "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958",
+    "Pryce R, et al. The effect of power stretchers on occupational injury rates in an urban emergency medical services system. Am J Ind Med 2024; Armstrong DP, et al. Appl Ergon 2017",
+    "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient - a joint position statement. Prehosp Emerg Care 2018;22(6):659-61",
+    "NIOSH data on EMS occupational injury"
+  ],
+  "objectives": [
+    {
+      "id": "obj-6.1.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Explain why lifting injuries dominate EMS injury data, and what has been shown to reduce them",
+      "enables": "Spend your effort on the thing that works rather than the thing that is taught"
+    },
+    {
+      "id": "obj-6.2.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Make the resource decision before committing to a lift",
+      "enables": "Decide for more hands or a different device while you can still change your mind"
+    },
+    {
+      "id": "obj-6.3.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Apply lifting technique and the communication that keeps a team lift together",
+      "enables": "Lift with three other people without anyone taking the load alone"
+    },
+    {
+      "id": "obj-6.4.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Apply the principles of carrying, reaching, pushing and pulling",
+      "enables": "Recognize the postures that injure you outside the lift itself"
+    },
+    {
+      "id": "obj-6.5.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Differentiate emergency, urgent and non-urgent moves and select one",
+      "enables": "Know when dragging someone across a floor is the right call"
+    },
+    {
+      "id": "obj-6.6.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Select moving equipment and position a patient for their condition",
+      "enables": "Pick the device that fits the space, the patient and the injury"
+    },
+    {
+      "id": "obj-6.7.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Apply current spinal motion restriction indications and choose a device",
+      "enables": "Restrict motion where it is indicated and avoid the harm where it is not"
+    },
+    {
+      "id": "obj-6.8.a",
+      "chapter": 6,
+      "tier": "context",
+      "text": "Adapt handling for bariatric, pediatric and geriatric patients",
+      "enables": "Plan a move that the patient in front of you will actually survive undamaged"
+    },
+    {
+      "id": "obj-6.INT.a",
+      "chapter": 6,
+      "tier": "core",
+      "text": "Integrate the resource decision, move selection and spinal decision on one extrication",
+      "enables": "Get someone out of a difficult space without injuring them or yourself"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "6.1",
+      "chapter": 6,
+      "title": "Why backs get hurt",
+      "learner_title": "The injury that ends careers",
+      "objectives": [
+        "obj-6.1.a"
+      ],
+      "est_minutes": 8,
+      "cold_open": {
+        "text": "Ask any provider with a ruined back which call did it. Most of them cannot tell you. There was no snap, no dropped patient, no incident report — just twenty years of lifts, and then one morning the getting out of bed was different.",
+        "decision_point": "So what actually prevents that?"
+      },
+      "pretest_item": "itm-6.1.001",
+      "evidence_flag": {
+        "topic": "Whether lifting technique training prevents back injury",
+        "textbook_position": "Body mechanics training is presented as the primary defense against lifting injury: lift with your legs, keep the load close, do not twist. Learn the technique and apply it, and your back will be protected across a career.",
+        "current_evidence": "A Cochrane review of manual material handling advice and assistive devices pooled nine randomized and nine controlled trials — over **21,000 workers** — and found **moderate quality evidence that training, with or without assistive devices, does not prevent back pain or back-pain-related disability** compared with no intervention or an alternative. What has been associated with reduced injury in EMS specifically is engineering the lift out of the job: before-and-after studies of powered stretchers and powered load systems report reductions of roughly 14% in all injuries and 25% in patient-handling injuries.",
+        "uncertainty": "Two limits, in opposite directions. The biomechanics of a single lift are not in dispute — a load held at arm’s length really does load the spine far more than one held close — so this is evidence against *training as prevention*, not against technique. And the powered-equipment evidence is observational before-and-after work, not randomized: consistent and large, and a weaker design than the review that found training ineffective.",
+        "source_ref": "Verbeek JH et al., Cochrane Database Syst Rev 2011;(6):CD005958 · Pryce R et al., Am J Ind Med 2024",
+        "teach_as": "divergence"
+      },
+      "screens": [
+        {
+          "id": "scr-6.1.1",
+          "body_md": "**Lifting and moving is the largest source of EMS injury and lost work time.** Chapter 2 said vehicles are what kill you. This is what ends careers instead — slowly, without an incident report, years later.\n\nMost of it is cumulative. Nobody can name the lift that did it, which is exactly what makes it hard to prevent.\n\nThere is no single call to review, so there is nothing for a safety process to find.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.1.2",
+          "body_md": "**The biomechanics are not in dispute.** A load held at arm’s length loads the spine several times more than the same load held close. Twisting under load is a separate mechanism again. Distance and rotation are what hurt you.\n\nSo keep it close, keep it short, do not twist, and move your feet instead of turning your back.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.1.3",
+          "body_md": "**What is in dispute is whether teaching that prevents injury.** It does not appear to. And the thing that does show reductions is removing the lift: powered cots, powered load systems, more hands, a different device.\n\nBack belts have been studied repeatedly and have not shown benefit. Neither has pre-employment strength screening.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.1.4",
+          "body_md": "**So where is your leverage?** Not in lifting better. In lifting less: the decision made before anyone takes weight about how many people, what device, and what route.\n\nThat is block 6.2, and it is the part of this chapter with the strongest claim to keeping you working until you choose to stop.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.1.5",
+          "body_md": "**One sentence to stop saying.** \"Just lift with your legs and you will be fine\" is half right and entirely misplaced — advice about one lift, offered as a career-long prevention plan.\n\nIt also implies that anyone who gets hurt did it wrong. Twenty thousand workers in eighteen trials suggest otherwise, and they suggest it fairly clearly.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.1.007",
+        "itm-6.1.008"
+      ],
+      "quiz": [
+        "itm-6.1.002",
+        "itm-6.1.003",
+        "itm-6.1.004",
+        "itm-6.1.005",
+        "itm-6.1.006"
+      ],
+      "callback_md": "Not technique — or at least, not technique alone, and that is what the trial evidence says rather than an opinion about it.\n\nWhat prevents it is the lift you did not do with two people, the device you sent for, the four minutes you waited. **The leverage is in the decision before the lift**, which is why the next block is the most important one in this chapter and takes ten seconds to run.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.2",
+      "chapter": 6,
+      "title": "The decision before the lift",
+      "learner_title": "Ten seconds that matter",
+      "objectives": [
+        "obj-6.2.a"
+      ],
+      "est_minutes": 7,
+      "lab_gate": true,
+      "verification": {
+        "method": "instructor_checklist",
+        "checklist_ref": "chk-6.2",
+        "verifier_role": "credentialed_instructor"
+      },
+      "cold_open": {
+        "text": "Third floor, no elevator, a narrow turn on the second landing, and a patient who is heavier than either of you expected. Your partner already has the head end off the ground and is looking at you, waiting. Everything from here is worse than everything before it.",
+        "decision_point": "When was this call decided?"
+      },
+      "pretest_item": "itm-6.2.001",
+      "screens": [
+        {
+          "id": "scr-6.2.1",
+          "body_md": "**Once weight is off the ground your options have closed.** You cannot send for a device, add a person, or change the route while three people are holding a patient on a staircase.\n\nSo the decision happens before anyone touches anything. It takes about ten seconds, and it is free.\n\nEvery other block in this chapter is about executing a plan. This one is about having made one.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.2.2",
+          "body_md": "**Four questions.**\n\nHow much does this patient actually weigh — estimated high, not optimistically? What is the route out, including turns, stairs and doorways? Do we have enough people, and how long for more? Which device fits the patient, the space and the condition?\n\nWeight, route, hands, device. Ask them out loud, so your partner hears the answers too.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.2.3",
+          "body_md": "**The route usually decides it.** A ninety-degree landing can rule out the cot that would have carried the weight for you, at any weight.\n\nWalk it first. The constraint that will decide this call is visible from the bottom of the stairs, and it is invisible from beside the patient.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.2.4",
+          "body_md": "**Waiting is almost always affordable.** For a stable patient, eight minutes for a second crew costs nothing clinically and buys the difference between a routine move and an injury.\n\nThe exceptions are real — deterioration, danger — and they are exceptions. Difficulty is not one of them, and neither is being busy.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.2.5",
+          "body_md": "**Agree a stop word before you lift**, and agree who calls the count. Anyone can stop it, nobody argues in the moment, and it is discussed afterward.\n\nIf you realize mid-lift that the plan is wrong, set down in a controlled way and re-plan. A controlled abort is available at every moment, and almost nobody uses it — because stopping feels like failing, right up until somebody is hurt.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.2.005",
+        "itm-6.2.007"
+      ],
+      "quiz": [
+        "itm-6.2.002",
+        "itm-6.2.003",
+        "itm-6.2.004",
+        "itm-6.2.006",
+        "itm-6.2.008"
+      ],
+      "callback_md": "At the bottom of the stairs, before either of you went up — and it was decided by not being asked.\n\nWeight, route, hands, device. Ten seconds on the sidewalk would have produced a stair chair, a third pair of hands, or a plan for that landing. **Right now the only correct move is the one nobody likes**: call the stop, set him down, and answer the four questions you skipped.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.3",
+      "chapter": 6,
+      "title": "Technique and team communication",
+      "learner_title": "Lifting with other people",
+      "objectives": [
+        "obj-6.3.a"
+      ],
+      "est_minutes": 7,
+      "lab_gate": true,
+      "verification": {
+        "method": "instructor_checklist",
+        "checklist_ref": "chk-6.3",
+        "verifier_role": "credentialed_instructor"
+      },
+      "cold_open": {
+        "text": "Four people, one patient, and someone says \"ready?\" Two of you lift on the word ready. One lifts on a count of three that never came. The fourth is still finding a grip, and for about a second the whole load is on one person’s lumbar spine.",
+        "decision_point": "What was missing?"
+      },
+      "pretest_item": "itm-6.3.001",
+      "screens": [
+        {
+          "id": "scr-6.3.1",
+          "body_md": "**A sound lift is four things.** A stable base — feet apart and planted, one slightly ahead. A neutral back, bending at the hips and knees. The load close to the body throughout. Smooth movement, without twisting.\n\nWorth doing on every lift. Not, by itself, enough to keep you uninjured across a career, which is what 6.1 was about.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.3.2",
+          "body_md": "**Name who calls the count, and agree the words.** \"Ready, set, lift\" and \"lifting on three\" give different answers to when the weight moves, and half a crew will guess.\n\nOne voice, agreed in advance, saying the same words every time. That is the whole of it, and it is what was missing above.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.3.3",
+          "body_md": "**Everyone confirms ready before the count.** A verbal yes from each person, not an assumption from the fact that nobody objected.\n\nThe fourth person still finding a grip is the one who did not get asked. It costs one second and it is where team lifts fail. Ask by name if you have to.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.3.4",
+          "body_md": "**Say the specific thing, immediately.** \"Losing it — setting down on three\" tells three other people exactly what happens next. \"Hurry up\" tells them to go faster into a failure.\n\nSame rule as chapter 4: name the problem, before it happens, not after. A failing grip is the clearest case there is, because everyone else can act on it instantly.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.3.5",
+          "body_md": "**Set down on a second count.** Concentration drops the moment the weight is up, and a large share of drops and strains happen on the way down.\n\nMove your feet to turn rather than twisting. And if you need to change your grip, set the load down first — regripping under load is when things get dropped, and the patient is what gets dropped.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.3.006",
+        "itm-6.3.007"
+      ],
+      "quiz": [
+        "itm-6.3.002",
+        "itm-6.3.003",
+        "itm-6.3.004",
+        "itm-6.3.005",
+        "itm-6.3.008"
+      ],
+      "callback_md": "A named voice and agreed words.\n\nNobody was careless. Four people heard an ambiguous cue and resolved it four different ways, which is exactly what an ambiguous cue is for. **One person calls it, everyone confirms ready first, and the words are the same every time** — and there is a second count for setting down, because the way down is where this usually goes wrong.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.4",
+      "chapter": 6,
+      "title": "Carrying, reaching, pushing, pulling",
+      "learner_title": "The rest of the shift",
+      "objectives": [
+        "obj-6.4.a"
+      ],
+      "est_minutes": 7,
+      "cold_open": {
+        "text": "You never lifted anything heavy today. You reached across a bed to log roll someone, held a door with one arm for four minutes, pulled a cot up a curb, and leaned over a car seat. Your back hurts anyway, and there is nothing to write an incident report about.",
+        "decision_point": "Which of those did it?"
+      },
+      "pretest_item": "itm-6.4.001",
+      "screens": [
+        {
+          "id": "scr-6.4.1",
+          "body_md": "**Push rather than pull wherever you can.** Pushing lets you put body weight behind the load and keeps it in front of you where you can see it. Pulling loads the back and hides the load behind you.\n\nAnd push between waist and shoulder height. Lower bends you forward; higher removes your leverage.\n\nWhere you must pull, keep it low and close and walk backward rather than leaning.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.4.2",
+          "body_md": "**Reaching is the quiet one.** Keep the back neutral, avoid hyperextension, and do not reach more than about fifteen to twenty inches in front of you with any weight.\n\nThe fix for a long reach is almost always your feet. Move closer rather than extending further — and that is the whole of the log roll problem.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.4.3",
+          "body_md": "**A log roll combines three mechanisms at once**: a long reach, a sustained hold, and usually a twist, at bed height.\n\nGet the bed to a workable height if you can, put people on both sides, and do not solve the distance by reaching further. It is one of the most repeated postures in the job.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.4.4",
+          "body_md": "**Time under load is its own exposure.** Muscles fatigue under a static hold and the burden shifts progressively onto passive structures.\n\nSo holding a door, a limb or a cot rail \"just for a minute\" during a long extrication is worth handing over rather than enduring. The weight never changed; what it is resting on did.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.4.5",
+          "body_md": "**A wheeled device stops being one on the wrong surface.** Gravel, grass, snow, a curb.\n\nRecognize that before you are halfway across it, and change the plan — four people carrying, or a device suited to the ground. Forcing a cot across deep gravel with two people is how cots tip and backs go. The surface changed the task, so change the plan with it.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.4.005",
+        "itm-6.4.006"
+      ],
+      "quiz": [
+        "itm-6.4.002",
+        "itm-6.4.003",
+        "itm-6.4.004",
+        "itm-6.4.007",
+        "itm-6.4.008"
+      ],
+      "callback_md": "All of them, a little, which is the point.\n\nThe reach across the bed, the four-minute static hold, the pull above shoulder height, the lean into a car seat. None produced a moment worth reporting and each loaded the spine in a way a textbook lift would not have.\n\n**Cumulative loading is what ends careers**, and it never arrives as an incident. It arrives as a morning.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.5",
+      "chapter": 6,
+      "title": "Emergency, urgent and non-urgent moves",
+      "learner_title": "When to drag someone",
+      "objectives": [
+        "obj-6.5.a"
+      ],
+      "est_minutes": 7,
+      "cold_open": {
+        "text": "Two calls. In the first, a patient is on a soft bed in cardiac arrest. In the second, a patient with a hip injury is at the end of a long carry and everyone is tired. Both crews are about to move a patient in a way that would not survive review.",
+        "decision_point": "Which one is justified?"
+      },
+      "pretest_item": "itm-6.5.001",
+      "screens": [
+        {
+          "id": "scr-6.5.1",
+          "body_md": "**Three categories, sorted by why you are moving.**\n\n**Emergency** — immediate danger to patient or crew. **Urgent** — the patient’s condition requires moving them in order to assess or treat. **Non-urgent** — everything else, which is most of your calls.\n\nThe equipment follows from the category, not the other way round.\n\nMost of the errors here are non-urgent moves being run as though they were urgent ones.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.5.2",
+          "body_md": "**An emergency move accepts the risk of aggravating an injury** because the alternative is worse: fire, a hazardous atmosphere, an unstable vehicle.\n\nOr a clinical necessity with no external danger at all — a patient in arrest on a soft bed, where compressions dissipate into the mattress. The surface is the emergency.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.5.3",
+          "body_md": "**If you are dragging someone, pull along the long axis of the body** and support the head as far as you can. Clothes drag, blanket drag, shoulder drag.\n\nNever sideways, never by one limb, never by the ankles. You are accepting risk to the spine, not ignoring it, and the direction of pull is how you keep that honest.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.5.4",
+          "body_md": "**Rapid extrication has four indications**: the scene is unsafe, the patient’s condition cannot be managed in the vehicle, the patient blocks access to someone more critical, or they are deteriorating and cannot wait.\n\nA patient who simply wants out of the car is not one of them, however reasonable the request sounds at the time.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.5.5",
+          "body_md": "**Difficulty is not danger.** A long carry, a short crew or a tired crew are resource problems with resource answers, and none of them justifies an emergency move.\n\nEvery emergency move trades one risk for another. Write down which risk you were buying down — \"rapid extrication due to fuel leak\" is a defensible sentence, and \"moved quickly\" is not.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.5.003",
+        "itm-6.5.007"
+      ],
+      "quiz": [
+        "itm-6.5.002",
+        "itm-6.5.004",
+        "itm-6.5.005",
+        "itm-6.5.006",
+        "itm-6.5.008"
+      ],
+      "callback_md": "The first. A patient in arrest on a soft bed needs the floor before anything else you do will work, and that is an emergency move for a clinical reason with no danger anywhere on the scene.\n\nThe second is a tired crew at the end of a long carry, which is a resource problem wearing an emergency’s clothes. **Difficulty is not danger**, and the hip is going to be a great deal more difficult tomorrow.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.6",
+      "chapter": 6,
+      "title": "Equipment and positioning",
+      "learner_title": "Picking the right thing",
+      "objectives": [
+        "obj-6.6.a"
+      ],
+      "est_minutes": 7,
+      "cold_open": {
+        "text": "A patient in severe respiratory distress, sitting bolt upright and gripping the edge of the bed, and a cot that is flat. Your partner starts lowering the back rest so they can be strapped in properly for transport.",
+        "decision_point": "Is that the right move?"
+      },
+      "pretest_item": "itm-6.6.002",
+      "screens": [
+        {
+          "id": "scr-6.6.1",
+          "body_md": "**The space, the injury and the distance pick the device.** Stair chair for a conscious patient and a narrow staircase. Scoop where a patient must be lifted with minimal movement. Vacuum mattress for a long transport with a spinal indication. Cot for everything else.\n\nPoor choices usually come from picking the device first and then fitting the call to it.\n\nDecide at the bottom of the stairs, where you can still change your mind about all three.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.6.2",
+          "body_md": "**A scoop earns its place by how it gets under the patient**: it splits, slides in from both sides and closes, with far less movement than a log roll onto a board.\n\nA vacuum mattress earns its place over time — it conforms and spreads pressure, where a rigid board concentrates it and causes pain and tissue injury.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.6.3",
+          "body_md": "**Position is treatment.** A conscious patient in respiratory distress sits up. An unresponsive patient breathing adequately, with no spinal concern, goes lateral. A vomiting patient who cannot protect their airway goes lateral.\n\nLaying a breathless patient flat because the cot is flat is one of the more common avoidable harms in this chapter.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.6.4",
+          "body_md": "**The shock position did not survive testing.** Elevating the legs has not shown a clinically meaningful benefit.\n\nSupine, warm, and moving. The transport is the intervention, and the position is one more practice that persisted on plausibility rather than on measurement. Chapter 1 named that pattern; here it is again.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.6.5",
+          "body_md": "**Before a loaded cot moves**: all straps including chest and legs, rails up, equipment secured, height controlled, both crew in position, and the route checked for the threshold you have not seen.\n\nCot tip-overs with a patient aboard keep happening, and every one of them is preventable at this list. Run it out loud, the same way every time.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.6.004",
+        "itm-6.6.006"
+      ],
+      "quiz": [
+        "itm-6.6.001",
+        "itm-6.6.003",
+        "itm-6.6.005",
+        "itm-6.6.007",
+        "itm-6.6.008"
+      ],
+      "callback_md": "No. Stop him.\n\nThat patient has found the position that lets them breathe, and they found it before you arrived. Forcing them flat for the convenience of the straps can be actively harmful, and there is no rule that requires a supine patient to be secured.\n\n**Position is treatment** — the patient is already administering it, and the job here is to transport it rather than undo it.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.7",
+      "chapter": 6,
+      "title": "Spinal motion restriction",
+      "learner_title": "The board question",
+      "objectives": [
+        "obj-6.7.a"
+      ],
+      "est_minutes": 9,
+      "lab_gate": true,
+      "verification": {
+        "method": "instructor_checklist",
+        "checklist_ref": "chk-6.7",
+        "verifier_role": "credentialed_instructor"
+      },
+      "cold_open": {
+        "text": "A stabbing to the neck. He is alert, talking in full sentences, has no weakness anywhere, and he is bleeding steadily. Somebody on scene hands you a cervical collar, because it is an injury to the neck and that is what the collar is for. The trauma center is eleven minutes away.",
+        "decision_point": "Does the collar go on?"
+      },
+      "pretest_item": "itm-6.7.001",
+      "evidence_flag": {
+        "topic": "Spinal immobilization and the long backboard",
+        "textbook_position": "Backboard-centric: apply a cervical collar and secure the patient to a long backboard for any suspected spinal injury, with mechanism of injury as an indication in its own right, and including penetrating trauma.",
+        "current_evidence": "Joint guidance from ACS-COT, ACEP and NAEMSP is that the goal is **restriction of motion** — head, neck and torso kept in alignment — achievable with a backboard, scoop, vacuum mattress or the ambulance cot, and driven by **findings rather than mechanism**. It states plainly that there is **no role for spinal motion restriction in penetrating trauma**, where it delays transport and has been associated with worse outcomes. The long board is an extrication tool, not a transport surface.",
+        "uncertainty": "Go further than the guidance. A NAEMSP literature review characterizes both spinal motion restriction and spinal immobilization as long-established standards that carry potential for significant patient harm and are **without definitive evidence of clinical benefit**. So two things are true at once: it is indicated in defined circumstances by current guidance, and the evidence that it helps anyone is thin. Being able to say both out loud is part of what this block teaches.",
+        "source_ref": "Fischer PE et al., Prehosp Emerg Care 2018;22(6):659–61 · NAEMSP literature review",
+        "teach_as": "divergence"
+      },
+      "screens": [
+        {
+          "id": "scr-6.7.1",
+          "body_md": "**The goal is alignment, not immobility.** Head, neck and torso kept in line — which a vacuum mattress, a scoop, or the cot with the patient properly secured can all achieve.\n\nThe change in language is the change in practice. \"Restriction of motion by any adequate means\" replaced \"immobilization on a specific device\".\n\nThat frees you to use what fits the patient and the space rather than what is on the truck.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.7.2",
+          "body_md": "**Findings, not mechanism.** Midline spinal pain or tenderness. Any neurological complaint or finding. Altered mental status, including intoxication. A distracting injury, or visible deformity of the spine.\n\nBeing in a collision is no longer an indication by itself. That single change is most of the difference from the older practice.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.7.3",
+          "body_md": "**No role in penetrating trauma.** None. It delays transport for patients whose problem is bleeding, and it has been associated with worse outcomes.\n\nThis is the most consequential line in the block, and the one most likely to be contradicted by someone on scene who learned it the other way. Say the reason with it.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.7.4",
+          "body_md": "**The board is an extrication tool.** A patient extricated on one, with no indications, comes off it for transport in line with your protocol.\n\nRigid boards cause documented harm over time — pain, pressure injury, restricted breathing. Being carried out on one is not a reason to be transported on one, and the two decisions are made separately.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.7.5",
+          "body_md": "**And a patient fighting the device is a problem, not a failure of compliance.** Struggling against straps can produce more spinal movement than the restriction prevents.\n\nAsk why they are agitated — hypoxia and head injury are on that list — and weigh honestly whether forcing the device is achieving anything at all.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.7.006",
+        "itm-6.7.009"
+      ],
+      "quiz": [
+        "itm-6.7.002",
+        "itm-6.7.003",
+        "itm-6.7.004",
+        "itm-6.7.005",
+        "itm-6.7.007",
+        "itm-6.7.008"
+      ],
+      "callback_md": "No. There is no role for spinal motion restriction in penetrating trauma, and the collar would cover the neck you most need to be watching.\n\nHe is bleeding, he is alert, and the trauma center is eleven minutes away. **The collar buys nothing and costs time and visibility.**\n\nIf somebody on scene insists, this is worth saying out loud with the reason attached — it is joint guidance from three national bodies, not a local preference.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.8",
+      "chapter": 6,
+      "title": "Bariatric, pediatric and geriatric handling",
+      "learner_title": "When the plan does not fit",
+      "objectives": [
+        "obj-6.8.a"
+      ],
+      "est_minutes": 6,
+      "cold_open": {
+        "text": "Three patients your standard plan was not written for: one heavier than the cot is rated to carry, one too small for the straps to hold, and one whose spine will not straighten onto a flat surface. All three are about to be moved as though none of that were true.",
+        "decision_point": "What has to change first?"
+      },
+      "pretest_item": "itm-6.8.001",
+      "screens": [
+        {
+          "id": "scr-6.8.1",
+          "body_md": "**Bariatric: the rated capacity is a limit, not a suggestion.** Check every device in the chain, request extra hands early rather than once you are committed, and assess the route for width, turns and floor strength.\n\nAnd do not discuss the patient as a problem in front of them. They can hear you, and they have heard it before — often enough that it affects whether they call at all.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.8.2",
+          "body_md": "**Pediatric: adult cot straps do not restrain a small body.** A size-appropriate restraint device is needed, every time, on every transport length.\n\nA parent holding a child cannot hold them in a collision. Seat the parent where the child can see and touch them — that solves the distress without solving it by removing the restraint.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.8.3",
+          "body_md": "**Geriatric: the tissue does not tolerate what the equipment assumes.** Thin skin tears from grip and shear. Osteoporotic bone fractures at forces that would not mark a younger patient.\n\nUse a slide sheet or a scoop rather than dragging on skin, and grip broad areas rather than pinching a limb.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.8.4",
+          "body_md": "**Pad to the patient.** A marked kyphosis will not flatten onto a cot, and forcing it risks fracture as well as being painful and pointless.\n\nSupport the position they actually have, with padding under the head and shoulders. The cot is a flat surface; the patient is not obliged to become one, and forcing the point achieves nothing clinical.",
+          "figure": null
+        },
+        {
+          "id": "scr-6.8.5",
+          "body_md": "**What all three share is that the standard plan assumes a patient none of them is.** The equipment, the straps and the flat surface were designed for somebody else.\n\nWhich puts every one of them back in 6.2: the resource and equipment decision, made before anyone lifts, with the four questions asked out loud.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [
+        "itm-6.8.003",
+        "itm-6.8.006"
+      ],
+      "quiz": [
+        "itm-6.8.002",
+        "itm-6.8.004",
+        "itm-6.8.005",
+        "itm-6.8.007",
+        "itm-6.8.008"
+      ],
+      "callback_md": "The plan, before anyone touches anyone.\n\nCheck the rating and get more hands for the first. Fit a proper restraint for the second, and put the parent where the child can see them. Pad to the curve for the third, rather than flattening it.\n\n**None of that is discovered mid-move**, and all of it is answered by the same four questions from 6.2 — which is why that block is the one to have automatic.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    },
+    {
+      "id": "6.INT",
+      "chapter": 6,
+      "title": "Integration — a man in a ditch",
+      "learner_title": "Everything at once, at 0210",
+      "objectives": [
+        "obj-6.INT.a"
+      ],
+      "est_minutes": 10,
+      "cold_open": {
+        "text": "A difficult extrication asks every question in this chapter within about ninety seconds, in the dark, with a patient who has an opinion about all of them. Move category, spinal indications, resource decision, device, and how four people carry someone up a soft bank.",
+        "decision_point": "Which of those is the one that protects you?"
+      },
+      "pretest_item": null,
+      "screens": [
+        {
+          "id": "scr-6.INT.1",
+          "body_md": "**Five questions, in order, and the order matters.**\n\nIs this an emergency move? Does he meet spinal indications? Do we have the people and the equipment? Which device? And how does the team keep the carry together?\n\nWhat follows is one call. Four of the five are about the patient, and one of them is about you.",
+          "figure": null
+        }
+      ],
+      "inline_checks": [],
+      "quiz": [
+        "itm-6.INT.000"
+      ],
+      "callback_md": "The resource decision — waiting fourteen minutes for a second unit.\n\nEverything else on that call was about him: the move category, the spinal indication, the choice of a scoop over a board, the count on the bank. All correct, and none of it changes what your spine carried.\n\n**The only decision that reduced the load was the one to not lift 280 pounds out of a ditch with two people**, and he was stable the entire time it took to make it.",
+      "local_overlay": "ks-amr-kc",
+      "version": "1.0.0"
+    }
+  ],
+  "items": [
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.1.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "stem": "What do lifting and moving injuries account for in EMS injury data?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The largest share of injuries and of lost work time",
+          "correct": true,
+          "rationale": "Not the leading cause of death, which is transportation — the leading cause of injury."
+        },
+        {
+          "id": "b",
+          "text": "A minor share, well behind assault",
+          "correct": false,
+          "rationale": "Assault is common and does not dominate the injury data."
+        },
+        {
+          "id": "c",
+          "text": "The leading cause of on-duty death",
+          "correct": false,
+          "rationale": "That is transportation-related events, from chapter 2."
+        },
+        {
+          "id": "d",
+          "text": "Roughly the same share as infectious exposure",
+          "correct": false,
+          "rationale": "Far higher than exposure."
+        }
+      ],
+      "explanation_md": "Chapter 2 said vehicles are what kill you. This chapter is about what ends careers instead — slowly, and years later.",
+      "source_ref": "NIOSH data on EMS occupational injury; safe patient handling program guidance."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.1.002",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "stem": "What does the evidence show about lifting technique training as a way to prevent back injury?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Moderate quality evidence that training, with or without assistive devices, does not prevent back pain",
+          "correct": true,
+          "rationale": "A Cochrane review of eighteen trials in over twenty thousand workers found no preventive effect."
+        },
+        {
+          "id": "b",
+          "text": "Strong evidence that it substantially reduces injury",
+          "correct": false,
+          "rationale": "That is the belief the review tested, and it did not hold."
+        },
+        {
+          "id": "c",
+          "text": "No evidence either way has been gathered",
+          "correct": false,
+          "rationale": "A large body of trial evidence exists."
+        },
+        {
+          "id": "d",
+          "text": "It works only when refreshed annually",
+          "correct": false,
+          "rationale": "Frequency was not what rescued the effect."
+        }
+      ],
+      "explanation_md": "This does not make technique pointless — it makes training alone a weak lever. What has shown reductions in EMS is engineering the lift out of the job.",
+      "source_ref": "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.1.003",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "stem": "What has been associated with reduced injury rates in EMS services specifically?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Powered stretchers and powered load systems — before-and-after studies show meaningful reductions",
+          "correct": true,
+          "rationale": "Weaker study design than a trial, and consistent and large."
+        },
+        {
+          "id": "b",
+          "text": "Longer annual training in body mechanics",
+          "correct": false,
+          "rationale": "That is the intervention the trial evidence did not support."
+        },
+        {
+          "id": "c",
+          "text": "Pre-employment strength screening",
+          "correct": false,
+          "rationale": "Not established as effective."
+        },
+        {
+          "id": "d",
+          "text": "Back belts",
+          "correct": false,
+          "rationale": "These have repeatedly failed to show benefit."
+        }
+      ],
+      "explanation_md": "One urban service reported all injuries down about 14 per cent and patient-handling injuries down about 25 per cent after power stretchers. Observational, not randomized — so state it that way.",
+      "source_ref": "Pryce R, et al. The effect of power stretchers on occupational injury rates in an urban emergency medical services system. Am J Ind Med 2024 · Armstrong DP, et al. Appl Ergon 2017."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.1.004",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "select_count": [
+        3,
+        4
+      ],
+      "stem": "Select what genuinely reduces the load on your spine during a lift.",
+      "options": [
+        {
+          "id": "a",
+          "text": "Keeping the weight close to your body",
+          "correct": true,
+          "rationale": "Distance from the spine multiplies the force on it."
+        },
+        {
+          "id": "b",
+          "text": "Reducing how far the weight has to travel",
+          "correct": true,
+          "rationale": "Shorter lift, less exposure."
+        },
+        {
+          "id": "c",
+          "text": "Adding people or a device so each person carries less",
+          "correct": true,
+          "rationale": "The only reliable way to reduce the load itself."
+        },
+        {
+          "id": "d",
+          "text": "Avoiding twisting while loaded",
+          "correct": true,
+          "rationale": "Rotation under load is a distinct and serious risk."
+        },
+        {
+          "id": "e",
+          "text": "Wearing a back belt",
+          "correct": false,
+          "rationale": "Repeatedly studied, repeatedly without benefit."
+        }
+      ],
+      "explanation_md": "Close, short, shared, and straight. The first four change the physics. The fifth changes how you feel about the physics.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.1.005",
+      "type": "options_box",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "stem": "Supported by evidence, or taught without it?",
+      "columns": [
+        {
+          "id": "yes",
+          "label": "Supported"
+        },
+        {
+          "id": "no",
+          "label": "Taught, not supported"
+        }
+      ],
+      "rows": [
+        {
+          "id": "r1",
+          "label": "Powered stretchers reduce EMS injury rates",
+          "answer": "yes"
+        },
+        {
+          "id": "r2",
+          "label": "Lifting technique training prevents back injury",
+          "answer": "no"
+        },
+        {
+          "id": "r3",
+          "label": "Keeping the load close reduces spinal force",
+          "answer": "yes"
+        },
+        {
+          "id": "r4",
+          "label": "Back belts prevent injury in workers who lift",
+          "answer": "no"
+        }
+      ],
+      "options": [],
+      "explanation_md": "The biomechanics of a single lift are not in dispute. What is in dispute is whether teaching people about them changes how many of them get hurt.",
+      "source_ref": "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.1.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "stem": "If technique training does not prevent injury, what follows for you on shift?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Use technique, and treat the resource decision as the intervention that matters — more hands, a device, a different route",
+          "correct": true,
+          "rationale": "The decision before the lift is the part you control that has leverage."
+        },
+        {
+          "id": "b",
+          "text": "Ignore technique entirely",
+          "correct": false,
+          "rationale": "The biomechanics of a single lift are real; it is the training-as-prevention claim that failed."
+        },
+        {
+          "id": "c",
+          "text": "Accept that injury is unavoidable in this job",
+          "correct": false,
+          "rationale": "The engineering evidence says otherwise."
+        },
+        {
+          "id": "d",
+          "text": "Wait for your service to buy powered equipment",
+          "correct": false,
+          "rationale": "That is worth advocating for, and it is not the only lever you have today."
+        }
+      ],
+      "explanation_md": "The lever is not how well you lift. It is how often you agree to lift something that should have been moved another way.",
+      "source_ref": "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.1.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "stem": "Why is cumulative loading the more important risk rather than the single heavy lift?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Most career-ending back injury builds over years of repeated loading, not from one identifiable event",
+          "correct": true,
+          "rationale": "Which is why nobody can name the lift that did it."
+        },
+        {
+          "id": "b",
+          "text": "Single heavy lifts never cause injury",
+          "correct": false,
+          "rationale": "They do; they are not the dominant pattern."
+        },
+        {
+          "id": "c",
+          "text": "Because heavy patients are rare",
+          "correct": false,
+          "rationale": "They are not rare, and that is not the reasoning."
+        },
+        {
+          "id": "d",
+          "text": "Because acute injuries heal completely",
+          "correct": false,
+          "rationale": "Not reliably, and it is not the point."
+        }
+      ],
+      "explanation_md": "Ask any provider with a damaged back which call did it. Most cannot tell you, and that is the shape of the problem.",
+      "source_ref": "NIOSH data on EMS occupational injury; safe patient handling program guidance."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.1.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.1",
+      "objective": "obj-6.1.a",
+      "stem": "A colleague says \"just lift with your legs and you will be fine\". What is wrong with that?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It puts all the responsibility on individual technique, which the trial evidence says does not prevent injury",
+          "correct": true,
+          "rationale": "And it implies that anyone who gets hurt did it wrong."
+        },
+        {
+          "id": "b",
+          "text": "Lifting with the legs is biomechanically wrong",
+          "correct": false,
+          "rationale": "It is sound for a single lift."
+        },
+        {
+          "id": "c",
+          "text": "Nothing — it is well supported",
+          "correct": false,
+          "rationale": "As a prevention strategy it is not."
+        },
+        {
+          "id": "d",
+          "text": "It only applies to heavy patients",
+          "correct": false,
+          "rationale": "Not the objection."
+        }
+      ],
+      "explanation_md": "The sentence is half right and entirely misplaced. It is advice about one lift being offered as a career-long injury prevention plan.",
+      "source_ref": "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.2.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "stem": "When is the decision about how to move a patient actually made?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Before anyone takes weight — once the lift has started, your options have closed",
+          "correct": true,
+          "rationale": "Mid-lift is the worst possible moment to discover you needed a fourth person."
+        },
+        {
+          "id": "b",
+          "text": "As the lift proceeds, adjusting to what you find",
+          "correct": false,
+          "rationale": "Adjusting under load is how people get hurt."
+        },
+        {
+          "id": "c",
+          "text": "When the patient is at the door",
+          "correct": false,
+          "rationale": "Too late to change the route or the device."
+        },
+        {
+          "id": "d",
+          "text": "It is not a decision — you lift what is in front of you",
+          "correct": false,
+          "rationale": "It is the single decision in this chapter with the most leverage."
+        }
+      ],
+      "explanation_md": "Stand still for ten seconds and answer four questions. That pause is the intervention, and it is free.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.2.002",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "select_count": [
+        4,
+        5
+      ],
+      "stem": "Select the questions to answer before committing to a move.",
+      "options": [
+        {
+          "id": "a",
+          "text": "How much does this patient weigh, honestly?",
+          "correct": true,
+          "rationale": "Estimate high rather than optimistically."
+        },
+        {
+          "id": "b",
+          "text": "What is the route out, including turns, stairs and door widths?",
+          "correct": true,
+          "rationale": "The route decides the device."
+        },
+        {
+          "id": "c",
+          "text": "Do we have enough people, and if not, how long for more?",
+          "correct": true,
+          "rationale": "Waiting four minutes beats a career-ending lift."
+        },
+        {
+          "id": "d",
+          "text": "Which device fits the patient, the space and the condition?",
+          "correct": true,
+          "rationale": "Three constraints, and the space is usually the binding one."
+        },
+        {
+          "id": "e",
+          "text": "How quickly can we clear this call?",
+          "correct": false,
+          "rationale": "Not a factor in how the patient gets moved."
+        }
+      ],
+      "explanation_md": "Weight, route, hands, device. Four questions, ten seconds, and they are the part of this chapter with the strongest claim to preventing injury.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.2.003",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "stem": "The patient is heavier than your crew can safely manage and help is eight minutes away. What do you do?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Wait for the help, unless the patient will deteriorate in that time",
+          "correct": true,
+          "rationale": "Almost nothing in a non-time-critical move is worth a spinal injury."
+        },
+        {
+          "id": "b",
+          "text": "Attempt it and reassess if it goes badly",
+          "correct": false,
+          "rationale": "Reassessing mid-lift is exactly the failure mode."
+        },
+        {
+          "id": "c",
+          "text": "Ask family members to help lift",
+          "correct": false,
+          "rationale": "Untrained, unequipped, and a liability problem as well as a safety one."
+        },
+        {
+          "id": "d",
+          "text": "Drag the patient to reduce the lifting",
+          "correct": false,
+          "rationale": "Drags are emergency moves, not a workaround for being short-handed."
+        }
+      ],
+      "explanation_md": "The question is not whether you could. It is what happens over the next twenty years if you do this twice a month.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.2.004",
+      "type": "options_box",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "stem": "Does this situation justify moving now with the crew you have?",
+      "columns": [
+        {
+          "id": "now",
+          "label": "Move now"
+        },
+        {
+          "id": "wait",
+          "label": "Wait or re-plan"
+        }
+      ],
+      "rows": [
+        {
+          "id": "r1",
+          "label": "Active structure fire, patient in the room",
+          "answer": "now"
+        },
+        {
+          "id": "r2",
+          "label": "Stable hip fracture, narrow stairs, two crew",
+          "answer": "wait"
+        },
+        {
+          "id": "r3",
+          "label": "Cardiac arrest on a soft bed in a cluttered bedroom",
+          "answer": "now"
+        },
+        {
+          "id": "r4",
+          "label": "Heavy patient, third floor, no elevator, stable",
+          "answer": "wait"
+        }
+      ],
+      "options": [],
+      "explanation_md": "Immediate danger and the need for a hard surface are reasons to move now. Difficulty alone is a reason to plan better, not to push through.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.2.005",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "stem": "Why is the route out often more decisive than the patient’s weight?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A narrow turn or a spiral stair can rule out the device that would otherwise have carried the weight for you",
+          "correct": true,
+          "rationale": "Space constrains the equipment, and the equipment is what makes weight manageable."
+        },
+        {
+          "id": "b",
+          "text": "Weight does not affect the difficulty of a move",
+          "correct": false,
+          "rationale": "It clearly does."
+        },
+        {
+          "id": "c",
+          "text": "Because routes are always the same",
+          "correct": false,
+          "rationale": "They are never the same."
+        },
+        {
+          "id": "d",
+          "text": "Because patients rarely weigh enough to matter",
+          "correct": false,
+          "rationale": "Not true, and not the argument."
+        }
+      ],
+      "explanation_md": "Walk the route before you commit. The second-floor landing with a ninety-degree turn is the thing that decides this call, and it is visible from the bottom of the stairs.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.2.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "stem": "What should you do when you realize mid-lift that the plan is wrong?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Call a stop, set the patient down in a controlled way, and re-plan",
+          "correct": true,
+          "rationale": "A controlled abort is available at any moment and almost nobody uses it."
+        },
+        {
+          "id": "b",
+          "text": "Push through — stopping is more dangerous",
+          "correct": false,
+          "rationale": "A controlled set-down is safer than a failing lift."
+        },
+        {
+          "id": "c",
+          "text": "Have one person take more of the load",
+          "correct": false,
+          "rationale": "Now one person is carrying a load nobody planned for."
+        },
+        {
+          "id": "d",
+          "text": "Speed up to shorten the exposure",
+          "correct": false,
+          "rationale": "Speed under a failing lift is how patients get dropped."
+        }
+      ],
+      "explanation_md": "Agree the stop word before you lift. Anybody can call it, nobody argues in the moment, and it is discussed afterwards.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.2.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "stem": "Why estimate a patient’s weight high rather than optimistically?",
+      "options": [
+        {
+          "id": "a",
+          "text": "An underestimate commits you to equipment and a crew size that cannot cope, and you discover it under load",
+          "correct": true,
+          "rationale": "Overestimating costs a few minutes; underestimating costs a back."
+        },
+        {
+          "id": "b",
+          "text": "Equipment ratings are inaccurate",
+          "correct": false,
+          "rationale": "They are usually accurate — the issue is your estimate."
+        },
+        {
+          "id": "c",
+          "text": "Patients routinely misreport their weight upward",
+          "correct": false,
+          "rationale": "Under-reporting is the more common direction."
+        },
+        {
+          "id": "d",
+          "text": "It affects drug dosing only",
+          "correct": false,
+          "rationale": "Dosing matters and is not this block’s concern."
+        }
+      ],
+      "explanation_md": "Every device has a rated capacity. Exceeding it is not a safety margin being tested, it is a failure being scheduled.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.2.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.2",
+      "objective": "obj-6.2.a",
+      "stem": "What is the strongest argument for asking for more resources on a difficult move?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It is the one part of injury prevention with real leverage, and it costs only time",
+          "correct": true,
+          "rationale": "Technique training did not prevent injury. Not needing the lift does."
+        },
+        {
+          "id": "b",
+          "text": "It looks thorough",
+          "correct": false,
+          "rationale": "Not a reason."
+        },
+        {
+          "id": "c",
+          "text": "It reduces documentation",
+          "correct": false,
+          "rationale": "It does not."
+        },
+        {
+          "id": "d",
+          "text": "It is required by protocol on every call",
+          "correct": false,
+          "rationale": "It is a judgment, not a universal rule."
+        }
+      ],
+      "explanation_md": "This is why 6.1 comes first. Once you know training does not save you, the resource decision stops being an admission and starts being the plan.",
+      "source_ref": "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.3.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "stem": "What does keeping the load close to your body actually change?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The force on the spine, which rises as the weight moves further from it",
+          "correct": true,
+          "rationale": "A load at arm’s length loads the back several times more than the same load held close."
+        },
+        {
+          "id": "b",
+          "text": "Nothing measurable",
+          "correct": false,
+          "rationale": "The effect is large and well established."
+        },
+        {
+          "id": "c",
+          "text": "Only the effort in your arms",
+          "correct": false,
+          "rationale": "The spine is where the difference shows."
+        },
+        {
+          "id": "d",
+          "text": "Only your balance",
+          "correct": false,
+          "rationale": "Balance improves too, and force is the point."
+        }
+      ],
+      "explanation_md": "This is the biomechanics nobody disputes. It is worth doing on every lift; it is just not a substitute for having enough people.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.3.002",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "select_count": [
+        4,
+        5
+      ],
+      "stem": "Select the elements of a sound lift.",
+      "options": [
+        {
+          "id": "a",
+          "text": "Feet apart and planted, one slightly ahead",
+          "correct": true,
+          "rationale": "A stable base before anything moves."
+        },
+        {
+          "id": "b",
+          "text": "Back in a neutral position, bending at the hips and knees",
+          "correct": true,
+          "rationale": "Load the legs rather than the lumbar spine."
+        },
+        {
+          "id": "c",
+          "text": "Load kept close to the body throughout",
+          "correct": true,
+          "rationale": "Distance is what multiplies the force."
+        },
+        {
+          "id": "d",
+          "text": "Lift and lower smoothly, without twisting",
+          "correct": true,
+          "rationale": "Rotation under load is a distinct injury mechanism."
+        },
+        {
+          "id": "e",
+          "text": "Lift quickly to shorten the time under load",
+          "correct": false,
+          "rationale": "Speed removes your ability to abort."
+        }
+      ],
+      "explanation_md": "Base, back, close, smooth. Straightforward, universally taught, and not by itself enough to keep you uninjured across a career.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.3.003",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "stem": "Who should call the count on a team lift?",
+      "options": [
+        {
+          "id": "a",
+          "text": "One named person, agreed before anyone takes weight, using words everyone has heard",
+          "correct": true,
+          "rationale": "One voice, agreed in advance, saying the same words every time."
+        },
+        {
+          "id": "b",
+          "text": "Whoever is strongest",
+          "correct": false,
+          "rationale": "Strength has nothing to do with who counts."
+        },
+        {
+          "id": "c",
+          "text": "Whoever is at the head",
+          "correct": false,
+          "rationale": "Position does not determine it either, though it is a common convention."
+        },
+        {
+          "id": "d",
+          "text": "Nobody — people lift when ready",
+          "correct": false,
+          "rationale": "That is how one person ends up lifting alone."
+        }
+      ],
+      "explanation_md": "Agree the words too. \"Ready, set, lift\" and \"on three, lifting on three\" give different answers to when the weight moves, and half a crew will guess wrong.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.3.004",
+      "type": "build_list",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "stem": "Put a coordinated team lift in order.",
+      "options": [
+        {
+          "id": "a",
+          "text": "Agree the plan, the route and the stop word",
+          "correct": true,
+          "rationale": "Before anybody touches the patient."
+        },
+        {
+          "id": "b",
+          "text": "Name who calls the count and confirm the words",
+          "correct": true,
+          "rationale": "One voice, agreed."
+        },
+        {
+          "id": "c",
+          "text": "Everyone sets their base and confirms they are ready",
+          "correct": true,
+          "rationale": "A verbal yes from each person."
+        },
+        {
+          "id": "d",
+          "text": "The count is called and the load moves together",
+          "correct": true,
+          "rationale": "Together is the whole point."
+        },
+        {
+          "id": "e",
+          "text": "Move, then set down smoothly on a second count",
+          "correct": true,
+          "rationale": "Setting down is a lift in reverse and gets skipped."
+        }
+      ],
+      "explanation_md": "Most dropped patients and most crew injuries happen in the setting-down phase, because everyone treats the lift as finished once it is in the air.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.3.005",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "stem": "You are on a four-person lift and your grip is failing. What do you say?",
+      "options": [
+        {
+          "id": "a",
+          "text": "\"Losing it — setting down on three.\" Name the problem and the action, immediately",
+          "correct": true,
+          "rationale": "Specific, early, and it tells three other people exactly what happens next."
+        },
+        {
+          "id": "b",
+          "text": "Nothing, and try to hold on",
+          "correct": false,
+          "rationale": "The others cannot plan for a failure they do not know about."
+        },
+        {
+          "id": "c",
+          "text": "\"Hurry up\"",
+          "correct": false,
+          "rationale": "Ambiguous, and it invites speed rather than a controlled stop."
+        },
+        {
+          "id": "d",
+          "text": "Adjust your grip silently while holding",
+          "correct": false,
+          "rationale": "Regripping under load is when people drop things."
+        }
+      ],
+      "explanation_md": "The same rule as chapter 4: name the specific problem, before the failure, not after. A lift is the clearest case there is.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.3.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "stem": "Why is twisting while carrying a load singled out as a risk?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Rotation under load stresses spinal structures in a way straight lifting does not",
+          "correct": true,
+          "rationale": "It is a separate mechanism, not just more of the same force."
+        },
+        {
+          "id": "b",
+          "text": "It slows the move",
+          "correct": false,
+          "rationale": "Not the reason."
+        },
+        {
+          "id": "c",
+          "text": "It only matters with heavy patients",
+          "correct": false,
+          "rationale": "It matters at modest loads too."
+        },
+        {
+          "id": "d",
+          "text": "It is uncomfortable but harmless",
+          "correct": false,
+          "rationale": "It is one of the better established mechanisms of injury."
+        }
+      ],
+      "explanation_md": "Move your feet. Turning the whole body takes an extra second and removes the mechanism entirely.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.3.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "stem": "What is the point of a stop word on a lift?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It lets anyone halt the lift without argument or explanation at the moment they need to",
+          "correct": true,
+          "rationale": "Agreed in advance so nobody has to negotiate under load."
+        },
+        {
+          "id": "b",
+          "text": "It signals the end of the lift",
+          "correct": false,
+          "rationale": "That is the count for setting down."
+        },
+        {
+          "id": "c",
+          "text": "It tells the patient what is happening",
+          "correct": false,
+          "rationale": "Explaining to the patient is separate and also worth doing."
+        },
+        {
+          "id": "d",
+          "text": "It is a formality for documentation",
+          "correct": false,
+          "rationale": "It is an operational safeguard."
+        }
+      ],
+      "explanation_md": "The value is that it removes the social cost of stopping. Nobody has to decide whether their grip failing is worth speaking up about.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.3.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.3",
+      "objective": "obj-6.3.a",
+      "stem": "Why does the setting-down phase deserve as much attention as the lift?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Concentration drops once the weight is up, and a large share of drops and strains happen on the way down",
+          "correct": true,
+          "rationale": "People treat the lift as finished at the top."
+        },
+        {
+          "id": "b",
+          "text": "Because the load is heavier going down",
+          "correct": false,
+          "rationale": "It is the same load."
+        },
+        {
+          "id": "c",
+          "text": "Because the patient moves more",
+          "correct": false,
+          "rationale": "Not the general mechanism."
+        },
+        {
+          "id": "d",
+          "text": "It does not — the lift is the risky part",
+          "correct": false,
+          "rationale": "That belief is the reason the setting down goes wrong."
+        }
+      ],
+      "explanation_md": "Call a second count for setting down, every time. It costs one word and it is where the attention has already gone.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.4.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "stem": "Is it better to push or to pull a loaded cot?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Push — it lets you use body weight and keeps the load in front of you where you can see it",
+          "correct": true,
+          "rationale": "Pulling loads the back and takes the load out of view."
+        },
+        {
+          "id": "b",
+          "text": "Pull — it gives better control",
+          "correct": false,
+          "rationale": "It gives worse control and worse mechanics."
+        },
+        {
+          "id": "c",
+          "text": "They are equivalent",
+          "correct": false,
+          "rationale": "They are not."
+        },
+        {
+          "id": "d",
+          "text": "It depends only on the floor surface",
+          "correct": false,
+          "rationale": "Surface matters; it does not reverse the principle."
+        }
+      ],
+      "explanation_md": "Push where you can, pull only where you must, and keep the load between waist and shoulder height while you do.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.4.002",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "select_count": [
+        3,
+        4
+      ],
+      "stem": "Select the principles that apply when reaching for a patient.",
+      "options": [
+        {
+          "id": "a",
+          "text": "Keep the back in a neutral position, avoiding hyperextension",
+          "correct": true,
+          "rationale": "Reaching overhead arches the back under load."
+        },
+        {
+          "id": "b",
+          "text": "Avoid reaching more than about fifteen to twenty inches in front of the body",
+          "correct": true,
+          "rationale": "Beyond that the leverage against the spine climbs sharply."
+        },
+        {
+          "id": "c",
+          "text": "Avoid prolonged reaching, particularly with any weight",
+          "correct": true,
+          "rationale": "Sustained reach is worse than brief."
+        },
+        {
+          "id": "d",
+          "text": "Move yourself closer rather than extending further",
+          "correct": true,
+          "rationale": "The fix for a long reach is almost always your feet."
+        },
+        {
+          "id": "e",
+          "text": "Twist at the waist to extend range",
+          "correct": false,
+          "rationale": "That combines the two worst mechanisms at once."
+        }
+      ],
+      "explanation_md": "Almost every reaching problem is solved by moving your own position. Log rolls and bed-to-cot transfers are where this gets forgotten.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.4.003",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "stem": "You are carrying a loaded stair chair down a flight with a partner. What matters most?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Flexing at the hips rather than the waist, keeping the back locked, and moving one step at a time on a count",
+          "correct": true,
+          "rationale": "The back stays neutral and the legs do the work, on an agreed rhythm."
+        },
+        {
+          "id": "b",
+          "text": "Moving quickly to reduce time under load",
+          "correct": false,
+          "rationale": "Speed on stairs is how both of you end up at the bottom."
+        },
+        {
+          "id": "c",
+          "text": "Having the stronger person take the bottom",
+          "correct": false,
+          "rationale": "Convention exists; it is not what protects the backs."
+        },
+        {
+          "id": "d",
+          "text": "Carrying with arms extended for clearance",
+          "correct": false,
+          "rationale": "That is the reaching problem, on stairs, under load."
+        }
+      ],
+      "explanation_md": "Stairs are where the largest forces and the worst positions meet. A track stair chair, where you have one, removes most of the lift.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.4.004",
+      "type": "options_box",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "stem": "Sound, or a mechanism of injury?",
+      "columns": [
+        {
+          "id": "ok",
+          "label": "Sound"
+        },
+        {
+          "id": "no",
+          "label": "Injury mechanism"
+        }
+      ],
+      "rows": [
+        {
+          "id": "r1",
+          "label": "Moving your feet to turn rather than twisting at the waist",
+          "answer": "ok"
+        },
+        {
+          "id": "r2",
+          "label": "Reaching across a bed to log roll a patient",
+          "answer": "no"
+        },
+        {
+          "id": "r3",
+          "label": "Pushing a cot from waist height with body weight behind it",
+          "answer": "ok"
+        },
+        {
+          "id": "r4",
+          "label": "Pulling a loaded cot up a curb from above the shoulders",
+          "answer": "no"
+        }
+      ],
+      "options": [],
+      "explanation_md": "The two injury mechanisms share a feature: the load is far from the body, and the spine is making up the difference.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.4.005",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "stem": "Why is a log roll a high-risk maneuver for the crew rather than only for the patient?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It combines a long reach, a sustained hold and often a twist, at bed height",
+          "correct": true,
+          "rationale": "Three mechanisms in one, repeated on most trauma calls."
+        },
+        {
+          "id": "b",
+          "text": "Because the patient is heavy",
+          "correct": false,
+          "rationale": "Weight is a factor, and the posture is the reason this one is singled out."
+        },
+        {
+          "id": "c",
+          "text": "Because it takes a long time",
+          "correct": false,
+          "rationale": "It is quick. That does not help."
+        },
+        {
+          "id": "d",
+          "text": "It is not high risk for the crew",
+          "correct": false,
+          "rationale": "It is one of the most common postures associated with injury."
+        }
+      ],
+      "explanation_md": "Get the bed to a workable height if you can, kneel on it if that is permitted, and put people on both sides. Do not solve it by reaching further.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.4.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "stem": "At what height should you push a loaded cot?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Between waist and shoulder height, where you can put body weight behind it",
+          "correct": true,
+          "rationale": "Below the waist loads the back; above the shoulders removes your leverage."
+        },
+        {
+          "id": "b",
+          "text": "As low as possible for stability",
+          "correct": false,
+          "rationale": "Low pushing bends you forward under load."
+        },
+        {
+          "id": "c",
+          "text": "Above shoulder height for visibility",
+          "correct": false,
+          "rationale": "It costs you the ability to push with body weight."
+        },
+        {
+          "id": "d",
+          "text": "Height is irrelevant when pushing",
+          "correct": false,
+          "rationale": "It changes both the force and who supplies it."
+        }
+      ],
+      "explanation_md": "The same principle as everything else in this block: get the work into the large muscles and out of the lumbar spine.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.4.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "stem": "Why does a sustained static hold injure people who could have lifted the same weight briefly?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Muscles fatigue under static load and the burden shifts progressively onto passive structures",
+          "correct": true,
+          "rationale": "Time under load is its own exposure."
+        },
+        {
+          "id": "b",
+          "text": "The weight increases over time",
+          "correct": false,
+          "rationale": "It does not."
+        },
+        {
+          "id": "c",
+          "text": "Static holds are always heavier",
+          "correct": false,
+          "rationale": "Not necessarily."
+        },
+        {
+          "id": "d",
+          "text": "It does not — duration is irrelevant",
+          "correct": false,
+          "rationale": "Duration is a well described risk factor."
+        }
+      ],
+      "explanation_md": "Which is why holding a door, a limb or a cot rail \"just for a minute\" during a long extrication is worth handing over rather than enduring.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.4.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.4",
+      "objective": "obj-6.4.a",
+      "stem": "A cot will not roll over deep gravel to the ambulance. What is the answer?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Carry it with four people, or use a device suited to the ground, rather than forcing it with two",
+          "correct": true,
+          "rationale": "The surface has changed the task; the plan should change with it."
+        },
+        {
+          "id": "b",
+          "text": "Push harder with two",
+          "correct": false,
+          "rationale": "This is the moment the cot tips or a back goes."
+        },
+        {
+          "id": "c",
+          "text": "Pull it backwards over the gravel",
+          "correct": false,
+          "rationale": "Worse mechanics and the load is now behind you."
+        },
+        {
+          "id": "d",
+          "text": "Lift one end and drag the other",
+          "correct": false,
+          "rationale": "It loads one person entirely and destabilizes the cot."
+        }
+      ],
+      "explanation_md": "A wheeled device stops being a wheeled device on the wrong surface. Recognize that before you are halfway across it.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.5.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "stem": "What justifies an emergency move?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Immediate danger to the patient or crew, or the need to reach a patient whose condition requires it now",
+          "correct": true,
+          "rationale": "Fire, hazardous atmosphere, an unstable vehicle, or a patient in arrest on a surface you cannot work on."
+        },
+        {
+          "id": "b",
+          "text": "A long carry to the ambulance",
+          "correct": false,
+          "rationale": "Difficulty is not danger."
+        },
+        {
+          "id": "c",
+          "text": "A crew that is short-handed",
+          "correct": false,
+          "rationale": "That is a resource problem with a different answer."
+        },
+        {
+          "id": "d",
+          "text": "A patient who is refusing to cooperate",
+          "correct": false,
+          "rationale": "Not a justification for an emergency move."
+        }
+      ],
+      "explanation_md": "Emergency moves accept the risk of aggravating an injury because the alternative is worse. That trade only works when something really is worse.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.5.002",
+      "type": "drag_drop",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "stem": "Sort each situation by the category of move it calls for.",
+      "categories": [
+        {
+          "id": "em",
+          "label": "Emergency move"
+        },
+        {
+          "id": "ur",
+          "label": "Urgent move"
+        },
+        {
+          "id": "non",
+          "label": "Non-urgent move"
+        }
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Fire in the structure, patient in the room",
+          "correct": true,
+          "rationale": "Immediate danger — move now, by whatever means."
+        },
+        {
+          "id": "b",
+          "text": "Altered mental status with a compromised airway in a cramped car",
+          "correct": true,
+          "rationale": "Condition requires moving them to be treated — urgent."
+        },
+        {
+          "id": "c",
+          "text": "Stable ankle injury, clear route to the cot",
+          "correct": true,
+          "rationale": "Non-urgent: plan it, do it properly."
+        },
+        {
+          "id": "d",
+          "text": "Cardiac arrest on a soft bed",
+          "correct": true,
+          "rationale": "Needs a hard surface now — an emergency move for a clinical reason."
+        }
+      ],
+      "answer_map": {
+        "a": "em",
+        "b": "ur",
+        "c": "non",
+        "d": "em"
+      },
+      "explanation_md": "Emergency: danger now. Urgent: the condition requires moving them to treat them. Non-urgent: everything else, and most of your calls.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.5.003",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "stem": "Which drag best protects the spine during an emergency move?",
+      "options": [
+        {
+          "id": "a",
+          "text": "One that pulls along the long axis of the body, supporting the head and neck as far as possible",
+          "correct": true,
+          "rationale": "Clothes drag, blanket drag or shoulder drag — all pull in line with the spine."
+        },
+        {
+          "id": "b",
+          "text": "Pulling sideways by one arm",
+          "correct": false,
+          "rationale": "It twists the spine and concentrates force on one joint."
+        },
+        {
+          "id": "c",
+          "text": "Lifting under the arms and dragging the legs sideways",
+          "correct": false,
+          "rationale": "Sideways is the problem."
+        },
+        {
+          "id": "d",
+          "text": "Dragging by the ankles",
+          "correct": false,
+          "rationale": "The head is unsupported and the spine is loaded in the wrong direction."
+        }
+      ],
+      "explanation_md": "You are accepting risk to the spine, not ignoring it. Pull along the long axis and take the head with you.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.5.004",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "select_count": [
+        3,
+        4
+      ],
+      "stem": "Select the situations where a rapid extrication from a vehicle is appropriate.",
+      "options": [
+        {
+          "id": "a",
+          "text": "The scene is unsafe — fire, fuel, an unstable vehicle",
+          "correct": true,
+          "rationale": "Danger outweighs the risk of the move."
+        },
+        {
+          "id": "b",
+          "text": "The patient’s condition needs care that cannot be given in the vehicle",
+          "correct": true,
+          "rationale": "Airway or arrest in a seated patient."
+        },
+        {
+          "id": "c",
+          "text": "The patient blocks access to a more critically injured patient",
+          "correct": true,
+          "rationale": "A recognized indication."
+        },
+        {
+          "id": "d",
+          "text": "The patient is deteriorating and transport cannot wait for a controlled extrication",
+          "correct": true,
+          "rationale": "Time-critical condition."
+        },
+        {
+          "id": "e",
+          "text": "The patient wants to get out of the car",
+          "correct": false,
+          "rationale": "Understandable, and not an indication for rapid extrication."
+        }
+      ],
+      "explanation_md": "Four indications, all of them about danger or time. Rapid extrication is not the default for a patient who happens to be in a car.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.5.005",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "stem": "A patient in cardiac arrest is on a soft bed. What do you do first?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Move them to the floor, or get a hard surface under the chest, before compressions",
+          "correct": true,
+          "rationale": "Compressions on a soft mattress dissipate into the mattress."
+        },
+        {
+          "id": "b",
+          "text": "Start compressions on the bed and move when help arrives",
+          "correct": false,
+          "rationale": "You will be delivering ineffective compressions for minutes."
+        },
+        {
+          "id": "c",
+          "text": "Raise the bed to working height and compress there",
+          "correct": false,
+          "rationale": "Height does not fix compliance of the surface."
+        },
+        {
+          "id": "d",
+          "text": "Wait for a backboard",
+          "correct": false,
+          "rationale": "The floor is available now."
+        }
+      ],
+      "explanation_md": "This is the clearest clinical reason for an emergency move that has nothing to do with danger. The surface is the problem.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.5.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "stem": "What is the cost of choosing an emergency move when it was not needed?",
+      "options": [
+        {
+          "id": "a",
+          "text": "You accept a real risk of worsening an injury, for no benefit that could not have been had by planning",
+          "correct": true,
+          "rationale": "The trade only pays when the alternative is genuinely worse."
+        },
+        {
+          "id": "b",
+          "text": "There is no cost — faster is always safer",
+          "correct": false,
+          "rationale": "That reasoning is how patients get hurt during moves."
+        },
+        {
+          "id": "c",
+          "text": "Only a documentation problem",
+          "correct": false,
+          "rationale": "The harm is physical."
+        },
+        {
+          "id": "d",
+          "text": "Only a cost to the crew",
+          "correct": false,
+          "rationale": "Both patient and crew."
+        }
+      ],
+      "explanation_md": "Every emergency move is a decision to trade one risk for another. Naming which risk you are buying down keeps that decision honest.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.5.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "stem": "What defines an urgent move, as distinct from an emergency one?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The patient’s condition requires moving them in order to assess or treat, without immediate external danger",
+          "correct": true,
+          "rationale": "Condition-driven rather than scene-driven."
+        },
+        {
+          "id": "b",
+          "text": "The crew is in a hurry",
+          "correct": false,
+          "rationale": "Not a category of move."
+        },
+        {
+          "id": "c",
+          "text": "It is any move done within five minutes",
+          "correct": false,
+          "rationale": "Time is not the definition."
+        },
+        {
+          "id": "d",
+          "text": "It requires a backboard",
+          "correct": false,
+          "rationale": "Equipment does not define the category."
+        }
+      ],
+      "explanation_md": "The three categories sort by *why* you are moving: danger, condition, or neither. The equipment follows from that, not the other way round.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.5.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.5",
+      "objective": "obj-6.5.a",
+      "stem": "What should the record show about an emergency move?",
+      "options": [
+        {
+          "id": "a",
+          "text": "What the danger or clinical necessity was, and what move was used",
+          "correct": true,
+          "rationale": "The justification is the part that matters afterward."
+        },
+        {
+          "id": "b",
+          "text": "Only that the patient was moved",
+          "correct": false,
+          "rationale": "It leaves the decision unexplained."
+        },
+        {
+          "id": "c",
+          "text": "Nothing — moves are routine",
+          "correct": false,
+          "rationale": "An emergency move is not routine."
+        },
+        {
+          "id": "d",
+          "text": "Only the time of the move",
+          "correct": false,
+          "rationale": "Time without reason explains nothing."
+        }
+      ],
+      "explanation_md": "Chapter 4 again: write the reasoning, not only the action. \"Rapid extrication due to fuel leak and deteriorating airway\" is a defensible sentence.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.6.001",
+      "type": "drag_drop",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "stem": "Match each situation to the most appropriate device.",
+      "categories": [
+        {
+          "id": "chair",
+          "label": "Stair chair"
+        },
+        {
+          "id": "scoop",
+          "label": "Scoop stretcher"
+        },
+        {
+          "id": "vac",
+          "label": "Vacuum mattress"
+        },
+        {
+          "id": "cot",
+          "label": "Wheeled cot"
+        }
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Conscious patient, no spinal concern, narrow staircase",
+          "correct": true,
+          "rationale": "A stair chair fits where a cot cannot."
+        },
+        {
+          "id": "b",
+          "text": "Suspected pelvic or femoral injury, needs lifting with minimal movement",
+          "correct": true,
+          "rationale": "A scoop splits and closes under the patient."
+        },
+        {
+          "id": "c",
+          "text": "Unstable spinal injury, long transport, needs conforming support",
+          "correct": true,
+          "rationale": "A vacuum mattress conforms and distributes pressure."
+        },
+        {
+          "id": "d",
+          "text": "Stable patient, level route to the ambulance",
+          "correct": true,
+          "rationale": "The cot, which is what it is for."
+        }
+      ],
+      "answer_map": {
+        "a": "chair",
+        "b": "scoop",
+        "c": "vac",
+        "d": "cot"
+      },
+      "explanation_md": "The space, the injury and the distance pick the device between them. Most poor choices come from picking the device first.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.6.002",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "stem": "What is the advantage of a scoop stretcher over a log roll onto a board?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It can be assembled under the patient with far less movement of the spine",
+          "correct": true,
+          "rationale": "It splits, slides under from both sides, and closes."
+        },
+        {
+          "id": "b",
+          "text": "It is more comfortable for long transport",
+          "correct": false,
+          "rationale": "A vacuum mattress is better for that."
+        },
+        {
+          "id": "c",
+          "text": "It is lighter than a backboard",
+          "correct": false,
+          "rationale": "Weight is not the clinical advantage."
+        },
+        {
+          "id": "d",
+          "text": "It provides better immobilization",
+          "correct": false,
+          "rationale": "That is not its distinguishing feature either."
+        }
+      ],
+      "explanation_md": "Less movement to get the patient onto it is the whole case for it, and it is a good one — particularly with a suspected pelvic injury.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.6.003",
+      "type": "options_box",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "stem": "Which position fits the patient?",
+      "columns": [
+        {
+          "id": "sit",
+          "label": "Sitting up"
+        },
+        {
+          "id": "sup",
+          "label": "Supine"
+        },
+        {
+          "id": "lat",
+          "label": "Lateral recumbent"
+        }
+      ],
+      "rows": [
+        {
+          "id": "r1",
+          "label": "Conscious patient in respiratory distress",
+          "answer": "sit"
+        },
+        {
+          "id": "r2",
+          "label": "Unresponsive patient breathing adequately, no spinal concern",
+          "answer": "lat"
+        },
+        {
+          "id": "r3",
+          "label": "Hypotensive patient with no respiratory distress",
+          "answer": "sup"
+        },
+        {
+          "id": "r4",
+          "label": "Patient vomiting, unable to protect their airway",
+          "answer": "lat"
+        }
+      ],
+      "options": [],
+      "explanation_md": "Position is treatment. Laying a breathless patient flat because the cot is flat is one of the more common avoidable harms in this chapter.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.6.004",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "stem": "A conscious patient in severe respiratory distress refuses to lie flat for transport. What do you do?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Transport them sitting up — their position is a treatment they are administering to themselves",
+          "correct": true,
+          "rationale": "Forcing a breathless patient flat can be actively harmful."
+        },
+        {
+          "id": "b",
+          "text": "Insist on supine for safety during transport",
+          "correct": false,
+          "rationale": "Restraint straps do not require a supine patient."
+        },
+        {
+          "id": "c",
+          "text": "Document a refusal of care",
+          "correct": false,
+          "rationale": "They are not refusing care; they are refusing a position."
+        },
+        {
+          "id": "d",
+          "text": "Lay them flat once they are secured",
+          "correct": false,
+          "rationale": "Same harm, delayed."
+        }
+      ],
+      "explanation_md": "Patients in distress adopt the position that works. Overriding it for tidiness is the error, and it is a common one.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.6.005",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "select_count": [
+        3,
+        4
+      ],
+      "stem": "Select what must be true before you move a loaded wheeled cot.",
+      "options": [
+        {
+          "id": "a",
+          "text": "The patient is secured with all straps, including across the chest and legs",
+          "correct": true,
+          "rationale": "All of them, every time."
+        },
+        {
+          "id": "b",
+          "text": "Rails are up and equipment is secured",
+          "correct": true,
+          "rationale": "Loose equipment on a cot becomes a projectile."
+        },
+        {
+          "id": "c",
+          "text": "The cot is at a height you can control, and both crew are in position",
+          "correct": true,
+          "rationale": "Height and hands before movement."
+        },
+        {
+          "id": "d",
+          "text": "The route has been checked for the obstacle you have not seen yet",
+          "correct": true,
+          "rationale": "Thresholds, curbs, gravel, ice."
+        },
+        {
+          "id": "e",
+          "text": "The patient has consented to each strap individually",
+          "correct": false,
+          "rationale": "Explain what you are doing; this is not a consent procedure per strap."
+        }
+      ],
+      "explanation_md": "Cot tip-overs with a patient aboard are a recurring and entirely preventable event. Straps, rails, height, route.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.6.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "stem": "Why position a patient with suspected shock supine rather than with the legs elevated?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Leg elevation has not been shown to produce a clinically meaningful benefit, and supine with warmth and rapid transport is what is supported",
+          "correct": true,
+          "rationale": "The historical shock position has not held up."
+        },
+        {
+          "id": "b",
+          "text": "Leg elevation causes airway compromise",
+          "correct": false,
+          "rationale": "Not the reason it fell out of favor."
+        },
+        {
+          "id": "c",
+          "text": "It is impossible on a cot",
+          "correct": false,
+          "rationale": "It is quite possible."
+        },
+        {
+          "id": "d",
+          "text": "Because the patient will be uncomfortable",
+          "correct": false,
+          "rationale": "Comfort is not the issue."
+        }
+      ],
+      "explanation_md": "Another practice that survived on plausibility. Keep them flat, keep them warm, and get moving — the transport is the intervention.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.6.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "stem": "Why does a vacuum mattress suit a long transport better than a rigid board?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It conforms to the patient and spreads pressure, where a rigid board concentrates it and causes pain and tissue injury",
+          "correct": true,
+          "rationale": "Board-related pain and pressure injury are well described."
+        },
+        {
+          "id": "b",
+          "text": "It restricts motion more completely",
+          "correct": false,
+          "rationale": "That is not its advantage."
+        },
+        {
+          "id": "c",
+          "text": "It is faster to apply",
+          "correct": false,
+          "rationale": "It is usually slower."
+        },
+        {
+          "id": "d",
+          "text": "It is radiolucent and boards are not",
+          "correct": false,
+          "rationale": "Not the distinguishing point here."
+        }
+      ],
+      "explanation_md": "Rigid boards cause measurable harm over time — pain, pressure areas, respiratory restriction. That is why 6.7 spends most of its length on getting people off them.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.6.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.6",
+      "objective": "obj-6.6.a",
+      "stem": "What is the practical limit that decides whether a stair chair or a cot goes up?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The geometry of the route — width, turns and landings — not the patient’s weight",
+          "correct": true,
+          "rationale": "A cot that cannot turn the landing is not an option at any weight."
+        },
+        {
+          "id": "b",
+          "text": "The patient’s weight alone",
+          "correct": false,
+          "rationale": "Weight matters and geometry is what rules a device out."
+        },
+        {
+          "id": "c",
+          "text": "The number of crew",
+          "correct": false,
+          "rationale": "Crew affects whether you can, not whether it fits."
+        },
+        {
+          "id": "d",
+          "text": "The patient’s preference",
+          "correct": false,
+          "rationale": "Worth hearing, not decisive."
+        }
+      ],
+      "explanation_md": "Walk it first. The device decision is made at the bottom of the stairs, which is also where you can still change it.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.7.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "What is the goal of spinal motion restriction, as currently described?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Keeping the head, neck and torso in alignment — which several devices can achieve",
+          "correct": true,
+          "rationale": "Alignment is the objective; the long board is one means among several."
+        },
+        {
+          "id": "b",
+          "text": "Complete elimination of all spinal movement",
+          "correct": false,
+          "rationale": "Not achievable, and not the stated goal."
+        },
+        {
+          "id": "c",
+          "text": "Securing every patient with a mechanism of injury to a long board",
+          "correct": false,
+          "rationale": "That is the practice current guidance moved away from."
+        },
+        {
+          "id": "d",
+          "text": "Preventing the patient from moving at all during transport",
+          "correct": false,
+          "rationale": "Overstates it and describes restraint rather than alignment."
+        }
+      ],
+      "explanation_md": "The change of language is the change of practice. Restriction of motion, achieved by any adequate means, replaced immobilization on a specific device.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.7.002",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "A patient has a penetrating injury to the neck and no neurological deficit. What does current guidance say about spinal motion restriction?",
+      "options": [
+        {
+          "id": "a",
+          "text": "There is no role for it in penetrating trauma — it delays transport and has been associated with worse outcomes",
+          "correct": true,
+          "rationale": "Stated plainly in the joint position statement."
+        },
+        {
+          "id": "b",
+          "text": "Apply a collar and board as for blunt trauma",
+          "correct": false,
+          "rationale": "This is the specific practice the guidance rejects."
+        },
+        {
+          "id": "c",
+          "text": "Apply a collar only",
+          "correct": false,
+          "rationale": "Still not indicated, and it obscures the neck you need to watch."
+        },
+        {
+          "id": "d",
+          "text": "Decide based on the weapon used",
+          "correct": false,
+          "rationale": "Not the basis for the recommendation."
+        }
+      ],
+      "explanation_md": "This is the single most consequential line in the block. Penetrating trauma patients need to be somewhere else quickly, and the collar buys nothing.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.7.003",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "select_count": [
+        4,
+        5
+      ],
+      "stem": "Select the findings that support restricting spinal motion after blunt trauma.",
+      "options": [
+        {
+          "id": "a",
+          "text": "Midline spinal pain or tenderness",
+          "correct": true,
+          "rationale": "A core indication."
+        },
+        {
+          "id": "b",
+          "text": "Any neurological complaint or finding — numbness, weakness, tingling",
+          "correct": true,
+          "rationale": "The finding you cannot afford to miss."
+        },
+        {
+          "id": "c",
+          "text": "Altered mental status, including intoxication",
+          "correct": true,
+          "rationale": "You cannot clear a spine you cannot examine."
+        },
+        {
+          "id": "d",
+          "text": "A distracting injury, or anatomic deformity of the spine",
+          "correct": true,
+          "rationale": "Both limit the reliability of your assessment."
+        },
+        {
+          "id": "e",
+          "text": "Any motor vehicle collision, regardless of findings",
+          "correct": false,
+          "rationale": "Mechanism alone stopped being an indication."
+        }
+      ],
+      "explanation_md": "Findings, not mechanism. That shift is what separates current practice from the version that boarded everybody who had been in a car.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.7.004",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "What is the argument against routine use of the long backboard for transport?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It causes measurable harm — pain, pressure injury, respiratory restriction — without demonstrated benefit for most patients",
+          "correct": true,
+          "rationale": "Harm is documented; benefit for routine use is not."
+        },
+        {
+          "id": "b",
+          "text": "It is too expensive",
+          "correct": false,
+          "rationale": "Cost is not the argument."
+        },
+        {
+          "id": "c",
+          "text": "It takes too long to apply",
+          "correct": false,
+          "rationale": "Time matters and is not the main case."
+        },
+        {
+          "id": "d",
+          "text": "It is uncomfortable, which is a minor consideration",
+          "correct": false,
+          "rationale": "The harms are more than discomfort."
+        }
+      ],
+      "explanation_md": "The board remains useful as an extrication tool. The change is that being extricated on one is not a reason to be transported on one.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.7.005",
+      "type": "options_box",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "Does this patient need spinal motion restriction?",
+      "columns": [
+        {
+          "id": "yes",
+          "label": "Yes"
+        },
+        {
+          "id": "no",
+          "label": "No"
+        }
+      ],
+      "rows": [
+        {
+          "id": "r1",
+          "label": "Gunshot wound to the abdomen, alert, no deficit",
+          "answer": "no"
+        },
+        {
+          "id": "r2",
+          "label": "Fall from a ladder, midline thoracic tenderness",
+          "answer": "yes"
+        },
+        {
+          "id": "r3",
+          "label": "Low-speed collision, no pain, no deficit, fully alert",
+          "answer": "no"
+        },
+        {
+          "id": "r4",
+          "label": "Collision, intoxicated, cannot give a reliable examination",
+          "answer": "yes"
+        }
+      ],
+      "options": [],
+      "explanation_md": "Two of these turn on findings. One turns on the fact that the assessment cannot be trusted. And one is penetrating trauma, where the answer is no regardless.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "remember",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.7.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "Which devices can achieve adequate spinal motion restriction?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A vacuum mattress, a scoop stretcher, or the ambulance cot with the patient secured and aligned",
+          "correct": true,
+          "rationale": "Alignment is the goal, and several devices reach it."
+        },
+        {
+          "id": "b",
+          "text": "Only a long backboard with head blocks",
+          "correct": false,
+          "rationale": "That is the practice the guidance moved away from."
+        },
+        {
+          "id": "c",
+          "text": "A cervical collar alone in every case",
+          "correct": false,
+          "rationale": "A collar alone does not restrict torso motion."
+        },
+        {
+          "id": "d",
+          "text": "Only a vacuum mattress",
+          "correct": false,
+          "rationale": "It is one good option, not the only one."
+        }
+      ],
+      "explanation_md": "Naming the goal rather than the device is what allows a crew to use what fits the patient and the space in front of them.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.7.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "How should you describe the evidence base for spinal motion restriction itself?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Long-established practice with potential for significant harm and without definitive evidence of clinical benefit",
+          "correct": true,
+          "rationale": "That is how a recent literature review characterizes it, and saying so is honest."
+        },
+        {
+          "id": "b",
+          "text": "Strongly supported by randomized trials",
+          "correct": false,
+          "rationale": "No such trial base exists."
+        },
+        {
+          "id": "c",
+          "text": "Proven to prevent secondary spinal injury",
+          "correct": false,
+          "rationale": "Not demonstrated."
+        },
+        {
+          "id": "d",
+          "text": "Disproven and abandoned everywhere",
+          "correct": false,
+          "rationale": "It remains indicated in defined circumstances."
+        }
+      ],
+      "explanation_md": "Both things are true at once: it is indicated by current guidance in defined situations, and the evidence that it helps is thin. Being able to hold both is the skill.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.7.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "A patient was extricated on a long board and now has no indications for spinal motion restriction. What next?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Take them off it for transport, in line with protocol — extrication and transport are separate decisions",
+          "correct": true,
+          "rationale": "The board did a job; that job is finished."
+        },
+        {
+          "id": "b",
+          "text": "Leave them on it, since removing risks movement",
+          "correct": false,
+          "rationale": "The transport harms accumulate and the indication is absent."
+        },
+        {
+          "id": "c",
+          "text": "Leave them on it to save time",
+          "correct": false,
+          "rationale": "Not a clinical reason."
+        },
+        {
+          "id": "d",
+          "text": "Leave them on it because the hospital expects it",
+          "correct": false,
+          "rationale": "Expectation is not an indication."
+        }
+      ],
+      "explanation_md": "Extrication tool, not a transport surface. That one sentence carries most of the practical change in this block.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.7.009",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.7",
+      "objective": "obj-6.7.a",
+      "stem": "A patient meeting indications is agitated and fighting the collar and straps. What is the concern?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Fighting restraint can produce more spinal movement than leaving them in a position of comfort under observation",
+          "correct": true,
+          "rationale": "Restriction that provokes struggling can defeat its own purpose."
+        },
+        {
+          "id": "b",
+          "text": "The straps will fail",
+          "correct": false,
+          "rationale": "Not the primary concern."
+        },
+        {
+          "id": "c",
+          "text": "It delays transport only",
+          "correct": false,
+          "rationale": "The delay matters less than the movement."
+        },
+        {
+          "id": "d",
+          "text": "There is no concern — restriction must be maintained",
+          "correct": false,
+          "rationale": "Not if maintaining it causes what it was meant to prevent."
+        }
+      ],
+      "explanation_md": "Consider why they are agitated — hypoxia and head injury are on that list — and weigh whether forcing the device is achieving anything.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.8.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "stem": "What is the first thing to establish before moving a bariatric patient?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Whether your equipment is rated for the weight, and how many people and what device the move needs",
+          "correct": true,
+          "rationale": "Rated capacity is a limit, not a suggestion."
+        },
+        {
+          "id": "b",
+          "text": "Whether the patient can walk",
+          "correct": false,
+          "rationale": "Relevant, and it does not come before the equipment question."
+        },
+        {
+          "id": "c",
+          "text": "Which hospital will accept them",
+          "correct": false,
+          "rationale": "Destination matters and is not the first handling question."
+        },
+        {
+          "id": "d",
+          "text": "How long the move will take",
+          "correct": false,
+          "rationale": "Not the deciding factor."
+        }
+      ],
+      "explanation_md": "Most services have a bariatric resource and a rated capacity for every device. Knowing both before the call is what makes the decision quick.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.8.002",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "select_count": [
+        3,
+        4
+      ],
+      "stem": "Select what a bariatric move needs beyond a standard one.",
+      "options": [
+        {
+          "id": "a",
+          "text": "Equipment rated for the actual weight, not close to it",
+          "correct": true,
+          "rationale": "Exceeding a rating is a scheduled failure."
+        },
+        {
+          "id": "b",
+          "text": "More hands, requested early rather than once you are committed",
+          "correct": true,
+          "rationale": "Early, because the wait is the cost."
+        },
+        {
+          "id": "c",
+          "text": "A route assessed for width, floor strength and turns",
+          "correct": true,
+          "rationale": "Including whether the floor and stairs will take it."
+        },
+        {
+          "id": "d",
+          "text": "Care that the patient is not talked about as a problem in front of them",
+          "correct": true,
+          "rationale": "They can hear you, and they have heard it before."
+        },
+        {
+          "id": "e",
+          "text": "A faster move to limit time under load",
+          "correct": false,
+          "rationale": "Speed is exactly what should not increase."
+        }
+      ],
+      "explanation_md": "The fourth is not decoration. Bariatric patients routinely report being discussed as an object during a move, and it changes whether they call next time.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.8.003",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "stem": "What is different about securing an infant or small child for transport?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Adult cot straps do not fit them — a size-appropriate restraint device is needed",
+          "correct": true,
+          "rationale": "An unsecured child in the compartment is a projectile."
+        },
+        {
+          "id": "b",
+          "text": "They can be held by a parent during transport",
+          "correct": false,
+          "rationale": "Being held is not restraint, and in a crash the child is lost."
+        },
+        {
+          "id": "c",
+          "text": "Adult straps work if tightened fully",
+          "correct": false,
+          "rationale": "They do not restrain a small body."
+        },
+        {
+          "id": "d",
+          "text": "Children do not need restraint on short transports",
+          "correct": false,
+          "rationale": "Crash forces do not care about distance."
+        }
+      ],
+      "explanation_md": "A parent holding a child in a moving ambulance cannot hold them in a collision. This is one of the clearest examples of a comfortable practice that fails at the moment it matters.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.8.004",
+      "type": "options_box",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "stem": "Which handling consideration applies?",
+      "columns": [
+        {
+          "id": "bar",
+          "label": "Bariatric"
+        },
+        {
+          "id": "ped",
+          "label": "Pediatric"
+        },
+        {
+          "id": "ger",
+          "label": "Geriatric"
+        }
+      ],
+      "rows": [
+        {
+          "id": "r1",
+          "label": "Check the rated capacity of every device in the chain",
+          "answer": "bar"
+        },
+        {
+          "id": "r2",
+          "label": "Use a size-appropriate restraint rather than adult straps",
+          "answer": "ped"
+        },
+        {
+          "id": "r3",
+          "label": "Handle limbs gently — fragile skin and osteoporotic bone",
+          "answer": "ger"
+        },
+        {
+          "id": "r4",
+          "label": "Pad to accommodate kyphosis rather than forcing the patient flat",
+          "answer": "ger"
+        }
+      ],
+      "options": [],
+      "explanation_md": "Two of these are about the equipment fitting the patient. Two are about the patient’s tissue not tolerating what the equipment assumes.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.8.005",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "stem": "An older patient with a marked kyphosis cannot lie flat on the cot. What do you do?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Pad under the head and shoulders to support the position they actually have",
+          "correct": true,
+          "rationale": "Forcing them flat risks fracture and is painful and unnecessary."
+        },
+        {
+          "id": "b",
+          "text": "Strap them down flat for transport safety",
+          "correct": false,
+          "rationale": "That is how you fracture a spine during a move."
+        },
+        {
+          "id": "c",
+          "text": "Transport them sitting in a stair chair instead",
+          "correct": false,
+          "rationale": "Sometimes appropriate; it is not the general answer."
+        },
+        {
+          "id": "d",
+          "text": "Ask them to straighten as much as they can",
+          "correct": false,
+          "rationale": "The curvature is fixed, and asking is asking the impossible."
+        }
+      ],
+      "explanation_md": "Pad to the patient. A cot is a flat surface, and the patient is not obliged to become one.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "understand",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.8.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "stem": "Why is skin integrity a handling consideration in older patients?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Thin, fragile skin tears and bruises from grip and shear that would not mark a younger patient",
+          "correct": true,
+          "rationale": "Sliding transfers and tight grips are the usual causes."
+        },
+        {
+          "id": "b",
+          "text": "It affects drug absorption",
+          "correct": false,
+          "rationale": "Not a handling matter."
+        },
+        {
+          "id": "c",
+          "text": "It only matters with diabetes",
+          "correct": false,
+          "rationale": "It is a general feature of aging skin."
+        },
+        {
+          "id": "d",
+          "text": "It does not affect how you move them",
+          "correct": false,
+          "rationale": "It changes grip, surfaces and transfer technique."
+        }
+      ],
+      "explanation_md": "Use a slide sheet or a scoop rather than dragging on skin, and grip broad areas rather than pinching limbs. A skin tear on an older patient is a real injury.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.8.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "stem": "What do bariatric, pediatric and geriatric handling have in common?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The standard equipment and the standard plan assume a patient none of them is",
+          "correct": true,
+          "rationale": "Each one needs the plan changed before the move, not during it."
+        },
+        {
+          "id": "b",
+          "text": "All three require more crew members",
+          "correct": false,
+          "rationale": "Bariatric usually does; the others often do not."
+        },
+        {
+          "id": "c",
+          "text": "All three are emergency moves",
+          "correct": false,
+          "rationale": "They are not."
+        },
+        {
+          "id": "d",
+          "text": "All three require a backboard",
+          "correct": false,
+          "rationale": "None of them does, as such."
+        }
+      ],
+      "explanation_md": "Which brings this chapter back to 6.2. The resource and equipment decision is where every one of these is handled, and it is made before anyone lifts.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.8.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.8",
+      "objective": "obj-6.8.a",
+      "stem": "A parent asks to hold their two-year-old on the cot during transport. What do you say?",
+      "options": [
+        {
+          "id": "a",
+          "text": "No, and explain why — in a crash they cannot hold on, and the child becomes unrestrained",
+          "correct": true,
+          "rationale": "Explain it rather than just refusing; parents accept the reason."
+        },
+        {
+          "id": "b",
+          "text": "Yes, if the parent is belted",
+          "correct": false,
+          "rationale": "The parent being belted does not restrain the child."
+        },
+        {
+          "id": "c",
+          "text": "Yes, for short transports only",
+          "correct": false,
+          "rationale": "Distance does not change crash forces."
+        },
+        {
+          "id": "d",
+          "text": "Yes, if the child is distressed otherwise",
+          "correct": false,
+          "rationale": "Distress is real and it is not a reason to leave a child unrestrained."
+        }
+      ],
+      "explanation_md": "Seat the parent where the child can see and touch them. That solves most of the distress without solving it by removing the restraint.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "scenario",
+        "ref": null,
+        "text": "0210. A single-vehicle collision into a ditch off a rural road. The car is upright and stable, no fuel leak, no fire.\n\nThe driver is a 58-year-old man, alert, oriented, complaining of pain across his lower back. He has no numbness or weakness anywhere, and no other injuries you can find. He weighs, by his own account, about 280 pounds, and he is sitting in a car with the driver door jammed shut.\n\nThe ditch is soft and about four feet deep. Your cot is on the road above it. There are two of you and the nearest additional unit is fourteen minutes out. The patient is asking you to help him climb out."
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.INT.000",
+      "type": "scenario",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "children": [
+        "itm-6.INT.001",
+        "itm-6.INT.002",
+        "itm-6.INT.003",
+        "itm-6.INT.004",
+        "itm-6.INT.005",
+        "itm-6.INT.006",
+        "itm-6.INT.007",
+        "itm-6.INT.008"
+      ],
+      "stem": "",
+      "options": [],
+      "explanation_md": "",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.INT.001",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "stem": "Does this call justify a rapid extrication?",
+      "options": [
+        {
+          "id": "a",
+          "text": "No — the scene is stable, he is alert with no deficit, and nothing about his condition demands it now",
+          "correct": true,
+          "rationale": "The indications are danger, condition, access or deterioration. None applies."
+        },
+        {
+          "id": "b",
+          "text": "Yes, because the door is jammed",
+          "correct": false,
+          "rationale": "A jammed door is a logistics problem, not an emergency."
+        },
+        {
+          "id": "c",
+          "text": "Yes, because the ditch is soft",
+          "correct": false,
+          "rationale": "Difficulty is not danger."
+        },
+        {
+          "id": "d",
+          "text": "Yes, because you are short-handed",
+          "correct": false,
+          "rationale": "That is an argument for waiting, not for hurrying."
+        }
+      ],
+      "explanation_md": "Everything here is difficult and nothing is dangerous. That distinction is the whole of 6.5.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.INT.002",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "stem": "Does he meet indications for spinal motion restriction?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Yes — midline lower back pain after blunt trauma is an indication, even with no deficit",
+          "correct": true,
+          "rationale": "Findings, not mechanism, and he has a finding."
+        },
+        {
+          "id": "b",
+          "text": "No, because he has no neurological deficit",
+          "correct": false,
+          "rationale": "Deficit is one indication among several, not a requirement."
+        },
+        {
+          "id": "c",
+          "text": "No, because he is alert and oriented",
+          "correct": false,
+          "rationale": "Alertness makes the examination reliable; it does not negate the finding."
+        },
+        {
+          "id": "d",
+          "text": "Yes, but only because of the mechanism",
+          "correct": false,
+          "rationale": "Mechanism alone is no longer an indication. The pain is."
+        }
+      ],
+      "explanation_md": "Midline spinal pain is a core indication. What follows is a question about alignment and device, not about whether to do it at all.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.INT.003",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "stem": "He asks you to help him climb out of the car. What do you say?",
+      "options": [
+        {
+          "id": "a",
+          "text": "No, and explain why — self-extrication would produce exactly the motion you are trying to restrict",
+          "correct": true,
+          "rationale": "Explain it; patients generally accept a reason."
+        },
+        {
+          "id": "b",
+          "text": "Yes, it saves the lift and the movement is minimal",
+          "correct": false,
+          "rationale": "Climbing out of a car seat is not minimal spinal movement."
+        },
+        {
+          "id": "c",
+          "text": "Yes, if he moves slowly",
+          "correct": false,
+          "rationale": "Slowly is still the movement you are trying to avoid."
+        },
+        {
+          "id": "d",
+          "text": "Yes, if he holds his own neck",
+          "correct": false,
+          "rationale": "It does not restrict the thoracolumbar motion that his pain points at."
+        }
+      ],
+      "explanation_md": "There is a real debate about self-extrication in patients with no findings. This patient has a finding, which puts him outside it.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.INT.004",
+      "type": "mr",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "select_count": [
+        4,
+        5
+      ],
+      "stem": "What has to be answered before anybody takes weight here?",
+      "options": [
+        {
+          "id": "a",
+          "text": "His actual weight, estimated high rather than optimistically",
+          "correct": true,
+          "rationale": "280 by his own account means plan for more."
+        },
+        {
+          "id": "b",
+          "text": "The route — out of a four-foot soft ditch, up to a road",
+          "correct": true,
+          "rationale": "This is the constraint that decides everything else."
+        },
+        {
+          "id": "c",
+          "text": "Whether two people is enough, and what fourteen minutes costs",
+          "correct": true,
+          "rationale": "He is stable, so the wait is affordable."
+        },
+        {
+          "id": "d",
+          "text": "Which device works: a scoop assembled under him, or a vacuum mattress",
+          "correct": true,
+          "rationale": "Both achieve alignment with less movement than a log roll."
+        },
+        {
+          "id": "e",
+          "text": "How quickly the call can be cleared",
+          "correct": false,
+          "rationale": "Not a factor in how he gets moved."
+        }
+      ],
+      "explanation_md": "Weight, route, hands, device. On this call the route and the weight together answer the hands question for you.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": true,
+      "version": "1.0.0",
+      "id": "itm-6.INT.005",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "stem": "Two of you, 280 pounds, a soft four-foot ditch, and help fourteen minutes away. What do you do?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Wait for the second unit — he is stable, and nothing about fourteen minutes harms him",
+          "correct": true,
+          "rationale": "This is the resource decision, and it is the one with real leverage."
+        },
+        {
+          "id": "b",
+          "text": "Attempt it with two and reassess if it goes badly",
+          "correct": false,
+          "rationale": "Reassessing mid-lift out of a ditch is the failure mode."
+        },
+        {
+          "id": "c",
+          "text": "Ask bystanders to help carry him up the bank",
+          "correct": false,
+          "rationale": "Untrained hands on an uneven slope with a spinal indication."
+        },
+        {
+          "id": "d",
+          "text": "Have him self-extricate to avoid the lift entirely",
+          "correct": false,
+          "rationale": "Already ruled out by his findings."
+        }
+      ],
+      "explanation_md": "Fourteen minutes costs this patient nothing. The alternative costs two crews a lift they will remember in twenty years.",
+      "source_ref": "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.INT.006",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "stem": "Which device best fits this patient and this extraction?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A scoop stretcher assembled under him, or a vacuum mattress — either achieves alignment with minimal movement",
+          "correct": true,
+          "rationale": "And both are practical to carry up a bank with four people."
+        },
+        {
+          "id": "b",
+          "text": "A long backboard, because he needs immobilization",
+          "correct": false,
+          "rationale": "Alignment is the goal and the board is not required to reach it."
+        },
+        {
+          "id": "c",
+          "text": "A stair chair, since he is seated",
+          "correct": false,
+          "rationale": "It is not a spinal device and he has a spinal indication."
+        },
+        {
+          "id": "d",
+          "text": "Walk him to the cot supported by two crew",
+          "correct": false,
+          "rationale": "The movement you are avoiding is exactly the movement that would produce."
+        }
+      ],
+      "explanation_md": "If a board is used to get him out of the ditch, it is an extrication tool. He does not stay on it for transport.",
+      "source_ref": "Fischer PE, Perina DG, Delbridge TR, et al. Spinal motion restriction in the trauma patient — a joint position statement (ACS-COT, ACEP, NAEMSP). Prehosp Emerg Care 2018;22(6):659–61."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "apply",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.INT.007",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "stem": "Four people are now carrying him up a soft bank. What keeps that lift together?",
+      "options": [
+        {
+          "id": "a",
+          "text": "One named person calling an agreed count, an agreed stop word, and a second count for setting down",
+          "correct": true,
+          "rationale": "One voice, agreed words, and an abort available at any moment."
+        },
+        {
+          "id": "b",
+          "text": "Everyone lifting when they feel ready",
+          "correct": false,
+          "rationale": "That is how one person carries the load alone."
+        },
+        {
+          "id": "c",
+          "text": "Moving as fast as possible up the bank",
+          "correct": false,
+          "rationale": "Speed removes the ability to stop."
+        },
+        {
+          "id": "d",
+          "text": "The strongest person taking the heavy end and setting the pace",
+          "correct": false,
+          "rationale": "Strength does not decide who counts."
+        }
+      ],
+      "explanation_md": "Uneven ground is precisely where someone loses footing. The stop word exists so the person who does can say so without deciding whether it is worth mentioning.",
+      "source_ref": "NHTSA National EMS Education Standards (2021) — Preparatory: Lifting and Moving Patients."
+    },
+    {
+      "stimulus": {
+        "kind": "none",
+        "ref": null
+      },
+      "bloom": "analyze",
+      "nremt_domain": "ems_operations",
+      "cj_step": null,
+      "difficulty_seed": 0.5,
+      "high_stakes": false,
+      "version": "1.0.0",
+      "id": "itm-6.INT.008",
+      "type": "mc",
+      "chapter": 6,
+      "block": "6.INT",
+      "objective": "obj-6.INT.a",
+      "parent": "itm-6.INT.000",
+      "stem": "Reviewing this call, which decision did the most to prevent injury?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Waiting for the second unit — the resource decision, made before anyone took weight",
+          "correct": true,
+          "rationale": "Technique training does not prevent injury. Not lifting it with two people does."
+        },
+        {
+          "id": "b",
+          "text": "Lifting with the legs rather than the back",
+          "correct": false,
+          "rationale": "Sound for one lift, and not what the evidence says prevents career injury."
+        },
+        {
+          "id": "c",
+          "text": "Choosing a scoop over a backboard",
+          "correct": false,
+          "rationale": "The right call clinically, and it is about the patient rather than the crew."
+        },
+        {
+          "id": "d",
+          "text": "Calling a clear count",
+          "correct": false,
+          "rationale": "It keeps the lift together; it does not reduce the load."
+        }
+      ],
+      "explanation_md": "Everything else in this chapter is about doing a lift well. This is about arranging not to do it at all, and it is the only part with good evidence behind it.",
+      "source_ref": "Verbeek JH, Martimo K-P, Karppinen J, et al. Manual material handling advice and assistive devices for preventing and treating back pain in workers. Cochrane Database Syst Rev 2011;(6):CD005958."
+    }
+  ]
+}

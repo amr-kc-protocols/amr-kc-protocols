@@ -63,8 +63,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1
   padding:14px;margin-bottom:14px}
 .about-t{font-size:13.5px;font-weight:700;color:var(--teal);margin-bottom:6px}
 .about-b{font-size:12px;color:var(--gray);line-height:1.55;margin-top:7px}
+.about-n{font-size:11.5px;color:var(--gray);line-height:1.5;margin-top:6px;padding-left:9px;border-left:2px solid var(--border)}
+.about-d{margin-top:9px}
+.about-d>summary{font-size:11.5px;color:var(--teal2);font-weight:700;cursor:pointer;list-style:none}
+.about-d>summary::-webkit-details-marker{display:none}
+.about-d>summary::before{content:'\25B8';display:inline-block;margin-right:6px;transition:transform .15s}
+.about-d[open]>summary::before{transform:rotate(90deg)}
+.ch-d{border-top:1px solid var(--border)}
+.ch-d:first-of-type{border-top:none}
+.ch-sum{display:flex;align-items:center;gap:9px;padding:11px 2px;cursor:pointer;list-style:none;font-size:13px}
+.ch-sum::-webkit-details-marker{display:none}
+.ch-n{font-weight:700;color:var(--teal2);min-width:34px}
+.ch-t{flex:1;color:var(--ink)}
+.ch-p{font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums}
+.ch-p.all{color:var(--ok);font-weight:700}
+.ch-b{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:var(--dim);border:none;border-radius:7px;padding:9px 11px;margin:0 0 5px 0;cursor:pointer;font:inherit;font-size:12.5px}
+.ch-b:last-child{margin-bottom:10px}
+.ch-b.done{opacity:.62}
+.ch-bi{font-weight:700;color:var(--gray);min-width:38px;font-variant-numeric:tabular-nums}
+.ch-bt{flex:1;color:var(--ink)}
+.ch-bm{font-size:11px;color:var(--gray);white-space:nowrap}
 .about-b strong{color:var(--ink)}
-.about-flag{color:var(--warn);font-weight:700}
 
 /* ── HOME: due-count first (spec §4.3, §10) ───────────────────────────── */
 .due-hero{background:linear-gradient(135deg,#0b3f75,#14406f 45%,#0e7490);color:#fff;
@@ -863,7 +882,7 @@ Render.drag_drop=function(item){
         c.setAttribute('aria-label','Remove "'+o.text+'" from '+cat.label);
         // While something is armed the whole bin is a drop target, so a chip
         // already sitting in it must not swallow the tap. A filled bin's
-        // centre lands on a chip, and without this a learner aiming at the bin
+        // center lands on a chip, and without this a learner aiming at the bin
         // removes the last thing they placed instead of placing the next one.
         c.onclick=function(ev){
           if(armed) return;                       // let it bubble to the bin
@@ -1296,7 +1315,7 @@ function makeRenderer(item){
 }
 
 /* The figure alone, for the renderers that draw on top of it. Records the
-   licence beside it — v1.1 §2.2 requires one per asset, and the place to make
+   license beside it — v1.1 §2.2 requires one per asset, and the place to make
    that visible is where the asset is used. */
 function stimulusFigure(item){
   var s=item.stimulus;
@@ -1316,6 +1335,9 @@ function stimulusEl(item){
   if(s.kind==='image'&&s.ref){
     var img=el('img'); img.src=s.ref; img.alt=s.alt||'Item figure'; img.loading='lazy';
     box.appendChild(img);
+    // v1.1 §2.2 requires the license beside the asset wherever it is used, and
+    // a graphical item is a use. This was recorded but not shown.
+    if(s.asset_license) box.appendChild(el('div','fig-lic',esc(s.asset_license)));
   } else if(s.text){
     box.innerHTML=md(s.text);
   }
@@ -1482,7 +1504,7 @@ function runBlock(block){
 
     if(s.kind==='evidence'){
       // v1.1 §2.4 — where the book and the current evidence disagree, both
-      // are shown side by side. Modelling "here is what the book says, here is
+      // are shown side by side. Modeling "here is what the book says, here is
       // what the evidence says" is itself a teaching objective.
       var ef=block.evidence_flag, ec=el('div','card');
       ec.appendChild(header('Where the book and the evidence differ'));
@@ -1747,9 +1769,19 @@ function renderHome(){
   if(built.length){
     about.appendChild(el('div','about-b','<strong>Written:</strong> '+
       built.map(function(ch){
-        return 'Ch '+ch.n+' '+esc(ch.title)+
-          (meta[ch.n].review_status==='unreviewed'?' <span class="about-flag">not yet instructor-reviewed</span>':'');
+        return 'Ch '+ch.n+' '+esc(ch.title);
       }).join(' &middot; ')));
+    var noted=built.filter(function(ch){ return meta[ch.n].notice; });
+    if(noted.length){
+      var nd=document.createElement('details'); nd.className='about-d';
+      var ns=document.createElement('summary');
+      ns.textContent='What each chapter leaves to your local protocol ('+noted.length+')';
+      nd.appendChild(ns);
+      noted.forEach(function(ch){
+        nd.appendChild(el('div','about-n','<strong>Ch '+ch.n+':</strong> '+esc(meta[ch.n].notice)));
+      });
+      about.appendChild(nd);
+    }
   }
   if(pending.length){
     about.appendChild(el('div','about-b','<strong>Placeholder so far:</strong> '+
@@ -1810,6 +1842,34 @@ function renderHome(){
   sec.appendChild(drill);
   c.appendChild(sec);
 
+  // Jump straight to a chapter. With 79 blocks, "next block" alone means a
+  // learner revising chapter 6 before a class has to walk through chapter 1.
+  var pick=el('div','card');
+  pick.appendChild(el('div','card-lbl','All chapters'));
+  (SERIES.chapters||[]).forEach(function(ch){
+    var list=(SERIES.blocks||[]).filter(function(b){ return b.chapter===ch.n; });
+    if(!list.length) return;
+    var done=list.filter(function(b){ var r=STATE.blocks[b.id]; return r&&r.completed_at; }).length;
+    var d=document.createElement('details'); d.className='ch-d';
+    var sm=document.createElement('summary'); sm.className='ch-sum';
+    sm.innerHTML='<span class="ch-n">Ch '+ch.n+'</span>'+
+      '<span class="ch-t">'+esc(ch.title)+'</span>'+
+      '<span class="ch-p'+(done===list.length?' all':'')+'">'+done+'/'+list.length+'</span>';
+    d.appendChild(sm);
+    list.forEach(function(b){
+      var r=STATE.blocks[b.id], fin=!!(r&&r.completed_at);
+      var row=el('button','ch-b'+(fin?' done':'')); row.type='button';
+      row.setAttribute('data-block',b.id);
+      row.innerHTML='<span class="ch-bi">'+esc(b.id)+'</span>'+
+        '<span class="ch-bt">'+esc(b.learner_title||b.title)+'</span>'+
+        '<span class="ch-bm">'+(fin?'&#10003;':(b.est_minutes||6)+' min')+'</span>';
+      row.onclick=function(){ runBlock(b); };
+      d.appendChild(row);
+    });
+    pick.appendChild(d);
+  });
+  c.appendChild(pick);
+
   // Two bars. Never merged — completion implying mastery is the standard
   // failure mode of every EMS LMS these crews have already been through.
   var comp=Mastery.completion(), mast=Mastery.masteryOverall();
@@ -1868,12 +1928,12 @@ function renderProgress(){
     var list=el('div'); list.style.marginTop='12px';
     objs.forEach(function(o){
       var st=statuses[o.id];
-      var colour=st==='mastered'?'var(--ok)':(st==='practicing'?'var(--teal2)':'var(--gray)');
+      var color=st==='mastered'?'var(--ok)':(st==='practicing'?'var(--teal2)':'var(--gray)');
       list.appendChild(el('div','',
         '<div style="display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--border);font-size:13px">'+
-        '<span style="width:9px;height:9px;border-radius:50%;background:'+colour+';flex-shrink:0"></span>'+
+        '<span style="width:9px;height:9px;border-radius:50%;background:'+color+';flex-shrink:0"></span>'+
         '<span style="flex:1">'+esc(o.text)+'</span>'+
-        '<span style="font-size:11px;color:'+colour+';font-weight:700;text-transform:uppercase;letter-spacing:.05em">'+
+        '<span style="font-size:11px;color:'+color+';font-weight:700;text-transform:uppercase;letter-spacing:.05em">'+
         esc(st.replace('_',' '))+'</span></div>'));
     });
     card.appendChild(list);
@@ -2039,8 +2099,8 @@ function loadSources(manifest){
       });
       (l.src.chapters||[]).forEach(function(n){
         out.chapter_meta[n]={ seed:seed,
-          review_status:l.doc.review_status||(seed?'placeholder':'unreviewed'),
-          sources:l.doc.sources||null, file:l.src.file };
+          review_status:l.doc.review_status||(seed?'placeholder':'released'),
+          sources:l.doc.sources||null, notice:l.doc.notice||null, file:l.src.file };
       });
     });
     (out.chapters||[]).forEach(function(c){
@@ -2078,6 +2138,7 @@ function boot(){
 // Exposed for the test suite to drive the scheduler and the mastery model
 // directly, without having to click through a week of reviews.
 window.AEMT={
+  stimulusFigure:stimulusFigure, stimulusEl:stimulusEl,
   get series(){ return SERIES; }, get state(){ return STATE; },
   set state(v){ STATE=v; },
   Sched:Sched, Mastery:Mastery, Render:Render,

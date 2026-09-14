@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v17';
+const CACHE = 'amrkc-2026-v28';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -20,11 +20,19 @@ const ASSETS = [
   // The shell, the content and the scheduler all have to be here already.
   './aemt-series.html',
   './aemt/series.json',
+  './aemt/ch01-ems-systems.json',
+  './aemt/ch02-workforce-safety.json',
+  './aemt/ch03-medical-legal-ethical.json',
+  './aemt/ch04-communications-documentation.json',
   './aemt/ch05-terminology.json',
-  './aemt/series-preparatory.json',
+  './aemt/ch06-lifting-and-moving.json',
+  './aemt/ch07-the-human-body.json',
+  './aemt/ch08-pathophysiology.json',
+  './aemt/ch09-life-span-development.json',
   './aemt/fsrs-5.4.2.umd.js',
-  './aemt/seed-tpopp-placeholder.svg',
-  './aemt/seed-airway-placeholder.svg',
+  './aemt/fig-portable-medical-order.svg',
+  './aemt/fig-body-cavities.svg',
+  './aemt/fig-upper-airway.svg',
   './aemt/fig-abdominal-quadrants.svg'
 ];
 

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 320" role="img"
+     aria-label="Schematic of a portable medical order form with four sections: A cardiopulmonary resuscitation, B medical interventions, C artificially administered nutrition, and D signatures. Section A is left unmarked; sections B and C each have one option ticked; section D carries two signature lines, one of them blank.">
+  <title>Portable medical order form — structure</title>
+  <desc>Original schematic drawn for this module. Not a reproduction of any state form.</desc>
+  <style>
+    .bg{fill:#f5f7fa}.card{fill:#fff;stroke:#c3cdda;stroke-width:2}
+    .hd{fill:#e6edf7}.t{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;fill:#16243a}
+    .lab{font-weight:700}.sm{font-size:10.5px;fill:#5a6676}.xs{font-size:9px;fill:#8a95a5}
+    .box{fill:#fff;stroke:#93a2b6;stroke-width:1.4}
+    .tick{stroke:#16243a;stroke-width:2.2;fill:none;stroke-linecap:round}
+    .line{stroke:#c3cdda;stroke-width:1.2}
+  </style>
+  <rect class="bg" width="420" height="320"/>
+  <rect class="card" x="12" y="12" width="396" height="296" rx="9"/>
+  <path class="hd" d="M12 21a9 9 0 0 1 9-9h378a9 9 0 0 1 9 9v22H12z"/>
+  <text class="t lab" x="26" y="34" font-size="13">PORTABLE MEDICAL ORDER</text>
+  <text class="t xs" x="330" y="34">Page 1 of 1</text>
+
+  <g class="t" font-size="11.5">
+    <!-- Section A: left unmarked -->
+    <rect class="box" x="26" y="56" width="368" height="56" rx="5"/>
+    <text class="lab" x="38" y="74" font-size="12">A</text>
+    <text x="56" y="74">Cardiopulmonary resuscitation</text>
+    <rect class="box" x="56" y="82" width="13" height="13" rx="2.5"/>
+    <text class="sm" x="76" y="93">Attempt resuscitation</text>
+    <rect class="box" x="212" y="82" width="13" height="13" rx="2.5"/>
+    <text class="sm" x="232" y="93">Do not attempt resuscitation</text>
+
+    <!-- Section B: one option ticked -->
+    <rect class="box" x="26" y="120" width="368" height="56" rx="5"/>
+    <text class="lab" x="38" y="138" font-size="12">B</text>
+    <text x="56" y="138">Medical interventions</text>
+    <rect class="box" x="56" y="146" width="13" height="13" rx="2.5"/>
+    <path class="tick" d="M58.5 152.5l3 3.5 5.5-6.5"/>
+    <text class="sm" x="76" y="157">Selective treatment</text>
+    <rect class="box" x="212" y="146" width="13" height="13" rx="2.5"/>
+    <text class="sm" x="232" y="157">Comfort measures only</text>
+
+    <!-- Section C: one option ticked -->
+    <rect class="box" x="26" y="184" width="368" height="56" rx="5"/>
+    <text class="lab" x="38" y="202" font-size="12">C</text>
+    <text x="56" y="202">Artificially administered nutrition</text>
+    <rect class="box" x="56" y="210" width="13" height="13" rx="2.5"/>
+    <text class="sm" x="76" y="221">Trial period</text>
+    <rect class="box" x="212" y="210" width="13" height="13" rx="2.5"/>
+    <path class="tick" d="M214.5 216.5l3 3.5 5.5-6.5"/>
+    <text class="sm" x="232" y="221">No artificial nutrition</text>
+
+    <!-- Section D: signatures, one line blank -->
+    <rect class="box" x="26" y="248" width="368" height="44" rx="5"/>
+    <text class="lab" x="38" y="266" font-size="12">D</text>
+    <text x="56" y="266">Signatures</text>
+    <line class="line" x1="56" y1="282" x2="200" y2="282"/>
+    <text class="xs" x="56" y="291">Authorized clinician — signed</text>
+    <line class="line" x1="232" y1="282" x2="378" y2="282"/>
+    <text class="xs" x="232" y="291">Patient or representative — blank</text>
+  </g>
+</svg>
