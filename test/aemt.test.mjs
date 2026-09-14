@@ -677,28 +677,30 @@ async function answerItem(page, itemId, how) {
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    return { core: A.objectiveTier("obj-seed.a1"),
-             context: A.objectiveTier("obj-seed.a2"),
-             reference: A.objectiveTier("obj-seed.a3"),
+    return { core: A.objectiveTier("obj-7.2.a"),
+             context: A.objectiveTier("obj-7.3.a"),
+             reference: A.objectiveTier("obj-7.8.a"),
              legacy: (() => { A.series.objectives.push({ id: "obj-test.untiered", chapter: 9 });
                const t = A.objectiveTier("obj-test.untiered"); A.series.objectives.pop(); return t; })(),
-             coreQueued: A.isQueued(A.itemById("itm-seed.101")),
-             contextQueued: A.isQueued(A.itemById("itm-seed.103")) };
+             coreQueued: A.isQueued(A.itemById("itm-7.2.001")),
+             contextQueued: A.isQueued(A.itemById("itm-7.3.001")),
+             refQueued: A.isQueued(A.itemById("itm-7.8.001")) };
   });
   check("M1 tiers read off the objective", r.core === "core" && r.context === "context" &&
     r.reference === "reference", JSON.stringify(r));
   check("M2 an objective authored before v1.1 is treated as core", r.legacy === "core", r.legacy);
   check("M3 a core objective's items are queued", r.coreQueued === true);
   check("M4 a context objective's items are not", r.contextQueued === false);
+  check("M5 and neither are a reference objective's", r.refQueued === false);
 
   // Answering a context item records progress but schedules nothing — that is
   // what stops Ch 7 producing 300 items nobody finishes reviewing.
   const after = await p.evaluate(() => {
     const A = window.AEMT;
     A.state.blocks["7.7"] = { attempted: true, completed_at: null };
-    A.recordAnswer(A.itemById("itm-seed.103"), true, null, new Date());
-    A.recordAnswer(A.itemById("itm-seed.101"), true, null, new Date());
-    const ctx = A.state.items["itm-seed.103"], core = A.state.items["itm-seed.101"];
+    A.recordAnswer(A.itemById("itm-7.3.001"), true, null, new Date());
+    A.recordAnswer(A.itemById("itm-7.2.001"), true, null, new Date());
+    const ctx = A.state.items["itm-7.3.001"], core = A.state.items["itm-7.2.001"];
     const past = new Date(Date.now() + 40 * 86400000);
     return { ctxQueued: ctx.queued, ctxHasDue: !!ctx.due, coreHasDue: !!core.due,
              ctxRecorded: ctx.last_correct === true,
@@ -709,7 +711,7 @@ async function answerItem(page, itemId, how) {
     JSON.stringify(after));
   check("M7 while a core item is scheduled", after.coreHasDue === true);
   check("M8 and only the core item ever reaches the queue",
-    after.dueIds.indexOf("itm-seed.101") !== -1 && after.dueIds.indexOf("itm-seed.103") === -1,
+    after.dueIds.indexOf("itm-7.2.001") !== -1 && after.dueIds.indexOf("itm-7.3.001") === -1,
     JSON.stringify(after.dueIds));
   check("M no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
@@ -957,13 +959,13 @@ async function answerItem(page, itemId, how) {
 { const p = await open();
   const hs = await p.evaluate(() => {
     const A = window.AEMT;
-    const item = A.itemById("itm-seed.101");
+    const item = A.itemById("itm-7.2.001");
     const host = document.createElement("div"); document.body.appendChild(host);
     const r = A.Render.hotspot(item); host.appendChild(r.el);
     const regions = [...host.querySelectorAll(".hs-region")];
     const pick = (id) => regions.find((x) => x.getAttribute("data-region") === id)
       .dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    pick("trachea");
+    pick("pelvic");
     const wrong = r.grade(r.read());
     pick(item.answer_region);
     const right = r.grade(r.read());
@@ -973,7 +975,7 @@ async function answerItem(page, itemId, how) {
     const roles = regions.every((x) => x.getAttribute("role") === "button");
     r.showAnswer();
     const painted = host.querySelectorAll(".hs-right").length;
-    const license = /SEED PLACEHOLDER/.test(host.textContent);
+    const license = /Original schematic/.test(host.textContent);
     host.remove();
     return { right, wrong, labels, focusable, roles, painted, license };
   });
@@ -991,8 +993,8 @@ async function answerItem(page, itemId, how) {
   const kb = await p.evaluate(() => {
     const A = window.AEMT;
     const host = document.createElement("div"); document.body.appendChild(host);
-    const r = A.Render.hotspot(A.itemById("itm-seed.101")); host.appendChild(r.el);
-    const reg = host.querySelector('.hs-region[data-region="cricoid"]');
+    const r = A.Render.hotspot(A.itemById("itm-7.2.001")); host.appendChild(r.el);
+    const reg = host.querySelector('.hs-region[data-region="thoracic"]');
     reg.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     const viaEnter = r.grade(r.read());
     host.remove();
@@ -1002,7 +1004,7 @@ async function answerItem(page, itemId, how) {
 
   const ld = await p.evaluate(() => {
     const A = window.AEMT;
-    const item = A.itemById("itm-seed.102");
+    const item = A.itemById("itm-7.7.001");
     const host = document.createElement("div"); document.body.appendChild(host);
     const r = A.Render.label_drag(item); host.appendChild(r.el);
     const place = (pid, lid) => {
@@ -1157,7 +1159,9 @@ async function answerItem(page, itemId, how) {
              seedLeft: A.series.blocks.filter((b) => ch5(b) && b.seed_throwaway).length +
                        A.series.items.filter((i) => ch5(i) && i.seed_throwaway).length +
                        A.series.terms.filter((t) => t.seed_throwaway).length,
-             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 7 && b.seed_throwaway).length,
+             strandedSeed: A.series.items.filter((i) => i.seed_throwaway)
+               .filter((i) => (A.series.chapter_meta[i.chapter] || {}).seed !== true)
+               .map((i) => i.id),
              meta: A.series.chapter_meta[5] };
   });
   check("T1 seven blocks, as the framework specifies", r.blocks === 7, String(r.blocks));
@@ -1165,7 +1169,8 @@ async function answerItem(page, itemId, how) {
   check("T3 and the term bank", r.terms > 200, String(r.terms));
   // An authored chapter replaces its placeholder rather than sitting beside it.
   check("T4 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
-  check("T5 while other chapters keep theirs", r.otherSeedKept > 0, String(r.otherSeedKept));
+  check("T5 and dropping it strands no seed content elsewhere",
+    r.strandedSeed.length === 0, r.strandedSeed.join(","));
   check("T6 the chapter is not marked seed", r.meta.seed === false);
   check("T7 it declares its review status honestly",
     r.meta.review_status === "released", r.meta.review_status);
@@ -1348,7 +1353,9 @@ async function answerItem(page, itemId, how) {
              objectives: A.series.objectives.filter(ch1).length,
              seedLeft: A.series.blocks.filter((b) => ch1(b) && b.seed_throwaway).length +
                        A.series.items.filter((i) => ch1(i) && i.seed_throwaway).length,
-             otherSeedKept: A.series.blocks.filter((b) => b.chapter === 7 && b.seed_throwaway).length,
+             strandedSeed: A.series.items.filter((i) => i.seed_throwaway)
+               .filter((i) => (A.series.chapter_meta[i.chapter] || {}).seed !== true)
+               .map((i) => i.id),
              meta: A.series.chapter_meta[1],
              tiers: [...new Set(A.series.objectives.filter(ch1).map((o) => o.tier))].sort(),
              noEnables: A.series.objectives.filter(ch1).filter((o) => !o.enables).map((o) => o.id) };
@@ -1357,7 +1364,8 @@ async function answerItem(page, itemId, how) {
     r.blocks === 8, String(r.blocks));
   check("X2 sixty-eight items", r.items === 68, String(r.items));
   check("X3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
-  check("X4 while other chapters keep theirs", r.otherSeedKept > 0, String(r.otherSeedKept));
+  check("X4 and dropping it strands no seed content elsewhere",
+    r.strandedSeed.length === 0, r.strandedSeed.join(","));
   check("X5 the chapter is not marked seed", r.meta.seed === false);
   check("X6 it declares its review status honestly",
     r.meta.review_status === "released", r.meta.review_status);
@@ -1680,23 +1688,23 @@ async function answerItem(page, itemId, how) {
   check("AA no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
-/* ── AB. Chapters 1-6 and 9 are written; the seed is down to 7-8 ───────── */
+/* ── AB. Chapters 1-7 and 9 are written; the seed is down to 8 ─────────── */
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const written = [1, 2, 3, 4, 5, 6, 9];
+    const written = [1, 2, 3, 4, 5, 6, 7, 9];
     const meta = A.series.chapter_meta;
     return { writtenSeed: written.filter((n) => (meta[n] || {}).seed !== false),
-             pendingSeed: [7, 8].filter((n) => (meta[n] || {}).seed !== true),
+             pendingSeed: [8].filter((n) => (meta[n] || {}).seed !== true),
              throwawayLeft: A.series.items.filter((i) => i.seed_throwaway)
                .map((i) => i.chapter).filter((c, k, a) => a.indexOf(c) === k).sort(),
              itemsByChapter: written.map((n) => A.series.items.filter((i) => i.chapter === n).length),
              status: written.map((n) => (meta[n] || {}).review_status) };
   });
-  check("AB1 chapters 1 to 6 and 9 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
-  check("AB2 chapters 7 and 8 are still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
-  check("AB3 no throwaway content remains outside chapters 7 and 8",
-    r.throwawayLeft.every((c) => c >= 7 && c <= 8), JSON.stringify(r.throwawayLeft));
+  check("AB1 chapters 1 to 7 and 9 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
+  check("AB2 chapter 8 is still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
+  check("AB3 no throwaway content remains outside chapter 8",
+    r.throwawayLeft.every((c) => c === 8), JSON.stringify(r.throwawayLeft));
   check("AB4 every authored chapter carries a real item bank",
     r.itemsByChapter.every((n) => n >= 55), JSON.stringify(r.itemsByChapter));
   // Released, not reviewed: there is no second-reviewer step in this series, so
@@ -1731,6 +1739,8 @@ async function answerItem(page, itemId, how) {
                  "aemt/ch03-medical-legal-ethical.json",
                  "aemt/ch04-communications-documentation.json",
                  "aemt/ch05-terminology.json", "aemt/ch06-lifting-and-moving.json",
+                 "aemt/ch07-the-human-body.json", "aemt/fig-body-cavities.svg",
+                 "aemt/fig-upper-airway.svg",
                  "aemt/ch09-life-span-development.json",
                  "aemt/series-preparatory.json",
                  "aemt-series.html", "aemt/fig-portable-medical-order.svg",
@@ -1998,6 +2008,96 @@ async function answerItem(page, itemId, how) {
       .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
     JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
   check("AG no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AH. Chapter 7, The Human Body ─────────────────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch7 = (x) => x.chapter === 7;
+    return { blocks: A.series.blocks.filter(ch7).length,
+             items: A.series.items.filter(ch7).length,
+             seedLeft: A.series.blocks.filter((b) => ch7(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch7(i) && i.seed_throwaway).length,
+             meta: A.series.chapter_meta[7],
+             tiers: A.series.objectives.filter(ch7).map((o) => o.tier),
+             noEnables: A.series.objectives.filter(ch7).filter((o) => !o.enables).map((o) => o.id),
+             noSource: A.series.items.filter(ch7).filter((i) => !i.source_ref).map((i) => i.id) };
+  });
+  check("AH1 eight teaching blocks and an integration block", r.blocks === 9, String(r.blocks));
+  check("AH2 seventy-three items", r.items === 73, String(r.items));
+  check("AH3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("AH4 the chapter is not marked seed", r.meta.seed === false);
+  check("AH5 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("AH6 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+  // v1.1 §2.4 — anatomy is where a chapter is most tempted to drill everything.
+  // This one uses all three tiers, so orientation and reference stay out of the
+  // review queue instead of competing with material that changes an action.
+  check("AH7 the chapter uses all three tiers",
+    r.tiers.includes("core") && r.tiers.includes("context") && r.tiers.includes("reference"),
+    JSON.stringify(r.tiers));
+
+  const t = await p.evaluate(() => {
+    const A = window.AEMT;
+    return { ctx: A.objectiveTier("obj-7.3.a"), ref: A.objectiveTier("obj-7.8.a"),
+             ctxQueued: A.isQueued(A.itemById("itm-7.3.001")),
+             refQueued: A.isQueued(A.itemById("itm-7.8.001")),
+             coreQueued: A.isQueued(A.itemById("itm-7.4.001")) };
+  });
+  check("AH8 the orientation block is context and is not queued",
+    t.ctx === "context" && t.ctxQueued === false, JSON.stringify(t));
+  check("AH9 the look-it-up block is reference and is not queued",
+    t.ref === "reference" && t.refQueued === false, JSON.stringify(t));
+  check("AH10 while the core physiology is queued", t.coreQueued === true);
+
+  // Both figures are original work and carry their license where they are used.
+  const figs = await p.evaluate(() => ({
+    cav: window.AEMT.itemById("itm-7.2.001").stimulus,
+    air: window.AEMT.itemById("itm-7.7.001").stimulus,
+  }));
+  check("AH11 the cavities figure is an original schematic",
+    /Original schematic/.test(figs.cav.asset_license) &&
+    /Not traced/.test(figs.cav.asset_license), String(figs.cav.asset_license));
+  check("AH12 and so is the airway figure",
+    /Original schematic/.test(figs.air.asset_license) &&
+    /Not traced/.test(figs.air.asset_license), String(figs.air.asset_license));
+  check("AH13 both carry alt text that describes the figure",
+    figs.cav.alt.length > 40 && figs.air.alt.length > 40);
+  check("AH14 and both files exist",
+    fs.existsSync(path.join(ROOT, figs.cav.ref)) && fs.existsSync(path.join(ROOT, figs.air.ref)));
+
+  // The four physiology answers the rest of the course leans on.
+  const phys = await p.evaluate(() => {
+    const A = window.AEMT;
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    return { vr: right("itm-7.4.001"), perf: right("itm-7.5.001"),
+             bp: right("itm-7.5.003"), co: right("itm-7.4.008"),
+             diaphragm: right("itm-7.2.004"), tongue: right("itm-7.7.002") };
+  });
+  check("AH15 ventilation and respiration are kept apart",
+    /air moving in and out/i.test(phys.vr[0]) && /gas exchange/i.test(phys.vr[0]),
+    JSON.stringify(phys.vr));
+  check("AH16 perfusion is pump, volume and vessels",
+    /pump.*volume.*vessels/i.test(phys.perf[0]), JSON.stringify(phys.perf));
+  check("AH17 a normal blood pressure is not evidence of adequate perfusion",
+    /until the loss is large/i.test(phys.bp[0]), JSON.stringify(phys.bp));
+  check("AH18 and a normal oximeter reading is not reassurance in carbon monoxide",
+    /cannot distinguish/i.test(phys.co[0]), JSON.stringify(phys.co));
+  check("AH19 the moving diaphragm makes the lower chest ambiguous",
+    /moves with breathing/i.test(phys.diaphragm[0]), JSON.stringify(phys.diaphragm));
+  check("AH20 the tongue is named as the commonest obstruction",
+    /tongue falling back/i.test(phys.tongue[0]), JSON.stringify(phys.tongue));
+
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 7)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length, screens: b.screens.length })));
+  check("AH21 every block opens on a decision point and answers it",
+    shape.every((b) => b.dp && b.cb), JSON.stringify(shape.filter((b) => !b.dp || !b.cb)));
+  check("AH22 every teaching block runs three to five screens and quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id))
+      .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
+  check("AH no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();
