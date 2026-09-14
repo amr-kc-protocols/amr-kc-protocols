@@ -58,8 +58,8 @@ async function launch() {
 }
 const browser = await launch();
 
-async function open() {
-  const ctx = await browser.newContext({ viewport: { width: 414, height: 900 } });
+async function open(viewport) {
+  const ctx = await browser.newContext({ viewport: viewport || { width: 414, height: 900 } });
   const page = await ctx.newPage();
   page._errs = [];
   page.on("pageerror", (e) => page._errs.push(String(e)));
@@ -2204,6 +2204,9 @@ async function answerItem(page, itemId, how) {
              textbook: A.series.items.map((i) => i.source_ref)
                .filter((x) => /jones|bartlett|emergency care and transportation/i.test(x || "")).length,
              flagged: A.series.blocks.filter((b) => b.evidence_flag).map((b) => b.id).sort(),
+             flagDetail: A.series.blocks.filter((b) => b.evidence_flag).map((b) => ({
+               id: b.id, src: !!b.evidence_flag.source_ref, unc: !!b.evidence_flag.uncertainty,
+               teach: b.evidence_flag.teach_as })),
              gated: A.series.blocks.filter((b) => b.lab_gate).map((b) => b.id).sort(),
              status: ns.map((n) => (A.series.chapter_meta[n] || {}).review_status) };
   });
@@ -2219,14 +2222,107 @@ async function answerItem(page, itemId, how) {
   // v1.0 §11.2 — nothing in the series may trace to the textbook.
   check("AJ7 and none of them is the textbook", r.textbook === 0, String(r.textbook));
   // The divergences are the reason this series exists rather than a question bank.
-  check("AJ8 five blocks teach a book-versus-evidence divergence",
-    JSON.stringify(r.flagged) === JSON.stringify(["2.5", "2.8", "6.1", "6.7", "8.7", "9.6"]) ||
-    r.flagged.length >= 4, JSON.stringify(r.flagged));
+  // Teaching a divergence in prose is not the same as declaring it: only a
+  // declared evidence_flag gets the learner the side-by-side panel before the
+  // content, and every block that argues with the textbook must have one.
+  check("AJ8 six blocks declare a book-versus-evidence divergence",
+    JSON.stringify(r.flagged) === JSON.stringify(["2.5", "2.8", "6.1", "6.7", "8.7", "9.6"]),
+    JSON.stringify(r.flagged));
+  check("AJ8b and each one carries a source and an uncertainty",
+    r.flagDetail.every((f) => f.src && f.unc && f.teach === "divergence"),
+    JSON.stringify(r.flagDetail.filter((f) => !f.src || !f.unc)));
   check("AJ9 the psychomotor blocks are lab-gated rather than claimed",
     r.gated.length >= 3 && r.gated.every((id) => /^6\./.test(id)), JSON.stringify(r.gated));
   check("AJ10 every chapter is released, and none claims a review",
     r.status.every((x) => x === "released"), r.status.join(","));
   check("AJ no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AK. Every figure actually renders, and shows its license ──────────── */
+{ // A figure can be well-formed data, correctly licensed in the item, and still
+  // be a broken image on the screen. SVG only predefines five entities, so an
+  // HTML one like &mdash; makes the whole file unparseable and it renders as
+  // nothing — silently, with the item still "passing" every data-level check.
+  for (const f of fs.readdirSync(path.join(ROOT, "aemt")).filter((x) => x.endsWith(".svg"))) {
+    const svg = fs.readFileSync(path.join(ROOT, "aemt", f), "utf8");
+    const bad = [...new Set((svg.match(/&[a-zA-Z][a-zA-Z0-9]*;/g) || [])
+      .filter((e) => !["&amp;", "&lt;", "&gt;", "&quot;", "&apos;"].includes(e)))];
+    check(`AK ${f} uses no entity SVG cannot parse`, bad.length === 0, bad.join(","));
+  }
+
+  const p = await open();
+  const figs = await p.evaluate(async () => {
+    const A = window.AEMT;
+    const imgs = A.series.items.filter((i) => i.stimulus && i.stimulus.kind === "image");
+    const out = [];
+    for (const it of imgs) {
+      const loaded = await new Promise((res) => {
+        const im = new Image();
+        im.onload = () => res(im.naturalWidth > 0 && im.naturalHeight > 0);
+        im.onerror = () => res(false);
+        im.src = it.stimulus.ref;
+      });
+      // Whichever path this item type takes to the screen, the license goes with it.
+      const host = document.createElement("div"); document.body.appendChild(host);
+      const el = A.stimulusFigure ? A.stimulusFigure(it) : null;
+      const via = el || (A.stimulusEl ? A.stimulusEl(it) : null);
+      if (via) host.appendChild(via);
+      const shown = !!host.querySelector(".fig-lic");
+      host.remove();
+      out.push({ id: it.id, type: it.type, ref: it.stimulus.ref, loaded, shown,
+                 alt: (it.stimulus.alt || "").length });
+    }
+    return out;
+  });
+  check("AK every image stimulus has at least one figure", figs.length >= 4, String(figs.length));
+  check("AK every figure file loads as an image",
+    figs.every((f) => f.loaded), figs.filter((f) => !f.loaded).map((f) => f.ref).join(","));
+  check("AK every figure shows its license where it is used",
+    figs.every((f) => f.shown), figs.filter((f) => !f.shown).map((f) => f.id).join(","));
+  check("AK and every figure carries real alt text",
+    figs.every((f) => f.alt > 40), figs.filter((f) => f.alt <= 40).map((f) => f.id).join(","));
+  check("AK no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AL. The home screen survives a finished series ────────────────────── */
+{ // Nine chapters of notices used to push the hero 1,500px down a phone, and 79
+  // blocks with only a "next block" button meant no way to reach chapter 6.
+  const p = await open({ width: 390, height: 844 });
+  const m = await p.evaluate(() => {
+    const doc = document.documentElement;
+    const r = (sel) => { const e = document.querySelector(sel);
+      return e ? Math.round(e.getBoundingClientRect().top) : -1; };
+    return { overflowX: doc.scrollWidth - doc.clientWidth,
+             heroTop: r(".due-hero"), nextTop: r("#btn-next-block"),
+             aboutH: Math.round(document.querySelector(".about").getBoundingClientRect().height),
+             notices: document.querySelectorAll(".about-n").length,
+             noticesCollapsed: !document.querySelector(".about-d[open]"),
+             chapterRows: document.querySelectorAll(".ch-d").length };
+  });
+  // Chromium still reports a layout box for children of a closed <details>, so
+  // ask the browser what is actually painted rather than measuring rectangles.
+  const blocksVisible = await p.locator(".ch-b:visible").count();
+  check("AL1 the home screen does not scroll sideways on a phone", m.overflowX === 0, String(m.overflowX));
+  check("AL2 the due-count hero is on the first screen", m.heroTop > 0 && m.heroTop < 844,
+    String(m.heroTop));
+  check("AL3 the chapter notices are still there", m.notices === 9, String(m.notices));
+  check("AL4 but collapsed rather than filling the page",
+    m.noticesCollapsed === true && m.aboutH < 500, String(m.aboutH));
+  check("AL5 every chapter is reachable directly", m.chapterRows === 9, String(m.chapterRows));
+  check("AL6 with its blocks collapsed until asked for", blocksVisible === 0, String(blocksVisible));
+
+  // And the picker actually starts the block it names, not the next one in order.
+  await p.locator(".ch-d").nth(5).locator("summary").click();
+  await p.waitForTimeout(150);
+  const ids = await p.locator(".ch-d").nth(5).locator(".ch-bi").allTextContents();
+  check("AL7 chapter 6 lists its own blocks", ids[0] === "6.1" && ids.length === 9, ids.join(","));
+  await p.locator(".ch-d").nth(5).locator(".ch-b").nth(6).click();
+  await p.waitForSelector("#screen-session .cold");
+  const started = await p.evaluate(() => window.AEMT.currentBlockId ? window.AEMT.currentBlockId() : null);
+  const cold = await p.textContent("#screen-session .cold");
+  check("AL8 and starts the one that was tapped, not the next unfinished one",
+    /stabbing to the neck/i.test(cold), cold.slice(0, 60));
+  check("AL no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();

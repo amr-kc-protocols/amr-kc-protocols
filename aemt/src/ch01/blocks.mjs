@@ -550,7 +550,7 @@ base({id:'itm-1.INT.008',type:'mc',chapter:1,block:'1.INT',objective:'obj-1.INT.
   opt('d','Endotracheal intubation for the airway',false,'Above AEMT scope.')],
  explanation_md:'Acquiring and transmitting a 12-lead is a task; interpreting it as the basis for treatment is a scope question.',source_ref:SOP}),
 base({id:'itm-1.INT.009',type:'mr',chapter:1,block:'1.INT',objective:'obj-1.INT.a',parent:'itm-1.INT.000',
- select_count:[2,3],cj_step:'evaluation',
+ select_count:[4,4],cj_step:'evaluation',
  stem:'Reviewing this call, which decisions would you expect to defend and be able to?',
  options:[opt('a','Giving aspirin on the standing order without calling',true,'Written direction covered it exactly.'),
   opt('b','Bypassing the nearer hospital for the PCI center',true,'Protocol-directed and clinically reasoned.'),

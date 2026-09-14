@@ -58,6 +58,50 @@ export function conform({ objectives, items, blocks, terms = [] }) {
       // §5.2 rule 4 — a distractor you cannot write a rationale for is filler
       if (!o.rationale) err.push(`${i.id}/${o.id}: option has no rationale (§5.2 rule 4)`);
     });
+    // The "Select 2-3" hint is generated from select_count, and mr is graded as
+    // an exact set match. If the two disagree, a learner who follows the hint is
+    // guaranteed to be marked wrong, and nothing about the item looks broken.
+    if (i.type === 'mr') {
+      const nCorrect = (i.options || []).filter((o) => o.correct).length;
+      const [lo, hi] = i.select_count || [2, 3];
+      if (nCorrect < lo || nCorrect > hi)
+        err.push(`${i.id}: ${nCorrect} correct options but select_count says ${lo}\u2013${hi}`);
+      if (nCorrect < 2) err.push(`${i.id}: multi-response item with ${nCorrect} correct options`);
+    }
+    // Answer keys have to point at something that exists and is reachable.
+    if (i.type === 'drag_drop') {
+      const cats = new Set((i.categories || []).map((c) => c.id));
+      const opts = new Set((i.options || []).map((o) => o.id));
+      Object.entries(i.answer_map || {}).forEach(([k, v]) => {
+        if (!opts.has(k)) err.push(`${i.id}: answer_map key ${k} is not an option`);
+        if (!cats.has(v)) err.push(`${i.id}: answer_map points at unknown category ${v}`);
+      });
+      if (Object.keys(i.answer_map || {}).length !== (i.options || []).length)
+        err.push(`${i.id}: every option needs a category in answer_map`);
+    }
+    if (i.type === 'options_box') {
+      const cols = new Set((i.columns || []).map((c) => c.id));
+      if (!(i.rows || []).length) err.push(`${i.id}: options_box has no rows`);
+      (i.rows || []).forEach((r) => {
+        if (!cols.has(r.answer)) err.push(`${i.id}/${r.id}: answer ${r.answer} is not a column`);
+      });
+    }
+    if (i.type === 'hotspot' && !(i.regions || []).some((r) => r.id === i.answer_region))
+      err.push(`${i.id}: answer_region ${i.answer_region} is not one of the regions`);
+    if (i.type === 'label_drag') {
+      const pts = new Set((i.pointers || []).map((x) => x.id));
+      const lbs = new Set((i.labels || []).map((x) => x.id));
+      Object.entries(i.answer_map || {}).forEach(([k, v]) => {
+        if (!pts.has(k)) err.push(`${i.id}: answer_map pointer ${k} does not exist`);
+        if (!lbs.has(v)) err.push(`${i.id}: answer_map label ${v} does not exist`);
+      });
+      if (Object.keys(i.answer_map || {}).length !== (i.pointers || []).length)
+        err.push(`${i.id}: every pointer needs a label in answer_map`);
+    }
+    // Two options with the same text cannot both be graded meaningfully.
+    const texts = (i.options || []).map((o) => String(o.text).trim().toLowerCase());
+    if (new Set(texts).size !== texts.length) err.push(`${i.id}: duplicate option text`);
+
     // §5.2 rule 8 — stems under 60 words unless the item is scenario-based
     if (i.type !== 'scenario' && !i.parent && words(i.stem) > 60)
       err.push(`${i.id}: stem is ${words(i.stem)} words (max 60)`);
