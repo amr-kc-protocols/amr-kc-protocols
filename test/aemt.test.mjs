@@ -720,9 +720,9 @@ async function answerItem(page, itemId, how) {
     const A = window.AEMT;
     const earned = { successes: 3, attempts: 3, correct_items: ["a", "b", "c"],
                      correct_intervals: [1, 9, 14], last_attempts: [true, true] };
-    const gatedBefore = A.Mastery.objective(earned, "obj-seed.m1");
-    const ungated = A.Mastery.objective(earned, "obj-seed.a1");
-    const gate = A.gateFor("obj-seed.m1");
+    const gatedBefore = A.Mastery.objective(earned, "obj-6.2.a");
+    const ungated = A.Mastery.objective(earned, "obj-6.1.a");
+    const gate = A.gateFor("obj-6.2.a");
     return { gatedBefore, ungated, gatedBlocks: gate.gated.map((b) => b.id),
              unverified: gate.unverified.map((b) => b.id) };
   });
@@ -740,10 +740,10 @@ async function answerItem(page, itemId, how) {
     const earned = { successes: 3, attempts: 3, correct_items: ["a", "b", "c"],
                      correct_intervals: [1, 9, 14], last_attempts: [true, true] };
     const rec = A.verificationFor("6.2");
-    return { status: A.Mastery.objective(earned, "obj-seed.m1"),
+    return { status: A.Mastery.objective(earned, "obj-6.2.a"),
              instructor: rec.instructor_id, version: rec.checklist_version,
              checklist: rec.checklist_ref, role: rec.verifier_role, dated: !!rec.verified_at,
-             unverified: A.gateFor("obj-seed.m1").unverified.length };
+             unverified: A.gateFor("obj-6.2.a").unverified.length };
   });
   check("N4 an instructor sign-off releases the gate", signed.status === "mastered", signed.status);
   check("N5 the record carries who signed", signed.instructor === "J. Jones NRP");
@@ -775,13 +775,28 @@ async function answerItem(page, itemId, how) {
   await p.waitForSelector('#screen-session button.btn:text-is("Start")');
   await p.click('#screen-session button.btn:text-is("Start")');
   await p.waitForTimeout(200);
-  for (let n = 0; n < 40; n++) {
+  for (let n = 0; n < 80; n++) {
     if (await p.locator("#screen-home:not(.hidden)").count()) break;
     const chk = p.locator('#screen-session button.btn:text-is("Check answer")');
     if (await chk.count()) {
+      // Answer whatever renderer is on screen, well enough to enable the check.
+      // Correctness does not matter here — only that the block can be driven to
+      // its end panel, which is what this test is actually about.
       await p.evaluate(() => {
         const h = document.querySelector("#screen-session");
-        h.querySelectorAll(".opt").forEach((o) => o.click());   // mr: select everything
+        h.querySelectorAll(".opt").forEach((o) => o.click());   // mc / mr
+        h.querySelectorAll(".ob-row").forEach((r) => {          // options_box
+          const b = r.querySelector(".ob-pick");
+          if (b) b.click();
+        });
+        for (let i = 0; i < 8; i++) {                          // drag_drop
+          const chip = h.querySelector(".dd-pool .dd-chip");
+          const bin = h.querySelector(".dd-bin");
+          if (!chip || !bin) break;
+          chip.click(); bin.click();
+        }
+        const region = h.querySelector(".hs-region");           // hotspot
+        if (region) region.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       });
       await p.waitForTimeout(60);
       if (!(await chk.isDisabled())) await chk.click();
@@ -790,7 +805,7 @@ async function answerItem(page, itemId, how) {
       if (await conf.count()) { await conf.click(); await p.waitForTimeout(100); }
     }
     let moved = false;
-    for (const label of ["Got it", "Next", "Continue", "Finish block"]) {
+    for (const label of ["Got it", "Next", "Now the content", "Continue", "Finish block"]) {
       const b = p.locator(`#screen-session button.btn:text-is("${label}")`);
       if (await b.count()) { await b.first().click(); moved = true; break; }
     }
@@ -1665,23 +1680,23 @@ async function answerItem(page, itemId, how) {
   check("AA no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
-/* ── AB. Chapters 1-5 and 9 are written; the seed is down to 6-8 ───────── */
+/* ── AB. Chapters 1-6 and 9 are written; the seed is down to 7-8 ───────── */
 { const p = await open();
   const r = await p.evaluate(() => {
     const A = window.AEMT;
-    const written = [1, 2, 3, 4, 5, 9];
+    const written = [1, 2, 3, 4, 5, 6, 9];
     const meta = A.series.chapter_meta;
     return { writtenSeed: written.filter((n) => (meta[n] || {}).seed !== false),
-             pendingSeed: [6, 7, 8].filter((n) => (meta[n] || {}).seed !== true),
+             pendingSeed: [7, 8].filter((n) => (meta[n] || {}).seed !== true),
              throwawayLeft: A.series.items.filter((i) => i.seed_throwaway)
                .map((i) => i.chapter).filter((c, k, a) => a.indexOf(c) === k).sort(),
              itemsByChapter: written.map((n) => A.series.items.filter((i) => i.chapter === n).length),
              status: written.map((n) => (meta[n] || {}).review_status) };
   });
-  check("AB1 chapters 1 to 5 and 9 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
-  check("AB2 chapters 6 to 8 are still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
-  check("AB3 no throwaway content remains outside chapters 6 to 8",
-    r.throwawayLeft.every((c) => c >= 6 && c <= 8), JSON.stringify(r.throwawayLeft));
+  check("AB1 chapters 1 to 6 and 9 are all authored", r.writtenSeed.length === 0, r.writtenSeed.join(","));
+  check("AB2 chapters 7 and 8 are still placeholder", r.pendingSeed.length === 0, r.pendingSeed.join(","));
+  check("AB3 no throwaway content remains outside chapters 7 and 8",
+    r.throwawayLeft.every((c) => c >= 7 && c <= 8), JSON.stringify(r.throwawayLeft));
   check("AB4 every authored chapter carries a real item bank",
     r.itemsByChapter.every((n) => n >= 55), JSON.stringify(r.itemsByChapter));
   // Released, not reviewed: there is no second-reviewer step in this series, so
@@ -1715,7 +1730,8 @@ async function answerItem(page, itemId, how) {
   const files = ["aemt/ch01-ems-systems.json", "aemt/ch02-workforce-safety.json",
                  "aemt/ch03-medical-legal-ethical.json",
                  "aemt/ch04-communications-documentation.json",
-                 "aemt/ch05-terminology.json", "aemt/ch09-life-span-development.json",
+                 "aemt/ch05-terminology.json", "aemt/ch06-lifting-and-moving.json",
+                 "aemt/ch09-life-span-development.json",
                  "aemt/series-preparatory.json",
                  "aemt-series.html", "aemt/fig-portable-medical-order.svg",
                  "aemt/fig-abdominal-quadrants.svg"];
@@ -1892,6 +1908,96 @@ async function answerItem(page, itemId, how) {
     /weaker half/i.test(ev) && /awake, healthy children at rest/i.test(ev));
   check("AF6 with the study cited on screen", /Fleming/.test(ev) && /Lancet 2011/.test(ev));
   check("AF no errors", p._errs.length === 0, p._errs.join("|"));
+  await p.context().close(); }
+
+/* ── AG. Chapter 6, Lifting and Moving Patients ────────────────────────── */
+{ const p = await open();
+  const r = await p.evaluate(() => {
+    const A = window.AEMT;
+    const ch6 = (x) => x.chapter === 6;
+    return { blocks: A.series.blocks.filter(ch6).length,
+             items: A.series.items.filter(ch6).length,
+             seedLeft: A.series.blocks.filter((b) => ch6(b) && b.seed_throwaway).length +
+                       A.series.items.filter((i) => ch6(i) && i.seed_throwaway).length,
+             meta: A.series.chapter_meta[6],
+             gated: A.series.blocks.filter((b) => ch6(b) && b.lab_gate).map((b) => b.id),
+             checklists: A.series.blocks.filter((b) => ch6(b) && b.lab_gate)
+               .map((b) => (b.verification || {}).checklist_ref),
+             noEnables: A.series.objectives.filter(ch6).filter((o) => !o.enables).map((o) => o.id),
+             noSource: A.series.items.filter(ch6).filter((i) => !i.source_ref).map((i) => i.id) };
+  });
+  check("AG1 eight teaching blocks and an integration block", r.blocks === 9, String(r.blocks));
+  check("AG2 seventy-four items", r.items === 74, String(r.items));
+  check("AG3 no seed content survives in an authored chapter", r.seedLeft === 0, String(r.seedLeft));
+  check("AG4 the chapter is not marked seed", r.meta.seed === false);
+  check("AG5 every objective names what it enables", r.noEnables.length === 0, r.noEnables.join(","));
+  check("AG6 every item cites a source", r.noSource.length === 0, r.noSource.join(","));
+  // A module cannot teach a psychomotor skill, and the handling blocks say so.
+  check("AG7 the handling blocks are lab-gated",
+    JSON.stringify(r.gated) === JSON.stringify(["6.2", "6.3", "6.7"]), JSON.stringify(r.gated));
+  check("AG8 each naming its own checklist",
+    JSON.stringify(r.checklists) === JSON.stringify(["chk-6.2", "chk-6.3", "chk-6.7"]),
+    JSON.stringify(r.checklists));
+
+  // 6.1 is the block most likely to be softened back into "lift with your legs".
+  const back = await p.evaluate(() => {
+    const A = window.AEMT;
+    const b = A.series.blocks.find((x) => x.id === "6.1");
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    return { ef: b.evidence_flag || null, training: right("itm-6.1.002"),
+             powered: right("itm-6.1.003"), belts: (A.itemById("itm-6.1.004").options || [])
+               .filter((o) => /back belt/i.test(o.text)).map((o) => o.correct) };
+  });
+  check("AG9 6.1 carries the training-versus-engineering divergence",
+    !!back.ef && /divergence/.test(back.ef.teach_as));
+  check("AG10 stating that training does not prevent back pain",
+    /does not prevent back pain/i.test(back.ef.current_evidence) &&
+    /21,000 workers/.test(back.ef.current_evidence), String(back.ef.source_ref));
+  check("AG11 and that the powered-equipment evidence is observational, not randomized",
+    /observational before-and-after/i.test(back.ef.uncertainty) &&
+    /not randomized/i.test(back.ef.uncertainty));
+  check("AG12 while keeping the biomechanics of a single lift intact",
+    /not in dispute/i.test(back.ef.uncertainty));
+  check("AG13 the item says the same as the flag",
+    /does not prevent back pain/i.test(back.training[0]), JSON.stringify(back.training));
+  check("AG14 back belts are not offered as a measure that works",
+    back.belts.length === 1 && back.belts[0] === false, JSON.stringify(back.belts));
+
+  // 6.7 is the block someone on scene will contradict.
+  const smr = await p.evaluate(() => {
+    const A = window.AEMT;
+    const b = A.series.blocks.find((x) => x.id === "6.7");
+    const right = (id) => (A.itemById(id).options || []).filter((o) => o.correct).map((o) => o.text);
+    const hs = (id) => A.itemById(id).high_stakes;
+    return { ef: b.evidence_flag || null, pen: right("itm-6.7.002"), penHs: hs("itm-6.7.002"),
+             goal: right("itm-6.7.001"), board: right("itm-6.7.008"),
+             honest: right("itm-6.7.007"), callback: b.callback_md };
+  });
+  check("AG15 6.7 carries the spinal divergence", !!smr.ef && /divergence/.test(smr.ef.teach_as));
+  check("AG16 no role for spinal motion restriction in penetrating trauma",
+    /no role for it in penetrating trauma/i.test(smr.pen[0]) && smr.penHs === true,
+    JSON.stringify(smr.pen));
+  check("AG17 and the callback answers the collar question with no",
+    /^No\./.test(smr.callback), smr.callback.slice(0, 60));
+  check("AG18 the goal is alignment, not a named device",
+    /alignment/i.test(smr.goal[0]), JSON.stringify(smr.goal));
+  check("AG19 the board is an extrication tool, not a transport surface",
+    /extrication and transport are separate/i.test(smr.board[0]), JSON.stringify(smr.board));
+  check("AG20 and the practice's own evidence base is stated honestly",
+    /without definitive evidence of clinical benefit/i.test(smr.honest[0]), JSON.stringify(smr.honest));
+  check("AG21 findings rather than mechanism drive the indication",
+    /findings rather than mechanism/i.test(smr.ef.current_evidence));
+
+  const shape = await p.evaluate(() => window.AEMT.series.blocks.filter((b) => b.chapter === 6)
+    .map((b) => ({ id: b.id, dp: !!(b.cold_open || {}).decision_point, cb: !!b.callback_md,
+                   quiz: (b.quiz || []).length, screens: b.screens.length })));
+  check("AG22 every block opens on a decision point and answers it",
+    shape.every((b) => b.dp && b.cb), JSON.stringify(shape.filter((b) => !b.dp || !b.cb)));
+  check("AG23 every teaching block runs three to five screens and quizzes five to seven items",
+    shape.filter((b) => !/INT/.test(b.id))
+      .every((b) => b.screens >= 3 && b.screens <= 5 && b.quiz >= 5 && b.quiz <= 7),
+    JSON.stringify(shape.map((b) => b.id + ":" + b.screens + "/" + b.quiz)));
+  check("AG no errors", p._errs.length === 0, p._errs.join("|"));
   await p.context().close(); }
 
 await browser.close();
