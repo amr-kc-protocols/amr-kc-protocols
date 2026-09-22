@@ -459,20 +459,27 @@ canvas#pip-canvas{display:none}
 .scen-text{font-size:11px;color:var(--sub);line-height:1.5;margin-bottom:8px}
 
 /* ── PATIENT MONITOR (LifePak 15 inspired) ── */
-.monitor{background:#05070a;border:2px solid #20242c;border-radius:10px;padding:6px 8px;margin-bottom:8px;
-  box-shadow:inset 0 2px 10px rgba(0,0,0,0.7)}
-.mon-lane{display:flex;align-items:stretch;gap:6px;height:38px;border-bottom:1px solid #12151b}
+.monitor{background:#000;border:2px solid #20242c;border-radius:10px;padding:0;margin-bottom:8px;
+  overflow:hidden;box-shadow:inset 0 2px 10px rgba(0,0,0,0.7)}
+.mon-lane{display:flex;align-items:stretch;gap:0;height:46px;border-bottom:1px solid #1a1a1a}
 .mon-lane:last-of-type{border-bottom:none}
 .mon-wave{flex:1;overflow:hidden;position:relative;min-width:0}
-.mon-wave svg{position:absolute;left:0;top:50%;transform:translateY(-50%);height:30px;width:200%;
+.mon-wave svg{position:absolute;left:0;top:50%;transform:translateY(-50%);height:34px;width:200%;
   animation:monSweep linear infinite}
 @keyframes monSweep{from{transform:translate(0,-50%)}to{transform:translate(-50%,-50%)}}
-.mon-val{width:82px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-right:2px}
-.mon-val-lbl{font-family:var(--mono);font-size:7px;letter-spacing:0.1em;opacity:0.75;line-height:1}
-.mon-val-num{font-family:var(--mono);font-weight:700;font-size:22px;line-height:1;margin-top:1px}
-.mon-val-unit{font-family:var(--mono);font-size:7px;opacity:0.7}
-.mon-ecg{color:#39ff5a} .mon-spo2{color:#35d6e6} .mon-co2{color:#f5d312} .mon-nibp{color:#f2f2f2}
-.mon-sub{font-family:var(--mono);font-size:8px;opacity:0.7;margin-top:1px}
+/* channel label, overlaid top-left of the trace the way the LP 15 labels a lead */
+.mon-wt{position:absolute;top:1px;left:5px;z-index:2;font-family:var(--mono);font-size:10px;
+  font-weight:700;letter-spacing:0.04em;pointer-events:none;line-height:1}
+.mon-ws{font-size:7px;font-weight:400;color:#777;margin-left:4px;letter-spacing:0}
+/* numeric block: colour-filled header bar with black text over a large value */
+.mon-nb{width:86px;flex-shrink:0;display:flex;flex-direction:column;background:#000;
+  border-left:1px solid #1a1a1a;overflow:hidden}
+.mon-nhdr{display:flex;align-items:center;justify-content:space-between;padding:1px 4px;flex-shrink:0}
+.mon-nlbl{font-family:var(--mono);font-size:8px;font-weight:700;color:#000;letter-spacing:0.04em}
+.mon-nunit{font-family:var(--mono);font-size:7px;font-weight:700;color:#000}
+.mon-nv{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1;letter-spacing:-0.04em;
+  padding:1px 5px 0;align-self:flex-start}
+.mon-nsub{font-family:var(--mono);font-size:8px;color:#8b8f94;padding:0 5px 1px;line-height:1}
 /* discrete clinical data (labs / exam / context) shown as chips under the monitor */
 .mon-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
 .mon-chip{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:3px 8px;line-height:1.2}
@@ -3521,42 +3528,120 @@ function renderTargetBadges(targets){
 // Renders the scenario's continuous vitals as a color-coded monitor with
 // animated ECG / pleth / capnography traces; discrete labs & exam findings
 // drop below as clinical-data chips.
-function _monWavePath(type,opts){
-  opts=opts||{};
-  var d='', x=0, W=240, P;
-  if(type==='ecg'){            // PQRST — one complex per period P
-    P=opts.period||40;
-    for(x=0;x<W;x+=P){
-      d+='M'+x+',15 H'+(x+P*0.28)+' L'+(x+P*0.33)+',12 L'+(x+P*0.38)+',15 L'+(x+P*0.45)+',15 L'+(x+P*0.48)+',5 L'+(x+P*0.53)+',26 L'+(x+P*0.56)+',15 H'+(x+P)+' ';
-    }
-  } else if(type==='pleth'){   // pulse with dicrotic notch — one per period
-    P=opts.period||40;
-    for(x=0;x<W;x+=P){
-      d+='M'+x+',26 C'+(x+P*0.15)+',26 '+(x+P*0.2)+',6 '+(x+P*0.4)+',7 C'+(x+P*0.5)+',7 '+(x+P*0.5)+',15 '+(x+P*0.6)+',15 C'+(x+P*0.75)+',15 '+(x+P*0.85)+',26 '+(x+P)+',26 ';
-    }
-  } else {                     // capno — one breath per period P
-    P=opts.period||60;
-    if(opts.flat) return 'M0,26 H'+W;     // EtCO₂ zero: no exhaled CO₂, flat trace
-    for(x=0;x<W;x+=P){
-      if(opts.obstructive){
-        // "shark-fin": slurred, up-sloping plateau — bronchospasm / obstruction
-        d+='M'+x+',26 L'+(x+P*0.30)+',15 L'+(x+P*0.62)+',5 L'+(x+P*0.63)+',26 H'+(x+P)+' ';
-      } else {
-        // normal rectangular alveolar plateau
-        d+='M'+x+',26 H'+(x+P*0.15)+' L'+(x+P*0.2)+',6 L'+(x+P*0.58)+',4 L'+(x+P*0.63)+',26 H'+(x+P)+' ';
-      }
-    }
+// ── LIFEPAK 15 TRACE PALETTE ──────────────────────────────────
+// Matched to the LP skin in lifepak-15.html so a learner moving between the
+// two simulators sees the same device language: green ECG, blue pleth, amber
+// capnograph, white for everything discrete.
+var LP_G='#31d63a', LP_B='#4aa8ff', LP_Y='#e0913c';
+
+// ── BEAT MORPHOLOGY ───────────────────────────────────────────
+// Normalised [t, amplitude] keyframes, 0.5 = isoelectric, 1 = top of scale.
+// Same source shapes as the LP 15 simulator's rhythm engine, so the complex
+// here has a real P wave, a narrow QRS with a septal q and an S notch, and a
+// broad low T instead of the single zig-zag this used to draw.
+var QRST=[[0,.5],[.03,.5],[.045,.476],[.065,.452],[.085,.492],[.105,.664],[.125,.856],
+  [.145,.952],[.16,.966],[.18,.872],[.205,.700],[.23,.548],[.25,.458],[.275,.482],
+  [.30,.5],[.38,.508],[.50,.53],[.62,.548],[.72,.538],[.86,.512],[1,.5]];
+var PWAVE=[[0,.5],[.16,.532],[.36,.562],[.5,.570],[.64,.556],[.86,.518],[1,.5]];
+var QRS_SEC=0.44, P_SEC=0.11, PR_SEC=0.06;
+
+var MON_BASE=15, MON_AMP=24;          // viewBox midline, and full-scale deflection
+function _ampY(v){ return MON_BASE-(v-0.5)*MON_AMP; }
+
+// Lay a keyframe set across [x0, x0+w] and emit it as line segments.
+function _segs(pts,x0,w){
+  var d='';
+  for(var i=0;i<pts.length;i++){
+    d+='L'+(x0+pts[i][0]*w).toFixed(2)+','+_ampY(pts[i][1]).toFixed(2)+' ';
   }
   return d;
 }
+
+// One cardiac cycle of width P viewBox units, representing 60/rate seconds.
+// P wave, PR segment, QRST, then diastole. At fast rates the complex and the
+// PR segment compress the way they really do, rather than overrunning the
+// next beat.
+function _beatPath(x0,P,rate){
+  var beatSec=60/Math.max(rate,1);
+  var pSec =Math.min(P_SEC,  beatSec*0.18);
+  var prSec=Math.min(PR_SEC, beatSec*0.08);
+  var qSec =Math.min(QRS_SEC,beatSec*0.70);
+  var used=pSec+prSec+qSec, cap=beatSec*0.95;
+  if(used>cap){ var k=cap/used; pSec*=k; prSec*=k; qSec*=k; used=cap; }
+  var u=P/beatSec;                                  // viewBox units per second
+  var d='M'+x0.toFixed(2)+','+MON_BASE+' ';
+  d+=_segs(PWAVE,x0,pSec*u);                        // P
+  var xq=x0+(pSec+prSec)*u;
+  d+='L'+xq.toFixed(2)+','+MON_BASE+' ';            // PR segment
+  d+=_segs(QRST,xq,qSec*u);                         // QRS + ST + T
+  d+='L'+(x0+P).toFixed(2)+','+MON_BASE+' ';        // diastole
+  return d;
+}
+
+// One respiratory cycle of width P, representing 60/rr seconds. Phase II
+// (the expiratory upstroke) and phase 0 (the inspiratory downstroke) are
+// near-fixed in duration on a real capnograph — it is the alveolar plateau
+// and the inspiratory baseline that stretch as the rate falls. Scaling every
+// segment with the period instead turned a slow breath into one long
+// trapezoid, which is not what a capnograph does.
+var CO2_BASE=26, CO2_PLAT_START=6, CO2_PLAT_END=4;
+function _capnoPath(x0,P,rr,obstructive){
+  var breathSec=60/Math.max(rr,1), u=P/breathSec;      // viewBox units per second
+  var upSec  =Math.min(0.22, breathSec*0.10);
+  var downSec=Math.min(0.15, breathSec*0.07);
+  var expSec =breathSec*0.62;                          // expiratory portion of the cycle
+  var platSec=Math.max(breathSec*0.05, expSec-upSec);
+  var inspSec=Math.max(breathSec*0.05, breathSec-upSec-platSec-downSec);
+  var x=x0+inspSec*u;                                  // phase I: no exhaled CO₂
+  var d='M'+x0.toFixed(2)+','+CO2_BASE+' H'+x.toFixed(2)+' ';
+  if(obstructive){
+    // "shark fin": no distinct phase II/III — a slurred, continuously rising
+    // slope through the whole exhalation. Bronchospasm / obstruction.
+    d+='L'+(x+(upSec+platSec)*u).toFixed(2)+','+CO2_PLAT_END+' ';
+    x+=(upSec+platSec)*u;
+  } else {
+    d+='L'+(x+upSec*u).toFixed(2)+','+CO2_PLAT_START+' ';   // phase II: rapid upstroke
+    x+=upSec*u;
+    d+='L'+(x+platSec*u).toFixed(2)+','+CO2_PLAT_END+' ';   // phase III: plateau, slight upslope
+    x+=platSec*u;
+  }
+  d+='L'+(x+downSec*u).toFixed(2)+','+CO2_BASE+' ';         // phase 0: inspiratory downstroke
+  d+='H'+(x0+P).toFixed(2)+' ';
+  return d;
+}
+
+function _monWavePath(type,opts){
+  opts=opts||{};
+  var d='', x=0, W=240, P=opts.period||40, rate=opts.rate||60;
+  if(type==='ecg'){
+    for(x=0;x<W-0.01;x+=P) d+=_beatPath(x,P,rate);
+  } else if(type==='pleth'){   // pulse with dicrotic notch — one per beat
+    for(x=0;x<W-0.01;x+=P){
+      d+='M'+x+',26 C'+(x+P*0.15)+',26 '+(x+P*0.2)+',6 '+(x+P*0.4)+',7 C'+(x+P*0.5)+',7 '+(x+P*0.5)+',15 '+(x+P*0.6)+',15 C'+(x+P*0.75)+',15 '+(x+P*0.85)+',26 '+(x+P)+',26 ';
+    }
+  } else {                     // capno — one breath per period P
+    if(opts.flat) return 'M0,26 H'+W;     // EtCO₂ zero: no exhaled CO₂, flat trace
+    for(x=0;x<W-0.01;x+=P) d+=_capnoPath(x,P,opts.rate||12,opts.obstructive);
+  }
+  return d;
+}
+
+// One LifePak-style channel: the trace with its label overlaid top-left, and
+// the parameter's numeric block to the right — coloured header bar with black
+// text over a large value, as the LP 15 lays its numerics out.
 function _monLane(type,color,dur,lbl,num,unit,sub,opts){
-  var svg='<div class="mon-wave"><svg viewBox="0 0 240 30" preserveAspectRatio="none" style="animation-duration:'+dur+'s">'
+  opts=opts||{};
+  var chan=opts.chanLabel||lbl;
+  var scale=opts.scaleLabel?'<span class="mon-ws">'+opts.scaleLabel+'</span>':'';
+  var svg='<div class="mon-wave">'
+    +'<span class="mon-wt" style="color:'+color+'">'+chan+scale+'</span>'
+    +'<svg viewBox="0 0 240 30" preserveAspectRatio="none" style="animation-duration:'+dur+'s">'
     +'<path d="'+_monWavePath(type,opts)+'" fill="none" stroke="'+color+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>';
-  var cls=type==='ecg'?'mon-ecg':(type==='pleth'?'mon-spo2':'mon-co2');
   return '<div class="mon-lane">'+svg
-    +'<div class="mon-val '+cls+'"><div class="mon-val-lbl">'+lbl+'</div>'
-    +'<div class="mon-val-num">'+num+'</div>'
-    +(sub?'<div class="mon-sub">'+sub+'</div>':'<div class="mon-val-unit">'+unit+'</div>')
+    +'<div class="mon-nb">'
+    +'<div class="mon-nhdr" style="background:'+color+'"><span class="mon-nlbl">'+lbl+'</span><span class="mon-nunit">'+unit+'</span></div>'
+    +'<div class="mon-nv" style="color:'+color+'">'+num+'</div>'
+    +(sub?'<div class="mon-nsub">'+sub+'</div>':'')
     +'</div></div>';
 }
 // Parse the leading integer out of a vitals string like "102", "85%", "32–54".
@@ -3576,15 +3661,34 @@ function renderMonitor(vitals,sc){
     else if(key==='rr'||key==='rr total'||key==='rr actual') slot.rr=v.v;
     else chips.push(v);
   });
-  // Sweep timing: 3 ECG/pleth complexes and 2 capno breaths fit one visible
-  // window, so duration = complexes ÷ (rate/60). Clamp for sane animation speed.
-  function sweepDur(rate,perWindow){
+
+  // ── SWEEP GEOMETRY ────────────────────────────────────────
+  // A real monitor runs at a fixed sweep speed and lets the SPACING between
+  // complexes carry the rate: a tachycardia is packed, a bradycardia is strung
+  // out. This used to draw a fixed three complexes per window and vary the
+  // scroll speed instead, so every patient's trace looked the same shape and
+  // only moved faster — a HR of 42 and a HR of 142 were indistinguishable.
+  //
+  // The SVG is 200% of the lane and scrolls by half itself each cycle, so the
+  // visible window is 120 viewBox units. Fit a whole number of complexes into
+  // that window (keeps the loop seamless), then set the animation duration to
+  // the true time those complexes take, so the displayed rate is exact.
+  // The capnograph runs a slower sweep than the ECG on a real monitor, so a
+  // few breaths sit in the window instead of one very wide one.
+  var VIS=120, ECG_WINDOW=4, CAPNO_WINDOW=10;
+  function sweep(rate,maxPer,windowSec){
     if(!rate||rate<=0) return null;
-    return Math.max(0.6, Math.min(6, perWindow*60/rate));
+    var n=Math.max(1,Math.min(maxPer,Math.round(rate/60*windowSec)));
+    return { period:VIS/n, dur:(n*60/rate).toFixed(2), rate:rate, n:n };
   }
-  var hr=_firstNum(slot.hr), rr=_firstNum(slot.rr);
-  var ecgDur=sweepDur(hr,3)||3.2;
-  var capnoDur=sweepDur(rr,2)||6.0;
+
+  var hr=_firstNum(slot.hr);
+  // Capnography follows the respiratory rate. When a case doesn't state one,
+  // the ventilator's own set rate is what the patient is actually getting.
+  var rr=_firstNum(slot.rr);
+  if(!rr && sc && sc.setup && sc.setup.rate) rr=sc.setup.rate;
+  var ecg=sweep(hr,14,ECG_WINDOW), cap=sweep(rr,7,CAPNO_WINDOW);
+
   // Obstructive capnograph (shark-fin) when the case involves bronchospasm.
   var obstructive=false;
   if(sc){
@@ -3593,10 +3697,17 @@ function renderMonitor(vitals,sc){
   }
   // Render a lane only when that parameter is actually measured (like a real monitor).
   var lanes='';
-  if(slot.hr)   lanes+=_monLane('ecg','#39ff5a',ecgDur,'HR',_splitVal(slot.hr).num,'bpm');
-  if(slot.spo2) lanes+=_monLane('pleth','#35d6e6',ecgDur,'SpO₂',_splitVal(slot.spo2).num,'%'); // pleth tracks the pulse
-  if(slot.co2)  lanes+=_monLane('co2','#f5d312',capnoDur,'EtCO₂',_splitVal(slot.co2).num,'mmHg',slot.rr?('RR '+_splitVal(slot.rr).num):null,
-                    {obstructive:obstructive, flat:_firstNum(slot.co2)===0});
+  if(slot.hr && ecg)
+    lanes+=_monLane('ecg',LP_G,ecg.dur,'HR',_splitVal(slot.hr).num,'bpm',null,
+      {period:ecg.period, rate:ecg.rate, chanLabel:'II', scaleLabel:'1.0 cm/mV'});
+  if(slot.spo2 && ecg)   // the pleth is a pulse: it runs at the heart rate
+    lanes+=_monLane('pleth',LP_B,ecg.dur,'SpO₂',_splitVal(slot.spo2).num,'%',null,
+      {period:ecg.period, chanLabel:'SpO2', scaleLabel:'1X'});
+  if(slot.co2 && cap)
+    lanes+=_monLane('co2',LP_Y,cap.dur,'EtCO₂',_splitVal(slot.co2).num,'mmHg',
+      (slot.rr?'RR '+_splitVal(slot.rr).num:null),
+      {period:cap.period, rate:cap.rate, obstructive:obstructive, flat:_firstNum(slot.co2)===0,
+       chanLabel:'CO2', scaleLabel:'0 to 60 mmHg'});
   else if(slot.rr) chips.unshift({k:'RR',v:_splitVal(slot.rr).num}); // RR without capno → chip
   var mon=lanes?('<div class="monitor">'+lanes+'</div>'):'';
   var chipHtml='';
