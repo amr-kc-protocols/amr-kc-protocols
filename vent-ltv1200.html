@@ -2825,7 +2825,7 @@ var STAGE_DEFS=[
       check:function(){ var pip=estPIP(); return vals.hipres.v>=pip+3&&vals.hipres.v<=pip+18; },
       readout:function(){ var pip=Math.round(estPIP()); return 'Hi-Pres '+vals.hipres.v+'   ·   PIP ~'+pip; }
     },
-    confirm:'✓ Assess first (patient, tube, circuit, plateau), THEN set the limit above the confirmed-normal PIP — it\'ll catch a real obstruction without crying wolf over every bump. Reset it after any big change to volume or PEEP. <em>SIMV and Pressure Support unlocked.</em>'
+    confirm:'✓ Assess first (patient, tube, circuit, secretions, breath sounds, plateau), THEN set the limit above the confirmed-normal PIP — it\'ll catch a real obstruction without crying wolf over every bump. <strong>Never silence or raise a high-pressure alarm before ruling out an airway cause:</strong> set too low it cries wolf; set too high it masks a real plug or pneumothorax. Reset it after any big change to volume or PEEP. <em>SIMV and Pressure Support unlocked.</em>'
   },
   {
     name:'Stage 5 · SIMV & Pressure Support',
@@ -2894,7 +2894,7 @@ var SCENARIO_LEVELS={
   2:[
     // ─── L2 S1 ────────────────────────────────────────────────
     { name:'The Rising CO₂',
-      badge:'L2 · Scenario 1 of 6', badgeCls:'scen-badge-2',
+      badgeCls:'scen-badge-2',
       intro:'Interfacility transfer — you\'re moving a fresh post-op patient from a community hospital to the tertiary ICU. During your pre-transport assessment the sending RT mentions the CO₂ has crept up on the last two gases. You get your LTV set before you load.',
       scenario:'45-year-old post-op man, 178 cm tall (≈ 70 kg predicted body weight), sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
       vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'PBW',v:'70 kg'},{k:'HR',v:'102'}],
@@ -2920,8 +2920,8 @@ var SCENARIO_LEVELS={
     },
     // ─── L2 S2 ────────────────────────────────────────────────
     { name:'Hypoxemia That Won\'t Budge',
-      badge:'L2 · Scenario 2 of 6', badgeCls:'scen-badge-2',
-      intro:'The sending ED hands you an ARDS patient for transfer to the tertiary ICU. Their sat just won\'t come up, even on max FiO₂. Before you commit to the road, you need it more stable than this.',
+      badgeCls:'scen-badge-2',
+      intro:'The sending ED hands you an ARDS patient for transfer to the tertiary ICU. The saturation is not where it needs to be, and turning the oxygen up has not fixed it. Before you commit to the road, you need this more stable than it is.',
       scenario:'62-year-old with ARDS. SpO₂ is stuck at 85% even on FiO₂ 60%. CXR shows dense bilateral infiltrates. PEEP is currently only 3 cmH₂O. EtCO₂ and pH are acceptable.',
       vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'PEEP',v:'3 cmH₂O'}],
       lung:{compliance:28,resistance:10,label:'ARDS'},
@@ -2945,35 +2945,9 @@ var SCENARIO_LEVELS={
       confirm:'✓ PEEP raised into the recruiting range — FRC rises, shunt falls, and SpO₂ improves without touching FiO₂. Above ~15 cmH₂O, watch for overdistension and falling cardiac output. PEEP and FiO₂ are titrated together on the ARDSnet ladder.'
     },
     // ─── L2 S3 ────────────────────────────────────────────────
-    { name:'The Alarm That Won\'t Stop',
-      badge:'L2 · Scenario 3 of 6', badgeCls:'scen-badge-2',
-      intro:'You\'re packaging a freshly intubated patient for transfer. The moment you switch them onto your LTV, the High Pressure alarm shrieks on every breath. The sending nurse shrugs: "It did that on our vent too — but he looks completely fine."',
-      scenario:'Freshly intubated adult. The High Pressure alarm is sounding on every single breath — at the exact same pressure each time. Breath sounds are equal bilaterally, the tube is patent, there are no secretions, and the patient looks comfortable. The PIP is a normal 30 cmH₂O.',
-      vitals:[{k:'SpO₂',v:'98%'},{k:'PIP',v:'30 cmH₂O'},{k:'EtCO₂',v:'40 mmHg'},{k:'HR',v:'88'}],
-      lung:{compliance:27,resistance:10,label:'Intubated'},
-      setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:25,lowpres:10,lowmv:3,apnea:20},
-      diagnose:{
-        q:'The alarm fires every breath. Before you touch the limit, you assess — exam, tube, circuit, secretions, breath sounds, and the plateau. What is the finding, and only then, the fix?',
-        choices:[
-          'A tension pneumothorax is developing',
-          'A mucus plug is obstructing the airway',
-          'Assessment is normal (equal sounds, patent tube, normal plateau) → the limit is set at/below the patient\'s own PIP',
-          'Auto-PEEP is elevating the circuit pressure'
-        ],
-        correct:2,
-        exp:'<strong>Assess before you adjust.</strong> A fixed obstruction (plug, mainstem, kink) can also cap inspiration at the <em>same</em> pressure every breath — reaching the limit repeatedly does NOT by itself prove the limit is too low. Here the work-up is complete and normal: equal breath sounds, patent tube, no secretions, and a normal plateau pressure — that rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem: it sits at/below the patient\'s own peak. A real obstruction would drive the <em>PIP</em> up while the plateau stayed near-normal (a widening PIP–plateau gap); a high <em>plateau</em> would instead signal reduced compliance. The normal plateau here points to neither.'
-      },
-      goal:{
-        text:'Now that obstruction is ruled out, set the High Pressure limit <strong>5–10 cmH₂O above the confirmed-normal PIP (~30)</strong> — roughly 35–45 cmH₂O. (Listen — the nuisance alarm stops when you clear the PIP.)',
-        check:function(){ return vals.hipres.v>=35 && vals.hipres.v<=45; },
-        readout:function(){ return 'Hi-Pres  '+vals.hipres.v+'   ·   PIP ~30'; }
-      },
-      confirm:'✓ Assess first — patient, tube, circuit, secretions, breath sounds, and the plateau/auto-PEEP — THEN set the limit 5–10 above the confirmed-normal PIP. Never silence or raise a high-pressure alarm before ruling out an airway cause: set too low it cries wolf; set too high it masks a real plug or pneumothorax. Re-check on every intubation and after every big settings change.'
-    },
-    // ─── L2 S4 ────────────────────────────────────────────────
     { name:'COPD — Stop the Air-Trapping',
-      badge:'L2 · Scenario 4 of 6', badgeCls:'scen-badge-2',
-      intro:'You\'re fifteen minutes into a transfer with an intubated COPD patient when the CO₂ starts climbing on your inline monitor and he begins bucking your vent. You\'re in the back of a moving truck — this is yours to fix.',
+      badgeCls:'scen-badge-2',
+      intro:'Fifteen minutes into a transfer with an intubated COPD patient, the monitor picture turns on you and he stops going along with the vent. You\'re in the back of a moving truck — this one is yours to fix.',
       scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. The flow–time curve shows expiratory flow never returns to zero before the next breath begins, EtCO₂ is climbing, and the patient is beginning to fight the vent.',
       vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'pH',v:'7.30'},{k:'HR',v:'112'}],
       lung:{compliance:50,resistance:22,autoPEEP:6,label:'COPD'},
@@ -2997,10 +2971,10 @@ var SCENARIO_LEVELS={
       confirm:'✓ Expiration lengthened to I:E ≥ 1:4 — but an I:E target is only a proxy. It does <strong>not</strong> prove the trapping is gone: confirm on the flow–time curve that <strong>expiratory flow returns to zero</strong> before the next breath, or measure total-PEEP with an expiratory hold. In COPD, protect the exhale (low rate, short Ti), accept permissive hypercapnia (pH ≥ 7.20), and a small applied PEEP below auto-PEEP can ease triggering. Several combinations work — the endpoint is that the flow reaches baseline.'
     },
 
-    // ─── L2 S5: NEW ───────────────────────────────────────────
+    // ─── L2 S4 ────────────────────────────────────────────────
     { name:'Fighting the Vent',
-      badge:'L2 · Scenario 5 of 6', badgeCls:'scen-badge-2',
-      intro:'Loaded and rolling. Your young post-op transfer wakes up, gets agitated, and starts fighting the transport vent. The flow alarm keeps tripping in the back of the truck and the family member riding along is getting nervous.',
+      badgeCls:'scen-badge-2',
+      intro:'Loaded and rolling. Your young post-op transfer wakes up on the way and stops going along with the vent. The alarms keep going in the back of the truck and the family member riding along is getting nervous.',
       scenario:'28-year-old post-op, awake and air-hungry on AC-VC. Pulling hard at the start of each breath, the flow alarm keeps tripping, and the total rate has climbed to 28. Oxygenation and CO₂ are fine. Inspiratory time is set long at 1.2 s. Sedation is being addressed — but there is also a mechanical fix.',
       vitals:[{k:'SpO₂',v:'97%'},{k:'RR total',v:'28'},{k:'EtCO₂',v:'42 mmHg'},{k:'HR',v:'136'}],
       lung:{compliance:50,resistance:8,label:'Healthy'},
@@ -3023,9 +2997,9 @@ var SCENARIO_LEVELS={
       },
       confirm:'✓ Shorter inspiration → higher inspiratory flow and a longer exhale → the flow hunger and stacking ease. Flow-related dyssynchrony is mechanically addressable; pair it with adequate sedation and reassess.'
     },
-    // ─── L2 S6: NEW ───────────────────────────────────────────
+    // ─── L2 S5 ────────────────────────────────────────────────
     { name:'The Compensating Septic Patient',
-      badge:'L2 · Scenario 6 of 6', badgeCls:'scen-badge-2',
+      badgeCls:'scen-badge-2',
       intro:'You accept a septic-shock patient for an emergent transfer to a higher level of care. Just intubated, lactate through the roof, and the sending gas shows a frighteningly low pH. Vasopressors are running — the ventilator is your piece of the package.',
       scenario:'56-year-old in septic shock, lactate 6.2. ABG: pH 7.18 with PaCO₂ already low at 28. They were breathing 30+ before intubation. On the current settings MV is only 7.2 L/min — and the low PaCO₂ says they were doing much more work than that themselves.',
       vitals:[{k:'HR',v:'142'},{k:'SpO₂',v:'95%'},{k:'PaCO₂',v:'28 mmHg'},{k:'EtCO₂',v:'26 mmHg'},{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'}],
@@ -3053,40 +3027,8 @@ var SCENARIO_LEVELS={
 
   3:[
     // ─── L3 S1 ────────────────────────────────────────────────
-    { name:'The Injurious Tidal Volume',
-      badge:'L3 · Scenario 1 of 6', badgeCls:'scen-badge-3',
-      intro:'You arrive to transfer an ARDS patient to the tertiary center. "The vent\'s been running since the ED — nobody touched the volume," the nurse says. As you set up your LTV you clock the plateau pressure and wince. This lung is being hurt with every breath.',
-      scenario:'32-year-old with ARDS, PBW 70 kg. The vent is delivering Vt 700 mL — that\'s 10 mL/kg — and the plateau pressure is 34 cmH₂O. Oxygenation is borderline. The lungs are small and stiff.',
-      vitals:[{k:'HR',v:'110'},{k:'SpO₂',v:'87%'},{k:'Pplat',v:'34 cmH₂O'},{k:'Vt now',v:'10 mL/kg'},{k:'FiO₂',v:'60%'}],
-      lung:{compliance:24,resistance:10,label:'ARDS'},
-      setup:{mode:'ac',bt:'volume',rate:12,vt:700,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
-      diagnose:{
-        q:'Vt 10 mL/kg PBW and Pplat 34 in ARDS. What is the priority — and what does it cost you?',
-        choices:[
-          'Leave the volume; just raise PEEP to fix oxygenation',
-          'Cut the tidal volume toward 6 mL/kg to protect the lung — then raise the rate so minute ventilation doesn\'t collapse',
-          'Increase the tidal volume to recruit more lung',
-          'Switch to pressure control and accept whatever volume results'
-        ],
-        correct:1,
-        exp:'Large tidal volumes and Pplat > 30 drive ventilator-induced lung injury. Lung-protective ventilation means <strong>~6 mL/kg PBW and Pplat ≤ 30</strong> — but a smaller breath lowers minute ventilation, so you must <strong>raise the rate to compensate</strong>. That trade-off is the whole skill.'
-      },
-      goal:{
-        text:'Make it lung-protective, all three at once: <strong>Vt ≈ 6 mL/kg (about 350–450 mL), Pplat ≤ 30, and minute ventilation ≥ 6.5 L/min</strong> — so raise the rate as you drop the volume. (Add PEEP if you like; it helps oxygenation.)',
-        check:function(){
-          var pplat=calcPplat();
-          return vals.vt.v<=450 && vals.vt.v>=350 && pplat!==null && pplat.pplat<=30 && estMinuteVolume()>=6.5;
-        },
-        readout:function(){
-          var pplat=calcPplat();
-          return 'Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg  ·  Pplat '+(pplat?pplat.pplat.toFixed(0):'—')+'  ·  MV '+estMinuteVolume().toFixed(1);
-        }
-      },
-      confirm:'✓ Lung-protective settings dialed in: ~6 mL/kg PBW, plateau under 30, and the rate raised to hold minute ventilation. The ARDSNet (ARMA) trial reported mortality <strong>31.0% vs 39.8%</strong> with 6 vs 12 mL/kg PBW — an 8.8-point absolute reduction (~22% relative). Use predicted body weight, because lung size tracks height, not weight. Permissive hypercapnia is acceptable as long as pH ≥ 7.20.'
-    },
-    // ─── L3 S2 ────────────────────────────────────────────────
     { name:'Ready to Come Down',
-      badge:'L3 · Scenario 2 of 6', badgeCls:'scen-badge-3',
+      badgeCls:'scen-badge-3',
       intro:'A long-distance transfer to a rehab-capable facility. Your patient is awake, following commands, and clearly doing more of the breathing than the vent is. Medical control has cleared you to begin easing the support down for the ride.',
       scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support and the RSBI is 62. They\'re fully controlled on AC right now.',
       vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
@@ -3110,10 +3052,10 @@ var SCENARIO_LEVELS={
       },
       confirm:'✓ Reduced to a monitored spontaneous trial with the patient carrying the work — the right transport action when it is ordered and tolerance is watched. A tolerated trial (stable RR/Vt/SpO₂, comfortable, RSBI < 105) is <em>one</em> input toward liberation, <strong>not a green light to extubate</strong>: airway protection, cough and secretions still decide that, and the extubation decision belongs to the receiving team and medical direction. If they tire, restore support. SIMV rate-weaning, by contrast, is linked to slower liberation (AARC 2024). Recognize readiness — and communicate it.'
     },
-    // ─── L3 S3 ────────────────────────────────────────────────
+    // ─── L3 S2 ────────────────────────────────────────────────
     { name:'The Swinging Peak Pressure',
-      badge:'L3 · Scenario 3 of 6', badgeCls:'scen-badge-3',
-      intro:'Mid-transport with an intubated status asthmaticus. The peak pressure alarm keeps shrieking and the peaks bounce wildly — you\'re miles out and worried about barotrauma. Before you chase that number, an inspiratory hold tells a different story.',
+      badgeCls:'scen-badge-3',
+      intro:'Mid-transport with an intubated status asthmaticus. The peak pressure alarm will not leave you alone — you\'re miles out and worried about barotrauma. Before you chase that number, find out what the vent can actually tell you about it.',
       scenario:'Intubated status asthmaticus on volume control. Peak pressure lurches breath to breath — 32 one breath, 54 the next — but an inspiratory-hold plateau is far lower, around 25. The rate is 22 and expiratory flow doesn\'t return to baseline before the next breath. SpO₂ and CO₂ are holding for now.',
       vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54'},{k:'Pplat',v:'~25 cmH₂O'},{k:'EtCO₂',v:'44 mmHg'},{k:'HR',v:'104'}],
       lung:{compliance:45,resistance:30,autoPEEP:8,label:'Status asthmaticus'},
@@ -3136,9 +3078,9 @@ var SCENARIO_LEVELS={
       },
       confirm:'✓ You read the <strong>plateau, not the peak</strong> — the alveoli were never at 54; those peaks were resistive. In severe airflow obstruction, protect expiration (low rate, short Ti, long exhale), accept permissive hypercapnia, and watch the plateau and auto-PEEP rather than the PIP. Pressure control can cap the peak but doesn\'t resolve hyperinflation — the trapping is what hurts these patients.'
     },
-    // ─── L3 S4 ────────────────────────────────────────────────
+    // ─── L3 S3 ────────────────────────────────────────────────
     { name:'Losing the Oxygenation Battle',
-      badge:'L3 · Scenario 4 of 6', badgeCls:'scen-badge-3',
+      badgeCls:'scen-badge-3',
       intro:'You\'re transferring a severe ARDS patient to an ECMO center. Partway there the saturations start sliding despite everything the sending team set. The monitor keeps alarming in the back of the truck — this is the oxygenation battle, and you\'re losing it.',
       scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82%. The latest ABG shows PaO₂ 41 mmHg on FiO₂ 0.70 — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
       vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'PaO₂',v:'41 mmHg'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8'},{k:'P/F',v:'≈ 59'}],
@@ -3162,37 +3104,11 @@ var SCENARIO_LEVELS={
       },
       confirm:'✓ PEEP and FiO₂ escalated together per the ARDSnet ladder. This is severe ARDS (Berlin P/F < 100) — beyond high PEEP/FiO₂, the proven moves are prone positioning, neuromuscular blockade for dyssynchrony, and early ECMO referral. The ventilator is one piece of a bigger rescue.'
     },
-    // ─── L3 S5: NEW ───────────────────────────────────────────
-    { name:'Drowning on Dry Land',
-      badge:'L3 · Scenario 5 of 6', badgeCls:'scen-badge-3',
-      intro:'A "routine" transfer goes sideways: your heart-failure patient decompensates into flash pulmonary edema en route, soaked in his own lung fluid and gasping on the non-rebreather. He\'s awake and terrified. You have one shot with your transport vent to keep him off the tube before the receiving ED.',
-      scenario:'67-year-old, acute decompensated heart failure. Flash pulmonary edema: SpO₂ 78% on a 100% non-rebreather, RR 34, bilateral crackles to the apices, JVD. Awake and protecting the airway — not yet intubated. The team is pushing nitroglycerin and a diuretic.',
-      vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'78%'},{k:'RR',v:'34'},{k:'JVD',v:'Present'},{k:'Crackles',v:'Bilateral'}],
-      lung:{compliance:30,resistance:12,label:'Flash pulmonary edema'},
-      setup:{mode:'cpap',bt:'volume',rate:12,vt:400,it:1.0,peep:8,pc:15,ps:5,fio2:40,sens:5,hipres:40,lowpres:10,lowmv:3,apnea:20},
-      diagnose:{
-        q:'Awake CHF patient, flash edema, failing on a non-rebreather but still protecting the airway. Best initial respiratory support?',
-        choices:[
-          'Intubate immediately — non-invasive support has no role here',
-          'Non-invasive CPAP at high pressure with high FiO₂ — recruit lung and reduce preload/afterload',
-          'Nasal cannula and watchful waiting',
-          'Bag-mask ventilation until the diuretic works'
-        ],
-        correct:1,
-        exp:'An awake patient who can protect their airway in flash pulmonary edema is the ideal candidate for <strong>CPAP</strong>. High airway pressure recruits flooded alveoli AND squeezes preload/afterload down — it treats the physiology while the drugs work. NIV (CPAP or bilevel) is guideline-supported first-line therapy for cardiogenic pulmonary edema and reduces the need for intubation.'
-      },
-      goal:{
-        text:'Set up non-invasive rescue: <strong>CPAP mode</strong>, high pressure <strong>12–18 cmH₂O</strong>, and <strong>FiO₂ ≥ 95%</strong>. Buy oxygenation and unload the heart.',
-        check:function(){ return ventMode==='cpap' && vals.peep.v>=12 && vals.peep.v<=18 && vals.fio2.v>=95; },
-        readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  CPAP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
-      },
-      confirm:'✓ High CPAP recruits collapsed lung and, by raising intrathoracic pressure, drops both preload and afterload — often turning a crashing CHF patient around within minutes. NIV is guideline-supported first-line for cardiogenic pulmonary edema and lowers intubation rates. Watch for fatigue or a failing mental status; if they tire, intubate.'
-    },
-    // ─── L3 S6: NEW ───────────────────────────────────────────
+    // ─── L3 S4 ────────────────────────────────────────────────
     { name:'The Blown Pupil',
-      badge:'L3 · Scenario 6 of 6', badgeCls:'scen-badge-3',
-      intro:'You\'re transporting a head-injured trauma patient to the neuro center. Halfway there the left pupil blows — herniation, in the back of your truck, still eight minutes out. You need a bridge from the ventilator right now to buy this brain time.',
-      scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. Definitive neurosurgical care is still eight minutes out. PaCO₂ is 42. You need a bridge, right now, from the ventilator.',
+      badgeCls:'scen-badge-3',
+      intro:'You\'re transporting a head-injured trauma patient to the neuro center when, halfway there, the exam changes under your hands. No surgeon, no OR — just you, the monitor and the vent. You need a bridge right now to buy this brain some time.',
+      scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. Definitive neurosurgical care is still eight minutes out. PaCO₂ is 42.',
       vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'40 mmHg'},{k:'PaCO₂',v:'42 mmHg'},{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'}],
       lung:{compliance:50,resistance:8,label:'TBI (lungs OK)'},
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
@@ -3251,7 +3167,7 @@ var ACADEMY_SCENARIOS={
   'niv-setup':{
     name:'Non-Invasive Setup — CHF',
     badge:'Academy · NIV / CPAP', badgeCls:'scen-badge-3',
-    intro:'Module 5 practice. Dispatched for a "difficulty breathing" transfer, you find an awake CHF patient in early flash pulmonary edema — working hard, but protecting their airway and following commands. The sending facility wants them at the cardiac center. You\'d rather not intubate if CPAP can hold them.',
+    intro:'Module 5 practice. Dispatched for a "difficulty breathing" transfer, you find a heart-failure patient in early flash pulmonary edema, working hard for every breath. The sending facility wants them at the cardiac center. You\'d rather not put a tube in if you don\'t have to.',
     scenario:'Awake, oriented, tripoding on a non-rebreather at SpO₂ 89%, RR 30, bilateral crackles. Good airway reflexes. This is a set-up-non-invasive-support decision, not an intubation.',
     vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'89%'},{k:'RR',v:'30'},{k:'BP',v:'176/98'}],
     setup:{mode:'ac',bt:'volume',rate:12,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -3271,7 +3187,7 @@ var ACADEMY_SCENARIOS={
       check:function(){ return ventMode==='cpap'&&vals.peep.v>=10&&vals.peep.v<=15&&vals.fio2.v>=90; },
       readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  CPAP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
     },
-    confirm:'✓ CPAP up, pressure recruiting lung and unloading the heart, oxygen high. Coach the patient to the mask, watch for fatigue or a dropping mental status, and be ready to intubate if they tire — but most flash-edema patients turn the corner on CPAP within minutes.'
+    confirm:'✓ CPAP up, pressure recruiting lung and unloading the heart, oxygen high. By raising intrathoracic pressure it drops both preload and afterload — treating the physiology while the nitrates and diuretic work. <strong>NIV is guideline-supported first-line therapy for cardiogenic pulmonary edema and lowers intubation rates.</strong> Coach the patient to the mask, watch for fatigue or a dropping mental status, and be ready to intubate if they tire — but most flash-edema patients turn the corner on CPAP within minutes.'
   },
   'failure-type':{
     name:'Which Kind of Failure?',
@@ -3301,7 +3217,7 @@ var ACADEMY_SCENARIOS={
   'niv-vs-tube':{
     name:'Tube or Mask?',
     badge:'Academy · Indication Call', badgeCls:'scen-badge-3',
-    intro:'Module 3 practice. A COPD exacerbation is failing on the floor and the sending team has you transporting to the ICU. They\'re asking whether to intubate before you leave. The patient is awake, protecting the airway, and hypercapnic. Make the indication call, then set it up.',
+    intro:'Module 3 practice. A COPD exacerbation is failing on the floor and the sending team has you transporting to the ICU. They\'re asking whether to intubate before you leave. Make the indication call, then set it up.',
     scenario:'Awake, hypercapnic COPD exacerbation (pH 7.30, PaCO₂ 68), tiring but following commands and protecting the airway. Not yet intubated. This is a "what support is indicated" decision.',
     vitals:[{k:'HR',v:'110'},{k:'SpO₂',v:'88%'},{k:'RR',v:'28'},{k:'PaCO₂',v:'68 mmHg'}],
     setup:{mode:'ac',bt:'volume',rate:12,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -3326,7 +3242,7 @@ var ACADEMY_SCENARIOS={
   'agitation':{
     name:'Not Every Fight Is a Knob',
     badge:'Academy · Sedation & Comfort', badgeCls:'scen-badge-2',
-    intro:'Module 8 practice. Your intubated patient is agitated and "fighting the vent." The reflex is to start turning knobs — but the numbers tell a different story. Read the mechanics before you reach for a setting.',
+    intro:'Module 8 practice. Your intubated patient is agitated and "fighting the vent." The reflex is to start turning knobs. Read the mechanics first, then decide whether a setting is even the problem.',
     scenario:'Intubated, awake and agitated, pulling at the tube. But the mechanics are clean: I:E is fine, no breath-stacking, SpO₂ 98%, CO₂ normal. The one thing set poorly is a hard trigger sensitivity that makes them work for every breath.',
     vitals:[{k:'HR',v:'124'},{k:'SpO₂',v:'98%'},{k:'EtCO₂',v:'41 mmHg'},{k:'BP',v:'158/92'}],
     setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:0.9,peep:5,pc:15,ps:10,fio2:40,sens:8,hipres:40,lowpres:10,lowmv:3,apnea:20},
@@ -3378,7 +3294,7 @@ var ACADEMY_SCENARIOS={
         return 'Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg · PEEP '+vals.peep.v+' · Pplat '+(pplat?pplat.pplat.toFixed(0):'—')+' · MV '+estMinuteVolume().toFixed(1);
       }
     },
-    confirm:'🏆 Everything at once: a lung-protective tidal volume, plateau under 30, the rate raised to hold minute ventilation, and PEEP climbed to recruit and oxygenate. That is the whole discipline of transport ventilation in one patient — and you just ran it cold. You\'re ready.'
+    confirm:'🏆 Everything at once: a lung-protective tidal volume, plateau under 30, the rate raised to hold minute ventilation, and PEEP climbed to recruit and oxygenate. The ARDSNet (ARMA) trial reported mortality <strong>31.0% vs 39.8%</strong> with 6 vs 12 mL/kg PBW — an 8.8-point absolute reduction (~22% relative); size the breath off <strong>predicted</strong> body weight, because lung size tracks height, not weight. Permissive hypercapnia is acceptable while pH ≥ 7.20. That is the whole discipline of transport ventilation in one patient — and you just ran it cold. You\'re ready.'
   }
 };
 
@@ -3407,6 +3323,16 @@ function curScenario(){
 }
 // Unified task getter: returns current stage (L1) or scenario (L2/L3)
 function curTask(){ return gameLevel<=1 ? curStage() : curScenario(); }
+
+// How many graded cases the current level holds, and the badge that labels one.
+// Computed rather than stored, so adding or removing a scenario can never leave
+// a stale "Scenario 4 of 6" behind. Academy one-offs carry their own literal badge.
+function levelCount(n){ var sc=SCENARIO_LEVELS[n]; return sc?sc.length:0; }
+function taskBadge(sc){
+  if(!sc) return '';
+  if(sc.badge) return sc.badge;                       // academy mission: literal badge
+  return 'L'+gameLevel+' \u00b7 Scenario '+(scenarioIdx+1)+' of '+levelCount(gameLevel);
+}
 
 function gameDone(){
   if(freeMode) return false;          // Test Lung never "completes"
@@ -3692,7 +3618,7 @@ function renderMissionCard(){
       bar.innerHTML='<div class="lc-wrap">'
         +'<div class="lc-icon">'+(gameLevel===2?'⭐':'🏆')+'</div>'
         +'<div class="lc-title" style="color:'+(gameLevel===2?'var(--orange)':'var(--alarm)')+'">Level '+gameLevel+' Complete</div>'
-        +'<div class="lc-sub">'+(gameLevel===2?'All 6 clinical scenarios solved.':'Advanced management mastered — all 6 cases.')+'</div>'
+        +'<div class="lc-sub">'+(gameLevel===2?'All '+levelCount(2)+' clinical scenarios solved.':'Advanced management mastered — all '+levelCount(3)+' cases.')+'</div>'
         +'<div class="lc-btns">'
         +(gameLevel<3?'<button class="lc-btn lc-btn-next" onclick="startLevel('+nextLvl+')">'+nextTxt+' →</button>':'')
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
@@ -3738,7 +3664,7 @@ function renderMissionCard(){
   var header='<button class="scen-back-btn" onclick="'+backAction+'">'+backLabel+'</button>'
     +'<div class="scen-header">'
     +'<div class="mission-stage">'+sc.name+'</div>'
-    +'<span class="scen-badge '+sc.badgeCls+'">'+sc.badge+'</span>'
+    +'<span class="scen-badge '+sc.badgeCls+'">'+taskBadge(sc)+'</span>'
     +'</div>'
     +'<div class="scen-text">'+sc.scenario+'</div>'
     +vitalsHtml;
@@ -3827,20 +3753,25 @@ function showIntro(sc){
   var isTut=gameLevel===1;
   var kicker=isTut?'Training · Setup':(academyMode?'Academy · Practice':(gameLevel===3?'Incoming · Advanced':'Incoming · Clinical'));
   var narr=sc.intro||sc.scenario;
-  var obj=isTut
+  // The Assess→Diagnose→Set→Confirm strip is orientation, not content: it only
+  // earns its space the first time a learner meets the format. Show it when
+  // they open a level (or land on a standalone academy mission, which they may
+  // reach cold from a module link) and drop it on every case after that.
+  var firstOfRun = academyMode || (isTut ? gameStage===0 : scenarioIdx===0);
+  var obj=!firstOfRun ? '' : (isTut
     ? '<span class="intro-step">Decide</span><span class="intro-arrow">→</span>'
       +'<span class="intro-step">Set the control</span><span class="intro-arrow">→</span>'
       +'<span class="intro-step">Confirm</span>'
     : '<span class="intro-step">Assess</span><span class="intro-arrow">→</span>'
       +'<span class="intro-step">Diagnose</span><span class="intro-arrow">→</span>'
       +'<span class="intro-step">Set the vent</span><span class="intro-arrow">→</span>'
-      +'<span class="intro-step">Confirm</span>';
+      +'<span class="intro-step">Confirm</span>');
   card.innerHTML=
      '<div class="intro-kicker"><span class="blip"></span>'+kicker+'</div>'
-    +'<div class="intro-badge">'+sc.badge+'</div>'
+    +'<div class="intro-badge">'+taskBadge(sc)+'</div>'
     +'<div class="intro-name">'+sc.name+'</div>'
     +'<div class="intro-narr">'+narr+'</div>'
-    +'<div class="intro-obj"><span class="intro-obj-lbl">'+(isTut?'How it works':'Your job')+'</span>'+obj+'</div>'
+    +(obj?'<div class="intro-obj"><span class="intro-obj-lbl">'+(isTut?'How it works':'Your job')+'</span>'+obj+'</div>':'')
     +'<button class="intro-btn" onclick="beginScenario()">'+(isTut?'Start the walkthrough →':'Approach the patient →')+'</button>';
   ov.classList.add('open');
 }
@@ -4407,7 +4338,7 @@ function showVictoryOverlay(level){
   } else if(level===2){
     icon='⭐'; glowCls='vc-glow-orange'; colorStr='var(--orange)';
     levelTxt='LEVEL 2 COMPLETE';
-    subTxt='All 6 clinical scenarios solved.<br>Ready for the advanced cases?';
+    subTxt='All '+levelCount(2)+' clinical scenarios solved.<br>Ready for the advanced cases?';
     btnsHtml='<div class="vc-btns">'
       +'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startLevel(3)">Level 3 →</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay here</button>'
@@ -4415,7 +4346,7 @@ function showVictoryOverlay(level){
   } else {
     icon='🏆'; glowCls='vc-glow-red'; colorStr='var(--alarm)';
     levelTxt='LEVEL 3 COMPLETE';
-    subTxt='Advanced management mastered.<br>All 6 complex cases solved.<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>';
+    subTxt='Advanced management mastered.<br>All '+levelCount(3)+' complex cases solved.<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>';
     btnsHtml='<div class="vc-btns">'
       +'<button class="vc-btn vc-btn-red" onclick="closeVictory();openLevelSelect()">Level Select</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Keep exploring</button>'
@@ -4481,20 +4412,20 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
       <div class="lvl-desc">Learn the controls step by step. Settings unlock progressively as you demonstrate each concept and answer a question.</div>
       <span class="lvl-arrow">›</span>
     </div>
-    <div class="lvl-card" data-level="2" onclick="startLevel(2)" role="button" tabindex="0" aria-label="Level 2, Clinical Scenarios, Intermediate. Six real patient situations.">
+    <div class="lvl-card" data-level="2" onclick="startLevel(2)" role="button" tabindex="0" aria-label="Level 2, Clinical Scenarios, Intermediate. Five real patient situations.">
       <div class="lvl-card-top">
         <div class="lvl-name">Level 2 — Clinical Scenarios</div>
         <span class="lvl-badge lvl-badge-2">Intermediate</span>
       </div>
-      <div class="lvl-desc">6 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
+      <div class="lvl-desc">5 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
       <span class="lvl-arrow">›</span>
     </div>
-    <div class="lvl-card" data-level="3" onclick="startLevel(3)" role="button" tabindex="0" aria-label="Level 3, Advanced Management, Advanced. Six complex cases.">
+    <div class="lvl-card" data-level="3" onclick="startLevel(3)" role="button" tabindex="0" aria-label="Level 3, Advanced Management, Advanced. Four complex cases.">
       <div class="lvl-card-top">
         <div class="lvl-name">Level 3 — Advanced Management</div>
         <span class="lvl-badge lvl-badge-3">Advanced</span>
       </div>
-      <div class="lvl-desc">6 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
+      <div class="lvl-desc">4 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
       <span class="lvl-arrow">›</span>
     </div>
     <div class="lvl-card lvl-card-free" onclick="startFree()" role="button" tabindex="0" aria-label="Free Play, Test Lung sandbox. Dial any settings you want.">
