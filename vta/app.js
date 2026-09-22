@@ -1240,8 +1240,8 @@ const MODULES = [
   title: "Alarms & Troubleshooting",
   blurb: "Every alarm is information. Assess the patient first, use DOPE to organize the search, and support ventilation when the patient is not being ventilated safely.",
   estMin: 55,
-  practiceLevel: 2,
-  practiceNote: "Test yourself on the simulator's clinical scenarios — read the picture and correct the vent under pressure.",
+  practiceLevel: 7,
+  practiceNote: "Work the DOPE track on the simulator — three transport failures: find the cause, then fix what the vent can fix.",
 
   lessons: [
     {
@@ -2498,9 +2498,10 @@ const PRACTICE_MISSIONS = [
   { mod: "3", title: "Tube or Mask?", sub: "The NIV-vs-intubation indication call, then set BiPAP.", href: "../vent-ltv1200.html?scenario=niv-vs-tube" },
   { mod: "4", title: "Initial Settings", sub: "Safe starting settings on a fresh intubation.", href: "../vent-ltv1200.html?scenario=initial-settings" },
   { mod: "5", title: "Non-Invasive Setup", sub: "CPAP for the awake CHF patient.", href: "../vent-ltv1200.html?scenario=niv-setup" },
-  { mod: "7", title: "Clinical Scenarios", sub: "Five graded cases — ARDS, COPD, dyssynchrony & more.", href: "../vent-ltv1200.html?level=2" },
+  { mod: "7", title: "Troubleshooting — DOPE", sub: "Disconnect, tension pneumothorax, mainstem: find it, then fix it.", href: "../vent-ltv1200.html?level=7" },
   { mod: "8", title: "Not Every Fight Is a Knob", sub: "Recognize when the fix is a drug, not a setting.", href: "../vent-ltv1200.html?scenario=agitation" },
   { mod: "9", title: "Advanced Management", sub: "Four advanced multi-parameter cases.", href: "../vent-ltv1200.html?level=3" },
+  { mod: "◆", title: "Clinical Scenarios", sub: "Five graded cases across the course — ARDS, COPD, dyssynchrony & more.", href: "../vent-ltv1200.html?level=2" },
   { mod: "★", title: "Capstone — The Whole Package", sub: "Severe ARDS to ECMO: everything at once.", href: "../vent-ltv1200.html?scenario=capstone" },
 ];
 

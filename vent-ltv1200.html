@@ -414,6 +414,7 @@ canvas#pip-canvas{display:none}
 .lvl-badge-1{background:#eafbf1;color:var(--green);border:1px solid var(--green)}
 .lvl-badge-2{background:#fdf0e7;color:var(--orange);border:1px solid var(--orange)}
 .lvl-badge-3{background:#fdecec;color:var(--alarm);border:1px solid var(--alarm)}
+.lvl-badge-7{background:#efeaf9;color:var(--purple-dark);border:1px solid var(--purple-dark)}
 .lvl-desc{font-size:11px;color:var(--sub);line-height:1.5}
 .lvl-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);
   color:var(--border);font-size:20px;transition:color 0.18s;line-height:1}
@@ -571,6 +572,9 @@ canvas#pip-canvas{display:none}
 .vc-glow-blue{animation:vc-glow-b 2.4s ease-in-out infinite}
 .vc-glow-orange{animation:vc-glow-o 2.4s ease-in-out infinite}
 .vc-glow-red{animation:vc-glow-r 2.4s ease-in-out infinite}
+@keyframes vc-glow-p{0%,100%{box-shadow:0 0 0 1.5px var(--purple-dark),0 0 20px rgba(76,76,148,0.22),0 20px 60px rgba(0,0,0,0.8)}
+  50%{box-shadow:0 0 0 1.5px var(--purple-dark),0 0 34px rgba(76,76,148,0.42),0 20px 60px rgba(0,0,0,0.8)}}
+.vc-glow-purple{animation:vc-glow-p 2.4s ease-in-out infinite}
 
 /* ── COMPACT PHONE LAYOUT (no-scroll) ── */
 @media (pointer:coarse){
@@ -2170,6 +2174,7 @@ function calcPplat(){
           autoPEEP:aPEEP};
 }
 
+var inspHoldSinceLoad=false;   // did the learner run a hold on THIS case? (goal checks read it)
 function triggerInspHold(){
   if(!deviceRunning()) return;   // panel dead in Standby
   if(ventMode==='cpap'||ventMode==='nppv'){openDrawer('insphold');return;}
@@ -2177,6 +2182,8 @@ function triggerInspHold(){
   if(!d){openDrawer('insphold');return;} // Pressure mode — just show info
   inspHoldPIP=d.pip; inspHoldPplat=d.pplat;
   inspHoldActive=true; inspHoldStartTs=null; // set on next rAF frame
+  inspHoldSinceLoad=true;
+  if(typeof renderMissionCard==='function') renderMissionCard();   // a hold can satisfy a goal
   openDrawer('insphold');
 }
 
@@ -3130,6 +3137,107 @@ var SCENARIO_LEVELS={
       },
       confirm:'🏆 Controlled, capnography-guided hyperventilation buys minutes by shrinking cerebral blood volume — a bridge to the OR, osmotic therapy, and sedation, not a destination. Follow continuous ETCO₂ (target ~30–35) with ABG correlation, and back off to normocapnia once the crisis is controlled — sustained PaCO₂ < 30 worsens outcomes (Brain Trauma Foundation). Level 3 complete — you\'re managing the toughest cases.'
     }
+  ],
+
+  // ── TROUBLESHOOTING TRACK (Module 7 · DOPE) ───────────────
+  // Not "set the vent for this physiology" — that is Levels 2 and 3. These are
+  // failures: something was working and stopped. Each one is a DOPE letter the
+  // course teaches but nothing hands-on ever practised, and each ends in an
+  // action the panel can actually verify. Deliberately NOT re-covered here:
+  // auto-PEEP (L2), flow dyssynchrony (L2 + the academy sedation mission),
+  // managing known bronchospasm (L3) and setting the high-pressure limit (L1).
+  7:[
+    // ─── T1 · E — equipment ─────────────────────────────
+    { name:'Nothing Is Going In',
+      badgeCls:'scen-badge-2',
+      intro:'Forty minutes into a routine transfer, in the dark, in the back of a moving truck. You hear the vent change its tune and the numbers on your monitor start to go the wrong way. Everything was fine ten seconds ago.',
+      scenario:'Intubated adult, previously stable on your LTV. The chest is not rising. The capnography waveform has gone flat, the SpO₂ is sliding, and the vent is annunciating LOW PRESSURE and LOW MINUTE VOLUME together. Peak pressure barely lifts off baseline with each attempted breath.',
+      vitals:[{k:'SpO₂',v:'88%'},{k:'EtCO₂',v:'0 mmHg'},{k:'HR',v:'118'},{k:'PIP',v:'6 cmH₂O'},{k:'BP',v:'126/78'}],
+      lung:{compliance:50,resistance:8,label:'Healthy'},
+      setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:0,lowmv:0,apnea:20},
+      diagnose:{
+        q:'No chest rise, no EtCO₂, falling sat, and the pressure never builds. Which DOPE letter is this — and what do you do first?',
+        choices:[
+          'O — a mucus plug. Suction down the tube immediately.',
+          'E — equipment: gas is not reaching the patient (disconnect, big leak, or cuff failure). Disconnect from the vent and bag, then trace the circuit.',
+          'P — tension pneumothorax. Needle decompress.',
+          'D — the patient is over-sedated. Increase the rate and keep going.'
+        ],
+        correct:1,
+        exp:'Read the <em>direction</em> of the pressure. A plug, a kink, a bite or a tension pneumothorax all drive pressure <strong>up</strong>. Pressure that never builds, with a flat capnograph and no chest rise, means the gas is going somewhere other than the lungs — a disconnect, a large circuit leak, or a failed cuff. That is the <strong>E</strong> of DOPE. Apply the <strong>10-second rule</strong>: you do not troubleshoot a patient who is not being ventilated. Disconnect and bag first, so someone is moving air while you work the circuit hand-over-hand from the patient back to the vent — wye, HME/filter, inline suction, tubing, exhalation-valve pilot line, water trap.'
+      },
+      goal:{
+        text:'You bagged, found the wye pulled apart behind the seat, reconnected it, and the chest is rising again. Now make sure the next one announces itself instead of being something you notice. Both low-side alarms were left OFF — set <strong>Low Pressure</strong> above PEEP but below the delivered peak, and <strong>Low Minute Volume</strong> just under the delivered minute volume.',
+        check:function(){
+          var pip=estPIP(), mv=estMinuteVolume();
+          return vals.lowpres.v>=vals.peep.v+3 && vals.lowpres.v<=pip-3 &&
+                 vals.lowmv.v>0 && vals.lowmv.v>=mv*0.6 && vals.lowmv.v<=mv*0.9;
+        },
+        readout:function(){
+          return 'Low Pres '+vals.lowpres.v+' (PEEP '+vals.peep.v+', PIP ~'+Math.round(estPIP())+')'
+               +'   ·   Low MV '+vals.lowmv.v+' (delivered '+estMinuteVolume().toFixed(1)+')';
+        }
+      },
+      confirm:'✓ The two low-side alarms are your disconnect detectors, and they are the ones people leave at the factory setting or switch off because they nuisance-alarmed once. <strong>Low Pressure</strong> has to sit above PEEP (or it never resets between breaths) and below the patient\'s own peak (or every normal breath trips it). <strong>Low Minute Volume</strong> sits just under what you are actually delivering, so a partial leak shows up before the sat does. These are set off <em>this</em> patient\'s delivered breath, not off a number in a book — which means re-setting them after any real change to volume, rate or PEEP. And the habit that mattered most here came before any of it: chest not rising, disconnect and bag.'
+    },
+
+    // ─── T2 · P vs O — the maneuver that separates them ───────────
+    { name:'The Pressure and the Pressure',
+      badgeCls:'scen-badge-3',
+      intro:'Thirty minutes out from the receiving facility, the high-pressure alarm starts and does not stop. The sat is going down and so is the blood pressure. You have one patient, one vent, and a decision to make about what is actually wrong.',
+      scenario:'Intubated adult on volume control. HIGH PRESSURE alarming on every breath. SpO₂ has fallen to 84% and the blood pressure with it. Breath sounds are decreased on the right; the neck veins look full. The tube is at its taped depth and passes a suction catheter without resistance.',
+      vitals:[{k:'HR',v:'132'},{k:'SpO₂',v:'84%'},{k:'BP',v:'78/44'},{k:'EtCO₂',v:'28 mmHg'},{k:'PIP',v:'38 cmH₂O'}],
+      lung:{compliance:18,resistance:8,label:'Stiff — cause unknown'},
+      setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:60,sens:3,hipres:35,lowpres:8,lowmv:5,apnea:20},
+      diagnose:{
+        q:'The pressure is high and you need to know whether it is stuck in the airways or in the lung itself. Which single maneuver tells you that — before you touch a setting?',
+        choices:[
+          'Raise the high-pressure limit until the alarm stops, then reassess',
+          'An inspiratory hold — at zero flow the plateau is alveolar pressure, so peak-minus-plateau is the airway (resistive) part',
+          'Switch to pressure control so the peak cannot exceed the limit',
+          'Increase the tidal volume to push past the resistance'
+        ],
+        correct:1,
+        exp:'Peak pressure is two things added together: the pressure spent pushing gas <em>through the airways</em> (resistive) and the pressure actually <em>distending the alveoli</em> (elastic). An <strong>inspiratory hold</strong> stops flow, so the resistive part falls away and what is left — the <strong>plateau</strong> — is alveolar. That one reading splits DOPE in half: <strong>high peak with a normal plateau</strong> is a resistance problem (plug, kink, bite, bronchospasm — the O), while <strong>high peak with a high plateau</strong> is a compliance problem (pneumothorax, mainstem, oedema, stiff lung — the P and D). Raising the limit silences the messenger and tells you nothing.'
+      },
+      goal:{
+        text:'Run the maneuver: press <strong>INSP HOLD</strong> on the panel and read the plateau against the peak.',
+        check:function(){ return inspHoldSinceLoad; },
+        readout:function(){
+          var d=calcPplat();
+          if(!inspHoldSinceLoad) return 'Press INSP HOLD on the front panel';
+          return d? ('PIP '+d.pip.toFixed(0)+'   ·   Pplat '+d.pplat.toFixed(0)+'   ·   gap '+d.raw.toFixed(0)+' cmH₂O') : 'Hold complete';
+        }
+      },
+      confirm:'✓ Plateau came back around <strong>33</strong> against a peak of <strong>38</strong> — a narrow gap, so almost all of that pressure is <em>alveolar</em>, not airway. The airways are fine; the lung has become stiff. Stack that on a falling sat, a falling blood pressure, decreased breath sounds on one side and full neck veins and you have a <strong>tension pneumothorax</strong> — and <strong>no ventilator setting fixes it</strong>. It needs decompression, and every positive-pressure breath until then makes it worse. Had the plateau come back normal with that same peak, you would be looking at the other half of DOPE — a plug, a kink, a bitten tube or bronchospasm — and the answers would be suction, a bite block, or a bronchodilator. Same alarm, opposite problems, and the hold is what tells them apart. (Tracheal deviation is a late and unreliable sign — do not wait for it.)'
+    },
+
+    // ─── T3 · D — dislodgement ──────────────────────────
+    { name:'Four Seconds to the Cot',
+      badgeCls:'scen-badge-2',
+      intro:'The move from the bed to your cot is four seconds long and it is where tubes go wrong. You get him across, look up at the vent, and the picture has changed.',
+      scenario:'Transferring an intubated adult onto your cot, the high-pressure alarm fired and the sat dropped to 88%. Breath sounds were absent on the left with the chest rising on the right only, and PIP had jumped from 22 to 36. The tube was taped at 26 cm at the teeth. You flushed to 100% oxygen, withdrew the tube to 22 cm, and re-auscultated: both sides are rising again, PIP is back to 21, and the saturation has come up to 97% — still on the 100% you flushed.',
+      vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'39 mmHg'},{k:'PIP',v:'21 cmH₂O'},{k:'FiO₂',v:'100%'}],
+      lung:{compliance:50,resistance:8,label:'Both lungs — repositioned'},
+      setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:10,fio2:100,sens:3,hipres:40,lowpres:8,lowmv:5,apnea:20},
+      diagnose:{
+        q:'Absent breath sounds on the left, chest rising only on the right, PIP 22 → 36, tube at 26 cm. Which DOPE letter was that?',
+        choices:[
+          'O — obstruction; the tube needed suctioning',
+          'D — dislodgement: the tube migrated into the right mainstem. Withdraw to ~21–23 cm at the teeth and re-auscultate.',
+          'P — pneumothorax; the left chest needed decompression',
+          'E — equipment; the circuit needed changing'
+        ],
+        correct:1,
+        exp:'<strong>D covers both directions.</strong> Too deep is a <strong>right mainstem</strong> — the right main bronchus leaves the carina at a shallower angle, so a migrating tube goes there. You are then putting the whole tidal volume into one lung: pressures climb, breath sounds go absent on the <em>left</em>, only one side rises, and the sat falls. Too far out is <strong>extubation</strong> — the opposite picture, with low pressure, low minute volume and a lost capnograph. Note what this was <em>not</em>: the tube was patent, so suctioning would have found nothing and cost time. Confirm the fix the way you found the problem — re-auscultate both axillae and watch the PIP fall as the second lung comes back. Re-check depth after every move: cot transfers, stair chairs, log rolls and lifts are when tubes migrate.'
+      },
+      goal:{
+        text:'The tube is repositioned and the saturation is 97% — on the 100% oxygen you flushed during the desaturation. Wean it back: set <strong>FiO₂ to the lowest that holds your target saturation, around 40%</strong> (30–60% is fine).',
+        check:function(){ return vals.fio2.v>=30 && vals.fio2.v<=60; },
+        readout:function(){ return 'FiO₂ '+vals.fio2.v+'%   ·   SpO₂ 97%'; }
+      },
+      confirm:'✓ Depth fixed, oxygen weaned. Two habits come out of this one. First, <strong>re-check tube depth after every patient move</strong> — and confirm with breath sounds plus a falling PIP, not by looking at the tape. Second, <strong>100% oxygen is for the crisis, not for the rest of the transport</strong>: flush it for the desaturation, then titrate back to your service\'s target saturation range once the patient recovers. Leaving it at 100% out of momentum is one of the most common things that gets carried all the way to the receiving bed. If the saturation falls again as you come down, that is information — go back up and look for the reason.'
+    }
   ]
 };
 
@@ -3328,10 +3436,26 @@ function curTask(){ return gameLevel<=1 ? curStage() : curScenario(); }
 // Computed rather than stored, so adding or removing a scenario can never leave
 // a stale "Scenario 4 of 6" behind. Academy one-offs carry their own literal badge.
 function levelCount(n){ var sc=SCENARIO_LEVELS[n]; return sc?sc.length:0; }
+
+// One description per track. Adding a track means adding a row here and an
+// array to SCENARIO_LEVELS — the badge, the completion card, the victory
+// overlay and the chooser all read from this.
+var LEVEL_META={
+  1:{ label:'Level 1', unit:'Stage', icon:'\ud83c\udf93', color:'var(--blue)',   glow:'vc-glow-blue',
+      done:'All controls unlocked. Ready for clinical scenarios?', next:2 },
+  2:{ label:'Level 2', unit:'Scenario', icon:'\u2b50', color:'var(--orange)', glow:'vc-glow-orange',
+      done:'clinical scenarios solved.', next:3 },
+  3:{ label:'Level 3', unit:'Scenario', icon:'\ud83c\udfc6', color:'var(--alarm)',  glow:'vc-glow-red',
+      done:'advanced cases solved.', next:7 },
+  7:{ label:'Troubleshooting', unit:'Case', icon:'\ud83e\uddf0', color:'var(--purple-dark)', glow:'vc-glow-purple',
+      done:'failures found and fixed.', next:0 }
+};
+function levelMeta(n){ return LEVEL_META[n]||LEVEL_META[2]; }
 function taskBadge(sc){
   if(!sc) return '';
   if(sc.badge) return sc.badge;                       // academy mission: literal badge
-  return 'L'+gameLevel+' \u00b7 Scenario '+(scenarioIdx+1)+' of '+levelCount(gameLevel);
+  var m=levelMeta(gameLevel);
+  return m.label+' \u00b7 '+m.unit+' '+(scenarioIdx+1)+' of '+levelCount(gameLevel);
 }
 
 function gameDone(){
@@ -3412,6 +3536,7 @@ function _monWavePath(type,opts){
     }
   } else {                     // capno — one breath per period P
     P=opts.period||60;
+    if(opts.flat) return 'M0,26 H'+W;     // EtCO₂ zero: no exhaled CO₂, flat trace
     for(x=0;x<W;x+=P){
       if(opts.obstructive){
         // "shark-fin": slurred, up-sloping plateau — bronchospasm / obstruction
@@ -3470,7 +3595,8 @@ function renderMonitor(vitals,sc){
   var lanes='';
   if(slot.hr)   lanes+=_monLane('ecg','#39ff5a',ecgDur,'HR',_splitVal(slot.hr).num,'bpm');
   if(slot.spo2) lanes+=_monLane('pleth','#35d6e6',ecgDur,'SpO₂',_splitVal(slot.spo2).num,'%'); // pleth tracks the pulse
-  if(slot.co2)  lanes+=_monLane('co2','#f5d312',capnoDur,'EtCO₂',_splitVal(slot.co2).num,'mmHg',slot.rr?('RR '+_splitVal(slot.rr).num):null,{obstructive:obstructive});
+  if(slot.co2)  lanes+=_monLane('co2','#f5d312',capnoDur,'EtCO₂',_splitVal(slot.co2).num,'mmHg',slot.rr?('RR '+_splitVal(slot.rr).num):null,
+                    {obstructive:obstructive, flat:_firstNum(slot.co2)===0});
   else if(slot.rr) chips.unshift({k:'RR',v:_splitVal(slot.rr).num}); // RR without capno → chip
   var mon=lanes?('<div class="monitor">'+lanes+'</div>'):'';
   var chipHtml='';
@@ -3613,14 +3739,13 @@ function renderMissionCard(){
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
         +'</div></div>';
     } else {
-      var nextLvl=gameLevel<3?gameLevel+1:0;
-      var nextTxt=gameLevel<3?'Try Level '+(gameLevel+1):'Level Select';
+      var m=levelMeta(gameLevel), nx=m.next?levelMeta(m.next):null;
       bar.innerHTML='<div class="lc-wrap">'
-        +'<div class="lc-icon">'+(gameLevel===2?'⭐':'🏆')+'</div>'
-        +'<div class="lc-title" style="color:'+(gameLevel===2?'var(--orange)':'var(--alarm)')+'">Level '+gameLevel+' Complete</div>'
-        +'<div class="lc-sub">'+(gameLevel===2?'All '+levelCount(2)+' clinical scenarios solved.':'Advanced management mastered — all '+levelCount(3)+' cases.')+'</div>'
+        +'<div class="lc-icon">'+m.icon+'</div>'
+        +'<div class="lc-title" style="color:'+m.color+'">'+m.label+' Complete</div>'
+        +'<div class="lc-sub">All '+levelCount(gameLevel)+' '+m.done+'</div>'
         +'<div class="lc-btns">'
-        +(gameLevel<3?'<button class="lc-btn lc-btn-next" onclick="startLevel('+nextLvl+')">'+nextTxt+' →</button>':'')
+        +(nx?'<button class="lc-btn lc-btn-next" onclick="startLevel('+m.next+')">'+nx.label+' →</button>':'')
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
         +'</div></div>';
     }
@@ -4009,6 +4134,7 @@ function loadScenario(s){
   simTime=0; pressureHistory=[]; resetMeasuredPIP();
   scenarioDiagnosed=false;   // reset problem-solving progress for the new case
   _assessAttempts=0;         // reset assessment attempts for the new case
+  inspHoldSinceLoad=false;   // a hold from the previous case must not count for this one
   keys.forEach(function(k){ updateKnob(k); });
   updateUI();
   showIntro(s);              // prime the clinician before they reach the vent
@@ -4101,7 +4227,7 @@ function loadProgress(){
   catch(_){ return {levels:{}}; }
 }
 function saveLevelComplete(n){
-  if(!(n>=1&&n<=3)) return;   // only the three core levels earn a badge
+  if(!LEVEL_META[n]) return;   // only defined tracks earn a badge
   try{ var p=loadProgress(); p.levels[n]=true; p.updated=Date.now();
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); }catch(_){}
 }
@@ -4138,7 +4264,7 @@ function initGameEntry(){
   if(sid && ACADEMY_SCENARIOS[sid]){ startAcademyScenario(sid); return; }   // deep-link: already booted to run
   if(params.get('free')!==null || params.get('mode')==='free' || params.get('mode')==='testlung'){ startFree(); return; }
   var lvl=parseInt(params.get('level'),10);
-  if(lvl===1||lvl===2||lvl===3){ startLevel(lvl); return; }                 // deep-link: already booted to run
+  if(LEVEL_META[lvl]){ startLevel(lvl); return; }                           // deep-link: already booted to run
   // Plain load: leave the device in Standby. The learner powers it up with
   // On/Standby → POST → Patient Query, and finishBoot() opens the level chooser.
   gameLevel=0;
@@ -4335,21 +4461,16 @@ function showVictoryOverlay(level){
       +'<button class="vc-btn vc-btn-primary" onclick="closeVictory();startLevel(2)">Level 2 →</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay &amp; explore</button>'
       +'</div>';
-  } else if(level===2){
-    icon='⭐'; glowCls='vc-glow-orange'; colorStr='var(--orange)';
-    levelTxt='LEVEL 2 COMPLETE';
-    subTxt='All '+levelCount(2)+' clinical scenarios solved.<br>Ready for the advanced cases?';
-    btnsHtml='<div class="vc-btns">'
-      +'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startLevel(3)">Level 3 →</button>'
-      +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay here</button>'
-      +'</div>';
   } else {
-    icon='🏆'; glowCls='vc-glow-red'; colorStr='var(--alarm)';
-    levelTxt='LEVEL 3 COMPLETE';
-    subTxt='Advanced management mastered.<br>All '+levelCount(3)+' complex cases solved.<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>';
+    var m=levelMeta(level), nx=m.next?levelMeta(m.next):null;
+    icon=m.icon; glowCls=m.glow; colorStr=m.color;
+    levelTxt=m.label.toUpperCase()+' COMPLETE';
+    subTxt='All '+levelCount(level)+' '+m.done
+      +(nx?'<br>Ready for '+nx.label+'?':'<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>');
     btnsHtml='<div class="vc-btns">'
-      +'<button class="vc-btn vc-btn-red" onclick="closeVictory();openLevelSelect()">Level Select</button>'
-      +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Keep exploring</button>'
+      +(nx?'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startLevel('+m.next+')">'+nx.label+' →</button>'
+          :'<button class="vc-btn vc-btn-red" onclick="closeVictory();openLevelSelect()">Level Select</button>')
+      +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay here</button>'
       +'</div>';
   }
 
@@ -4426,6 +4547,14 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
         <span class="lvl-badge lvl-badge-3">Advanced</span>
       </div>
       <div class="lvl-desc">4 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
+      <span class="lvl-arrow">›</span>
+    </div>
+    <div class="lvl-card" data-level="7" onclick="startLevel(7)" role="button" tabindex="0" aria-label="Troubleshooting, DOPE. Three things that go wrong in transport and how to find them.">
+      <div class="lvl-card-top">
+        <div class="lvl-name">Troubleshooting — DOPE</div>
+        <span class="lvl-badge lvl-badge-7">Failures</span>
+      </div>
+      <div class="lvl-desc">3 cases where something was working and stopped. Read the alarm, find the cause, fix what can be fixed at the vent — and recognize what cannot.</div>
       <span class="lvl-arrow">›</span>
     </div>
     <div class="lvl-card lvl-card-free" onclick="startFree()" role="button" tabindex="0" aria-label="Free Play, Test Lung sandbox. Dial any settings you want.">
