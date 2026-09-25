@@ -1,4 +1,7 @@
 const CACHE = 'amrkc-2026-v30';
+// As above, in the other direction: the Ventilator Academy registers its own
+// worker under /vta/ and keeps caches on this same origin. Only sweep ours.
+const CACHE_PREFIX = 'amrkc-';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -46,7 +49,10 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(
+        keys.filter(k => k.startsWith(CACHE_PREFIX) && k !== CACHE)
+            .map(k => caches.delete(k))
+      )
     ).then(() => self.clients.claim())
   );
 });
@@ -73,9 +79,9 @@ self.addEventListener('fetch', e => {
     }).catch(() => {
       // Offline fallback — serve from cache; only fall back to the app
       // shell for page navigations, never for scripts/styles/assets
-      return caches.match(e.request).then(cached => {
+      return caches.open(CACHE).then(c => c.match(e.request)).then(cached => {
         if (cached) return cached;
-        if (e.request.mode === 'navigate') return caches.match('./index.html');
+        if (e.request.mode === 'navigate') return caches.open(CACHE).then(c => c.match('./index.html'));
         return Response.error();
       });
     })

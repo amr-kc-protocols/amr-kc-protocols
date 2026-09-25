@@ -275,3 +275,21 @@ Grouped by the property being defended:
 | S16 | Reachable from the field guide, the copy describes the station rather than the old case engine, and the cache version is bumped |
 | S17 | **The tracings carry the finding the item asks about** — QRS width the same at 45/min as at 150, VT and a paced beat wide where SVT and a junctional escape are narrow, AF irregularly irregular where sinus is regular, flutter with no isoelectric baseline, complete heart block with more P waves than QRS and not a multiple of them, VF never at baseline |
 | S18 | **A laptop** — four desktop viewports including a 4:3 Toughbook and a half-screen window, and a whole item played with a mouse rather than a finger. Every other scenario runs at 844x390 with touch emulation on, so laptop use was being assumed rather than tested |
+
+- **`classroom.test.mjs`** — phase 1 of the classroom companion: the content
+  layer ([`vta/classroom-content.js`](../vta/classroom-content.js)) and the
+  record store ([`vta/classroom-store.js`](../vta/classroom-store.js)), in
+  headless Chromium so the store runs against real IndexedDB. Two things are
+  defended. The content layer has to agree with the PowerPoint — the
+  instructor says a slide number out loud and the app must land on what the
+  class is looking at, so every overlapping range (a calculation prompt inside
+  a lesson, a quiz question inside a quiz block) is checked to resolve in the
+  documented order, all 273 slides are checked to resolve to *something*, and
+  the class is checked to total the 480 minutes slide 3 claims. The store has
+  to be honest about what it kept: a submitted attempt is immutable, a retake
+  does not erase the below-target attempt before it, feedback release is a
+  separate recorded act from submission, and a CSV export cannot carry a
+  learner's text into a spreadsheet as a formula. It also asserts the thing
+  that would be worst to get wrong — that none of this can touch the
+  self-paced record or its certificate.
+
