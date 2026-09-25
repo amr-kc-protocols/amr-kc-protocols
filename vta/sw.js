@@ -2,6 +2,11 @@
    Cache the app shell so it works offline once installed. */
 
 const CACHE = "vta-pwa-v10";
+// Every cache this worker owns starts with this. The activate handler below
+// may only delete caches matching it: the Field Guide's worker at the origin
+// root keeps its own caches here too, and deleting "everything that is not
+// mine" takes the other tool's offline copy with it.
+const CACHE_PREFIX = "vta-pwa-";
 const ASSETS = [
   "./",
   "./academy.html",
@@ -59,7 +64,11 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE)
+          .map((k) => caches.delete(k))
+      )
     )
   );
   self.clients.claim();
@@ -69,7 +78,10 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   event.respondWith(
-    caches.match(req).then((cached) => {
+    // Read from this worker's own cache, not caches.match()'s search across
+    // every cache on the origin — a shared asset such as ../amr-backend.js
+    // exists in the Field Guide's cache too, and whichever it found first won.
+    caches.open(CACHE).then((cache) => cache.match(req)).then((cached) => {
       const network = fetch(req)
         .then((res) => {
           if (res && res.status === 200 && res.type === "basic") {
