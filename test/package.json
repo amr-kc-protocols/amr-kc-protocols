@@ -2,9 +2,9 @@
   "name": "amrkc-tests",
   "private": true,
   "type": "module",
-  "description": "Tests for the Kansas Class Builder, the Supabase sync layer, the health forms (including the TB risk assessment), the training pages, the AEMT series engine, the simulators and the homepage",
+  "description": "Tests for the Kansas Class Builder, the Supabase sync layer, the health forms (including the TB risk assessment), the training pages, the AEMT series engine, the simulators and the homepage, and the classroom companion content layer and record store",
   "scripts": {
-    "test": "node kcb.test.mjs && node backend.test.mjs && node sync.e2e.mjs && node fitform.test.mjs && node alaris.test.mjs && node medmath.test.mjs && node tbform.test.mjs && node aemt.test.mjs && node homepage.test.mjs && node lifepak.test.mjs && node formulary.test.mjs && node refresher.test.mjs",
+    "test": "node kcb.test.mjs && node backend.test.mjs && node sync.e2e.mjs && node fitform.test.mjs && node alaris.test.mjs && node medmath.test.mjs && node tbform.test.mjs && node aemt.test.mjs && node homepage.test.mjs && node lifepak.test.mjs && node formulary.test.mjs && node refresher.test.mjs && node classroom.test.mjs",
     "test:kcb": "node kcb.test.mjs",
     "test:backend": "node backend.test.mjs",
     "test:sync": "node sync.e2e.mjs",
@@ -15,7 +15,8 @@
     "test:aemt": "node aemt.test.mjs",
     "test:homepage": "node homepage.test.mjs",
     "test:lifepak": "node lifepak.test.mjs",
-    "test:formulary": "node formulary.test.mjs && node refresher.test.mjs"
+    "test:formulary": "node formulary.test.mjs && node refresher.test.mjs",
+    "test:classroom": "node classroom.test.mjs"
   },
   "devDependencies": {
     "playwright": "^1.47.0",
