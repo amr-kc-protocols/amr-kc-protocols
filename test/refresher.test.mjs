@@ -113,6 +113,16 @@ const order = await page.evaluate(() => {
 });
 ok('it sits between the masthead and the featured training', order === true);
 
+// The same class is listed in More → Classes & CE, and comes down the same day.
+const rowAt = (iso) => page.evaluate((d) => {
+  const p = d.split('-');
+  return window.refresherRow(new Date(+p[0], +p[1] - 1, +p[2]));
+}, iso);
+ok('More lists it while the course runs', /National Registry Refresher/.test(await rowAt('2026-11-18')));
+ok('and drops it the day the banner drops', (await rowAt('2026-11-19')) === '');
+ok('the More row opens externally without the referrer',
+   /target="_blank"/.test(await rowAt('2026-10-01')) && /noopener noreferrer/.test(await rowAt('2026-10-01')));
+
 ok('no horizontal scroll at 390px',
    !(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)));
 ok('no page errors', pageErrors.length === 0, pageErrors.join('; '));

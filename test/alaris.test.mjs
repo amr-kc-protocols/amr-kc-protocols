@@ -302,24 +302,25 @@ const TOPIC_IDS = ['titrate','alarms','bag','piggyback','handoff','limits','tran
   const gate = p.locator('text=I Understand');
   if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(400); }
 
-  // Several trainings share the featured-panel treatment, so target this one.
-  const feat = p.locator('.feat-card[href="alaris-pump.html"]');
-  ok('A12 home shows the feature card', (await feat.count()) === 1);
-  /* It was flagged "new" when it was the new thing. The LIFEPAK simulator has
-     that badge now, and this card carries the plain one — a badge three
-     panels claim at once tells a crew nothing. What still has to hold is that
-     the card is labelled and reachable, not that it claims to be the newest. */
-  ok('A12 feature card carries a training badge',
-     /training/i.test(await feat.locator('.feat-badge').textContent()));
-  ok('A12 and no longer claims to be the newest',
-     !/new/i.test(await feat.locator('.feat-badge').textContent()));
-  const box = await feat.boundingBox();
-  ok('A12 feature card sits high on the page', box && box.y < 700, 'y=' + (box && Math.round(box.y)));
+  /* This had a featured panel on the homepage while it was the newest
+     training, then kept a smaller one after LIFEPAK took the "new" badge. The
+     homepage now features only the newest, and older trainings live in
+     More → Training. What has to hold is what this suite said all along:
+     the training is labelled and reachable — not that it has a panel. */
+  ok('A12 the homepage does not claim it is the newest',
+     (await p.locator('.feat-card[href="alaris-pump.html"] .feat-badge', { hasText: /new/i }).count()) === 0);
+  ok('A12 the homepage links into More → Training',
+     (await p.locator('#lv [data-goto="more"][data-sec="training"]').count()) === 1);
 
-  await p.evaluate(() => { const b = document.querySelector('[data-goto="more"]'); if (b) b.click(); });
+  await p.locator('#lv [data-goto="more"][data-sec="training"]').click();
   await p.waitForTimeout(400);
   ok('A12 More lists the training exactly once',
      (await p.locator('.more-card[href="alaris-pump.html"]').count()) === 1);
+  ok('A12 and lists it under Training',
+     await p.evaluate(() => { const c = document.querySelector('.more-card[href="alaris-pump.html"]');
+       const list = c && c.closest('.more-list'); const sec = list && list.previousElementSibling;
+       return !!sec && sec.id === 'more-training'; }));
+  ok('A12 the row names it', /Alaris/.test(await p.locator('.more-card[href="alaris-pump.html"]').textContent()));
   await p.context().close(); }
 
 { const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');

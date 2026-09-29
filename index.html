@@ -380,7 +380,7 @@ display:flex;align-items:center;justify-content:center;padding:6px;cursor:pointe
 .more-card{display:flex;align-items:center;gap:13px;margin:0 12px;padding:14px 4px;
 border-bottom:1px solid var(--border);
 cursor:pointer;text-decoration:none;color:var(--white);-webkit-tap-highlight-color:transparent}
-.more-card:last-of-type{border-bottom:none}
+.more-list > .more-card:last-child{border-bottom:none}
 .more-card:active,.more-card:hover{background:var(--dim)}
 .more-card-ico{flex-shrink:0;width:36px;height:36px;border-radius:9px;font-size:18px;
 display:flex;align-items:center;justify-content:center;
@@ -390,6 +390,16 @@ background:var(--acb,var(--dim));color:var(--ac,var(--teal2))}
 .more-card-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:3px}
 .more-card-sub{font-size:12px;color:var(--gray);line-height:1.45}
 .more-card-arr{color:var(--gray);font-size:20px;flex-shrink:0}
+.more-card-title,.more-card-sub{display:block}
+button.more-card{width:calc(100% - 24px);background:none;border:0;
+  border-bottom:1px solid var(--border);font:inherit;text-align:left}
+/* Section index at the top of More. It wraps rather than scrolls, so no
+   section is hidden off the edge of a phone. */
+.more-jump{display:flex;flex-wrap:wrap;gap:6px;padding:4px 12px 4px}
+.more-jump button{font:inherit;font-size:12px;font-weight:600;color:var(--teal2);
+  background:var(--surface2);border:1px solid var(--border);border-radius:999px;
+  padding:6px 12px;cursor:pointer;white-space:nowrap}
+.more-jump button:hover,.more-jump button:focus-visible{border-color:var(--teal2)}
 
 /* ── CRITICAL CARE PREP TRACK ─────────────────────────────────────── */
 .cc-prep{margin:14px 12px 10px;border-radius:16px;overflow:hidden;
@@ -435,34 +445,6 @@ background:var(--acb,var(--dim));color:var(--ac,var(--teal2))}
 .stat-tile.tile-blue:active,.stat-tile.tile-blue:hover,
 .stat-tile.tile-purple:active,.stat-tile.tile-purple:hover{border-color:transparent;filter:brightness(1.06)}
 
-/* ── VENTILATOR 3000 GAME CARD ────────────────────────────────────── */
-.game-card{position:relative;display:block;margin:8px 12px 10px;padding:18px 18px 16px;
-  border-radius:16px;overflow:hidden;text-decoration:none;color:#fff;
-  background:linear-gradient(135deg,#5b21b6 0%,#7c3aed 42%,#c026d3 100%);
-  box-shadow:0 10px 28px rgba(124,58,237,0.34);-webkit-tap-highlight-color:transparent;
-  transition:transform 0.06s,box-shadow 0.18s}
-.game-card:active{transform:translateY(1px)}
-.game-card:hover{box-shadow:0 12px 32px rgba(124,58,237,0.42)}
-.game-card::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(130px 130px at 88% 10%,rgba(255,255,255,0.24),rgba(255,255,255,0) 70%)}
-.game-dials{position:absolute;top:14px;right:14px;display:flex;gap:9px;pointer-events:none}
-.game-dial{width:30px;height:30px}
-.game-dial circle{fill:none;stroke:rgba(255,255,255,0.5);stroke-width:2}
-.game-dial line{stroke:#fff;stroke-width:2.4;stroke-linecap:round}
-.game-dial .tick{stroke:rgba(255,255,255,0.4);stroke-width:1.5}
-.game-badge{position:relative;z-index:1;display:inline-block;font-family:var(--mono);font-size:9.5px;
-  font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:#f5e9ff;
-  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.32);border-radius:999px;padding:4px 10px}
-.game-title{position:relative;z-index:1;font-size:25px;font-weight:800;letter-spacing:-0.02em;
-  margin:11px 0 3px;line-height:1.05;text-shadow:0 2px 10px rgba(0,0,0,0.18)}
-.game-title .g3k{color:#f7d9ff}
-.game-sub{position:relative;z-index:1;font-size:13px;color:#f0e6ff;font-weight:500;max-width:80%;line-height:1.45}
-.game-play{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;margin-top:15px;
-  font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:0.04em;color:#6d28d9;
-  background:#fff;border-radius:999px;padding:8px 15px 8px 11px;box-shadow:0 4px 12px rgba(0,0,0,0.18)}
-.game-play-ico{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;
-  border-radius:50%;background:#c026d3;color:#fff;font-size:8px;line-height:1;padding-left:2px}
-
 /* ── FEATURED "NEW" HOME CARD ─────────────────────────────────────── */
 .feat-card{position:relative;display:block;margin:2px 12px 14px;padding:17px 18px 16px;
   border-radius:16px;overflow:hidden;text-decoration:none;color:#fff;
@@ -473,14 +455,6 @@ background:var(--acb,var(--dim));color:var(--ac,var(--teal2))}
 .feat-card:hover{box-shadow:0 12px 32px rgba(14,79,143,0.42)}
 .feat-card::before{content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(140px 140px at 88% 8%,rgba(255,255,255,0.26),rgba(255,255,255,0) 70%)}
-.feat-drip{position:absolute;top:13px;right:14px;width:38px;height:52px;pointer-events:none;opacity:0.92}
-.feat-drip .bag{fill:rgba(255,255,255,0.18);stroke:rgba(255,255,255,0.55);stroke-width:1.6}
-.feat-drip .fill{fill:rgba(255,255,255,0.34)}
-.feat-drip .line{stroke:rgba(255,255,255,0.5);stroke-width:1.6;fill:none}
-.feat-drip .drop{fill:#bdf0ff;animation:featdrop 1.9s ease-in infinite}
-@keyframes featdrop{0%{transform:translateY(0);opacity:0}
-  22%{opacity:1}70%{transform:translateY(11px);opacity:1}100%{transform:translateY(13px);opacity:0}}
-@media (prefers-reduced-motion:reduce){.feat-drip .drop{animation:none;opacity:1}}
 .feat-badge{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;
   font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;
   color:#0e4f8f;background:#fff;border-radius:999px;padding:4px 11px;
@@ -539,40 +513,6 @@ background:var(--acb,var(--dim));color:var(--ac,var(--teal2))}
   .feat-ecg{width:74px;height:38px;top:14px;right:13px;opacity:.75}
 }
 
-/* ---- Reduced variant: the two that are no longer the newest thing -------
-   The red dot and the word "new" go with them. This file already warned
-   against leaving a "New training" badge on something a crew has had for a
-   year, and three cards claiming it at once would have made the badge mean
-   nothing on the one card where it is true. */
-.feat-card.feat-sm{padding:14px 15px 13px}
-.feat-sm .feat-title{font-size:19px;margin:9px 0 3px}
-.feat-sm .feat-sub{font-size:12px;line-height:1.4;max-width:84%}
-.feat-sm .feat-chips{margin-top:9px;gap:5px}
-.feat-sm .feat-chip{font-size:9px;padding:2.5px 8px}
-.feat-sm .feat-go{margin-top:11px;font-size:11px;padding:7px 13px 7px 11px}
-.feat-sm .feat-drip{width:32px;height:44px;top:11px;right:12px}
-.feat-sm .feat-calc{width:37px;height:44px;top:11px;right:12px}
-
-/* Violet variant — two featured panels sit together, so they must not read as
-   one block of blue. Same shape, different family. */
-.feat-card.feat-violet{background:linear-gradient(135deg,#4c1d95 0%,#6d28d9 46%,#a21caf 100%);
-  box-shadow:0 10px 28px rgba(109,40,217,0.34)}
-.feat-card.feat-violet:hover{box-shadow:0 12px 32px rgba(109,40,217,0.42)}
-.feat-violet .feat-badge{color:#5b21b6}
-.feat-violet .feat-title .fa{color:#f0d5ff}
-.feat-violet .feat-sub{color:#efe4fd}
-.feat-violet .feat-chip{color:#eddcff}
-.feat-violet .feat-go{color:#6d28d9}
-/* Numbers ticking over on the calculator face */
-.feat-calc{position:absolute;top:13px;right:14px;width:44px;height:52px;pointer-events:none;opacity:0.95}
-.feat-calc .body{fill:rgba(255,255,255,0.16);stroke:rgba(255,255,255,0.55);stroke-width:1.6}
-.feat-calc .screen{fill:rgba(255,255,255,0.30)}
-.feat-calc .k{fill:rgba(255,255,255,0.55)}
-.feat-calc .digit{fill:#f7e6ff;font-family:var(--mono);font-size:7px;font-weight:700;
-  animation:featflip 3.2s steps(1) infinite}
-.feat-calc .digit:nth-of-type(2){animation-delay:.4s}
-@keyframes featflip{0%,45%{opacity:1}50%,95%{opacity:.25}100%{opacity:1}}
-@media (prefers-reduced-motion:reduce){.feat-calc .digit{animation:none;opacity:1}}
 .sub-back{display:inline-flex;align-items:center;gap:5px;margin:12px 14px 4px;
 padding:7px 12px;background:var(--dim);border:1px solid var(--border);border-radius:7px;
 font-size:13px;font-weight:600;color:var(--teal2);cursor:pointer;font-family:var(--sans)}
@@ -657,15 +597,6 @@ fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linej
 .ts-critical,.co.d{display:flex;align-items:flex-start;gap:8px}
 .ts-critical .icon,.co.d .icon{width:15px;height:15px;margin-top:1px}
 .pcs-door{display:flex;align-items:center;gap:5px}
-.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 12px 6px}
-.qa-tile{display:flex;flex-direction:column;gap:9px;background:var(--surface2);
-border:1px solid transparent;border-radius:12px;padding:14px 12px;cursor:pointer;
-text-align:left;transition:border-color 0.12s;font-family:var(--sans);width:100%}
-.qa-tile:active,.qa-tile:hover{border-color:var(--ac,var(--teal))}
-.qa-ico{width:30px;height:30px;border-radius:8px;background:var(--acb,var(--dim));
-display:flex;align-items:center;justify-content:center;color:var(--ac,var(--teal2));font-size:16px}
-.qa-label{font-size:13px;font-weight:600;color:var(--white)}
-.qa-sub{font-size:11px;color:var(--gray);line-height:1.4}
 
 /* ── Subtle per-tile accents (quieter than the top brand tiles) ──── */
 .ac-red{--ac:#dc2626;--acb:#fdecec}
@@ -727,6 +658,11 @@ text-transform:uppercase;color:#fff;background:var(--warn);border-radius:999px;p
 background:var(--teal2);color:#fff;font-size:12.5px;font-weight:600;
 border-radius:8px;padding:8px 14px;letter-spacing:0.01em}
 @media (min-width:760px){.rfr{margin:0 12px 14px}}
+/* Tiles that move within the app are buttons, not link-less anchors, so they
+   take keyboard focus. Their text is in spans, which a button may contain. */
+button.stat-tile{font:inherit;text-align:left;width:100%;cursor:pointer}
+.stat-tile-val,.stat-tile-lbl{display:block}
+.home-sec{padding-top:10px}
 .stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 12px}
 .stat-tile{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid transparent;
 border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:border-color 0.12s}
@@ -744,7 +680,6 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
   #lv{max-width:1180px;margin:0 auto}
   #hdr .ht,#hdr .sw{max-width:1180px;margin-left:auto;margin-right:auto}
   .stat-strip{grid-template-columns:repeat(auto-fit,minmax(228px,1fr))}
-  .qa-grid{grid-template-columns:repeat(auto-fit,minmax(205px,1fr))}
   .mast{padding:28px 26px 36px}
   .mast-title{font-size:38px}
   .mast-sub{font-size:14px}
@@ -768,13 +703,6 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
   .age-row{grid-column:1;grid-row:3}
   #calc-out{grid-column:2;grid-row:2/-1;margin-top:0}
   .calc-empty{padding:8px 0}
-}
-@media (min-width:960px){
-  /* The headline takes the full width; the two older trainings share the row
-     underneath it rather than each taking a band of their own. */
-  .home-feats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 12px 14px}
-  .home-feats .feat-card{margin:0;height:100%}
-  .home-feats .feat-hero{grid-column:1 / -1}
 }
 @media (min-width:1220px){
   /* Keep the fixed tab bar's items with the content rather than at the edges. */
@@ -1096,6 +1024,43 @@ function getAirwayStats(){
   }catch(e){ return null; }
 }
 
+// ── NAV TILES ─────────────────────────────────────────────────────────
+// One builder each for the home tiles and the More rows, so every entry has
+// the same shape. An entry either leaves for another page (`href`, and `ext`
+// for another site) or moves within the guide (`goto`, and optionally `sec`
+// to land on a section of More). The second kind renders as a <button>, so
+// it takes keyboard focus the way the old link-less anchors did not.
+function navAttrs(o){
+  if(o.goto) return ' type="button" data-goto="'+o.goto+'"' + (o.sec ? ' data-sec="'+o.sec+'"' : '');
+  return ' href="'+o.href+'"' + (o.ext ? ' target="_blank" rel="noopener noreferrer"' : '');
+}
+function tile(o){
+  var tag = o.goto ? 'button' : 'a';
+  var cls = 'stat-tile' + (o.empty ? ' empty' : '') + (o.ac ? ' ac-chip '+o.ac : '') + (o.cls ? ' '+o.cls : '');
+  return '<'+tag+' class="'+cls+'"'+navAttrs(o)+'>'
+       + '<span class="stat-tile-ico"><svg class="icon"><use href="#'+o.ico+'"></use></svg></span>'
+       + '<span><span class="stat-tile-val">'+o.val+'</span>'
+       + '<span class="stat-tile-lbl">'+o.lbl+'</span></span></'+tag+'>';
+}
+function moreCard(o){
+  var tag = o.goto ? 'button' : 'a';
+  var ico = o.img ? '<img class="edu-avatar-sm" src="'+o.img+'" alt="">'
+                  : '<svg class="icon"><use href="#'+o.ico+'"></use></svg>';
+  return '<'+tag+' class="more-card'+(o.ac ? ' '+o.ac : '')+'"'+navAttrs(o)+'>'
+       + '<span class="more-card-ico">'+ico+'</span>'
+       + '<span class="more-card-info"><span class="more-card-title">'+o.title+'</span>'
+       + '<span class="more-card-sub">'+o.sub+'</span></span>'
+       + '<span class="more-card-arr" aria-hidden="true">&#x203A;</span></'+tag+'>';
+}
+// Scroll to a section of More, clear of the fixed header.
+function jumpToSec(id){
+  var el = $('more-' + id);
+  if(!el) return false;
+  var hdr = $('hdr'), off = hdr ? hdr.offsetHeight : 0;
+  window.scrollTo(0, Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - off - 8));
+  return true;
+}
+
 // ── Refresher sign-up ─────────────────────────────────────────────
 // The banner on the home screen. Everything about the class lives here.
 // It renders from today until the end of the last session and then stops
@@ -1143,13 +1108,22 @@ function rfrNextSession(from, end, nights){
 
 // Returns the banner markup, or '' when there is nothing to advertise.
 // `now` is injectable so the date behaviour can be tested.
+// True from now until the end of the last session. The home banner and the
+// More row both ask this, so they come down on the same day.
+function refresherLive(now){
+  var R = REFRESHER;
+  if(!R || !R.url) return false;
+  now = now || new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return today <= rfrDate(R.end);
+}
+
 function refresherCard(now){
   var R = REFRESHER;
-  if(!R || !R.url) return '';
+  if(!refresherLive(now)) return '';  // course is over — render nothing
   now = now || new Date();
   var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   var start = rfrDate(R.start), end = rfrDate(R.end);
-  if(today > end) return '';      // course is over — render nothing
 
   var when;
   if(today < start){
@@ -1173,6 +1147,13 @@ function refresherCard(now){
   h += '</a>';
   return h;
 }
+// The same class as a row in More → Classes & CE, while it is running.
+function refresherRow(now){
+  if(!refresherLive(now)) return '';
+  var R = REFRESHER;
+  return moreCard({href:R.url, ext:true, ac:'ac-amber', ico:'i-calendar', title:R.title,
+    sub:'Sign-up open &middot; '+R.when+' &middot; from '+rfrLongDate(rfrDate(R.start))});
+}
 if(typeof window !== 'undefined') window.refresherCard = refresherCard;
 
 function renderHome(){
@@ -1194,12 +1175,27 @@ function renderHome(){
 
   h += refresherCard();
 
-  // Featured — newest training. Sits above the stats strip so it is the first
-  // thing on the page after the greeting. When this stops being the new thing,
-  // move it down to the stat strip or the More list rather than leaving a
-  // "New training" badge on something crews have seen for a year.
-  h += '<div class="home-feats">';
+  // The tab bar already carries doses, hospital meds, the formulary, the
+  // ventilator and door codes, and it is on screen the whole time. This page
+  // used to restate all six as a grid of tiles, below three screens of
+  // training — so the first screen on a phone held a sign-up and an ad, and
+  // no tool. Now it opens on the shift tools the tab bar does not have.
+  h += '<div class="sec home-sec">On shift</div>';
+  h += '<div class="stat-strip">';
+  h += tile({href:'ift-call-guide.html', ac:'ac-teal', ico:'i-ambulance',
+             val:'IFT Call Guide', lbl:'Specialty transfers &amp; charting'});
+  h += tile({href:'imagetrend-job-aid.html', ac:'ac-green', ico:'i-clipboard',
+             val:'Charting Help', lbl:'ImageTrend Job Aid'});
+  h += tile({href:'narcotics-logging.html', ac:'ac-amber', ico:'i-lock',
+             val:'Narcotics Logging', lbl:'Operative IQ &middot; 7 videos'});
+  h += tile({goto:'forms', ac:'ac-stone', ico:'i-edit',
+             val:'Caregiver Signature', lbl:'Missing PCR signature'});
+  h += '</div>';
 
+  // Featured — the newest training, and only the newest. When something newer
+  // ships, it takes this slot and the old one lives on in More → Training,
+  // which is where Alaris and Medication Math went when LIFEPAK arrived.
+  h += '<div class="home-feats">';
   h += '<a class="feat-card feat-hero" href="lifepak-15.html">';
   h += '<svg class="feat-ecg" viewBox="0 0 104 50" aria-hidden="true">';
   h += '<path class="base" d="M0 31h104"/>';
@@ -1214,102 +1210,29 @@ function renderHome(){
      + '<span class="feat-chip">4 THERAPIES</span>'
      + '<span class="feat-chip">ON THE REAL KEYS</span></div>';
   h += '<div class="feat-go">Start the station &#x203A;</div></a>';
-
-  h += '<a class="feat-card feat-sm" href="alaris-pump.html">';
-  h += '<svg class="feat-drip" viewBox="0 0 38 52" aria-hidden="true">';
-  h += '<path class="bag" d="M11 3h16a3 3 0 0 1 3 3v20a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"/>';
-  h += '<path class="fill" d="M8 16h22v10a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z"/>';
-  h += '<path class="line" d="M19 29v6M19 44v7"/>';
-  h += '<circle class="drop" cx="19" cy="36" r="2.2"/></svg>';
-  h += '<div class="feat-badge">Training</div>';
-  h += '<div class="feat-title">Alaris <span class="fa">IV Pump</span></div>';
-  h += '<div class="feat-sub">Changing a rate, alarms, piggybacks, what to check at handoff. '
-     + 'Nine short topics built for your phone.</div>';
-  h += '<div class="feat-chips"><span class="feat-chip">9 TOPICS</span>'
-     + '<span class="feat-chip">~25 MIN</span>'
-     + '<span class="feat-chip">INTERACTIVE</span></div>';
-  h += '<div class="feat-go">Start training &#x203A;</div></a>';
-
-  h += '<a class="feat-card feat-violet feat-sm" href="med-math.html">';
-  h += '<svg class="feat-calc" viewBox="0 0 44 52" aria-hidden="true">';
-  h += '<rect class="body" x="7" y="3" width="30" height="46" rx="4"/>';
-  h += '<rect class="screen" x="11" y="7" width="22" height="10" rx="2"/>';
-  h += '<text class="digit" x="14" y="15">0.3</text>';
-  h += '<text class="digit" x="24" y="15">mL</text>';
-  h += '<rect class="k" x="11" y="21" width="6" height="5" rx="1.5"/>';
-  h += '<rect class="k" x="19" y="21" width="6" height="5" rx="1.5"/>';
-  h += '<rect class="k" x="27" y="21" width="6" height="5" rx="1.5"/>';
-  h += '<rect class="k" x="11" y="29" width="6" height="5" rx="1.5"/>';
-  h += '<rect class="k" x="19" y="29" width="6" height="5" rx="1.5"/>';
-  h += '<rect class="k" x="27" y="29" width="6" height="5" rx="1.5"/>';
-  h += '<rect class="k" x="11" y="37" width="14" height="5" rx="1.5"/>';
-  h += '<rect class="k" x="27" y="37" width="6" height="5" rx="1.5"/></svg>';
-  h += '<div class="feat-badge">Training</div>';
-  h += '<div class="feat-title">Medication <span class="fa">Math</span></div>';
-  h += '<div class="feat-sub">Draw-up volumes, weight-based peds doses and caps, drip rates. '
-     + 'Every number from our own formulary.</div>';
-  h += '<div class="feat-chips"><span class="feat-chip">8 TOPICS</span>'
-     + '<span class="feat-chip">PRACTICE PROBLEMS</span>'
-     + '<span class="feat-chip">OUR FORMULARY</span></div>';
-  h += '<div class="feat-go">Start training &#x203A;</div></a>';
   h += '</div>';
 
-  // Personal stats strip
+  // Keep learning — progress and a way into the rest of it.
   var d5 = getDaily5Stats();
-  var vta = getVtaStats();
-  var hemo = getHemoStats();
-  var metab = getMetabStats();
-  var neonate = getNeonateStats();
-  var airway = getAirwayStats();
+  var vta = getVtaStats(), hemo = getHemoStats(), metab = getMetabStats();
+  var neonate = getNeonateStats(), airway = getAirwayStats();
+  var ccDone = (vta&&vta.certificate?1:0)+(hemo&&hemo.certificate?1:0)+(metab&&metab.certificate?1:0)
+             + (neonate&&neonate.certificate?1:0)+(airway&&airway.certificate?1:0);
+  h += '<div class="sec home-sec">Keep learning</div>';
   h += '<div class="stat-strip">';
-  var ccDone = (vta&&vta.certificate?1:0)+(hemo&&hemo.certificate?1:0)+(metab&&metab.certificate?1:0)+(neonate&&neonate.certificate?1:0)+(airway&&airway.certificate?1:0);
-  h += '<a class="stat-tile tile-blue" data-goto="more">';
-  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-cap"></use></svg></div><div>';
-  h += '<div class="stat-tile-val">Critical Care Prep</div>';
-  h += '<div class="stat-tile-lbl">'+(ccDone>0 ? ccDone+' of 5 certified' : '5-course FP-C track')+'</div></div></a>';
-  h += '<a class="stat-tile ac-chip ac-red" href="https://gmrlearning.com/kansas/" target="_blank" rel="noopener noreferrer">';
-  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-heart"></use></svg></div><div>';
-  h += '<div class="stat-tile-val">AHA Classes</div>';
-  h += '<div class="stat-tile-lbl">Sign up &middot; GMR Learning</div></div></a>';
-  h += '<a class="stat-tile tile-purple" href="vent-ltv1200.html">';
-  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div><div>';
-  h += '<div class="stat-tile-val">Ventilator 3000</div>';
-  h += '<div class="stat-tile-lbl">The Game</div></div></a>';
-  if(d5.streak){
-    h += '<a class="stat-tile ac-chip ac-orange" href="quiz-daily5.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">'+d5.streak+'-day streak</div>';
-    h += '<div class="stat-tile-lbl">Daily 5 &middot; '+(d5.totalDone||0)+' completed</div></div></a>';
-  } else {
-    h += '<a class="stat-tile empty ac-chip ac-orange" href="quiz-daily5.html">';
-    h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-flame"></use></svg></div><div>';
-    h += '<div class="stat-tile-val">Start your streak</div>';
-    h += '<div class="stat-tile-lbl">Daily 5 questions</div></div></a>';
-  }
-  h += '<a class="stat-tile ac-chip ac-green" href="imagetrend-job-aid.html">';
-  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div><div>';
-  h += '<div class="stat-tile-val">Charting Help</div>';
-  h += '<div class="stat-tile-lbl">ImageTrend Job Aid</div></div></a>';
-  h += '<a class="stat-tile ac-chip ac-amber" href="narcotics-logging.html">';
-  h += '<div class="stat-tile-ico"><svg class="icon"><use href="#i-lock"></use></svg></div><div>';
-  h += '<div class="stat-tile-val">Narcotics Logging</div>';
-  h += '<div class="stat-tile-lbl">Operative IQ &middot; 7 videos</div></div></a>';
+  h += d5.streak
+     ? tile({href:'quiz-daily5.html', ac:'ac-orange', ico:'i-flame',
+             val:d5.streak+'-day streak', lbl:'Daily 5 &middot; '+(d5.totalDone||0)+' completed'})
+     : tile({href:'quiz-daily5.html', ac:'ac-orange', ico:'i-flame', empty:true,
+             val:'Start your streak', lbl:'Daily 5 questions'});
+  h += tile({goto:'more', sec:'cc', cls:'tile-blue', ico:'i-cap', val:'Critical Care Prep',
+             lbl: ccDone>0 ? ccDone+' of 5 certified' : '5-course FP-C track'});
+  h += tile({href:'https://gmrlearning.com/kansas/', ext:true, ac:'ac-red', ico:'i-heart',
+             val:'AHA Classes', lbl:'Sign up &middot; GMR Learning'});
+  h += tile({goto:'more', sec:'training', ac:'ac-slate', ico:'i-cards',
+             val:'All training', lbl:'Courses, quizzes &amp; flashcards'});
   h += '</div>';
 
-  h += '<div class="qa-grid">';
-  [['calc','i-syringe','Doses','Weight-based dose calculator','ac-red'],
-   ['hosp','i-droplet','Hosp Meds','Hospital-supplied infusions','ac-cyan'],
-   ['formulary','i-pill','Formulary','AMR KC carried medications','ac-violet'],
-   ['vent','i-lungs','Ventilator','IBW, tidal volume &amp; troubleshooting','ac-sky'],
-   ['pcs','i-key','PCS / Doors','Facility access codes','ac-amber'],
-   ['more','i-dots','More','Study tools, forms &amp; resources','ac-slate'],
-  ].forEach(function(t){
-    h += '<button type="button" class="qa-tile '+t[4]+'" data-goto="'+t[0]+'">';
-    h += '<div class="qa-ico"><svg class="icon"><use href="#'+t[1]+'"></use></svg></div>';
-    h += '<div class="qa-label">'+t[2]+'</div>';
-    h += '<div class="qa-sub">'+t[3]+'</div></button>';
-  });
-  h += '</div>';
   c.innerHTML = h;
 }
 
@@ -1631,8 +1554,14 @@ document.addEventListener('DOMContentLoaded', function(){
   // List delegation — handles all dynamic content clicks in one place
   $('lv').addEventListener('click', function(e){
     // More hub → sub-tab navigation
+    var jb = e.target.closest('[data-jump]');
+    if(jb){ jumpToSec(jb.dataset.jump); return; }
     var mc = e.target.closest('[data-goto]');
-    if(mc){ TAB = mc.dataset.goto; render(); window.scrollTo(0,0); return; }
+    if(mc){
+      TAB = mc.dataset.goto; render();
+      if(!(mc.dataset.sec && jumpToSec(mc.dataset.sec))) window.scrollTo(0,0);
+      return;
+    }
     var hm = e.target.closest('.hm-card');
     if(hm){ openHospMed(parseInt(hm.dataset.hidx)); return; }
     var fc = e.target.closest('.drug-card');
@@ -2724,226 +2653,119 @@ function cgfDisplayDate(v){
   return m ? (+m[2])+'/'+(+m[3])+'/'+m[1] : (v||'');
 }
 // ── MORE HUB ──────────────────────────────────────────────────────────────
+// ── MORE ──────────────────────────────────────────────────────────────
+// Everything in the guide that is not on the tab bar, grouped by why a
+// provider opened it rather than by what kind of page it is. The home screen
+// shows a few of these; this page lists all of them, once each.
+var MORE_SECTIONS = [
+  ['shift',    'On shift'],
+  ['training', 'Training'],
+  ['cc',       'Critical care'],
+  ['quiz',     'Quizzes'],
+  ['classes',  'Classes &amp; CE'],
+  ['forms',    'Forms &amp; feedback'],
+];
+function moreSec(id){
+  for(var i = 0; i < MORE_SECTIONS.length; i++)
+    if(MORE_SECTIONS[i][0] === id)
+      return '<div class="sec" id="more-'+id+'">'+MORE_SECTIONS[i][1]+'</div>';
+  return '';
+}
 function renderMore(){
   var c = $('lv');
-  c.innerHTML = [
-    '<div class="more-hub">',
+  var h = '<div class="more-hub">';
 
-    '<div class="sec">FIELD REFERENCE</div>',
-    '<a class="more-card ac-teal" href="ift-call-guide.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-ambulance"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">IFT Call Guide</div>',
-    '    <div class="more-card-sub">How to run &amp; document specialty transfers — logistics, monitoring, charting</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-sky" href="aemt-series.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-cap"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">AEMT Series</div>',
-    '    <div class="more-card-sub">Preparatory blocks with a spaced review queue &mdash; five to nine minutes at a time, offline</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-violet" href="med-math.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-syringe"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Medication Math</div>',
-    '    <div class="more-card-sub">Draw-up volumes, weight-based peds doses &amp; caps, drip rates &mdash; using our own formulary</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-cyan" href="alaris-pump.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-droplet"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Alaris IV Pump Training</div>',
-    '    <div class="more-card-sub">Nine short topics &mdash; changing a rate, alarms, piggybacks, handoff checks &amp; pump safety</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-amber" href="narcotics-logging.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-lock"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Narcotics Logging</div>',
-    '    <div class="more-card-sub">Operative IQ &amp; Frontline video walkthroughs — crew change, administration, audits &amp; restocking</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
+  h += '<div class="more-jump" role="navigation" aria-label="Jump to a section">';
+  MORE_SECTIONS.forEach(function(s){
+    h += '<button type="button" data-jump="'+s[0]+'">'+s[1]+'</button>';
+  });
+  h += '</div>';
 
-    '<a class="more-card ac-green" href="imagetrend-job-aid.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">ImageTrend Job Aid</div>',
-    '    <div class="more-card-sub">Searchable ePCR charting reference</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-emerald" href="organ-transport.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Organ Transport</div>',
-    '    <div class="more-card-sub">Familiarization training — the 3 mission types, your role &amp; charting</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
+  h += moreSec('shift') + '<div class="more-list">';
+  h += moreCard({href:'ift-call-guide.html', ac:'ac-teal', ico:'i-ambulance', title:'IFT Call Guide',
+                 sub:'How to run &amp; document specialty transfers &mdash; logistics, monitoring, charting'});
+  h += moreCard({href:'imagetrend-job-aid.html', ac:'ac-green', ico:'i-clipboard', title:'ImageTrend Job Aid',
+                 sub:'Searchable ePCR charting reference'});
+  h += moreCard({href:'narcotics-logging.html', ac:'ac-amber', ico:'i-lock', title:'Narcotics Logging',
+                 sub:'Operative IQ &amp; Frontline walkthroughs &mdash; crew change, administration, audits &amp; restocking'});
+  h += moreCard({goto:'forms', ac:'ac-stone', ico:'i-edit', title:'Caregiver Signature Form',
+                 sub:'Signed PDF for missing PCR signatures'});
+  h += '</div>';
 
-    '<div class="cc-prep">',
-    '  <div class="cc-banner">',
-    '    <div class="cc-eyebrow">&#x25C6; CRITICAL CARE ACADEMY</div>',
-    '    <div class="cc-title">Critical Care Prep</div>',
-    '    <div class="cc-tag">A five-course track for FP-C &amp; critical-care transport readiness</div>',
-    '    <svg class="cc-wave" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 H58 l4 -7 l4 12 l4 -5 H138 l4 -7 l4 12 l4 -5 H218 l4 -7 l4 12 l4 -5 H300"/></svg>',
-    '  </div>',
-    '  <div class="cc-track">',
-    '    <a class="cc-card" href="vta/academy.html">',
-    '      <div class="cc-ico"><svg class="icon"><use href="#i-lungs"></use></svg></div>',
-    '      <div class="cc-body"><div class="cc-name">Ventilator Academy</div><div class="cc-sub">Lessons, knowledge checks &amp; scenarios</div></div>',
-    '      <div class="cc-meta"><span class="cc-pill">9 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
-    '    </a>',
-    '    <a class="cc-card" href="hemodynamics-academy.html">',
-    '      <div class="cc-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
-    '      <div class="cc-body"><div class="cc-name">Hemodynamics Academy</div><div class="cc-sub">Pressors, arterial lines &amp; MCS devices</div></div>',
-    '      <div class="cc-meta"><span class="cc-pill">8 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
-    '    </a>',
-    '    <a class="cc-card" href="metabolic-academy.html">',
-    '      <div class="cc-ico"><svg class="icon"><use href="#i-droplet"></use></svg></div>',
-    '      <div class="cc-body"><div class="cc-name">Metabolic &amp; Lab Data Academy</div><div class="cc-sub">Acid&#x2013;base, electrolytes &amp; blood-gas reads</div></div>',
-    '      <div class="cc-meta"><span class="cc-pill">8 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
-    '    </a>',
-    '    <a class="cc-card" href="neonate-academy.html">',
-    '      <div class="cc-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
-    '      <div class="cc-body"><div class="cc-name">Neonatal Resuscitation Academy</div><div class="cc-sub">NRP &amp; S.T.A.B.L.E. — the newborn in the first minutes</div></div>',
-    '      <div class="cc-meta"><span class="cc-pill">8 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
-    '    </a>',
-    '    <a class="cc-card" href="airway-academy.html">',
-    '      <div class="cc-ico"><svg class="icon"><use href="#i-syringe"></use></svg></div>',
-    '      <div class="cc-body"><div class="cc-name">Airway &amp; RSI Academy</div><div class="cc-sub">Interactive &mdash; the decision, the difficult airway &amp; physiologic optimization</div></div>',
-    '      <div class="cc-meta"><span class="cc-pill">8 MODULES</span><span class="cc-arr">&#x203A;</span></div>',
-    '    </a>',
-    '  </div>',
-    '</div>',
+  h += moreSec('training') + '<div class="more-list">';
+  h += moreCard({href:'lifepak-15.html', ac:'ac-cyan', ico:'i-pulse', title:'LIFEPAK 15 Station',
+                 sub:'ACLS rhythm recognition and electrical therapy, worked on the unit itself'});
+  h += moreCard({href:'alaris-pump.html', ac:'ac-sky', ico:'i-droplet', title:'Alaris IV Pump',
+                 sub:'Nine short topics &mdash; changing a rate, alarms, piggybacks, handoff checks &amp; pump safety'});
+  h += moreCard({href:'med-math.html', ac:'ac-violet', ico:'i-syringe', title:'Medication Math',
+                 sub:'Draw-up volumes, weight-based peds doses &amp; caps, drip rates &mdash; using our own formulary'});
+  h += moreCard({href:'aemt-series.html', ac:'ac-blue', ico:'i-cap', title:'AEMT Series',
+                 sub:'Preparatory blocks with a spaced review queue &mdash; five to nine minutes at a time, offline'});
+  h += moreCard({href:'vent-ltv1200.html', ac:'ac-purple', ico:'i-lungs', title:'Ventilator 3000',
+                 sub:'The game &mdash; tap any knob on an LTV-1200 to learn what it does'});
+  h += moreCard({href:'organ-transport.html', ac:'ac-emerald', ico:'i-heart', title:'Organ Transport',
+                 sub:'Familiarization &mdash; the three mission types, your role &amp; charting'});
+  h += '</div>';
 
-    '<div class="sec">STUDY &amp; CE</div>',
-    '<a class="more-card ac-orange" href="quiz-daily5.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-calendar"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Daily 5</div>',
-    '    <div class="more-card-sub">Five questions a day \u2014 build a streak</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-pink" href="quiz-rhythms.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Rhythm Strip ID</div>',
-    '    <div class="more-card-sub">Identify 12 EMS rhythms from ECG strips</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-rose" href="quiz-pals.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">PALS 2025 Quiz</div>',
-    '    <div class="more-card-sub">Pediatric advanced life support — explains every answer</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-purple" href="flashcards.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-cards"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Drug Flashcards</div>',
-    '    <div class="more-card-sub">Formulary quick-review cards</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-indigo" href="acls-2025-flashcards.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">ACLS Flashcards</div>',
-    '    <div class="more-card-sub">Algorithm and rhythm review</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
+  h += '<div id="more-cc" class="cc-prep">';
+  h += '  <div class="cc-banner">';
+  h += '    <div class="cc-eyebrow">&#x25C6; CRITICAL CARE ACADEMY</div>';
+  h += '    <div class="cc-title">Critical Care Prep</div>';
+  h += '    <div class="cc-tag">A five-course track for FP-C &amp; critical-care transport readiness</div>';
+  h += '    <svg class="cc-wave" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 H58 l4 -7 l4 12 l4 -5 H138 l4 -7 l4 12 l4 -5 H218 l4 -7 l4 12 l4 -5 H300"/></svg>';
+  h += '  </div>';
+  h += '  <div class="cc-track">';
+  [['vta/academy.html','i-lungs','Ventilator Academy','Lessons, knowledge checks &amp; scenarios','9 MODULES'],
+   ['hemodynamics-academy.html','i-pulse','Hemodynamics Academy','Pressors, arterial lines &amp; MCS devices','8 MODULES'],
+   ['metabolic-academy.html','i-droplet','Metabolic &amp; Lab Data Academy','Acid&#x2013;base, electrolytes &amp; blood-gas reads','8 MODULES'],
+   ['neonate-academy.html','i-heart','Neonatal Resuscitation Academy','NRP &amp; S.T.A.B.L.E. &mdash; the newborn in the first minutes','8 MODULES'],
+   ['airway-academy.html','i-syringe','Airway &amp; RSI Academy','Interactive &mdash; the decision, the difficult airway &amp; physiologic optimization','8 MODULES'],
+  ].forEach(function(a){
+    h += '<a class="cc-card" href="'+a[0]+'">';
+    h += '<div class="cc-ico"><svg class="icon"><use href="#'+a[1]+'"></use></svg></div>';
+    h += '<div class="cc-body"><div class="cc-name">'+a[2]+'</div><div class="cc-sub">'+a[3]+'</div></div>';
+    h += '<div class="cc-meta"><span class="cc-pill">'+a[4]+'</span><span class="cc-arr">&#x203A;</span></div></a>';
+  });
+  h += '  </div>';
+  h += '</div>';
 
-    '<div class="sec">INTERACTIVE TOOLS</div>',
-    '<a class="game-card" href="vent-ltv1200.html">',
-    '  <div class="game-dials">',
-    '    <svg class="game-dial" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11"/><line class="tick" x1="15" y1="2" x2="15" y2="5"/><line class="tick" x1="28" y1="15" x2="25" y2="15"/><line x1="15" y1="15" x2="8" y2="9"/></svg>',
-    '    <svg class="game-dial" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11"/><line class="tick" x1="15" y1="2" x2="15" y2="5"/><line class="tick" x1="28" y1="15" x2="25" y2="15"/><line x1="15" y1="15" x2="15" y2="5"/></svg>',
-    '    <svg class="game-dial" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11"/><line class="tick" x1="15" y1="2" x2="15" y2="5"/><line class="tick" x1="2" y1="15" x2="5" y2="15"/><line x1="15" y1="15" x2="22" y2="10"/></svg>',
-    '  </div>',
-    '  <div class="game-badge">&#x25C6; Interactive Trainer &middot; The Game</div>',
-    '  <div class="game-title">Ventilator <span class="g3k">3000</span></div>',
-    '  <div class="game-sub">Tap any knob to learn what it does &mdash; a hands-on LTV-1200 vent trainer.</div>',
-    '  <div class="game-play"><span class="game-play-ico">&#x25B6;</span> Play now</div>',
-    '</a>',
-    '<a class="more-card ac-cyan" href="lifepak-15.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-pulse"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">LIFEPAK 15 Station</div>',
-    '    <div class="more-card-sub">ACLS rhythm recognition and electrical therapy, worked on the unit itself</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
+  h += moreSec('quiz') + '<div class="more-list">';
+  h += moreCard({href:'quiz-daily5.html', ac:'ac-orange', ico:'i-calendar', title:'Daily 5',
+                 sub:'Five questions a day &mdash; build a streak'});
+  h += moreCard({href:'quiz-rhythms.html', ac:'ac-pink', ico:'i-pulse', title:'Rhythm Strip ID',
+                 sub:'Identify 12 EMS rhythms from ECG strips'});
+  h += moreCard({href:'quiz-pals.html', ac:'ac-rose', ico:'i-heart', title:'PALS 2025 Quiz',
+                 sub:'Pediatric advanced life support &mdash; explains every answer'});
+  h += moreCard({href:'flashcards.html', ac:'ac-purple', ico:'i-cards', title:'Drug Flashcards',
+                 sub:'Formulary quick-review cards'});
+  h += moreCard({href:'acls-2025-flashcards.html', ac:'ac-indigo', ico:'i-pulse', title:'ACLS Flashcards',
+                 sub:'Algorithm and rhythm review'});
+  h += '</div>';
 
-    '<div class="sec">FORMS &amp; ADMIN</div>',
-    // Credentials Log is hidden for now — credentials-log.html is still in the
-    // repo, this is the only link to it. Uncomment to put the card back.
-    // '<a class="more-card ac-blue" href="credentials-log.html">',
-    // '  <div class="more-card-ico"><svg class="icon"><use href="#i-lock"></use></svg></div>',
-    // '  <div class="more-card-info">',
-    // '    <div class="more-card-title">Credentials Log</div>',
-    // '    <div class="more-card-sub">Show my expiration &mdash; ACLS, BLS &amp; state license renewal dates</div>',
-    // '  </div>',
-    // '  <div class="more-card-arr">&#x203A;</div>',
-    // '</a>',
-    '<a class="more-card ac-lime" href="kansas-class-builder.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-cap"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Kansas Class Builder</div>',
-    '    <div class="more-card-sub">Generate a print-ready Kansas CE submission packet</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<div class="more-card ac-stone" data-goto="forms">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-clipboard"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Caregiver Signature Form</div>',
-    '    <div class="more-card-sub">Signed PDF for missing PCR signatures</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</div>',
-    '<a class="more-card ac-yellow" href="immunization-forms.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-heart"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Health &amp; Immunization Forms</div>',
-    '    <div class="more-card-sub">Sign &amp; download Flu, Hep B, or TB/PPD statements</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
-    '<a class="more-card ac-fuchsia" href="orientation-exit-survey.html">',
-    '  <div class="more-card-ico"><svg class="icon"><use href="#i-edit"></use></svg></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">New Hire Survey</div>',
-    '    <div class="more-card-sub">Complete after/during your field rides</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</a>',
+  h += moreSec('classes') + '<div class="more-list">';
+  h += refresherRow();
+  h += moreCard({href:'https://gmrlearning.com/kansas/', ext:true, ac:'ac-red', ico:'i-heart', title:'AHA Classes',
+                 sub:'BLS, ACLS &amp; PALS sign-up through GMR Learning'});
+  h += moreCard({href:'kansas-class-builder.html', ac:'ac-lime', ico:'i-cap', title:'Kansas Class Builder',
+                 sub:'Generate a print-ready Kansas CE submission packet'});
+  h += '</div>';
 
-    '<div class="sec">FEEDBACK</div>',
-    '<div class="more-card" data-goto="ask">',
-    '  <div class="more-card-ico"><img class="edu-avatar-sm" src="educator.jpg" alt=""></div>',
-    '  <div class="more-card-info">',
-    '    <div class="more-card-title">Ask the Educator</div>',
-    '    <div class="more-card-sub">Questions &amp; feedback to Dr. Deshmukh &mdash; no name required</div>',
-    '  </div>',
-    '  <div class="more-card-arr">&#x203A;</div>',
-    '</div>',
+  h += moreSec('forms') + '<div class="more-list">';
+  // Credentials Log is hidden for now — credentials-log.html is still in the
+  // repo, and this was its only link. To restore it, add:
+  //   moreCard({href:'credentials-log.html', ac:'ac-blue', ico:'i-lock', title:'Credentials Log',
+  //             sub:'Show my expiration &mdash; ACLS, BLS &amp; state license renewal dates'})
+  h += moreCard({href:'immunization-forms.html', ac:'ac-yellow', ico:'i-heart', title:'Health &amp; Immunization Forms',
+                 sub:'Sign &amp; download Flu, Hep B, or TB/PPD statements'});
+  h += moreCard({href:'orientation-exit-survey.html', ac:'ac-fuchsia', ico:'i-edit', title:'New Hire Survey',
+                 sub:'Complete after/during your field rides'});
+  h += moreCard({goto:'ask', img:'educator.jpg', title:'Ask the Educator',
+                 sub:'Questions &amp; feedback to Dr. Deshmukh &mdash; no name required'});
+  h += '</div>';
 
-    '<div class="colophon">AMR KC Field Guide &middot; an independent work by Jordan Hunter Jones &middot; &copy; 2026</div>',
-    '</div>',
-  ].join('');
+  h += '<div class="colophon">AMR KC Field Guide &middot; an independent work by Jordan Hunter Jones &middot; &copy; 2026</div>';
+  h += '</div>';
+  c.innerHTML = h;
 }
 
 // ── ASK THE EDUCATOR ──────────────────────────────────────────────────────
