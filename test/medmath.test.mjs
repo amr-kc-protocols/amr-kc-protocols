@@ -363,28 +363,21 @@ const PRACTICE_IDS = ['draw','peds','drip','drops'];
   await p.waitForTimeout(400);
   const gate = p.locator('text=I Understand');
   if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(400); }
-  const feat = p.locator('.feat-card[href="med-math.html"]');
-  ok('M11 home shows the feature panel', (await feat.count()) === 1);
-  /* "New training" moved to the LIFEPAK station when that shipped — one badge,
-     on the newest thing, or it stops meaning anything. Med Math keeps a
-     Training badge. */
-  ok('M11 the panel is badged as training',
-     /training/i.test(await feat.locator('.feat-badge').textContent()));
-  ok('M11 and the "new" flag sits on the newest trainer, not this one',
-     /new training/i.test(await p.locator('.feat-card[href="lifepak-15.html"] .feat-badge').textContent())
-       && !/new/i.test(await feat.locator('.feat-badge').textContent()));
-  const box = await feat.boundingBox();
-  ok('M11 the panel sits high on the page', box && box.y < 1200, 'y=' + (box && Math.round(box.y)));
-  // Three featured panels now sit together; they must not read as one block.
-  const shades = await p.locator('.feat-card').evaluateAll(els =>
-    els.map(e => getComputedStyle(e).backgroundImage));
-  ok('M11 the three panels are each visually distinct',
-     shades.length === 3 && new Set(shades).size === 3,
-     shades.length + ' panels, ' + new Set(shades).size + ' distinct');
-  await p.evaluate(() => { const b = document.querySelector('[data-goto="more"]'); if (b) b.click(); });
+  /* Med Math had a homepage panel beside Alaris under the LIFEPAK hero. The
+     homepage now features only the newest training, so the "new" flag and the
+     slot are LIFEPAK's, and Med Math lives in More → Training with the rest. */
+  ok('M11 the "new" flag sits on the newest trainer',
+     /new training/i.test(await p.locator('.feat-card[href="lifepak-15.html"] .feat-badge').textContent()));
+  ok('M11 and not on this one',
+     (await p.locator('.feat-card[href="med-math.html"] .feat-badge', { hasText: /new/i }).count()) === 0);
+  await p.locator('#lv [data-goto="more"][data-sec="training"]').click();
   await p.waitForTimeout(400);
   ok('M11 More lists it exactly once',
      (await p.locator('.more-card[href="med-math.html"]').count()) === 1);
+  ok('M11 under Training',
+     await p.evaluate(() => { const c = document.querySelector('.more-card[href="med-math.html"]');
+       const list = c && c.closest('.more-list'); const sec = list && list.previousElementSibling;
+       return !!sec && sec.id === 'more-training'; }));
   await p.context().close(); }
 
 { const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');

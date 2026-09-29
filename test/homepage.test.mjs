@@ -124,7 +124,10 @@ for (const [label, w, h] of SCREENS) {
     };
     const lv = document.getElementById('lv').getBoundingClientRect();
     return {
-      qa: cols('.qa-grid'), stat: cols('.stat-strip'),
+      // First strip is On shift, last is Keep learning.
+      shift: cols('.stat-strip'),
+      learn: (() => { const all = document.querySelectorAll('.stat-strip');
+        return all.length ? getComputedStyle(all[all.length - 1]).gridTemplateColumns.split(' ').length : 0; })(),
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       lvWidth: Math.round(lv.width),
       height: document.body.scrollHeight,
@@ -132,8 +135,8 @@ for (const [label, w, h] of SCREENS) {
   });
   ok(`H4 ${label}: no sideways scroll`, m.overflow <= 0, 'overflow=' + m.overflow);
   if (w >= 760) {
-    ok(`H4 ${label}: quick actions go multi-column`, m.qa >= 3, m.qa + ' columns');
-    ok(`H4 ${label}: stat tiles go multi-column`, m.stat >= 3, m.stat + ' columns');
+    ok(`H4 ${label}: shift tools go multi-column`, m.shift >= 3, m.shift + ' columns');
+    ok(`H4 ${label}: learning tiles go multi-column`, m.learn >= 3, m.learn + ' columns');
     // Below the 1180px cap there is nothing to cap, so only assert the cap
     // itself — and that it actually bites on a screen wider than it.
     ok(`H4 ${label}: content never exceeds the 1180px cap`,
@@ -143,65 +146,74 @@ for (const [label, w, h] of SCREENS) {
          m.lvWidth < w, m.lvWidth + 'px of ' + w);
     }
   } else {
-    ok(`H4 ${label}: stays two-up on a phone`, m.qa === 2, m.qa + ' columns');
+    ok(`H4 ${label}: stays two-up on a phone`, m.shift === 2 && m.learn === 2,
+       m.shift + ' / ' + m.learn + ' columns');
   }
   ok(`H4 ${label}: no errors`, p._errs.length === 0, p._errs.join('|'));
   await p.context().close();
 }
 
-/* H5 — three featured panels, and they are not equals. The newest takes the
-   full width above the other two, which share the row beneath it; on a phone
-   all three stack. The badge that says "new" belongs to one of them. */
+/* H5 — one featured panel, and it is the newest. There used to be three, and
+   the two older ones restated items already in More. The slot now belongs to
+   whatever shipped last; when something newer arrives it takes the slot and
+   the old one stays in More → Training. */
 { const wide = await home(1366, 768);
   const cards = await wide.locator('.feat-card').evaluateAll(els => els.map(e => {
     const b = e.getBoundingClientRect();
-    return { href: e.getAttribute('href'), top: Math.round(b.top),
-             w: Math.round(b.width), h: Math.round(b.height) };
+    return { href: e.getAttribute('href'), w: Math.round(b.width) };
   }));
-  ok('H5 all three featured panels render', cards.length === 3, JSON.stringify(cards));
-  const hero = cards.find(c => c.href === 'lifepak-15.html');
-  const rest = cards.filter(c => c !== hero);
-  ok('H5 the newest is the hero', !!hero && cards[0] === hero, JSON.stringify(cards));
-  ok('H5 it takes the full width on a Toughbook',
-     hero && rest.every(c => hero.w > c.w * 1.7), JSON.stringify(cards));
-  ok('H5 it is the tallest of them', hero && rest.every(c => hero.h > c.h), JSON.stringify(cards));
-  ok('H5 the other two share the row underneath it',
-     rest.length === 2 && rest[0].top === rest[1].top && rest[0].top > hero.top,
-     JSON.stringify(cards));
-  ok('H5 nothing overflows sideways',
-     await wide.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
-
+  ok('H5 one featured panel on the homepage', cards.length === 1, JSON.stringify(cards));
+  ok('H5 it is the newest training', cards[0] && cards[0].href === 'lifepak-15.html', JSON.stringify(cards));
+  const lvW = await wide.evaluate(() => document.getElementById('lv').getBoundingClientRect().width);
+  ok('H5 it takes the full width on a Toughbook', cards[0] && cards[0].w > lvW * 0.9,
+     (cards[0] && cards[0].w) + ' of ' + Math.round(lvW));
   /* One "new" badge. This page already warned against leaving that on
-     something a crew has had for a year, and three at once means none. */
+     something a crew has had for a year. */
   const badges = await wide.locator('.feat-badge').allTextContents();
   ok('H5 exactly one panel claims to be new',
      badges.filter(t => /new/i.test(t)).length === 1, JSON.stringify(badges));
+  ok('H5 nothing overflows sideways',
+     await wide.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   await wide.context().close();
 
+  // On a phone the shift tools come first, then the training.
   const narrow = await home(390, 844);
-  const stacked = await narrow.locator('.feat-card').evaluateAll(els =>
-    els.map(e => Math.round(e.getBoundingClientRect().top)));
-  ok('H5 all three stack on a phone',
-     stacked.length === 3 && new Set(stacked).size === 3, JSON.stringify(stacked));
-  const heroFirst = await narrow.locator('.feat-card').first().getAttribute('href');
-  ok('H5 and the hero is the first thing a crew sees', heroFirst === 'lifepak-15.html', heroFirst);
+  const order = await narrow.evaluate(() => {
+    const shift = document.querySelector('.stat-strip'), feat = document.querySelector('.feat-card');
+    return !!(shift && feat && (shift.compareDocumentPosition(feat) & Node.DOCUMENT_POSITION_FOLLOWING));
+  });
+  ok('H5 on a phone the shift tools come before the training', order);
   await narrow.context().close(); }
 
-/* H6 — the things a crew opens are still one tap away */
+/* H6 — nothing the homepage used to offer has been lost. Before the
+   reorganization the homepage linked fifteen places. Six of them restated the
+   tab bar, which is on screen the whole time; seven were also in More. Every
+   one of the fifteen must still be on the homepage, on the tab bar, or listed
+   in More — and the homepage must not restate the tab bar again. */
 { const p = await home(1366, 768);
-  for (const [label, sel] of [
-    ['LIFEPAK 15 sim',   '.feat-card[href="lifepak-15.html"]'],
-    ['Alaris training',  '.feat-card[href="alaris-pump.html"]'],
-    ['Medication Math',  '.feat-card[href="med-math.html"]'],
-    ['dose calculator',  '.qa-tile[data-goto="calc"]'],
-    ['hospital meds',    '.qa-tile[data-goto="hosp"]'],
-    ['formulary',        '.qa-tile[data-goto="formulary"]'],
-    ['ventilator',       '.qa-tile[data-goto="vent"]'],
-    ['door codes',       '.qa-tile[data-goto="pcs"]'],
-    ['More',             '.qa-tile[data-goto="more"]'],
-  ]) {
-    ok(`H6 ${label} is on the homepage`, (await p.locator(sel).count()) === 1);
-  }
+  const TAB_BAR = ['calc', 'hosp', 'formulary', 'vent', 'pcs', 'more'];
+  const PAGES = ['lifepak-15.html', 'alaris-pump.html', 'med-math.html', 'vent-ltv1200.html',
+                 'quiz-daily5.html', 'imagetrend-job-aid.html', 'narcotics-logging.html',
+                 'https://gmrlearning.com/kansas/'];
+  for (const t of TAB_BAR)
+    ok(`H6 ${t} is on the tab bar`, (await p.locator(`#nav .nb[data-tab="${t}"]`).count()) === 1);
+  const onHome = await p.evaluate(() =>
+    [...document.querySelectorAll('#lv a[href]')].map(a => a.getAttribute('href')));
+  const restated = await p.evaluate((tabs) =>
+    [...document.querySelectorAll('#lv [data-goto]')].map(e => e.dataset.goto)
+      .filter(g => tabs.includes(g) && g !== 'more'), TAB_BAR);
+  ok('H6 the homepage does not restate the tab bar', restated.length === 0, JSON.stringify(restated));
+
+  await p.locator('#nav .nb[data-tab="more"]').click();
+  await p.waitForTimeout(300);
+  const onMore = await p.evaluate(() =>
+    [...document.querySelectorAll('#lv a[href]')].map(a => a.getAttribute('href')));
+  for (const href of PAGES)
+    ok(`H6 ${href} is still reachable`, onHome.includes(href) || onMore.includes(href),
+       'not on home or More');
+  await p.locator('#nav .nb[data-tab="home"]').click();
+  await p.waitForTimeout(300);
+
   // And the search still works, since it is the fastest route to a dose.
   await p.fill('#srch', 'adenosine');
   await p.waitForTimeout(400);
@@ -343,6 +355,91 @@ for (const [label, w, h] of SCREENS) {
   ok(`H11 ${label}: no errors`, p._errs.length === 0, p._errs.join('|'));
   await p.context().close();
 }
+
+/* H12 — More is an index, grouped by why a provider opened it, with a jump
+   list at the top. Everything in it appears once. Moving within the guide is
+   done by real buttons, so it works from a keyboard. */
+for (const [label, w, h] of [['phone 390', 390, 844], ['Toughbook 1366', 1366, 768]]) {
+  const p = await home(w, h);
+  await p.locator('#nav .nb[data-tab="more"]').click();
+  await p.waitForTimeout(300);
+
+  const jumps = await p.locator('.more-jump [data-jump]').evaluateAll(els => els.map(e => e.dataset.jump));
+  ok(`H12 ${label}: the jump list names six sections`, jumps.length === 6, JSON.stringify(jumps));
+  const missing = await p.evaluate((ids) => ids.filter(id => !document.getElementById('more-' + id)), jumps);
+  ok(`H12 ${label}: every jump has a section to land on`, missing.length === 0, JSON.stringify(missing));
+
+  // Each jump lands its section just under the fixed header, not behind it.
+  const hdrBottom = await p.evaluate(() => document.getElementById('hdr').getBoundingClientRect().bottom);
+  const bad = [];
+  for (const id of jumps) {
+    await p.evaluate(() => window.scrollTo(0, 0));
+    await p.locator(`.more-jump [data-jump="${id}"]`).click();
+    await p.waitForTimeout(120);
+    const top = await p.evaluate((i) => document.getElementById('more-' + i).getBoundingClientRect().top, id);
+    const max = await p.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    const y = await p.evaluate(() => window.pageYOffset);
+    // A section near the end cannot scroll higher than the page allows.
+    if (!(top >= hdrBottom - 1 && (top <= hdrBottom + 40 || y >= max - 1))) bad.push(id + '@' + Math.round(top));
+  }
+  ok(`H12 ${label}: each jump lands its section below the header`, bad.length === 0,
+     'header ' + Math.round(hdrBottom) + ': ' + bad.join(', '));
+
+  const hrefs = await p.evaluate(() => [...document.querySelectorAll('#lv a[href]')].map(a => a.getAttribute('href')));
+  const dupes = hrefs.filter((x, i) => hrefs.indexOf(x) !== i);
+  ok(`H12 ${label}: nothing is listed twice`, dupes.length === 0, JSON.stringify(dupes));
+
+  const empty = await p.evaluate(() => [...document.querySelectorAll('#lv .sec[id^="more-"]')]
+    .filter(sec => { const n = sec.nextElementSibling; return !n || !n.querySelector('a,button'); })
+    .map(sec => sec.id));
+  ok(`H12 ${label}: no section is empty`, empty.length === 0, JSON.stringify(empty));
+
+  const notButtons = await p.evaluate(() => [...document.querySelectorAll('#lv [data-goto]')]
+    .filter(e => e.tagName !== 'BUTTON').map(e => e.tagName + ':' + e.dataset.goto));
+  ok(`H12 ${label}: in-app entries are buttons`, notButtons.length === 0, JSON.stringify(notButtons));
+  ok(`H12 ${label}: no sideways scroll`,
+     await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  ok(`H12 ${label}: no errors`, p._errs.length === 0, p._errs.join('|'));
+  await p.context().close();
+}
+
+/* H12 — the homepage tiles that point into More land on the right section. */
+{ const p = await home(390, 844);
+  for (const [sec, label] of [['cc', 'Critical Care Prep'], ['training', 'All training']]) {
+    await p.locator('#nav .nb[data-tab="home"]').click();
+    await p.waitForTimeout(250);
+    await p.locator(`#lv [data-goto="more"][data-sec="${sec}"]`).click();
+    await p.waitForTimeout(250);
+    const m = await p.evaluate((id) => ({
+      tab: location.hash,
+      top: document.getElementById('more-' + id).getBoundingClientRect().top,
+      hdr: document.getElementById('hdr').getBoundingClientRect().bottom,
+    }), sec);
+    ok(`H12 "${label}" opens More at that section`,
+       m.tab === '#more' && m.top >= m.hdr - 1 && m.top <= m.hdr + 40, JSON.stringify(m));
+  }
+  // A keyboard user can reach and open an in-app tile.
+  await p.locator('#nav .nb[data-tab="home"]').click();
+  await p.waitForTimeout(250);
+  await p.locator('#lv [data-goto="forms"]').focus();
+  await p.keyboard.press('Enter');
+  await p.waitForTimeout(250);
+  ok('H12 the Caregiver tile opens from the keyboard', /#forms$/.test(await p.evaluate(() => location.hash)));
+  await p.context().close(); }
+
+/* H13 — on a phone the first screen holds the shift tools, whole, above the
+   tab bar. This was the point of the reorganization: before it, the first
+   screen held a sign-up banner and a training advert and no tool. */
+{ const p = await home(390, 844);
+  const m = await p.evaluate(() => {
+    const nav = document.getElementById('nav').getBoundingClientRect().top;
+    const tiles = [...document.querySelectorAll('.stat-strip')][0].querySelectorAll('.stat-tile');
+    return { nav: Math.round(nav), n: tiles.length,
+             bottoms: [...tiles].map(t => Math.round(t.getBoundingClientRect().bottom)) };
+  });
+  ok('H13 four shift tools', m.n === 4, m.n);
+  ok('H13 all of them fully on the first screen', m.bottoms.every(b => b <= m.nav), JSON.stringify(m));
+  await p.context().close(); }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));
