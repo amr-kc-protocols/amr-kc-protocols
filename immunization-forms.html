@@ -116,6 +116,65 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 .sub{margin-top:10px}
 .notice-ok{background:var(--correct-bg);border-color:#b7e3c6;color:#14663a}
 .notice-mute{background:var(--surface2);border-color:var(--border);color:var(--gray);font-weight:500}
+/* ── Fit test guide: 3M qualitative (Bitrex / saccharin) ──────────────── */
+.fg{margin:4px 0 14px;padding-top:14px;border-top:1px solid var(--border)}
+.fg-h{font-size:14px;font-weight:700;color:var(--white)}
+.fg-src{font-size:11px;color:var(--gray);margin:2px 0 12px;line-height:1.45}
+.fg-step{background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:12px 13px;margin-bottom:10px}
+.fg-step.done{background:var(--correct-bg);border-color:#b7e3c6}
+.fg-step.off{opacity:.55}
+.fg-n{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal2)}
+.fg-step.done .fg-n{color:var(--correct)}
+.fg-t{font-size:14px;font-weight:700;color:var(--white);margin:2px 0 4px}
+.fg-p{font-size:13px;line-height:1.5;color:var(--white)}
+.fg-p b{font-weight:700}
+.fg-step .chk{margin-top:8px}
+.fg-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.fg-btn{font:inherit;font-size:13px;font-weight:600;padding:9px 14px;border-radius:9px;
+  border:1.5px solid var(--border);background:#fff;color:var(--white);cursor:pointer}
+.fg-btn:focus-visible{outline:2px solid var(--teal2);outline-offset:2px}
+.fg-btn[aria-pressed="true"]{border-color:var(--teal2);background:#eaf1fd;color:var(--teal)}
+.fg-btn.primary{background:var(--teal2);border-color:var(--teal2);color:#fff}
+.fg-btn.danger{background:var(--wrong);border-color:var(--wrong);color:#fff}
+.fg-btn:disabled{opacity:.45;cursor:not-allowed}
+.fg-why{font-size:12px;color:var(--gray);margin-top:8px}
+.fg-stop{margin-top:10px;font-size:13px;line-height:1.5;color:var(--wrong);
+  background:var(--wrong-bg);border:1px solid #f3c6c6;border-radius:9px;padding:10px 12px}
+.fg-stop small{display:block;color:var(--gray);font-size:11px;margin-top:4px}
+.fg-dose{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.fg-dose div{background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px 8px;text-align:center}
+.fg-dose b{display:block;font-size:26px;font-weight:700;color:var(--teal);font-variant-numeric:tabular-nums;line-height:1.1}
+.fg-dose span{font-size:11px;color:var(--gray);line-height:1.35;display:block}
+/* the live test */
+.fg-live{background:#fff;border:1.5px solid var(--teal2);border-radius:12px;padding:14px;margin-top:10px}
+.fg-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.fg-of{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal2)}
+.fg-left{font-size:13px;color:var(--gray);font-variant-numeric:tabular-nums}
+.fg-ex{font-size:21px;font-weight:700;color:var(--white);line-height:1.2;margin:4px 0 10px}
+.fg-bar{height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.fg-bar i{display:block;height:100%;background:var(--teal2);width:0}
+.fg-spray{border-radius:10px;padding:11px 12px;font-size:14px;font-weight:600;text-align:center;
+  background:var(--surface2);color:var(--white);font-variant-numeric:tabular-nums}
+.fg-spray.now{background:var(--warn);color:#fff;font-size:17px;font-weight:700}
+@media (prefers-reduced-motion:no-preference){
+  .fg-spray.now{animation:fgpulse .8s ease-in-out infinite alternate}
+  @keyframes fgpulse{from{filter:brightness(1)}to{filter:brightness(1.18)}}
+}
+.fg-rainbow{margin-top:12px;font-size:15px;line-height:1.65;color:var(--white);background:var(--surface2);
+  border-left:3px solid var(--teal2);border-radius:0 8px 8px 0;padding:11px 13px}
+.fg-rainbow .fg-n{display:block;margin-bottom:4px}
+.fg-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:4px;counter-reset:fgx}
+.fg-list li{counter-increment:fgx;font-size:12.5px;color:var(--gray);display:flex;gap:8px}
+.fg-list li::before{content:counter(fgx);width:16px;text-align:right;font-weight:700;flex-shrink:0}
+.fg-list li.cur{color:var(--white);font-weight:700}
+.fg-list li.done{color:var(--correct)}
+.fg-list li.done::before{content:"\2713"}
+.fg-out{border-radius:10px;padding:13px 14px;margin-top:10px;font-size:13px;line-height:1.5}
+.fg-out b{display:block;font-size:17px;margin-bottom:3px}
+.fg-out.pass{background:var(--correct-bg);border:1px solid #b7e3c6;color:#14663a}
+.fg-out.fail{background:var(--wrong-bg);border:1px solid #f3c6c6;color:var(--wrong)}
+.fg-mute{margin-left:auto}
 
 /* SIGNATURE */
 .sig-wrap{margin-top:6px}
@@ -322,6 +381,309 @@ function ppdEvaluate(){
   return ev;
 }
 
+// ── FIT TEST GUIDE ────────────────────────────────────────────────────────
+// The 3M qualitative fit test quick guide (Bitrex or saccharin), run as a
+// walkthrough inside the Qualitative Fit Test card. It helps the
+// administrator run the test; it is not part of SR-100.03.1. Nothing it
+// records goes into the PDF, and the Result can still be chosen by hand —
+// when the exercises finish, or the subject tastes the solution, it sets the
+// Result for them.
+//
+// Every instruction is the 3M sheet's except one, and that one is labelled on
+// screen: a subject who cannot taste the sensitivity solution after 30
+// squeezes cannot be fit tested with it (OSHA 29 CFR 1910.134 Appendix A).
+// Without it the walkthrough would have nowhere to go from that answer.
+var FG_EXERCISES=['Normal breathing','Deep breathing','Turn head side to side',
+  'Move head up and down','Read the Rainbow Passage aloud','Bend at the waist','Normal breathing'];
+var FG_RAINBOW_EX=4;                         // index of the Rainbow Passage exercise
+var FG_EX_MS=60000, FG_SPRAY_MS=30000, FG_FLASH_MS=6000;
+var FG_TOTAL_MS=FG_EXERCISES.length*FG_EX_MS;
+var FG_RAINBOW='When the sunlight strikes raindrops in the air, they act like a prism and form a '+
+  'rainbow. The rainbow is a division of white light into many beautiful colors. These take the '+
+  'shape of a long round arch, with its path high above, and its two ends apparently beyond the '+
+  'horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no '+
+  'one ever finds it. When a man looks for something beyond reach, his friends say he is looking '+
+  'for the pot of gold at the end of the rainbow.';
+
+var FG={};
+function fgReset(){
+  fgStop();
+  FG={shaven:false,water:false,level:0,noTaste:false,sealed:false,
+      phase:'ready',                    // ready | running | paused | pass | fail
+      acc:0,since:0,timer:null,lastK:0,lastEx:0,endAt:0,
+      muted:false,audio:(FG&&FG.audio)||null,wake:null};
+}
+function fgElapsed(){ return FG.acc+(FG.phase==='running'?Date.now()-FG.since:0); }
+function fgReady(){ return FG.shaven&&FG.water&&FG.level>0&&FG.sealed; }
+function fgLive(){ return FG.phase==='running'||FG.phase==='paused'; }
+function fgFmt(ms){ var s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+function fgFmtAt(ms){ var s=Math.max(0,Math.floor(ms/1000)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+
+function fgChk(id,on,label,dis){
+  return '<label class="chk"><input type="checkbox" id="'+id+'"'+(on?' checked':'')+(dis?' disabled':'')+
+    '><span>'+label+'</span></label>';
+}
+function fgBtn(id,label,cls,attrs){
+  return '<button type="button" class="fg-btn'+(cls?' '+cls:'')+'" id="'+id+'"'+(attrs||'')+'>'+label+'</button>';
+}
+
+function fgRender(){
+  var box=document.getElementById('fit-guide'); if(!box) return;
+  var focused=document.activeElement&&document.activeElement.id;
+  var sol=pick('fit-sol');
+  if(sol==='Smoke'){
+    box.innerHTML='<div class="fg"><div class="notice notice-mute">The 3M quick guide below covers '+
+      'Bitrex and saccharin only. For smoke, follow the smoke kit&rsquo;s instructions.</div></div>';
+    return;
+  }
+  if(sol!=='Bitrex / Saccharin'){ box.innerHTML=''; return; }
+
+  var lock=FG.phase!=='ready';           // setup is fixed once the clock has started
+  var n=FG.level, half=FG.level/2;
+  var h='<div class="fg">';
+  h+='<div class="fg-h">Step by step: 3M qualitative fit test</div>';
+  h+='<div class="fg-src">From the 3M quick guide for Bitrex or saccharin. Use it with your 3M '+
+     'fit-test kit and respiratory protection program. The guide is not part of the record.</div>';
+
+  // Once the clock has started, the finished setup collapses to one line so
+  // the timer is what fills the screen — on a phone the four setup blocks
+  // are about 900px, and the administrator should not scroll to find a cue.
+  if(lock){
+    h+='<div class="fg-step done" id="fg-setup"><div class="fg-n">Steps 1&ndash;3 done</div>'+
+       '<div class="fg-p">Sensitivity at <b>'+n+'</b> &middot; seal check complete &middot; '+
+       '<b>'+n+'</b> sprays to start, then <b>'+half+'</b> every 30 seconds.</div></div>';
+  } else {
+  // Before you start
+  h+='<div class="fg-step'+(FG.shaven&&FG.water?' done':'')+'"><div class="fg-n">Before you start</div>';
+  h+=fgChk('fg-shaven',FG.shaven,'Clean-shaven where the respirator seals.',lock);
+  h+=fgChk('fg-water',FG.water,'No food, gum, smoking, or drinks other than water for 15 minutes.',lock);
+  h+='</div>';
+
+  // 1 · sensitivity
+  h+='<div class="fg-step'+(n>0?' done':'')+'"><div class="fg-n">Step 1</div>';
+  h+='<div class="fg-t">Sensitivity test &mdash; no mask</div>';
+  h+='<div class="fg-p">Hood on. Mouth open, tongue slightly out. Spray the <b>sensitivity</b> '+
+     'solution in groups of 10 squeezes until tasted. Record the number:</div>';
+  h+='<div class="fg-btns" role="group" aria-label="Sensitivity result">';
+  [10,20,30].forEach(function(l){
+    h+=fgBtn('fg-l'+l,'Tasted at '+l,'',' data-fg-level="'+l+'" aria-pressed="'+(FG.level===l)+'"'+(lock?' disabled':''));
+  });
+  h+=fgBtn('fg-lnone','Not tasted after 30','',' data-fg-level="none" aria-pressed="'+FG.noTaste+'"'+(lock?' disabled':''));
+  h+='</div>';
+  if(FG.noTaste){
+    h+='<div class="fg-stop"><b>Cannot be fit tested with this solution.</b> Stop here and use a '+
+       'different test agent or fit test method.<small>From OSHA 29 CFR 1910.134 Appendix A &mdash; '+
+       'this case is not on the 3M sheet.</small></div>';
+  }
+  h+='</div>';
+
+  // 2 · respirator
+  var s2off=!n;
+  h+='<div class="fg-step'+(FG.sealed?' done':'')+(s2off?' off':'')+'"><div class="fg-n">Step 2</div>';
+  h+='<div class="fg-t">Put on the respirator</div>';
+  h+='<div class="fg-p">Fit the mask, tighten it correctly, and complete the user seal check.</div>';
+  h+=fgChk('fg-sealed',FG.sealed,'User seal check complete.',lock||s2off);
+  h+='</div>';
+
+  // 3 · start
+  var ready=fgReady();
+  h+='<div class="fg-step'+(lock?' done':'')+(!ready&&!lock?' off':'')+'"><div class="fg-n">Step 3</div>';
+  h+='<div class="fg-t">Start the fit test</div>';
+  h+='<div class="fg-p">Hood on. Use the <b>FIT TEST</b> solution &mdash; not the sensitivity solution.</div>';
+  h+='<div class="fg-dose"><div><b id="fg-dose-init">'+(n||'&ndash;')+'</b><span>sprays to start</span></div>'+
+     '<div><b id="fg-dose-half">'+(n?half:'&ndash;')+'</b><span>sprays every 30 seconds after</span></div></div>';
+  if(FG.phase==='ready'){
+    h+='<div class="fg-btns">'+fgBtn('fg-start',n?'Gave '+n+' sprays &mdash; start the clock':'Start the clock',
+       'primary',' data-fg="start"'+(ready?'':' disabled'))+'</div>';
+    if(!ready){
+      var need=[];
+      if(!(FG.shaven&&FG.water)) need.push('the two checks before you start');
+      if(!n) need.push('the sensitivity result');
+      else if(!FG.sealed) need.push('the user seal check');
+      if(!FG.noTaste) h+='<div class="fg-why" id="fg-why">Needs '+need.join(', ')+'.</div>';
+    }
+  }
+  h+='</div>';
+  }
+
+  // 4 · exercises
+  var e=fgElapsed(), cur=Math.min(FG_EXERCISES.length-1,Math.floor(e/FG_EX_MS));
+  h+='<div class="fg-step"><div class="fg-n">Step 4</div>';
+  h+='<div class="fg-t">Exercises &mdash; 1 minute each</div>';
+  if(fgLive()){
+    h+='<div class="fg-live">';
+    h+='<div class="fg-top"><span class="fg-of" id="fg-of"></span><span class="fg-left" id="fg-left"></span></div>';
+    h+='<div class="fg-ex" id="fg-ex"></div><div class="fg-bar"><i id="fg-bar"></i></div>';
+    h+='<div class="fg-spray" id="fg-spray" role="status" aria-live="assertive"></div>';
+    if(cur===FG_RAINBOW_EX){
+      h+='<div class="fg-rainbow" id="fg-rainbow"><span class="fg-n">Rainbow Passage &mdash; read aloud</span>'+FG_RAINBOW+'</div>';
+    }
+    h+='<div class="fg-btns">'+fgBtn('fg-taste','Solution tasted &mdash; fail','danger',' data-fg="taste"');
+    h+=FG.phase==='running'
+      ? fgBtn('fg-pause','Pause','',' data-fg="pause"')
+      : fgBtn('fg-resume','Resume','primary',' data-fg="resume"')+fgBtn('fg-restart','Start over','',' data-fg="restart"');
+    h+=fgBtn('fg-mute',FG.muted?'Sound off':'Sound on','fg-mute',' data-fg="mute" aria-pressed="'+!FG.muted+'"');
+    h+='</div></div>';
+  } else if(FG.phase==='pass'){
+    h+='<div class="fg-out pass" id="fg-out"><b>PASS</b>No test solution tasted during any exercise. '+
+       'Result is set to Pass below.</div>';
+    h+='<div class="fg-btns">'+fgBtn('fg-again','Run the test again','',' data-fg="again"')+'</div>';
+  } else if(FG.phase==='fail'){
+    var fx=Math.min(FG_EXERCISES.length-1,Math.floor(FG.endAt/FG_EX_MS));
+    h+='<div class="fg-out fail" id="fg-out"><b>FAIL</b>Solution tasted during exercise '+(fx+1)+' ('+
+       FG_EXERCISES[fx].toLowerCase()+') at '+fgFmtAt(FG.endAt)+'. Stop and refit, then retest. '+
+       'Result is set to Fail below.</div>';
+    h+='<div class="fg-btns">'+fgBtn('fg-again','Refit and retest','primary',' data-fg="again"')+'</div>';
+  } else {
+    h+='<div class="fg-p"><b>Pass:</b> no test solution tasted during any exercise.<br>'+
+       '<b>Fail:</b> solution tasted at any time &mdash; stop and refit/retest.</div>';
+  }
+  h+='<ol class="fg-list">';
+  FG_EXERCISES.forEach(function(x,i){
+    var c='';
+    if(fgLive()||FG.phase==='fail') c = i<cur?'done':(i===cur?'cur':'');
+    if(FG.phase==='pass') c='done';
+    h+='<li'+(c?' class="'+c+'"':'')+'>'+x+'</li>';
+  });
+  h+='</ol>';
+  if(!fgLive()){
+    h+='<details style="margin-top:10px"><summary class="fg-p" style="cursor:pointer"><b>Rainbow Passage</b> '+
+       '(exercise 5)</summary><div class="fg-rainbow">'+FG_RAINBOW+'</div></details>';
+  }
+  h+='</div></div>';
+  box.innerHTML=h;
+  if(fgLive()) fgPaint(e);
+  if(focused){ var f=document.getElementById(focused); if(f&&!f.disabled) f.focus(); }
+}
+
+// Update only the live numbers, so a tick does not rebuild the whole guide.
+function fgPaint(e){
+  var ex=Math.min(FG_EXERCISES.length-1,Math.floor(e/FG_EX_MS));
+  var into=e-ex*FG_EX_MS, half=FG.level/2;
+  var set=function(id,t){ var el=document.getElementById(id); if(el) el.textContent=t; };
+  set('fg-of','Exercise '+(ex+1)+' of '+FG_EXERCISES.length+(FG.phase==='paused'?' · paused':''));
+  set('fg-left',fgFmt(FG_EX_MS-into)+' left');
+  set('fg-ex',FG_EXERCISES[ex]);
+  var bar=document.getElementById('fg-bar'); if(bar) bar.style.width=(into/FG_EX_MS*100)+'%';
+  var sp=document.getElementById('fg-spray'); if(!sp) return;
+  var since=e%FG_SPRAY_MS, nextAt=(Math.floor(e/FG_SPRAY_MS)+1)*FG_SPRAY_MS;
+  var now=e>=FG_SPRAY_MS&&since<FG_FLASH_MS;
+  sp.classList.toggle('now',now);
+  sp.textContent = now ? 'Spray '+half+' now'
+    : nextAt>=FG_TOTAL_MS ? 'No more sprays — finish this exercise'
+    : 'Next '+half+' sprays in '+fgFmt(nextAt-e);
+}
+
+function fgTick(){
+  if(!document.getElementById('fg-ex')){ fgStop(); return; }   // the form was closed
+  var e=fgElapsed();
+  if(e>=FG_TOTAL_MS){ fgFinish('pass'); return; }
+  var ex=Math.floor(e/FG_EX_MS), k=Math.floor(e/FG_SPRAY_MS);
+  if(k>FG.lastK){ FG.lastK=k; fgBeep(880,0.12); setTimeout(function(){ fgBeep(880,0.12); },190);
+    try{ if(navigator.vibrate) navigator.vibrate([120,80,120]); }catch(x){} }
+  if(ex!==FG.lastEx){ FG.lastEx=ex; fgBeep(520,0.25); fgRender(); }
+  else fgPaint(e);
+}
+
+function fgStart(){
+  if(!fgReady()) return;
+  try{ FG.audio=FG.audio||new (window.AudioContext||window.webkitAudioContext)();
+       if(FG.audio.resume) FG.audio.resume(); }catch(x){ FG.audio=null; }
+  FG.acc=0; FG.lastK=0; FG.lastEx=0; FG.phase='running'; FG.since=Date.now();
+  FG.timer=setInterval(fgTick,200); fgWake(true); fgRender();
+  var live=document.querySelector('.fg-live');
+  if(live&&live.scrollIntoView) live.scrollIntoView({block:'start',behavior:'smooth'});
+}
+function fgPause(){
+  if(FG.phase!=='running') return;
+  FG.acc=fgElapsed(); FG.phase='paused'; fgStop(); fgRender();
+}
+function fgResume(){
+  if(FG.phase!=='paused') return;
+  FG.phase='running'; FG.since=Date.now(); FG.timer=setInterval(fgTick,200); fgWake(true); fgRender();
+}
+function fgFinish(outcome){
+  if(!fgLive()) return;
+  FG.endAt=Math.min(fgElapsed(),FG_TOTAL_MS); FG.acc=FG.endAt; FG.phase=outcome; fgStop();
+  fgBeep(outcome==='pass'?660:300,0.45);
+  var r=document.querySelector('input[name="fit-result"][value="'+(outcome==='pass'?'Pass':'Fail')+'"]');
+  if(r){ r.checked=true; r.dispatchEvent(new Event('change',{bubbles:true})); }
+  fgRender();
+}
+// Back to Step 3. After a result the mask comes off for a refit, so the user
+// seal check has to be done again; starting a paused test over does not.
+function fgRewind(refit){
+  fgStop(); FG.phase='ready'; FG.acc=0; FG.lastK=0; FG.lastEx=0; FG.endAt=0;
+  if(refit) FG.sealed=false;
+  fgRender();
+}
+function fgStop(){
+  if(FG&&FG.timer){ clearInterval(FG.timer); FG.timer=null; }
+  fgWake(false);
+}
+
+function fgBeep(freq,dur){
+  var A=FG.audio; if(FG.muted||!A) return;
+  try{
+    var o=A.createOscillator(), g=A.createGain(), t=A.currentTime;
+    o.type='sine'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.35,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(A.destination); o.start(t); o.stop(t+dur+0.03);
+  }catch(x){}
+}
+// Keep the screen on while the clock runs: the administrator is watching the
+// subject, not the phone, and a locked screen would swallow the spray cues.
+function fgWake(on){
+  try{
+    if(on&&navigator.wakeLock&&!FG.wake){
+      navigator.wakeLock.request('screen').then(function(w){
+        if(FG.phase==='running') FG.wake=w; else w.release();
+      }).catch(function(){});
+    } else if(!on&&FG&&FG.wake){ FG.wake.release(); FG.wake=null; }
+  }catch(x){}
+}
+document.addEventListener('visibilitychange',function(){
+  // The browser drops a wake lock when the page is hidden; take it back.
+  if(document.visibilityState==='visible'&&FG.phase==='running'){ FG.wake=null; fgWake(true); }
+});
+
+function fgInit(){
+  fgReset();
+  var box=document.getElementById('fit-guide'); if(!box) return;
+  box.addEventListener('change',function(ev){
+    var t=ev.target, key={'fg-shaven':'shaven','fg-water':'water','fg-sealed':'sealed'}[t.id];
+    if(!key) return;
+    FG[key]=t.checked; fgRender();
+  });
+  box.addEventListener('click',function(ev){
+    var b=ev.target.closest('button'); if(!b||b.disabled) return;
+    if(b.dataset.fgLevel){
+      FG.noTaste=(b.dataset.fgLevel==='none');
+      FG.level=FG.noTaste?0:parseInt(b.dataset.fgLevel,10);
+      if(FG.noTaste) FG.sealed=false;
+      fgRender(); return;
+    }
+    switch(b.dataset.fg){
+      case 'start':   fgStart(); break;
+      case 'pause':   fgPause(); break;
+      case 'resume':  fgResume(); break;
+      case 'taste':   fgFinish('fail'); break;
+      case 'restart': fgRewind(false); break;
+      case 'again':   fgRewind(true); break;
+      case 'mute':    FG.muted=!FG.muted; fgRender(); break;
+    }
+  });
+  document.querySelectorAll('input[name="fit-sol"]').forEach(function(r){
+    r.addEventListener('change',function(){
+      if(fgLive()){ fgStop(); FG.phase='ready'; FG.acc=0; FG.lastK=0; FG.lastEx=0; }
+      fgRender();
+    });
+  });
+  fgRender();
+}
+
 var FORMS={
   // ─────────────────────────────────────────────────────────── FIT TEST
   // Reproduces SR-100.03.1 (Rev 02, effective 24 FEB 2026). Field names,
@@ -364,6 +726,7 @@ var FORMS={
         '<div class="field"><label>Fit Test Solution Type <span class="req">*</span></label>'+
           chips('fit-sol',[['Bitrex / Saccharin','Bitrex / Saccharin'],['Smoke','Smoke']])+
         '</div>'+
+        '<div id="fit-guide"></div>'+
         '<div class="field"><label>Result <span class="req">*</span></label>'+
           chips('fit-result',['Pass','Fail'])+
         '</div>'+
@@ -394,7 +757,8 @@ var FORMS={
       'mandatory uploading.</div>';
     },
     init:function(){
-      setupSig('fit-empsig'); setupSig('fit-adminsig');
+      setupSig('fit-empsig'); setupSig('fit-adminsig');      fgInit();
+
       // The free-text box only appears once "Other" is chosen, so the form
       // does not show two empty inputs nobody needs to fill in.
       [['fit-job','fit-job-other'],['fit-style','fit-style-other']].forEach(function(pair){
