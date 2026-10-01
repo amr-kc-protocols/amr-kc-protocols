@@ -175,6 +175,12 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
 .fg-out.pass{background:var(--correct-bg);border:1px solid #b7e3c6;color:#14663a}
 .fg-out.fail{background:var(--wrong-bg);border:1px solid #f3c6c6;color:var(--wrong)}
 .fg-mute{margin-left:auto}
+.fg-jump{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  font:inherit;font-size:13px;text-align:left;color:var(--teal);cursor:pointer;
+  background:#eaf1fd;border:1.5px solid var(--teal2);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.fg-jump b{font-weight:700}
+.fg-jump span[aria-hidden]{font-size:18px;color:var(--teal2);flex-shrink:0}
+.fg-jump:focus-visible{outline:2px solid var(--teal2);outline-offset:2px}
 
 /* SIGNATURE */
 .sig-wrap{margin-top:6px}
@@ -228,7 +234,7 @@ body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-
     </button>
     <button class="pick-card fit" onclick="openForm('fit')">
       <span class="pick-ico">&#x1F637;</span>
-      <span class="pick-body"><span class="pick-t">Respirator Fit Test Record</span><span class="pick-s">SR-100.03.1 &mdash; employee &amp; administrator signatures</span></span>
+      <span class="pick-body"><span class="pick-t">Respirator Fit Test Record</span><span class="pick-s">SR-100.03.1 &mdash; with the 3M step-by-step test guide</span></span>
       <span class="pick-arr">&#x203A;</span>
     </button>
     <div class="privacy">
@@ -436,7 +442,9 @@ function fgRender(){
       'Bitrex and saccharin only. For smoke, follow the smoke kit&rsquo;s instructions.</div></div>';
     return;
   }
-  if(sol!=='Bitrex / Saccharin'){ box.innerHTML=''; return; }
+  // No solution chosen yet still shows the guide: it was hidden behind that
+  // choice, four cards down, and an administrator opening the form to run a
+  // test had no reason to make it first — so the instructions were never seen.
 
   var lock=FG.phase!=='ready';           // setup is fixed once the clock has started
   var n=FG.level, half=FG.level/2;
@@ -652,6 +660,11 @@ document.addEventListener('visibilitychange',function(){
 function fgInit(){
   fgReset();
   var box=document.getElementById('fit-guide'); if(!box) return;
+  var jump=document.getElementById('fg-jump');
+  if(jump) jump.addEventListener('click',function(){
+    var hdr=document.querySelector('header,.hdr'), off=hdr?hdr.getBoundingClientRect().height:0;
+    window.scrollTo(0,Math.max(0,box.getBoundingClientRect().top+window.pageYOffset-off-12));
+  });
   box.addEventListener('change',function(ev){
     var t=ev.target, key={'fg-shaven':'shaven','fg-water':'water','fg-sealed':'sealed'}[t.id];
     if(!key) return;
@@ -660,6 +673,10 @@ function fgInit(){
   box.addEventListener('click',function(ev){
     var b=ev.target.closest('button'); if(!b||b.disabled) return;
     if(b.dataset.fgLevel){
+      if(!pick('fit-sol')){
+        var bs=document.querySelector('input[name="fit-sol"][value="Bitrex / Saccharin"]');
+        if(bs) bs.checked=true;
+      }
       FG.noTaste=(b.dataset.fgLevel==='none');
       FG.level=FG.noTaste?0:parseInt(b.dataset.fgLevel,10);
       if(FG.noTaste) FG.sealed=false;
@@ -700,6 +717,9 @@ var FORMS={
           'DO NOT PROCEED until a Medical Clearance is issued.</div>'+
         fieldRow([{id:'fit-clear',label:'Medical Clearance Date',req:true,ph:'MM/DD/YYYY'}])+
       '</div>'+
+      '<button type="button" class="fg-jump" id="fg-jump">'+
+        '<span><b>Running the test?</b> 3M step-by-step guide &mdash; Bitrex or saccharin</span>'+
+        '<span aria-hidden="true">&darr;</span></button>'+
 
       '<div class="card"><div class="card-lbl">Employee Information</div>'+
         fieldRow([{id:'fit-name',label:'Employee Name / ID',req:true}])+
