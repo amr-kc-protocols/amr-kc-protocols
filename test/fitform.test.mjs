@@ -100,6 +100,8 @@ await open(page);
 
 console.log("\n--- picker ---");
 check("the fit test card is listed", await page.isVisible(".pick-card.fit"));
+check("it says the form carries the 3M step-by-step guide",
+  /3M step-by-step test guide/.test(await page.textContent(".pick-card.fit")));
 check("it names the source document",
   (await page.textContent(".pick-card.fit")).includes("SR-100.03.1"));
 
@@ -271,7 +273,30 @@ const gtext = () => g.textContent("#fit-guide");
 const spray = () => g.textContent("#fg-spray");
 const result = () => g.evaluate(() => (document.querySelector('input[name="fit-result"]:checked') || {}).value || "");
 
-check("no guide before a solution is chosen", (await g.innerHTML("#fit-guide")) === "");
+/* The guide shipped hidden until "Bitrex / Saccharin" was chosen, four cards
+   down the form — and an administrator opening the form had no reason to
+   choose it first, so the instructions were never seen. It shows now as soon
+   as the form opens, and there is a way to it from the top. */
+// openForm() draws the form, then wires it (the guide included) in a setTimeout.
+await g.waitForSelector("#fit-guide .fg-step", { timeout: 5000 }).catch(() => {});
+check("the guide is there before any solution is chosen",
+  (await g.locator(".fg-step").count()) >= 5 && (await result()) === "" &&
+  (await g.evaluate(() => !document.querySelector('input[name="fit-sol"]:checked'))));
+const jb = await g.locator("#fg-jump").boundingBox();
+check("a link to it sits on the first screen of a phone", !!jb && jb.y + jb.height <= 844,
+  jb && Math.round(jb.y + jb.height) + "px");
+check("the link comes after the medical clearance gate",
+  await g.evaluate(() => { const c = document.getElementById("fit-clear"), j = document.getElementById("fg-jump");
+    return !!(c && j && (c.compareDocumentPosition(j) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
+await g.click("#fg-jump");
+await g.waitForTimeout(100);
+const gtop = await g.evaluate(() => document.getElementById("fit-guide").getBoundingClientRect().top);
+const htop = await g.evaluate(() => document.querySelector(".hdr").getBoundingClientRect().bottom);
+check("the link brings the guide up under the header", gtop >= htop - 1 && gtop <= htop + 60,
+  "guide " + Math.round(gtop) + " header " + Math.round(htop));
+await g.click("#fg-l20");
+check("using the guide records Bitrex / Saccharin as the solution",
+  (await g.evaluate(() => (document.querySelector('input[name="fit-sol"]:checked') || {}).value)) === "Bitrex / Saccharin");
 await chip(g, "fit-sol", "Smoke");
 check("smoke gets a pointer to its own kit, not the 3M steps",
   /smoke kit/i.test(await gtext()) && (await g.locator(".fg-step").count()) === 0);
@@ -382,7 +407,9 @@ await g.clock.runFor(10 * 60000);
 check("closing the form mid-test throws nothing", gerrors.length === 0, gerrors.join("\n"));
 await g.click(".pick-card.fit");
 await g.waitForSelector("#fit-name");
-check("reopening starts the guide fresh", (await g.innerHTML("#fit-guide")) === "");
+check("reopening starts the guide fresh",
+  (await g.locator(".fg-live").count()) === 0 && !(await g.isChecked("#fg-shaven")) &&
+  (await g.getAttribute("#fg-l20", "aria-pressed")) === "false");
 
 console.log("\n--- keyboard ---");
 await chip(g, "fit-sol", "Bitrex / Saccharin");
