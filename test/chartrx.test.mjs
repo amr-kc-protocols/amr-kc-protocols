@@ -23,6 +23,7 @@
  *   C16 reduced motion, and right/wrong is never shown by color alone
  *   C17 a broken or missing question bank fails safe
  *   C18 it is reachable from the Field Guide
+ *   C19 axe-core finds no accessibility violation on any screen, either theme
  *
  * Run:  cd test && node chartrx.test.mjs
  */
@@ -590,6 +591,44 @@ console.log('\nC18 Field Guide');
   await p.goto(PAGE); await p.waitForSelector('#v-home:not([hidden])');
   ok('C18 and its header leads back to the Field Guide', (await p.getAttribute('.hdr a.hdr-btn', 'href')) === 'index.html');
   await ctx.close(); }
+
+/* ── C19 — axe-core on every screen, in both themes ───────────────────
+   Lighthouse audits only the first screen. This walks the rest: each question
+   type before and after answering, the summary, badges, credit and the
+   supervisor check — light at 10:00, dark at 21:00. */
+console.log('\nC19 accessibility (axe-core)');
+{ const AXE = await readFile(join(ROOT, 'test/node_modules/axe-core/axe.min.js'), 'utf8');
+  const ids = ['sign-01', 'vitals-01', 'meds-01', 'sign-02', 'impression-01', 'fullset-01', 'psych-04', 'hospice-01'];
+  for (const [theme, clock] of [['light', '2026-10-06T10:00:00-05:00'], ['dark', '2026-10-06T21:00:00-05:00']]) {
+    const p = await open({ clock: new Date(clock), seed: seedRound(ids) });
+    const found = [];
+    const audit = async (where) => {
+      await p.addScriptTag({ content: AXE });
+      // Fonts are blocked in the sandbox, so contrast is measured on the fallback face; the colors are the same.
+      const r = await p.evaluate(() => window.axe.run(document, { resultTypes: ['violations'] }));
+      r.violations.forEach(v => v.nodes.forEach(n => found.push(`${where}: ${v.id} ${n.target.join(' ')}`)));
+    };
+    await p.waitForSelector('#v-q:not([hidden])');
+    for (let i = 0; i < ids.length; i++) {
+      const q = await cur(p);
+      await audit(q.type + ' question');
+      await p.click(pickSel(q, i % 2 === 0));
+      await p.waitForTimeout(700);              // let the fade-ins finish: mid-fade text reads as low contrast
+      await audit(q.type + ' feedback');
+      await p.click('#btn-next');
+      if (i < ids.length - 1) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1);
+    }
+    await p.waitForSelector('#v-sum:not([hidden])'); await p.waitForTimeout(900); await audit('summary');
+    await p.click('#btn-credit'); await audit('credit form');
+    await p.fill('#cr-name', 'A'); await p.fill('#cr-id', 'B'); await p.click('#credit-form button[type=submit]');
+    await p.waitForSelector('#cr-code'); await audit('completion');
+    await p.click('#cr-home'); await audit('home');
+    await p.click('#btn-badges'); await audit('badges');
+    await p.goto(PAGE + '#verify'); await p.waitForSelector('#vf'); await audit('supervisor check');
+    ok(`C19 ${theme}: no axe violations on any screen`, found.length === 0, [...new Set(found)].slice(0, 12).join(' | '));
+    await p.context().close();
+  }
+}
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));

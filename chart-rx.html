@@ -44,11 +44,11 @@
 </script>
 <style>
 :root{
-  --bg:#f4f6f9; --card:#ffffff; --card2:#eef2f7; --ink:#152238; --ink2:#4b5768; --ink3:#6f7a89;
+  --bg:#f4f6f9; --card:#ffffff; --card2:#eef2f7; --ink:#152238; --ink2:#4b5768; --ink3:#5b6676;
   --line:#dde3ea; --brand:#173a68; --brand2:#1b63c4; --brand-ink:#ffffff;
   --ok:#15803d; --ok-bg:#e6f6ec; --ok-line:#9ed6b3;
   --no:#c2271d; --no-bg:#fdebea; --no-line:#f1b7b2;
-  --gold:#b7790f; --gold-bg:#fff4dc; --flame:#e8590c;
+  --gold:#8a5a00; --gold-bg:#fff4dc; --flame:#b8420a;
   --chart-bar:#1f2a37; --chart-bar-ink:#e7edf5; --chart-row:#ffffff; --chart-alt:#f6f8fb;
   --shadow:0 1px 2px rgba(21,34,56,.06),0 8px 24px -14px rgba(21,34,56,.35);
   --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -239,12 +239,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .sum-stats span{font-size:11px;color:var(--ink3)}
 .weak{margin-top:14px;text-align:left;border-radius:14px;padding:12px 14px;background:var(--gold-bg);border:1px solid var(--gold)}
 .weak.clean{background:var(--ok-bg);border-color:var(--ok-line)}
-.weak h3{font-size:14px;font-weight:700}
+.weak h2{font-size:14px;font-weight:700}
 .weak p{font-size:14px;margin-top:3px;color:var(--ink)}
 .newbadge{margin-top:12px;font-size:14px;font-weight:700;color:var(--brand)}
 .sum-actions{display:grid;gap:10px;margin-top:16px}
 .review{margin-top:18px}
-.review h3{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.review h2{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
 .rv{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--no);border-radius:10px;padding:10px 12px;margin-bottom:8px}
 .rv p{font-size:13.5px} .rv p+p{color:var(--ink2);margin-top:4px}
 
@@ -255,7 +255,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .badge{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px 12px;text-align:center}
 .badge .em{font-size:34px;line-height:1.1;display:block}
 .badge.locked .em{filter:grayscale(1);opacity:.35}
-.badge h3{font-size:14px;font-weight:700;margin-top:6px}
+.badge h2{font-size:14px;font-weight:700;margin-top:6px}
 .badge .prog{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 6px}
 .badge .prog i{display:block;height:100%;background:var(--brand2);border-radius:99px}
 .badge.earned{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-bg),var(--card) 70%)}
@@ -301,12 +301,12 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
 </style>
 </head>
 <body>
-<div class="hdr" id="hdr">
+<header class="hdr" id="hdr">
   <div class="hdr-logo" aria-hidden="true">KC</div>
   <div class="hdr-txt"><div class="hdr-title">Chart Rx</div><div class="hdr-sub">AMR KC Field Guide &middot; PCR documentation</div></div>
   <button class="hdr-btn icon" id="theme-btn" type="button" aria-label="Switch to dark theme">&#9790;</button>
   <a class="hdr-btn" href="index.html">&#x2190; Field Guide</a>
-</div>
+</header>
 
 <main id="app">
   <div class="loading" id="v-loading">Loading charts&hellip;</div>
@@ -346,7 +346,7 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
     </div>
     <div class="qwrap">
       <div class="tags" id="q-tags"></div>
-      <h2 class="prompt" id="q-prompt"></h2>
+      <h1 class="prompt" id="q-prompt"></h1>
       <div id="q-body"></div>
     </div>
   </section>
@@ -849,7 +849,7 @@ function finishRound(){
 function renderSummary(){
   var L = STATS.last; if(!L){ renderHome(); return; }
   var m = L.weak ? BANK.modules[L.weak] : null, C = 2 * Math.PI * 54, frac = L.total ? L.score / L.total : 0;
-  var h = '<div class="sum-card">' +
+  var h = '<h1 class="sr" id="sum-h">Round summary</h1><div class="sum-card">' +
     '<div class="sum-eye">Round complete</div>' +
     '<div class="ring" role="img" aria-label="' + L.score + ' of ' + L.total + ' correct"><svg viewBox="0 0 132 132">' +
       '<circle class="trk" cx="66" cy="66" r="54"/><circle class="val" id="ring-val" cx="66" cy="66" r="54" stroke-dasharray="' + C.toFixed(1) +
@@ -857,19 +857,18 @@ function renderSummary(){
     '<div class="sum-line">' + (L.score === L.total ? 'Clean chart. Every one.' : L.score >= L.total - 2 ? 'Nearly clean.' : 'Charts to fix &mdash; that&rsquo;s the point.') + '</div>' +
     '<div class="sum-stats"><div><b>+' + L.xp + '</b><span>XP</span></div><div><b>' + L.best + '</b><span>best streak</span></div>' +
       '<div><b>' + badgeCount() + '/' + Object.keys(BANK.modules).length + '</b><span>badges</span></div></div>';
-  h += m ? '<div class="weak"><h3>Your weak spot: ' + esc((m.badge ? m.badge + ' ' : '') + m.name) + '</h3><p>' + esc(m.tip) + '</p></div>'
-         : '<div class="weak clean"><h3>No weak spot this round</h3><p>Nothing missed. Run another to keep the streak going.</p></div>';
+  h += m ? '<div class="weak"><h2>Your weak spot: ' + esc((m.badge ? m.badge + ' ' : '') + m.name) + '</h2><p>' + esc(m.tip) + '</p></div>'
+         : '<div class="weak clean"><h2>No weak spot this round</h2><p>Nothing missed. Run another to keep the streak going.</p></div>';
   (L.earned || []).forEach(function(k){ var b = BANK.modules[k]; if(b)
     h += '<div class="newbadge">New badge: ' + esc((b.badge ? b.badge + ' ' : '') + b.name) + '</div>'; });
   h += '<div class="sum-actions"><button class="btn btn-primary" id="btn-again" type="button">Play again</button>' +
        '<button class="btn btn-ghost" id="btn-credit" type="button">Get completion credit</button></div></div>';
   if(L.missed && L.missed.length){
-    h += '<div class="review"><h3>What you missed</h3>';
+    h += '<div class="review"><h2>What you missed</h2>';
     L.missed.forEach(function(id){ var q = BANK.byId[id]; if(!q) return;
       h += '<div class="rv"><p>' + esc(q.prompt) + '</p><p>' + esc(q.explain) + '</p></div>'; });
     h += '</div>';
   }
-  h += '<h2 class="sr" id="sum-h">Round summary</h2>';
   var v = $('v-sum'); v.innerHTML = h;
   show('v-sum');
   $('btn-again').addEventListener('click', startRound);
@@ -881,12 +880,12 @@ function renderSummary(){
 
 /* ── BADGES ────────────────────────────────────────────────────────── */
 function renderBadges(){
-  var h = '<h2 class="h2" id="badges-h">My badges</h2><p class="lede">Get ' + CONFIG.badgeAt +
+  var h = '<h1 class="h2" id="badges-h">My badges</h1><p class="lede">Get ' + CONFIG.badgeAt +
           ' right in a module, across any rounds, to earn its badge. Each one is a habit from the October review.</p><div class="badges">';
   Object.keys(BANK.modules).forEach(function(k){
     var m = BANK.modules[k], n = Math.min(STATS.mod[k] || 0, CONFIG.badgeAt), got = !!STATS.badges[k];
     h += '<div class="badge ' + (got ? 'earned' : 'locked') + '"><span class="em" aria-hidden="true">' + esc(m.badge || '') + '</span>' +
-         '<h3>' + esc(m.name) + '</h3><div class="prog" aria-hidden="true"><i style="width:' + (n / CONFIG.badgeAt * 100) + '%"></i></div>' +
+         '<h2>' + esc(m.name) + '</h2><div class="prog" aria-hidden="true"><i style="width:' + (n / CONFIG.badgeAt * 100) + '%"></i></div>' +
          '<div class="state">' + (got ? 'Earned' : n + ' of ' + CONFIG.badgeAt) + '<span class="sr"> ' + (got ? 'badge earned' : 'not yet earned') + '</span></div>' +
          '<p class="tip">' + esc(m.tip || '') + '</p></div>';
   });
@@ -909,7 +908,7 @@ function startDaily(){
 function renderCredit(){
   var L = STATS.last; if(!L){ renderHome(); return; }
   $('v-credit').innerHTML =
-    '<h2 class="h2" id="credit-h">Completion credit</h2>' +
+    '<h1 class="h2" id="credit-h">Completion credit</h1>' +
     '<p class="lede">Score ' + L.score + '/' + L.total + ' on ' + esc(L.date) + '. Your name and ID make the completion code; they are not saved on this device.</p>' +
     '<form id="credit-form" novalidate>' +
       '<div class="field"><label for="cr-name">Name</label><input id="cr-name" autocomplete="name" required></div>' +
@@ -981,7 +980,7 @@ function submit(name, id, L){
 function renderVerify(){
   var errs = BANK.errors;
   $('v-verify').innerHTML =
-    '<h2 class="h2" id="verify-h">Check a completion code</h2>' +
+    '<h1 class="h2" id="verify-h">Check a completion code</h1>' +
     '<p class="lede">Enter what is on the provider&rsquo;s completion screen. The code is recomputed here; it should match theirs.</p>' +
     '<div class="vbox"><form id="vf">' +
       '<div class="field"><label for="vf-id">Employee ID</label><input id="vf-id" required></div>' +
