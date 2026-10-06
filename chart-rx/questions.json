@@ -1,13 +1,14 @@
 {
-  "version": "2026-10.3",
+  "version": "2026-10.4",
   "writing_guide": [
     "Scenarios are made up for practice. No patient names, dates of birth, addresses or incident numbers.",
-    "context: one short line on who the patient is and what happened. Leave it out if the prompt says enough.",
-    "prompt: the task, in about 12 words or fewer. Say what to look for: 'Tap the incomplete vitals row', not 'Tap the problem'.",
-    "quote: for fix questions, the chart text being fixed. It shows in an 'As charted' box.",
+    "Simple and straightforward: a provider should know what's being asked within three seconds.",
+    "context: one short line of facts the question needs. Leave it out if the prompt says enough.",
+    "prompt: a plain question, 12 words or fewer. Spot questions say exactly what to tap: 'Tap the sentence…', 'Tap the vitals row…', 'Tap the med entry…'.",
+    "quote: chart text being judged. It shows in an 'As charted' box — never put chart text inside a quoted sentence.",
+    "Swipe statements: one plain claim, 12 words or fewer, not an instruction. Mix true and false, and avoid double negatives.",
     "explain: two sentences at most. Lead with the rule, then why it matters.",
     "spot charts: one clear problem. Vitals rows use time, hr, bp, rr, spo2 and optional pain; leave a value out to show it was not recorded.",
-    "Mix true and false swipe statements, and avoid double negatives.",
     "Options: 3 or 4, each short enough to read in one glance."
   ],
   "modules": {
@@ -23,47 +24,47 @@
   "questions": [
     {
       "id": "sign-01", "module": "sign", "type": "swipe",
-      "prompt": "It's fine to sign the chart at dispatch and finish it later.",
+      "prompt": "You can sign the chart before you finish writing it.",
       "answer": false,
-      "explain": "Your signature says the chart is complete and accurate. Sign after transfer of care, once you've reviewed it."
+      "explain": "Your signature says the chart is complete and accurate. Sign last, after handoff."
     },
     {
       "id": "sign-02", "module": "sign", "type": "mc",
-      "prompt": "When should you sign the crew attestation?",
+      "prompt": "When should you sign the chart?",
       "options": [
-        { "id": "a", "text": "When you open the chart" },
-        { "id": "b", "text": "Once the patient is loaded" },
-        { "id": "c", "text": "After handoff, once you've reviewed the chart" },
-        { "id": "d", "text": "Any time — it's a formality" }
+        { "id": "a", "text": "When you open it" },
+        { "id": "b", "text": "When the patient is loaded" },
+        { "id": "c", "text": "After handoff, once you've read it all" },
+        { "id": "d", "text": "Any time" }
       ],
       "answer": "c",
-      "explain": "Sign last. The attestation covers everything in the chart, including the handoff."
+      "explain": "Sign last. Your signature covers everything in the chart, including the handoff."
     },
     {
       "id": "sign-03", "module": "sign", "type": "swipe",
-      "prompt": "Co-signing your partner's chart means you're vouching for it too.",
+      "prompt": "Signing your partner's chart means you vouch for all of it.",
       "answer": true,
       "explain": "Your signature covers the whole chart, not just your part. Read it before you sign."
     },
     {
       "id": "sign-04", "module": "sign", "type": "mc",
-      "context": "You spot a mistake after the chart is locked.",
+      "context": "You find a mistake after the chart is locked.",
       "prompt": "How do you fix it?",
       "options": [
-        { "id": "a", "text": "Add a dated addendum with the correction" },
+        { "id": "a", "text": "Add an addendum with the correction" },
         { "id": "b", "text": "Ask someone to delete the chart" },
-        { "id": "c", "text": "Leave it — it's too late" },
-        { "id": "d", "text": "Start a new chart for the same call" }
+        { "id": "c", "text": "Leave it" },
+        { "id": "d", "text": "Start a new chart" }
       ],
       "answer": "a",
-      "explain": "Fix a locked chart with an addendum that shows when it was added. Never hide or erase the original."
+      "explain": "An addendum shows what changed and when. Never hide or erase the original."
     },
     {
       "id": "sign-05", "module": "sign", "type": "mc",
-      "prompt": "Before you sign, what's the most important check?",
+      "prompt": "What should you check before you sign?",
       "options": [
-        { "id": "a", "text": "The narrative agrees with the vitals and meds" },
-        { "id": "b", "text": "The narrative is as short as possible" },
+        { "id": "a", "text": "Narrative, vitals and meds all agree" },
+        { "id": "b", "text": "The narrative is short" },
         { "id": "c", "text": "Your partner's name is spelled right" },
         { "id": "d", "text": "Nothing — the system checks it" }
       ],
@@ -74,7 +75,7 @@
     {
       "id": "vitals-01", "module": "vitals", "type": "spot",
       "context": "16-year-old going to a psychiatric facility.",
-      "prompt": "Tap the vitals row that needed a recheck.",
+      "prompt": "Tap the reading you should recheck.",
       "chart": {
         "vitals": [
           { "id": "v1", "time": "1110", "hr": 81, "bp": "109/71", "rr": 16, "spo2": 100 },
@@ -90,31 +91,31 @@
     },
     {
       "id": "vitals-02", "module": "vitals", "type": "swipe",
-      "prompt": "A heart rate of 120 the whole ride counts as 'stable' because it never changed.",
+      "prompt": "A heart rate of 120 that never changes is 'stable.'",
       "answer": false,
-      "explain": "Stable means normal and unchanged — a steady 120 is persistent tachycardia. Name it, say what you did, and who you told."
+      "explain": "Stable means normal and unchanged. A steady 120 is tachycardia — chart it, what you did, and who you told."
     },
     {
       "id": "vitals-03", "module": "vitals", "type": "fix",
       "context": "The patient's BP was 118/40.",
-      "prompt": "Which rewrite is best?",
       "quote": "VITALS STABLE THROUGHOUT TRANSPORT.",
+      "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Vitals stable." },
-        { "id": "b", "text": "BP 118/40, rechecked 120/45. Alert, skin warm and dry. Low diastolic reported to RN." },
+        { "id": "b", "text": "BP 118/40, rechecked 120/45. Alert, skin warm and dry. Reported to RN." },
         { "id": "c", "text": "BP a little low, patient fine." },
         { "id": "d", "text": "Vitals monitored per protocol." }
       ],
       "answer": "b",
-      "explain": "Name the abnormal value, show the recheck, describe how the patient looked, and say who you told."
+      "explain": "Name the abnormal number, show the recheck, and say who you told."
     },
     {
       "id": "vitals-04", "module": "vitals", "type": "mc",
       "prompt": "A reading looks wrong. What do you do?",
       "options": [
         { "id": "a", "text": "Delete it" },
-        { "id": "b", "text": "Replace it with the last reading" },
-        { "id": "c", "text": "Recheck it and chart both readings" },
+        { "id": "b", "text": "Copy the last reading" },
+        { "id": "c", "text": "Recheck it and chart both" },
         { "id": "d", "text": "Ignore it" }
       ],
       "answer": "c",
@@ -122,27 +123,26 @@
     },
     {
       "id": "vitals-05", "module": "vitals", "type": "spot",
-      "context": "Patient on 2 L nasal cannula.",
-      "prompt": "Tap the line the vitals don't support.",
+      "prompt": "Tap the sentence that doesn't match the vitals.",
       "chart": {
         "vitals": [
           { "id": "v1", "time": "0905", "hr": 92, "bp": "128/76", "rr": 22, "spo2": 94 },
           { "id": "v2", "time": "0920", "hr": 104, "bp": "124/70", "rr": 26, "spo2": 88 }
         ],
         "narrative": [
-          { "id": "n1", "text": "Patient on 2 L nasal cannula per facility." },
+          { "id": "n1", "text": "On 2 L nasal cannula from the facility." },
           { "id": "n2", "text": "Vitals stable throughout transport." },
           { "id": "n3", "text": "Report given to the receiving nurse." }
         ]
       },
       "answer": ["n2"],
-      "explain": "SpO2 fell to 88% while the heart and breathing rates rose — that isn't stable. Chart the change, what you did, and who you told."
+      "explain": "SpO2 fell to 88% while heart and breathing rates rose — that isn't stable. Chart the change, what you did, and who you told."
     },
 
     {
       "id": "fullset-01", "module": "fullset", "type": "spot",
-      "context": "Patient got IV hydromorphone in the ED before you arrived.",
-      "prompt": "Tap the incomplete vitals row.",
+      "context": "Patient got IV hydromorphone before you arrived.",
+      "prompt": "Tap the vitals row that's missing a value.",
       "chart": {
         "vitals": [
           { "id": "v1", "time": "1950", "hr": 82, "bp": "132/84", "rr": 16, "spo2": 99, "pain": 7 },
@@ -158,34 +158,34 @@
     },
     {
       "id": "fullset-02", "module": "fullset", "type": "mc",
-      "prompt": "What makes a full set of vitals?",
+      "prompt": "What's in a full set of vitals?",
       "options": [
         { "id": "a", "text": "HR and BP" },
         { "id": "b", "text": "HR, BP, RR and SpO2" },
         { "id": "c", "text": "BP and SpO2" },
-        { "id": "d", "text": "Whatever the monitor imports" }
+        { "id": "d", "text": "Whatever the monitor sends" }
       ],
       "answer": "b",
       "explain": "HR, BP, RR and SpO2 on every set. Add a pain score when pain is part of the complaint."
     },
     {
       "id": "fullset-03", "module": "fullset", "type": "swipe",
-      "prompt": "If the patient refuses a BP, leave the BP blank.",
+      "prompt": "If the patient refuses a BP, leave it blank.",
       "answer": false,
       "explain": "Chart it as refused and say so in the narrative. A blank looks like you skipped it."
     },
     {
       "id": "fullset-04", "module": "fullset", "type": "mc",
-      "context": "Two-hour transfer, stable patient.",
-      "prompt": "When should you take vitals?",
+      "context": "Two-hour transfer. The patient is stable.",
+      "prompt": "How often should you take vitals?",
       "options": [
         { "id": "a", "text": "Once, at pickup" },
-        { "id": "b", "text": "Twice — pickup and arrival" },
-        { "id": "c", "text": "Throughout the ride, and after any change or treatment" },
+        { "id": "b", "text": "Only at pickup and arrival" },
+        { "id": "c", "text": "Throughout the ride, and after any change" },
         { "id": "d", "text": "Only if the patient complains" }
       ],
       "answer": "c",
-      "explain": "Two sets is the floor, not the goal. A long ride needs reassessment along the way."
+      "explain": "Two sets is the floor, not the goal. A long ride needs rechecks along the way."
     },
     {
       "id": "fullset-05", "module": "fullset", "type": "swipe",
@@ -195,9 +195,9 @@
     },
 
     {
-      "id": "impression-01", "picklist": "primary", "module": "impression", "type": "match",
-      "context": "Hospice patient. SpO2 69% on room air; you place a non-rebreather.",
-      "prompt": "Best primary impression?",
+      "id": "impression-01", "module": "impression", "type": "match", "picklist": "primary",
+      "context": "Hospice patient. SpO2 69% on room air; you put on a non-rebreather.",
+      "prompt": "Which primary impression fits best?",
       "options": [
         { "id": "a", "text": "Weakness" },
         { "id": "b", "text": "Pain" },
@@ -208,9 +208,9 @@
       "explain": "Pick the problem that needed you — here, the low oxygen. A vague impression undersells why the patient needed an ambulance."
     },
     {
-      "id": "impression-02", "picklist": "primary", "module": "impression", "type": "match",
-      "context": "Colostomy came out at the nursing home. No pain or bleeding; going to the ED to have it replaced.",
-      "prompt": "Best primary impression?",
+      "id": "impression-02", "module": "impression", "type": "match", "picklist": "primary",
+      "context": "Feeding tube came out at the nursing home. No pain or bleeding. Going to the ED to have it replaced.",
+      "prompt": "Which primary impression fits best?",
       "options": [
         { "id": "a", "text": "No Apparent Illness/Injury (Adult)" },
         { "id": "b", "text": "Gastrointestinal System Issue (G.I.)" },
@@ -222,14 +222,14 @@
     },
     {
       "id": "impression-03", "module": "impression", "type": "swipe",
-      "prompt": "Your primary impression should agree with the vitals you charted.",
+      "prompt": "Your primary impression should match your vitals.",
       "answer": true,
       "explain": "'Cardiac Dysrhythmia - Bradycardia' next to a charted heart rate of 75 doesn't hold up. The numbers and the impression should tell the same story."
     },
     {
-      "id": "impression-04", "picklist": "primary", "module": "impression", "type": "match",
-      "context": "16-year-old transferred for suicidal thoughts with a plan. No attempt.",
-      "prompt": "Best primary impression?",
+      "id": "impression-04", "module": "impression", "type": "match", "picklist": "primary",
+      "context": "16-year-old with suicidal thoughts and a plan. No attempt.",
+      "prompt": "Which primary impression fits best?",
       "options": [
         { "id": "a", "text": "No Apparent Illness/Injury (Pediatric)" },
         { "id": "b", "text": "Anxiety/Emotional Upset" },
@@ -241,10 +241,10 @@
     },
     {
       "id": "impression-05", "module": "impression", "type": "mc",
-      "prompt": "When is 'No Apparent Illness/Injury' right on a transfer?",
+      "prompt": "When is 'No Apparent Illness/Injury' the right impression?",
       "options": [
         { "id": "a", "text": "Whenever the patient is stable" },
-        { "id": "b", "text": "Almost never — there's a reason they need an ambulance" },
+        { "id": "b", "text": "Almost never on an ambulance transfer" },
         { "id": "c", "text": "When you're not sure what to pick" },
         { "id": "d", "text": "On every routine transfer" }
       ],
@@ -254,8 +254,9 @@
 
     {
       "id": "meds-01", "module": "meds", "type": "fix",
-      "prompt": "Which rewrite is best?",
+      "context": "The nurse gave hydromorphone before you arrived.",
       "quote": "NURSE GAVE PATIENT .5 OF DILAUDID.",
+      "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Nurse gave Dilaudid." },
         { "id": "b", "text": "RN gave hydromorphone 0.5 mg IV at 1415, before EMS arrival." },
@@ -267,47 +268,47 @@
     },
     {
       "id": "meds-02", "module": "meds", "type": "swipe",
-      "prompt": "Write a leading zero: 0.5 mg, not .5 mg.",
+      "prompt": "Writing 0.5 mg is safer than writing .5 mg.",
       "answer": true,
       "explain": "'.5' is easily misread as 5 — a tenfold error. Write 0.5 mg, and never a trailing zero like 5.0 mg."
     },
     {
       "id": "meds-03", "module": "meds", "type": "swipe",
-      "prompt": "Meds the sending facility gave before you arrived don't belong in your chart.",
+      "prompt": "Meds given before you arrived don't go in your chart.",
       "answer": false,
       "explain": "They change what to expect en route — sedation, pain, vitals. Chart drug, dose, units, route and time."
     },
     {
       "id": "meds-04", "module": "meds", "type": "mc",
-      "prompt": "What's missing from this line?",
       "quote": "ATIVAN AND HALDOL GIVEN FOR AGITATION.",
+      "prompt": "What's missing from this line?",
       "options": [
         { "id": "a", "text": "Nothing" },
         { "id": "b", "text": "Dose, route and time for each" },
         { "id": "c", "text": "Brand names" },
-        { "id": "d", "text": "Who prescribed them" }
+        { "id": "d", "text": "Who ordered them" }
       ],
       "answer": "b",
       "explain": "Sedatives change how you monitor the patient. Every med needs its dose, route and time."
     },
     {
       "id": "meds-05", "module": "meds", "type": "spot",
-      "context": "Back pain patient leaving the ED.",
-      "prompt": "Tap the line that's missing doses.",
+      "context": "Patient leaving the ED after pain meds.",
+      "prompt": "Tap the med entry that's missing its dose.",
       "chart": {
         "narrative": [
-          { "id": "n1", "text": "Ketorolac 15 mg IV given at 2010." },
-          { "id": "n2", "text": "Morphine given twice and Zofran given." },
-          { "id": "n3", "text": "Two-person pivot from bed to cot." }
+          { "id": "n1", "text": "Ketorolac 15 mg IV at 2010." },
+          { "id": "n2", "text": "Morphine given twice." },
+          { "id": "n3", "text": "Ondansetron 4 mg IV at 2025." }
         ]
       },
       "answer": ["n2"],
-      "explain": "'Given twice' can't be checked by anyone. Every med needs drug, dose, units, route and time — as the ketorolac line shows."
+      "explain": "'Given twice' can't be checked by anyone. Every med needs drug, dose, route and time — like the other two lines."
     },
 
     {
       "id": "psych-01", "module": "psych", "type": "mc",
-      "prompt": "Which belongs in every psych transfer narrative?",
+      "prompt": "What belongs in every psych transfer chart?",
       "options": [
         { "id": "a", "text": "Legal status — voluntary or on a hold" },
         { "id": "b", "text": "The patient's insurance" },
@@ -319,45 +320,47 @@
     },
     {
       "id": "psych-02", "module": "psych", "type": "mc",
-      "context": "Patient says they planned to use a knife.",
-      "prompt": "What must the chart show before you leave?",
+      "context": "Psych patient says they planned to use a knife.",
+      "prompt": "What must your chart show?",
       "options": [
-        { "id": "a", "text": "That a safety search was done, and what it found" },
+        { "id": "a", "text": "That you did a safety search, and what you found" },
         { "id": "b", "text": "That the patient seemed calm" },
         { "id": "c", "text": "The patient's insurance" },
-        { "id": "d", "text": "Nothing beyond a routine transfer" }
+        { "id": "d", "text": "Nothing extra" }
       ],
       "answer": "a",
       "explain": "A stated weapon plan makes the safety search essential. Chart that it was done and what turned up."
     },
     {
       "id": "psych-03", "module": "psych", "type": "swipe",
-      "prompt": "'Calm and cooperative' on its own shows why a psych patient needed an ambulance.",
+      "context": "Psych transfer.",
+      "quote": "PT CALM AND COOPERATIVE.",
+      "prompt": "This line alone shows why the patient needed an ambulance.",
       "answer": false,
-      "explain": "On its own it argues the opposite. Add the reason — for example, active SI with a plan and a need for 1:1 observation."
+      "explain": "On its own it suggests the opposite. Add the reason — for example, suicidal with a plan and needs 1:1 watch."
     },
     {
       "id": "psych-04", "module": "psych", "type": "fix",
-      "context": "Patient argued about going; the crew said they'd restrain him if he got aggressive.",
-      "prompt": "Which rewrite is best?",
-      "quote": "CREW TOLD PT WE WOULD RESTRAIN HIM.",
+      "context": "Patient argued about going to the facility.",
+      "quote": "PT WAS DIFFICULT.",
+      "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Leave it as written." },
-        { "id": "b", "text": "Pt verbally agitated about transport. Calm de-escalation used; pt agreed to sit on cot. No restraints needed." },
-        { "id": "c", "text": "Pt was difficult." },
-        { "id": "d", "text": "Leave it out of the chart." }
+        { "id": "b", "text": "Pt yelling, refused to sit on cot. Explained the transfer; pt agreed and sat on cot." },
+        { "id": "c", "text": "Pt was combative." },
+        { "id": "d", "text": "Pt was a problem." }
       ],
       "answer": "b",
-      "explain": "Chart the behavior, your de-escalation, and the result. Restraint is a protocol decision, not a threat."
+      "explain": "Describe what the patient said and did, what you did, and how it ended. A label like 'difficult' tells the next reader nothing."
     },
     {
       "id": "psych-05", "module": "psych", "type": "mc",
-      "context": "12-year-old with suicidal thoughts; mom at bedside.",
+      "context": "12-year-old with suicidal thoughts. Mom is at the bedside.",
       "prompt": "What should the chart say about consent?",
       "options": [
         { "id": "a", "text": "Nothing — the hospital handles it" },
         { "id": "b", "text": "Who consented: name and relationship" },
-        { "id": "c", "text": "'Minor' checked in billing is enough" },
+        { "id": "c", "text": "Just check 'minor' in billing" },
         { "id": "d", "text": "Only needed if mom rides along" }
       ],
       "answer": "b",
@@ -366,28 +369,28 @@
 
     {
       "id": "hospice-01", "module": "hospice", "type": "swipe",
-      "prompt": "Every hospice transport chart should state the patient's code status.",
+      "prompt": "Every hospice transport chart should list the code status.",
       "answer": true,
       "explain": "If the patient declines en route, code status guides what you do. Note that the DNR form traveled with the patient."
     },
     {
       "id": "hospice-02", "module": "hospice", "type": "mc",
-      "context": "Hospice patient going home; the family asks you not to take vitals.",
+      "context": "Hospice patient going home. The family asks you not to take vitals.",
       "prompt": "What do you chart?",
       "options": [
         { "id": "a", "text": "Leave the vitals blank" },
-        { "id": "b", "text": "Who declined, their relationship, and what you could see" },
+        { "id": "b", "text": "Who declined, and what you could see" },
         { "id": "c", "text": "Estimate the numbers" },
         { "id": "d", "text": "Cancel the transport" }
       ],
       "answer": "b",
-      "explain": "A refusal is charted, not left blank. Then chart what you can observe — breathing, skin, mental status."
+      "explain": "A refusal is charted, not left blank. Then chart what you can see — breathing, skin, mental status."
     },
     {
       "id": "hospice-03", "module": "hospice", "type": "mc",
-      "prompt": "Which belongs in every hospice transport chart?",
+      "prompt": "What belongs in every hospice transport chart?",
       "options": [
-        { "id": "a", "text": "Code status, and that the DNR form traveled with the patient" },
+        { "id": "a", "text": "Code status, and that the DNR form came along" },
         { "id": "b", "text": "The hospice company's phone number" },
         { "id": "c", "text": "The family's opinion of the hospital" },
         { "id": "d", "text": "Nothing extra" }
@@ -397,17 +400,17 @@
     },
     {
       "id": "hospice-04", "module": "hospice", "type": "swipe",
-      "prompt": "For a hospice patient going home, you don't need to chart why they needed an ambulance.",
-      "answer": false,
+      "prompt": "Hospice charts still need to say why an ambulance was needed.",
+      "answer": true,
       "explain": "Every transport needs a reason a car or wheelchair van wouldn't do — bedbound, on oxygen, unable to sit up. Chart it."
     },
     {
       "id": "hospice-05", "module": "hospice", "type": "fix",
-      "prompt": "Which rewrite is best?",
       "quote": "PT TRANSPORTED HOME PER HOSPICE.",
+      "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Pt transported home." },
-        { "id": "b", "text": "Hospice pt to home. DNR form with pt. Bedbound, on 2 L oxygen, unable to sit upright." },
+        { "id": "b", "text": "Hospice pt to home. DNR with pt. Bedbound, on 2 L O2, can't sit up." },
         { "id": "c", "text": "Hospice transport, no issues." },
         { "id": "d", "text": "Transported per family request." }
       ],
@@ -417,14 +420,15 @@
 
     {
       "id": "narrative-01", "module": "narrative", "type": "swipe",
-      "prompt": "'On scene, primary, secondary, vitals, pt to cot' is a complete narrative.",
+      "quote": "ON SCENE, PRIMARY, SECONDARY, VITALS, PT TO COT.",
+      "prompt": "This is a complete narrative.",
       "answer": false,
-      "explain": "That's a checklist, not a narrative. It says you assessed — not what you found."
+      "explain": "That's a checklist, not a narrative. It says you assessed, but not what you found."
     },
     {
       "id": "narrative-02", "module": "narrative", "type": "spot",
-      "context": "Ventilator patient going to a long-term acute care hospital.",
-      "prompt": "Tap the line that needs more detail.",
+      "context": "Ventilator patient going to a long-term care hospital.",
+      "prompt": "Tap the line that's too vague.",
       "chart": {
         "narrative": [
           { "id": "n1", "text": "Patient on ventilator, opens eyes to voice." },
@@ -437,21 +441,22 @@
     },
     {
       "id": "narrative-03", "module": "narrative", "type": "mc",
-      "prompt": "Your narrative says 'without incident' seven times. The fix?",
+      "context": "Your narrative says 'without incident' seven times.",
+      "prompt": "What's the fix?",
       "options": [
         { "id": "a", "text": "Change it to 'without issue'" },
-        { "id": "b", "text": "Say it once; use the space for what you found" },
-        { "id": "c", "text": "Delete the narrative and rely on the fields" },
-        { "id": "d", "text": "Leave it — nothing went wrong" }
+        { "id": "b", "text": "Say it once; describe what you found" },
+        { "id": "c", "text": "Delete the narrative" },
+        { "id": "d", "text": "Leave it" }
       ],
       "answer": "b",
       "explain": "Swapping the phrase isn't a fix. The next caregiver needs what you observed."
     },
     {
       "id": "narrative-04", "module": "narrative", "type": "fix",
-      "context": "This line was meant to describe the patient.",
-      "prompt": "Which rewrite is best?",
+      "context": "You meant to say the patient had no pain.",
       "quote": "CREW STATED THEY DID NOT FEEL PAIN.",
+      "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Leave it as written." },
         { "id": "b", "text": "Patient denies pain." },
@@ -463,13 +468,13 @@
     },
     {
       "id": "narrative-05", "module": "narrative", "type": "swipe",
-      "prompt": "When the patient describes a symptom, quoting their own words is good practice.",
+      "prompt": "Quoting the patient's own words is good charting.",
       "answer": true,
       "explain": "A direct quote like \"my chest feels tight\" is objective and hard to dispute. It beats your summary of what they meant."
     },
     {
       "id": "narrative-06", "module": "narrative", "type": "mc",
-      "prompt": "Which is the most objective?",
+      "prompt": "Which line is the most objective?",
       "options": [
         { "id": "a", "text": "Pt was drunk." },
         { "id": "b", "text": "Odor of alcohol, slurred speech, unsteady when standing." },

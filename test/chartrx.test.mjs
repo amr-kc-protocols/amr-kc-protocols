@@ -27,6 +27,8 @@
  *   C20 vitals read as a grid: headers over their values, a missing value
  *       shown and spoken as missing, nothing overflowing a small phone
  *   C21 no focus ring on a touch screen (it reads as a hint); rings for keyboards
+ *   C22 every question opens at the top: its scenario and heading are never
+ *       left under the top bar by the scroll from the last answer
  *
  * Run:  cd test && node chartrx.test.mjs
  */
@@ -128,6 +130,10 @@ console.log('\nC1 question bank');
   // Readable at a glance: the bank's own writing guide, enforced.
   const wordy = Q.filter(q => q.type !== 'swipe' && q.prompt.split(/\s+/).length > 12).map(q => q.id);
   ok('C1 every task prompt is 12 words or fewer', wordy.length === 0, wordy.join(','));
+  const wordySw = Q.filter(q => q.type === 'swipe' && q.prompt.split(/\s+/).length > 12).map(q => q.id);
+  ok('C1 every true/false statement is 12 words or fewer', wordySw.length === 0, wordySw.join(','));
+  const vague = Q.filter(q => q.type === 'spot' && !/^Tap the (sentence|vitals row|reading|med entry|line)\b/.test(q.prompt)).map(q => q.id);
+  ok('C1 every spot question says what kind of line to tap', vague.length === 0, vague.join(','));
   const long = Q.filter(q => q.explain.trim().split(/(?<=[.!?])\s+/).filter(Boolean).length > 2).map(q => q.id);
   ok('C1 every explanation is two sentences or fewer', long.length === 0, long.join(','));
   const muddy = Q.filter(q => q.type === 'spot' && q.answer.length !== 1).map(q => q.id);
@@ -720,6 +726,37 @@ console.log('\nC21 focus rings');
   await p.keyboard.press('Tab'); await p.keyboard.press('Shift+Tab');
   ok('C21 once the keyboard is used, the ring shows', (await ring()) !== 'none', await ring());
   await p.context().close(); }
+
+/* ── C22 — every question opens at the top ───────────────────────────── */
+// On a phone the answer reveal scrolls the page. A scroll still running when
+// Next is tapped used to open the next question under the top bar, hiding its
+// scenario or its "True or false?" heading.
+console.log('\nC22 questions open at the top');
+for (const [w, h] of [[390, 664], [360, 600]]) {
+  const ids = Q.map(q => q.id);
+  const p = await open({ w, h, seed: seedRound(ids) });
+  await p.waitForSelector('#v-q:not([hidden])');
+  const hidden = [];
+  for (let i = 0; i < ids.length; i++) {
+    const q = await cur(p);
+    const m = await p.evaluate(() => {
+      const bar = document.querySelector('.qbar').getBoundingClientRect().bottom;
+      const ctx = document.getElementById('q-ctx'), h1 = document.getElementById('q-prompt');
+      const first = ctx.hidden ? h1 : ctx;
+      return { y: scrollY, top: first.getBoundingClientRect().top, bar };
+    });
+    if (m.y !== 0 || m.top < m.bar) hidden.push(`${q.id} (scrollY ${Math.round(m.y)}, first line ${Math.round(m.top - m.bar)}px below bar)`);
+    if (i === ids.length - 1) break;
+    await answer(p, false);
+    // Leave a scroll still in flight, as a quick tap on Next does on iPhone.
+    await p.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
+    await p.click('#btn-next');
+    await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1);
+    await p.waitForTimeout(120);
+  }
+  ok(`C22 ${w}×${h}: all ${ids.length} questions open at the top, scenario in view`, hidden.length === 0, hidden.join('; '));
+  await p.context().close();
+}
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));
