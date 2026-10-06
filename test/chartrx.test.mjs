@@ -24,6 +24,9 @@
  *   C17 a broken or missing question bank fails safe
  *   C18 it is reachable from the Field Guide
  *   C19 axe-core finds no accessibility violation on any screen, either theme
+ *   C20 vitals read as a grid: headers over their values, a missing value
+ *       shown and spoken as missing, nothing overflowing a small phone
+ *   C21 no focus ring on a touch screen (it reads as a hint); rings for keyboards
  *
  * Run:  cd test && node chartrx.test.mjs
  */
@@ -98,16 +101,39 @@ function pickSel(q, right) {
 async function answer(p, right) { const q = await cur(p); await p.click(pickSel(q, right)); return q; }
 function seedRound(ids) { return { round: { ids, i: 0, res: [], xp: 0, streak: 0, best: 0 } }; }
 const nonSpot = Q.filter(q => q.type !== 'spot').map(q => q.id);
+// Questions are chosen by what they are, never by id, so editing the bank
+// does not break the suite.
+const ofType = (t) => Q.filter(q => q.type === t).map(q => q.id);
+const ofModule = (m) => Q.filter(q => q.module === m).map(q => q.id);
+const SPOT = ofType('spot'), MC = ofType('mc');
+const SWIPE_F = Q.filter(q => q.type === 'swipe' && q.answer === false).map(q => q.id);
+const SWIPE_T = Q.filter(q => q.type === 'swipe' && q.answer === true).map(q => q.id);
+const GRID_SPOT = Q.filter(q => q.type === 'spot' && (q.chart.vitals || []).some(v => v.time != null)).map(q => q.id);
+const ONE_OF_EACH = ['swipe', 'spot', 'fix', 'mc', 'match'].map(t => ofType(t)[0]);
+const EIGHT = [...new Set([...ONE_OF_EACH, SPOT[1], SWIPE_F[1], MC[1], MC[2]])].slice(0, 8);
+// One question from each of eight modules, in a fixed order.
+const PER_MODULE = Object.keys(BANK.modules).map(m => ofModule(m)[0]);
 
 /* ── C1 — the bank, and nothing hard-coded ───────────────────────────── */
 console.log('\nC1 question bank');
 { const p = await open();
   const b = await p.evaluate(() => { const B = window.ChartRx.bank(); return { n: B.questions.length, errors: B.errors }; });
   ok('C1 every shipped question passes the schema', b.errors.length === 0, b.errors.join(' | '));
-  ok('C1 all 34 load', b.n === Q.length && Q.length === 34, b.n);
+  ok(`C1 every question loads (${Q.length})`, b.n === Q.length && Q.length >= 32, b.n);
   const types = new Set(Q.map(q => q.type));
   ok('C1 all five question types are in the bank', ['swipe','spot','fix','mc','match'].every(t => types.has(t)), [...types].join(','));
   ok('C1 every module has questions', Object.keys(BANK.modules).every(m => Q.some(q => q.module === m)));
+  // Readable at a glance: the bank's own writing guide, enforced.
+  const wordy = Q.filter(q => q.type !== 'swipe' && q.prompt.split(/\s+/).length > 12).map(q => q.id);
+  ok('C1 every task prompt is 12 words or fewer', wordy.length === 0, wordy.join(','));
+  const long = Q.filter(q => q.explain.trim().split(/(?<=[.!?])\s+/).filter(Boolean).length > 2).map(q => q.id);
+  ok('C1 every explanation is two sentences or fewer', long.length === 0, long.join(','));
+  const muddy = Q.filter(q => q.type === 'spot' && q.answer.length !== 1).map(q => q.id);
+  ok('C1 every chart has exactly one problem to find', muddy.length === 0, muddy.join(','));
+  const sw = Q.filter(q => q.type === 'swipe');
+  ok('C1 true/false statements are a real mix, not all one answer',
+     sw.filter(q => q.answer).length >= sw.length / 3 && sw.filter(q => !q.answer).length >= sw.length / 3,
+     sw.filter(q => q.answer).length + ' true / ' + sw.filter(q => !q.answer).length + ' false');
   const leaked = Q.filter(q => SRC.includes(q.prompt.slice(0, 40)) || SRC.includes(q.explain.slice(0, 40))).map(q => q.id);
   ok('C1 no question text is hard-coded in the page', leaked.length === 0, leaked.join(','));
   const leakedMods = Object.values(BANK.modules).filter(m => SRC.includes(m.tip)).map(m => m.name);
@@ -147,7 +173,7 @@ console.log('\nC2 no patient data');
     const m = scan.match(re);
     ok(`C2 no ${label}`, !m, m && m[0]);
   }
-  ok('C2 the spec\'s de-identification is stated on the page', /de-identified composite/.test(SRC)); }
+  ok('C2 the page says the charts are made up for practice', /made up for practice/.test(SRC)); }
 
 /* ── C3 — the round builder ──────────────────────────────────────────── */
 console.log('\nC3 round builder');
@@ -178,10 +204,10 @@ console.log('\nC3 round builder');
   ok('C3 nothing right in the last two rounds comes back', held.length === 0, held.join(','));
   await p2.context().close();
   // ...unless there is not enough else to fill a round, and then it still fills.
-  const most = Q.map(q => q.id).filter(id => id !== 'vitals-01');
+  const keep = SPOT[0], most = Q.map(q => q.id).filter(id => id !== keep);
   const p3 = await open({ seed: { stats: { recent: [most.slice(0, 17), most.slice(17)] } } });
   const full = await p3.evaluate(() => window.ChartRx.buildRound());
-  ok('C3 a round still fills when almost everything is held back', full.length === 8 && full.includes('vitals-01'), full.join(','));
+  ok('C3 a round still fills when almost everything is held back', full.length === 8 && full.includes(keep), full.join(','));
   await p3.context().close(); }
 
 /* ── C4 — every question renders, grades and fits ────────────────────── */
@@ -220,7 +246,7 @@ for (const [w, h, right] of [[390, 844, true], [360, 740, false]]) {
 { // Options are shuffled at runtime, and graded by id rather than position.
   const orders = new Set();
   for (let i = 0; i < 6; i++) {
-    const p = await open({ seed: seedRound(['sign-02']) });
+    const p = await open({ seed: seedRound([MC[0]]) });
     await p.waitForSelector('#v-q:not([hidden])');
     orders.add(await p.evaluate(() => [...document.querySelectorAll('.opts .opt')].map(b => b.dataset.id).join('')));
     await p.context().close();
@@ -230,7 +256,7 @@ for (const [w, h, right] of [[390, 844, true], [360, 740, false]]) {
 
 /* ── C5 — feedback inside 150 ms on a slow phone ─────────────────────── */
 console.log('\nC5 feedback speed');
-{ const ids = ['vitals-01', 'sign-01', 'meds-01', 'sign-02', 'impression-01', 'fullset-01', 'psych-01', 'narrative-02'];
+{ const ids = EIGHT;
   const p = await open({ seed: seedRound(ids) });
   const cdp = await p.context().newCDPSession(p);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
@@ -254,7 +280,7 @@ console.log('\nC5 feedback speed');
 /* ── C6 — swipe ──────────────────────────────────────────────────────── */
 console.log('\nC6 swipe');
 { // A real touch drag, as a phone sends it.
-  const p = await open({ touch: true, seed: seedRound(['sign-01', 'meds-03', 'sign-03']) });
+  const p = await open({ touch: true, seed: seedRound([SWIPE_F[0], SWIPE_F[1], SWIPE_F[2], SWIPE_T[0]]) });
   await p.waitForSelector('#scard');
   const cdp = await p.context().newCDPSession(p);
   async function touchDrag(dx) {
@@ -267,7 +293,7 @@ console.log('\nC6 swipe');
   }
   await touchDrag(25);
   ok('C6 a short nudge is not an answer', (await p.locator('#sheet:not([hidden])').count()) === 0);
-  await touchDrag(-160);                                   // sign-01 is false
+  await touchDrag(-160);                                   // a false statement
   ok('C6 a touch swipe left answers FALSE', (await p.textContent('.vtext')) === 'Correct');
   ok('C6 the card settles with the FALSE stamp', await p.evaluate(() => document.getElementById('scard').classList.contains('settle-l')));
   ok('C6 the statement stays on screen to read', await p.isVisible('#scard-text'));
@@ -278,11 +304,15 @@ console.log('\nC6 swipe');
   await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await p.mouse.down();
   await p.mouse.move(b.x + b.width / 2 + 170, b.y + b.height / 2, { steps: 10 }); await p.mouse.up();
   await p.waitForTimeout(100);
-  ok('C6 a mouse drag right answers TRUE', /Not quite/.test(await p.textContent('.vtext')));   // meds-03 is false
+  ok('C6 a mouse drag right answers TRUE', /Not quite/.test(await p.textContent('.vtext')));   // also false
   await p.click('#btn-next');
   await p.waitForSelector('#scard');
   await p.keyboard.press('ArrowLeft');
   ok('C6 the left arrow key answers FALSE', (await p.textContent('.vtext')) === 'Correct');
+  await p.click('#btn-next');
+  await p.waitForSelector('#scard:not(.done)');
+  await p.keyboard.press('ArrowRight');                   // a true statement
+  ok('C6 the right arrow key answers TRUE', (await p.textContent('.vtext')) === 'Correct');
   ok('C6 no errors', p._errs.length === 0, p._errs.join('|'));
   await p.context().close(); }
 
@@ -311,7 +341,7 @@ console.log('\nC7 keyboard');
 
 /* ── C8 — XP, speed bonus, streak ────────────────────────────────────── */
 console.log('\nC8 XP and streak');
-{ const ids = nonSpot.slice(0, 6).concat(['vitals-01', 'fullset-01']);
+{ const ids = nonSpot.slice(0, 6).concat(SPOT.slice(0, 2));
   const p = await open({ clock: new Date('2026-10-06T10:00:00-05:00'), seed: seedRound(ids) });
   await p.waitForSelector('#v-q:not([hidden])');
   await answer(p, true);
@@ -339,7 +369,7 @@ console.log('\nC8 XP and streak');
 
 /* ── C9 — resume after closing mid-round ─────────────────────────────── */
 console.log('\nC9 resume');
-{ const ids = ['sign-02', 'vitals-01', 'meds-01', 'psych-01', 'sign-01', 'impression-01', 'hospice-03', 'narrative-03'];
+{ const ids = EIGHT;
   const p = await open({ seed: seedRound(ids) });
   await p.waitForSelector('#v-q:not([hidden])');
   for (let i = 0; i < 3; i++) { await answer(p, i !== 1); await p.click('#btn-next'); await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1); }
@@ -364,8 +394,10 @@ console.log('\nC9 resume');
 
 /* ── C10 — summary, weak spot, badges, records ───────────────────────── */
 console.log('\nC10 summary and badges');
-{ const ids = ['meds-01', 'meds-04', 'psych-01', 'sign-02', 'vitals-01', 'hospice-03', 'narrative-03', 'impression-01'];
-  const miss = new Set(['meds-01', 'meds-04', 'psych-01']);
+{ const others = ['sign', 'vitals', 'fullset', 'hospice', 'narrative'].map(m => ofModule(m)[0]);
+  const ids = [ofModule('meds')[0], ofModule('meds')[1], ofModule('psych')[0], ...others.slice(0, 4), ofModule('impression')[0]];
+  const miss = new Set(ids.slice(0, 3));
+  const MEDS = BANK.modules.meds, IMP = BANK.modules.impression;
   const p = await open({ seed: { ...seedRound(ids), stats: { mod: { impression: 4 } } } });
   await p.waitForSelector('#v-q:not([hidden])');
   for (let i = 0; i < 8; i++) {
@@ -377,11 +409,11 @@ console.log('\nC10 summary and badges');
   await p.waitForSelector('#v-sum:not([hidden])');
   const sum = await p.textContent('#v-sum');
   ok('C10 the summary shows the score', /5\/8/.test(sum.replace(/\s/g, '')), sum.slice(0, 80));
-  ok('C10 the weak spot is the module missed most (Dose Detective, 2 misses)', /weak spot: 💊 Dose Detective/.test(sum));
+  ok(`C10 the weak spot is the module missed most (${MEDS.name}, 2 misses)`, sum.includes(`weak spot: ${MEDS.badge} ${MEDS.name}`));
   ok('C10 with its one-line tip', sum.includes(BANK.modules.meds.tip));
   ok('C10 the misses are listed to review', (await p.locator('.rv').count()) === 3);
   ok('C10 the impression badge was earned on the 5th right answer', !!(await stats(p)).badges.impression);
-  ok('C10 the summary announces it', /New badge: 🩺 Impression Matcher/.test(sum));
+  ok('C10 the summary announces it', sum.includes(`New badge: ${IMP.badge} ${IMP.name}`));
   ok('C10 right answers are held back next time', JSON.stringify([...(await stats(p)).recent[0]].sort()) ===
      JSON.stringify(ids.filter(id => !miss.has(id)).sort()));
   await p.reload();
@@ -426,7 +458,7 @@ console.log('\nC12 completion');
 const expected = (id, date, score) =>
   crypto.createHash('sha256').update(`${String(id).trim()}|${date}|${score}|chartrx-oct26`).digest('hex').slice(0, 8);
 { const p = await open({ clock: new Date('2026-10-06T14:00:00-05:00'), perms: ['clipboard-read', 'clipboard-write'],
-                         seed: seedRound(['sign-02', 'sign-01', 'meds-01', 'vitals-01', 'psych-01', 'hospice-03', 'narrative-03', 'impression-01']) });
+                         seed: seedRound(EIGHT) });
   await p.waitForSelector('#v-q:not([hidden])');
   for (let i = 0; i < 8; i++) { await answer(p, i !== 3); await p.click('#btn-next'); if (i < 7) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1); }
   await p.click('#btn-credit');
@@ -461,7 +493,7 @@ const expected = (id, date, score) =>
   await p.click('#vf button[type=submit]');
   await p.waitForFunction(() => document.getElementById('vf-code').textContent.length === 8);
   ok('C12 the supervisor check reproduces the code', (await p.textContent('#vf-code')) === expected('E10293', '2026-10-06', 7));
-  ok('C12 and reports the bank as healthy', /34 loaded, none skipped/.test(await p.textContent('.health')));
+  ok('C12 and reports the bank as healthy', (await p.textContent('.health')).includes(`${Q.length} loaded, none skipped`));
   await p.context().close(); }
 
 /* ── C13 — optional submit ───────────────────────────────────────────── */
@@ -469,7 +501,7 @@ console.log('\nC13 submit');
 for (const mode of ['ok', 'down']) {
   const hook = 'https://hooks.example.test/chartrx';
   const p = await open({ init: 'window.CHARTRX_CONFIG = { submitUrl: ' + JSON.stringify(hook) + ' };', clock: new Date('2026-10-06T14:00:00-05:00'),
-                         seed: seedRound(['meds-01', 'sign-02', 'sign-01', 'vitals-01', 'psych-01', 'hospice-03', 'narrative-03', 'impression-01']) });
+                         seed: seedRound([ofModule('meds')[0], ...PER_MODULE.filter(id => !id.startsWith('meds'))].slice(0, 8)) });
   let body = null;
   await p.route(hook, (r) => { body = r.request().postData(); return mode === 'ok' ? r.fulfill({ status: 200, body: 'ok' }) : r.abort(); });
   await p.reload(); await p.waitForSelector('#v-q:not([hidden])');
@@ -482,14 +514,14 @@ for (const mode of ['ok', 'down']) {
     ok('C13 it POSTs the completion', !!j);
     ok('C13 with exactly name, employeeId, date, score, weakModule', j && JSON.stringify(Object.keys(j).sort()) ===
        JSON.stringify(['date', 'employeeId', 'name', 'score', 'weakModule']), j && Object.keys(j).join(','));
-    ok('C13 the values are right', j && j.score === 7 && j.date === '2026-10-06' && j.weakModule === 'Dose Detective', body);
+    ok('C13 the values are right', j && j.score === 7 && j.date === '2026-10-06' && j.weakModule === BANK.modules.meds.name, body);
   } else {
     ok('C13 an unreachable endpoint still leaves the code on screen', (await p.textContent('#cr-code')).length === 8);
     ok('C13 and fails silently', p._errs.length === 0, p._errs.join('|'));
   }
   await p.context().close();
 }
-{ const p = await open({ seed: seedRound(['sign-02']) });
+{ const p = await open({ seed: seedRound([MC[0]]) });
   let posted = false; await p.route('**/*', (r) => { if (r.request().method() === 'POST') posted = true; return r.continue(); });
   await p.reload(); await p.waitForSelector('#v-q:not([hidden])');
   await answer(p, true); await p.click('#btn-next'); await p.click('#btn-credit');
@@ -532,7 +564,7 @@ console.log('\nC15 theme');
   const after = await p.evaluate(() => ({ t: document.documentElement.dataset.theme, now: new Date().toString().slice(0, 21) }));
   ok('C15 after the next switch it goes back to auto — dark at 20:00, not the old light', after.t === 'dark', JSON.stringify(after));
   await p.context().close();
-  const dark = await open({ clock: new Date('2026-10-06T21:00:00-05:00'), seed: seedRound(['vitals-01']) });
+  const dark = await open({ clock: new Date('2026-10-06T21:00:00-05:00'), seed: seedRound([SPOT[0]]) });
   await dark.waitForSelector('#v-q:not([hidden])');
   const bg = await dark.evaluate(() => getComputedStyle(document.body).backgroundColor);
   ok('C15 night shift gets a dark page', bg === 'rgb(11, 18, 32)', bg);
@@ -540,7 +572,7 @@ console.log('\nC15 theme');
 
 /* ── C16 — reduced motion; never color alone ─────────────────────────── */
 console.log('\nC16 motion and color');
-{ const p = await open({ motion: 'reduce', seed: seedRound(['vitals-01', 'sign-02']) });
+{ const p = await open({ motion: 'reduce', seed: seedRound([GRID_SPOT[0], MC[0]]) });
   await p.waitForSelector('#v-q:not([hidden])');
   await answer(p, false);
   const m = await p.evaluate(() => ({
@@ -549,8 +581,11 @@ console.log('\nC16 motion and color');
   ok('C16 reduced motion: no pulsing', parseFloat(m.pulse) <= 0.0001, m.pulse);
   ok('C16 reduced motion: the sheet fades instead of sliding', m.sheet === 'fade', m.sheet);
   ok('C16 a miss says so in words and an icon', (await p.textContent('.vtext')) === 'Not quite' && (await p.textContent('.vicon')).trim() === '✗');
-  ok('C16 the picked row says "Your pick", the right one says "Answer"',
-     /Your pick/.test(await p.textContent('.is-wrong .mark')) && /Answer/.test(await p.textContent('.is-right .mark')));
+  // What a screen reader hears: the aria-label where there is one, the text otherwise.
+  const said = (sel) => p.locator(sel).first().evaluate(e => e.getAttribute('aria-label') || e.textContent);
+  ok('C16 the picked row carries ✗ and says "incorrect"; the right one ✓ and "correct answer"',
+     /✗/.test(await p.textContent('.is-wrong .mark')) && /incorrect/i.test(await said('.is-wrong')) &&
+     /✓/.test(await p.textContent('.is-right .mark')) && /correct answer/i.test(await said('.is-right')));
   await p.click('#btn-next'); await answer(p, true);
   ok('C16 a hit says so in words and an icon', (await p.textContent('.vtext')) === 'Correct' && (await p.textContent('.vicon')).trim() === '✓');
   ok('C16 no errors', p._errs.length === 0, p._errs.join('|'));
@@ -560,14 +595,14 @@ console.log('\nC16 motion and color');
 console.log('\nC17 bad bank');
 { const broken = JSON.parse(JSON.stringify(BANK));
   broken.questions.push({ id: 'bad-1', module: 'meds', type: 'mc', prompt: 'x', explain: 'y', options: [{ id: 'a', text: 'a' }], answer: 'a' });
-  broken.questions.push({ id: 'sign-01', module: 'sign', type: 'swipe', prompt: 'dupe', explain: 'dupe', answer: true });
+  broken.questions.push({ id: Q[0].id, module: Q[0].module, type: 'swipe', prompt: 'dupe', explain: 'dupe', answer: true });
   const ctx = await browser.newContext({ serviceWorkers: 'block' });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.route('**/chart-rx/questions.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(broken) }));
   await p.goto(PAGE + '#verify'); await p.waitForSelector('.health');
   const hl = await p.textContent('.health');
-  ok('C17 bad questions are skipped, good ones still load', /34 loaded, 2 skipped/.test(hl), hl);
-  ok('C17 the supervisor screen says which and why', /bad-1: needs 2 to 4 options/.test(hl) && /sign-01: duplicate id/.test(hl), hl);
+  ok('C17 bad questions are skipped, good ones still load', hl.includes(`${Q.length} loaded, 2 skipped`), hl);
+  ok('C17 the supervisor screen says which and why', /bad-1: needs 2 to 4 options/.test(hl) && hl.includes(`${Q[0].id}: duplicate id`), hl);
   ok('C17 no errors', errs.length === 0, errs.join('|'));
   await ctx.close();
   const ctx2 = await browser.newContext({ serviceWorkers: 'block' });
@@ -598,7 +633,7 @@ console.log('\nC18 Field Guide');
    supervisor check — light at 10:00, dark at 21:00. */
 console.log('\nC19 accessibility (axe-core)');
 { const AXE = await readFile(join(ROOT, 'test/node_modules/axe-core/axe.min.js'), 'utf8');
-  const ids = ['sign-01', 'vitals-01', 'meds-01', 'sign-02', 'impression-01', 'fullset-01', 'psych-04', 'hospice-01'];
+  const ids = EIGHT;
   for (const [theme, clock] of [['light', '2026-10-06T10:00:00-05:00'], ['dark', '2026-10-06T21:00:00-05:00']]) {
     const p = await open({ clock: new Date(clock), seed: seedRound(ids) });
     const found = [];
@@ -629,6 +664,53 @@ console.log('\nC19 accessibility (axe-core)');
     await p.context().close();
   }
 }
+
+/* ── C20 — the vitals grid reads at a glance ─────────────────────────── */
+console.log('\nC20 vitals grid');
+for (const [w, h] of [[390, 844], [360, 740]]) {
+  const p = await open({ w, h, seed: seedRound(GRID_SPOT) });
+  await p.waitForSelector('#v-q:not([hidden])');
+  const drift = [], overflow = [], gaps = [];
+  for (let i = 0; i < GRID_SPOT.length; i++) {
+    const q = await cur(p);
+    const m = await p.evaluate(() => {
+      const head = [...document.querySelectorAll('.vhead span')].slice(0, -1).map(s => s.getBoundingClientRect().left);
+      const rows = [...document.querySelectorAll('.row.vrow')];
+      return {
+        drift: rows.flatMap(r => [...r.querySelectorAll('.c')].map((c, k) => Math.abs(c.getBoundingClientRect().left - head[k]))),
+        over: rows.filter(r => r.scrollWidth > r.clientWidth + 1).length,
+        gapLabels: rows.filter(r => r.querySelector('.gap')).map(r => r.textContent),
+        gapText: [...document.querySelectorAll('.vrow .gap [aria-hidden]')].map(g => g.textContent),
+      };
+    });
+    if (Math.max(0, ...m.drift) > 1.5) drift.push(q.id + ':' + Math.max(...m.drift).toFixed(1));
+    if (m.over) overflow.push(q.id);
+    if (m.gapText.some(t => t !== '—') || m.gapLabels.some(l => !/not recorded/.test(l))) gaps.push(q.id);
+    await p.click(pickSel(q, true)); await p.click('#btn-next');
+    if (i < GRID_SPOT.length - 1) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1);
+  }
+  ok(`C20 ${w}px: every column header sits over its values`, drift.length === 0, drift.join(', '));
+  ok(`C20 ${w}px: no vitals row overflows`, overflow.length === 0, overflow.join(','));
+  ok(`C20 ${w}px: a missing value shows as — and is read out as "not recorded"`, gaps.length === 0, gaps.join(','));
+  await p.context().close();
+}
+{ // A chart that leaves a value out has a visible gap.
+  const withGap = Q.find(q => q.type === 'spot' && (q.chart.vitals || []).some(v => v.time != null && ['hr','bp','rr','spo2'].some(k => v[k] == null)));
+  ok('C20 the bank has a missing-value chart to find', !!withGap);
+}
+
+/* ── C21 — focus rings: keyboards yes, touch screens no ──────────────── */
+console.log('\nC21 focus rings');
+{ const p = await open({ seed: seedRound(EIGHT) });
+  await p.waitForSelector('#v-q:not([hidden])');
+  const ring = () => p.evaluate(() => { const a = document.activeElement; return a && a !== document.body ? getComputedStyle(a).outlineStyle : 'none'; });
+  ok('C21 the first option has focus, ready for Enter', await p.evaluate(() => document.getElementById('q-body').contains(document.activeElement)));
+  ok('C21 but no ring shows on a touch screen, where it would read as a hint', (await ring()) === 'none', await ring());
+  await answer(p, true);
+  ok('C21 no ring on Next after a tap either', (await ring()) === 'none', await ring());
+  await p.keyboard.press('Tab'); await p.keyboard.press('Shift+Tab');
+  ok('C21 once the keyboard is used, the ring shows', (await ring()) !== 'none', await ring());
+  await p.context().close(); }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));

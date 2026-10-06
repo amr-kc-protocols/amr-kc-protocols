@@ -9,7 +9,7 @@
   schema is skipped rather than breaking the round; the supervisor screen
   (chart-rx.html#verify) lists any that were skipped and why.
 
-  Content: de-identified composites from the October 2026 PCR review. No
+  Content: made-up practice scenarios that teach good charting habits. No
   patient data is stored anywhere — only the provider's own name, employee
   ID and score, and only when they ask for completion credit.
 
@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Chart Rx">
 <meta name="theme-color" content="#f4f6f9" id="theme-color">
-<meta name="description" content="Chart Rx — a three-minute PCR documentation game for AMR Kansas City crews. Eight charts a round, built from the October 2026 chart review.">
+<meta name="description" content="Chart Rx — a three-minute PCR documentation game for AMR Kansas City crews. Eight questions a round on the charting habits that hold up.">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
@@ -69,7 +69,11 @@ html{background:var(--bg)}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;min-height:100vh;
   padding-bottom:calc(var(--sheet-h) + env(safe-area-inset-bottom,0px));-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-appearance:none;text-align:inherit}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--brand2);outline-offset:2px;border-radius:10px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--brand2);outline-offset:2px}
+/* Focus moves into each new question so Tab and Enter keep working, but on a
+   touch screen a ring on the first option reads like a hint. Rings show once
+   the keyboard is in use. */
+html.pointer button:focus-visible,html.pointer a:focus-visible{outline:none}
 [hidden]{display:none!important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
@@ -131,9 +135,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .qwrap{max-width:560px;margin:0 auto;padding:4px 14px 18px}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:0}
 .tag{font-size:11px;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:99px}
-.tag.real{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
 .tag.daily{background:var(--card2);color:var(--brand)}
-.prompt{font-size:18px;font-weight:600;line-height:1.38;letter-spacing:-.005em;margin-bottom:14px}
+.prompt{font-size:19px;font-weight:700;line-height:1.32;letter-spacing:-.01em;margin-bottom:14px}
+/* The scenario is set apart from the task, so the task reads in one glance. */
+.ctx{font-size:14.5px;line-height:1.45;color:var(--ink2);margin:0 0 6px;padding-left:10px;border-left:3px solid var(--brand2)}
+.ctx b{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--brand2);margin-right:6px}
+.quote{margin:-4px 0 14px;padding:10px 12px;border-radius:10px;background:var(--no-bg);border:1px dashed var(--no-line);
+  font-family:var(--mono);font-size:14px;font-weight:500;line-height:1.4}
+.quote-lbl{display:block;font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--no);margin-bottom:3px}
 
 .opts{display:grid;gap:9px}
 .opts.grid{grid-template-columns:1fr 1fr}
@@ -162,7 +171,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
   scroll-margin-bottom:calc(var(--sheet-h) + 12px);transition:background .12s,box-shadow .12s}
 .row:nth-child(even){background:var(--chart-alt)}
 .row:last-child{border-bottom:0}
-.row.nar{text-transform:uppercase;letter-spacing:.01em}
+.row.nar{font-family:var(--sans);font-size:15px;line-height:1.4}
+/* Vitals as a grid with labeled columns: a missing value is a gap you can see. */
+.vhead,.row.vrow{display:grid;grid-template-columns:var(--vcols);column-gap:6px;align-items:center}
+.vhead{background:var(--chart-alt);border-bottom:1px solid var(--line);padding:6px 12px;font-family:var(--mono);
+  font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.row.vrow{font-size:15px;font-variant-numeric:tabular-nums;padding:12px}
+.vrow .c{white-space:nowrap}
+.vrow .gap{color:var(--ink3)}
+.vrow .mark{padding:0;justify-self:end}
 .row:hover:not([disabled]){box-shadow:inset 3px 0 0 var(--brand2)}
 .row[disabled]{cursor:default}
 .row .mark{font-family:var(--sans);text-transform:none}
@@ -315,7 +332,7 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
   <section class="view wrap" id="v-home" hidden aria-labelledby="home-h">
     <div class="hero">
       <div class="rx" aria-hidden="true">&#8478;</div>
-      <div class="hero-eye">PCR documentation &middot; Oct 2026 review</div>
+      <div class="hero-eye">PCR documentation &middot; good charting habits</div>
       <h1 id="home-h">Chart <span>Rx</span></h1>
       <p class="hero-sub">3 minutes. 8 charts. Find what&rsquo;s wrong.</p>
       <div class="stats">
@@ -331,7 +348,7 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
         <button class="btn btn-ghost" id="btn-badges" type="button"><span>My badges<br><span class="sub" id="badge-sub"></span></span></button>
       </div>
     </div>
-    <p class="fine">Every chart is a de-identified composite from the October 2026 review of 35 KC charts.
+    <p class="fine">Every chart here is made up for practice &mdash; no real patient data.
       No sign-in &mdash; your name is asked for only if you want completion credit.</p>
   </section>
 
@@ -346,7 +363,9 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
     </div>
     <div class="qwrap">
       <div class="tags" id="q-tags"></div>
+      <p class="ctx" id="q-ctx" hidden></p>
       <h1 class="prompt" id="q-prompt"></h1>
+      <div class="quote" id="q-quote" hidden><span class="quote-lbl">As charted</span><span id="q-quote-t"></span></div>
       <div id="q-body"></div>
     </div>
   </section>
@@ -414,14 +433,18 @@ function checkQ(q, mods, seen){
   if(!TYPES[q.type]) return 'unknown type "' + q.type + '"';
   if(typeof q.prompt !== 'string' || !q.prompt.trim()) return 'missing prompt';
   if(typeof q.explain !== 'string' || !q.explain.trim()) return 'missing explain';
+  if(q.context != null && typeof q.context !== 'string') return 'context must be text';
+  if(q.quote != null && typeof q.quote !== 'string') return 'quote must be text';
   if(q.type === 'swipe') return typeof q.answer === 'boolean' ? '' : 'a swipe answer must be true or false';
   if(q.type === 'spot'){
     var c = q.chart; if(!c || typeof c !== 'object') return 'a spot question needs a chart';
     var lines = [].concat(c.vitals || [], c.narrative || []), ids = {};
     if(!lines.length) return 'the chart has no lines';
     for(var i = 0; i < lines.length; i++){
-      var l = lines[i];
-      if(!l || typeof l.id !== 'string' || typeof l.text !== 'string') return 'chart line ' + (i + 1) + ' needs an id and text';
+      var l = lines[i], vital = i < (c.vitals || []).length;
+      // A vitals row is either a line of text or fields (time, hr, bp, rr, spo2, pain).
+      if(!l || typeof l.id !== 'string') return 'chart line ' + (i + 1) + ' needs an id';
+      if(typeof l.text !== 'string' && !(vital && l.time != null)) return 'chart line ' + (i + 1) + (vital ? ' needs text or a time' : ' needs text');
       if(ids[l.id]) return 'duplicate chart line id "' + l.id + '"';
       ids[l.id] = 1;
     }
@@ -601,8 +624,12 @@ function ask(q, kind){
   renderBar(kind);
   var tags = '';
   if(kind === 'daily') tags += '<span class="tag daily">Today&rsquo;s challenge</span>';
-  if(q.real === true) tags += '<span class="tag real">&#9733; Based on a real KC chart</span>';
   $('q-tags').innerHTML = tags;
+  var ctx = $('q-ctx');
+  ctx.hidden = !q.context;
+  ctx.innerHTML = q.context ? '<b>Scenario</b>' + esc(q.context) : '';
+  $('q-quote').hidden = !q.quote;
+  $('q-quote-t').textContent = q.quote || '';
   // A swipe question's statement goes on the card you swipe; the heading asks.
   $('q-prompt').textContent = q.type === 'swipe' ? 'True or false?' : q.prompt;
   var body = $('q-body');
@@ -638,22 +665,52 @@ var RENDER = {
   spot: function(q){
     var card = document.createElement('div');
     card.className = 'chart';
-    function block(label, rows, nar){
-      if(!rows || !rows.length) return;
-      var bar = document.createElement('div');
-      bar.className = 'chart-bar';
-      bar.innerHTML = '<span>' + label + '</span>' + (nar ? '' : '<i>Time &middot; HR &middot; BP &middot; RR &middot; SpO2</i>');
-      card.appendChild(bar);
-      rows.forEach(function(r){
-        var b = document.createElement('button');
-        b.type = 'button'; b.className = 'row' + (nar ? ' nar' : ''); b.dataset.id = r.id;
-        b.innerHTML = '<span class="t">' + esc(r.text) + '</span><span class="mark"></span>';
-        b.addEventListener('click', function(){ answer(r.id, b); });
-        card.appendChild(b);
-      });
+    function bar(label){
+      var b = document.createElement('div'); b.className = 'chart-bar'; b.innerHTML = '<span>' + label + '</span>';
+      card.appendChild(b);
     }
-    block('Vitals', q.chart.vitals, false);
-    block('Narrative', q.chart.narrative, true);
+    function rowButton(id, cls, html, label){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'row ' + cls; b.dataset.id = id;
+      b.innerHTML = html + '<span class="mark"></span>';
+      if(label) b.setAttribute('aria-label', label);
+      b.addEventListener('click', function(){ answer(id, b); });
+      card.appendChild(b);
+    }
+    var vit = q.chart.vitals || [], nar = q.chart.narrative || [];
+    if(vit.length){
+      bar('Vitals');
+      var grid = vit.some(function(v){ return v.time != null; });
+      if(grid){
+        // Columns are the ones the chart uses; pain appears only when a row has it.
+        var COLS = [['time','Time'],['hr','HR'],['bp','BP'],['rr','RR'],['spo2','SpO\u2082'],['pain','Pain']].filter(function(c){
+          return c[0] !== 'pain' || vit.some(function(v){ return v.pain != null; }); });
+        // px, not ch: ch follows each element's own font size, so a small header would not line up.
+        var W = { time:'42px', hr:'36px', bp:'70px', rr:'30px', spo2:'44px', pain:'36px' };
+        card.style.setProperty('--vcols', COLS.map(function(c){ return W[c[0]]; }).join(' ') + ' 1fr');
+        var head = document.createElement('div'); head.className = 'vhead'; head.setAttribute('aria-hidden', 'true');
+        head.innerHTML = COLS.map(function(c){ return '<span>' + c[1] + '</span>'; }).join('') + '<span></span>';
+        card.appendChild(head);
+        // Each cell carries its column name for screen readers, inside the
+        // button's own text rather than an aria-label, so the visible numbers
+        // stay part of the name and voice control can still reach the row.
+        vit.forEach(function(v){
+          var cells = '';
+          COLS.forEach(function(c){
+            var val = v[c[0]], has = val != null && val !== '';
+            var name = '<span class="sr">' + c[1].replace('\u2082', '2') + ' </span>';
+            cells += has
+              ? '<span class="c">' + name + esc(String(val) + (c[0] === 'spo2' ? '%' : '')) + '<span class="sr">, </span></span>'
+              : '<span class="c gap">' + name + '<span aria-hidden="true">\u2014</span><span class="sr">not recorded, </span></span>';
+          });
+          rowButton(v.id, 'vrow', cells);
+        });
+      } else vit.forEach(function(v){ rowButton(v.id, '', '<span class="t">' + esc(v.text) + '</span>'); });
+    }
+    if(nar.length){
+      bar('Narrative');
+      nar.forEach(function(n){ rowButton(n.id, 'nar', '<span class="t">' + esc(n.text) + '</span>'); });
+    }
     return card;
   },
 
@@ -771,15 +828,25 @@ function markAnswer(q, choice, el, ok){
   var key = q.type === 'swipe' ? [String(q.answer)] : q.type === 'spot' ? q.answer : [q.answer];
   if(el){
     el.classList.add(ok ? 'is-right' : 'is-wrong', ok ? 'anim-pop' : 'anim-shake');
-    el.querySelector('.mark').textContent = ok ? '✓ Right' : '✗ Your pick';
-    el.setAttribute('aria-label', (ok ? 'Correct: ' : 'Your answer, incorrect: ') + el.textContent);
+    if(el.classList.contains('vrow'))
+      el.querySelector('.mark').innerHTML = '<span aria-hidden="true">' + (ok ? '✓' : '✗') + '</span><span class="sr">' +
+        (ok ? 'your pick, correct' : 'your pick, incorrect') + '</span>';
+    else {
+      el.querySelector('.mark').textContent = ok ? '✓ Right' : '✗ Your pick';
+      el.setAttribute('aria-label', (ok ? 'Correct: ' : 'Your answer, incorrect: ') + el.textContent);
+    }
   }
   var firstKey = null;
   key.forEach(function(k){
     var b = body.querySelector('[data-id="' + k + '"]');
     if(!b || b === el) return;
     b.classList.add('is-right');
-    b.querySelector('.mark').textContent = '✓ Answer';
+    if(b.classList.contains('vrow'))
+      b.querySelector('.mark').innerHTML = '<span aria-hidden="true">✓</span><span class="sr">correct answer</span>';
+    else {
+      b.querySelector('.mark').textContent = '✓ Answer';
+      b.setAttribute('aria-label', 'Correct answer: ' + b.textContent);
+    }
     if(!ok) b.classList.add('anim-pulse');
     if(!firstKey) firstKey = b;
   });
@@ -866,7 +933,7 @@ function renderSummary(){
   if(L.missed && L.missed.length){
     h += '<div class="review"><h2>What you missed</h2>';
     L.missed.forEach(function(id){ var q = BANK.byId[id]; if(!q) return;
-      h += '<div class="rv"><p>' + esc(q.prompt) + '</p><p>' + esc(q.explain) + '</p></div>'; });
+      h += '<div class="rv"><p>' + (q.context ? esc(q.context) + ' ' : '') + esc(q.prompt) + '</p><p>' + esc(q.explain) + '</p></div>'; });
     h += '</div>';
   }
   var v = $('v-sum'); v.innerHTML = h;
@@ -881,7 +948,7 @@ function renderSummary(){
 /* ── BADGES ────────────────────────────────────────────────────────── */
 function renderBadges(){
   var h = '<h1 class="h2" id="badges-h">My badges</h1><p class="lede">Get ' + CONFIG.badgeAt +
-          ' right in a module, across any rounds, to earn its badge. Each one is a habit from the October review.</p><div class="badges">';
+          ' right in a module, across any rounds, to earn its badge. Each one is a charting habit worth keeping.</p><div class="badges">';
   Object.keys(BANK.modules).forEach(function(k){
     var m = BANK.modules[k], n = Math.min(STATS.mod[k] || 0, CONFIG.badgeAt), got = !!STATS.badges[k];
     h += '<div class="badge ' + (got ? 'earned' : 'locked') + '"><span class="em" aria-hidden="true">' + esc(m.badge || '') + '</span>' +
@@ -1036,6 +1103,11 @@ function confetti(){
 }
 
 /* ── KEYBOARD (Toughbook trackpad + Enter) ─────────────────────────── */
+document.documentElement.classList.add('pointer');
+document.addEventListener('pointerdown', function(){ document.documentElement.classList.add('pointer'); }, true);
+document.addEventListener('keydown', function(e){
+  if(/^(Tab|Enter| |Arrow|[1-4]$)/.test(e.key)) document.documentElement.classList.remove('pointer');
+}, true);
 document.addEventListener('keydown', function(e){
   if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
   if($('v-q').hidden || !CUR) return;
