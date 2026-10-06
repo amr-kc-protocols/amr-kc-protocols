@@ -1,5 +1,5 @@
 {
-  "version": "2026-10.2",
+  "version": "2026-10.3",
   "writing_guide": [
     "Scenarios are made up for practice. No patient names, dates of birth, addresses or incident numbers.",
     "context: one short line on who the patient is and what happened. Leave it out if the prompt says enough.",
@@ -195,53 +195,53 @@
     },
 
     {
-      "id": "impression-01", "module": "impression", "type": "match",
+      "id": "impression-01", "picklist": "primary", "module": "impression", "type": "match",
       "context": "Hospice patient. SpO2 69% on room air; you place a non-rebreather.",
       "prompt": "Best primary impression?",
       "options": [
         { "id": "a", "text": "Weakness" },
         { "id": "b", "text": "Pain" },
-        { "id": "c", "text": "Hypoxemia / respiratory distress" },
-        { "id": "d", "text": "No apparent illness/injury" }
+        { "id": "c", "text": "Respiratory Distress - Unspecified" },
+        { "id": "d", "text": "No Apparent Illness/Injury (Adult)" }
       ],
       "answer": "c",
       "explain": "Pick the problem that needed you — here, the low oxygen. A vague impression undersells why the patient needed an ambulance."
     },
     {
-      "id": "impression-02", "module": "impression", "type": "match",
-      "context": "Colostomy came out at the nursing home; going to the ED to have it replaced.",
+      "id": "impression-02", "picklist": "primary", "module": "impression", "type": "match",
+      "context": "Colostomy came out at the nursing home. No pain or bleeding; going to the ED to have it replaced.",
       "prompt": "Best primary impression?",
       "options": [
-        { "id": "a", "text": "No apparent illness/injury" },
-        { "id": "b", "text": "Ostomy / GI device problem" },
-        { "id": "c", "text": "Abdominal pain" },
+        { "id": "a", "text": "No Apparent Illness/Injury (Adult)" },
+        { "id": "b", "text": "Gastrointestinal System Issue (G.I.)" },
+        { "id": "c", "text": "Nausea / Vomiting" },
         { "id": "d", "text": "Weakness" }
       ],
       "answer": "b",
-      "explain": "If they need an ambulance to the ED, 'No apparent illness' contradicts the call. Chart the actual problem."
+      "explain": "Chart the body system with the problem, then add 'Mechanical complication of … devices, implants and grafts' as a secondary impression. 'No Apparent Illness/Injury' contradicts an ambulance trip to the ED."
     },
     {
       "id": "impression-03", "module": "impression", "type": "swipe",
       "prompt": "Your primary impression should agree with the vitals you charted.",
       "answer": true,
-      "explain": "'Bradycardia' next to a charted heart rate of 75 doesn't hold up. The numbers and the impression should tell the same story."
+      "explain": "'Cardiac Dysrhythmia - Bradycardia' next to a charted heart rate of 75 doesn't hold up. The numbers and the impression should tell the same story."
     },
     {
-      "id": "impression-04", "module": "impression", "type": "match",
-      "context": "Teen transferred for suicidal thoughts with a plan.",
+      "id": "impression-04", "picklist": "primary", "module": "impression", "type": "match",
+      "context": "16-year-old transferred for suicidal thoughts with a plan. No attempt.",
       "prompt": "Best primary impression?",
       "options": [
-        { "id": "a", "text": "No apparent illness/injury" },
-        { "id": "b", "text": "Anxiety" },
-        { "id": "c", "text": "Behavioral — suicidal ideation" },
-        { "id": "d", "text": "Altered mental status" }
+        { "id": "a", "text": "No Apparent Illness/Injury (Pediatric)" },
+        { "id": "b", "text": "Anxiety/Emotional Upset" },
+        { "id": "c", "text": "Behavioral / Psychiatric disorder" },
+        { "id": "d", "text": "Suicide attempt" }
       ],
       "answer": "c",
-      "explain": "Chart what's actually going on. 'No apparent illness' on an SI transfer undercuts why they needed you."
+      "explain": "Thoughts with a plan are behavioral; 'Suicide attempt' is only for someone who acted. 'No Apparent Illness/Injury' undercuts why they needed you."
     },
     {
       "id": "impression-05", "module": "impression", "type": "mc",
-      "prompt": "When is 'No apparent illness/injury' right on a transfer?",
+      "prompt": "When is 'No Apparent Illness/Injury' right on a transfer?",
       "options": [
         { "id": "a", "text": "Whenever the patient is stable" },
         { "id": "b", "text": "Almost never — there's a reason they need an ambulance" },

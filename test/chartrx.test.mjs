@@ -66,6 +66,8 @@ function ok(name, cond, extra) {
 
 const BANK = JSON.parse(await readFile(join(ROOT, 'chart-rx/questions.json'), 'utf8'));
 const SRC = await readFile(join(ROOT, 'chart-rx.html'), 'utf8');
+// ImageTrend's own pick lists, copied verbatim; answer choices must match them.
+const PICK = JSON.parse(await readFile(join(ROOT, 'chart-rx/imagetrend-impressions.json'), 'utf8'));
 const Q = BANK.questions;
 
 /* A fresh page. `seed` goes into localStorage once, before the first load
@@ -134,6 +136,13 @@ console.log('\nC1 question bank');
   ok('C1 true/false statements are a real mix, not all one answer',
      sw.filter(q => q.answer).length >= sw.length / 3 && sw.filter(q => !q.answer).length >= sw.length / 3,
      sw.filter(q => q.answer).length + ' true / ' + sw.filter(q => !q.answer).length + ' false');
+  // An impression choice providers won't find in ImageTrend teaches the wrong habit.
+  const unmarked = Q.filter(q => q.options && /primary impression/i.test(q.prompt) && !q.picklist).map(q => q.id);
+  ok('C1 every "pick the impression" question is tied to an ImageTrend list', unmarked.length === 0, unmarked.join(','));
+  const offList = Q.filter(q => q.picklist).flatMap(q => !PICK[q.picklist] ? [q.id + ': no list "' + q.picklist + '"']
+    : q.options.filter(o => !PICK[q.picklist].includes(o.text)).map(o => q.id + ': ' + o.text));
+  ok(`C1 every impression choice is spelled exactly as in ImageTrend (${Q.filter(q => q.picklist).length} questions)`,
+     offList.length === 0 && Q.some(q => q.picklist), offList.join(' | '));
   const leaked = Q.filter(q => SRC.includes(q.prompt.slice(0, 40)) || SRC.includes(q.explain.slice(0, 40))).map(q => q.id);
   ok('C1 no question text is hard-coded in the page', leaked.length === 0, leaked.join(','));
   const leakedMods = Object.values(BANK.modules).filter(m => SRC.includes(m.tip)).map(m => m.name);
