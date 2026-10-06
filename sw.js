@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v33';
+const CACHE = 'amrkc-2026-v34';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -15,6 +15,9 @@ const ASSETS = [
   './alaris-pump.html',
   // Medication math — same reason: it gets opened to check a dose, not to browse
   './med-math.html',
+  // Chart Rx — played between calls, often with no signal. The shell and the
+  // question bank both have to be here, or a round cannot start offline.
+  './chart-rx.html', './chart-rx/questions.json',
   // AEMT series — a study block is opened on a post-run window in a bay, and
   // the whole point of the queue is that it runs client-side with no network.
   // The shell, the content and the scheduler all have to be here already.

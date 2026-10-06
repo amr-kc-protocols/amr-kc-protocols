@@ -479,17 +479,23 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
   ok('S15 and it is the one asked for', await p.evaluate(() => RUN.items[0] === ITEMS[2]));
   await p.context().close(); }
 
-/* S16 — reachable from the field guide, and installed devices get it */
+/* S16 — reachable from the field guide, and installed devices get it. It held
+   the homepage's featured slot while it was the newest training; when Chart Rx
+   took that slot it moved to More → Training, so it is checked there. */
 { const idx = await readFile(join(ROOT, 'index.html'), 'utf8');
-  ok('S16 there is a hero panel and a More entry', (idx.match(/lifepak-15\.html/g) || []).length >= 2);
+  ok('S16 the field guide links it', (idx.match(/lifepak-15\.html/g) || []).length >= 1);
   ok('S16 the copy describes the station rather than the old case engine',
-     /rhythm and electrical therapy station/i.test(idx) && !/11 CASES|3 LEVELS/.test(idx));
+     /rhythm recognition and electrical therapy/i.test(idx) && !/11 CASES|3 LEVELS/.test(idx));
   const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');
   ok('S16 the cache version was bumped so installed devices see it',
      /amrkc-2026-v(?:1[3-9]|[2-9]\d)/.test(sw), (sw.match(/amrkc-2026-v\d+/) || [])[0]);
   const p = await fresh(ORIGIN + '/index.html', 1366, 768);
-  ok('S16 the link is really on the rendered homepage',
-     (await p.locator('a[href="lifepak-15.html"]').count()) >= 1);
+  const gate = p.getByRole('button', { name: /I Understand/i });
+  if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(250); }
+  await p.locator('#nav .nb[data-tab="more"]').click();
+  await p.waitForTimeout(300);
+  ok('S16 the link is really in the rendered More → Training list',
+     (await p.locator('#more-training + .more-list a[href="lifepak-15.html"]').count()) === 1);
   await p.context().close(); }
 
 /* S17 — the tracings carry the findings the items ask about. The rhythm on the

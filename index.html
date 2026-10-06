@@ -1194,22 +1194,21 @@ function renderHome(){
 
   // Featured — the newest training, and only the newest. When something newer
   // ships, it takes this slot and the old one lives on in More → Training,
-  // which is where Alaris and Medication Math went when LIFEPAK arrived.
+  // which is where Alaris and Medication Math went when LIFEPAK arrived, and
+  // where LIFEPAK went when Chart Rx arrived.
   h += '<div class="home-feats">';
-  h += '<a class="feat-card feat-hero" href="lifepak-15.html">';
+  h += '<a class="feat-card feat-hero" href="chart-rx.html">';
   h += '<svg class="feat-ecg" viewBox="0 0 104 50" aria-hidden="true">';
-  h += '<path class="base" d="M0 31h104"/>';
-  h += '<path class="trace" d="M1 31h13l3-3 3 7 4-25 4 33 3-12 3 2h9'
-     + 'l4-4 3 4h12l3-3 3 7 4-25 4 33 3-12 3 2h15"/></svg>';
+  h += '<path class="base" d="M8 12h44M8 22h56M8 32h38M8 42h50"/>';
+  h += '<path class="trace" d="M68 27l9 10 20-25"/></svg>';
   h += '<div class="feat-badge"><span class="dot"></span>New training</div>';
-  h += '<div class="feat-title">LIFEPAK <span class="fa">15</span> Station</div>';
-  h += '<div class="feat-sub">The ACLS rhythm and electrical therapy station. Name the rhythm, '
-     + 'then deliver the therapy on the unit\'s own keys &mdash; defibrillate, cardiovert, pace, '
-     + 'or recognise that none of them is the answer.</div>';
-  h += '<div class="feat-chips"><span class="feat-chip">16 RHYTHMS</span>'
-     + '<span class="feat-chip">4 THERAPIES</span>'
-     + '<span class="feat-chip">ON THE REAL KEYS</span></div>';
-  h += '<div class="feat-go">Start the station &#x203A;</div></a>';
+  h += '<div class="feat-title">Chart <span class="fa">Rx</span></div>';
+  h += '<div class="feat-sub">Three minutes, eight charts &mdash; find what&rsquo;s wrong. A game built from '
+     + 'our own October chart review: the eight documentation habits crews keep missing.</div>';
+  h += '<div class="feat-chips"><span class="feat-chip">3 MINUTES</span>'
+     + '<span class="feat-chip">REAL KC CHARTS</span>'
+     + '<span class="feat-chip">8 BADGES</span></div>';
+  h += '<div class="feat-go">Play a round &#x203A;</div></a>';
   h += '</div>';
 
   // Keep learning — progress and a way into the rest of it.
@@ -2730,6 +2729,8 @@ function renderMore(){
   h += '</div>';
 
   h += moreSec('quiz') + '<div class="more-list">';
+  h += moreCard({href:'chart-rx.html', ac:'ac-blue', ico:'i-clipboard', title:'Chart Rx',
+                 sub:'PCR documentation game &mdash; 8 charts, 3 minutes, find what&rsquo;s wrong'});
   h += moreCard({href:'quiz-daily5.html', ac:'ac-orange', ico:'i-calendar', title:'Daily 5',
                  sub:'Five questions a day &mdash; build a streak'});
   h += moreCard({href:'quiz-rhythms.html', ac:'ac-pink', ico:'i-pulse', title:'Rhythm Strip ID',

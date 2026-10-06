@@ -163,7 +163,7 @@ for (const [label, w, h] of SCREENS) {
     return { href: e.getAttribute('href'), w: Math.round(b.width) };
   }));
   ok('H5 one featured panel on the homepage', cards.length === 1, JSON.stringify(cards));
-  ok('H5 it is the newest training', cards[0] && cards[0].href === 'lifepak-15.html', JSON.stringify(cards));
+  ok('H5 it is the newest training', cards[0] && cards[0].href === 'chart-rx.html', JSON.stringify(cards));
   const lvW = await wide.evaluate(() => document.getElementById('lv').getBoundingClientRect().width);
   ok('H5 it takes the full width on a Toughbook', cards[0] && cards[0].w > lvW * 0.9,
      (cards[0] && cards[0].w) + ' of ' + Math.round(lvW));

@@ -1,0 +1,396 @@
+{
+  "version": "2026-10",
+  "modules": {
+    "sign": { "name": "Sign Last", "badge": "✍️", "tip": "Your signature says the chart is complete. Sign after the handoff — every time." },
+    "vitals": { "name": "Abnormal Vitals", "badge": "📈", "tip": "Abnormal is never 'stable.' Recheck it, write it, report it." },
+    "fullset": { "name": "Full Set Every Time", "badge": "⏱️", "tip": "HR, BP, RR, SpO2 on every set, at least two sets, more on long rides." },
+    "impression": { "name": "Impression Matcher", "badge": "🩺", "tip": "The impression is why they're on your cot — not 'No Apparent Illness.'" },
+    "meds": { "name": "Dose Detective", "badge": "💊", "tip": "Drug, dose, units, route, time. Every med given before you arrived." },
+    "psych": { "name": "Psych Pro", "badge": "🧠", "tip": "Legal status, safety search, SI details, guardian consent." },
+    "hospice": { "name": "Code Status Keeper", "badge": "🕊️", "tip": "Every hospice/end-of-life transport: code status and DNR form travel with the patient." },
+    "narrative": { "name": "No Templates", "badge": "📝", "tip": "Write what you found, not 'W/O INCIDENT' x7." }
+  },
+  "questions": [
+    {
+      "id": "sign-01", "module": "sign", "type": "swipe", "real": true,
+      "prompt": "Signing your crew attestation at dispatch is fine as long as you finish the chart later.",
+      "answer": false,
+      "explain": "Your signature attests the chart is complete and accurate. In our October review, half of charts were signed before the crew even reached the scene."
+    },
+    {
+      "id": "sign-02", "module": "sign", "type": "mc", "real": false,
+      "prompt": "When should you sign the crew attestation on a BLS IFT?",
+      "options": [
+        { "id": "a", "text": "When you open the chart at dispatch" },
+        { "id": "b", "text": "Once the patient is loaded" },
+        { "id": "c", "text": "After transfer of care, once you've reviewed the chart" },
+        { "id": "d", "text": "Whenever — it's just a formality" }
+      ],
+      "answer": "c",
+      "explain": "Sign last. The attestation covers everything in the chart, including the handoff."
+    },
+    {
+      "id": "sign-03", "module": "sign", "type": "swipe", "real": true,
+      "prompt": "Your partner wrote the chart, so your co-signature doesn't make you responsible for what's in it.",
+      "answer": false,
+      "explain": "Your signature attests to the whole chart. Read it before you co-sign."
+    },
+    {
+      "id": "sign-04", "module": "sign", "type": "mc", "real": true,
+      "prompt": "Out of 35 charts reviewed in October, how many were signed BEFORE transfer of care?",
+      "options": [
+        { "id": "a", "text": "3" },
+        { "id": "b", "text": "11" },
+        { "id": "c", "text": "20" },
+        { "id": "d", "text": "29" }
+      ],
+      "answer": "d",
+      "explain": "29 of 35 — and 18 of those before arriving on scene. This is our #1 system-wide fix."
+    },
+    {
+      "id": "vitals-01", "module": "vitals", "type": "spot", "real": true,
+      "prompt": "16 y/o psych transfer. Tap the problem.",
+      "chart": {
+        "vitals": [
+          { "id": "v1", "text": "1109 · HR 81 · BP 109/71 · RR 16 · SpO2 100%" },
+          { "id": "v2", "text": "1118 · HR 68 · BP 170/150 · RR 16 · SpO2 100%" }
+        ],
+        "narrative": [
+          { "id": "n1", "text": "PATIENT WALKED FROM BED TO COT WITH EMS CREW." },
+          { "id": "n2", "text": "PATIENT SECURED TO COT VIA SEATBELTS AND WINGS UP." },
+          { "id": "n3", "text": "PATIENT CARE REPORT GIVEN TO NURSE." }
+        ]
+      },
+      "answer": ["v2"],
+      "explain": "170/150 in a 16-year-old was never rechecked or mentioned. Recheck (manual if needed), document it, and report it to the receiving RN."
+    },
+    {
+      "id": "vitals-02", "module": "vitals", "type": "swipe", "real": true,
+      "prompt": "Patient's HR was 116–120 the whole ride, but they 'looked fine,' so 'vitals remained stable' is accurate.",
+      "answer": false,
+      "explain": "Persistent tachycardia is abnormal. Name it in the narrative, note what you did, and who you told."
+    },
+    {
+      "id": "vitals-03", "module": "vitals", "type": "fix", "real": true,
+      "prompt": "Pick the best rewrite: \"PT VITALS AND CONDITION REMAINED STABLE THROUGHOUT TRANSPORT.\" (BP was 118/40, pt on warfarin)",
+      "options": [
+        { "id": "a", "text": "PT VITALS REMAINED STABLE." },
+        { "id": "b", "text": "Initial BP 118/40; recheck 120/45. Pt asymptomatic, A&Ox4, skin warm/dry. Low diastolic reported to receiving RN." },
+        { "id": "c", "text": "BP slightly low but pt is fine." },
+        { "id": "d", "text": "Vitals monitored per protocol." }
+      ],
+      "answer": "b",
+      "explain": "Name the abnormal value, show you rechecked it, describe how the patient looked, and say who you told."
+    },
+    {
+      "id": "vitals-04", "module": "vitals", "type": "spot", "real": true,
+      "prompt": "Chest pain, elevated troponin, BLS transfer. Tap the finding that was never mentioned in the narrative.",
+      "chart": {
+        "vitals": [
+          { "id": "v1", "text": "1946 · HR 74 · BP 149/96 · RR 16 · SpO2 99%" },
+          { "id": "v2", "text": "1954 · HR 67 · BP 147/81 · RR 16 · SpO2 98% · Pulse: IRREGULARLY IRREGULAR" }
+        ],
+        "narrative": [
+          { "id": "n1", "text": "DOCTOR CONFIRMED TRANSPORT IS BLS." },
+          { "id": "n2", "text": "PT ABLE TO STAND AND SIT ON COT WITHOUT INCIDENT." },
+          { "id": "n3", "text": "PT TRANSPORTED WITHOUT INCIDENT." }
+        ]
+      },
+      "answer": ["v2"],
+      "explain": "A new irregularly irregular pulse in a chest pain patient matters. Document it, ask if it's known, and report it."
+    },
+    {
+      "id": "vitals-05", "module": "vitals", "type": "mc", "real": false,
+      "prompt": "You get a reading you think is wrong (BP 170/150). Best move?",
+      "options": [
+        { "id": "a", "text": "Delete it — it's obviously an artifact" },
+        { "id": "b", "text": "Leave it and say nothing" },
+        { "id": "c", "text": "Recheck (manual if possible), document both readings and your reasoning" },
+        { "id": "d", "text": "Change it to the previous reading" }
+      ],
+      "answer": "c",
+      "explain": "Never delete or ignore a reading. Recheck it and write what you found — the chart has to explain itself."
+    },
+    {
+      "id": "fullset-01", "module": "fullset", "type": "spot", "real": true,
+      "prompt": "Post-op abdominal pain, IV Dilaudid given. Tap the problem.",
+      "chart": {
+        "vitals": [
+          { "id": "v1", "text": "1951 · HR 81 · BP —/— · RR 16 · SpO2 100% · Pain 7" },
+          { "id": "v2", "text": "2005 · HR 84 · BP —/— · RR 16 · SpO2 98% · Pain 7" }
+        ],
+        "narrative": [
+          { "id": "n1", "text": "PT HAS RECEIVED DILAUDID (1MG @ 1917), REGLAN, AND BENADRYL IN ER." },
+          { "id": "n2", "text": "PT ABLE TO STAND WITH ASSISTANCE AND WALK TO COT." },
+          { "id": "n3", "text": "MET WITH NURSE FOR REPORT AND PAPERWORK." }
+        ]
+      },
+      "answer": ["v1", "v2"],
+      "explain": "No blood pressure on either set — on a patient who just got IV opioids. Full set every time."
+    },
+    {
+      "id": "fullset-02", "module": "fullset", "type": "mc", "real": true,
+      "prompt": "A 2-hour, 115-mile psych transfer had vitals at 1223 and 1404. What's the problem?",
+      "options": [
+        { "id": "a", "text": "Nothing — two sets is the minimum" },
+        { "id": "b", "text": "A 100-minute gap with no reassessment on a long transport" },
+        { "id": "c", "text": "Too many vitals for a psych patient" },
+        { "id": "d", "text": "Vitals aren't needed on psych transfers" }
+      ],
+      "answer": "b",
+      "explain": "Two sets is the floor, not the goal. On long transports, reassess regularly per AMR KC guidelines."
+    },
+    {
+      "id": "fullset-03", "module": "fullset", "type": "swipe", "real": false,
+      "prompt": "If the patient refuses a BP, leave the field blank.",
+      "answer": false,
+      "explain": "Chart it as 'Refused' and note it in the narrative, plus what you could observe. A blank looks like you skipped it."
+    },
+    {
+      "id": "fullset-04", "module": "fullset", "type": "mc", "real": false,
+      "prompt": "What's a full set of vitals on a BLS transport?",
+      "options": [
+        { "id": "a", "text": "HR and BP" },
+        { "id": "b", "text": "HR, BP, RR, SpO2" },
+        { "id": "c", "text": "BP and SpO2" },
+        { "id": "d", "text": "Whatever the monitor imports" }
+      ],
+      "answer": "b",
+      "explain": "HR, BP, RR, and SpO2 on every set — plus pain score when pain is part of the complaint."
+    },
+    {
+      "id": "impression-01", "module": "impression", "type": "match", "real": true,
+      "prompt": "Hospice transport. SpO2 69% on room air, placed on NRB 15 LPM. Pick the best Primary Impression.",
+      "options": [
+        { "id": "a", "text": "Weakness" },
+        { "id": "b", "text": "Pain" },
+        { "id": "c", "text": "Hypoxemia / Respiratory distress" },
+        { "id": "d", "text": "No Apparent Illness/Injury" }
+      ],
+      "answer": "c",
+      "explain": "This chart was coded 'Weakness.' The impression should reflect why they needed you — here, the hypoxia."
+    },
+    {
+      "id": "impression-02", "module": "impression", "type": "match", "real": true,
+      "prompt": "Colostomy dislodged at the nursing home; going to the ED for replacement. Best Primary Impression?",
+      "options": [
+        { "id": "a", "text": "No Apparent Illness/Injury" },
+        { "id": "b", "text": "Ostomy / GI device complication" },
+        { "id": "c", "text": "Abdominal pain" },
+        { "id": "d", "text": "Weakness" }
+      ],
+      "answer": "b",
+      "explain": "If they need an ambulance to the ED, 'No Apparent Illness' contradicts the call. Code the actual problem."
+    },
+    {
+      "id": "impression-03", "module": "impression", "type": "swipe", "real": true,
+      "prompt": "Patient with 3rd-degree heart block, HR 75 the entire transport. Primary impression 'Bradycardia' is the best fit.",
+      "answer": false,
+      "explain": "The documented HR doesn't support bradycardia. Use the rhythm (AV block, 3rd degree) — and make sure the numbers and the impression agree."
+    },
+    {
+      "id": "impression-04", "module": "impression", "type": "match", "real": true,
+      "prompt": "Teen psych transfer for SI with a plan. Best Primary Impression?",
+      "options": [
+        { "id": "a", "text": "No Apparent Illness/Injury (Pediatric)" },
+        { "id": "b", "text": "Anxiety" },
+        { "id": "c", "text": "Behavioral/Psychiatric — Suicidal ideation" },
+        { "id": "d", "text": "Altered Level of Consciousness" }
+      ],
+      "answer": "c",
+      "explain": "'No Apparent Illness' on an SI transfer undercuts medical necessity. Code the SI."
+    },
+    {
+      "id": "meds-01", "module": "meds", "type": "fix", "real": true,
+      "prompt": "Pick the best rewrite: \"NURSE GAVE PATIENT .5 OF DILAUDID.\"",
+      "options": [
+        { "id": "a", "text": "Nurse gave Dilaudid." },
+        { "id": "b", "text": "RN administered hydromorphone (Dilaudid) 0.5 mg IV at 1415 prior to EMS arrival." },
+        { "id": "c", "text": "Pt got .5 Dilaudid earlier." },
+        { "id": "d", "text": "Pain meds given per RN." }
+      ],
+      "answer": "b",
+      "explain": "Drug, dose, units, route, time. '.5' could be mg or mL — and a missing leading zero is a classic med-error setup."
+    },
+    {
+      "id": "meds-02", "module": "meds", "type": "spot", "real": true,
+      "prompt": "Tap the line with the documentation problem.",
+      "chart": {
+        "vitals": [
+          { "id": "v1", "text": "2111 · HR 78 · BP 134/67 · RR 22 · SpO2 98% · Pain 0" }
+        ],
+        "narrative": [
+          { "id": "n1", "text": "ER FOUND MODERATE SPINAL STENOSIS AT L3-L4 AND L4-L5." },
+          { "id": "n2", "text": "PT WAS GIVEN MORPHINE (2 DOSES, LAST WAS 4 @ 2050) AND ZOFRAN." },
+          { "id": "n3", "text": "ASSISTED PT IN STANDING AND PIVOTING WITH 2 PERSON ASSIST." }
+        ]
+      },
+      "answer": ["n2"],
+      "explain": "'4' of what? And Zofran has no dose or time. Units and route on every med."
+    },
+    {
+      "id": "meds-03", "module": "meds", "type": "swipe", "real": false,
+      "prompt": "Meds given by the sending facility before you arrived don't need to be in your chart.",
+      "answer": false,
+      "explain": "They affect your assessment (sedation, pain, vitals). Document drug, dose, units, route, and time."
+    },
+    {
+      "id": "meds-04", "module": "meds", "type": "mc", "real": true,
+      "prompt": "\"Ativan and Haldol were given for agitation.\" What's missing?",
+      "options": [
+        { "id": "a", "text": "Nothing" },
+        { "id": "b", "text": "Dose, route, and time for each" },
+        { "id": "c", "text": "The brand names" },
+        { "id": "d", "text": "The pharmacy that filled it" }
+      ],
+      "answer": "b",
+      "explain": "Sedatives given before transport change what you should expect en route. Dose, route, time."
+    },
+    {
+      "id": "psych-01", "module": "psych", "type": "mc", "real": false,
+      "prompt": "Which of these is NOT one of the 4 must-haves on a psych transfer?",
+      "options": [
+        { "id": "a", "text": "Legal status (voluntary or hold)" },
+        { "id": "b", "text": "Safety search done" },
+        { "id": "c", "text": "Patient's insurance company" },
+        { "id": "d", "text": "SI details — plan or means" }
+      ],
+      "answer": "c",
+      "explain": "The 4: legal status, safety search, SI details, and who consented (for minors). Payer info goes in billing, not the narrative."
+    },
+    {
+      "id": "psych-02", "module": "psych", "type": "spot", "real": true,
+      "prompt": "SI with a plan to use a knife, auditory/visual hallucinations. What's MOST important that's missing?",
+      "chart": {
+        "vitals": [
+          { "id": "v1", "text": "1230 · HR 86 · BP 160/95 · RR 18 · SpO2 98%" }
+        ],
+        "narrative": [
+          { "id": "n1", "text": "PT WAS SEEN IN ED FOR SUICIDAL IDEATIONS W/ A PLAN TO USE A KNIFE." },
+          { "id": "n2", "text": "PT IS MOVED FROM BED TO COT VIA WALKING W/O INCIDENT." },
+          { "id": "n3", "text": "PT IS TRANSPORTED W/O INCIDENT." }
+        ]
+      },
+      "answer": ["n1"],
+      "explain": "With a weapon plan, the chart must show a safety search was done (and legal status). Tap the line that should have triggered it. Also: 160/95 never addressed."
+    },
+    {
+      "id": "psych-03", "module": "psych", "type": "swipe", "real": true,
+      "prompt": "\"Calm and cooperative, no interventions needed\" is enough to show a psych patient needed an ambulance.",
+      "answer": false,
+      "explain": "On its own, it argues they didn't. Add the reason: e.g., 'active SI with plan, requires 1:1 observation, elopement risk.'"
+    },
+    {
+      "id": "psych-04", "module": "psych", "type": "fix", "real": true,
+      "prompt": "Best way to document this? The patient asks why he has to go, and the crew tells him they'd restrain him if he got aggressive.",
+      "options": [
+        { "id": "a", "text": "Crew told pt we would restrain him." },
+        { "id": "b", "text": "Pt verbally agitated, questioning transport. Crew used calm verbal de-escalation and explained the process; pt agreed to sit on cot. No restraints required." },
+        { "id": "c", "text": "Pt was difficult." },
+        { "id": "d", "text": "Leave it out of the chart." }
+      ],
+      "answer": "b",
+      "explain": "Document the behavior, your de-escalation, and the outcome. Restraints are a protocol decision, not a threat to chart."
+    },
+    {
+      "id": "psych-05", "module": "psych", "type": "mc", "real": true,
+      "prompt": "12 y/o SI transfer. Mom is at bedside. What should the chart say about consent?",
+      "options": [
+        { "id": "a", "text": "Nothing — the hospital handles it" },
+        { "id": "b", "text": "Who consented (name and relationship) and that they signed as representative" },
+        { "id": "c", "text": "'Minor/Child' checked on billing is enough" },
+        { "id": "d", "text": "Only needed if mom rides along" }
+      ],
+      "answer": "b",
+      "explain": "One of our best October charts did exactly this: named the parent and noted she signed as the patient's representative."
+    },
+    {
+      "id": "hospice-01", "module": "hospice", "type": "swipe", "real": true,
+      "prompt": "In October's review, all 3 hospice transports documented the patient's code status.",
+      "answer": false,
+      "explain": "None of them did. Every hospice/end-of-life transport: code status, and confirm the DNR/OOH-DNR form traveled with the patient."
+    },
+    {
+      "id": "hospice-02", "module": "hospice", "type": "mc", "real": false,
+      "prompt": "Hospice patient going home. Family member refuses vitals. What do you chart?",
+      "options": [
+        { "id": "a", "text": "Leave vitals blank" },
+        { "id": "b", "text": "Make up reasonable numbers" },
+        { "id": "c", "text": "Who refused, their relationship, and what you could observe (resp effort, skin, mental status)" },
+        { "id": "d", "text": "Cancel the transport" }
+      ],
+      "answer": "c",
+      "explain": "Refusals are documented, not blanks. Then chart what you can see without equipment."
+    },
+    {
+      "id": "hospice-03", "module": "hospice", "type": "mc", "real": false,
+      "prompt": "Which belongs in EVERY hospice transport chart?",
+      "options": [
+        { "id": "a", "text": "Code status and that the DNR/OOH-DNR form traveled with the patient" },
+        { "id": "b", "text": "The hospice company's phone number" },
+        { "id": "c", "text": "Family's opinion of the hospital" },
+        { "id": "d", "text": "Nothing extra — same as any transfer" }
+      ],
+      "answer": "a",
+      "explain": "If the patient deteriorates en route, the code status in your chart is what protects them and you."
+    },
+    {
+      "id": "narrative-01", "module": "narrative", "type": "swipe", "real": true,
+      "prompt": "\"ON SCENE, PRIMARY, HPI/PMH, SECONDARY, VITALS, PT TO COT\" is an acceptable narrative.",
+      "answer": false,
+      "explain": "That's a checklist, not a narrative. It says you did an assessment — but not what you found."
+    },
+    {
+      "id": "narrative-02", "module": "narrative", "type": "spot", "real": true,
+      "prompt": "Ventilator patient to an LTAC. Tap the biggest gap.",
+      "chart": {
+        "vitals": [
+          { "id": "v1", "text": "1508 · HR 73 · BP 102/55 · RR 23 · SpO2 96% · EtCO2 41" }
+        ],
+        "narrative": [
+          { "id": "n1", "text": "ARRIVED TO FIND MALE PT LYING SEMI FOWLERS IN BED." },
+          { "id": "n2", "text": "PT UNABLE TO SPEAK AT THIS TIME DUE TO BEING ON A VENTILATOR." },
+          { "id": "n3", "text": "PT RESPONSIVE TO VERBAL ONLY BUT DOES NOT SPEAK AT THIS TIME." },
+          { "id": "n4", "text": "[ END OF NARRATIVE ]" }
+        ]
+      },
+      "answer": ["n4"],
+      "explain": "The narrative ends before transport. No vent settings (mode, rate, TV, FiO2, PEEP), no reassessment, no handoff."
+    },
+    {
+      "id": "narrative-03", "module": "narrative", "type": "mc", "real": true,
+      "prompt": "Your narrative uses 'W/O INCIDENT' 7 times. What's the fix?",
+      "options": [
+        { "id": "a", "text": "Change it to 'WITHOUT ISSUE'" },
+        { "id": "b", "text": "Say it once; use the space for findings — behavior, complaints, reassessment" },
+        { "id": "c", "text": "Delete the narrative and rely on the fields" },
+        { "id": "d", "text": "It's fine — it shows nothing went wrong" }
+      ],
+      "answer": "b",
+      "explain": "Swapping the phrase isn't a fix. Auditors and receiving staff need what you observed."
+    },
+    {
+      "id": "narrative-04", "module": "narrative", "type": "swipe", "real": true,
+      "prompt": "\"CREW STATED THEY DID NOT FEEL PAIN... CREW HAD A SLIGHT COUGH.\" — this clearly describes the patient.",
+      "answer": false,
+      "explain": "As written, it says the crew had the pain and cough. Reread before you submit — pronouns matter in a legal record."
+    },
+    {
+      "id": "narrative-05", "module": "narrative", "type": "spot", "real": true,
+      "prompt": "Patient woke up with abnormal sensation in both legs and was incontinent without realizing it. Tap what's missing.",
+      "chart": {
+        "vitals": [
+          { "id": "v1", "text": "2111 · HR 78 · BP 134/67 · RR 22 · SpO2 98%" }
+        ],
+        "narrative": [
+          { "id": "n1", "text": "PT WAS INCONTINENT AS WELL WITHOUT REALIZING IT." },
+          { "id": "n2", "text": "MET WITH PT WHO WAS ALERT AND PLEASANT." },
+          { "id": "n3", "text": "[ NO NEURO EXAM DOCUMENTED ]" },
+          { "id": "n4", "text": "TRANSFERRED CARE, CLEANED EQUIPMENT, CLEARED SCENE." }
+        ]
+      },
+      "answer": ["n3"],
+      "explain": "New incontinence plus bilateral leg symptoms is a red flag. Document strength, sensation, and bowel/bladder function in both legs."
+    }
+  ]
+}
