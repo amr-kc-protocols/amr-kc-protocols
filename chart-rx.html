@@ -117,6 +117,36 @@ html.pointer button:focus-visible,html.pointer a:focus-visible{outline:none}
 .btn-ghost .sub{font-size:12px;font-weight:600;color:var(--ink3)}
 .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .daily-done{color:var(--ok)}
+.btn-primary .sub{font-size:12px;font-weight:600;color:inherit;opacity:.85}
+/* rank, weekly goal, today's double-XP habit */
+.rankline{margin-top:14px}
+.rank-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}
+.rankline .rank-top b{font-size:16px;color:#ffd166}
+.rankline .rank-top span{color:#d6e6fb;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--gold);transition:width .6s ease-out}
+.rankline .bar{background:rgba(255,255,255,.18)}
+.rankline .bar i{background:#ffd166}
+.rank{margin-top:14px;text-align:left}
+.rank .rank-top b{font-size:15px;color:var(--ink)} .rank .rank-top span{color:var(--ink2)}
+.rankup{margin-top:12px;font-size:16px;font-weight:700;color:var(--gold);background:var(--gold-bg);border:1px solid var(--gold);border-radius:12px;padding:9px 12px}
+.week-row{display:grid;gap:6px;margin-top:12px}
+.week{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600;color:var(--ink2);
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.wk-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.pips{display:flex;gap:5px}
+.pips i{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);display:block}
+.pips i.on{background:var(--ok);border-color:var(--ok)}
+.fx{font-size:13.5px;color:var(--ink2);padding:0 4px} .fx b{color:var(--ink)}
+.goals{margin-top:14px;text-align:left}
+.goals h2{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px}
+.goals ul{list-style:none;display:grid;gap:6px}
+.goals li{font-size:14px;padding:8px 11px;border-radius:10px;background:var(--card2)}
+.blitz-score b{display:block;font-size:56px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:8px}
+.blitz-score span{font-size:13px;color:var(--ink3)}
+.tbar{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--flame);border-radius:99px}
+.tleft{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink2);min-width:32px;text-align:right}
 .fine{font-size:11.5px;color:var(--ink3);margin-top:16px;line-height:1.5;text-align:center}
 
 /* ── QUESTION ─────────────────────────────────────────────────── */
@@ -280,6 +310,10 @@ html.pointer button:focus-visible,html.pointer a:focus-visible{outline:none}
 .badge .state{font-size:11.5px;font-weight:700;color:var(--ink3)}
 .badge.earned .state{color:var(--gold)}
 .badge .tip{font-size:12px;color:var(--ink2);margin-top:6px;line-height:1.4;text-align:left}
+.badge .mast{font-size:11.5px;color:var(--ink3);margin-top:2px}
+.badge.silver{border-color:var(--ink3);background:linear-gradient(180deg,var(--card2),var(--card) 70%)}
+.badge.silver .prog i{background:var(--ink3)} .badge.silver .state{color:var(--ink2)}
+.badge.gold{border-width:2.5px}
 
 /* ── CREDIT ───────────────────────────────────────────────────── */
 .field{display:grid;gap:6px;margin-bottom:12px}
@@ -335,14 +369,23 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
       <div class="hero-eye">PCR documentation &middot; good charting habits</div>
       <h1 id="home-h">Chart <span>Rx</span></h1>
       <p class="hero-sub">3 minutes. 8 charts. Find what&rsquo;s wrong.</p>
-      <div class="stats">
-        <div class="stat"><b id="st-streak">0</b><span>best streak</span></div>
-        <div class="stat"><b id="st-badges">0/10</b><span>badges</span></div>
-        <div class="stat"><b id="st-xp">0</b><span>total XP</span></div>
+      <div class="rankline">
+        <div class="rank-top"><b id="rk-name">Probie</b><span><span id="st-xp">0 XP</span> &middot; <span id="rk-next"></span></span></div>
+        <div class="bar" role="progressbar" aria-label="Progress to the next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="rk-bar"></i></div>
       </div>
+      <div class="stats">
+        <div class="stat"><b id="st-mastered">0</b><span>mastered</span></div>
+        <div class="stat"><b id="st-badges">0/10</b><span>badges</span></div>
+        <div class="stat"><b id="st-streak">0</b><span>best streak</span></div>
+      </div>
+    </div>
+    <div class="week-row">
+      <div class="week"><span class="wk-lbl">This week</span><span class="pips" id="wk-pips" aria-hidden="true"></span><span id="wk-text"></span></div>
+      <div class="fx" id="fx"></div>
     </div>
     <div class="home-actions">
       <button class="btn btn-primary" id="btn-start" type="button">Start round</button>
+      <button class="btn btn-ghost" id="btn-blitz" type="button"><span>&#9889; Lightning round<br><span class="sub" id="blitz-sub"></span></span></button>
       <div class="btn-row">
         <button class="btn btn-ghost" id="btn-daily" type="button"><span>Today&rsquo;s challenge<br><span class="sub" id="daily-sub"></span></span></button>
         <button class="btn btn-ghost" id="btn-badges" type="button"><span>My badges<br><span class="sub" id="badge-sub"></span></span></button>
@@ -402,12 +445,15 @@ function load(k, d){ try{ var v = localStorage.getItem(LS + k); return v ? JSON.
 function save(k, v){ try{ localStorage.setItem(LS + k, JSON.stringify(v)); }catch(e){} }
 function drop(k){ try{ localStorage.removeItem(LS + k); }catch(e){} }
 
-var STATS = Object.assign({ bestStreak:0, rounds:0, xp:0, mod:{}, badges:{}, recent:[[],[]], daily:null, last:null },
+var STATS = Object.assign({ bestStreak:0, rounds:0, xp:0, mod:{}, badges:{}, recent:[[],[]], daily:null, last:null,
+                            box:{}, silver:{}, gold:{}, week:null, goalWeek:'', weeksRun:0, blitzBest:0 },
                           load('stats', {}));
+['box', 'silver', 'gold', 'mod', 'badges'].forEach(function(k){ if(!STATS[k] || typeof STATS[k] !== 'object') STATS[k] = {}; });
 var ROUND = load('round', null);
 var BANK = null;            // { modules, questions, byId, errors, version }
 var CUR = null;             // the question on screen: { q, t0, answered, kind }
 var DAILY = null;           // { q } while today's challenge is on screen
+var BLITZ = null;           // the lightning round in play: { ids, i, score, miss, end, xp, rank0 }
 
 /* ── SMALL HELPERS ─────────────────────────────────────────────────── */
 function $(id){ return document.getElementById(id); }
@@ -476,30 +522,104 @@ function validate(raw){
   return { modules:mods, questions:ok, byId:byId, errors:errors, version:(raw && raw.version) || '' };
 }
 
+/* ── PROGRESSION ───────────────────────────────────────────────────────
+   What brings people back is built on what helps them remember: spaced
+   review (a miss comes back first; a question you know comes back days
+   later), progress you can see (rank, mastery, badge tiers), and a weekly
+   goal that suits 24- and 48-hour shifts better than a daily streak.
+   Nothing is ever taken away, there are no random prizes, and you can leave
+   at any moment without losing anything. */
+var BOX_DAYS = [0, 1, 3, 7, 14];   // days until a question is due again, by box
+var MASTERED = 3;                  // box 3+: right on three spaced occasions
+var SILVER = 15, WEEK_GOAL = 3, BLITZ_MS = 60000, BLITZ_XP = 5, DRILL_SIZE = 5;
+var RANKS = [[0, 'Probie'], [100, 'Charter'], [250, 'Clean Charter'], [500, 'Detail Hound'],
+             [800, 'QA Ready'], [1200, 'Chart Whisperer'], [2000, 'Chart Legend']];
+
+function addDays(date, n){ var d = new Date(date + 'T12:00:00'); d.setDate(d.getDate() + n); return ymd(d); }
+// A week is keyed by its Monday.
+function weekKey(d){ d = d || new Date(); var m = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12);
+  m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return ymd(m); }
+function rankOf(xp){
+  var i = 0; while(i + 1 < RANKS.length && xp >= RANKS[i + 1][0]) i++;
+  var next = RANKS[i + 1];
+  return { i:i, name:RANKS[i][1], floor:RANKS[i][0], next:next ? next[1] : '', at:next ? next[0] : 0,
+           frac:next ? (xp - RANKS[i][0]) / (next[0] - RANKS[i][0]) : 1 };
+}
+function boxOf(id){ return STATS.box[id] || null; }
+function isMastered(id){ var b = boxOf(id); return !!b && b.b >= MASTERED; }
+function isDue(id, t){ var b = boxOf(id); return !!b && b.due <= (t || ymd()); }
+function masteredIn(m){ return BANK.questions.filter(function(q){ return (!m || q.module === m) && isMastered(q.id); }).length; }
+function dueCount(){ var t = ymd(); return BANK.questions.filter(function(q){ return isDue(q.id, t); }).length; }
+function newCount(){ return BANK.questions.filter(function(q){ return !boxOf(q.id); }).length; }
+// Spaced review: a miss resets a question to today; a right answer moves it
+// up a box, but only once it is due, so cramming the same day does not count.
+function review(q, ok){
+  var t = ymd(), b = STATS.box[q.id];
+  if(!ok) STATS.box[q.id] = { b:0, due:t };
+  else if(!b || b.due <= t){ var n = b ? Math.min(b.b + 1, BOX_DAYS.length - 1) : 1; STATS.box[q.id] = { b:n, due:addDays(t, BOX_DAYS[n]) }; }
+}
+// The habit that pays double XP today: the same one on every device.
+function featured(date){
+  var keys = Object.keys(BANK.modules).sort();
+  return keys.length ? keys[fnv('chartrx-2x|' + (date || ymd())) % keys.length] : '';
+}
+function tierOf(m){ return STATS.gold[m] ? 'gold' : STATS.silver[m] ? 'silver' : STATS.badges[m] ? 'bronze' : ''; }
+// The closest things to earn, nearest first. Shown after every round.
+function nextGoals(){
+  var g = [], wk = weekKey(), n = STATS.week && STATS.week.k === wk ? STATS.week.n : 0;
+  if(n < WEEK_GOAL) g.push({ left:WEEK_GOAL - n, text:(WEEK_GOAL - n) + ' more round' + (WEEK_GOAL - n > 1 ? 's' : '') + ' meets this week’s goal' });
+  Object.keys(BANK.modules).forEach(function(k){
+    var m = BANK.modules[k], right = STATS.mod[k] || 0, name = (m.badge ? m.badge + ' ' : '') + m.name;
+    if(!STATS.badges[k]) g.push({ left:CONFIG.badgeAt - right, text:(CONFIG.badgeAt - right) + ' more right for the ' + name + ' badge' });
+    else if(!STATS.silver[k]) g.push({ left:SILVER - right, text:(SILVER - right) + ' more right for Silver in ' + name });
+    else if(!STATS.gold[k]){ var tot = BANK.questions.filter(function(q){ return q.module === k; }).length, got = masteredIn(k);
+      g.push({ left:(tot - got) * 2, text:'Master ' + (tot - got) + ' more for Gold in ' + name }); }
+  });
+  var r = rankOf(STATS.xp || 0);
+  if(r.next) g.push({ left:Math.ceil((r.at - STATS.xp) / 15), text:(r.at - STATS.xp) + ' XP to ' + r.next });
+  return g.sort(function(a, b){ return a.left - b.left; }).slice(0, 3);
+}
+
 /* ── ROUND BUILDER ─────────────────────────────────────────────────────
    Eight questions, no more than two from a module, at least one spot.
    Anything answered correctly in either of the last two finished rounds is
    held back while there is enough else to fill the round; the rules relax
    in that order (repeats first, never the per-module cap unless the bank is
    too small to fill a round at all). */
+// Review order: misses due again, then other reviews due, then questions not
+// yet seen, then the rest. Shuffled within each tier.
+function tiers(list, rng){
+  var t = ymd(), out = [[], [], [], []];
+  list.forEach(function(q){ var b = boxOf(q.id);
+    out[!b ? 2 : b.due > t ? 3 : b.b === 0 ? 0 : 1].push(q); });
+  return out.map(function(a){ return shuffle(a, rng); }).reduce(function(a, b){ return a.concat(b); }, []);
+}
 function buildRound(rng){
   rng = rng || Math.random;
   var all = BANK.questions, held = {};
   (STATS.recent || []).forEach(function(r){ (r || []).forEach(function(id){ held[id] = 1; }); });
-  var fresh = all.filter(function(q){ return !held[q.id]; });
+  var fresh = tiers(all.filter(function(q){ return !held[q.id]; }), rng), every = tiers(all.slice(), rng);
   var pick = [], per = {};
   function take(q){ pick.push(q); per[q.module] = (per[q.module] || 0) + 1; }
   function fits(q){ return pick.indexOf(q) < 0 && (per[q.module] || 0) < CONFIG.perModule; }
-  var spots = shuffle(fresh.filter(function(q){ return q.type === 'spot'; }), rng);
-  if(!spots.length) spots = shuffle(all.filter(function(q){ return q.type === 'spot'; }), rng);
+  var spots = fresh.filter(function(q){ return q.type === 'spot'; });
+  if(!spots.length) spots = every.filter(function(q){ return q.type === 'spot'; });
   if(spots.length) take(spots[0]);
-  [fresh, all].forEach(function(src){
-    shuffle(src.slice(), rng).forEach(function(q){ if(pick.length < CONFIG.roundSize && fits(q)) take(q); });
+  // One from today's double-XP habit, so the bonus is always in play.
+  var fx = featured(), fq = fresh.concat(every).filter(function(q){ return q.module === fx && fits(q); })[0];
+  if(fq) take(fq);
+  [fresh, every].forEach(function(src){
+    src.forEach(function(q){ if(pick.length < CONFIG.roundSize && fits(q)) take(q); });
   });
   shuffle(all.slice(), rng).forEach(function(q){
     if(pick.length < CONFIG.roundSize && pick.indexOf(q) < 0) take(q);
   });
   return shuffle(pick, rng).map(function(q){ return q.id; });
+}
+// A drill: five from one habit, misses and due reviews first.
+function buildDrill(m, rng){
+  return tiers(BANK.questions.filter(function(q){ return q.module === m; }), rng || Math.random)
+    .slice(0, DRILL_SIZE).map(function(q){ return q.id; });
 }
 
 /* Today's challenge: the same question on every device on the same date.
@@ -571,13 +691,34 @@ function show(id){
 function moduleOf(q){ return BANK.modules[q.module] || { name:q.module, badge:'', tip:'' }; }
 
 /* ── HOME ──────────────────────────────────────────────────────────── */
+function rankBlock(){
+  var xp = STATS.xp || 0, r = rankOf(xp);
+  return '<div class="rank"><div class="rank-top"><b>' + esc(r.name) + '</b><span>' +
+    (r.next ? (r.at - xp) + ' XP to ' + esc(r.next) : 'Top rank') + '</span></div>' +
+    '<div class="bar" role="progressbar" aria-label="Progress to the next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
+    Math.round(r.frac * 100) + '"><i style="width:' + Math.round(r.frac * 100) + '%"></i></div></div>';
+}
 function badgeCount(){ return Object.keys(BANK.modules).filter(function(m){ return STATS.badges[m]; }).length; }
 function renderHome(){
   $('st-streak').textContent = STATS.bestStreak || 0;
   $('st-badges').textContent = badgeCount() + '/' + Object.keys(BANK.modules).length;
-  $('st-xp').textContent = STATS.xp || 0;
-  var live = ROUND && ROUND.ids && ROUND.i < ROUND.ids.length;
-  $('btn-start').textContent = live ? 'Resume round — question ' + (ROUND.i + 1) + ' of ' + ROUND.ids.length : 'Start round';
+  $('st-mastered').textContent = masteredIn() + '/' + BANK.questions.length;
+  $('st-xp').textContent = (STATS.xp || 0) + ' XP';
+  var r = rankOf(STATS.xp || 0);
+  $('rk-name').textContent = r.name;
+  $('rk-next').textContent = r.next ? (r.at - (STATS.xp || 0)) + ' XP to ' + r.next : 'Top rank';
+  $('rk-bar').style.width = Math.round(r.frac * 100) + '%';
+  $('rk-bar').parentNode.setAttribute('aria-valuenow', Math.round(r.frac * 100));
+  var w = weekState(), pips = '';
+  for(var i = 0; i < WEEK_GOAL; i++) pips += '<i class="' + (i < w.n ? 'on' : '') + '"></i>';
+  $('wk-pips').innerHTML = pips;
+  $('wk-text').textContent = w.met ? 'Goal met' + (w.run > 1 ? ' \u00b7 ' + w.run + ' weeks running' : '') : w.n + ' of ' + WEEK_GOAL + ' rounds';
+  var fx = BANK.modules[featured()];
+  $('fx').innerHTML = fx ? '2&times; XP today on <b>' + esc((fx.badge ? fx.badge + ' ' : '') + fx.name) + '</b>' : '';
+  var live = ROUND && ROUND.ids && ROUND.i < ROUND.ids.length, due = dueCount();
+  $('btn-start').innerHTML = live ? 'Resume round — question ' + (ROUND.i + 1) + ' of ' + ROUND.ids.length
+    : '<span>Start round<br><span class="sub">' + (due ? due + ' due for review' : newCount() + ' new questions') + '</span></span>';
+  $('blitz-sub').textContent = STATS.blitzBest ? 'Your best: ' + STATS.blitzBest : '60 seconds of true or false';
   var today = ymd(), d = STATS.daily && STATS.daily.date === today ? STATS.daily : null;
   var ds = $('daily-sub');
   ds.textContent = d ? (d.ok ? '✓ Done — you got it' : '✓ Done — see the answer') : 'One question, same for every crew';
@@ -589,7 +730,14 @@ function renderHome(){
 /* ── ROUND FLOW ────────────────────────────────────────────────────── */
 function startRound(){
   if(ROUND && ROUND.ids && ROUND.i < ROUND.ids.length){ askNext(); return; }   // resume
-  ROUND = { ids:buildRound(), i:0, res:[], xp:0, streak:0, best:0, started:Date.now() };
+  ROUND = { ids:buildRound(), i:0, res:[], xp:0, streak:0, best:0, started:Date.now(),
+            rank0:rankOf(STATS.xp || 0).i, m0:masteredIn() };
+  save('round', ROUND);
+  askNext();
+}
+function startDrill(m){
+  ROUND = { ids:buildDrill(m), i:0, res:[], xp:0, streak:0, best:0, started:Date.now(), drill:m,
+            rank0:rankOf(STATS.xp || 0).i, m0:masteredIn() };
   save('round', ROUND);
   askNext();
 }
@@ -603,6 +751,16 @@ function renderBar(kind){
   var dots = $('q-dots'), h = '';
   if(kind === 'daily'){ dots.innerHTML = '<span class="tag daily">Today&rsquo;s challenge &middot; ' + esc(ymd()) + '</span>';
     dots.setAttribute('aria-label', 'Today’s challenge'); }
+  else if(kind === 'blitz'){
+    var left = Math.max(0, BLITZ.end - Date.now());
+    dots.innerHTML = '<span class="tbar"><i id="blitz-bar" style="width:' + (left / BLITZ_MS * 100) + '%"></i></span><span class="tleft" id="blitz-left">' + Math.ceil(left / 1000) + 's</span>';
+    dots.setAttribute('aria-label', 'Lightning round, ' + Math.ceil(left / 1000) + ' seconds left');
+    $('q-xp').textContent = BLITZ.xp + ' XP';
+    $('q-streak').innerHTML = '&#9889; ' + BLITZ.score;
+    $('q-streak').classList.remove('hot');
+    $('q-streak').setAttribute('aria-label', 'Score ' + BLITZ.score);
+    return;
+  }
   else {
     ROUND.ids.forEach(function(id, i){
       var r = ROUND.res[i];
@@ -787,15 +945,27 @@ function answer(choice, el){
   // verdict is on screen in the next frame.
   markAnswer(q, choice, el, ok);
   buzz();
-  var gain = ok ? CONFIG.baseXp + (ms < CONFIG.speedMs ? CONFIG.speedXp : 0) : 0, speedy = ok && ms < CONFIG.speedMs;
-  var streakNow = 0, label = '', newBadges = [];
+  if(CUR.kind === 'blitz'){ blitzAnswer(q, ok); return; }
+  var speedy = ok && ms < CONFIG.speedMs, round = CUR.kind === 'round';
+  var streakNow = round && ok ? ROUND.streak + 1 : 0;
+  // XP: 10 a right answer (20 on today's double-XP habit), +5 under 8 s, and in
+  // a round +5 at 3 in a row, +10 from 5 in a row. A miss earns nothing and
+  // costs nothing.
+  var parts = [];
+  if(ok){
+    parts.push(['XP', CONFIG.baseXp]);
+    if(round && q.module === featured()) parts.push(['2\u00d7 habit', CONFIG.baseXp]);
+    if(speedy) parts.push(['speed', CONFIG.speedXp]);
+    if(streakNow >= 5) parts.push(['combo', 10]); else if(streakNow >= 3) parts.push(['combo', 5]);
+  }
+  var gain = parts.reduce(function(a, x){ return a + x[1]; }, 0);
+  var label = '', newBadges = [];
 
-  if(CUR.kind === 'round'){
+  if(round){
     ROUND.res[ROUND.i] = { id:q.id, ok:ok, ms:Math.round(ms) };
     ROUND.xp += gain;
-    ROUND.streak = ok ? ROUND.streak + 1 : 0;
+    ROUND.streak = streakNow;
     ROUND.best = Math.max(ROUND.best, ROUND.streak);
-    streakNow = ROUND.streak;
     ROUND.i++;
     newBadges = credit(q, ok, gain);
     ROUND.earned = (ROUND.earned || []).concat(newBadges);
@@ -804,22 +974,27 @@ function answer(choice, el){
   } else {
     var first = !(STATS.daily && STATS.daily.date === ymd());
     if(first){ newBadges = credit(q, ok, gain); STATS.daily = { date:ymd(), id:q.id, ok:ok }; save('stats', STATS); }
+    else gain = 0, parts = [];
   }
   if(streakNow >= 5) label = '\u{1FA7A} Chart Doctor — ' + streakNow + ' in a row';
   else if(streakNow >= 3) label = '\u{1F525} On a roll — ' + streakNow + ' in a row';
-  feedback(q, ok, gain, speedy, label);
-  newBadges.forEach(function(k, i){ var m = BANK.modules[k];
-    setTimeout(function(){ toast('New badge: ' + (m.badge ? m.badge + ' ' : '') + m.name); }, 400 + i * 1600); });
+  feedback(q, ok, parts, label);
+  newBadges.forEach(function(e, i){ setTimeout(function(){ toast(badgeText(e)); }, 400 + i * 1600); });
 }
+var TIER = { bronze:'Bronze', silver:'Silver', gold:'Gold' };
+function badgeText(e){ var m = BANK.modules[e.k] || { name:e.k, badge:'' };
+  return (e.tier === 'bronze' ? 'New badge: ' : TIER[e.tier] + ' badge: ') + (m.badge ? m.badge + ' ' : '') + m.name; }
 // Returns the keys of any badges this answer earned.
 function credit(q, ok, gain){
-  var got = [];
+  var got = [], k = q.module;
   STATS.xp = (STATS.xp || 0) + gain;
+  review(q, ok);
   if(ok){
-    STATS.mod[q.module] = (STATS.mod[q.module] || 0) + 1;
-    if(!STATS.badges[q.module] && STATS.mod[q.module] >= CONFIG.badgeAt){
-      STATS.badges[q.module] = ymd(); got.push(q.module);
-    }
+    STATS.mod[k] = (STATS.mod[k] || 0) + 1;
+    if(!STATS.badges[k] && STATS.mod[k] >= CONFIG.badgeAt){ STATS.badges[k] = ymd(); got.push({ k:k, tier:'bronze' }); }
+    if(STATS.badges[k] && !STATS.silver[k] && STATS.mod[k] >= SILVER){ STATS.silver[k] = ymd(); got.push({ k:k, tier:'silver' }); }
+    if(STATS.silver[k] && !STATS.gold[k] && masteredIn(k) === BANK.questions.filter(function(x){ return x.module === k; }).length){
+      STATS.gold[k] = ymd(); got.push({ k:k, tier:'gold' }); }
   }
   save('stats', STATS);
   return got;
@@ -858,7 +1033,7 @@ function markAnswer(q, choice, el, ok){
 }
 
 /* ── FEEDBACK SHEET ────────────────────────────────────────────────── */
-function feedback(q, ok, gain, speedy, label){
+function feedback(q, ok, parts, label){
   var m = moduleOf(q), last = CUR.kind === 'round' && ROUND.i >= ROUND.ids.length;
   var next = CUR.kind === 'daily' ? 'Done' : last ? 'See my results →' : 'Next →';
   var s = $('sheet');
@@ -867,7 +1042,7 @@ function feedback(q, ok, gain, speedy, label){
     '<div class="sheet-in" role="region" aria-label="Answer feedback">' +
       '<div class="verdict"><span class="vicon" aria-hidden="true">' + (ok ? '&#10003;' : '&#10007;') + '</span>' +
         '<span class="vtext">' + (ok ? 'Correct' : 'Not quite') + '</span>' +
-        (ok ? '<span class="gain"><span>+' + CONFIG.baseXp + ' XP</span>' + (speedy ? '<span>+' + CONFIG.speedXp + ' speed</span>' : '') + '</span>' : '') +
+        (parts.length ? '<span class="gain">' + parts.map(function(x){ return '<span>+' + x[1] + ' ' + x[0] + '</span>'; }).join('') + '</span>' : '') +
       '</div>' +
       (label ? '<div class="streak-banner">' + esc(label) + '</div>' : '') +
       '<p class="why"><span class="why-mod">' + esc((m.badge ? m.badge + ' ' : '') + m.name) + ' &middot; </span>' + esc(q.explain) + '</p>' +
@@ -898,6 +1073,21 @@ function toast(t){
 }
 
 /* ── SUMMARY ───────────────────────────────────────────────────────── */
+// Count a finished round toward this week's goal. Returns true the moment the goal is met.
+function weekTick(){
+  var wk = weekKey();
+  if(!STATS.week || STATS.week.k !== wk) STATS.week = { k:wk, n:0 };
+  STATS.week.n++;
+  if(STATS.week.n !== WEEK_GOAL) return false;
+  STATS.weeksRun = STATS.goalWeek === addDays(wk, -7) ? (STATS.weeksRun || 0) + 1 : 1;
+  STATS.goalWeek = wk;
+  return true;
+}
+function weekState(){
+  var wk = weekKey(), n = STATS.week && STATS.week.k === wk ? STATS.week.n : 0;
+  var run = (STATS.goalWeek === wk || STATS.goalWeek === addDays(wk, -7)) ? (STATS.weeksRun || 0) : 0;
+  return { n:Math.min(n, WEEK_GOAL), met:n >= WEEK_GOAL, run:run };
+}
 function weakSpot(res){
   var miss = {};
   res.forEach(function(r){ if(!r.ok){ var q = BANK.byId[r.id]; if(q) miss[q.module] = (miss[q.module] || 0) + 1; } });
@@ -907,35 +1097,48 @@ function weakSpot(res){
 }
 function finishRound(){
   var res = ROUND.res.filter(Boolean), score = res.filter(function(r){ return r.ok; }).length, total = ROUND.ids.length;
-  var weak = weakSpot(res);
+  var weak = weakSpot(res), drill = ROUND.drill || '';
   STATS.rounds = (STATS.rounds || 0) + 1;
   STATS.bestStreak = Math.max(STATS.bestStreak || 0, ROUND.best);
-  STATS.recent = [res.filter(function(r){ return r.ok; }).map(function(r){ return r.id; }), (STATS.recent || [[]])[0] || []];
+  if(!drill) STATS.recent = [res.filter(function(r){ return r.ok; }).map(function(r){ return r.id; }), (STATS.recent || [[]])[0] || []];
+  var met = weekTick();
+  var r1 = rankOf(STATS.xp || 0);
   STATS.last = { date:ymd(), score:score, total:total, xp:ROUND.xp, best:ROUND.best,
                  weak:weak, missed:res.filter(function(r){ return !r.ok; }).map(function(r){ return r.id; }),
-                 earned:ROUND.earned || [] };
+                 earned:ROUND.earned || [], drill:drill, weekMet:met,
+                 rankUp:ROUND.rank0 != null && r1.i > ROUND.rank0 ? r1.name : '',
+                 mastered:Math.max(0, masteredIn() - (ROUND.m0 || 0)) };
+  if(!drill) STATS.lastFull = STATS.last;
   save('stats', STATS);
   ROUND = null; drop('round');
   renderSummary();
-  if(score === total && !reduced()) confetti();
+  if((score === total || STATS.last.rankUp) && !reduced()) confetti();
 }
 function renderSummary(){
   var L = STATS.last; if(!L){ renderHome(); return; }
   var m = L.weak ? BANK.modules[L.weak] : null, C = 2 * Math.PI * 54, frac = L.total ? L.score / L.total : 0;
   var h = '<h1 class="sr" id="sum-h">Round summary</h1><div class="sum-card">' +
-    '<div class="sum-eye">Round complete</div>' +
+    '<div class="sum-eye">' + (L.drill ? 'Drill complete' : 'Round complete') + '</div>' +
     '<div class="ring" role="img" aria-label="' + L.score + ' of ' + L.total + ' correct"><svg viewBox="0 0 132 132">' +
       '<circle class="trk" cx="66" cy="66" r="54"/><circle class="val" id="ring-val" cx="66" cy="66" r="54" stroke-dasharray="' + C.toFixed(1) +
       '" stroke-dashoffset="' + C.toFixed(1) + '"/></svg><b>' + L.score + '<small>/' + L.total + '</small></b></div>' +
     '<div class="sum-line">' + (L.score === L.total ? 'Clean chart. Every one.' : L.score >= L.total - 2 ? 'Nearly clean.' : 'Charts to fix &mdash; that&rsquo;s the point.') + '</div>' +
     '<div class="sum-stats"><div><b>+' + L.xp + '</b><span>XP</span></div><div><b>' + L.best + '</b><span>best streak</span></div>' +
-      '<div><b>' + badgeCount() + '/' + Object.keys(BANK.modules).length + '</b><span>badges</span></div></div>';
+      '<div><b>+' + (L.mastered || 0) + '</b><span>mastered</span></div></div>';
+  if(L.rankUp) h += '<div class="rankup" role="status">Rank up: <b>' + esc(L.rankUp) + '</b></div>';
+  h += rankBlock();
+  if(L.weekMet) h += '<div class="newbadge">This week&rsquo;s goal met &mdash; ' + weekState().run + ' week' + (weekState().run > 1 ? 's' : '') + ' running</div>';
+  (L.earned || []).forEach(function(e){ if(e && BANK.modules[e.k]) h += '<div class="newbadge">' + esc(badgeText(e)) + '</div>'; });
   h += m ? '<div class="weak"><h2>Your weak spot: ' + esc((m.badge ? m.badge + ' ' : '') + m.name) + '</h2><p>' + esc(m.tip) + '</p></div>'
          : '<div class="weak clean"><h2>No weak spot this round</h2><p>Nothing missed. Run another to keep the streak going.</p></div>';
-  (L.earned || []).forEach(function(k){ var b = BANK.modules[k]; if(b)
-    h += '<div class="newbadge">New badge: ' + esc((b.badge ? b.badge + ' ' : '') + b.name) + '</div>'; });
-  h += '<div class="sum-actions"><button class="btn btn-primary" id="btn-again" type="button">Play again</button>' +
-       '<button class="btn btn-ghost" id="btn-credit" type="button">Get completion credit</button></div></div>';
+  var goals = nextGoals();
+  if(goals.length) h += '<div class="goals"><h2>Next up</h2><ul>' + goals.map(function(g){ return '<li>' + esc(g.text) + '</li>'; }).join('') + '</ul></div>';
+  var due = dueCount();
+  h += '<div class="sum-actions"><button class="btn btn-primary" id="btn-again" type="button"><span>Next round &rarr;<br><span class="sub">' +
+         (due ? due + ' due for review' : newCount() + ' questions you haven&rsquo;t seen') + '</span></span></button>' +
+       (m ? '<button class="btn btn-ghost" id="btn-drill" type="button"><span>Drill ' + esc(m.name) + '<br><span class="sub">' + DRILL_SIZE + ' questions on your weak spot</span></span></button>' : '') +
+       '<button class="btn btn-ghost" id="btn-s-blitz" type="button"><span>Lightning round<br><span class="sub">60 seconds of true or false</span></span></button>' +
+       (L.drill ? '' : '<button class="btn btn-ghost" id="btn-credit" type="button">Get completion credit</button>') + '</div></div>';
   if(L.missed && L.missed.length){
     h += '<div class="review"><h2>What you missed</h2>';
     L.missed.forEach(function(id){ var q = BANK.byId[id]; if(!q) return;
@@ -945,7 +1148,9 @@ function renderSummary(){
   var v = $('v-sum'); v.innerHTML = h;
   show('v-sum');
   $('btn-again').addEventListener('click', startRound);
-  $('btn-credit').addEventListener('click', renderCredit);
+  if($('btn-drill')) $('btn-drill').addEventListener('click', function(){ startDrill(L.weak); });
+  $('btn-s-blitz').addEventListener('click', startBlitz);
+  if($('btn-credit')) $('btn-credit').addEventListener('click', renderCredit);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
     var rv = $('ring-val'); if(rv) rv.style.strokeDashoffset = (C * (1 - frac)).toFixed(1); }); });
   $('btn-again').focus({ preventScroll:true });
@@ -953,13 +1158,19 @@ function renderSummary(){
 
 /* ── BADGES ────────────────────────────────────────────────────────── */
 function renderBadges(){
-  var h = '<h1 class="h2" id="badges-h">My badges</h1><p class="lede">Get ' + CONFIG.badgeAt +
-          ' right in a module, across any rounds, to earn its badge. Each one is a charting habit worth keeping.</p><div class="badges">';
+  var h = '<h1 class="h2" id="badges-h">My badges</h1><p class="lede">Bronze at ' + CONFIG.badgeAt + ' right in a habit, Silver at ' + SILVER +
+          ', Gold when you&rsquo;ve mastered every question in it (right on three separate days). Each one is a charting habit worth keeping.</p><div class="badges">';
   Object.keys(BANK.modules).forEach(function(k){
-    var m = BANK.modules[k], n = Math.min(STATS.mod[k] || 0, CONFIG.badgeAt), got = !!STATS.badges[k];
-    h += '<div class="badge ' + (got ? 'earned' : 'locked') + '"><span class="em" aria-hidden="true">' + esc(m.badge || '') + '</span>' +
-         '<h2>' + esc(m.name) + '</h2><div class="prog" aria-hidden="true"><i style="width:' + (n / CONFIG.badgeAt * 100) + '%"></i></div>' +
-         '<div class="state">' + (got ? 'Earned' : n + ' of ' + CONFIG.badgeAt) + '<span class="sr"> ' + (got ? 'badge earned' : 'not yet earned') + '</span></div>' +
+    var m = BANK.modules[k], right = STATS.mod[k] || 0, tier = tierOf(k), tot = BANK.questions.filter(function(q){ return q.module === k; }).length;
+    var n, of, label;
+    if(!tier){ n = Math.min(right, CONFIG.badgeAt); of = CONFIG.badgeAt; label = n + ' of ' + of + ' for Bronze'; }
+    else if(tier === 'bronze'){ n = Math.min(right, SILVER); of = SILVER; label = 'Bronze \u00b7 ' + n + ' of ' + of + ' for Silver'; }
+    else if(tier === 'silver'){ n = masteredIn(k); of = tot; label = 'Silver \u00b7 ' + n + ' of ' + of + ' mastered for Gold'; }
+    else { n = of = 1; label = 'Gold'; }
+    h += '<div class="badge ' + (tier ? 'earned ' + tier : 'locked') + '"><span class="em" aria-hidden="true">' + esc(m.badge || '') + '</span>' +
+         '<h2>' + esc(m.name) + '</h2><div class="prog" aria-hidden="true"><i style="width:' + (n / of * 100) + '%"></i></div>' +
+         '<div class="state">' + label + '<span class="sr"> ' + (tier ? 'badge earned' : 'not yet earned') + '</span></div>' +
+         '<p class="mast">' + masteredIn(k) + '/' + tot + ' mastered</p>' +
          '<p class="tip">' + esc(m.tip || '') + '</p></div>';
   });
   h += '</div><div class="sum-actions"><button class="btn btn-primary" id="btn-b-start" type="button">Start a round</button>' +
@@ -968,6 +1179,75 @@ function renderBadges(){
   show('v-badges');
   $('btn-b-start').addEventListener('click', startRound);
   $('btn-b-home').addEventListener('click', renderHome);
+}
+
+/* ── LIGHTNING ROUND ───────────────────────────────────────────────────
+   60 seconds of true-or-false. No sheet between questions: the card shows
+   right or wrong and the next one comes up. Misses are listed with their
+   explanations at the end, so speed never costs the learning. Not saved if
+   you leave mid-way; it is only a minute. */
+var blitzTimer = null;
+function startBlitz(){
+  var pool = BANK.questions.filter(function(q){ return q.type === 'swipe'; });
+  if(!pool.length) return;
+  BLITZ = { ids:shuffle(pool.map(function(q){ return q.id; })), i:0, score:0, miss:[], xp:0,
+            end:Date.now() + BLITZ_MS, rank0:rankOf(STATS.xp || 0).i };
+  clearInterval(blitzTimer);
+  blitzTimer = setInterval(blitzTick, 200);
+  blitzNext();
+}
+function blitzNext(){
+  if(!BLITZ) return;
+  if(Date.now() >= BLITZ.end){ finishBlitz(); return; }
+  if(BLITZ.i >= BLITZ.ids.length){ BLITZ.ids = shuffle(BLITZ.ids); BLITZ.i = 0; }
+  ask(BANK.byId[BLITZ.ids[BLITZ.i++]], 'blitz');
+}
+function blitzTick(){
+  if(!BLITZ){ clearInterval(blitzTimer); return; }
+  var left = Math.max(0, BLITZ.end - Date.now()), bar = $('blitz-bar');
+  if(bar) bar.style.width = (left / BLITZ_MS * 100) + '%';
+  var t = $('blitz-left'); if(t) t.textContent = Math.ceil(left / 1000) + 's';
+  if(left <= 0 && CUR && !CUR.answered) finishBlitz();
+}
+function blitzAnswer(q, ok){
+  if(ok){ BLITZ.score++; BLITZ.xp += BLITZ_XP; }
+  else BLITZ.miss.push(q.id);
+  credit(q, ok, ok ? BLITZ_XP : 0).forEach(function(e){ toast(badgeText(e)); });
+  renderBar('blitz');
+  say(ok ? 'Correct' : 'Not quite');
+  setTimeout(blitzNext, ok ? 350 : 650);
+}
+function finishBlitz(){
+  if(!BLITZ) return;
+  clearInterval(blitzTimer);
+  var B = BLITZ; BLITZ = null; CUR = null;
+  var best = B.score > (STATS.blitzBest || 0);
+  if(best) STATS.blitzBest = B.score;
+  var r1 = rankOf(STATS.xp || 0);
+  save('stats', STATS);
+  var h = '<h1 class="sr" id="sum-h">Lightning round results</h1><div class="sum-card"><div class="sum-eye">Lightning round</div>' +
+    '<div class="blitz-score"><b>' + B.score + '</b><span>right in 60 seconds</span></div>' +
+    '<div class="sum-line">' + (best ? 'New personal best!' : 'Your best: ' + STATS.blitzBest) + '</div>' +
+    '<div class="sum-stats"><div><b>+' + B.xp + '</b><span>XP</span></div><div><b>' + B.miss.length + '</b><span>missed</span></div>' +
+      '<div><b>' + STATS.blitzBest + '</b><span>best</span></div></div>' +
+    (r1.i > B.rank0 ? '<div class="rankup" role="status">Rank up: <b>' + esc(r1.name) + '</b></div>' : '') + rankBlock() +
+    '<div class="sum-actions"><button class="btn btn-primary" id="btn-b-again" type="button">Go again</button>' +
+    '<button class="btn btn-ghost" id="btn-b-round" type="button">Start a full round</button>' +
+    '<button class="btn btn-ghost" id="btn-b-out" type="button">Chart Rx home</button></div></div>';
+  var seen = {};
+  if(B.miss.length){
+    h += '<div class="review"><h2>What you missed</h2>';
+    B.miss.forEach(function(id){ var q = BANK.byId[id]; if(!q || seen[id]) return; seen[id] = 1;
+      h += '<div class="rv"><p>' + esc(q.prompt) + ' <b>' + (q.answer ? 'True' : 'False') + '.</b></p><p>' + esc(q.explain) + '</p></div>'; });
+    h += '</div>';
+  }
+  $('v-sum').innerHTML = h;
+  show('v-sum');
+  $('btn-b-again').addEventListener('click', startBlitz);
+  $('btn-b-round').addEventListener('click', startRound);
+  $('btn-b-out').addEventListener('click', renderHome);
+  $('btn-b-again').focus({ preventScroll:true });
+  if((best || r1.i > B.rank0) && !reduced()) confetti();
 }
 
 /* ── DAILY CHALLENGE ───────────────────────────────────────────────── */
@@ -979,7 +1259,7 @@ function startDaily(){
 
 /* ── COMPLETION CREDIT ─────────────────────────────────────────────── */
 function renderCredit(){
-  var L = STATS.last; if(!L){ renderHome(); return; }
+  var L = STATS.lastFull || STATS.last; if(!L){ renderHome(); return; }
   $('v-credit').innerHTML =
     '<h1 class="h2" id="credit-h">Completion credit</h1>' +
     '<p class="lede">Score ' + L.score + '/' + L.total + ' on ' + esc(L.date) + '. Your name and ID make the completion code; they are not saved on this device.</p>' +
@@ -1136,7 +1416,8 @@ document.addEventListener('keydown', function(e){
 $('btn-start').addEventListener('click', startRound);
 $('btn-daily').addEventListener('click', startDaily);
 $('btn-badges').addEventListener('click', renderBadges);
-$('q-quit').addEventListener('click', function(){ CUR = null; DAILY = null; renderHome(); });
+$('q-quit').addEventListener('click', function(){ CUR = null; DAILY = null; if(BLITZ){ BLITZ = null; clearInterval(blitzTimer); } renderHome(); });
+$('btn-blitz').addEventListener('click', startBlitz);
 window.addEventListener('hashchange', function(){ if(BANK && location.hash === '#verify') renderVerify(); });
 
 function boot(raw){
@@ -1174,7 +1455,10 @@ window.ChartRx = {
   dailyFor:function(d){ var q = dailyFor(d); return q && q.id; },
   codeFor:codeFor, sha256js:sha256js, codeInput:codeInput,
   bank:function(){ return BANK; }, stats:function(){ return STATS; }, round:function(){ return ROUND; },
-  current:function(){ return CUR && CUR.q; }
+  current:function(){ return CUR && CUR.q; },
+  featured:function(d){ return featured(d); }, rankOf:rankOf, weekKey:function(d){ return weekKey(d ? new Date(d) : undefined); },
+  blitz:function(){ return BLITZ; }, buildDrill:function(m, rng){ return buildDrill(m, rng); },
+  review:function(id, ok){ review(BANK.byId[id], ok); save('stats', STATS); }
 };
 })();
 </script>
