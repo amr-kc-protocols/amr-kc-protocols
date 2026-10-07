@@ -29,6 +29,16 @@
  *   C21 no focus ring on a touch screen (it reads as a hint); rings for keyboards
  *   C22 every question opens at the top: its scenario and heading are never
  *       left under the top bar by the scroll from the last answer
+ *   D1  spaced review: a miss comes back today, a right answer days later,
+ *       and cramming the same day does not count
+ *   D2  rounds lead with what's due; mastery shows on the home screen
+ *   D3  ranks, and a rank-up on the summary
+ *   D4  today's double-XP habit: same on every device, always in a round, paid
+ *   D5  the weekly goal (3 rounds), counted across weeks
+ *   D6  badge tiers: Bronze, Silver, Gold
+ *   D7  the lightning round: 60 seconds, score, personal best, misses explained
+ *   D8  the weak-spot drill, which never replaces the round used for credit
+ *   D9  nothing is ever taken away: no XP, rank or badge is lost for a miss
  *
  * Run:  cd test && node chartrx.test.mjs
  */
@@ -363,7 +373,9 @@ console.log('\nC7 keyboard');
 
 /* ── C8 — XP, speed bonus, streak ────────────────────────────────────── */
 console.log('\nC8 XP and streak');
-{ const ids = nonSpot.slice(0, 6).concat(SPOT.slice(0, 2));
+{ const fx = await (async () => { const t = await open({ clock: new Date('2026-10-06T10:00:00-05:00') });
+    const f = await t.evaluate(() => window.ChartRx.featured('2026-10-06')); await t.context().close(); return f; })();
+  const ids = Q.filter(q => q.type !== 'spot' && q.module !== fx).map(q => q.id).slice(0, 6).concat(SPOT.filter(id => BANK.questions.find(q => q.id === id).module !== fx).slice(0, 2));
   const p = await open({ clock: new Date('2026-10-06T10:00:00-05:00'), seed: seedRound(ids) });
   await p.waitForSelector('#v-q:not([hidden])');
   await answer(p, true);
@@ -377,16 +389,18 @@ console.log('\nC8 XP and streak');
   await p.click('#btn-next'); await p.waitForFunction(() => window.ChartRx.round().i === 2);
   await answer(p, true);
   ok('C8 three in a row: "On a roll"', /On a roll/.test(await p.textContent('#sheet')));
+  ok('C8 and a +5 combo bonus (15 + 5)', (await round(p)).xp === 45 && /\+5 combo/.test(await p.textContent('#sheet')), (await round(p)).xp);
   await p.click('#btn-next'); await p.waitForFunction(() => window.ChartRx.round().i === 3);
   await answer(p, true); await p.click('#btn-next'); await p.waitForFunction(() => window.ChartRx.round().i === 4);
   await answer(p, true);
   ok('C8 five in a row: "Chart Doctor"', /Chart Doctor/.test(await p.textContent('#sheet')));
+  ok('C8 and the combo rises to +10 (15 + 10)', (await round(p)).xp === 90 && /\+10 combo/.test(await p.textContent('#sheet')), (await round(p)).xp);
   await p.click('#btn-next'); await p.waitForFunction(() => window.ChartRx.round().i === 5);
   await p.clock.runFor(60000);
   await answer(p, false);
-  // 15 + 10 (slow) + 15 + 15 + 15 = 70 before the miss.
-  ok('C8 a miss resets the streak and earns nothing', (await round(p)).streak === 0 && (await round(p)).xp === 70, JSON.stringify(await round(p)));
-  ok('C8 a miss never costs XP, however slow', (await round(p)).xp === 70);
+  // 15 + 10 (slow) + 20 + 20 + 25 = 90 before the miss.
+  ok('C8 a miss resets the streak and earns nothing', (await round(p)).streak === 0 && (await round(p)).xp === 90, JSON.stringify(await round(p)));
+  ok('C8 a miss never costs XP, however slow', (await round(p)).xp === 90);
   await p.context().close(); }
 
 /* ── C9 — resume after closing mid-round ─────────────────────────────── */
@@ -681,6 +695,11 @@ console.log('\nC19 accessibility (axe-core)');
     await p.waitForSelector('#cr-code'); await audit('completion');
     await p.click('#cr-home'); await audit('home');
     await p.click('#btn-badges'); await audit('badges');
+    await p.click('#btn-b-home'); await p.click('#btn-blitz'); await p.waitForSelector('#v-q:not([hidden])');
+    await audit('lightning question');
+    await p.click('.tf .opt[data-id="true"]'); await p.waitForTimeout(100); await audit('lightning answered');
+    await p.clock.runFor(61000); await p.waitForSelector('#v-sum:not([hidden])'); await p.waitForTimeout(900);
+    await audit('lightning results');
     await p.goto(PAGE + '#verify'); await p.waitForSelector('#vf'); await audit('supervisor check');
     ok(`C19 ${theme}: no axe violations on any screen`, found.length === 0, [...new Set(found)].slice(0, 12).join(' | '));
     await p.context().close();
@@ -764,6 +783,193 @@ for (const [w, h] of [[390, 664], [360, 600]]) {
   ok(`C22 ${w}×${h}: all ${ids.length} questions open at the top, scenario in view`, hidden.length === 0, hidden.join('; '));
   await p.context().close();
 }
+
+/* ── D — what keeps people coming back ───────────────────────────────── */
+const DAY = '2026-10-06T10:00:00-05:00';            // a Tuesday
+const st = (p) => p.evaluate(() => window.ChartRx.stats());
+const qOf = (id) => Q.find(q => q.id === id);
+const MODS = Object.keys(BANK.modules);
+async function finishOne(p) {            // answer the one seeded question right and reach the summary
+  await p.waitForSelector('#v-q:not([hidden])');
+  await answer(p, true); await p.click('#btn-next'); await p.waitForSelector('#v-sum:not([hidden])');
+}
+
+console.log('\nD1 spaced review');
+{ const id = MC[0];
+  const p = await open({ clock: new Date(DAY) });
+  await p.evaluate((id) => window.ChartRx.review(id, false), id);
+  let b = (await st(p)).box[id];
+  ok('D1 a miss is due again today, in box 0', b.b === 0 && b.due === '2026-10-06', JSON.stringify(b));
+  await p.evaluate((id) => window.ChartRx.review(id, true), id);
+  b = (await st(p)).box[id];
+  ok('D1 a right answer moves it up and makes it due tomorrow', b.b === 1 && b.due === '2026-10-07', JSON.stringify(b));
+  await p.evaluate((id) => window.ChartRx.review(id, true), id);
+  ok('D1 answering it again the same day does not count twice', JSON.stringify((await st(p)).box[id]) === JSON.stringify(b), JSON.stringify((await st(p)).box[id]));
+  await p.clock.runFor(24 * 3600e3);
+  await p.evaluate((id) => window.ChartRx.review(id, true), id);
+  b = (await st(p)).box[id];
+  ok('D1 the next day it moves up again, due 3 days later', b.b === 2 && b.due === '2026-10-10', JSON.stringify(b));
+  await p.clock.runFor(3 * 24 * 3600e3);
+  await p.evaluate((id) => window.ChartRx.review(id, true), id);
+  ok('D1 three spaced right answers: mastered', (await st(p)).box[id].b === 3);
+  await p.evaluate((id) => window.ChartRx.review(id, false), id);
+  ok('D1 a later miss sends it back for review', (await st(p)).box[id].b === 0);
+  await p.context().close(); }
+
+console.log('\nD2 review first, mastery on show');
+{ // Three misses due today, in different habits and not spot questions.
+  const missed = []; const used = new Set();
+  for (const q of Q) if (q.type !== 'spot' && !used.has(q.module) && missed.length < 3) { missed.push(q.id); used.add(q.module); }
+  const box = {}; missed.forEach(id => box[id] = { b: 0, due: '2026-10-06' });
+  const mastered = Q.filter(q => !used.has(q.module)).slice(0, 5).map(q => q.id); mastered.forEach(id => box[id] = { b: 3, due: '2026-10-20' });
+  const p = await open({ clock: new Date(DAY), seed: { stats: { box } } });
+  const r = await p.evaluate((missed) => { const B = window.ChartRx.bank(); let all = 0, bad = [];
+    for (let i = 0; i < 300; i++) { const ids = window.ChartRx.buildRound(), per = {};
+      if (missed.every(id => ids.includes(id))) all++;
+      ids.forEach(id => per[B.byId[id].module] = (per[B.byId[id].module] || 0) + 1);
+      if (ids.length !== 8 || new Set(ids).size !== 8 || Object.values(per).some(n => n > 2) || !ids.some(id => B.byId[id].type === 'spot')) bad.push(ids.join(','));
+    } return { all, bad: bad.length }; }, missed);
+  ok('D2 every round leads with the misses that are due', r.all === 300, r.all + '/300');
+  ok('D2 and still keeps the round rules (8, ≤2 a habit, ≥1 spot)', r.bad === 0, r.bad);
+  await p.waitForSelector('#v-home:not([hidden])');
+  ok('D2 the home screen shows mastery', (await p.textContent('#st-mastered')) === '5/' + Q.length, await p.textContent('#st-mastered'));
+  ok('D2 and says what is due', /3 due for review/.test(await p.textContent('#btn-start')), await p.textContent('#btn-start'));
+  await p.context().close(); }
+
+console.log('\nD3 ranks');
+{ const p = await open({ clock: new Date(DAY) });
+  const rk = await p.evaluate(() => [0, 99, 100, 260, 1999, 2000, 5000].map(x => window.ChartRx.rankOf(x).name));
+  ok('D3 ranks climb with XP and stop at the top', JSON.stringify(rk) === JSON.stringify(['Probie', 'Probie', 'Charter', 'Clean Charter', 'Chart Whisperer', 'Chart Legend', 'Chart Legend']), rk.join(','));
+  await p.context().close();
+  const fx = await (async () => { const t = await open({ clock: new Date(DAY) }); const f = await t.evaluate(() => window.ChartRx.featured()); await t.context().close(); return f; })();
+  const one = Q.find(q => q.type === 'mc' && q.module !== fx).id;
+  const p2 = await open({ clock: new Date(DAY), seed: { stats: { xp: 260 } } });
+  await p2.waitForSelector('#v-home:not([hidden])');
+  ok('D3 home shows the rank and the XP to the next one', (await p2.textContent('#rk-name')) === 'Clean Charter' && /240 XP to Detail Hound/.test(await p2.textContent('.rankline')), await p2.textContent('.rankline'));
+  await p2.context().close();
+  const p3 = await open({ clock: new Date(DAY), seed: { stats: { xp: 90 }, round: { ids: [one], i: 0, res: [], xp: 0, streak: 0, best: 0, rank0: 0, m0: 0 } } });
+  await finishOne(p3);
+  ok('D3 crossing a rank shows a rank-up on the summary', /Rank up: Charter/.test(await p3.textContent('#v-sum')), await p3.textContent('.rankup').catch(() => 'none'));
+  await p3.context().close(); }
+
+console.log('\nD4 double-XP habit');
+{ const a = await open({ clock: new Date(DAY) }), b = await open({ clock: new Date(DAY) });
+  const fa = await a.evaluate(() => window.ChartRx.featured()), fb = await b.evaluate(() => window.ChartRx.featured());
+  const week = await a.evaluate(() => { const s = new Set(); for (let d = 1; d <= 28; d++) s.add(window.ChartRx.featured('2026-11-' + String(d).padStart(2, '0'))); return s.size; });
+  ok('D4 the same habit on every device on a date', fa === fb && MODS.includes(fa), fa + ' / ' + fb);
+  ok('D4 and it changes from day to day', week > 3, week);
+  await a.waitForSelector('#v-home:not([hidden])');
+  ok('D4 the home screen names it', (await a.textContent('#fx')).includes(BANK.modules[fa].name), await a.textContent('#fx'));
+  const inRound = await a.evaluate((fx) => { const B = window.ChartRx.bank(); let n = 0;
+    for (let i = 0; i < 200; i++) if (window.ChartRx.buildRound().some(id => B.byId[id].module === fx)) n++; return n; }, fa);
+  ok('D4 every round has at least one question from it', inRound === 200, inRound);
+  await a.context().close(); await b.context().close();
+  const id = Q.find(q => q.module === fa && q.type !== 'spot').id;
+  const p = await open({ clock: new Date(DAY), seed: seedRound([id]) });
+  await p.waitForSelector('#v-q:not([hidden])'); await answer(p, true);
+  ok('D4 a right answer there pays double: 10 + 10 + 5 speed', (await round(p)).xp === 25 && /2× habit/.test(await p.textContent('#sheet')), (await round(p)).xp);
+  await p.context().close(); }
+
+console.log('\nD5 weekly goal');
+{ const one = MC[1];
+  const wk = '2026-10-05';                                   // Monday of the test week
+  const p = await open({ clock: new Date(DAY), seed: { stats: { week: { k: wk, n: 2 } }, round: { ids: [one], i: 0, res: [], xp: 0, streak: 0, best: 0 } } });
+  await finishOne(p);
+  let s = await st(p);
+  ok('D5 the third round in a week meets the goal', s.week.n === 3 && s.goalWeek === wk && s.weeksRun === 1, JSON.stringify([s.week, s.goalWeek, s.weeksRun]));
+  ok('D5 and the summary says so', /goal met/.test(await p.textContent('#v-sum')));
+  await p.click('#btn-again'); await p.click('#q-quit');
+  ok('D5 home shows three of three', (await p.locator('#wk-pips i.on').count()) === 3 && /Goal met/.test(await p.textContent('#wk-text')), await p.textContent('#wk-text'));
+  await p.context().close();
+  // Met last week too: the run goes to 2. A missed week starts it over.
+  const p2 = await open({ clock: new Date(DAY), seed: { stats: { week: { k: wk, n: 2 }, goalWeek: '2026-09-28', weeksRun: 1 }, round: { ids: [one], i: 0, res: [], xp: 0, streak: 0, best: 0 } } });
+  await finishOne(p2);
+  ok('D5 meeting it two weeks running counts 2', (await st(p2)).weeksRun === 2, (await st(p2)).weeksRun);
+  await p2.context().close();
+  const p3 = await open({ clock: new Date(DAY), seed: { stats: { week: { k: wk, n: 2 }, goalWeek: '2026-09-21', weeksRun: 4 }, round: { ids: [one], i: 0, res: [], xp: 0, streak: 0, best: 0 } } });
+  await finishOne(p3);
+  ok('D5 after a week off it starts again at 1, nothing else lost', (await st(p3)).weeksRun === 1, (await st(p3)).weeksRun);
+  await p3.context().close();
+  const p4 = await open({ clock: new Date('2026-10-12T10:00:00-05:00'), seed: { stats: { week: { k: wk, n: 3 }, goalWeek: wk, weeksRun: 1 } } });
+  await p4.waitForSelector('#v-home:not([hidden])');
+  ok('D5 a new week starts at 0 of 3', (await p4.locator('#wk-pips i.on').count()) === 0 && /0 of 3/.test(await p4.textContent('#wk-text')), await p4.textContent('#wk-text'));
+  await p4.context().close(); }
+
+console.log('\nD6 badge tiers');
+{ const k = MODS[0], qs = Q.filter(q => q.module === k), one = qs.find(q => q.type !== 'spot').id;
+  const p = await open({ clock: new Date(DAY), seed: { stats: { mod: { [k]: 14 }, badges: { [k]: '2026-10-01' } }, round: { ids: [one], i: 0, res: [], xp: 0, streak: 0, best: 0 } } });
+  await finishOne(p);
+  ok('D6 15 right in a habit earns Silver', !!(await st(p)).silver[k] && /Silver badge/.test(await p.textContent('#v-sum')), JSON.stringify((await st(p)).silver));
+  await p.context().close();
+  // Every question in the habit mastered but one, which is due: answering it earns Gold.
+  const box = {}; qs.forEach(q => box[q.id] = { b: 3, due: '2026-10-20' }); box[one] = { b: 2, due: '2026-10-06' };
+  const p2 = await open({ clock: new Date(DAY), seed: { stats: { mod: { [k]: 20 }, badges: { [k]: '2026-10-01' }, silver: { [k]: '2026-10-02' }, box }, round: { ids: [one], i: 0, res: [], xp: 0, streak: 0, best: 0 } } });
+  await finishOne(p2);
+  ok('D6 mastering every question in it earns Gold', !!(await st(p2)).gold[k] && /Gold badge/.test(await p2.textContent('#v-sum')), JSON.stringify((await st(p2)).gold));
+  await p2.click('#btn-again'); await p2.click('#q-quit'); await p2.click('#btn-badges');
+  ok('D6 the badge screen shows the tier', /Gold/.test(await p2.textContent('.badge.gold')), await p2.locator('.badge').first().textContent());
+  await p2.context().close(); }
+
+console.log('\nD7 lightning round');
+{ const p = await open({ clock: new Date(DAY) });
+  await p.waitForSelector('#v-home:not([hidden])');
+  await p.click('#btn-blitz'); await p.waitForSelector('#v-q:not([hidden])');
+  ok('D7 it is true-or-false only, with a clock', (await cur(p)).type === 'swipe' && /\d+s/.test(await p.textContent('#q-dots')), await p.textContent('#q-dots'));
+  const right = [], wrong = [];
+  for (let i = 0; i < 4; i++) {
+    const q = await cur(p), r = i !== 2;
+    await p.click(`.tf .opt[data-id="${r ? q.answer : !q.answer}"]`);
+    (r ? right : wrong).push(q.id);
+    ok(`D7 no feedback sheet to tap through (${i + 1})`, await p.isHidden('#sheet'));
+    await p.clock.runFor(700);
+  }
+  ok('D7 score and XP count up as you go', (await p.evaluate(() => window.ChartRx.blitz())).score === 3, JSON.stringify(await p.evaluate(() => window.ChartRx.blitz())));
+  await p.clock.runFor(60000);
+  await p.waitForSelector('#v-sum:not([hidden])');
+  const t = await p.textContent('#v-sum');
+  ok('D7 after 60 seconds: the score', /3\s*right in 60 seconds/.test(t), t.slice(0, 120));
+  ok('D7 a first run is a personal best', /New personal best/.test(t) && (await st(p)).blitzBest === 3);
+  ok('D7 the miss is listed with its answer and explanation', t.includes(qOf(wrong[0]).explain));
+  ok('D7 XP is banked: 5 a right answer', (await st(p)).xp === 15, (await st(p)).xp);
+  await p.click('#btn-b-out');
+  ok('D7 home shows the best to beat', /Your best: 3/.test(await p.textContent('#btn-blitz')));
+  await p.click('#btn-blitz'); await p.waitForSelector('#v-q:not([hidden])');
+  await p.click('#q-quit'); await p.clock.runFor(61000);
+  ok('D7 leaving mid-way just stops it: home stays put', await p.isVisible('#v-home') && (await st(p)).blitzBest === 3);
+  ok('D7 no errors', p._errs.length === 0, p._errs.join('|'));
+  await p.context().close(); }
+
+console.log('\nD8 weak-spot drill');
+{ const k = MODS[1], miss = Q.find(q => q.module === k && q.type !== 'spot').id, two = Q.find(q => q.module !== k && q.type !== 'spot').id;
+  const p = await open({ clock: new Date(DAY), seed: seedRound([two, miss]) });
+  await p.waitForSelector('#v-q:not([hidden])');
+  await answer(p, true); await p.click('#btn-next'); await p.waitForFunction(() => window.ChartRx.round().i === 1);
+  await answer(p, false); await p.click('#btn-next'); await p.waitForSelector('#v-sum:not([hidden])');
+  const full = JSON.stringify((await st(p)).lastFull);
+  ok('D8 the summary offers a drill on the weak spot', /Drill/.test(await p.textContent('#btn-drill')) && (await p.textContent('#btn-drill')).includes(BANK.modules[k].name));
+  await p.click('#btn-drill'); await p.waitForSelector('#v-q:not([hidden])');
+  const r = await round(p);
+  ok('D8 five questions, all from that habit', r.ids.length === Math.min(5, Q.filter(q => q.module === k).length) && r.ids.every(id => qOf(id).module === k), r.ids.join(','));
+  ok('D8 the question missed comes first in line', r.ids.includes(miss));
+  for (let i = 0; i < r.ids.length; i++) { await answer(p, true); await p.click('#btn-next');
+    if (i < r.ids.length - 1) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1); }
+  await p.waitForSelector('#v-sum:not([hidden])');
+  ok('D8 its summary says drill and offers no completion credit', /Drill complete/.test(await p.textContent('#v-sum')) && (await p.locator('#btn-credit').count()) === 0);
+  ok('D8 credit still uses the last full round', JSON.stringify((await st(p)).lastFull) === full);
+  await p.context().close(); }
+
+console.log('\nD9 nothing is ever taken away');
+{ const ids = Q.filter(q => q.type !== 'spot').slice(0, 8).map(q => q.id);
+  const seedStats = { xp: 300, mod: { [qOf(ids[0]).module]: 9 }, badges: { [qOf(ids[0]).module]: '2026-10-01' } };
+  const p = await open({ clock: new Date(DAY), seed: { stats: seedStats, round: { ids, i: 0, res: [], xp: 0, streak: 0, best: 0 } } });
+  await p.waitForSelector('#v-q:not([hidden])');
+  for (let i = 0; i < ids.length; i++) { await answer(p, false); await p.click('#btn-next');
+    if (i < ids.length - 1) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1); }
+  await p.waitForSelector('#v-sum:not([hidden])');
+  const s = await st(p);
+  ok('D9 a round of misses keeps every XP point, the rank and the badge', s.xp === 300 && !!s.badges[qOf(ids[0]).module] && s.mod[qOf(ids[0]).module] === 9, JSON.stringify([s.xp, s.badges, s.mod]));
+  ok('D9 and the summary still points to what is next', (await p.locator('.goals li').count()) > 0);
+  await p.context().close(); }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));
