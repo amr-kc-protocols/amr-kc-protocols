@@ -1,5 +1,5 @@
 {
-  "version": "2026-10.4",
+  "version": "2026-10.5",
   "writing_guide": [
     "Scenarios are made up for practice. No patient names, dates of birth, addresses or incident numbers.",
     "Simple and straightforward: a provider should know what's being asked within three seconds.",
@@ -9,67 +9,73 @@
     "Swipe statements: one plain claim, 12 words or fewer, not an instruction. Mix true and false, and avoid double negatives.",
     "explain: two sentences at most. Lead with the rule, then why it matters.",
     "spot charts: one clear problem. Vitals rows use time, hr, bp, rr, spo2 and optional pain; leave a value out to show it was not recorded.",
-    "Options: 3 or 4, each short enough to read in one glance."
+    "Wrong options are mistakes crews really make, not throwaways. The right answer should not usually be the longest one.",
+    "Options: 3 or 4, each short enough to read in one glance.",
+    "source: where the fact comes from (GMR ImageTrend training, a regulation). The review page shows it; the game doesn't."
   ],
   "modules": {
-    "sign":       { "name": "Sign Last",           "badge": "✍️", "tip": "Sign last — after handoff, once you've read the whole chart." },
+    "sign":       { "name": "Sign Last",           "badge": "✍️", "tip": "Your crew signature goes on last, after handoff. Patient and ABA signatures are captured at the bedside." },
     "vitals":     { "name": "Abnormal Vitals",     "badge": "📈", "tip": "Abnormal is never 'stable.' Recheck it, chart it, report it." },
-    "fullset":    { "name": "Full Set Every Time", "badge": "⏱️", "tip": "HR, BP, RR and SpO2 on every set — and recheck after every treatment." },
+    "fullset":    { "name": "Full Set Every Time", "badge": "⏱️", "tip": "HR, BP, RR, SpO2 and mental status on every set, and recheck after every treatment." },
     "impression": { "name": "Impression Matcher",  "badge": "🩺", "tip": "The impression is why they needed an ambulance, and it must match what you charted." },
     "meds":       { "name": "Dose Detective",      "badge": "💊", "tip": "Drug, dose, units, route, time — for every med, including ones given before you arrived." },
     "psych":      { "name": "Psych Pro",           "badge": "🧠", "tip": "Legal status, safety search, SI details, and who consented." },
     "hospice":    { "name": "Code Status Keeper",  "badge": "🕊️", "tip": "Code status, the DNR form, and why a car wouldn't do." },
-    "narrative":  { "name": "No Templates",        "badge": "📝", "tip": "Write what you found, in plain objective words — not a checklist." }
+    "narrative":  { "name": "No Templates",        "badge": "📝", "tip": "Write what you found, in plain objective words — not a checklist." },
+    "imt":        { "name": "ImageTrend Smarts",   "badge": "💻", "tip": "Sync, post, fix it in the Timeline, and pick the right box." },
+    "mn":         { "name": "Prove the Stretcher", "badge": "🛏️", "tip": "Why an ambulance and not a car or wheelchair van. Show it with what you saw." }
   },
   "questions": [
     {
       "id": "sign-01", "module": "sign", "type": "swipe",
-      "prompt": "You can sign the chart before you finish writing it.",
+      "prompt": "You should add your crew signature before the chart is finished.",
       "answer": false,
-      "explain": "Your signature says the chart is complete and accurate. Sign last, after handoff."
+      "explain": "Your crew signature says the chart is complete and accurate. Add it last, after handoff."
     },
     {
       "id": "sign-02", "module": "sign", "type": "mc",
-      "prompt": "When should you sign the chart?",
+      "prompt": "When should you add your crew signature?",
       "options": [
-        { "id": "a", "text": "When you open it" },
-        { "id": "b", "text": "When the patient is loaded" },
-        { "id": "c", "text": "After handoff, once you've read it all" },
-        { "id": "d", "text": "Any time" }
+        { "id": "a", "text": "After handoff, once the chart is complete" },
+        { "id": "b", "text": "When you start the chart" },
+        { "id": "c", "text": "At the bedside, with the patient's signature" },
+        { "id": "d", "text": "Before you post the first time" }
       ],
-      "answer": "c",
-      "explain": "Sign last. Your signature covers everything in the chart, including the handoff."
+      "answer": "a",
+      "explain": "Your crew signature goes on last. Patient and ABA signatures are captured at the bedside or at handoff."
     },
     {
       "id": "sign-03", "module": "sign", "type": "swipe",
-      "prompt": "Signing your partner's chart means you vouch for all of it.",
-      "answer": true,
-      "explain": "Your signature covers the whole chart, not just your part. Read it before you sign."
+      "prompt": "You can sign in your partner's place if they're busy.",
+      "answer": false,
+      "explain": "Each crew member signs for themselves. Signing for a partner is a common error, and Clinical Education will ask for an addendum.",
+      "source": "GMR End User IMT: missing signatures (job aid)"
     },
     {
       "id": "sign-04", "module": "sign", "type": "mc",
-      "context": "You find a mistake after the chart is locked.",
+      "context": "Your chart is finished and locked. Then you find a mistake.",
       "prompt": "How do you fix it?",
       "options": [
-        { "id": "a", "text": "Add an addendum with the correction" },
-        { "id": "b", "text": "Ask someone to delete the chart" },
-        { "id": "c", "text": "Leave it" },
-        { "id": "d", "text": "Start a new chart" }
+        { "id": "a", "text": "Ask Clinical Support to unlock it" },
+        { "id": "b", "text": "Add an addendum in Elite Web" },
+        { "id": "c", "text": "Fix it in Elite Field and post again" },
+        { "id": "d", "text": "Start a new chart for the call" }
       ],
-      "answer": "a",
-      "explain": "An addendum shows what changed and when. Never hide or erase the original."
+      "answer": "b",
+      "explain": "A locked chart is corrected by addendum in Elite Web. The original stays, and the addendum becomes part of the record.",
+      "source": "GMR End User IMT: Addendums; Elite Web"
     },
     {
       "id": "sign-05", "module": "sign", "type": "mc",
-      "prompt": "What should you check before you sign?",
+      "prompt": "What should you check before your crew signature?",
       "options": [
-        { "id": "a", "text": "Narrative, vitals and meds all agree" },
-        { "id": "b", "text": "The narrative is short" },
-        { "id": "c", "text": "Your partner's name is spelled right" },
-        { "id": "d", "text": "Nothing — the system checks it" }
+        { "id": "a", "text": "The narrative is short" },
+        { "id": "b", "text": "Your partner's name is spelled right" },
+        { "id": "c", "text": "Narrative, vitals and meds all agree" },
+        { "id": "d", "text": "The validation score reads 100" }
       ],
-      "answer": "a",
-      "explain": "The chart has to agree with itself. Mismatched vitals, meds and narrative are the first thing a reviewer finds."
+      "answer": "c",
+      "explain": "The chart has to agree with itself. A clean validation score means fields are filled in, not that they agree."
     },
 
     {
@@ -102,24 +108,24 @@
       "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Vitals stable." },
-        { "id": "b", "text": "BP 118/40, rechecked 120/45. Alert, skin warm and dry. Reported to RN." },
-        { "id": "c", "text": "BP a little low, patient fine." },
-        { "id": "d", "text": "Vitals monitored per protocol." }
+        { "id": "b", "text": "BP 118/40. Alert, skin warm and dry; no complaints." },
+        { "id": "c", "text": "BP low, rechecked, patient fine. Reported to RN." },
+        { "id": "d", "text": "BP 118/40, rechecked 120/45. Alert, skin warm and dry. Reported to RN." }
       ],
-      "answer": "b",
+      "answer": "d",
       "explain": "Name the abnormal number, show the recheck, and say who you told."
     },
     {
       "id": "vitals-04", "module": "vitals", "type": "mc",
-      "prompt": "A reading looks wrong. What do you do?",
+      "prompt": "A BP you took looks wrong. What do you do?",
       "options": [
-        { "id": "a", "text": "Delete it" },
-        { "id": "b", "text": "Copy the last reading" },
-        { "id": "c", "text": "Recheck it and chart both" },
-        { "id": "d", "text": "Ignore it" }
+        { "id": "a", "text": "Recheck it and chart both readings" },
+        { "id": "b", "text": "Replace it with the recheck" },
+        { "id": "c", "text": "Delete it and take another" },
+        { "id": "d", "text": "Chart only the one that looks right" }
       ],
-      "answer": "c",
-      "explain": "Never delete or change a reading. Recheck it and chart what you found, so the chart explains itself."
+      "answer": "a",
+      "explain": "Keep a reading you actually took, and chart the recheck beside it. A typo is different: open that entry and correct it."
     },
     {
       "id": "vitals-05", "module": "vitals", "type": "spot",
@@ -154,42 +160,38 @@
         ]
       },
       "answer": ["v2"],
-      "explain": "Every set needs HR, BP, RR and SpO2 — especially after an opioid, when BP and breathing can drop. A blank BP looks like it was never checked."
+      "explain": "BP belongs in every set, especially after an opioid, when BP and breathing can drop. A blank BP looks like it was never checked."
     },
     {
       "id": "fullset-02", "module": "fullset", "type": "mc",
       "prompt": "What's in a full set of vitals?",
       "options": [
-        { "id": "a", "text": "HR and BP" },
-        { "id": "b", "text": "HR, BP, RR and SpO2" },
-        { "id": "c", "text": "BP and SpO2" },
-        { "id": "d", "text": "Whatever the monitor sends" }
+        { "id": "a", "text": "HR, BP, RR and SpO2" },
+        { "id": "b", "text": "HR, BP, RR, SpO2 and mental status (GCS)" },
+        { "id": "c", "text": "HR, BP and SpO2" },
+        { "id": "d", "text": "Whatever the monitor sends, plus a pain score" }
       ],
       "answer": "b",
-      "explain": "HR, BP, RR and SpO2 on every set. Add a pain score when pain is part of the complaint."
+      "explain": "GMR's standard includes mental status (GCS or LOC) with the vitals. Add a pain score when pain is part of the complaint.",
+      "source": "GMR End User IMT: Clinical Documentation Requirements"
     },
     {
       "id": "fullset-03", "module": "fullset", "type": "swipe",
       "prompt": "If the patient refuses a BP, leave it blank.",
       "answer": false,
-      "explain": "Chart it as refused and say so in the narrative. A blank looks like you skipped it."
+      "explain": "Use the Pertinent Negative 'Refused' on the BP field. A blank looks like you skipped it and fails validation.",
+      "source": "GMR End User IMT: Pertinent Negatives"
     },
     {
-      "id": "fullset-04", "module": "fullset", "type": "mc",
+      "id": "fullset-04", "module": "fullset", "type": "swipe",
       "context": "Two-hour transfer. The patient is stable.",
-      "prompt": "How often should you take vitals?",
-      "options": [
-        { "id": "a", "text": "Once, at pickup" },
-        { "id": "b", "text": "Only at pickup and arrival" },
-        { "id": "c", "text": "Throughout the ride, and after any change" },
-        { "id": "d", "text": "Only if the patient complains" }
-      ],
-      "answer": "c",
-      "explain": "Two sets is the floor, not the goal. A long ride needs rechecks along the way."
+      "prompt": "Vitals at pickup and arrival are enough for this ride.",
+      "answer": false,
+      "explain": "Recheck along the way and after any change or treatment. The 2026 guidelines set tighter intervals for some conditions, like BP every 5 minutes with ACS."
     },
     {
       "id": "fullset-05", "module": "fullset", "type": "swipe",
-      "prompt": "After you give a medication, take another set of vitals.",
+      "prompt": "After any treatment, including oxygen, take another set of vitals.",
       "answer": true,
       "explain": "The recheck shows whether the treatment worked or caused harm. Chart the after as well as the before."
     },
@@ -213,16 +215,16 @@
       "prompt": "Which primary impression fits best?",
       "options": [
         { "id": "a", "text": "No Apparent Illness/Injury (Adult)" },
-        { "id": "b", "text": "Gastrointestinal System Issue (G.I.)" },
-        { "id": "c", "text": "Nausea / Vomiting" },
-        { "id": "d", "text": "Weakness" }
+        { "id": "b", "text": "Nausea / Vomiting" },
+        { "id": "c", "text": "Weakness" },
+        { "id": "d", "text": "Gastrointestinal System Issue (G.I.)" }
       ],
-      "answer": "b",
+      "answer": "d",
       "explain": "Chart the body system with the problem, then add 'Mechanical complication of … devices, implants and grafts' as a secondary impression. 'No Apparent Illness/Injury' contradicts an ambulance trip to the ED."
     },
     {
       "id": "impression-03", "module": "impression", "type": "swipe",
-      "prompt": "Your primary impression should match your vitals.",
+      "prompt": "Your impression shouldn't contradict your assessment or vitals.",
       "answer": true,
       "explain": "'Cardiac Dysrhythmia - Bradycardia' next to a charted heart rate of 75 doesn't hold up. The numbers and the impression should tell the same story."
     },
@@ -231,19 +233,19 @@
       "context": "16-year-old with suicidal thoughts and a plan. No attempt.",
       "prompt": "Which primary impression fits best?",
       "options": [
-        { "id": "a", "text": "No Apparent Illness/Injury (Pediatric)" },
-        { "id": "b", "text": "Anxiety/Emotional Upset" },
-        { "id": "c", "text": "Behavioral / Psychiatric disorder" },
+        { "id": "a", "text": "Behavioral / Psychiatric disorder" },
+        { "id": "b", "text": "No Apparent Illness/Injury (Pediatric)" },
+        { "id": "c", "text": "Anxiety/Emotional Upset" },
         { "id": "d", "text": "Suicide attempt" }
       ],
-      "answer": "c",
+      "answer": "a",
       "explain": "Thoughts with a plan are behavioral; 'Suicide attempt' is only for someone who acted. 'No Apparent Illness/Injury' undercuts why they needed you."
     },
     {
       "id": "impression-05", "module": "impression", "type": "mc",
       "prompt": "When is 'No Apparent Illness/Injury' the right impression?",
       "options": [
-        { "id": "a", "text": "Whenever the patient is stable" },
+        { "id": "a", "text": "Whenever the patient is stable and has no new complaints" },
         { "id": "b", "text": "Almost never on an ambulance transfer" },
         { "id": "c", "text": "When you're not sure what to pick" },
         { "id": "d", "text": "On every routine transfer" }
@@ -258,12 +260,12 @@
       "quote": "NURSE GAVE PATIENT .5 OF DILAUDID.",
       "prompt": "What's the best way to chart this?",
       "options": [
-        { "id": "a", "text": "Nurse gave Dilaudid." },
-        { "id": "b", "text": "RN gave hydromorphone 0.5 mg IV at 1415, before EMS arrival." },
-        { "id": "c", "text": "Pt got .5 Dilaudid earlier." },
+        { "id": "a", "text": "RN gave Dilaudid .5 mg IV before EMS arrival." },
+        { "id": "b", "text": "Hydromorphone given by RN prior to arrival, dose per MAR." },
+        { "id": "c", "text": "RN gave hydromorphone 0.5 mg IV at 1415, before EMS arrival." },
         { "id": "d", "text": "Pain meds given per RN." }
       ],
-      "answer": "b",
+      "answer": "c",
       "explain": "Drug, dose, units, route, time. '.5' could mean mg or mL, and a missing leading zero is a setup for a tenfold error."
     },
     {
@@ -276,7 +278,8 @@
       "id": "meds-03", "module": "meds", "type": "swipe",
       "prompt": "Meds given before you arrived don't go in your chart.",
       "answer": false,
-      "explain": "They change what to expect en route — sedation, pain, vitals. Chart drug, dose, units, route and time."
+      "explain": "Enter them in the Medication power tool with Prior to Arrival set to match what happened. They change what to expect en route.",
+      "source": "GMR job aid: infusions already running on an IFT"
     },
     {
       "id": "meds-04", "module": "meds", "type": "mc",
@@ -284,11 +287,11 @@
       "prompt": "What's missing from this line?",
       "options": [
         { "id": "a", "text": "Nothing" },
-        { "id": "b", "text": "Dose, route and time for each" },
-        { "id": "c", "text": "Brand names" },
-        { "id": "d", "text": "Who ordered them" }
+        { "id": "b", "text": "Brand names" },
+        { "id": "c", "text": "The reason each was given and who ordered it" },
+        { "id": "d", "text": "Dose, route and time for each" }
       ],
-      "answer": "b",
+      "answer": "d",
       "explain": "Sedatives change how you monitor the patient. Every med needs its dose, route and time."
     },
     {
@@ -310,10 +313,10 @@
       "id": "psych-01", "module": "psych", "type": "mc",
       "prompt": "What belongs in every psych transfer chart?",
       "options": [
-        { "id": "a", "text": "Legal status — voluntary or on a hold" },
+        { "id": "a", "text": "Legal status: voluntary or involuntary" },
         { "id": "b", "text": "The patient's insurance" },
         { "id": "c", "text": "Your guess at the diagnosis" },
-        { "id": "d", "text": "How long the ED wait was" }
+        { "id": "d", "text": "How long the patient waited in the ED for a bed" }
       ],
       "answer": "a",
       "explain": "Chart legal status, the safety search, SI details, and who consented for a minor. Those protect the patient and you."
@@ -323,12 +326,12 @@
       "context": "Psych patient says they planned to use a knife.",
       "prompt": "What must your chart show?",
       "options": [
-        { "id": "a", "text": "That you did a safety search, and what you found" },
-        { "id": "b", "text": "That the patient seemed calm" },
+        { "id": "a", "text": "That the patient seemed calm and denied wanting to hurt anyone" },
+        { "id": "b", "text": "That you did a safety search, and what you found" },
         { "id": "c", "text": "The patient's insurance" },
         { "id": "d", "text": "Nothing extra" }
       ],
-      "answer": "a",
+      "answer": "b",
       "explain": "A stated weapon plan makes the safety search essential. Chart that it was done and what turned up."
     },
     {
@@ -346,11 +349,11 @@
       "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Leave it as written." },
-        { "id": "b", "text": "Pt yelling, refused to sit on cot. Explained the transfer; pt agreed and sat on cot." },
-        { "id": "c", "text": "Pt was combative." },
-        { "id": "d", "text": "Pt was a problem." }
+        { "id": "b", "text": "Pt combative and uncooperative with crew; eventually agreed to transport." },
+        { "id": "c", "text": "Pt yelling, refused to sit on cot. Explained the transfer; pt agreed and sat on cot." },
+        { "id": "d", "text": "Pt was difficult; calmed down after a while." }
       ],
-      "answer": "b",
+      "answer": "c",
       "explain": "Describe what the patient said and did, what you did, and how it ended. A label like 'difficult' tells the next reader nothing."
     },
     {
@@ -359,11 +362,11 @@
       "prompt": "What should the chart say about consent?",
       "options": [
         { "id": "a", "text": "Nothing — the hospital handles it" },
-        { "id": "b", "text": "Who consented: name and relationship" },
-        { "id": "c", "text": "Just check 'minor' in billing" },
-        { "id": "d", "text": "Only needed if mom rides along" }
+        { "id": "b", "text": "That the patient is a minor, checked on the billing page" },
+        { "id": "c", "text": "Only needed if mom rides along" },
+        { "id": "d", "text": "Who consented: name and relationship" }
       ],
-      "answer": "b",
+      "answer": "d",
       "explain": "For a minor, chart who consented and how they're related. That's the legal basis for the transport."
     },
 
@@ -375,34 +378,34 @@
     },
     {
       "id": "hospice-02", "module": "hospice", "type": "mc",
-      "context": "Hospice patient going home. The family asks you not to take vitals.",
+      "context": "Hospice patient going home, too confused to decide. The family asks you not to take vitals.",
       "prompt": "What do you chart?",
       "options": [
-        { "id": "a", "text": "Leave the vitals blank" },
-        { "id": "b", "text": "Who declined, and what you could see" },
+        { "id": "a", "text": "Who declined, their relationship, and what you could see" },
+        { "id": "b", "text": "Leave the vitals blank" },
         { "id": "c", "text": "Estimate the numbers" },
-        { "id": "d", "text": "Cancel the transport" }
+        { "id": "d", "text": "Take them anyway, and chart that the family objected to vitals" }
       ],
-      "answer": "b",
-      "explain": "A refusal is charted, not left blank. Then chart what you can see — breathing, skin, mental status."
+      "answer": "a",
+      "explain": "Use the Pertinent Negative 'Refused' and chart who declined and what you could see. If the patient can decide, ask them: family can't refuse for a patient who can."
     },
     {
       "id": "hospice-03", "module": "hospice", "type": "mc",
       "prompt": "What belongs in every hospice transport chart?",
       "options": [
-        { "id": "a", "text": "Code status, and that the DNR form came along" },
-        { "id": "b", "text": "The hospice company's phone number" },
+        { "id": "a", "text": "The hospice agency's name, phone number and nurse on call" },
+        { "id": "b", "text": "Code status, and that the DNR form came along" },
         { "id": "c", "text": "The family's opinion of the hospital" },
         { "id": "d", "text": "Nothing extra" }
       ],
-      "answer": "a",
+      "answer": "b",
       "explain": "Code status and the DNR form protect the patient's wishes if something changes en route."
     },
     {
       "id": "hospice-04", "module": "hospice", "type": "swipe",
       "prompt": "Hospice charts still need to say why an ambulance was needed.",
       "answer": true,
-      "explain": "Every transport needs a reason a car or wheelchair van wouldn't do — bedbound, on oxygen, unable to sit up. Chart it."
+      "explain": "Every transport needs a reason a car or wheelchair van wouldn't do, like being unable to sit in a wheelchair. Chart what you saw."
     },
     {
       "id": "hospice-05", "module": "hospice", "type": "fix",
@@ -410,12 +413,13 @@
       "prompt": "What's the best way to chart this?",
       "options": [
         { "id": "a", "text": "Pt transported home." },
-        { "id": "b", "text": "Hospice pt to home. DNR with pt. Bedbound, on 2 L O2, can't sit up." },
-        { "id": "c", "text": "Hospice transport, no issues." },
-        { "id": "d", "text": "Transported per family request." }
+        { "id": "b", "text": "Hospice pt to home. DNR with pt. Pt bedbound, on home O2." },
+        { "id": "c", "text": "Hospice pt to home. DNR with pt. Can't get up or stand without 2 assist; can't sit in wheelchair." },
+        { "id": "d", "text": "Hospice transport home per family request; DNR on file." }
       ],
-      "answer": "b",
-      "explain": "Chart code status and why a car wouldn't do. That protects the patient's wishes and shows the transport was needed."
+      "answer": "c",
+      "explain": "Chart code status and what the patient can't do: get up, walk or sit in a wheelchair. 'Bedbound' and home O2 alone don't show an ambulance was needed.",
+      "source": "42 CFR §410.40 (bed-confined)"
     },
 
     {
@@ -427,29 +431,29 @@
     },
     {
       "id": "narrative-02", "module": "narrative", "type": "spot",
-      "context": "Ventilator patient going to a long-term care hospital.",
+      "context": "Hospital to a skilled nursing facility.",
       "prompt": "Tap the line that's too vague.",
       "chart": {
         "narrative": [
-          { "id": "n1", "text": "Patient on ventilator, opens eyes to voice." },
-          { "id": "n2", "text": "Ventilator settings per sending hospital." },
-          { "id": "n3", "text": "Care transferred to the receiving nurse with report." }
+          { "id": "n1", "text": "Alert and oriented; skin warm and dry; breathing unlabored." },
+          { "id": "n2", "text": "Patient tolerated transport well." },
+          { "id": "n3", "text": "Report given to the receiving nurse at 1430." }
         ]
       },
       "answer": ["n2"],
-      "explain": "'Per sending hospital' tells the next crew nothing. Chart the mode, rate, tidal volume, FiO2 and PEEP."
+      "explain": "'Tolerated transport well' gives a reviewer nothing to check. Chart what you saw: mental status, breathing, pain and vitals."
     },
     {
       "id": "narrative-03", "module": "narrative", "type": "mc",
       "context": "Your narrative says 'without incident' seven times.",
       "prompt": "What's the fix?",
       "options": [
-        { "id": "a", "text": "Change it to 'without issue'" },
-        { "id": "b", "text": "Say it once; describe what you found" },
-        { "id": "c", "text": "Delete the narrative" },
-        { "id": "d", "text": "Leave it" }
+        { "id": "a", "text": "Change each one to 'without issue' so it reads better" },
+        { "id": "b", "text": "Delete the narrative" },
+        { "id": "c", "text": "Leave it" },
+        { "id": "d", "text": "Say it once; describe what you found" }
       ],
-      "answer": "b",
+      "answer": "d",
       "explain": "Swapping the phrase isn't a fix. The next caregiver needs what you observed."
     },
     {
@@ -458,12 +462,12 @@
       "quote": "CREW STATED THEY DID NOT FEEL PAIN.",
       "prompt": "What's the best way to chart this?",
       "options": [
-        { "id": "a", "text": "Leave it as written." },
-        { "id": "b", "text": "Patient denies pain." },
+        { "id": "a", "text": "Patient denies pain." },
+        { "id": "b", "text": "Leave it as written." },
         { "id": "c", "text": "No pain noted by crew." },
         { "id": "d", "text": "They did not feel pain." }
       ],
-      "answer": "b",
+      "answer": "a",
       "explain": "As written, it says the crew had no pain. Reread before you submit — who did what matters in a legal record."
     },
     {
@@ -478,11 +482,289 @@
       "options": [
         { "id": "a", "text": "Pt was drunk." },
         { "id": "b", "text": "Odor of alcohol, slurred speech, unsteady when standing." },
-        { "id": "c", "text": "Pt was intoxicated and rude." },
+        { "id": "c", "text": "Pt was intoxicated, belligerent and uncooperative with crew." },
         { "id": "d", "text": "Pt obviously had too much." }
       ],
       "answer": "b",
       "explain": "Chart what you saw, heard and smelled. Labels like 'drunk' can be wrong and invite challenge."
+    },
+
+    {
+      "id": "imt-01", "module": "imt", "type": "swipe",
+      "prompt": "If sync is slow, you can close it and start charting.",
+      "answer": false,
+      "explain": "Sync downloads current users, vehicles and validation rules. Close it early and you chart against old rules.",
+      "source": "GMR End User IMT: Elite Web v Elite Field (syncing)"
+    },
+    {
+      "id": "imt-02", "module": "imt", "type": "mc",
+      "context": "You finished a call but never posted.",
+      "prompt": "How long does Elite Field keep that chart?",
+      "options": [
+        { "id": "a", "text": "Until you delete it" },
+        { "id": "b", "text": "14 days" },
+        { "id": "c", "text": "Up to 4 days" },
+        { "id": "d", "text": "Forever, it backs itself up" }
+      ],
+      "answer": "c",
+      "explain": "Elite Field keeps unposted charts for only up to 4 days. Post early, post often: after a signature, after a CAD update, and before you close the chart.",
+      "source": "GMR End User IMT: Elite Web v Elite Field; Posting an Incident"
+    },
+    {
+      "id": "imt-03", "module": "imt", "type": "mc",
+      "context": "You can't find your chart in Elite Web.",
+      "prompt": "What do you check first?",
+      "options": [
+        { "id": "a", "text": "File a Clinical Support ticket" },
+        { "id": "b", "text": "Start a new chart" },
+        { "id": "c", "text": "Ask your partner to rechart it" },
+        { "id": "d", "text": "Whether you posted it" }
+      ],
+      "answer": "d",
+      "explain": "An unposted chart isn't in Web: look for the cloud icon and green check on the tablet home screen. If you posted with the wrong CAD, search Web by crew member.",
+      "source": "GMR End User IMT: Troubleshooting"
+    },
+    {
+      "id": "imt-04", "module": "imt", "type": "swipe",
+      "prompt": "An auto-locked chart usually can't be unlocked; fix it with an addendum.",
+      "answer": true,
+      "explain": "Unfinished charts auto-lock after 336 hours (14 days), and Clinical Support unlocks them only in narrow cases. Add corrections as an addendum in Elite Web.",
+      "source": "GMR End User IMT: What can Kayako do for you"
+    },
+    {
+      "id": "imt-05", "module": "imt", "type": "mc",
+      "prompt": "An entry in the Timeline shows in red. What does that mean?",
+      "options": [
+        { "id": "a", "text": "It has a validation error you must fix" },
+        { "id": "b", "text": "It has already posted" },
+        { "id": "c", "text": "It's a warning to review before you finish" },
+        { "id": "d", "text": "Your partner entered it" }
+      ],
+      "answer": "a",
+      "explain": "Red is a validation error and gold is a warning. Tap the arrow on the entry to open and fix it, and review the whole Timeline before you post.",
+      "source": "GMR End User IMT: Timeline"
+    },
+    {
+      "id": "imt-06", "module": "imt", "type": "mc",
+      "context": "A validation rule sends you to Procedures (Read Only) to fix an entry.",
+      "prompt": "Where do you fix it?",
+      "options": [
+        { "id": "a", "text": "Type over it on the read-only tab" },
+        { "id": "b", "text": "Open the entry in the Timeline" },
+        { "id": "c", "text": "Delete the chart and start over" },
+        { "id": "d", "text": "Explain it in the narrative instead" }
+      ],
+      "answer": "b",
+      "explain": "Medications and Procedures can't be edited on the read-only tabs. Edits to any Power Tool or Situation are made in the Timeline.",
+      "source": "GMR End User IMT: Read Only Tabs; Timeline"
+    },
+    {
+      "id": "imt-07", "module": "imt", "type": "swipe",
+      "context": "Your patient's mental status changes en route.",
+      "prompt": "You should edit your first Assessment to show the new findings.",
+      "answer": false,
+      "explain": "Add a new Assessment Power Tool for every reassessment after a change. Editing the first one erases what you found at pickup.",
+      "source": "GMR End User IMT: Assessments"
+    },
+    {
+      "id": "imt-08", "module": "imt", "type": "swipe",
+      "context": "The patient can't tell you a date of birth and the facility doesn't have one.",
+      "prompt": "You can mark the Age field with a pertinent negative.",
+      "answer": false,
+      "explain": "NEMSIS 3.5 rules don't allow a pertinent negative on age. Estimate the age instead; ages over 110 are rejected.",
+      "source": "GMR End User IMT: Patient Demographics"
+    },
+    {
+      "id": "imt-09", "module": "imt", "type": "mc", "picklist": "patient_evaluation_care",
+      "context": "The patient let you assess and take vitals, then refused transport.",
+      "prompt": "Which Patient Evaluation/Care choice fits?",
+      "options": [
+        { "id": "a", "text": "Patient Refused Evaluation/Care" },
+        { "id": "b", "text": "Patient Evaluated, No Care Required" },
+        { "id": "c", "text": "Patient Evaluated and Refused Care" },
+        { "id": "d", "text": "Patient Support Services Provided" }
+      ],
+      "answer": "c",
+      "explain": "You assessed them, so it's Evaluated and Refused Care; 'Refused Evaluation/Care' is for patients who refused before you assessed. Then set Crew and Transport dispositions so the refusal worksheet populates.",
+      "source": "GMR End User IMT: Dispositions, Patient Refused Medical Aid"
+    },
+    {
+      "id": "imt-10", "module": "imt", "type": "swipe",
+      "prompt": "The ABA worksheet is required on every transport.",
+      "answer": true,
+      "explain": "It appears under Signatures (ABA Navigation) whenever the patient was treated and transported. Its questions pick the right signature for you.",
+      "source": "GMR End User IMT: ABA Worksheet"
+    },
+    {
+      "id": "imt-11", "module": "imt", "type": "mc",
+      "context": "The patient can't sign and no authorized representative is present.",
+      "prompt": "Who signs the ABA?",
+      "options": [
+        { "id": "a", "text": "Your partner signs on the patient's line as a witness" },
+        { "id": "b", "text": "Nobody; post it unsigned" },
+        { "id": "c", "text": "Skip the ABA since the patient couldn't sign" },
+        { "id": "d", "text": "Your crew and a receiving-facility representative" }
+      ],
+      "answer": "d",
+      "explain": "The crew and the receiving facility co-sign. A chart with no signature at all needs a face sheet plus crew attestation, and that should be rare.",
+      "source": "GMR End User IMT: ABA Worksheet"
+    },
+    {
+      "id": "imt-12", "module": "imt", "type": "mc",
+      "context": "Your tablet died and the patient signed a paper ABA.",
+      "prompt": "What else does the chart need?",
+      "options": [
+        { "id": "a", "text": "A crew member attestation in the ABA worksheet" },
+        { "id": "b", "text": "Nothing; the paper form covers it" },
+        { "id": "c", "text": "An electronic signature you enter for the patient" },
+        { "id": "d", "text": "A note to mail the paper in later" }
+      ],
+      "answer": "a",
+      "explain": "A paper ABA needs a crew attestation in the worksheet, plus a clear photo of the form in Attachments. Paper is only for downtime or tablet failure.",
+      "source": "GMR End User IMT: Worksheets; ABA Worksheet; Trailing Documents"
+    },
+    {
+      "id": "imt-13", "module": "imt", "type": "swipe",
+      "prompt": "CMS Level of Service should match the care you actually gave.",
+      "answer": true,
+      "explain": "Pick from the definitions on screen based on the care given. The field doesn't set billing status, but it has to agree with the rest of the chart.",
+      "source": "GMR End User IMT: CMS Level of Service"
+    },
+    {
+      "id": "imt-14", "module": "imt", "type": "fix",
+      "context": "Hospital-to-rehab transfer. This is what's in the interfacility justification box.",
+      "quote": "HIGHER LEVEL OF CARE.",
+      "prompt": "What's the best way to chart this?",
+      "options": [
+        { "id": "a", "text": "Higher level of care needed per MD; patient accepted at receiving facility." },
+        { "id": "b", "text": "Pt needs inpatient rehab; sending hospital has no inpatient rehab unit." },
+        { "id": "c", "text": "Patient requires transfer to another facility." },
+        { "id": "d", "text": "Family prefers the rehab facility." }
+      ],
+      "answer": "b",
+      "explain": "Payers use this box to judge whether the patient went to the right place. Name the service the sending facility doesn't have.",
+      "source": "GMR End User IMT: Interfacility Transport Justification; Clinical Documentation Requirements"
+    },
+
+    {
+      "id": "mn-01", "module": "mn", "type": "mc",
+      "prompt": "For Medicare, a patient is 'bed-confined' when they are…",
+      "options": [
+        { "id": "a", "text": "Unable to walk without help, and in bed most of the day" },
+        { "id": "b", "text": "Unable to walk OR unable to sit in a chair" },
+        { "id": "c", "text": "Unable to get up from bed without help, unable to walk, AND unable to sit in a chair or wheelchair" },
+        { "id": "d", "text": "Lying in a hospital bed when you arrive" }
+      ],
+      "answer": "c",
+      "explain": "All three must be true. If the patient can sit in a wheelchair, they aren't bed-confined, even if they can't walk.",
+      "source": "42 CFR §410.40 (bed-confined definition)"
+    },
+    {
+      "id": "mn-02", "module": "mn", "type": "swipe",
+      "prompt": "Writing 'Pt bedbound' is enough to show the patient needed an ambulance.",
+      "answer": false,
+      "explain": "'Bedbound' is a label, and reviewers discount it. Chart each of the three criteria and what you saw: how they moved, what help it took, what happened when they tried to sit.",
+      "source": "42 CFR §410.40"
+    },
+    {
+      "id": "mn-03", "module": "mn", "type": "swipe",
+      "prompt": "A signed PCS doesn't, by itself, prove the transport was medically necessary.",
+      "answer": true,
+      "explain": "Medicare says the signed certification alone doesn't show medical necessity. Your chart has to back it up with the patient's condition.",
+      "source": "42 CFR §410.40"
+    },
+    {
+      "id": "mn-04", "module": "mn", "type": "mc",
+      "prompt": "Which of these is a medical reason for an ambulance?",
+      "options": [
+        { "id": "a", "text": "No wheelchair van was available, and the appointment couldn't be moved" },
+        { "id": "b", "text": "The family asked for an ambulance" },
+        { "id": "c", "text": "The patient prefers the stretcher" },
+        { "id": "d", "text": "Hip contractures keep the patient from sitting; 2-person lift to cot" }
+      ],
+      "answer": "d",
+      "explain": "Availability, convenience and preference aren't medical reasons. Chart the condition that made a seated ride unsafe.",
+      "source": "42 CFR §410.40 (other means of transport contraindicated)"
+    },
+    {
+      "id": "mn-05", "module": "mn", "type": "fix",
+      "context": "74-year-old, 3 days after left hip repair, going from the hospital to rehab.",
+      "quote": "PT TRANSPORTED BY STRETCHER FOR SAFETY.",
+      "prompt": "What's the best way to chart this?",
+      "options": [
+        { "id": "a", "text": "Can't get OOB without 2 assist, can't bear weight on L leg, can't sit up >5 min d/t surgical pain 7/10." },
+        { "id": "b", "text": "Pt bed-confined, stretcher required for safety." },
+        { "id": "c", "text": "Pt is a fall risk; facility requested stretcher transport." },
+        { "id": "d", "text": "Pt recovering from hip surgery, transported by stretcher." }
+      ],
+      "answer": "a",
+      "explain": "The right answer covers all three bed-confined criteria with what you actually saw. 'For safety', 'fall risk' and 'bed-confined' are conclusions without the evidence.",
+      "source": "42 CFR §410.40"
+    },
+    {
+      "id": "mn-06", "module": "mn", "type": "spot",
+      "context": "BLS transfer from the hospital to a skilled nursing facility.",
+      "prompt": "Tap the line a reviewer would use to deny the claim.",
+      "chart": {
+        "narrative": [
+          { "id": "n1", "text": "Pt supine in bed, states \"I can't sit up, my back hurts.\"" },
+          { "id": "n2", "text": "Pt ambulated to the cot with standby assist." },
+          { "id": "n3", "text": "Moved to bed at SNF by draw sheet, 2 assist." }
+        ]
+      },
+      "answer": ["n2"],
+      "explain": "If the patient walked to the cot, the chart has to say why a seated ride wasn't safe. Walking doesn't rule out an ambulance, but it has to be explained.",
+      "source": "42 CFR §410.40"
+    },
+    {
+      "id": "mn-07", "module": "mn", "type": "mc",
+      "context": "You're driving past two closer hospitals. The MNC worksheet asks: closest appropriate facility?",
+      "prompt": "What do you chart?",
+      "options": [
+        { "id": "a", "text": "'Yes', because the doctor picked it" },
+        { "id": "b", "text": "'No', and name the service the closer hospitals don't offer" },
+        { "id": "c", "text": "Leave it blank" },
+        { "id": "d", "text": "'No', because the family prefers the farther hospital" }
+      ],
+      "answer": "b",
+      "explain": "Medicare generally pays mileage only to the nearest facility that can give the needed care. Name the specific service; family preference isn't a reason.",
+      "source": "GMR End User IMT: PCS and MNC; Medicare closest-appropriate-facility rule"
+    },
+    {
+      "id": "mn-08", "module": "mn", "type": "swipe",
+      "prompt": "Medical necessity depends on today's condition, not the diagnosis alone.",
+      "answer": true,
+      "explain": "'Hip fracture' doesn't tell a reviewer why today's patient couldn't sit. Chart what you found today.",
+      "source": "42 CFR §410.40"
+    },
+    {
+      "id": "mn-09", "module": "mn", "type": "mc",
+      "context": "At pickup, the PCS is blank.",
+      "prompt": "What do you do?",
+      "options": [
+        { "id": "a", "text": "Sign it yourself as the crew" },
+        { "id": "b", "text": "Leave and chart 'PCS not available'" },
+        { "id": "c", "text": "Ask the facility to have the physician or other authorized staff complete and sign it" },
+        { "id": "d", "text": "Have the patient sign it" }
+      ],
+      "answer": "c",
+      "explain": "Crews can't certify medical necessity; if the physician isn't available, a PA, NP, clinical nurse specialist, RN or discharge planner who knows the patient can sign. Take a clear photo for the chart.",
+      "source": "42 CFR §410.40 (who may sign); GMR End User IMT: Trailing Documents"
+    },
+    {
+      "id": "mn-10", "module": "mn", "type": "fix",
+      "context": "Patient on home oxygen going to a dialysis appointment.",
+      "quote": "PT ON HOME O2, AMBULANCE REQUIRED.",
+      "prompt": "What's the best way to chart this?",
+      "options": [
+        { "id": "a", "text": "Pt on O2, can't go by wheelchair van." },
+        { "id": "b", "text": "Pt on oxygen; transported per protocol." },
+        { "id": "c", "text": "Pt O2 dependent, stretcher needed." },
+        { "id": "d", "text": "On home O2 2 L NC. SpO2 87% and RR 28 when HOB raised >45°; can't tolerate sitting up." }
+      ],
+      "answer": "d",
+      "explain": "Many home-oxygen patients ride seated with their own tank. Show what made sitting unsafe: the numbers and what you saw.",
+      "source": "42 CFR §410.40"
     }
   ]
 }

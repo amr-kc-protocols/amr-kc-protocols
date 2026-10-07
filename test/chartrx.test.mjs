@@ -69,8 +69,9 @@ function ok(name, cond, extra) {
 const BANK = JSON.parse(await readFile(join(ROOT, 'chart-rx/questions.json'), 'utf8'));
 const SRC = await readFile(join(ROOT, 'chart-rx.html'), 'utf8');
 // ImageTrend's own pick lists, copied verbatim; answer choices must match them.
-const PICK = JSON.parse(await readFile(join(ROOT, 'chart-rx/imagetrend-impressions.json'), 'utf8'));
+const PICK = JSON.parse(await readFile(join(ROOT, 'chart-rx/imagetrend-picklists.json'), 'utf8'));
 const Q = BANK.questions;
+const NMOD = Object.keys(BANK.modules).length;   // one badge per habit
 
 /* A fresh page. `seed` goes into localStorage once, before the first load
    only, so a reload in the middle of a test sees what the app saved. */
@@ -143,12 +144,18 @@ console.log('\nC1 question bank');
      sw.filter(q => q.answer).length >= sw.length / 3 && sw.filter(q => !q.answer).length >= sw.length / 3,
      sw.filter(q => q.answer).length + ' true / ' + sw.filter(q => !q.answer).length + ' false');
   // An impression choice providers won't find in ImageTrend teaches the wrong habit.
-  const unmarked = Q.filter(q => q.options && /primary impression/i.test(q.prompt) && !q.picklist).map(q => q.id);
-  ok('C1 every "pick the impression" question is tied to an ImageTrend list', unmarked.length === 0, unmarked.join(','));
+  const unmarked = Q.filter(q => q.options && /primary impression|Patient Evaluation\/Care/i.test(q.prompt) && !q.picklist).map(q => q.id);
+  ok('C1 every "pick the ImageTrend value" question is tied to an ImageTrend list', unmarked.length === 0, unmarked.join(','));
   const offList = Q.filter(q => q.picklist).flatMap(q => !PICK[q.picklist] ? [q.id + ': no list "' + q.picklist + '"']
     : q.options.filter(o => !PICK[q.picklist].includes(o.text)).map(o => q.id + ': ' + o.text));
-  ok(`C1 every impression choice is spelled exactly as in ImageTrend (${Q.filter(q => q.picklist).length} questions)`,
+  ok(`C1 every pick-list choice is spelled exactly as in ImageTrend (${Q.filter(q => q.picklist).length} questions)`,
      offList.length === 0 && Q.some(q => q.picklist), offList.join(' | '));
+  // Players shouldn't be able to win by always picking one slot or the longest answer.
+  const withOpts = Q.filter(q => q.options);
+  const slots = [0, 1, 2, 3].map(i => withOpts.filter(q => q.options.findIndex(o => o.id === q.answer) === i).length);
+  ok('C1 right answers are spread across positions 1–4', slots.every(n => n >= withOpts.length * 0.15 && n <= withOpts.length * 0.35), slots.join('/'));
+  const longest = withOpts.filter(q => { const s = q.options.map(o => [o.text.length, o.id]).sort((x, y) => y[0] - x[0]); return s[0][1] === q.answer && s[0][0] > s[1][0]; });
+  ok('C1 the right answer is usually not the longest choice', longest.length <= withOpts.length / 2, longest.length + ' of ' + withOpts.length);
   const leaked = Q.filter(q => SRC.includes(q.prompt.slice(0, 40)) || SRC.includes(q.explain.slice(0, 40))).map(q => q.id);
   ok('C1 no question text is hard-coded in the page', leaked.length === 0, leaked.join(','));
   const leakedMods = Object.values(BANK.modules).filter(m => SRC.includes(m.tip)).map(m => m.name);
@@ -433,12 +440,12 @@ console.log('\nC10 summary and badges');
      JSON.stringify(ids.filter(id => !miss.has(id)).sort()));
   await p.reload();
   await p.waitForSelector('#v-home:not([hidden])');
-  ok('C10 the badge survives a reload', (await p.textContent('#st-badges')) === '1/8');
+  ok('C10 the badge survives a reload', (await p.textContent('#st-badges')) === '1/' + NMOD);
   ok('C10 so does the streak record', (await p.textContent('#st-streak')) === '5', await p.textContent('#st-streak'));
   await p.click('#btn-badges');
   ok('C10 the badge screen shows it earned, the rest locked',
-     (await p.locator('.badge.earned').count()) === 1 && (await p.locator('.badge.locked').count()) === 7);
-  ok('C10 every badge carries its habit, so the screen doubles as a cheat sheet', (await p.locator('.badge .tip').count()) === 8);
+     (await p.locator('.badge.earned').count()) === 1 && (await p.locator('.badge.locked').count()) === NMOD - 1);
+  ok('C10 every badge carries its habit, so the screen doubles as a cheat sheet', (await p.locator('.badge .tip').count()) === NMOD);
   await p.context().close();
 
   const p2 = await open({ seed: seedRound(ids) });
@@ -558,7 +565,7 @@ console.log('\nC14 offline');
   await p.context().setOffline(true);
   await p.reload();
   await p.waitForSelector('#v-home:not([hidden])', { timeout: 10000 }).catch(() => {});
-  ok('C14 offline, the home screen loads with the questions', await p.isVisible('#v-home') && (await p.textContent('#st-badges')).endsWith('/8'));
+  ok('C14 offline, the home screen loads with the questions', await p.isVisible('#v-home') && (await p.textContent('#st-badges')).endsWith('/' + NMOD));
   await p.click('#btn-start');
   ok('C14 offline, a round starts', await p.isVisible('#v-q') && (await round(p)).ids.length === 8);
   await p.context().close(); }
