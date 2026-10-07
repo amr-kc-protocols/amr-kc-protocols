@@ -367,7 +367,7 @@ const PRACTICE_IDS = ['draw','peds','drip','drops'];
      homepage now features only the newest training, so the "new" flag and the
      slot are LIFEPAK's, and Med Math lives in More → Training with the rest. */
   ok('M11 the "new" flag sits on the newest trainer',
-     /new training/i.test(await p.locator('.feat-card[href="lifepak-15.html"] .feat-badge').textContent()));
+     /new training/i.test(await p.locator('.feat-card[href="chart-rx.html"] .feat-badge').textContent()));
   ok('M11 and not on this one',
      (await p.locator('.feat-card[href="med-math.html"] .feat-badge', { hasText: /new/i }).count()) === 0);
   await p.locator('#lv [data-goto="more"][data-sec="training"]').click();

@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<!--
+  Chart Rx — PCR documentation micro-quiz · AMR KC Field Guide
+  A three-minute round: eight charts, find what's wrong. Built for a phone or
+  a Toughbook between calls, with a dispatch tone about to drop.
+
+  Every question lives in chart-rx/questions.json. Nothing in this file is
+  question content: edit the JSON, not this page. A question that fails the
+  schema is skipped rather than breaking the round; the supervisor screen
+  (chart-rx.html#verify) lists any that were skipped and why.
+
+  Content: made-up practice scenarios that teach good charting habits. No
+  patient data is stored anywhere — only the provider's own name, employee
+  ID and score, and only when they ask for completion credit.
+
+  Progress persists in localStorage under the "chartrx." prefix.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chart Rx">
+<meta name="theme-color" content="#f4f6f9" id="theme-color">
+<meta name="description" content="Chart Rx — a three-minute PCR documentation game for AMR Kansas City crews. Eight questions a round on the charting habits that hold up.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Chart Rx — AMR KC Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script>
+/* Theme before first paint, so a night shift never gets a white flash.
+   Dark from 1900 to 0700 local unless the provider chose otherwise; a manual
+   choice lasts until the next 0700/1900 switch, then auto takes over again. */
+(function(){
+  var t=null, now=new Date();
+  try{ var s=JSON.parse(localStorage.getItem('chartrx.theme')||'null');
+       if(s&&s.until>now.getTime()) t=s.theme; }catch(e){}
+  if(!t){ var h=now.getHours(); t=(h>=19||h<7)?'dark':'light'; }
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+<style>
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --card2:#eef2f7; --ink:#152238; --ink2:#4b5768; --ink3:#5b6676;
+  --line:#dde3ea; --brand:#173a68; --brand2:#1b63c4; --brand-ink:#ffffff;
+  --ok:#15803d; --ok-bg:#e6f6ec; --ok-line:#9ed6b3;
+  --no:#c2271d; --no-bg:#fdebea; --no-line:#f1b7b2;
+  --gold:#8a5a00; --gold-bg:#fff4dc; --flame:#b8420a;
+  --chart-bar:#1f2a37; --chart-bar-ink:#e7edf5; --chart-row:#ffffff; --chart-alt:#f6f8fb;
+  --shadow:0 1px 2px rgba(21,34,56,.06),0 8px 24px -14px rgba(21,34,56,.35);
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --sheet-h:0px;
+}
+[data-theme="dark"]{
+  --bg:#0b1220; --card:#141e31; --card2:#1b2740; --ink:#e7edf6; --ink2:#b3bfd0; --ink3:#8d9ab0;
+  --line:#26344f; --brand:#9cc3ff; --brand2:#5b9cff; --brand-ink:#0b1220;
+  --ok:#4ade80; --ok-bg:#0f2a1b; --ok-line:#21603a;
+  --no:#ff7a6e; --no-bg:#33140f; --no-line:#7a2a22;
+  --gold:#f6c453; --gold-bg:#2c2410; --flame:#ff8a3d;
+  --chart-bar:#0e1726; --chart-bar-ink:#c9d6e8; --chart-row:#141e31; --chart-alt:#18233a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;min-height:100vh;
+  padding-bottom:calc(var(--sheet-h) + env(safe-area-inset-bottom,0px));-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-appearance:none;text-align:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--brand2);outline-offset:2px}
+/* Focus moves into each new question so Tab and Enter keep working, but on a
+   touch screen a ring on the first option reads like a hint. Rings show once
+   the keyboard is in use. */
+html.pointer button:focus-visible,html.pointer a:focus-visible{outline:none}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* site header — same shape as the other Field Guide pages */
+.hdr{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);
+  padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+.hdr-logo{width:32px;height:32px;border-radius:9px;background:#173a68;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:14.5px;font-weight:700;color:var(--brand);line-height:1.15}
+.hdr-sub{font-size:11px;color:var(--ink3)}
+.hdr-btn{font-size:12px;font-weight:600;color:var(--brand);text-decoration:none;padding:7px 10px;min-height:36px;
+  display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--card2);white-space:nowrap}
+.hdr-btn.icon{width:38px;justify-content:center;padding:0;font-size:16px}
+
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 28px}
+.view[hidden]{display:none}
+
+/* ── HOME ─────────────────────────────────────────────────────── */
+.hero{position:relative;overflow:hidden;border-radius:20px;padding:22px 20px 20px;color:#fff;
+  background:linear-gradient(140deg,#0f2f57 0%,#173a68 45%,#1b63c4 100%);box-shadow:var(--shadow)}
+.hero::after{content:"";position:absolute;right:-40px;top:-50px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.18),rgba(255,255,255,0) 70%);pointer-events:none}
+.rx{position:absolute;right:18px;top:6px;font-family:Georgia,'Times New Roman',serif;font-size:96px;
+  line-height:1;color:rgba(255,255,255,.13);font-weight:700;pointer-events:none;user-select:none}
+.hero-eye{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#9fd0ff}
+.hero h1{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.05;margin:8px 0 6px}
+.hero h1 span{color:#ffd166}
+.hero-sub{font-size:15px;color:#d6e6fb;max-width:30ch}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:9px 8px;text-align:center}
+.stat b{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.stat span{font-size:10.5px;color:#cfe1f8;letter-spacing:.02em}
+.home-actions{display:grid;gap:10px;margin-top:16px}
+.btn{display:flex;align-items:center;justify-content:center;text-align:center;gap:9px;min-height:54px;padding:12px 18px;border-radius:14px;
+  font-size:16px;font-weight:700;letter-spacing:.005em;transition:transform .08s,box-shadow .15s,background .15s}
+.btn:active{transform:translateY(1px) scale(.995)}
+.btn-primary{background:var(--brand2);color:#fff;box-shadow:0 8px 20px -10px rgba(27,99,196,.8)}
+[data-theme="dark"] .btn-primary{color:#06101f}
+.btn-ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--line)}
+.btn-ghost .sub{font-size:12px;font-weight:600;color:var(--ink3)}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.daily-done{color:var(--ok)}
+.fine{font-size:11.5px;color:var(--ink3);margin-top:16px;line-height:1.5;text-align:center}
+
+/* ── QUESTION ─────────────────────────────────────────────────── */
+.qbar{position:sticky;top:0;z-index:30;background:var(--bg);display:flex;align-items:center;gap:10px;
+  padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));max-width:560px;margin:0 auto}
+.qx{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;
+  color:var(--ink2);background:var(--card);border:1px solid var(--line);flex-shrink:0}
+.dots{flex:1;display:flex;gap:5px;align-items:center}
+.dot{flex:1;height:8px;border-radius:99px;background:var(--line);transition:background .2s}
+.dot.ok{background:var(--ok)} .dot.no{background:var(--no)} .dot.cur{background:var(--brand2);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--brand2)}
+.chips{display:flex;gap:6px;flex-shrink:0}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;padding:5px 9px;border-radius:99px;
+  background:var(--card);border:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip.xp{color:var(--gold)} .chip.st{color:var(--flame)}
+.chip.st.hot{background:var(--gold-bg);border-color:var(--flame)}
+.qwrap{max-width:560px;margin:0 auto;padding:4px 14px 18px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:0}
+.tag{font-size:11px;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:99px}
+.tag.daily{background:var(--card2);color:var(--brand)}
+.prompt{font-size:19px;font-weight:700;line-height:1.32;letter-spacing:-.01em;margin-bottom:14px}
+/* The scenario is set apart from the task, so the task reads in one glance. */
+.ctx{font-size:16px;line-height:1.45;color:var(--ink);margin:0 0 8px;padding-left:10px;border-left:3px solid var(--brand2)}
+.ctx b{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--brand2);margin-right:6px}
+.quote{margin:-4px 0 14px;padding:10px 12px;border-radius:10px;background:var(--no-bg);border:1px dashed var(--no-line);
+  font-family:var(--mono);font-size:14px;font-weight:500;line-height:1.4}
+.quote-lbl{display:block;font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--no);margin-bottom:3px}
+
+.opts{display:grid;gap:9px}
+.opts.grid{grid-template-columns:1fr 1fr}
+.opt{position:relative;display:flex;align-items:flex-start;gap:10px;min-height:52px;padding:12px 14px;border-radius:13px;
+  background:var(--card);border:2px solid var(--line);font-size:15px;line-height:1.38;font-weight:500;
+  transition:border-color .12s,background .12s,transform .08s;scroll-margin-bottom:calc(var(--sheet-h) + 12px)}
+.opts.grid .opt{align-items:center;justify-content:center;text-align:center;font-weight:600}
+.opt:hover:not([disabled]){border-color:var(--brand2)}
+.opt:active:not([disabled]){transform:scale(.99)}
+.opt .k{flex-shrink:0;width:22px;height:22px;border-radius:7px;background:var(--card2);color:var(--ink3);font-size:12px;
+  font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.opts.grid .opt .k{display:none}
+.opt[disabled]{cursor:default}
+.mark{display:none;font-size:12px;font-weight:700;margin-left:auto;padding-left:6px;white-space:nowrap;align-self:center}
+.is-right{border-color:var(--ok);background:var(--ok-bg)} .is-right .mark{display:inline;color:var(--ok)}
+.is-wrong{border-color:var(--no);background:var(--no-bg)} .is-wrong .mark{display:inline;color:var(--no)}
+.opts.grid .mark{position:absolute;top:6px;right:8px;padding:0}
+
+/* chart card — styled after the ImageTrend grid */
+.chart{border-radius:13px;overflow:hidden;border:1px solid var(--line);background:var(--chart-row);box-shadow:var(--shadow)}
+.chart-bar{background:var(--chart-bar);color:var(--chart-bar-ink);font-family:var(--mono);font-size:11px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;padding:7px 12px;display:flex;justify-content:space-between}
+.chart-bar i{font-style:normal;opacity:.6;letter-spacing:.04em}
+.row{display:flex;align-items:center;gap:8px;width:100%;min-height:48px;padding:10px 12px;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:12.5px;line-height:1.4;font-weight:500;text-align:left;
+  scroll-margin-bottom:calc(var(--sheet-h) + 12px);transition:background .12s,box-shadow .12s}
+.row:nth-child(even){background:var(--chart-alt)}
+.row:last-child{border-bottom:0}
+.row.nar{font-family:var(--sans);font-size:15px;line-height:1.4}
+/* Vitals as a grid with labeled columns: a missing value is a gap you can see. */
+.vhead,.row.vrow{display:grid;grid-template-columns:var(--vcols);column-gap:6px;align-items:center}
+.vhead{background:var(--chart-alt);border-bottom:1px solid var(--line);padding:6px 12px;font-family:var(--mono);
+  font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.row.vrow{font-size:15px;font-variant-numeric:tabular-nums;padding:12px}
+.vrow .c{white-space:nowrap}
+.vrow .gap{color:var(--ink3)}
+.vrow .mark{padding:0;justify-self:end}
+.row:hover:not([disabled]){box-shadow:inset 3px 0 0 var(--brand2)}
+.row[disabled]{cursor:default}
+.row .mark{font-family:var(--sans);text-transform:none}
+.row.is-right{background:var(--ok-bg);box-shadow:inset 4px 0 0 var(--ok)}
+.row.is-wrong{background:var(--no-bg);box-shadow:inset 4px 0 0 var(--no)}
+
+/* swipe card */
+.swipe-zone{position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.scard{position:relative;border-radius:18px;background:var(--card);border:2px solid var(--line);box-shadow:var(--shadow);
+  padding:26px 20px 22px;min-height:190px;display:flex;flex-direction:column;justify-content:center;cursor:grab;
+  will-change:transform;touch-action:pan-y}
+.scard:active{cursor:grabbing}
+.scard p{font-size:19px;font-weight:600;line-height:1.4;text-align:center}
+.stamp{position:absolute;top:14px;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.12em;
+  padding:4px 10px;border:3px solid;border-radius:8px;opacity:0;pointer-events:none}
+.stamp.t{right:14px;color:var(--ok);transform:rotate(10deg)} .stamp.f{left:14px;color:var(--no);transform:rotate(-10deg)}
+.swipe-hint{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--ink3);margin:10px 4px 12px}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tf .opt{justify-content:center;align-items:center;font-size:17px;font-weight:700;min-height:58px}
+.tf .opt .k{display:none}
+.tf .opt .mark{position:absolute;top:6px;right:8px;padding:0}
+.scard.back{transition:transform .2s cubic-bezier(.2,.9,.3,1.3)}
+/* After an answer the card settles toward the side chosen, stamped, and stays
+   readable — the explanation below is about the statement on it. */
+.scard.settle-r{transform:translateX(8px) rotate(2deg)!important;transition:transform .16s ease-out}
+.scard.settle-l{transform:translateX(-8px) rotate(-2deg)!important;transition:transform .16s ease-out}
+.scard.settle-r .stamp.t,.scard.settle-l .stamp.f{opacity:1!important}
+.scard.ok{border-color:var(--ok)} .scard.no{border-color:var(--no)}
+
+/* answer animations — all start the frame after the tap */
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.035)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(21,128,61,.0)}50%{box-shadow:0 0 0 6px rgba(21,128,61,.28)}}
+.anim-pop{animation:pop .28s ease-out}
+.anim-shake{animation:shake .32s ease-in-out}
+.anim-pulse{animation:pulse 1s ease-in-out 3}
+.row.anim-pulse{animation:pulse 1s ease-in-out 3}
+
+/* feedback sheet */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;pointer-events:none}
+.sheet-in{pointer-events:auto;width:100%;max-width:560px;background:var(--card);border-top:4px solid var(--line);
+  border-radius:20px 20px 0 0;box-shadow:0 -14px 40px -18px rgba(0,0,0,.5);
+  padding:14px 18px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(0);animation:sheet .18s ease-out}
+@keyframes sheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet.ok .sheet-in{border-top-color:var(--ok)} .sheet.no .sheet-in{border-top-color:var(--no)}
+.verdict{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vicon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.ok .vicon{background:var(--ok)} .no .vicon{background:var(--no)}
+.vtext{font-size:19px;font-weight:700}
+.ok .vtext{color:var(--ok)} .no .vtext{color:var(--no)}
+.gain{display:flex;gap:6px;margin-left:auto}
+.gain span{font-size:12px;font-weight:700;padding:4px 8px;border-radius:99px;background:var(--gold-bg);color:var(--gold);animation:rise .5s ease-out}
+@keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.streak-banner{margin-top:8px;font-size:13.5px;font-weight:700;color:var(--flame)}
+.why{font-size:15px;line-height:1.5;color:var(--ink);margin:9px 0 4px}
+.why-mod{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.sheet .btn{width:100%;margin-top:10px}
+.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:60;background:var(--brand);color:var(--brand-ink);
+  font-weight:700;font-size:14px;padding:10px 16px;border-radius:99px;box-shadow:var(--shadow);animation:rise .3s ease-out}
+
+/* ── SUMMARY ──────────────────────────────────────────────────── */
+.sum-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;text-align:center;box-shadow:var(--shadow)}
+.sum-eye{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+.ring{position:relative;width:132px;height:132px;margin:12px auto 6px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .trk{fill:none;stroke:var(--line);stroke-width:12}
+.ring .val{fill:none;stroke:var(--ok);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .8s ease-out}
+.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.ring b small{font-size:16px;color:var(--ink3);font-weight:600;margin-left:2px}
+.sum-line{font-size:15px;font-weight:600;color:var(--ink2)}
+.sum-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}
+.sum-stats div{background:var(--card2);border-radius:12px;padding:9px 6px}
+.sum-stats b{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.sum-stats span{font-size:11px;color:var(--ink3)}
+.weak{margin-top:14px;text-align:left;border-radius:14px;padding:12px 14px;background:var(--gold-bg);border:1px solid var(--gold)}
+.weak.clean{background:var(--ok-bg);border-color:var(--ok-line)}
+.weak h2{font-size:14px;font-weight:700}
+.weak p{font-size:14px;margin-top:3px;color:var(--ink)}
+.newbadge{margin-top:12px;font-size:14px;font-weight:700;color:var(--brand)}
+.sum-actions{display:grid;gap:10px;margin-top:16px}
+.review{margin-top:18px}
+.review h2{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.rv{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--no);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.rv p{font-size:13.5px} .rv p+p{color:var(--ink2);margin-top:4px}
+
+/* ── BADGES ───────────────────────────────────────────────────── */
+.h2{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:4px 0 4px}
+.lede{font-size:14px;color:var(--ink2);margin-bottom:14px}
+.badges{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px 12px;text-align:center}
+.badge .em{font-size:34px;line-height:1.1;display:block}
+.badge.locked .em{filter:grayscale(1);opacity:.35}
+.badge h2{font-size:14px;font-weight:700;margin-top:6px}
+.badge .prog{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 6px}
+.badge .prog i{display:block;height:100%;background:var(--brand2);border-radius:99px}
+.badge.earned{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-bg),var(--card) 70%)}
+.badge.earned .prog i{background:var(--gold)}
+.badge .state{font-size:11.5px;font-weight:700;color:var(--ink3)}
+.badge.earned .state{color:var(--gold)}
+.badge .tip{font-size:12px;color:var(--ink2);margin-top:6px;line-height:1.4;text-align:left}
+
+/* ── CREDIT ───────────────────────────────────────────────────── */
+.field{display:grid;gap:6px;margin-bottom:12px}
+.field label{font-size:13px;font-weight:700}
+.field input{font:inherit;font-size:16px;padding:12px 13px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--card);color:var(--ink);min-height:50px}
+.err{color:var(--no);font-size:13.5px;font-weight:600;min-height:20px;margin-bottom:6px}
+.cert{background:var(--card);border:2px solid var(--ok);border-radius:20px;padding:20px;text-align:center;box-shadow:var(--shadow)}
+.cert .tick{width:52px;height:52px;border-radius:50%;background:var(--ok);color:#fff;font-size:28px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.cert h2{font-size:20px;font-weight:700}
+.cert dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;text-align:left;margin:14px auto 0;max-width:320px;font-size:14.5px}
+.cert dt{color:var(--ink3);font-weight:600} .cert dd{font-weight:700}
+.code{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:.14em;margin:14px 0 2px;color:var(--brand)}
+.code-lbl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.copied{font-size:13px;font-weight:600;color:var(--ok);min-height:20px;margin-top:8px}
+
+/* ── VERIFY (supervisor) ──────────────────────────────────────── */
+.vbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.health{font-size:13px;color:var(--ink2)} .health li{margin-left:18px;color:var(--no)}
+
+.loading,.fail{padding:40px 10px;text-align:center;color:var(--ink2)}
+canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100vw;height:100vh}
+
+@media (min-width:760px){
+  .prompt{font-size:20px}
+  .hero h1{font-size:40px}
+}
+/* Reduced motion: every movement becomes a fade, nothing slides or shakes. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .sheet-in{animation:fade .15s ease-out!important;animation-duration:.15s!important}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .scard.settle-r,.scard.settle-l{transform:none!important}
+}
+</style>
+</head>
+<body>
+<header class="hdr" id="hdr">
+  <div class="hdr-logo" aria-hidden="true">KC</div>
+  <div class="hdr-txt"><div class="hdr-title">Chart Rx</div><div class="hdr-sub">AMR KC Field Guide &middot; PCR documentation</div></div>
+  <button class="hdr-btn icon" id="theme-btn" type="button" aria-label="Switch to dark theme">&#9790;</button>
+  <a class="hdr-btn" href="index.html">&#x2190; Field Guide</a>
+</header>
+
+<main id="app">
+  <div class="loading" id="v-loading">Loading charts&hellip;</div>
+  <div class="fail" id="v-fail" hidden></div>
+
+  <section class="view wrap" id="v-home" hidden aria-labelledby="home-h">
+    <div class="hero">
+      <div class="rx" aria-hidden="true">&#8478;</div>
+      <div class="hero-eye">PCR documentation &middot; good charting habits</div>
+      <h1 id="home-h">Chart <span>Rx</span></h1>
+      <p class="hero-sub">3 minutes. 8 charts. Find what&rsquo;s wrong.</p>
+      <div class="stats">
+        <div class="stat"><b id="st-streak">0</b><span>best streak</span></div>
+        <div class="stat"><b id="st-badges">0/10</b><span>badges</span></div>
+        <div class="stat"><b id="st-xp">0</b><span>total XP</span></div>
+      </div>
+    </div>
+    <div class="home-actions">
+      <button class="btn btn-primary" id="btn-start" type="button">Start round</button>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btn-daily" type="button"><span>Today&rsquo;s challenge<br><span class="sub" id="daily-sub"></span></span></button>
+        <button class="btn btn-ghost" id="btn-badges" type="button"><span>My badges<br><span class="sub" id="badge-sub"></span></span></button>
+      </div>
+    </div>
+    <p class="fine">Every chart here is made up for practice &mdash; no real patient data.
+      No sign-in &mdash; your name is asked for only if you want completion credit.</p>
+  </section>
+
+  <section class="view" id="v-q" hidden aria-label="Question">
+    <div class="qbar">
+      <button class="qx" id="q-quit" type="button" aria-label="Pause and go back to Chart Rx home">&#x2715;</button>
+      <div class="dots" id="q-dots" role="img"></div>
+      <div class="chips">
+        <span class="chip xp" id="q-xp" aria-label="XP">0 XP</span>
+        <span class="chip st" id="q-streak" aria-label="Streak">&#128293; 0</span>
+      </div>
+    </div>
+    <div class="qwrap">
+      <div class="tags" id="q-tags"></div>
+      <p class="ctx" id="q-ctx" hidden></p>
+      <h1 class="prompt" id="q-prompt"></h1>
+      <div class="quote" id="q-quote" hidden><span class="quote-lbl">As charted</span><span id="q-quote-t"></span></div>
+      <div id="q-body"></div>
+    </div>
+  </section>
+
+  <section class="view wrap" id="v-sum" hidden aria-labelledby="sum-h"></section>
+  <section class="view wrap" id="v-badges" hidden aria-labelledby="badges-h"></section>
+  <section class="view wrap" id="v-credit" hidden aria-labelledby="credit-h"></section>
+  <section class="view wrap" id="v-verify" hidden aria-labelledby="verify-h"></section>
+</main>
+
+<div class="sheet" id="sheet" hidden></div>
+<div class="sr" id="live" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+
+/* ── CONFIG ────────────────────────────────────────────────────────────
+   submitUrl: leave empty for code-only completion (the default). Set it to a
+   Google Apps Script web app or Power Automate HTTP trigger and a completion
+   is also POSTed as JSON {name, employeeId, date, score, weakModule}. It is
+   sent as text/plain so it needs no CORS preflight; a failure is silent and
+   the code still shows. Pages can set window.CHARTRX_CONFIG before this runs. */
+var CONFIG = Object.assign({
+  submitUrl: '',
+  questions: 'chart-rx/questions.json',
+  salt: 'chartrx-oct26',     // part of the verification code — see codeFor()
+  roundSize: 8, perModule: 2, badgeAt: 5,
+  baseXp: 10, speedXp: 5, speedMs: 8000
+}, window.CHARTRX_CONFIG || {});
+
+/* ── STORAGE (every access wrapped: private mode and full disks throw) ── */
+var LS = 'chartrx.';
+function load(k, d){ try{ var v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(LS + k, JSON.stringify(v)); }catch(e){} }
+function drop(k){ try{ localStorage.removeItem(LS + k); }catch(e){} }
+
+var STATS = Object.assign({ bestStreak:0, rounds:0, xp:0, mod:{}, badges:{}, recent:[[],[]], daily:null, last:null },
+                          load('stats', {}));
+var ROUND = load('round', null);
+var BANK = null;            // { modules, questions, byId, errors, version }
+var CUR = null;             // the question on screen: { q, t0, answered, kind }
+var DAILY = null;           // { q } while today's challenge is on screen
+
+/* ── SMALL HELPERS ─────────────────────────────────────────────────── */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+  return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+function shuffle(a, rng){ rng = rng || Math.random;
+  for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(rng() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a; }
+function pad(n){ return (n < 10 ? '0' : '') + n; }
+function ymd(d){ d = d || new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function reduced(){ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
+function buzz(){ try{ if(navigator.vibrate) navigator.vibrate(30); }catch(e){} }
+function say(t){ var l = $('live'); if(l){ l.textContent = ''; setTimeout(function(){ l.textContent = t; }, 30); } }
+function fnv(s){ var h = 2166136261; for(var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+/* ── QUESTION BANK: validate against the schema, skip what fails ────── */
+var TYPES = { swipe:1, spot:1, fix:1, mc:1, match:1 };
+function checkQ(q, mods, seen){
+  if(!q || typeof q !== 'object') return 'not an object';
+  if(typeof q.id !== 'string' || !q.id) return 'missing id';
+  if(seen[q.id]) return 'duplicate id';
+  if(!mods[q.module]) return 'unknown module "' + q.module + '"';
+  if(!TYPES[q.type]) return 'unknown type "' + q.type + '"';
+  if(typeof q.prompt !== 'string' || !q.prompt.trim()) return 'missing prompt';
+  if(typeof q.explain !== 'string' || !q.explain.trim()) return 'missing explain';
+  if(q.context != null && typeof q.context !== 'string') return 'context must be text';
+  if(q.quote != null && typeof q.quote !== 'string') return 'quote must be text';
+  if(q.type === 'swipe') return typeof q.answer === 'boolean' ? '' : 'a swipe answer must be true or false';
+  if(q.type === 'spot'){
+    var c = q.chart; if(!c || typeof c !== 'object') return 'a spot question needs a chart';
+    var lines = [].concat(c.vitals || [], c.narrative || []), ids = {};
+    if(!lines.length) return 'the chart has no lines';
+    for(var i = 0; i < lines.length; i++){
+      var l = lines[i], vital = i < (c.vitals || []).length;
+      // A vitals row is either a line of text or fields (time, hr, bp, rr, spo2, pain).
+      if(!l || typeof l.id !== 'string') return 'chart line ' + (i + 1) + ' needs an id';
+      if(typeof l.text !== 'string' && !(vital && l.time != null)) return 'chart line ' + (i + 1) + (vital ? ' needs text or a time' : ' needs text');
+      if(ids[l.id]) return 'duplicate chart line id "' + l.id + '"';
+      ids[l.id] = 1;
+    }
+    if(!Array.isArray(q.answer) || !q.answer.length) return 'a spot answer must list chart line ids';
+    for(var k = 0; k < q.answer.length; k++) if(!ids[q.answer[k]]) return 'answer "' + q.answer[k] + '" is not a chart line';
+    return '';
+  }
+  if(!Array.isArray(q.options) || q.options.length < 2 || q.options.length > 4) return 'needs 2 to 4 options';
+  var oid = {};
+  for(var j = 0; j < q.options.length; j++){
+    var o = q.options[j];
+    if(!o || typeof o.id !== 'string' || typeof o.text !== 'string') return 'option ' + (j + 1) + ' needs an id and text';
+    if(oid[o.id]) return 'duplicate option id "' + o.id + '"';
+    oid[o.id] = 1;
+  }
+  if(typeof q.answer !== 'string' || !oid[q.answer]) return 'the answer is not one of the option ids';
+  return '';
+}
+function validate(raw){
+  var mods = (raw && raw.modules && typeof raw.modules === 'object') ? raw.modules : {};
+  var list = (raw && Array.isArray(raw.questions)) ? raw.questions : [];
+  var ok = [], errors = [], seen = {};
+  list.forEach(function(q, i){
+    var e = checkQ(q, mods, seen);
+    if(e) errors.push(((q && q.id) || ('question #' + (i + 1))) + ': ' + e);
+    else { seen[q.id] = 1; ok.push(q); }
+  });
+  var byId = {}; ok.forEach(function(q){ byId[q.id] = q; });
+  return { modules:mods, questions:ok, byId:byId, errors:errors, version:(raw && raw.version) || '' };
+}
+
+/* ── ROUND BUILDER ─────────────────────────────────────────────────────
+   Eight questions, no more than two from a module, at least one spot.
+   Anything answered correctly in either of the last two finished rounds is
+   held back while there is enough else to fill the round; the rules relax
+   in that order (repeats first, never the per-module cap unless the bank is
+   too small to fill a round at all). */
+function buildRound(rng){
+  rng = rng || Math.random;
+  var all = BANK.questions, held = {};
+  (STATS.recent || []).forEach(function(r){ (r || []).forEach(function(id){ held[id] = 1; }); });
+  var fresh = all.filter(function(q){ return !held[q.id]; });
+  var pick = [], per = {};
+  function take(q){ pick.push(q); per[q.module] = (per[q.module] || 0) + 1; }
+  function fits(q){ return pick.indexOf(q) < 0 && (per[q.module] || 0) < CONFIG.perModule; }
+  var spots = shuffle(fresh.filter(function(q){ return q.type === 'spot'; }), rng);
+  if(!spots.length) spots = shuffle(all.filter(function(q){ return q.type === 'spot'; }), rng);
+  if(spots.length) take(spots[0]);
+  [fresh, all].forEach(function(src){
+    shuffle(src.slice(), rng).forEach(function(q){ if(pick.length < CONFIG.roundSize && fits(q)) take(q); });
+  });
+  shuffle(all.slice(), rng).forEach(function(q){
+    if(pick.length < CONFIG.roundSize && pick.indexOf(q) < 0) take(q);
+  });
+  return shuffle(pick, rng).map(function(q){ return q.id; });
+}
+
+/* Today's challenge: the same question on every device on the same date.
+   Seeded by the local date over the bank sorted by id, so reordering the
+   JSON does not change it. */
+function dailyFor(date){
+  var sorted = BANK.questions.slice().sort(function(a, b){ return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; });
+  return sorted.length ? sorted[fnv('chartrx|' + date) % sorted.length] : null;
+}
+
+/* ── VERIFICATION CODE ─────────────────────────────────────────────────
+   First 8 hex characters (lower case) of SHA-256 of
+       employeeID|YYYY-MM-DD|score|chartrx-oct26
+   with the employee ID trimmed and the score as the number correct (0–8).
+   Web Crypto where the page has it; a plain-JS SHA-256 otherwise, so the
+   code comes out the same on every device. It is a light check that the
+   screen was not typed up by hand — the salt is in this file, so it is not
+   tamper-proof. */
+function codeInput(id, date, score){ return String(id).trim() + '|' + date + '|' + score + '|' + CONFIG.salt; }
+function hex(buf){ var b = new Uint8Array(buf), s = ''; for(var i = 0; i < b.length; i++) s += (b[i] < 16 ? '0' : '') + b[i].toString(16); return s; }
+function sha256js(str){
+  var K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,
+    0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,
+    0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,
+    0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,
+    0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var bytes = new TextEncoder().encode(str), n = bytes.length;
+  var len = ((n + 9 + 63) >> 6) << 6, m = new Uint8Array(len);
+  m.set(bytes); m[n] = 0x80;
+  var bits = n * 8; for(var i = 0; i < 8; i++) m[len - 1 - i] = (i < 4) ? (bits >>> (8 * i)) & 0xff : Math.floor(bits / Math.pow(2, 8 * i)) & 0xff;
+  var H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19], W = new Array(64);
+  function r(x, c){ return (x >>> c) | (x << (32 - c)); }
+  for(var p = 0; p < len; p += 64){
+    for(var t = 0; t < 16; t++) W[t] = (m[p + 4*t] << 24) | (m[p + 4*t + 1] << 16) | (m[p + 4*t + 2] << 8) | m[p + 4*t + 3];
+    for(t = 16; t < 64; t++){
+      var s0 = r(W[t-15], 7) ^ r(W[t-15], 18) ^ (W[t-15] >>> 3), s1 = r(W[t-2], 17) ^ r(W[t-2], 19) ^ (W[t-2] >>> 10);
+      W[t] = (W[t-16] + s0 + W[t-7] + s1) | 0;
+    }
+    var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+    for(t = 0; t < 64; t++){
+      var S1 = r(e, 6) ^ r(e, 11) ^ r(e, 25), ch = (e & f) ^ (~e & g), t1 = (h + S1 + ch + K[t] + W[t]) | 0;
+      var S0 = r(a, 2) ^ r(a, 13) ^ r(a, 22), mj = (a & b) ^ (a & c) ^ (b & c), t2 = (S0 + mj) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+    H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+  }
+  return H.map(function(x){ return ('00000000' + (x >>> 0).toString(16)).slice(-8); }).join('');
+}
+function codeFor(id, date, score){
+  var s = codeInput(id, date, score);
+  try{
+    if(window.crypto && crypto.subtle && window.isSecureContext !== false)
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(b){ return hex(b).slice(0, 8); })
+        .catch(function(){ return sha256js(s).slice(0, 8); });
+  }catch(e){}
+  return Promise.resolve(sha256js(s).slice(0, 8));
+}
+
+/* ── VIEWS ─────────────────────────────────────────────────────────── */
+var VIEWS = ['v-loading', 'v-fail', 'v-home', 'v-q', 'v-sum', 'v-badges', 'v-credit', 'v-verify'];
+function show(id){
+  VIEWS.forEach(function(v){ var el = $(v); if(el) el.hidden = (v !== id); });
+  $('hdr').hidden = (id === 'v-q');          // a question gets the whole screen
+  hideSheet();
+  window.scrollTo(0, 0);
+}
+function moduleOf(q){ return BANK.modules[q.module] || { name:q.module, badge:'', tip:'' }; }
+
+/* ── HOME ──────────────────────────────────────────────────────────── */
+function badgeCount(){ return Object.keys(BANK.modules).filter(function(m){ return STATS.badges[m]; }).length; }
+function renderHome(){
+  $('st-streak').textContent = STATS.bestStreak || 0;
+  $('st-badges').textContent = badgeCount() + '/' + Object.keys(BANK.modules).length;
+  $('st-xp').textContent = STATS.xp || 0;
+  var live = ROUND && ROUND.ids && ROUND.i < ROUND.ids.length;
+  $('btn-start').textContent = live ? 'Resume round — question ' + (ROUND.i + 1) + ' of ' + ROUND.ids.length : 'Start round';
+  var today = ymd(), d = STATS.daily && STATS.daily.date === today ? STATS.daily : null;
+  var ds = $('daily-sub');
+  ds.textContent = d ? (d.ok ? '✓ Done — you got it' : '✓ Done — see the answer') : 'One question, same for every crew';
+  ds.classList.toggle('daily-done', !!d);
+  $('badge-sub').textContent = badgeCount() + ' of ' + Object.keys(BANK.modules).length + ' earned';
+  show('v-home');
+}
+
+/* ── ROUND FLOW ────────────────────────────────────────────────────── */
+function startRound(){
+  if(ROUND && ROUND.ids && ROUND.i < ROUND.ids.length){ askNext(); return; }   // resume
+  ROUND = { ids:buildRound(), i:0, res:[], xp:0, streak:0, best:0, started:Date.now() };
+  save('round', ROUND);
+  askNext();
+}
+function askNext(){
+  // Skip anything that has left the bank since the round was saved.
+  while(ROUND.i < ROUND.ids.length && !BANK.byId[ROUND.ids[ROUND.i]]){ ROUND.ids.splice(ROUND.i, 1); }
+  if(ROUND.i >= ROUND.ids.length){ finishRound(); return; }
+  ask(BANK.byId[ROUND.ids[ROUND.i]], 'round');
+}
+function renderBar(kind){
+  var dots = $('q-dots'), h = '';
+  if(kind === 'daily'){ dots.innerHTML = '<span class="tag daily">Today&rsquo;s challenge &middot; ' + esc(ymd()) + '</span>';
+    dots.setAttribute('aria-label', 'Today’s challenge'); }
+  else {
+    ROUND.ids.forEach(function(id, i){
+      var r = ROUND.res[i];
+      h += '<span class="dot' + (r ? (r.ok ? ' ok' : ' no') : (i === ROUND.i ? ' cur' : '')) + '"></span>';
+    });
+    dots.innerHTML = h;
+    dots.setAttribute('aria-label', 'Question ' + Math.min(ROUND.i + 1, ROUND.ids.length) + ' of ' + ROUND.ids.length);
+  }
+  var xp = kind === 'daily' ? 0 : ROUND.xp, st = kind === 'daily' ? 0 : ROUND.streak;
+  $('q-xp').textContent = xp + ' XP';
+  $('q-streak').innerHTML = '&#128293; ' + st;
+  $('q-streak').classList.toggle('hot', st >= 3);
+  $('q-streak').setAttribute('aria-label', 'Streak ' + st);
+}
+
+function ask(q, kind){
+  CUR = { q:q, kind:kind, t0:0, answered:false };
+  show('v-q');
+  renderBar(kind);
+  var tags = '';
+  if(kind === 'daily') tags += '<span class="tag daily">Today&rsquo;s challenge</span>';
+  $('q-tags').innerHTML = tags;
+  var ctx = $('q-ctx');
+  ctx.hidden = !q.context;
+  ctx.innerHTML = q.context ? '<b>Scenario</b>' + esc(q.context) : '';
+  $('q-quote').hidden = !q.quote;
+  $('q-quote-t').textContent = q.quote || '';
+  // A swipe question's statement goes on the card you swipe; the heading asks.
+  $('q-prompt').textContent = q.type === 'swipe' ? 'True or false?' : q.prompt;
+  var body = $('q-body');
+  body.innerHTML = '';
+  body.appendChild(RENDER[q.type](q));
+  CUR.t0 = performance.now();          // the clock for the speed bonus starts when the question is up
+  // Move focus into the new question, so Tab and Enter keep working after Next.
+  var first = body.querySelector('button:not([disabled])');
+  if(first) first.focus({ preventScroll:true });
+  // Every question starts at the top, so its scenario is the first thing you read.
+  toTop();
+  if(window.requestAnimationFrame) requestAnimationFrame(toTop);
+}
+function toTop(){ try{ window.scrollTo({ top:0, left:0, behavior:'instant' }); }catch(e){ window.scrollTo(0, 0); } }
+
+/* ── THE FIVE QUESTION TYPES ───────────────────────────────────────── */
+function optButton(o, i, grid){
+  var b = document.createElement('button');
+  b.type = 'button'; b.className = 'opt'; b.dataset.id = o.id;
+  b.innerHTML = (grid ? '' : '<span class="k" aria-hidden="true">' + (i + 1) + '</span>') +
+                '<span class="t">' + esc(o.text) + '</span><span class="mark"></span>';
+  b.addEventListener('click', function(){ answer(o.id, b); });
+  return b;
+}
+function choiceList(q, grid){
+  var box = document.createElement('div');
+  box.className = 'opts' + (grid ? ' grid' : '');
+  // Options are shuffled every time; the answer is keyed by id, never position.
+  shuffle(q.options.slice()).forEach(function(o, i){ box.appendChild(optButton(o, i, grid)); });
+  return box;
+}
+var RENDER = {
+  mc: function(q){ return choiceList(q, false); },
+  fix: function(q){ return choiceList(q, false); },
+  match: function(q){ return choiceList(q, true); },
+
+  spot: function(q){
+    var card = document.createElement('div');
+    card.className = 'chart';
+    function bar(label){
+      var b = document.createElement('div'); b.className = 'chart-bar'; b.innerHTML = '<span>' + label + '</span>';
+      card.appendChild(b);
+    }
+    function rowButton(id, cls, html, label){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'row ' + cls; b.dataset.id = id;
+      b.innerHTML = html + '<span class="mark"></span>';
+      if(label) b.setAttribute('aria-label', label);
+      b.addEventListener('click', function(){ answer(id, b); });
+      card.appendChild(b);
+    }
+    var vit = q.chart.vitals || [], nar = q.chart.narrative || [];
+    if(vit.length){
+      bar('Vitals');
+      var grid = vit.some(function(v){ return v.time != null; });
+      if(grid){
+        // Columns are the ones the chart uses; pain appears only when a row has it.
+        var COLS = [['time','Time'],['hr','HR'],['bp','BP'],['rr','RR'],['spo2','SpO\u2082'],['pain','Pain']].filter(function(c){
+          return c[0] !== 'pain' || vit.some(function(v){ return v.pain != null; }); });
+        // px, not ch: ch follows each element's own font size, so a small header would not line up.
+        var W = { time:'42px', hr:'36px', bp:'70px', rr:'30px', spo2:'44px', pain:'36px' };
+        card.style.setProperty('--vcols', COLS.map(function(c){ return W[c[0]]; }).join(' ') + ' 1fr');
+        var head = document.createElement('div'); head.className = 'vhead'; head.setAttribute('aria-hidden', 'true');
+        head.innerHTML = COLS.map(function(c){ return '<span>' + c[1] + '</span>'; }).join('') + '<span></span>';
+        card.appendChild(head);
+        // Each cell carries its column name for screen readers, inside the
+        // button's own text rather than an aria-label, so the visible numbers
+        // stay part of the name and voice control can still reach the row.
+        vit.forEach(function(v){
+          var cells = '';
+          COLS.forEach(function(c){
+            var val = v[c[0]], has = val != null && val !== '';
+            var name = '<span class="sr">' + c[1].replace('\u2082', '2') + ' </span>';
+            cells += has
+              ? '<span class="c">' + name + esc(String(val) + (c[0] === 'spo2' ? '%' : '')) + '<span class="sr">, </span></span>'
+              : '<span class="c gap">' + name + '<span aria-hidden="true">\u2014</span><span class="sr">not recorded, </span></span>';
+          });
+          rowButton(v.id, 'vrow', cells);
+        });
+      } else vit.forEach(function(v){ rowButton(v.id, '', '<span class="t">' + esc(v.text) + '</span>'); });
+    }
+    if(nar.length){
+      bar('Narrative');
+      nar.forEach(function(n){ rowButton(n.id, 'nar', '<span class="t">' + esc(n.text) + '</span>'); });
+    }
+    return card;
+  },
+
+  swipe: function(q){
+    var wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<div class="swipe-zone"><div class="scard" id="scard" role="group" aria-label="Swipe right for true, left for false">' +
+        '<span class="stamp f" aria-hidden="true">FALSE</span><span class="stamp t" aria-hidden="true">TRUE</span>' +
+        '<p id="scard-text"></p></div></div>' +
+      '<div class="swipe-hint" aria-hidden="true"><span>&larr; False</span><span>True &rarr;</span></div>' +
+      '<div class="tf"></div>';
+    wrap.querySelector('#scard-text').textContent = q.prompt;
+    var tf = wrap.querySelector('.tf');
+    [false, true].forEach(function(v){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'opt'; b.dataset.id = String(v);
+      b.innerHTML = '<span class="t">' + (v ? 'True &#10003;' : '&#10007; False') + '</span><span class="mark"></span>';
+      b.addEventListener('click', function(){ answer(v, b); });
+      tf.appendChild(b);
+    });
+    wireSwipe(wrap.querySelector('.scard'));
+    return wrap;
+  }
+};
+
+function wireSwipe(card){
+  var x0 = 0, y0 = 0, dx = 0, t0 = 0, dragging = false, id = null;
+  var st = card.querySelector('.stamp.t'), sf = card.querySelector('.stamp.f');
+  function paint(){
+    card.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 18) + 'deg)';
+    st.style.opacity = Math.max(0, Math.min(1, dx / 90));
+    sf.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+  }
+  card.addEventListener('pointerdown', function(e){
+    if(CUR.answered) return;
+    dragging = true; id = e.pointerId; x0 = e.clientX; y0 = e.clientY; dx = 0; t0 = performance.now();
+    card.classList.remove('back');
+    try{ card.setPointerCapture(id); }catch(x){}
+  });
+  card.addEventListener('pointermove', function(e){
+    if(!dragging || e.pointerId !== id) return;
+    dx = e.clientX - x0;
+    if(Math.abs(e.clientY - y0) > Math.abs(dx) * 1.4 && Math.abs(dx) < 12) return;   // a scroll, not a swipe
+    paint();
+  });
+  function end(e){
+    if(!dragging || (e && e.pointerId !== id)) return;
+    dragging = false;
+    var v = Math.abs(dx) / Math.max(1, performance.now() - t0);
+    if(Math.abs(dx) > 90 || (Math.abs(dx) > 40 && v > 0.6)){
+      var yes = dx > 0;
+      answer(yes, document.querySelector('.tf .opt[data-id="' + yes + '"]'));
+    } else { dx = 0; card.classList.add('back'); paint(); }
+  }
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+}
+
+/* ── ANSWERING ─────────────────────────────────────────────────────── */
+function isRight(q, choice){
+  if(q.type === 'swipe') return choice === q.answer;
+  if(q.type === 'spot') return q.answer.indexOf(choice) >= 0;
+  return choice === q.answer;
+}
+function answer(choice, el){
+  if(!CUR || CUR.answered) return;
+  CUR.answered = true;
+  var q = CUR.q, ms = performance.now() - CUR.t0, ok = isRight(q, choice);
+  // Feedback first: everything visible below happens in this same task, so the
+  // verdict is on screen in the next frame.
+  markAnswer(q, choice, el, ok);
+  buzz();
+  var gain = ok ? CONFIG.baseXp + (ms < CONFIG.speedMs ? CONFIG.speedXp : 0) : 0, speedy = ok && ms < CONFIG.speedMs;
+  var streakNow = 0, label = '', newBadges = [];
+
+  if(CUR.kind === 'round'){
+    ROUND.res[ROUND.i] = { id:q.id, ok:ok, ms:Math.round(ms) };
+    ROUND.xp += gain;
+    ROUND.streak = ok ? ROUND.streak + 1 : 0;
+    ROUND.best = Math.max(ROUND.best, ROUND.streak);
+    streakNow = ROUND.streak;
+    ROUND.i++;
+    newBadges = credit(q, ok, gain);
+    ROUND.earned = (ROUND.earned || []).concat(newBadges);
+    save('round', ROUND);           // saved per answer: a dispatch tone loses nothing
+    renderBar('round');
+  } else {
+    var first = !(STATS.daily && STATS.daily.date === ymd());
+    if(first){ newBadges = credit(q, ok, gain); STATS.daily = { date:ymd(), id:q.id, ok:ok }; save('stats', STATS); }
+  }
+  if(streakNow >= 5) label = '\u{1FA7A} Chart Doctor — ' + streakNow + ' in a row';
+  else if(streakNow >= 3) label = '\u{1F525} On a roll — ' + streakNow + ' in a row';
+  feedback(q, ok, gain, speedy, label);
+  newBadges.forEach(function(k, i){ var m = BANK.modules[k];
+    setTimeout(function(){ toast('New badge: ' + (m.badge ? m.badge + ' ' : '') + m.name); }, 400 + i * 1600); });
+}
+// Returns the keys of any badges this answer earned.
+function credit(q, ok, gain){
+  var got = [];
+  STATS.xp = (STATS.xp || 0) + gain;
+  if(ok){
+    STATS.mod[q.module] = (STATS.mod[q.module] || 0) + 1;
+    if(!STATS.badges[q.module] && STATS.mod[q.module] >= CONFIG.badgeAt){
+      STATS.badges[q.module] = ymd(); got.push(q.module);
+    }
+  }
+  save('stats', STATS);
+  return got;
+}
+function markAnswer(q, choice, el, ok){
+  var body = $('q-body');
+  body.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+  var card = $('scard');
+  if(card){ card.classList.add(choice === true ? 'settle-r' : 'settle-l', ok ? 'ok' : 'no'); card.style.transform = ''; }
+  var key = q.type === 'swipe' ? [String(q.answer)] : q.type === 'spot' ? q.answer : [q.answer];
+  if(el){
+    el.classList.add(ok ? 'is-right' : 'is-wrong', ok ? 'anim-pop' : 'anim-shake');
+    if(el.classList.contains('vrow'))
+      el.querySelector('.mark').innerHTML = '<span aria-hidden="true">' + (ok ? '✓' : '✗') + '</span><span class="sr">' +
+        (ok ? 'your pick, correct' : 'your pick, incorrect') + '</span>';
+    else {
+      el.querySelector('.mark').textContent = ok ? '✓ Right' : '✗ Your pick';
+      el.setAttribute('aria-label', (ok ? 'Correct: ' : 'Your answer, incorrect: ') + el.textContent);
+    }
+  }
+  var firstKey = null;
+  key.forEach(function(k){
+    var b = body.querySelector('[data-id="' + k + '"]');
+    if(!b || b === el) return;
+    b.classList.add('is-right');
+    if(b.classList.contains('vrow'))
+      b.querySelector('.mark').innerHTML = '<span aria-hidden="true">✓</span><span class="sr">correct answer</span>';
+    else {
+      b.querySelector('.mark').textContent = '✓ Answer';
+      b.setAttribute('aria-label', 'Correct answer: ' + b.textContent);
+    }
+    if(!ok) b.classList.add('anim-pulse');
+    if(!firstKey) firstKey = b;
+  });
+  CUR.reveal = ok ? el : (firstKey || el);
+}
+
+/* ── FEEDBACK SHEET ────────────────────────────────────────────────── */
+function feedback(q, ok, gain, speedy, label){
+  var m = moduleOf(q), last = CUR.kind === 'round' && ROUND.i >= ROUND.ids.length;
+  var next = CUR.kind === 'daily' ? 'Done' : last ? 'See my results →' : 'Next →';
+  var s = $('sheet');
+  s.className = 'sheet ' + (ok ? 'ok' : 'no');
+  s.innerHTML =
+    '<div class="sheet-in" role="region" aria-label="Answer feedback">' +
+      '<div class="verdict"><span class="vicon" aria-hidden="true">' + (ok ? '&#10003;' : '&#10007;') + '</span>' +
+        '<span class="vtext">' + (ok ? 'Correct' : 'Not quite') + '</span>' +
+        (ok ? '<span class="gain"><span>+' + CONFIG.baseXp + ' XP</span>' + (speedy ? '<span>+' + CONFIG.speedXp + ' speed</span>' : '') + '</span>' : '') +
+      '</div>' +
+      (label ? '<div class="streak-banner">' + esc(label) + '</div>' : '') +
+      '<p class="why"><span class="why-mod">' + esc((m.badge ? m.badge + ' ' : '') + m.name) + ' &middot; </span>' + esc(q.explain) + '</p>' +
+      '<button class="btn btn-primary" id="btn-next" type="button">' + next + '</button>' +
+    '</div>';
+  s.hidden = false;
+  say((ok ? 'Correct. ' : 'Not quite. ') + q.explain);
+  $('btn-next').addEventListener('click', onNext);
+  // Leave room under the question for the sheet, and bring the answer above it.
+  var hgt = s.firstChild.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--sheet-h', Math.ceil(hgt) + 'px');
+  // Jump, don't glide: on iPhone a smooth scroll still running when Next is
+  // tapped carries over and opens the next question under the top bar.
+  if(CUR.reveal && CUR.reveal.scrollIntoView) CUR.reveal.scrollIntoView({ block:'nearest' });
+  $('btn-next').focus({ preventScroll:true });
+}
+function hideSheet(){
+  var s = $('sheet'); if(s){ s.hidden = true; s.innerHTML = ''; }
+  document.documentElement.style.setProperty('--sheet-h', '0px');
+}
+function onNext(){
+  if(CUR.kind === 'daily'){ DAILY = null; CUR = null; renderHome(); return; }
+  if(ROUND.i >= ROUND.ids.length) finishRound(); else askNext();
+}
+function toast(t){
+  var d = document.createElement('div'); d.className = 'toast'; d.setAttribute('role', 'status'); d.textContent = t;
+  document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600);
+}
+
+/* ── SUMMARY ───────────────────────────────────────────────────────── */
+function weakSpot(res){
+  var miss = {};
+  res.forEach(function(r){ if(!r.ok){ var q = BANK.byId[r.id]; if(q) miss[q.module] = (miss[q.module] || 0) + 1; } });
+  var best = null;
+  Object.keys(miss).forEach(function(k){ if(!best || miss[k] > miss[best]) best = k; });
+  return best;
+}
+function finishRound(){
+  var res = ROUND.res.filter(Boolean), score = res.filter(function(r){ return r.ok; }).length, total = ROUND.ids.length;
+  var weak = weakSpot(res);
+  STATS.rounds = (STATS.rounds || 0) + 1;
+  STATS.bestStreak = Math.max(STATS.bestStreak || 0, ROUND.best);
+  STATS.recent = [res.filter(function(r){ return r.ok; }).map(function(r){ return r.id; }), (STATS.recent || [[]])[0] || []];
+  STATS.last = { date:ymd(), score:score, total:total, xp:ROUND.xp, best:ROUND.best,
+                 weak:weak, missed:res.filter(function(r){ return !r.ok; }).map(function(r){ return r.id; }),
+                 earned:ROUND.earned || [] };
+  save('stats', STATS);
+  ROUND = null; drop('round');
+  renderSummary();
+  if(score === total && !reduced()) confetti();
+}
+function renderSummary(){
+  var L = STATS.last; if(!L){ renderHome(); return; }
+  var m = L.weak ? BANK.modules[L.weak] : null, C = 2 * Math.PI * 54, frac = L.total ? L.score / L.total : 0;
+  var h = '<h1 class="sr" id="sum-h">Round summary</h1><div class="sum-card">' +
+    '<div class="sum-eye">Round complete</div>' +
+    '<div class="ring" role="img" aria-label="' + L.score + ' of ' + L.total + ' correct"><svg viewBox="0 0 132 132">' +
+      '<circle class="trk" cx="66" cy="66" r="54"/><circle class="val" id="ring-val" cx="66" cy="66" r="54" stroke-dasharray="' + C.toFixed(1) +
+      '" stroke-dashoffset="' + C.toFixed(1) + '"/></svg><b>' + L.score + '<small>/' + L.total + '</small></b></div>' +
+    '<div class="sum-line">' + (L.score === L.total ? 'Clean chart. Every one.' : L.score >= L.total - 2 ? 'Nearly clean.' : 'Charts to fix &mdash; that&rsquo;s the point.') + '</div>' +
+    '<div class="sum-stats"><div><b>+' + L.xp + '</b><span>XP</span></div><div><b>' + L.best + '</b><span>best streak</span></div>' +
+      '<div><b>' + badgeCount() + '/' + Object.keys(BANK.modules).length + '</b><span>badges</span></div></div>';
+  h += m ? '<div class="weak"><h2>Your weak spot: ' + esc((m.badge ? m.badge + ' ' : '') + m.name) + '</h2><p>' + esc(m.tip) + '</p></div>'
+         : '<div class="weak clean"><h2>No weak spot this round</h2><p>Nothing missed. Run another to keep the streak going.</p></div>';
+  (L.earned || []).forEach(function(k){ var b = BANK.modules[k]; if(b)
+    h += '<div class="newbadge">New badge: ' + esc((b.badge ? b.badge + ' ' : '') + b.name) + '</div>'; });
+  h += '<div class="sum-actions"><button class="btn btn-primary" id="btn-again" type="button">Play again</button>' +
+       '<button class="btn btn-ghost" id="btn-credit" type="button">Get completion credit</button></div></div>';
+  if(L.missed && L.missed.length){
+    h += '<div class="review"><h2>What you missed</h2>';
+    L.missed.forEach(function(id){ var q = BANK.byId[id]; if(!q) return;
+      h += '<div class="rv"><p>' + (q.context ? esc(q.context) + ' ' : '') + esc(q.prompt) + '</p><p>' + esc(q.explain) + '</p></div>'; });
+    h += '</div>';
+  }
+  var v = $('v-sum'); v.innerHTML = h;
+  show('v-sum');
+  $('btn-again').addEventListener('click', startRound);
+  $('btn-credit').addEventListener('click', renderCredit);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    var rv = $('ring-val'); if(rv) rv.style.strokeDashoffset = (C * (1 - frac)).toFixed(1); }); });
+  $('btn-again').focus({ preventScroll:true });
+}
+
+/* ── BADGES ────────────────────────────────────────────────────────── */
+function renderBadges(){
+  var h = '<h1 class="h2" id="badges-h">My badges</h1><p class="lede">Get ' + CONFIG.badgeAt +
+          ' right in a module, across any rounds, to earn its badge. Each one is a charting habit worth keeping.</p><div class="badges">';
+  Object.keys(BANK.modules).forEach(function(k){
+    var m = BANK.modules[k], n = Math.min(STATS.mod[k] || 0, CONFIG.badgeAt), got = !!STATS.badges[k];
+    h += '<div class="badge ' + (got ? 'earned' : 'locked') + '"><span class="em" aria-hidden="true">' + esc(m.badge || '') + '</span>' +
+         '<h2>' + esc(m.name) + '</h2><div class="prog" aria-hidden="true"><i style="width:' + (n / CONFIG.badgeAt * 100) + '%"></i></div>' +
+         '<div class="state">' + (got ? 'Earned' : n + ' of ' + CONFIG.badgeAt) + '<span class="sr"> ' + (got ? 'badge earned' : 'not yet earned') + '</span></div>' +
+         '<p class="tip">' + esc(m.tip || '') + '</p></div>';
+  });
+  h += '</div><div class="sum-actions"><button class="btn btn-primary" id="btn-b-start" type="button">Start a round</button>' +
+       '<button class="btn btn-ghost" id="btn-b-home" type="button">Back</button></div>';
+  $('v-badges').innerHTML = h;
+  show('v-badges');
+  $('btn-b-start').addEventListener('click', startRound);
+  $('btn-b-home').addEventListener('click', renderHome);
+}
+
+/* ── DAILY CHALLENGE ───────────────────────────────────────────────── */
+function startDaily(){
+  var q = dailyFor(ymd()); if(!q) return;
+  DAILY = { q:q };
+  ask(q, 'daily');
+}
+
+/* ── COMPLETION CREDIT ─────────────────────────────────────────────── */
+function renderCredit(){
+  var L = STATS.last; if(!L){ renderHome(); return; }
+  $('v-credit').innerHTML =
+    '<h1 class="h2" id="credit-h">Completion credit</h1>' +
+    '<p class="lede">Score ' + L.score + '/' + L.total + ' on ' + esc(L.date) + '. Your name and ID make the completion code; they are not saved on this device.</p>' +
+    '<form id="credit-form" novalidate>' +
+      '<div class="field"><label for="cr-name">Name</label><input id="cr-name" autocomplete="name" required></div>' +
+      '<div class="field"><label for="cr-id">Employee ID</label><input id="cr-id" autocomplete="off" inputmode="text" required></div>' +
+      '<div class="err" id="cr-err" role="alert"></div>' +
+      '<div class="sum-actions"><button class="btn btn-primary" type="submit">Make my completion code</button>' +
+      '<button class="btn btn-ghost" id="cr-back" type="button">Back to results</button></div>' +
+    '</form><div id="cert"></div>';
+  show('v-credit');
+  $('cr-back').addEventListener('click', renderSummary);
+  $('credit-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = $('cr-name').value.trim(), id = $('cr-id').value.trim();
+    if(!name || !id){ $('cr-err').textContent = !name ? 'Enter your name.' : 'Enter your employee ID.'; (!name ? $('cr-name') : $('cr-id')).focus(); return; }
+    $('cr-err').textContent = '';
+    codeFor(id, L.date, L.score).then(function(code){ showCert(name, id, L, code); submit(name, id, L); });
+  });
+  $('cr-name').focus({ preventScroll:true });
+}
+function shareText(name, id, L, code){
+  return 'Chart Rx completion — ' + name + ' (' + id + ') — ' + L.date + ' — score ' + L.score + '/' + L.total + ' — code ' + code;
+}
+function showCert(name, id, L, code){
+  $('credit-form').hidden = true;
+  $('cert').innerHTML =
+    '<div class="cert"><div class="tick" aria-hidden="true">&#10003;</div><h2>Chart Rx complete</h2>' +
+    '<dl><dt>Name</dt><dd>' + esc(name) + '</dd><dt>Employee ID</dt><dd>' + esc(id) + '</dd>' +
+    '<dt>Date</dt><dd>' + esc(L.date) + '</dd><dt>Score</dt><dd>' + L.score + ' / ' + L.total + '</dd></dl>' +
+    '<div class="code" id="cr-code">' + esc(code) + '</div><div class="code-lbl">Verification code</div>' +
+    '<p class="lede" style="margin:12px 0 0">Screenshot this, or send the code to your supervisor.</p>' +
+    '<div class="btn-row" style="margin-top:14px"><button class="btn btn-ghost" id="cr-copy" type="button">Copy</button>' +
+    '<button class="btn btn-primary" id="cr-share" type="button">Share</button></div>' +
+    '<div class="copied" id="cr-copied" role="status"></div>' +
+    '<button class="btn btn-ghost" id="cr-home" type="button" style="width:100%;margin-top:6px">Done</button></div>';
+  var text = shareText(name, id, L, code);
+  $('cr-copy').addEventListener('click', function(){ copy(text); });
+  $('cr-share').addEventListener('click', function(){
+    if(navigator.share){ navigator.share({ title:'Chart Rx completion', text:text }).catch(function(){}); }
+    else copy(text);
+  });
+  $('cr-home').addEventListener('click', renderHome);
+  $('cr-copy').focus({ preventScroll:true });
+}
+function copy(text){
+  function done(){ $('cr-copied').textContent = 'Copied — paste it to your supervisor.'; }
+  function legacy(){
+    var t = document.createElement('textarea'); t.value = text; t.setAttribute('readonly', '');
+    t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select();
+    var ok = false; try{ ok = document.execCommand('copy'); }catch(e){}
+    t.remove();
+    $('cr-copied').textContent = ok ? 'Copied — paste it to your supervisor.' : 'Copy did not work here — take a screenshot instead.';
+  }
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done, legacy); return; } }catch(e){}
+  legacy();
+}
+function submit(name, id, L){
+  if(!CONFIG.submitUrl) return;
+  var m = L.weak ? BANK.modules[L.weak] : null;
+  var body = JSON.stringify({ name:name, employeeId:id, date:L.date, score:L.score, weakModule:m ? m.name : '' });
+  try{
+    var ctl = window.AbortController ? new AbortController() : null;
+    if(ctl) setTimeout(function(){ ctl.abort(); }, 8000);
+    fetch(CONFIG.submitUrl, { method:'POST', mode:'no-cors', keepalive:true,
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body:body, signal:ctl ? ctl.signal : undefined }).catch(function(){});
+  }catch(e){}
+}
+
+/* ── SUPERVISOR CHECK (chart-rx.html#verify) ───────────────────────── */
+function renderVerify(){
+  var errs = BANK.errors;
+  $('v-verify').innerHTML =
+    '<h1 class="h2" id="verify-h">Check a completion code</h1>' +
+    '<p class="lede">Enter what is on the provider&rsquo;s completion screen. The code is recomputed here; it should match theirs.</p>' +
+    '<div class="vbox"><form id="vf">' +
+      '<div class="field"><label for="vf-id">Employee ID</label><input id="vf-id" required></div>' +
+      '<div class="field"><label for="vf-date">Date</label><input id="vf-date" type="date" value="' + ymd() + '" required></div>' +
+      '<div class="field"><label for="vf-score">Score (number correct, 0&ndash;8)</label><input id="vf-score" type="number" min="0" max="8" value="8" required></div>' +
+      '<button class="btn btn-primary" type="submit" style="width:100%">Show the expected code</button></form>' +
+      '<div class="code" id="vf-code" aria-live="polite"></div></div>' +
+    '<div class="vbox health"><b>Question bank ' + esc(BANK.version || '') + ':</b> ' + BANK.questions.length + ' loaded' +
+      (errs.length ? ', ' + errs.length + ' skipped<ul>' + errs.map(function(e){ return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : ', none skipped.') +
+    '</div><button class="btn btn-ghost" id="vf-home" type="button" style="width:100%">Chart Rx home</button>';
+  show('v-verify');
+  $('vf').addEventListener('submit', function(e){
+    e.preventDefault();
+    codeFor($('vf-id').value, $('vf-date').value, parseInt($('vf-score').value, 10)).then(function(c){ $('vf-code').textContent = c; });
+  });
+  $('vf-home').addEventListener('click', function(){ history.replaceState(null, '', location.pathname); renderHome(); });
+}
+
+/* ── THEME TOGGLE ──────────────────────────────────────────────────── */
+function themeNow(){ return document.documentElement.getAttribute('data-theme') || 'light'; }
+function paintThemeBtn(){
+  var dark = themeNow() === 'dark', b = $('theme-btn');
+  b.innerHTML = dark ? '&#9728;' : '&#9790;';
+  b.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+  var tc = $('theme-color'); if(tc) tc.setAttribute('content', dark ? '#0b1220' : '#f4f6f9');
+}
+function nextSwitch(now){
+  var d = new Date(now), h = d.getHours();
+  if(h >= 7 && h < 19){ d.setHours(19, 0, 0, 0); } else { if(h >= 19) d.setDate(d.getDate() + 1); d.setHours(7, 0, 0, 0); }
+  return d.getTime();
+}
+$('theme-btn').addEventListener('click', function(){
+  var t = themeNow() === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  save('theme', { theme:t, until:nextSwitch(Date.now()) });
+  paintThemeBtn();
+});
+
+/* ── CONFETTI (a clean round only; skipped under reduced motion) ───── */
+function confetti(){
+  var c = document.createElement('canvas'); c.className = 'confetti'; document.body.appendChild(c);
+  var w = c.width = innerWidth, h = c.height = innerHeight, x = c.getContext('2d'); if(!x){ c.remove(); return; }
+  var cols = ['#1b63c4','#15803d','#f6c453','#e8590c','#9cc3ff'], P = [];
+  for(var i = 0; i < 90; i++) P.push({ x:w / 2, y:h * 0.35, vx:(Math.random() - .5) * 9, vy:-Math.random() * 9 - 3,
+    s:4 + Math.random() * 5, c:cols[i % cols.length], r:Math.random() * 6 });
+  var t0 = performance.now();
+  (function f(t){
+    x.clearRect(0, 0, w, h);
+    P.forEach(function(p){ p.vy += 0.28; p.x += p.vx; p.y += p.vy; p.r += 0.2;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * .6); x.restore(); });
+    if(t - t0 < 1600) requestAnimationFrame(f); else c.remove();
+  })(t0);
+}
+
+/* ── KEYBOARD (Toughbook trackpad + Enter) ─────────────────────────── */
+document.documentElement.classList.add('pointer');
+document.addEventListener('pointerdown', function(){ document.documentElement.classList.add('pointer'); }, true);
+document.addEventListener('keydown', function(e){
+  if(/^(Tab|Enter| |Arrow|[1-4]$)/.test(e.key)) document.documentElement.classList.remove('pointer');
+}, true);
+document.addEventListener('keydown', function(e){
+  if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if($('v-q').hidden || !CUR) return;
+  if(CUR.answered){ return; }                 // Next is focused; Enter presses it
+  var q = CUR.q;
+  if(q.type === 'swipe' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
+    e.preventDefault();
+    var yes = e.key === 'ArrowRight';
+    answer(yes, document.querySelector('.tf .opt[data-id="' + yes + '"]'));
+    return;
+  }
+  if(/^[1-4]$/.test(e.key)){
+    var opts = $('q-body').querySelectorAll('.opts .opt');
+    var b = opts[parseInt(e.key, 10) - 1];
+    if(b){ e.preventDefault(); b.click(); }
+  }
+});
+
+/* ── WIRING ────────────────────────────────────────────────────────── */
+$('btn-start').addEventListener('click', startRound);
+$('btn-daily').addEventListener('click', startDaily);
+$('btn-badges').addEventListener('click', renderBadges);
+$('q-quit').addEventListener('click', function(){ CUR = null; DAILY = null; renderHome(); });
+window.addEventListener('hashchange', function(){ if(BANK && location.hash === '#verify') renderVerify(); });
+
+function boot(raw){
+  BANK = validate(raw);
+  if(BANK.errors.length && window.console) console.warn('Chart Rx skipped ' + BANK.errors.length + ' question(s):\n' + BANK.errors.join('\n'));
+  if(!BANK.questions.length){
+    var f = $('v-fail'); f.textContent = 'No questions could be loaded. Check chart-rx/questions.json.'; show('v-fail'); return;
+  }
+  // Badges and progress for a module that has been removed are kept but not shown.
+  paintThemeBtn();
+  if(location.hash === '#verify'){ renderVerify(); return; }
+  // Closed mid-round? Go straight back to the question you were on.
+  if(ROUND && ROUND.ids && ROUND.i < ROUND.ids.length) askNext();
+  else { ROUND = null; renderHome(); }
+}
+fetch(CONFIG.questions, { cache:'no-cache' })
+  .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(boot)
+  .catch(function(){
+    paintThemeBtn();
+    var f = $('v-fail');
+    f.innerHTML = 'Chart Rx could not load its questions.<br>Open it once with a signal and it will work offline after that.';
+    show('v-fail');
+  });
+
+if('serviceWorker' in navigator){
+  // Registered here too, so opening Chart Rx first — not the Field Guide — still
+  // leaves it working offline.
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+
+// For tests and for Hunter's checker script.
+window.ChartRx = {
+  config:CONFIG, validate:validate, buildRound:function(rng){ return buildRound(rng); },
+  dailyFor:function(d){ var q = dailyFor(d); return q && q.id; },
+  codeFor:codeFor, sha256js:sha256js, codeInput:codeInput,
+  bank:function(){ return BANK; }, stats:function(){ return STATS; }, round:function(){ return ROUND; },
+  current:function(){ return CUR && CUR.q; }
+};
+})();
+</script>
+</body>
+</html>
