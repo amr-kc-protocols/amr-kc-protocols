@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v39';
+const CACHE = 'amrkc-2026-v40';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -17,7 +17,9 @@ const ASSETS = [
   './med-math.html',
   // Chart Rx — played between calls, often with no signal. The shell and the
   // question bank both have to be here, or a round cannot start offline.
-  './chart-rx.html', './chart-rx/questions.json',
+  './chart-rx.html', './chart-rx/questions.json', './chart-rx/aemt-scope.json',
+  // Certificates are made on the device, so the PDF library has to be here offline too
+  './pdf-lib.min.js',
   // AEMT series — a study block is opened on a post-run window in a bay, and
   // the whole point of the queue is that it runs client-side with no network.
   // The shell, the content and the scheduler all have to be here already.

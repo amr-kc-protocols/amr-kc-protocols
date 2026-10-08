@@ -146,6 +146,19 @@ html.pointer button:focus-visible,html.pointer a:focus-visible{outline:none}
 .blitz-score span{font-size:13px;color:var(--ink3)}
 .tbar{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
 .tbar i{display:block;height:100%;background:var(--flame);border-radius:99px}
+.tracks{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;background:var(--card2);padding:4px;border-radius:12px}
+.trk{min-height:44px;border-radius:9px;font-size:14px;font-weight:700;color:var(--ink2)}
+.trk.on{background:var(--card);color:var(--brand);box-shadow:var(--shadow)}
+.tag.test{background:var(--gold-bg);color:var(--gold)}
+.sheet.test .sheet-in{border-top-color:var(--brand2)}
+.sheet.test .vtext{color:var(--ink)}
+.tcount{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--ink3)}
+.opt.is-picked,.row.is-picked{background:var(--card2);box-shadow:inset 4px 0 0 var(--brand2)}
+.blitz-score b small{font-size:22px;color:var(--ink3);font-weight:600}
+.pass,.fail-tag{display:inline-block;margin:10px 0 4px;font-size:15px;font-weight:700;padding:5px 14px;border-radius:99px}
+.pass{background:var(--card);color:var(--ok);border:1.5px solid var(--ok)}
+.fail-tag{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
+.field select{font:inherit;font-size:16px;padding:12px 13px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);min-height:50px}
 .tleft{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink2);min-width:32px;text-align:right}
 .fine{font-size:11.5px;color:var(--ink3);margin-top:16px;line-height:1.5;text-align:center}
 
@@ -364,11 +377,15 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
   <div class="fail" id="v-fail" hidden></div>
 
   <section class="view wrap" id="v-home" hidden aria-labelledby="home-h">
+    <div class="tracks" role="group" aria-label="Choose a training">
+      <button class="trk" id="trk-charting" type="button" data-track="charting">Charting habits</button>
+      <button class="trk" id="trk-aemt" type="button" data-track="aemt">AEMT scope check</button>
+    </div>
     <div class="hero">
       <div class="rx" aria-hidden="true">&#8478;</div>
-      <div class="hero-eye">PCR documentation &middot; good charting habits</div>
+      <div class="hero-eye" id="hero-eye">PCR documentation &middot; good charting habits</div>
       <h1 id="home-h">Chart <span>Rx</span></h1>
-      <p class="hero-sub">3 minutes. 8 charts. Find what&rsquo;s wrong.</p>
+      <p class="hero-sub" id="hero-sub">3 minutes. 8 charts. Find what&rsquo;s wrong.</p>
       <div class="rankline">
         <div class="rank-top"><b id="rk-name">Probie</b><span><span id="st-xp">0 XP</span> &middot; <span id="rk-next"></span></span></div>
         <div class="bar" role="progressbar" aria-label="Progress to the next rank" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="rk-bar"></i></div>
@@ -386,6 +403,7 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
     <div class="home-actions">
       <button class="btn btn-primary" id="btn-start" type="button">Start round</button>
       <button class="btn btn-ghost" id="btn-blitz" type="button"><span>&#9889; Lightning round<br><span class="sub" id="blitz-sub"></span></span></button>
+      <button class="btn btn-ghost" id="btn-test" type="button"><span><span id="test-t">Final test</span><br><span class="sub" id="test-sub"></span></span></button>
       <div class="btn-row">
         <button class="btn btn-ghost" id="btn-daily" type="button"><span>Today&rsquo;s challenge<br><span class="sub" id="daily-sub"></span></span></button>
         <button class="btn btn-ghost" id="btn-badges" type="button"><span>My badges<br><span class="sub" id="badge-sub"></span></span></button>
@@ -433,14 +451,36 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:55;width:100v
    the code still shows. Pages can set window.CHARTRX_CONFIG before this runs. */
 var CONFIG = Object.assign({
   submitUrl: '',
-  questions: 'chart-rx/questions.json',
+  questions: '',                 // empty: the track's own bank
   salt: 'chartrx-oct26',     // part of the verification code — see codeFor()
   roundSize: 8, perModule: 2, badgeAt: 5,
   baseXp: 10, speedXp: 5, speedMs: 8000
 }, window.CHARTRX_CONFIG || {});
 
+/* ── TRACKS ────────────────────────────────────────────────────────────
+   Two question banks share this engine: the charting habits, and the AEMT
+   scope check. Each keeps its own progress under its own storage prefix, so
+   switching never mixes them. #aemt or #charting in the link picks one;
+   otherwise the last one used opens. */
+var TRACKS = {
+  charting: { key:'charting', name:'Chart Rx', title:'Chart <span>Rx</span>', questions:'chart-rx/questions.json', ls:'chartrx.',
+              eyebrow:'PCR documentation &middot; good charting habits', sub:'3 minutes. 8 charts. Find what&rsquo;s wrong.',
+              hdr:'AMR KC Field Guide &middot; PCR documentation',
+              test:{ name:'Chart Rx Documentation Final Test', size:30, pass:0.8 } },
+  aemt:     { key:'aemt', name:'AEMT Scope Check', title:'AEMT <span>Scope</span>', questions:'chart-rx/aemt-scope.json', ls:'chartrx.aemt.',
+              eyebrow:'Advanced EMT &middot; can you take this patient?', sub:'Drips, procedures and meds, checked against the 2026 protocols.',
+              hdr:'AMR KC Field Guide &middot; AEMT scope of practice',
+              test:{ name:'AEMT Scope of Practice Test', size:25, pass:0.9 } }
+};
+function gload(k, d){ try{ var v = localStorage.getItem('chartrx.' + k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function gsave(k, v){ try{ localStorage.setItem('chartrx.' + k, JSON.stringify(v)); }catch(e){} }
+var TRACK = location.hash === '#aemt' ? 'aemt' : location.hash === '#charting' ? 'charting'
+          : (TRACKS[gload('track', 'charting')] ? gload('track', 'charting') : 'charting');
+var TR = TRACKS[TRACK];
+gsave('track', TRACK);
+
 /* ── STORAGE (every access wrapped: private mode and full disks throw) ── */
-var LS = 'chartrx.';
+var LS = TR.ls;
 function load(k, d){ try{ var v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
 function save(k, v){ try{ localStorage.setItem(LS + k, JSON.stringify(v)); }catch(e){} }
 function drop(k){ try{ localStorage.removeItem(LS + k); }catch(e){} }
@@ -616,6 +656,24 @@ function buildRound(rng){
   });
   return shuffle(pick, rng).map(function(q){ return q.id; });
 }
+// The final test: spread evenly over every module, at least one spot question.
+function buildTest(rng){
+  rng = rng || Math.random;
+  var size = Math.min(TR.test.size, BANK.questions.length), mods = Object.keys(BANK.modules), by = {}, pick = [];
+  mods.forEach(function(m){ by[m] = shuffle(BANK.questions.filter(function(q){ return q.module === m; }), rng); });
+  mods = mods.filter(function(m){ return by[m].length; });
+  // Round-robin over the modules, so each gets its share.
+  for(var r = 0; pick.length < size; r++){
+    var took = false;
+    mods.forEach(function(m){ if(pick.length < size && by[m][r]){ pick.push(by[m][r]); took = true; } });
+    if(!took) break;
+  }
+  if(!pick.some(function(q){ return q.type === 'spot'; })){
+    var sp = BANK.questions.filter(function(q){ return q.type === 'spot' && pick.indexOf(q) < 0; })[0];
+    if(sp){ var i = pick.length - 1; while(i > 0 && pick.filter(function(q){ return q.module === pick[i].module; }).length < 2) i--; pick[i] = sp; }
+  }
+  return shuffle(pick, rng).map(function(q){ return q.id; });
+}
 // A drill: five from one habit, misses and due reviews first.
 function buildDrill(m, rng){
   return tiers(BANK.questions.filter(function(q){ return q.module === m; }), rng || Math.random)
@@ -670,6 +728,81 @@ function sha256js(str){
   }
   return H.map(function(x){ return ('00000000' + (x >>> 0).toString(16)).slice(-8); }).join('');
 }
+// Certificates: first 8 hex of SHA-256 of employeeID|YYYY-MM-DD|score/total|track|salt.
+// The track ('charting' or 'aemt') keeps a code from one test from passing for the other.
+function certInput(id, date, score, total, track){ return String(id).trim() + '|' + date + '|' + score + '/' + total + '|' + track + '|' + CONFIG.salt; }
+function certCode(id, date, score, total, track){
+  var s = certInput(id, date, score, total, track);
+  try{
+    if(window.crypto && crypto.subtle && window.isSecureContext !== false)
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(b){ return hex(b).slice(0, 8); })
+        .catch(function(){ return sha256js(s).slice(0, 8); });
+  }catch(e){}
+  return Promise.resolve(sha256js(s).slice(0, 8));
+}
+function loadPdfLib(){
+  if(window.PDFLib) return Promise.resolve(window.PDFLib);
+  return new Promise(function(ok, bad){
+    var sc = document.createElement('script'); sc.src = 'pdf-lib.min.js';
+    sc.onload = function(){ window.PDFLib ? ok(window.PDFLib) : bad(new Error('pdf-lib missing')); };
+    sc.onerror = function(){ bad(new Error('pdf-lib did not load')); };
+    document.head.appendChild(sc);
+  });
+}
+// A one-page landscape certificate. Built on the device; nothing is uploaded.
+function certBytes(name, id, L, code){
+  return loadPdfLib().then(function(P){
+    return P.PDFDocument.create().then(function(doc){
+      return Promise.all([doc.embedFont(P.StandardFonts.Helvetica), doc.embedFont(P.StandardFonts.HelveticaBold),
+        fetch('amr-logo.png').then(function(r){ return r.ok ? r.arrayBuffer() : null; }).catch(function(){ return null; })])
+      .then(function(a){
+        var reg = a[0], bold = a[1], W = 792, H = 612, pg = doc.addPage([W, H]);
+        var navy = P.rgb(0.09, 0.23, 0.41), blue = P.rgb(0.11, 0.39, 0.77), ink = P.rgb(0.08, 0.13, 0.22), grey = P.rgb(0.36, 0.40, 0.46);
+        // Keep only characters the standard fonts can draw.
+        function safe(t, f){ var set = f.getCharacterSet(); return Array.from(String(t)).map(function(c){ return set.indexOf(c.codePointAt(0)) >= 0 ? c : '?'; }).join(''); }
+        function centre(t, y, size, f, color){ t = safe(t, f); var w = f.widthOfTextAtSize(t, size);
+          while(w > W - 120 && size > 10){ size -= 1; w = f.widthOfTextAtSize(t, size); }
+          pg.drawText(t, { x:(W - w) / 2, y:y, size:size, font:f, color:color }); }
+        pg.drawRectangle({ x:24, y:24, width:W - 48, height:H - 48, borderColor:navy, borderWidth:3 });
+        pg.drawRectangle({ x:34, y:34, width:W - 68, height:H - 68, borderColor:blue, borderWidth:0.75 });
+        var top = H - 110;
+        if(a[2]){ return doc.embedPng(a[2]).then(function(img){ var s = 56 / img.height; pg.drawImage(img, { x:(W - img.width * s) / 2, y:H - 120, width:img.width * s, height:56 }); top = H - 160; return draw(); }).catch(draw); }
+        return draw();
+        function draw(){
+          centre('CERTIFICATE OF COMPLETION', top, 28, bold, navy);
+          centre('AMR Kansas City  |  Field Guide Training', top - 30, 13, reg, grey);
+          centre('This certifies that', top - 80, 14, reg, ink);
+          centre(name, top - 122, 32, bold, ink);
+          centre('Employee ID ' + id, top - 148, 12, reg, grey);
+          centre('has passed the', top - 186, 14, reg, ink);
+          centre(TR.test.name, top - 216, 22, bold, blue);
+          centre('Score ' + L.score + ' of ' + L.total + ' (' + Math.round(L.score / L.total * 100) + '%)   Pass mark ' + Math.round(TR.test.pass * 100) + '%   Date ' + L.date, top - 252, 13, reg, ink);
+          centre('Verification code  ' + code, 92, 15, bold, navy);
+          centre('Supervisors: check this code at ' + location.origin + location.pathname + '#verify', 70, 10, reg, grey);
+          return doc.save();
+        }
+      });
+    });
+  });
+}
+function certFile(name){ return (TRACK === 'aemt' ? 'AEMT-Scope' : 'Chart-Rx') + '-certificate-' + String(name).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.pdf'; }
+function certPdf(name, id, L, code, how){
+  var msg = $('cr-copied'); msg.textContent = 'Making your certificate…';
+  certBytes(name, id, L, code).then(function(bytes){
+    var blob = new Blob([bytes], { type:'application/pdf' }), fname = certFile(name), file = null;
+    try{ file = new File([blob], fname, { type:'application/pdf' }); }catch(e){}
+    if(how === 'share' && file && navigator.canShare && navigator.canShare({ files:[file] })){
+      msg.textContent = '';
+      return navigator.share({ files:[file], title:TR.test.name, text:shareText(name, id, L, code) }).catch(function(){});
+    }
+    if(how === 'share' && navigator.share){ msg.textContent = ''; return navigator.share({ title:TR.test.name, text:shareText(name, id, L, code) }).catch(function(){}); }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 30000);
+    msg.textContent = 'Saved ' + fname + ' — send it to your Clinical Educator.';
+    window.__lastCert = bytes;                 // for tests
+  }).catch(function(){ msg.textContent = 'The certificate could not be made here. Copy the text instead, or take a screenshot.'; });
+}
 function codeFor(id, date, score){
   var s = codeInput(id, date, score);
   try{
@@ -700,6 +833,13 @@ function rankBlock(){
 }
 function badgeCount(){ return Object.keys(BANK.modules).filter(function(m){ return STATS.badges[m]; }).length; }
 function renderHome(){
+  ['charting', 'aemt'].forEach(function(t){ var b = $('trk-' + t); b.classList.toggle('on', t === TRACK); b.setAttribute('aria-pressed', t === TRACK ? 'true' : 'false'); });
+  $('hero-eye').innerHTML = TR.eyebrow; $('home-h').innerHTML = TR.title; $('hero-sub').innerHTML = TR.sub;
+  var live0 = ROUND && ROUND.ids && ROUND.i < ROUND.ids.length;
+  if(STATS.passed){ $('test-t').textContent = 'Your certificate';
+    $('test-sub').textContent = 'Passed ' + STATS.passed.score + '/' + STATS.passed.total + ' on ' + STATS.passed.date; }
+  else { $('test-t').textContent = 'Final test'; $('test-sub').textContent = live0 && !ROUND.test ? 'Finish your round first'
+    : TR.test.size + ' questions \u00b7 pass ' + Math.round(TR.test.pass * 100) + '% for a certificate'; }
   $('st-streak').textContent = STATS.bestStreak || 0;
   $('st-badges').textContent = badgeCount() + '/' + Object.keys(BANK.modules).length;
   $('st-mastered').textContent = masteredIn() + '/' + BANK.questions.length;
@@ -716,7 +856,7 @@ function renderHome(){
   var fx = BANK.modules[featured()];
   $('fx').innerHTML = fx ? '2&times; XP today on <b>' + esc((fx.badge ? fx.badge + ' ' : '') + fx.name) + '</b>' : '';
   var live = ROUND && ROUND.ids && ROUND.i < ROUND.ids.length, due = dueCount();
-  $('btn-start').innerHTML = live ? 'Resume round — question ' + (ROUND.i + 1) + ' of ' + ROUND.ids.length
+  $('btn-start').innerHTML = live ? (ROUND.test ? 'Resume test' : 'Resume round') + ' — question ' + (ROUND.i + 1) + ' of ' + ROUND.ids.length
     : '<span>Start round<br><span class="sub">' + (due ? due + ' due for review' : newCount() + ' new questions') + '</span></span>';
   $('blitz-sub').textContent = STATS.blitzBest ? 'Your best: ' + STATS.blitzBest : '60 seconds of true or false';
   var today = ymd(), d = STATS.daily && STATS.daily.date === today ? STATS.daily : null;
@@ -734,6 +874,72 @@ function startRound(){
             rank0:rankOf(STATS.xp || 0).i, m0:masteredIn() };
   save('round', ROUND);
   askNext();
+}
+function startTest(){
+  if(ROUND && ROUND.ids && ROUND.i < ROUND.ids.length){ askNext(); return; }   // finish what's open first
+  ROUND = { ids:buildTest(), i:0, res:[], xp:0, streak:0, best:0, started:Date.now(), test:true };
+  save('round', ROUND);
+  askNext();
+}
+// In the test the answer is recorded, not marked: right and wrong come at the end.
+function testAnswer(q, choice, el, ok){
+  $('q-body').querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+  var card = $('scard');
+  if(card){ card.classList.add(choice === true ? 'settle-r' : 'settle-l'); card.style.transform = ''; }
+  if(el){ el.classList.add('is-picked'); var mk = el.querySelector('.mark'); if(mk) mk.innerHTML = '<span aria-hidden="true">&#9679;</span><span class="sr">your answer</span>'; }
+  ROUND.res[ROUND.i] = { id:q.id, ok:ok };
+  ROUND.i++;
+  review(q, ok);
+  save('stats', STATS);
+  save('round', ROUND);
+  renderBar('round');
+  var last = ROUND.i >= ROUND.ids.length, s = $('sheet');
+  s.className = 'sheet test';
+  s.innerHTML = '<div class="sheet-in" role="region" aria-label="Answer saved"><div class="verdict"><span class="vtext">Answer saved</span>' +
+    '<span class="tcount">' + ROUND.i + ' of ' + ROUND.ids.length + '</span></div>' +
+    '<button class="btn btn-primary" id="btn-next" type="button">' + (last ? 'See my result &rarr;' : 'Next question &rarr;') + '</button></div>';
+  s.hidden = false;
+  say('Answer saved.');
+  $('btn-next').addEventListener('click', onNext);
+  document.documentElement.style.setProperty('--sheet-h', Math.ceil(s.firstChild.getBoundingClientRect().height) + 'px');
+  if(el && el.scrollIntoView) el.scrollIntoView({ block:'nearest' });
+  $('btn-next').focus({ preventScroll:true });
+}
+function finishTest(){
+  var res = ROUND.res.filter(Boolean), score = res.filter(function(r){ return r.ok; }).length, total = ROUND.ids.length;
+  var need = Math.ceil(TR.test.pass * total), pass = score >= need;
+  var T = { date:ymd(), score:score, total:total, need:need, pass:pass,
+            missed:res.filter(function(r){ return !r.ok; }).map(function(r){ return r.id; }) };
+  STATS.lastTest = T;
+  if(pass) STATS.passed = T;
+  save('stats', STATS);
+  ROUND = null; drop('round');
+  renderTestResult();
+  if(pass && !reduced()) confetti();
+}
+function renderTestResult(){
+  var T = STATS.lastTest; if(!T){ renderHome(); return; }
+  var h = '<h1 class="sr" id="sum-h">Test result</h1><div class="sum-card"><div class="sum-eye">' + esc(TR.test.name) + '</div>' +
+    '<div class="blitz-score"><b>' + T.score + '<small>/' + T.total + '</small></b><span>' + Math.round(T.score / T.total * 100) + '% &middot; pass mark ' + Math.round(TR.test.pass * 100) + '%</span></div>' +
+    (T.pass ? '<div class="pass" role="status">Passed</div><div class="sum-line">You can get your certificate now.</div>'
+            : '<div class="fail-tag" role="status">Not yet</div><div class="sum-line">You need ' + T.need + ' of ' + T.total + '. Review what you missed, practice, and take it again.</div>') +
+    '<div class="sum-actions">' +
+      (T.pass ? '<button class="btn btn-primary" id="btn-cert" type="button">Get my certificate</button>' : '<button class="btn btn-primary" id="btn-retest" type="button">Take the test again</button>') +
+      '<button class="btn btn-ghost" id="btn-t-practice" type="button">Practice round</button>' +
+      '<button class="btn btn-ghost" id="btn-t-home" type="button">' + esc(TR.name) + ' home</button></div></div>';
+  if(T.missed.length){
+    h += '<div class="review"><h2>What you missed</h2>';
+    T.missed.forEach(function(id){ var q = BANK.byId[id]; if(!q) return;
+      h += '<div class="rv"><p>' + (q.context ? esc(q.context) + ' ' : '') + esc(q.type === 'swipe' ? q.prompt + ' (' + (q.answer ? 'True' : 'False') + ')' : q.prompt) + '</p><p>' + esc(q.explain) + '</p></div>'; });
+    h += '</div>';
+  }
+  $('v-sum').innerHTML = h;
+  show('v-sum');
+  if($('btn-cert')) $('btn-cert').addEventListener('click', renderCredit);
+  if($('btn-retest')) $('btn-retest').addEventListener('click', startTest);
+  $('btn-t-practice').addEventListener('click', startRound);
+  $('btn-t-home').addEventListener('click', renderHome);
+  ($('btn-cert') || $('btn-retest')).focus({ preventScroll:true });
 }
 function startDrill(m){
   ROUND = { ids:buildDrill(m), i:0, res:[], xp:0, streak:0, best:0, started:Date.now(), drill:m,
@@ -766,8 +972,10 @@ function renderBar(kind){
       var r = ROUND.res[i];
       h += '<span class="dot' + (r ? (r.ok ? ' ok' : ' no') : (i === ROUND.i ? ' cur' : '')) + '"></span>';
     });
-    dots.innerHTML = h;
-    dots.setAttribute('aria-label', 'Question ' + Math.min(ROUND.i + 1, ROUND.ids.length) + ' of ' + ROUND.ids.length);
+    dots.innerHTML = ROUND.test ? '<span class="tag test">Final test</span><span class="tleft">' + Math.min(ROUND.i + 1, ROUND.ids.length) + '/' + ROUND.ids.length + '</span>' : h;
+    dots.setAttribute('aria-label', (ROUND.test ? 'Final test, question ' : 'Question ') + Math.min(ROUND.i + 1, ROUND.ids.length) + ' of ' + ROUND.ids.length);
+    if(ROUND.test){ $('q-xp').textContent = 'Test'; $('q-streak').innerHTML = '&#128221;'; $('q-streak').classList.remove('hot');
+      $('q-streak').setAttribute('aria-label', 'Final test'); return; }
   }
   var xp = kind === 'daily' ? 0 : ROUND.xp, st = kind === 'daily' ? 0 : ROUND.streak;
   $('q-xp').textContent = xp + ' XP';
@@ -941,6 +1149,7 @@ function answer(choice, el){
   if(!CUR || CUR.answered) return;
   CUR.answered = true;
   var q = CUR.q, ms = performance.now() - CUR.t0, ok = isRight(q, choice);
+  if(CUR.kind === 'round' && ROUND.test){ testAnswer(q, choice, el, ok); return; }
   // Feedback first: everything visible below happens in this same task, so the
   // verdict is on screen in the next frame.
   markAnswer(q, choice, el, ok);
@@ -1096,6 +1305,7 @@ function weakSpot(res){
   return best;
 }
 function finishRound(){
+  if(ROUND.test){ finishTest(); return; }
   var res = ROUND.res.filter(Boolean), score = res.filter(function(r){ return r.ok; }).length, total = ROUND.ids.length;
   var weak = weakSpot(res), drill = ROUND.drill || '';
   STATS.rounds = (STATS.rounds || 0) + 1;
@@ -1138,7 +1348,8 @@ function renderSummary(){
          (due ? due + ' due for review' : newCount() + ' questions you haven&rsquo;t seen') + '</span></span></button>' +
        (m ? '<button class="btn btn-ghost" id="btn-drill" type="button"><span>Drill ' + esc(m.name) + '<br><span class="sub">' + DRILL_SIZE + ' questions on your weak spot</span></span></button>' : '') +
        '<button class="btn btn-ghost" id="btn-s-blitz" type="button"><span>Lightning round<br><span class="sub">60 seconds of true or false</span></span></button>' +
-       (L.drill ? '' : '<button class="btn btn-ghost" id="btn-credit" type="button">Get completion credit</button>') + '</div></div>';
+       '<button class="btn btn-ghost" id="btn-s-test" type="button"><span>' + (STATS.passed ? 'Your certificate' : 'Final test') + '<br><span class="sub">' +
+         (STATS.passed ? 'Passed ' + esc(STATS.passed.date) : TR.test.size + ' questions &middot; pass ' + Math.round(TR.test.pass * 100) + '% for a certificate') + '</span></span></button></div></div>';
   if(L.missed && L.missed.length){
     h += '<div class="review"><h2>What you missed</h2>';
     L.missed.forEach(function(id){ var q = BANK.byId[id]; if(!q) return;
@@ -1150,7 +1361,7 @@ function renderSummary(){
   $('btn-again').addEventListener('click', startRound);
   if($('btn-drill')) $('btn-drill').addEventListener('click', function(){ startDrill(L.weak); });
   $('btn-s-blitz').addEventListener('click', startBlitz);
-  if($('btn-credit')) $('btn-credit').addEventListener('click', renderCredit);
+  $('btn-s-test').addEventListener('click', STATS.passed ? renderCredit : startTest);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
     var rv = $('ring-val'); if(rv) rv.style.strokeDashoffset = (C * (1 - frac)).toFixed(1); }); });
   $('btn-again').focus({ preventScroll:true });
@@ -1259,49 +1470,48 @@ function startDaily(){
 
 /* ── COMPLETION CREDIT ─────────────────────────────────────────────── */
 function renderCredit(){
-  var L = STATS.lastFull || STATS.last; if(!L){ renderHome(); return; }
+  var L = STATS.passed; if(!L){ renderHome(); return; }
   $('v-credit').innerHTML =
-    '<h1 class="h2" id="credit-h">Completion credit</h1>' +
-    '<p class="lede">Score ' + L.score + '/' + L.total + ' on ' + esc(L.date) + '. Your name and ID make the completion code; they are not saved on this device.</p>' +
+    '<h1 class="h2" id="credit-h">Your certificate</h1>' +
+    '<p class="lede">' + esc(TR.test.name) + ': passed ' + L.score + '/' + L.total + ' on ' + esc(L.date) + '. Your name and ID go on the certificate and make its verification code; they are not saved on this device.</p>' +
     '<form id="credit-form" novalidate>' +
       '<div class="field"><label for="cr-name">Name</label><input id="cr-name" autocomplete="name" required></div>' +
       '<div class="field"><label for="cr-id">Employee ID</label><input id="cr-id" autocomplete="off" inputmode="text" required></div>' +
       '<div class="err" id="cr-err" role="alert"></div>' +
-      '<div class="sum-actions"><button class="btn btn-primary" type="submit">Make my completion code</button>' +
-      '<button class="btn btn-ghost" id="cr-back" type="button">Back to results</button></div>' +
+      '<div class="sum-actions"><button class="btn btn-primary" type="submit">Make my certificate</button>' +
+      '<button class="btn btn-ghost" id="cr-back" type="button">Back</button></div>' +
     '</form><div id="cert"></div>';
   show('v-credit');
-  $('cr-back').addEventListener('click', renderSummary);
+  $('cr-back').addEventListener('click', renderHome);
   $('credit-form').addEventListener('submit', function(e){
     e.preventDefault();
     var name = $('cr-name').value.trim(), id = $('cr-id').value.trim();
     if(!name || !id){ $('cr-err').textContent = !name ? 'Enter your name.' : 'Enter your employee ID.'; (!name ? $('cr-name') : $('cr-id')).focus(); return; }
     $('cr-err').textContent = '';
-    codeFor(id, L.date, L.score).then(function(code){ showCert(name, id, L, code); submit(name, id, L); });
+    certCode(id, L.date, L.score, L.total, TRACK).then(function(code){ showCert(name, id, L, code); submit(name, id, L, code); });
   });
   $('cr-name').focus({ preventScroll:true });
 }
 function shareText(name, id, L, code){
-  return 'Chart Rx completion — ' + name + ' (' + id + ') — ' + L.date + ' — score ' + L.score + '/' + L.total + ' — code ' + code;
+  return TR.test.name + ' — passed — ' + name + ' (' + id + ') — ' + L.date + ' — score ' + L.score + '/' + L.total + ' — code ' + code;
 }
 function showCert(name, id, L, code){
   $('credit-form').hidden = true;
   $('cert').innerHTML =
-    '<div class="cert"><div class="tick" aria-hidden="true">&#10003;</div><h2>Chart Rx complete</h2>' +
+    '<div class="cert"><div class="tick" aria-hidden="true">&#10003;</div><h2>' + esc(TR.test.name) + '</h2>' +
     '<dl><dt>Name</dt><dd>' + esc(name) + '</dd><dt>Employee ID</dt><dd>' + esc(id) + '</dd>' +
     '<dt>Date</dt><dd>' + esc(L.date) + '</dd><dt>Score</dt><dd>' + L.score + ' / ' + L.total + '</dd></dl>' +
     '<div class="code" id="cr-code">' + esc(code) + '</div><div class="code-lbl">Verification code</div>' +
-    '<p class="lede" style="margin:12px 0 0">Screenshot this, or send the code to your supervisor.</p>' +
-    '<div class="btn-row" style="margin-top:14px"><button class="btn btn-ghost" id="cr-copy" type="button">Copy</button>' +
-    '<button class="btn btn-primary" id="cr-share" type="button">Share</button></div>' +
+    '<p class="lede" style="margin:12px 0 0">Save the certificate and send it to your Clinical Educator.</p>' +
+    '<button class="btn btn-primary" id="cr-pdf" type="button" style="width:100%;margin-top:14px">Save certificate (PDF)</button>' +
+    '<div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost" id="cr-copy" type="button">Copy text</button>' +
+    '<button class="btn btn-ghost" id="cr-share" type="button">Share</button></div>' +
     '<div class="copied" id="cr-copied" role="status"></div>' +
     '<button class="btn btn-ghost" id="cr-home" type="button" style="width:100%;margin-top:6px">Done</button></div>';
   var text = shareText(name, id, L, code);
   $('cr-copy').addEventListener('click', function(){ copy(text); });
-  $('cr-share').addEventListener('click', function(){
-    if(navigator.share){ navigator.share({ title:'Chart Rx completion', text:text }).catch(function(){}); }
-    else copy(text);
-  });
+  $('cr-pdf').addEventListener('click', function(){ certPdf(name, id, L, code, 'save'); });
+  $('cr-share').addEventListener('click', function(){ certPdf(name, id, L, code, 'share'); });
   $('cr-home').addEventListener('click', renderHome);
   $('cr-copy').focus({ preventScroll:true });
 }
@@ -1317,10 +1527,9 @@ function copy(text){
   try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done, legacy); return; } }catch(e){}
   legacy();
 }
-function submit(name, id, L){
+function submit(name, id, L, code){
   if(!CONFIG.submitUrl) return;
-  var m = L.weak ? BANK.modules[L.weak] : null;
-  var body = JSON.stringify({ name:name, employeeId:id, date:L.date, score:L.score, weakModule:m ? m.name : '' });
+  var body = JSON.stringify({ name:name, employeeId:id, training:TR.test.name, date:L.date, score:L.score, total:L.total, code:code });
   try{
     var ctl = window.AbortController ? new AbortController() : null;
     if(ctl) setTimeout(function(){ ctl.abort(); }, 8000);
@@ -1336,18 +1545,29 @@ function renderVerify(){
     '<h1 class="h2" id="verify-h">Check a completion code</h1>' +
     '<p class="lede">Enter what is on the provider&rsquo;s completion screen. The code is recomputed here; it should match theirs.</p>' +
     '<div class="vbox"><form id="vf">' +
+      '<div class="field"><label for="vf-test">Training</label><select id="vf-test">' +
+        '<option value="charting">' + esc(TRACKS.charting.test.name) + '</option>' +
+        '<option value="aemt">' + esc(TRACKS.aemt.test.name) + '</option>' +
+        '<option value="round">Chart Rx practice round (codes made before Oct 8, 2026)</option></select></div>' +
       '<div class="field"><label for="vf-id">Employee ID</label><input id="vf-id" required></div>' +
       '<div class="field"><label for="vf-date">Date</label><input id="vf-date" type="date" value="' + ymd() + '" required></div>' +
-      '<div class="field"><label for="vf-score">Score (number correct, 0&ndash;8)</label><input id="vf-score" type="number" min="0" max="8" value="8" required></div>' +
+      '<div class="field"><label for="vf-score">Score (number correct)</label><input id="vf-score" type="number" min="0" max="99" value="8" required></div>' +
+      '<div class="field"><label for="vf-total">Out of</label><input id="vf-total" type="number" min="1" max="99" value="' + TRACKS.charting.test.size + '" required></div>' +
       '<button class="btn btn-primary" type="submit" style="width:100%">Show the expected code</button></form>' +
       '<div class="code" id="vf-code" aria-live="polite"></div></div>' +
-    '<div class="vbox health"><b>Question bank ' + esc(BANK.version || '') + ':</b> ' + BANK.questions.length + ' loaded' +
+    '<div class="vbox health"><b>' + esc(TR.name) + ' question bank ' + esc(BANK.version || '') + ':</b> ' + BANK.questions.length + ' loaded' +
       (errs.length ? ', ' + errs.length + ' skipped<ul>' + errs.map(function(e){ return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : ', none skipped.') +
     '</div><button class="btn btn-ghost" id="vf-home" type="button" style="width:100%">Chart Rx home</button>';
   show('v-verify');
+  $('vf-test').addEventListener('change', function(){
+    var t = $('vf-test').value; $('vf-total').value = t === 'round' ? 8 : TRACKS[t].test.size; $('vf-total').disabled = t === 'round';
+  });
   $('vf').addEventListener('submit', function(e){
     e.preventDefault();
-    codeFor($('vf-id').value, $('vf-date').value, parseInt($('vf-score').value, 10)).then(function(c){ $('vf-code').textContent = c; });
+    var t = $('vf-test').value, score = parseInt($('vf-score').value, 10);
+    (t === 'round' ? codeFor($('vf-id').value, $('vf-date').value, score)
+                   : certCode($('vf-id').value, $('vf-date').value, score, parseInt($('vf-total').value, 10), t))
+      .then(function(c){ $('vf-code').textContent = c; });
   });
   $('vf-home').addEventListener('click', function(){ history.replaceState(null, '', location.pathname); renderHome(); });
 }
@@ -1368,7 +1588,7 @@ function nextSwitch(now){
 $('theme-btn').addEventListener('click', function(){
   var t = themeNow() === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', t);
-  save('theme', { theme:t, until:nextSwitch(Date.now()) });
+  gsave('theme', { theme:t, until:nextSwitch(Date.now()) });
   paintThemeBtn();
 });
 
@@ -1418,7 +1638,20 @@ $('btn-daily').addEventListener('click', startDaily);
 $('btn-badges').addEventListener('click', renderBadges);
 $('q-quit').addEventListener('click', function(){ CUR = null; DAILY = null; if(BLITZ){ BLITZ = null; clearInterval(blitzTimer); } renderHome(); });
 $('btn-blitz').addEventListener('click', startBlitz);
-window.addEventListener('hashchange', function(){ if(BANK && location.hash === '#verify') renderVerify(); });
+$('btn-test').addEventListener('click', function(){ STATS.passed ? renderCredit() : startTest(); });
+['charting', 'aemt'].forEach(function(t){ $('trk-' + t).addEventListener('click', function(){
+  if(t === TRACK) return;
+  gsave('track', t);
+  history.replaceState(null, '', location.pathname + '#' + t);
+  location.reload();
+}); });
+document.querySelector('.hdr-sub').innerHTML = TR.hdr;
+document.querySelector('.hdr-title').textContent = TR.name;
+document.title = TR.name + ' — AMR KC Field Guide';
+window.addEventListener('hashchange', function(){
+  if(BANK && location.hash === '#verify') renderVerify();
+  else if((location.hash === '#aemt' || location.hash === '#charting') && location.hash.slice(1) !== TRACK) location.reload();
+});
 
 function boot(raw){
   BANK = validate(raw);
@@ -1433,7 +1666,7 @@ function boot(raw){
   if(ROUND && ROUND.ids && ROUND.i < ROUND.ids.length) askNext();
   else { ROUND = null; renderHome(); }
 }
-fetch(CONFIG.questions, { cache:'no-cache' })
+fetch(CONFIG.questions || TR.questions, { cache:'no-cache' })
   .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(boot)
   .catch(function(){
@@ -1458,7 +1691,10 @@ window.ChartRx = {
   current:function(){ return CUR && CUR.q; },
   featured:function(d){ return featured(d); }, rankOf:rankOf, weekKey:function(d){ return weekKey(d ? new Date(d) : undefined); },
   blitz:function(){ return BLITZ; }, buildDrill:function(m, rng){ return buildDrill(m, rng); },
-  review:function(id, ok){ review(BANK.byId[id], ok); save('stats', STATS); }
+  review:function(id, ok){ review(BANK.byId[id], ok); save('stats', STATS); },
+  track:function(){ return TRACK; }, tracks:TRACKS, buildTest:function(rng){ return buildTest(rng); },
+  certInput:certInput, certCode:certCode, certBytes:function(n, i, L, c){ return certBytes(n, i, L, c); },
+  testResult:function(){ renderTestResult(); }
 };
 })();
 </script>

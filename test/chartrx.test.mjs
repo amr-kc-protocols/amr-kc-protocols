@@ -39,6 +39,11 @@
  *   D7  the lightning round: 60 seconds, score, personal best, misses explained
  *   D8  the weak-spot drill, which never replaces the round used for credit
  *   D9  nothing is ever taken away: no XP, rank or badge is lost for a miss
+ *   E1  the AEMT scope bank: valid, sourced, readable, balanced, no unruled items
+ *   E2  the two tracks keep separate progress; links and the switch pick one
+ *   E3  the final tests: 30 charting (3 a habit) and 25 AEMT, spread evenly
+ *   E4  taking a test: no answers shown until the end, pass and fail paths
+ *   E5  the AEMT pass mark is 90%
  *
  * Run:  cd test && node chartrx.test.mjs
  */
@@ -489,46 +494,67 @@ console.log('\nC11 daily challenge');
   ok('C11 playing it twice does not pay twice', (await stats(a)).xp === xp1, (await stats(a)).xp + ' vs ' + xp1);
   await a.context().close(); await b.context().close(); }
 
-/* ── C12 — completion code, supervisor check, copy and share ─────────── */
-console.log('\nC12 completion');
+/* ── C12 — the certificate: code, PDF, supervisor check ────────────── */
+console.log('\nC12 certificate');
 const expected = (id, date, score) =>
   crypto.createHash('sha256').update(`${String(id).trim()}|${date}|${score}|chartrx-oct26`).digest('hex').slice(0, 8);
-{ const p = await open({ clock: new Date('2026-10-06T14:00:00-05:00'), perms: ['clipboard-read', 'clipboard-write'],
-                         seed: seedRound(EIGHT) });
-  await p.waitForSelector('#v-q:not([hidden])');
-  for (let i = 0; i < 8; i++) { await answer(p, i !== 3); await p.click('#btn-next'); if (i < 7) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1); }
-  await p.click('#btn-credit');
+const certExpected = (id, date, score, total, track) =>
+  crypto.createHash('sha256').update(`${String(id).trim()}|${date}|${score}/${total}|${track}|chartrx-oct26`).digest('hex').slice(0, 8);
+const PASSED = { date: '2026-10-06', score: 27, total: 30, need: 24, pass: true, missed: [] };
+async function pdfText(bytes) {
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(bytes) }).promise;
+  const page = await doc.getPage(1); const t = await page.getTextContent();
+  return { pages: doc.numPages, text: t.items.map(x => x.str).join(' ') };
+}
+{ const p = await open({ clock: new Date('2026-10-06T14:00:00-05:00'), perms: ['clipboard-read', 'clipboard-write'], seed: { stats: { passed: PASSED } } });
+  await p.waitForSelector('#v-home:not([hidden])');
+  ok('C12 home offers the certificate once the test is passed', /Your certificate/.test(await p.textContent('#btn-test')) && /27\/30/.test(await p.textContent('#btn-test')));
+  await p.click('#btn-test');
   await p.click('#credit-form button[type=submit]');
   ok('C12 a blank name is refused', /name/i.test(await p.textContent('#cr-err')));
   await p.fill('#cr-name', 'Test Medic'); await p.fill('#cr-id', '  E10293  ');
   await p.click('#credit-form button[type=submit]');
   await p.waitForSelector('#cr-code');
-  const code = await p.textContent('#cr-code');
-  ok('C12 the code is SHA-256 of ID|date|score|salt, first 8 hex', code === expected('E10293', '2026-10-06', 7), code + ' vs ' + expected('E10293', '2026-10-06', 7));
+  const code = await p.textContent('#cr-code'), want = certExpected('E10293', '2026-10-06', 27, 30, 'charting');
+  ok('C12 the code is SHA-256 of ID|date|score/total|track|salt, first 8 hex', code === want, code + ' vs ' + want);
   const cert = await p.textContent('.cert');
-  ok('C12 the screen shows name, ID, date and score', /Test Medic/.test(cert) && /E10293/.test(cert) && /2026-10-06/.test(cert) && /7 \/ 8/.test(cert));
+  ok('C12 the screen names the test, the person, the date and the score', /Documentation Final Test/.test(cert) && /Test Medic/.test(cert) && /E10293/.test(cert) && /2026-10-06/.test(cert) && /27 \/ 30/.test(cert));
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#cr-pdf')]);
+  const bytes = await readFile(await dl.path());
+  ok('C12 Save gives a PDF named for the person', /^Chart-Rx-certificate-Test-Medic\.pdf$/.test(dl.suggestedFilename()) && bytes.slice(0, 4).toString() === '%PDF', dl.suggestedFilename());
+  const pt = await pdfText(bytes);
+  ok('C12 the PDF is one page with the name, test, score, date and code', pt.pages === 1 && /Test Medic/.test(pt.text) && /Documentation Final Test/.test(pt.text) &&
+     /27 of 30/.test(pt.text) && /2026-10-06/.test(pt.text) && pt.text.includes(code) && /#verify/.test(pt.text), pt.text.slice(0, 200));
   await p.click('#cr-copy');
   await p.waitForFunction(() => /Copied/.test(document.getElementById('cr-copied').textContent));
   const clip = await p.evaluate(() => navigator.clipboard.readText());
-  ok('C12 Copy puts the completion and the code on the clipboard', clip.includes(code) && clip.includes('7/8'), clip);
-  await p.evaluate(() => navigator.clipboard.writeText(''));
-  await p.evaluate(() => { delete Navigator.prototype.share; });
-  await p.click('#cr-share');
-  await p.waitForTimeout(150);
-  ok('C12 Share falls back to copying where there is no share sheet', (await p.evaluate(() => navigator.clipboard.readText())).includes(code));
+  ok('C12 Copy puts the test, score and code on the clipboard', clip.includes(code) && clip.includes('27/30') && /Final Test/.test(clip), clip);
+  await p.evaluate(() => { delete Navigator.prototype.share; delete Navigator.prototype.canShare; });
+  const [dl2] = await Promise.all([p.waitForEvent('download'), p.click('#cr-share')]);
+  ok('C12 Share falls back to saving the PDF where there is no share sheet', /\.pdf$/.test(dl2.suggestedFilename()));
   const stored = await p.evaluate(() => Object.keys(localStorage).map(k => localStorage.getItem(k)).join('\n'));
   ok('C12 the name and ID are not saved on the device', !/Test Medic|E10293/.test(stored));
-  // The plain-JS SHA-256 the page falls back to agrees with Web Crypto and Node.
+  const odd = await p.evaluate(async () => { const b = await window.ChartRx.certBytes('Zhāng 張 O’Brien', 'E1', { date: '2026-10-06', score: 27, total: 30 }, 'abcd1234'); return Array.from(b.slice(0, 5)); });
+  ok('C12 a name the PDF font cannot draw still makes a certificate', String.fromCharCode(...odd) === '%PDF-');
   const inputs = ['', 'abc', 'E1|2026-10-06|8|chartrx-oct26', 'é—ü 漢字 ' + 'x'.repeat(130)];
   const js = await p.evaluate((xs) => xs.map(x => window.ChartRx.sha256js(x)), inputs);
   ok('C12 the fallback SHA-256 matches Node on every input', js.every((h, i) => h === crypto.createHash('sha256').update(inputs[i]).digest('hex')), js[0]);
+  ok('C12 no errors', p._errs.length === 0, p._errs.join('|'));
   await p.context().close(); }
 { const p = await open({ clock: new Date('2026-10-06T14:00:00-05:00') });
   await p.goto(PAGE + '#verify'); await p.waitForSelector('#vf');
-  await p.fill('#vf-id', 'E10293'); await p.fill('#vf-date', '2026-10-06'); await p.fill('#vf-score', '7');
-  await p.click('#vf button[type=submit]');
-  await p.waitForFunction(() => document.getElementById('vf-code').textContent.length === 8);
-  ok('C12 the supervisor check reproduces the code', (await p.textContent('#vf-code')) === expected('E10293', '2026-10-06', 7));
+  const check = async (test, score, total) => {
+    await p.selectOption('#vf-test', test); await p.fill('#vf-id', 'E10293'); await p.fill('#vf-date', '2026-10-06');
+    await p.fill('#vf-score', String(score)); if (total) await p.fill('#vf-total', String(total));
+    await p.evaluate(() => { document.getElementById('vf-code').textContent = ''; });
+    await p.click('#vf button[type=submit]');
+    await p.waitForFunction(() => document.getElementById('vf-code').textContent.length === 8);
+    return p.textContent('#vf-code'); };
+  ok('C12 the supervisor check reproduces a Chart Rx test code', (await check('charting', 27, 30)) === certExpected('E10293', '2026-10-06', 27, 30, 'charting'));
+  ok('C12 and an AEMT test code', (await check('aemt', 24, 25)) === certExpected('E10293', '2026-10-06', 24, 25, 'aemt'));
+  ok('C12 a code from one test does not pass for the other', certExpected('E10293', '2026-10-06', 24, 25, 'aemt') !== certExpected('E10293', '2026-10-06', 24, 25, 'charting'));
+  ok('C12 codes made before the tests still check out', (await check('round', 7)) === expected('E10293', '2026-10-06', 7));
   ok('C12 and reports the bank as healthy', (await p.textContent('.health')).includes(`${Q.length} loaded, none skipped`));
   await p.context().close(); }
 
@@ -537,30 +563,30 @@ console.log('\nC13 submit');
 for (const mode of ['ok', 'down']) {
   const hook = 'https://hooks.example.test/chartrx';
   const p = await open({ init: 'window.CHARTRX_CONFIG = { submitUrl: ' + JSON.stringify(hook) + ' };', clock: new Date('2026-10-06T14:00:00-05:00'),
-                         seed: seedRound([ofModule('meds')[0], ...PER_MODULE.filter(id => !id.startsWith('meds'))].slice(0, 8)) });
+                         seed: { stats: { passed: PASSED } } });
   let body = null;
   await p.route(hook, (r) => { body = r.request().postData(); return mode === 'ok' ? r.fulfill({ status: 200, body: 'ok' }) : r.abort(); });
-  await p.reload(); await p.waitForSelector('#v-q:not([hidden])');
-  for (let i = 0; i < 8; i++) { await answer(p, i !== 0); await p.click('#btn-next'); if (i < 7) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1); }
-  await p.click('#btn-credit'); await p.fill('#cr-name', 'Test Medic'); await p.fill('#cr-id', 'E10293');
+  await p.reload(); await p.waitForSelector('#v-home:not([hidden])');
+  await p.click('#btn-test'); await p.fill('#cr-name', 'Test Medic'); await p.fill('#cr-id', 'E10293');
   await p.click('#credit-form button[type=submit]');
   await p.waitForSelector('#cr-code'); await p.waitForTimeout(300);
   if (mode === 'ok') {
     const j = body && JSON.parse(body);
     ok('C13 it POSTs the completion', !!j);
-    ok('C13 with exactly name, employeeId, date, score, weakModule', j && JSON.stringify(Object.keys(j).sort()) ===
-       JSON.stringify(['date', 'employeeId', 'name', 'score', 'weakModule']), j && Object.keys(j).join(','));
-    ok('C13 the values are right', j && j.score === 7 && j.date === '2026-10-06' && j.weakModule === BANK.modules.meds.name, body);
+    ok('C13 with exactly name, employeeId, training, date, score, total, code', j && JSON.stringify(Object.keys(j).sort()) ===
+       JSON.stringify(['code', 'date', 'employeeId', 'name', 'score', 'total', 'training']), j && Object.keys(j).join(','));
+    ok('C13 the values are right', j && j.score === 27 && j.total === 30 && j.date === '2026-10-06' && /Documentation Final Test/.test(j.training) &&
+       j.code === certExpected('E10293', '2026-10-06', 27, 30, 'charting'), body);
   } else {
     ok('C13 an unreachable endpoint still leaves the code on screen', (await p.textContent('#cr-code')).length === 8);
     ok('C13 and fails silently', p._errs.length === 0, p._errs.join('|'));
   }
   await p.context().close();
 }
-{ const p = await open({ seed: seedRound([MC[0]]) });
+{ const p = await open({ seed: { stats: { passed: PASSED } } });
   let posted = false; await p.route('**/*', (r) => { if (r.request().method() === 'POST') posted = true; return r.continue(); });
-  await p.reload(); await p.waitForSelector('#v-q:not([hidden])');
-  await answer(p, true); await p.click('#btn-next'); await p.click('#btn-credit');
+  await p.reload(); await p.waitForSelector('#v-home:not([hidden])');
+  await p.click('#btn-test');
   await p.fill('#cr-name', 'A'); await p.fill('#cr-id', 'B'); await p.click('#credit-form button[type=submit]');
   await p.waitForSelector('#cr-code'); await p.waitForTimeout(200);
   ok('C13 with no submitUrl set, nothing leaves the device', !posted);
@@ -655,10 +681,10 @@ console.log('\nC18 Field Guide');
   const p = await ctx.newPage(); await p.goto(ORIGIN + '/index.html'); await p.waitForTimeout(300);
   const gate = p.getByRole('button', { name: /I Understand/i });
   if (await gate.count()) { await gate.first().click(); await p.waitForTimeout(250); }
-  ok('C18 it is the featured new training on the home screen', (await p.locator('.feat-card.feat-hero[href="chart-rx.html"]').count()) === 1);
+  ok('C18 it is the featured new training on the home screen', (await p.locator('.feat-card.feat-hero[href="chart-rx.html#charting"]').count()) === 1);
   await p.locator('#nav .nb[data-tab="more"]').click(); await p.waitForTimeout(250);
-  ok('C18 More lists it once, under Quizzes', (await p.locator('#lv a[href="chart-rx.html"]').count()) === 1 &&
-     (await p.locator('#more-quiz + .more-list a[href="chart-rx.html"]').count()) === 1);
+  ok('C18 More lists it once, under Quizzes', (await p.locator('#lv a[href="chart-rx.html#charting"]').count()) === 1 &&
+     (await p.locator('#more-quiz + .more-list a[href="chart-rx.html#charting"]').count()) === 1);
   await p.goto(PAGE); await p.waitForSelector('#v-home:not([hidden])');
   ok('C18 and its header leads back to the Field Guide', (await p.getAttribute('.hdr a.hdr-btn', 'href')) === 'index.html');
   await ctx.close(); }
@@ -690,9 +716,18 @@ console.log('\nC19 accessibility (axe-core)');
       if (i < ids.length - 1) await p.waitForFunction((n) => window.ChartRx.round().i === n, i + 1);
     }
     await p.waitForSelector('#v-sum:not([hidden])'); await p.waitForTimeout(900); await audit('summary');
-    await p.click('#btn-credit'); await audit('credit form');
+    await p.click('#btn-s-test'); await p.waitForSelector('#v-q:not([hidden])'); await audit('test question');
+    { const q = await cur(p); await p.click(pickSel(q, true)); } await p.waitForTimeout(400); await audit('test answer saved');
+    await p.click('#q-quit');
+    for (const pass of [false, true]) {
+      await p.evaluate((pass) => { const S = window.ChartRx.stats(), B = window.ChartRx.bank();
+        S.lastTest = { date: '2026-10-06', score: pass ? 27 : 20, total: 30, need: 24, pass, missed: B.questions.slice(0, 3).map(q => q.id) };
+        if (pass) S.passed = S.lastTest; window.ChartRx.testResult(); }, pass);
+      await p.waitForTimeout(400); await audit(pass ? 'test passed' : 'test not passed');
+    }
+    await p.click('#btn-cert'); await audit('certificate form');
     await p.fill('#cr-name', 'A'); await p.fill('#cr-id', 'B'); await p.click('#credit-form button[type=submit]');
-    await p.waitForSelector('#cr-code'); await audit('completion');
+    await p.waitForSelector('#cr-code'); await audit('certificate');
     await p.click('#cr-home'); await audit('home');
     await p.click('#btn-badges'); await audit('badges');
     await p.click('#btn-b-home'); await p.click('#btn-blitz'); await p.waitForSelector('#v-q:not([hidden])');
@@ -700,7 +735,9 @@ console.log('\nC19 accessibility (axe-core)');
     await p.click('.tf .opt[data-id="true"]'); await p.waitForTimeout(100); await audit('lightning answered');
     await p.clock.runFor(61000); await p.waitForSelector('#v-sum:not([hidden])'); await p.waitForTimeout(900);
     await audit('lightning results');
-    await p.goto(PAGE + '#verify'); await p.waitForSelector('#vf'); await audit('supervisor check');
+    await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#aemt'); await p.waitForSelector('#v-home:not([hidden])'); await audit('AEMT home');
+    await p.click('#btn-start'); await p.waitForSelector('#v-q:not([hidden])'); await audit('AEMT question');
+    await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#verify'); await p.waitForSelector('#vf'); await audit('supervisor check');
     ok(`C19 ${theme}: no axe violations on any screen`, found.length === 0, [...new Set(found)].slice(0, 12).join(' | '));
     await p.context().close();
   }
@@ -970,6 +1007,123 @@ console.log('\nD9 nothing is ever taken away');
   ok('D9 a round of misses keeps every XP point, the rank and the badge', s.xp === 300 && !!s.badges[qOf(ids[0]).module] && s.mod[qOf(ids[0]).module] === 9, JSON.stringify([s.xp, s.badges, s.mod]));
   ok('D9 and the summary still points to what is next', (await p.locator('.goals li').count()) > 0);
   await p.context().close(); }
+
+/* ── E — AEMT scope check and the final tests ───────────────────────── */
+const AEMT = JSON.parse(await readFile(join(ROOT, 'chart-rx/aemt-scope.json'), 'utf8'));
+const AQ = AEMT.questions;
+console.log('\nE1 AEMT scope bank');
+{ const p = await open({ clock: new Date(DAY) }); await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#aemt');
+  await p.waitForFunction(() => window.ChartRx && window.ChartRx.bank());
+  const b = await p.evaluate(() => { const B = window.ChartRx.bank(); return { n: B.questions.length, errors: B.errors, track: window.ChartRx.track() }; });
+  ok('E1 #aemt opens the AEMT track', b.track === 'aemt');
+  ok(`E1 every AEMT question passes the schema (${AQ.length})`, b.errors.length === 0 && b.n === AQ.length && AQ.length >= 60, b.errors.join(' | '));
+  await p.context().close(); }
+ok('E1 every AEMT question cites its protocol source', AQ.every(q => typeof q.source === 'string' && /Protocol/.test(q.source)), AQ.filter(q => !q.source).map(q => q.id).join(','));
+ok('E1 prompts and statements are 12 words or fewer', AQ.every(q => q.prompt.split(/\s+/).length <= 12), AQ.filter(q => q.prompt.split(/\s+/).length > 12).map(q => q.id).join(','));
+ok('E1 explanations are two sentences or fewer', AQ.every(q => q.explain.trim().split(/(?<=[.!?])\s+/).filter(Boolean).length <= 2));
+ok('E1 every "tap the drip" chart has exactly one answer', AQ.filter(q => q.type === 'spot').every(q => q.answer.length === 1));
+{ const groups = {}; AQ.filter(q => q.options).forEach(q => { const n = q.options.length; (groups[n] = groups[n] || []).push(q.options.findIndex(o => o.id === q.answer)); });
+  const off = Object.entries(groups).filter(([n, idx]) => idx.length >= 9).filter(([n, idx]) =>
+    [...Array(+n).keys()].some(i => { const share = idx.filter(x => x === i).length / idx.length; return share < 0.5 / n || share > 1.5 / n; }));
+  ok('E1 right answers are spread across the positions', off.length === 0, JSON.stringify(off.map(([n, i]) => [n, i.length]))); }
+{ const W = AQ.filter(q => q.options), L = W.filter(q => { const s2 = q.options.map(o => [o.text.length, o.id]).sort((x, y) => y[0] - x[0]); return s2[0][1] === q.answer && s2[0][0] > s2[1][0]; });
+  ok('E1 the right answer is usually not the longest choice', L.length <= W.length / 2, L.length + ' of ' + W.length);
+  const sw = AQ.filter(q => q.type === 'swipe');
+  ok('E1 true/false statements are a real mix', sw.filter(q => q.answer).length >= sw.length / 3 && sw.filter(q => !q.answer).length >= sw.length / 3); }
+ok('E1 items awaiting a Medical Director ruling are left out (TXA, glucagon)', !/tranexamic|\bTXA\b|glucagon/i.test(JSON.stringify(AQ)));
+ok('E1 every module has enough questions for the test', Object.keys(AEMT.modules).every(m => AQ.filter(q => q.module === m).length >= 8));
+
+console.log('\nE2 two tracks, separate progress');
+{ const p = await open({ clock: new Date(DAY), seed: { stats: { xp: 500, passed: PASSED } } });
+  await p.waitForSelector('#v-home:not([hidden])');
+  ok('E2 charting is the default track', (await p.evaluate(() => window.ChartRx.track())) === 'charting' && /Chart/.test(await p.textContent('#home-h')));
+  await p.click('#trk-aemt'); await p.waitForFunction(() => window.ChartRx && window.ChartRx.bank() && window.ChartRx.track() === 'aemt');
+  await p.waitForSelector('#v-home:not([hidden])');
+  ok('E2 the switch opens the AEMT track', /AEMT/.test(await p.textContent('#home-h')) && /AEMT/.test(await p.title()));
+  ok('E2 with its own progress: charting XP and certificate do not carry over', (await st(p)).xp === 0 && !(await st(p)).passed && /Final test/.test(await p.textContent('#btn-test')));
+  await p.goto(ORIGIN + '/blank'); await p.goto(PAGE);
+  await p.waitForFunction(() => window.ChartRx && window.ChartRx.bank());
+  ok('E2 a plain link reopens the last track used', (await p.evaluate(() => window.ChartRx.track())) === 'aemt');
+  await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#charting');
+  await p.waitForFunction(() => window.ChartRx && window.ChartRx.bank());
+  ok('E2 #charting opens charting, with its progress intact', (await p.evaluate(() => window.ChartRx.track())) === 'charting' && (await st(p)).xp === 500);
+  ok('E2 no errors', p._errs.length === 0, p._errs.join('|'));
+  await p.context().close(); }
+{ const p = await open({ w: 1280, h: 900 }); await p.goto(ORIGIN + '/index.html'); await p.waitForTimeout(800);
+  await p.evaluate(() => { const b = [...document.querySelectorAll('button,a')].find(x => /^More/.test((x.textContent || '').trim())); if (b) b.click(); });
+  await p.waitForTimeout(400);
+  ok('E2 the Field Guide lists the AEMT Scope Check', (await p.locator('a[href="chart-rx.html#aemt"]').count()) >= 1);
+  await p.context().close(); }
+
+console.log('\nE3 the final tests');
+for (const [track, size, perMod] of [['charting', 30, 3], ['aemt', 25, 6]]) {
+  const p = await open({ clock: new Date(DAY) }); await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#' + track);
+  await p.waitForFunction(() => window.ChartRx && window.ChartRx.bank());
+  const r = await p.evaluate(([size, perMod]) => { const B = window.ChartRx.bank(), bad = [];
+    for (let i = 0; i < 200; i++) { const ids = window.ChartRx.buildTest(), per = {};
+      ids.forEach(id => per[B.byId[id].module] = (per[B.byId[id].module] || 0) + 1);
+      if (ids.length !== size || new Set(ids).size !== size || !ids.some(id => B.byId[id].type === 'spot') ||
+          Object.keys(B.modules).some(m => (per[m] || 0) < perMod - 1)) bad.push(JSON.stringify(per)); }
+    return bad; }, [size, perMod]);
+  ok(`E3 ${track}: ${size} questions, every module covered evenly, at least one chart to tap`, r.length === 0, r.slice(0, 2).join(' '));
+  await p.context().close();
+}
+
+console.log('\nE4 taking a test');
+async function takeTest(p, wrongCount) {
+  await p.click('#btn-test'); await p.waitForSelector('#v-q:not([hidden])');
+  const n = (await round(p)).ids.length; let shown = false;
+  for (let i = 0; i < n; i++) {
+    await answer(p, i >= wrongCount);
+    const sh = await p.textContent('#sheet');
+    if (/Correct|Not quite|✓ Answer/.test(sh) || (await p.locator('#q-body .is-right, #q-body .is-wrong').count())) shown = true;
+    await p.click('#btn-next');
+    if (i < n - 1) await p.waitForFunction((k) => window.ChartRx.round().i === k, i + 1);
+  }
+  await p.waitForSelector('#v-sum:not([hidden])');
+  return { n, shown };
+}
+{ const p = await open({ clock: new Date(DAY) });
+  await p.waitForSelector('#v-home:not([hidden])');
+  const t = await takeTest(p, 3);
+  ok('E4 the test is 30 questions', t.n === 30, t.n);
+  ok('E4 no right or wrong is shown until the end', !t.shown);
+  ok('E4 27 of 30 passes', /Passed/.test(await p.textContent('#v-sum')) && (await st(p)).passed && (await st(p)).passed.score === 27);
+  ok('E4 the result lists what was missed, with explanations', (await p.locator('.review .rv').count()) === 3);
+  ok('E4 a pass leads straight to the certificate', (await p.locator('#btn-cert').count()) === 1);
+  await p.click('#btn-cert');
+  ok('E4 the certificate form names the test', /Documentation Final Test/.test(await p.textContent('#v-credit')));
+  ok('E4 no errors', p._errs.length === 0, p._errs.join('|'));
+  await p.context().close(); }
+{ const p = await open({ clock: new Date(DAY) });
+  await p.waitForSelector('#v-home:not([hidden])');
+  await takeTest(p, 7);
+  ok('E4 23 of 30 is not yet a pass', /Not yet/.test(await p.textContent('#v-sum')) && !(await st(p)).passed);
+  ok('E4 and offers a retake, not a certificate', (await p.locator('#btn-cert').count()) === 0 && (await p.locator('#btn-retest').count()) === 1);
+  await p.click('#btn-t-home');
+  ok('E4 home still offers the test', /Final test/.test(await p.textContent('#btn-test')));
+  await p.context().close(); }
+{ // Leaving mid-test and coming back resumes it.
+  const p = await open({ clock: new Date(DAY) });
+  await p.waitForSelector('#v-home:not([hidden])');
+  await p.click('#btn-test'); await p.waitForSelector('#v-q:not([hidden])');
+  await answer(p, true); await p.click('#btn-next'); await p.waitForFunction(() => window.ChartRx.round().i === 1);
+  await p.reload(); await p.waitForSelector('#v-q:not([hidden])');
+  ok('E4 a test resumes where it was left', (await round(p)).test && (await round(p)).i === 1);
+  await p.context().close(); }
+
+console.log('\nE5 AEMT pass mark');
+for (const [wrong, passes] of [[3, false], [2, true]]) {
+  const p = await open({ clock: new Date(DAY) }); await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#aemt');
+  await p.waitForSelector('#v-home:not([hidden])');
+  const t = await takeTest(p, wrong);
+  ok(`E5 AEMT: ${t.n - wrong} of ${t.n} ${passes ? 'passes' : 'does not pass'} (90% needed)`, t.n === 25 && /Passed/.test(await p.textContent('#v-sum')) === passes);
+  if (passes) { await p.click('#btn-cert'); await p.fill('#cr-name', 'Test Medic'); await p.fill('#cr-id', 'E10293');
+    await p.click('#credit-form button[type=submit]'); await p.waitForSelector('#cr-code');
+    ok('E5 the AEMT certificate code uses the AEMT track', (await p.textContent('#cr-code')) === certExpected('E10293', '2026-10-06', 23, 25, 'aemt'));
+    ok('E5 and names the AEMT test', /AEMT Scope of Practice Test/.test(await p.textContent('.cert'))); }
+  await p.context().close();
+}
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));

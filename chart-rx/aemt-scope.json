@@ -1,0 +1,1953 @@
+{
+ "version": "2026-10.1",
+ "writing_guide": [
+  "Every answer comes from the AMR Kansas City 2026 Medical Protocols; each question cites its section in 'source'.",
+  "Items awaiting a Medical Director ruling (TXA, glucagon, atropine auto-injector, oral diphenhydramine) are left out until ruled on.",
+  "Prompts and statements 12 words or fewer; explanations two sentences or fewer."
+ ],
+ "modules": {
+  "drips": {
+   "name": "Hospital Drips",
+   "badge": "💧",
+   "tip": "Monitor only what's on the §IV-B list. Anything else: call dispatch before you leave."
+  },
+  "hands": {
+   "name": "Monitor, Don't Titrate",
+   "badge": "🎛️",
+   "tip": "Watch the patient and the pump. When in doubt, stop it, keep NS running and call DMO."
+  },
+  "procs": {
+   "name": "Procedures & Devices",
+   "badge": "🩺",
+   "tip": "Chest tubes, IO and deep trach suction are yours. Vents, art lines, central lines and pacing aren't."
+  },
+  "meds": {
+   "name": "Your Own Meds",
+   "badge": "💊",
+   "tip": "Drug, route and indication all have to be in scope."
+  }
+ },
+ "questions": [
+  {
+   "id": "aemt-drip-01",
+   "module": "drips",
+   "type": "mc",
+   "context": "Nurse: \"Just normal saline at 125 mL/hr.\"",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Only if you turn it off first"
+    }
+   ],
+   "answer": "a",
+   "explain": "Normal saline is on the AEMT list. You may monitor it and adjust the rate per standing orders.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-02",
+   "module": "drips",
+   "type": "mc",
+   "context": "Norepinephrine (Levophed) running at 8 mcg/min.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if you don't change the rate"
+    }
+   ],
+   "answer": "b",
+   "explain": "Vasopressors aren't on the AEMT list. Call dispatch before you leave; this is a Paramedic transport.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-03",
+   "module": "drips",
+   "type": "mc",
+   "context": "Heparin running at 18 units/kg/hr for a PE.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if the pump stays locked"
+    },
+    {
+     "id": "c",
+     "text": "No — call dispatch for a Paramedic"
+    }
+   ],
+   "answer": "c",
+   "explain": "Heparin isn't on the AEMT list. You may not depart with it running; call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-04",
+   "module": "drips",
+   "type": "mc",
+   "context": "Fentanyl drip at 50 mcg/hr for rib fractures. Alert, not intubated.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "No — opioid drips are never AEMT"
+    }
+   ],
+   "answer": "a",
+   "explain": "Fentanyl is on the list for non-intubated, non-sedated patients. Watch breathing and keep naloxone ready.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-05",
+   "module": "drips",
+   "type": "mc",
+   "context": "Fentanyl drip at 100 mcg/hr. Patient is intubated and sedated.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Yes — fentanyl is on your list"
+    }
+   ],
+   "answer": "b",
+   "explain": "Fentanyl is AEMT-monitorable only in non-intubated, non-sedated patients. Intubated or sedated makes it a Paramedic call.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-06",
+   "module": "drips",
+   "type": "mc",
+   "context": "Midazolam (Versed) drip for sedation. Patient is intubated.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "Yes — midazolam is in your formulary"
+    },
+    {
+     "id": "c",
+     "text": "No — call dispatch for a Paramedic"
+    }
+   ],
+   "answer": "c",
+   "explain": "AEMT midazolam is limited to active seizures. A sedation drip is a Paramedic transport.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-07",
+   "module": "drips",
+   "type": "mc",
+   "context": "Propofol running at 20 mcg/kg/min.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if the patient is breathing on their own"
+    }
+   ],
+   "answer": "a",
+   "explain": "Propofol isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-08",
+   "module": "drips",
+   "type": "mc",
+   "context": "Dexmedetomidine (Precedex) at 0.4 mcg/kg/hr.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it causes little breathing depression"
+    }
+   ],
+   "answer": "b",
+   "explain": "Precedex isn't on the AEMT list, however gentle it seems. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-09",
+   "module": "drips",
+   "type": "mc",
+   "context": "Insulin drip at 6 units/hr for DKA.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if you check glucose every 30 minutes"
+    },
+    {
+     "id": "c",
+     "text": "No — call dispatch for a Paramedic"
+    }
+   ],
+   "answer": "c",
+   "explain": "Insulin isn't on the AEMT list. It's a Paramedic transport; call dispatch before you leave.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-10",
+   "module": "drips",
+   "type": "mc",
+   "context": "Diltiazem drip at 10 mg/hr for A-fib with RVR.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if the heart rate is under 110"
+    }
+   ],
+   "answer": "a",
+   "explain": "Diltiazem isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-11",
+   "module": "drips",
+   "type": "mc",
+   "context": "Nicardipine drip for blood pressure after a brain bleed.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if BP is at the ordered target"
+    }
+   ],
+   "answer": "b",
+   "explain": "Nicardipine isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-12",
+   "module": "drips",
+   "type": "mc",
+   "context": "Hydromorphone (Dilaudid) drip for pain. Alert, not intubated.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's an opioid like fentanyl"
+    },
+    {
+     "id": "c",
+     "text": "No — call dispatch for a Paramedic"
+    }
+   ],
+   "answer": "c",
+   "explain": "Only fentanyl is on the AEMT opioid list; hydromorphone isn't. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-13",
+   "module": "drips",
+   "type": "mc",
+   "context": "A unit of packed red cells is hanging.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if the unit was checked at the bedside"
+    }
+   ],
+   "answer": "a",
+   "explain": "Blood products are Paramedic-managed. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B and §IV-C6 (pp. 74–78)"
+  },
+  {
+   "id": "aemt-drip-14",
+   "module": "drips",
+   "type": "mc",
+   "context": "3% saline running for a low sodium.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it's saline, like NS"
+    }
+   ],
+   "answer": "b",
+   "explain": "Hypertonic saline isn't normal saline and isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-15",
+   "module": "drips",
+   "type": "mc",
+   "context": "Magnesium sulfate drip for preeclampsia.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if reflexes are checked en route"
+    },
+    {
+     "id": "c",
+     "text": "No — call dispatch for a Paramedic"
+    }
+   ],
+   "answer": "c",
+   "explain": "Magnesium is Paramedic scope and isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-16",
+   "module": "drips",
+   "type": "mc",
+   "context": "Nitroglycerin drip for chest pain.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "c",
+     "text": "Yes — you give nitro SL already"
+    }
+   ],
+   "answer": "a",
+   "explain": "SL nitro is in your scope, but a nitro drip isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-17",
+   "module": "drips",
+   "type": "mc",
+   "context": "Esmolol drip for heart rate control.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if the rate never changes"
+    }
+   ],
+   "answer": "b",
+   "explain": "Esmolol isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-18",
+   "module": "drips",
+   "type": "mc",
+   "context": "Dobutamine at 5 mcg/kg/min for heart failure.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's not a vasopressor"
+    },
+    {
+     "id": "c",
+     "text": "No — call dispatch for a Paramedic"
+    }
+   ],
+   "answer": "c",
+   "explain": "Inotropes like dobutamine aren't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-19",
+   "module": "drips",
+   "type": "mc",
+   "context": "Amiodarone running at 0.5 mg/min after a VT episode.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — monitor it, don't change the rate"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "Yes — and titrate it as the nurse asks"
+    }
+   ],
+   "answer": "a",
+   "explain": "Amiodarone is on the AEMT list to monitor. Don't adjust the rate without explicit orders and DMO guidance.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-20",
+   "module": "drips",
+   "type": "mc",
+   "context": "Lidocaine running at 2 mg/min.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — monitor it and watch for toxicity"
+    },
+    {
+     "id": "c",
+     "text": "Yes — raise it if the patient feels fine"
+    }
+   ],
+   "answer": "b",
+   "explain": "Lidocaine is on the AEMT list to monitor. Watch for ringing ears, numb lips and confusion.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-21",
+   "module": "drips",
+   "type": "mc",
+   "context": "NS with 20 mEq KCl, running on a pump.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — gravity is fine if it runs slowly"
+    },
+    {
+     "id": "c",
+     "text": "Yes — and it must stay on a pump"
+    }
+   ],
+   "answer": "c",
+   "explain": "NS with KCl is on the AEMT list. Potassium runs on a pump at all times; free-flow potassium can stop the heart.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-22",
+   "module": "drips",
+   "type": "mc",
+   "context": "Vancomycin running in NS; about an hour left.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "No — antibiotics are Paramedic only"
+    }
+   ],
+   "answer": "a",
+   "explain": "NS with an antibiotic like vancomycin is on the AEMT list. Watch for flushing and itching (red man syndrome).",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-23",
+   "module": "drips",
+   "type": "mc",
+   "context": "Piperacillin-tazobactam (Zosyn) piggyback running.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "c",
+     "text": "No — piggybacks are Paramedic only"
+    }
+   ],
+   "answer": "b",
+   "explain": "NS with antibiotics like Zosyn is on the AEMT list. Watch for an infusion reaction the whole ride.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-24",
+   "module": "drips",
+   "type": "mc",
+   "context": "D10 running for a low blood sugar.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "No — dextrose drips are Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it's on your monitoring list"
+    }
+   ],
+   "answer": "c",
+   "explain": "Dextrose drips are on the AEMT list. Check the glucose every 30 minutes.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-25",
+   "module": "drips",
+   "type": "mc",
+   "context": "Naloxone drip after an opioid overdose.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "b",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "c",
+     "text": "No — naloxone is only a push"
+    }
+   ],
+   "answer": "a",
+   "explain": "A naloxone drip is on the AEMT list. Watch for re-sedation and for withdrawal.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-26",
+   "module": "drips",
+   "type": "mc",
+   "context": "Ondansetron (Zofran) infusion running.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — call dispatch for a Paramedic"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on your monitoring list"
+    },
+    {
+     "id": "c",
+     "text": "No — Zofran drips are Paramedic only"
+    }
+   ],
+   "answer": "b",
+   "explain": "Ondansetron is on the AEMT list. Watch for QT prolongation in high-risk patients.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-27",
+   "module": "drips",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "NS at 100 mL/hr"
+     },
+     {
+      "id": "n2",
+      "text": "Amiodarone at 0.5 mg/min"
+     },
+     {
+      "id": "n3",
+      "text": "Heparin at 1,000 units/hr"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "NS and amiodarone are on the AEMT list; heparin isn't. One drip off the list makes it a Paramedic transport.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-28",
+   "module": "drips",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "NS with 20 mEq KCl on a pump"
+     },
+     {
+      "id": "n2",
+      "text": "Fentanyl at 25 mcg/hr; alert and talking"
+     },
+     {
+      "id": "n3",
+      "text": "Insulin at 6 units/hr"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "KCl in NS and fentanyl in an alert patient are on the AEMT list. Insulin isn't.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-29",
+   "module": "drips",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "Vancomycin in NS"
+     },
+     {
+      "id": "n2",
+      "text": "D10 at 50 mL/hr"
+     },
+     {
+      "id": "n3",
+      "text": "Esmolol at 50 mcg/kg/min"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "Vancomycin in NS and D10 are on the AEMT list. Esmolol isn't.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-30",
+   "module": "drips",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "Lidocaine at 2 mg/min"
+     },
+     {
+      "id": "n2",
+      "text": "Ondansetron infusion"
+     },
+     {
+      "id": "n3",
+      "text": "Dobutamine at 5 mcg/kg/min"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "Lidocaine and ondansetron are on the AEMT list. Dobutamine isn't.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-31",
+   "module": "drips",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "Naloxone drip"
+     },
+     {
+      "id": "n2",
+      "text": "NS at 75 mL/hr"
+     },
+     {
+      "id": "n3",
+      "text": "Propofol at 10 mcg/kg/min"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "Naloxone and NS are on the AEMT list. Propofol isn't.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-32",
+   "module": "drips",
+   "type": "swipe",
+   "prompt": "Any drip in a drug class you carry is yours to monitor.",
+   "answer": false,
+   "explain": "Only drips on the §IV-B list are yours. Hydromorphone is an opioid, but only fentanyl is on the list.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-drip-33",
+   "module": "drips",
+   "type": "swipe",
+   "context": "At the bedside you find a drip that isn't on the AEMT list.",
+   "prompt": "You may still leave if the unlisted drip looks stable.",
+   "answer": false,
+   "explain": "You may not depart with an unauthorized drip running. Call dispatch; the call needs a Paramedic crew.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-01",
+   "module": "hands",
+   "type": "mc",
+   "context": "Amiodarone drip running. En route, the rhythm worsens.",
+   "prompt": "Can you increase it?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — the note is enough"
+    },
+    {
+     "id": "b",
+     "text": "Never, under any circumstances"
+    },
+    {
+     "id": "c",
+     "text": "Only with explicit orders and DMO guidance"
+    }
+   ],
+   "answer": "c",
+   "explain": "AEMTs don't titrate without explicit sending-physician parameters and DMO guidance. When in doubt, keep the current rate and call DMO.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-02",
+   "module": "hands",
+   "type": "mc",
+   "context": "Vancomycin running. The patient becomes flushed, itchy and hypotensive.",
+   "prompt": "What do you do first?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Stop it, keep NS running, check ABCs"
+    },
+    {
+     "id": "b",
+     "text": "Slow the rate and keep going"
+    },
+    {
+     "id": "c",
+     "text": "Give diphenhydramine and keep it running"
+    },
+    {
+     "id": "d",
+     "text": "Wait and report it at arrival"
+    }
+   ],
+   "answer": "a",
+   "explain": "For an infusion reaction: stop the infusion, keep the line open with NS, and assess airway, breathing and circulation. Then notify DMO and the receiving facility.",
+   "source": "2026 Protocols §IV-C5, Infusion reaction response (p. 78)"
+  },
+  {
+   "id": "aemt-hands-03",
+   "module": "hands",
+   "type": "swipe",
+   "prompt": "Monitoring a drip means you may titrate it to effect.",
+   "answer": false,
+   "explain": "Monitoring means watching the patient and the pump. It doesn't include adjusting the drug.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-04",
+   "module": "hands",
+   "type": "swipe",
+   "prompt": "The fallback is: stop the drip, keep NS running, call DMO.",
+   "answer": true,
+   "explain": "That's the protocol's fallback for AEMTs. Stopping in an emergency and keeping access open with NS is in your scope.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-05",
+   "module": "hands",
+   "type": "mc",
+   "context": "AEMT crew, two drips running at pickup.",
+   "prompt": "Who confirms the pre-departure infusion check?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Nobody; the hospital already did it"
+    },
+    {
+     "id": "b",
+     "text": "You confirm it has been done"
+    },
+    {
+     "id": "c",
+     "text": "Dispatch confirms it by radio"
+    },
+    {
+     "id": "d",
+     "text": "The receiving nurse, at handoff"
+    }
+   ],
+   "answer": "b",
+   "explain": "On AEMT and EMT crews, the crew member confirms the infusion verification was completed before leaving.",
+   "source": "2026 Protocols §IV-A, Pre-departure verification (p. 72)"
+  },
+  {
+   "id": "aemt-hands-06",
+   "module": "hands",
+   "type": "mc",
+   "prompt": "Which is part of pre-departure infusion verification?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Set the pump to your preferred rate"
+    },
+    {
+     "id": "b",
+     "text": "Take the hospital pump off the patient"
+    },
+    {
+     "id": "c",
+     "text": "Trace the tubing from bag to patient"
+    },
+    {
+     "id": "d",
+     "text": "Flush the central line before moving"
+    }
+   ],
+   "answer": "c",
+   "explain": "Verify drug and concentration, ordered rate vs pump rate, and trace and label each line. Confirm enough volume and a pump-failure plan.",
+   "source": "2026 Protocols §IV-A, Pre-departure verification (pp. 72–73)"
+  },
+  {
+   "id": "aemt-hands-07",
+   "module": "hands",
+   "type": "mc",
+   "context": "NS with KCl running. The pump fails halfway through the ride.",
+   "prompt": "What do you do?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Run the KCl by gravity, slowly"
+    },
+    {
+     "id": "b",
+     "text": "Push the rest of the KCl"
+    },
+    {
+     "id": "c",
+     "text": "Count drops and keep it going"
+    },
+    {
+     "id": "d",
+     "text": "Stop the KCl, keep NS running, call DMO"
+    }
+   ],
+   "answer": "d",
+   "explain": "Potassium must always run on a pump; free-flow potassium can cause cardiac arrest. Stop it, keep access with NS and call DMO.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-08",
+   "module": "hands",
+   "type": "mc",
+   "context": "NS running. BP drops and your standing orders call for a fluid bolus.",
+   "prompt": "Can you give the bolus?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — NS rate is yours per standing orders"
+    },
+    {
+     "id": "b",
+     "text": "No — only a Paramedic can change NS"
+    },
+    {
+     "id": "c",
+     "text": "Only after the receiving nurse agrees"
+    }
+   ],
+   "answer": "a",
+   "explain": "Normal saline is the one drip an AEMT may maintain and adjust per standing orders.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-09",
+   "module": "hands",
+   "type": "swipe",
+   "prompt": "You may adjust a lidocaine drip if the patient feels tingly.",
+   "answer": false,
+   "explain": "Don't change the rate. For signs of toxicity, stop the drip, keep NS running and call DMO.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-10",
+   "module": "hands",
+   "type": "mc",
+   "context": "Fentanyl drip running. The patient is hard to wake; RR is 8.",
+   "prompt": "What do you do?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Stop it, support breathing, give naloxone per protocol"
+    },
+    {
+     "id": "b",
+     "text": "Halve the rate and recheck"
+    },
+    {
+     "id": "c",
+     "text": "Let them sleep and recheck at arrival"
+    },
+    {
+     "id": "d",
+     "text": "Give midazolam to settle them"
+    }
+   ],
+   "answer": "a",
+   "explain": "On a fentanyl drip, naloxone must be at hand. Stop the drip, support breathing, give naloxone per protocol and call DMO.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-11",
+   "module": "hands",
+   "type": "mc",
+   "context": "D10 drip running on a 90-minute transfer.",
+   "prompt": "How often do you check the glucose?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Every 2 hours"
+    },
+    {
+     "id": "b",
+     "text": "Every 30 minutes"
+    },
+    {
+     "id": "c",
+     "text": "Only at arrival"
+    },
+    {
+     "id": "d",
+     "text": "Only if the patient complains"
+    }
+   ],
+   "answer": "b",
+   "explain": "Check the blood glucose every 30 minutes on a dextrose drip.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-12",
+   "module": "hands",
+   "type": "swipe",
+   "prompt": "A steady midazolam drip on an intubated patient is AEMT scope.",
+   "answer": false,
+   "explain": "AEMT midazolam is limited to active seizures. A sedation drip is a Paramedic transport, however steady.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-hands-13",
+   "module": "hands",
+   "type": "swipe",
+   "prompt": "On an EMT-only crew, normal saline is the only drip monitored.",
+   "answer": true,
+   "explain": "EMTs monitor the patient and keep NS running. Other drips need an AEMT or Paramedic crew.",
+   "source": "2026 Protocols §IV, Dispatch authority (p. 72)"
+  },
+  {
+   "id": "aemt-hands-14",
+   "module": "hands",
+   "type": "swipe",
+   "prompt": "Potassium in NS must run on a pump for the whole ride.",
+   "answer": true,
+   "explain": "Free-flow or bolus potassium can cause cardiac arrest. Confirm pump programming before you leave and after any line change.",
+   "source": "2026 Protocols §IV-B and KCl safety (pp. 75–78)"
+  },
+  {
+   "id": "aemt-drip-34",
+   "module": "drips",
+   "type": "swipe",
+   "prompt": "NS with an antibiotic like vancomycin is on the AEMT list.",
+   "answer": true,
+   "explain": "Isotonic fluid with antibiotic additives is explicitly AEMT-authorized. Watch for an infusion reaction the whole ride.",
+   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
+  },
+  {
+   "id": "aemt-procs-01",
+   "module": "procs",
+   "type": "mc",
+   "context": "Patient has a chest tube draining to a collection device.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — chest tubes are Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — passive chest tube monitoring is AEMT+"
+    },
+    {
+     "id": "c",
+     "text": "Only with a nurse riding along"
+    }
+   ],
+   "answer": "b",
+   "explain": "Passive chest tube monitoring is AEMT and Paramedic scope. An EMT-only crew can't take this patient.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-02",
+   "module": "procs",
+   "type": "mc",
+   "context": "Patient has an arterial line in the radial artery.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — just watch the waveform"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if the line is capped"
+    },
+    {
+     "id": "c",
+     "text": "No — arterial lines are Paramedic only"
+    }
+   ],
+   "answer": "c",
+   "explain": "Arterial line monitoring is Paramedic only. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-03",
+   "module": "procs",
+   "type": "mc",
+   "context": "Patient is on a ventilator through a trach.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — ventilators are Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if the settings don't change"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if RT sets it up first"
+    }
+   ],
+   "answer": "a",
+   "explain": "Ventilator management is Paramedic only. Call dispatch for a Paramedic crew.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-04",
+   "module": "procs",
+   "type": "mc",
+   "context": "Stable LVAD patient going home; the device is running normally.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — LVADs are Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — passive LVAD monitoring is all levels"
+    },
+    {
+     "id": "c",
+     "text": "Only with a perfusionist"
+    }
+   ],
+   "answer": "b",
+   "explain": "Passive LVAD monitoring is authorized at every level. Bring the patient's backup equipment and know who to call.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-05",
+   "module": "procs",
+   "type": "mc",
+   "context": "The nurse asks you to flush the PICC before you leave.",
+   "prompt": "Can you do it?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes, with a saline syringe"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if you use sterile technique"
+    },
+    {
+     "id": "c",
+     "text": "No — central line flushes are Paramedic only"
+    }
+   ],
+   "answer": "c",
+   "explain": "Accessing or flushing a central line is Paramedic only. Leave the PICC alone and use peripheral access if you need it.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-06",
+   "module": "procs",
+   "type": "mc",
+   "context": "The patient's peripheral IV infiltrates en route.",
+   "prompt": "Can you start a new IV?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — peripheral IVs are AEMT scope"
+    },
+    {
+     "id": "b",
+     "text": "No — only a Paramedic restarts lines"
+    },
+    {
+     "id": "c",
+     "text": "Only through the existing site"
+    }
+   ],
+   "answer": "a",
+   "explain": "Peripheral IV access is AEMT and Paramedic scope.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-07",
+   "module": "procs",
+   "type": "mc",
+   "prompt": "Can you place an external jugular IV?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — any peripheral vein is fine"
+    },
+    {
+     "id": "b",
+     "text": "No — EJ access is Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Only in cardiac arrest"
+    }
+   ],
+   "answer": "b",
+   "explain": "External jugular access is Paramedic only. Consider IO if access is urgent.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-08",
+   "module": "procs",
+   "type": "mc",
+   "context": "Cardiac arrest. No IV, and peripheral attempts fail.",
+   "prompt": "Can you place an IO?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — IO is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Only in a child"
+    },
+    {
+     "id": "c",
+     "text": "Yes — IO access is AEMT scope"
+    }
+   ],
+   "answer": "c",
+   "explain": "IO access is AEMT and Paramedic scope, for unstable or arrest patients when an IV isn't quick.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-09",
+   "module": "procs",
+   "type": "mc",
+   "context": "Trach patient with thick secretions blocking the airway.",
+   "prompt": "Can you suction past the stoma?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — deep trach suction is AEMT+"
+    },
+    {
+     "id": "b",
+     "text": "No — only surface suctioning"
+    },
+    {
+     "id": "c",
+     "text": "Only with a nurse's order"
+    }
+   ],
+   "answer": "a",
+   "explain": "Deep tracheal and stoma suctioning is AEMT and Paramedic scope. EMTs suction only the surface of the stoma.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-10",
+   "module": "procs",
+   "type": "mc",
+   "context": "Patient goes into VF on the monitor.",
+   "prompt": "Can you manually defibrillate?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — use the AED mode only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — manual defibrillation is AEMT scope"
+    },
+    {
+     "id": "c",
+     "text": "Only after a Paramedic arrives"
+    }
+   ],
+   "answer": "b",
+   "explain": "Manual defibrillation is AEMT and Paramedic scope.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-11",
+   "module": "procs",
+   "type": "mc",
+   "context": "Symptomatic bradycardia that isn't improving.",
+   "prompt": "Can you pace?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — pacing is AEMT scope"
+    },
+    {
+     "id": "b",
+     "text": "Yes, at the lowest current"
+    },
+    {
+     "id": "c",
+     "text": "No — pacing is Paramedic only"
+    }
+   ],
+   "answer": "c",
+   "explain": "Transcutaneous pacing is Paramedic only. Call DMO and consider diverting.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-12",
+   "module": "procs",
+   "type": "mc",
+   "context": "Unstable narrow-complex tachycardia en route.",
+   "prompt": "Can you cardiovert?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — cardioversion is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's like defibrillation"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if the patient is sedated"
+    }
+   ],
+   "answer": "a",
+   "explain": "Synchronized cardioversion is Paramedic only. Call DMO and consider diverting.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-13",
+   "module": "procs",
+   "type": "mc",
+   "context": "You acquire a 12-lead on a chest pain patient.",
+   "prompt": "Can you interpret it?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — acquisition only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — to recognize a STEMI"
+    },
+    {
+     "id": "c",
+     "text": "Yes — for any diagnosis"
+    }
+   ],
+   "answer": "b",
+   "explain": "AMR KC medical direction lets AEMTs read 12-leads to recognize a STEMI. Beyond that, consult a Paramedic or DMO.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-14",
+   "module": "procs",
+   "type": "mc",
+   "context": "Receiving hospital wants time-critical labs drawn.",
+   "prompt": "Can you draw the blood?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — phlebotomy is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Only from the existing IV"
+    },
+    {
+     "id": "c",
+     "text": "Yes — phlebotomy is AEMT scope"
+    }
+   ],
+   "answer": "c",
+   "explain": "AEMTs and Paramedics may draw blood samples for time-critical diagnoses per approved procedures.",
+   "source": "2026 Protocols, Obtaining blood samples (p. 12)"
+  },
+  {
+   "id": "aemt-procs-15",
+   "module": "procs",
+   "type": "mc",
+   "context": "Combative patient who is a danger to the crew.",
+   "prompt": "Can you give sedation per the behavioral protocol?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — behavioral sedation is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's a standing order"
+    },
+    {
+     "id": "c",
+     "text": "Yes, at half the dose"
+    }
+   ],
+   "answer": "a",
+   "explain": "Behavioral sedation is Paramedic only. Physical restraint per protocol is in your scope.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-16",
+   "module": "procs",
+   "type": "mc",
+   "context": "The nurse asks you to put on a new nitroglycerin patch.",
+   "prompt": "Can you apply it?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — you give nitro SL already"
+    },
+    {
+     "id": "b",
+     "text": "No — transdermal patches are Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if BP is over 100"
+    }
+   ],
+   "answer": "b",
+   "explain": "Applying or adjusting a prescription transdermal patch is Paramedic scope at AMR KC.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-17",
+   "module": "procs",
+   "type": "mc",
+   "context": "Patient is on CPAP for CHF.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — CPAP is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Only with RT riding along"
+    },
+    {
+     "id": "c",
+     "text": "Yes — CPAP is all levels"
+    }
+   ],
+   "answer": "c",
+   "explain": "CPAP (Flow-Safe II) is authorized at every level.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-18",
+   "module": "procs",
+   "type": "mc",
+   "context": "The airway fails and BVM isn't working well.",
+   "prompt": "Can you place an iGel?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — an SGA is all levels"
+    },
+    {
+     "id": "b",
+     "text": "No — airways are Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Only in cardiac arrest"
+    }
+   ],
+   "answer": "a",
+   "explain": "A supraglottic airway (iGel) is authorized at every level. Intubation is Paramedic only.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-19",
+   "module": "procs",
+   "type": "mc",
+   "context": "Signs of a tension pneumothorax en route.",
+   "prompt": "Can you decompress the chest?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's lifesaving"
+    },
+    {
+     "id": "b",
+     "text": "No — needle decompression is Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if DMO is busy"
+    }
+   ],
+   "answer": "b",
+   "explain": "Needle decompression is Paramedic only. Call DMO and divert for a suspected tension pneumothorax.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-20",
+   "module": "procs",
+   "type": "swipe",
+   "prompt": "Working with a Paramedic gives you Paramedic authority.",
+   "answer": false,
+   "explain": "You work within your own credentialed scope. You don't inherit your partner's.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-21",
+   "module": "procs",
+   "type": "swipe",
+   "prompt": "An EMT-only crew can take a patient with a chest tube.",
+   "answer": false,
+   "explain": "A chest tube needs at least an AEMT on the crew. Contact the sending facility and DMO before accepting.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-procs-22",
+   "module": "procs",
+   "type": "swipe",
+   "prompt": "AEMTs may push meds IV but may not start new drips.",
+   "answer": true,
+   "explain": "IV push is AEMT scope; IV infusion administration is Paramedic only. Monitoring listed hospital drips is a separate authority.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-meds-01",
+   "module": "meds",
+   "type": "mc",
+   "context": "Patient begins seizing en route.",
+   "prompt": "Can you give midazolam?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes, and for agitation too"
+    },
+    {
+     "id": "c",
+     "text": "Yes — for active seizures"
+    }
+   ],
+   "answer": "c",
+   "explain": "AEMT midazolam is authorized for active seizures only. It isn't for agitation or sedation.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-02",
+   "module": "meds",
+   "type": "mc",
+   "context": "Agitated patient. The nurse asks for midazolam to calm him.",
+   "prompt": "Can you give it?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — AEMT midazolam is seizures only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's in your formulary"
+    },
+    {
+     "id": "c",
+     "text": "Yes, at a lower dose"
+    }
+   ],
+   "answer": "a",
+   "explain": "AEMT midazolam is limited to active seizures. Agitation needs a Paramedic or DMO.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-03",
+   "module": "meds",
+   "type": "mc",
+   "context": "Symptomatic bradycardia; the patient has an IV.",
+   "prompt": "Can you give atropine IV?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — atropine is AEMT"
+    },
+    {
+     "id": "b",
+     "text": "No — IV atropine is Paramedic scope"
+    },
+    {
+     "id": "c",
+     "text": "Yes, half the usual dose"
+    }
+   ],
+   "answer": "b",
+   "explain": "IV/IO atropine for bradycardia is Paramedic scope. Call DMO.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-04",
+   "module": "meds",
+   "type": "mc",
+   "context": "Glucose is 42; patient can't swallow. IV in place.",
+   "prompt": "Can you give D10?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — dextrose is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Only oral glucose"
+    },
+    {
+     "id": "c",
+     "text": "Yes — D10 IV is AEMT scope"
+    }
+   ],
+   "answer": "c",
+   "explain": "D10 IV is in AEMT scope. Recheck the glucose after you give it.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-05",
+   "module": "meds",
+   "type": "mc",
+   "context": "Anaphylaxis. You have epinephrine 1:1,000 in a vial.",
+   "prompt": "Can you draw it up and give it IM?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — drawn-up IM epi is AEMT"
+    },
+    {
+     "id": "b",
+     "text": "No — auto-injector only"
+    },
+    {
+     "id": "c",
+     "text": "Only into the thigh muscle by a Paramedic"
+    }
+   ],
+   "answer": "a",
+   "explain": "Drawing up and giving IM epinephrine is AEMT and Paramedic scope. EMTs use the auto-injector only.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-06",
+   "module": "meds",
+   "type": "mc",
+   "context": "Cardiac arrest with IO access.",
+   "prompt": "Can you give epinephrine 1:10,000?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — IV epi is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — arrest epi IV/IO is AEMT"
+    },
+    {
+     "id": "c",
+     "text": "Only after three shocks"
+    }
+   ],
+   "answer": "b",
+   "explain": "Epinephrine 1:10,000 for cardiac arrest is in AEMT scope.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-07",
+   "module": "meds",
+   "type": "mc",
+   "context": "Hypotensive after intubation at the sending hospital.",
+   "prompt": "Can you give push-dose epinephrine?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's the same drug"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if BP is under 70"
+    },
+    {
+     "id": "c",
+     "text": "No — push-dose pressors are Paramedic only"
+    }
+   ],
+   "answer": "c",
+   "explain": "Push-dose epinephrine is Paramedic scope. An intubated patient is a Paramedic transport anyway.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-08",
+   "module": "meds",
+   "type": "mc",
+   "context": "Severe pain from a femur fracture; IV in place.",
+   "prompt": "Can you give fentanyl?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — fentanyl IV/IN/IM is AEMT"
+    },
+    {
+     "id": "b",
+     "text": "No — opioids are Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Only intranasal"
+    }
+   ],
+   "answer": "a",
+   "explain": "Fentanyl is in AEMT scope by IV/IO, IN or IM. Watch breathing and have naloxone ready.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-09",
+   "module": "meds",
+   "type": "mc",
+   "context": "Patient is vomiting; IV in place.",
+   "prompt": "Can you give ondansetron IV?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — only the ODT tablet"
+    },
+    {
+     "id": "b",
+     "text": "Yes — IV ondansetron is AEMT"
+    },
+    {
+     "id": "c",
+     "text": "Only with a nurse's order"
+    }
+   ],
+   "answer": "b",
+   "explain": "IV/IO, IM and IN ondansetron are AEMT scope. EMTs give it by mouth (ODT) only.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-10",
+   "module": "meds",
+   "type": "mc",
+   "context": "Opioid overdose with slow breathing; IV in place.",
+   "prompt": "Can you give naloxone IV?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — IN or IM only"
+    },
+    {
+     "id": "b",
+     "text": "Only after BVM fails"
+    },
+    {
+     "id": "c",
+     "text": "Yes — IV naloxone is AEMT"
+    }
+   ],
+   "answer": "c",
+   "explain": "IV/IO naloxone is AEMT scope; EMTs use IN, IM or the auto-injector.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-11",
+   "module": "meds",
+   "type": "mc",
+   "context": "Stable SVT at 190.",
+   "prompt": "Can you give adenosine?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — adenosine is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's a push"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if vagal maneuvers fail"
+    }
+   ],
+   "answer": "a",
+   "explain": "Adenosine is Paramedic scope. Try vagal maneuvers and call DMO.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-12",
+   "module": "meds",
+   "type": "mc",
+   "context": "The nurse suggests ketamine for pain.",
+   "prompt": "Can you give it?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — low-dose ketamine is AEMT"
+    },
+    {
+     "id": "b",
+     "text": "No — ketamine is Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Yes, intranasal only"
+    }
+   ],
+   "answer": "b",
+   "explain": "Ketamine is Paramedic scope at AMR KC.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-13",
+   "module": "meds",
+   "type": "mc",
+   "context": "Hives and itching after an antibiotic; IV in place.",
+   "prompt": "Can you give diphenhydramine IV?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Only by mouth"
+    },
+    {
+     "id": "c",
+     "text": "Yes — IV/IM diphenhydramine is AEMT"
+    }
+   ],
+   "answer": "c",
+   "explain": "Diphenhydramine IV or IM is AEMT scope. Stop the antibiotic infusion first.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-14",
+   "module": "meds",
+   "type": "mc",
+   "context": "Pregnant patient starts seizing; eclampsia suspected.",
+   "prompt": "Can you give magnesium?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — magnesium is Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's an electrolyte"
+    },
+    {
+     "id": "c",
+     "text": "Yes, a half dose"
+    }
+   ],
+   "answer": "a",
+   "explain": "Magnesium is Paramedic scope. Treat the active seizure with midazolam per protocol and call DMO.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-15",
+   "module": "meds",
+   "type": "mc",
+   "context": "Stable VT with a pulse; IV in place.",
+   "prompt": "Can you give amiodarone?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — Paramedic only"
+    },
+    {
+     "id": "b",
+     "text": "Yes — amiodarone is AEMT"
+    },
+    {
+     "id": "c",
+     "text": "Only in cardiac arrest"
+    }
+   ],
+   "answer": "b",
+   "explain": "Amiodarone for stable VT and arrest is in the AEMT formulary.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  },
+  {
+   "id": "aemt-meds-16",
+   "module": "meds",
+   "type": "swipe",
+   "prompt": "Any drug you can push, you may also start as a drip.",
+   "answer": false,
+   "explain": "IV push and IV infusion are separate. Starting an infusion is Paramedic only.",
+   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
+  },
+  {
+   "id": "aemt-meds-17",
+   "module": "meds",
+   "type": "swipe",
+   "prompt": "A drug can be AEMT scope by one route but not another.",
+   "answer": true,
+   "explain": "Atropine and epinephrine are examples. Check the drug, the route and the indication.",
+   "source": "2026 Protocols §III, Ambulance Medication Formulary"
+  }
+ ]
+}
