@@ -1030,9 +1030,15 @@ ok('E1 every "tap the drip" chart has exactly one answer', AQ.filter(q => q.type
   ok('E1 the right answer is usually not the longest choice', L.length <= W.length / 2, L.length + ' of ' + W.length);
   const sw = AQ.filter(q => q.type === 'swipe');
   ok('E1 true/false statements are a real mix', sw.filter(q => q.answer).length >= sw.length / 3 && sw.filter(q => !q.answer).length >= sw.length / 3); }
+ok('E1 every AEMT question with choices has exactly two, so a third can\'t give it away', AQ.filter(q => q.options).every(q => q.options.length === 2),
+   AQ.filter(q => q.options && q.options.length !== 2).map(q => q.id).join(','));
+{ const v = AQ.find(q => /Versed drip; the patient is sedated but not intubated/.test(q.context || ''));
+  ok('E1 Clinical Education ruling: a sedated, non-intubated patient on a Versed drip is AEMT',
+     !!v && /^An AEMT crew/.test(v.options.find(o => o.id === v.answer).text));
+  ok('E1 no explanation says sedation alone makes an opioid or benzo drip Paramedic', !AQ.some(q => /sedated/i.test(q.explain))); }
 ok('E1 items with no ruling yet are left out (glucagon)', !/glucagon/i.test(JSON.stringify(AQ)));
 { const drip = (re) => AQ.find(q => q.type === 'mc' && re.test(q.context || ''));
-  const yes = (q) => q && /^(Yes — it's on the AEMT list|An AEMT crew)/.test(q.options.find(o => o.id === q.answer).text);
+  const yes = (q) => q && /^(Yes — AEMT crew can take it|An AEMT crew)/.test(q.options.find(o => o.id === q.answer).text);
   ok('E1 every AEMT question comes from the Kansas City Medication List', AQ.every(q => /Procedure 401\.4-KC/.test(q.source)));
   ok('E1 the list holds: a Dilaudid PCA, Infumorph, Cyklokapron, Normosol and adult Rocephin are AEMT',
      [/^Dilaudid PCA/, /^Infumorph/, /^Cyklokapron/, /^Normosol/, /Rocephin.*adult/].every(re => yes(drip(re))));
