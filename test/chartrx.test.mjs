@@ -39,9 +39,9 @@
  *   D7  the lightning round: 60 seconds, score, personal best, misses explained
  *   D8  the weak-spot drill, which never replaces the round used for credit
  *   D9  nothing is ever taken away: no XP, rank or badge is lost for a miss
- *   E1  the AEMT scope bank: valid, sourced, readable, balanced, no unruled items
+ *   E1  the AEMT bank: all from the KC medication list, readable, balanced
  *   E2  the two tracks keep separate progress; links and the switch pick one
- *   E3  the final tests: 30 charting (3 a habit) and 25 AEMT, spread evenly
+ *   E3  the final tests: 30 charting (3 a habit) and 15 AEMT, spread evenly
  *   E4  taking a test: no answers shown until the end, pass and fail paths
  *   E5  the AEMT pass mark is 90%
  *
@@ -1031,12 +1031,13 @@ ok('E1 every "tap the drip" chart has exactly one answer', AQ.filter(q => q.type
   const sw = AQ.filter(q => q.type === 'swipe');
   ok('E1 true/false statements are a real mix', sw.filter(q => q.answer).length >= sw.length / 3 && sw.filter(q => !q.answer).length >= sw.length / 3); }
 ok('E1 items with no ruling yet are left out (glucagon)', !/glucagon/i.test(JSON.stringify(AQ)));
-{ const drip = (re) => AQ.find(q => q.module === 'drips' && q.type === 'mc' && re.test(q.context || ''));
-  const yes = (q) => q && /^Yes — it's on your monitoring list/.test(q.options.find(o => o.id === q.answer).text);
-  ok('E1 drips follow the Kansas City Medication List: hydromorphone, morphine PCA, TXA, LR are AEMT',
-     yes(drip(/^Hydromorphone \(Dilaudid\) drip for pain/)) && yes(drip(/^Morphine PCA/)) && yes(drip(/TXA/)) && yes(drip(/^Lactated Ringer/)));
-  ok('E1 and IV acetaminophen, Protonix, Keppra, newborn ceftriaxone and recent tPA are Paramedic',
-     [/Ofirmev/, /Protonix/, /Keppra/, /newborn/, /^tPA/].every(re => drip(re) && !yes(drip(re)))); }
+{ const drip = (re) => AQ.find(q => q.type === 'mc' && re.test(q.context || ''));
+  const yes = (q) => q && /^(Yes — it's on the AEMT list|An AEMT crew)/.test(q.options.find(o => o.id === q.answer).text);
+  ok('E1 every AEMT question comes from the Kansas City Medication List', AQ.every(q => /Procedure 401\.4-KC/.test(q.source)));
+  ok('E1 the list holds: a Dilaudid PCA, Infumorph, Cyklokapron, Normosol and adult Rocephin are AEMT',
+     [/^Dilaudid PCA/, /^Infumorph/, /^Cyklokapron/, /^Normosol/, /Rocephin.*adult/].every(re => yes(drip(re))));
+  ok('E1 and Ofirmev, Protonix, Keppra, Pitocin, newborn Rocephin and recent tPA are Paramedic',
+     [/Ofirmev/, /Protonix/, /Keppra/, /Pitocin/, /3-day-old/, /^tPA/].every(re => drip(re) && !yes(drip(re)))); }
 ok('E1 every module has enough questions for the test', Object.keys(AEMT.modules).every(m => AQ.filter(q => q.module === m).length >= 8));
 
 console.log('\nE2 two tracks, separate progress');
@@ -1062,7 +1063,7 @@ console.log('\nE2 two tracks, separate progress');
   await p.context().close(); }
 
 console.log('\nE3 the final tests');
-for (const [track, size, perMod] of [['charting', 30, 3], ['aemt', 25, 6]]) {
+for (const [track, size, perMod] of [['charting', 30, 3], ['aemt', AQ.length, 1]]) {
   const p = await open({ clock: new Date(DAY) }); await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#' + track);
   await p.waitForFunction(() => window.ChartRx && window.ChartRx.bank());
   const r = await p.evaluate(([size, perMod]) => { const B = window.ChartRx.bank(), bad = [];
@@ -1072,6 +1073,8 @@ for (const [track, size, perMod] of [['charting', 30, 3], ['aemt', 25, 6]]) {
           Object.keys(B.modules).some(m => (per[m] || 0) < perMod - 1)) bad.push(JSON.stringify(per)); }
     return bad; }, [size, perMod]);
   ok(`E3 ${track}: ${size} questions, every module covered evenly, at least one chart to tap`, r.length === 0, r.slice(0, 2).join(' '));
+  if (track === 'aemt') ok('E3 aemt: the certificate test is every question in the bank',
+    await p.evaluate((all) => { const ids = window.ChartRx.buildTest(); return ids.length === all.length && all.every(id => ids.includes(id)); }, AQ.map(q => q.id)));
   await p.context().close();
 }
 
@@ -1119,14 +1122,14 @@ async function takeTest(p, wrongCount) {
   await p.context().close(); }
 
 console.log('\nE5 AEMT pass mark');
-for (const [wrong, passes] of [[3, false], [2, true]]) {
+for (const [wrong, passes] of [[7, false], [6, true]]) {
   const p = await open({ clock: new Date(DAY) }); await p.goto(ORIGIN + '/blank'); await p.goto(PAGE + '#aemt');
   await p.waitForSelector('#v-home:not([hidden])');
   const t = await takeTest(p, wrong);
-  ok(`E5 AEMT: ${t.n - wrong} of ${t.n} ${passes ? 'passes' : 'does not pass'} (90% needed)`, t.n === 25 && /Passed/.test(await p.textContent('#v-sum')) === passes);
+  ok(`E5 AEMT: ${t.n - wrong} of ${t.n} ${passes ? 'passes' : 'does not pass'} (90% needed)`, t.n === AQ.length && /Passed/.test(await p.textContent('#v-sum')) === passes);
   if (passes) { await p.click('#btn-cert'); await p.fill('#cr-name', 'Test Medic'); await p.fill('#cr-id', 'E10293');
     await p.click('#credit-form button[type=submit]'); await p.waitForSelector('#cr-code');
-    ok('E5 the AEMT certificate code uses the AEMT track', (await p.textContent('#cr-code')) === certExpected('E10293', '2026-10-06', 23, 25, 'aemt'));
+    ok('E5 the AEMT certificate code uses the AEMT track', (await p.textContent('#cr-code')) === certExpected('E10293', '2026-10-06', AQ.length - 6, AQ.length, 'aemt'));
     ok('E5 and names the AEMT test', /AEMT Scope of Practice Test/.test(await p.textContent('.cert'))); }
   await p.context().close();
 }

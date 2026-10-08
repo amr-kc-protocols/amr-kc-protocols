@@ -468,9 +468,9 @@ var TRACKS = {
               hdr:'AMR KC Field Guide &middot; PCR documentation',
               test:{ name:'Chart Rx Documentation Final Test', size:30, pass:0.8 } },
   aemt:     { key:'aemt', name:'AEMT Scope Check', title:'AEMT <span>Scope</span>', questions:'chart-rx/aemt-scope.json', ls:'chartrx.aemt.',
-              eyebrow:'Advanced EMT &middot; can you take this patient?', sub:'Drips, procedures and meds, checked against the KC medication list and protocols.',
+              eyebrow:'Advanced EMT &middot; KC medication list by level', sub:'Which drips your crew can take, straight from the Kansas City medication list.',
               hdr:'AMR KC Field Guide &middot; AEMT scope of practice',
-              test:{ name:'AEMT Scope of Practice Test', size:25, pass:0.9 } }
+              test:{ name:'AEMT Scope of Practice Test', size:65, all:true, pass:0.9 } }   // the certificate means every question
 };
 function gload(k, d){ try{ var v = localStorage.getItem('chartrx.' + k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
 function gsave(k, v){ try{ localStorage.setItem('chartrx.' + k, JSON.stringify(v)); }catch(e){} }
@@ -656,10 +656,12 @@ function buildRound(rng){
   });
   return shuffle(pick, rng).map(function(q){ return q.id; });
 }
+// How long the final test is: a set number, or every question in the bank.
+function testSize(){ return TR.test.all ? BANK.questions.length : Math.min(TR.test.size, BANK.questions.length); }
 // The final test: spread evenly over every module, at least one spot question.
 function buildTest(rng){
   rng = rng || Math.random;
-  var size = Math.min(TR.test.size, BANK.questions.length), mods = Object.keys(BANK.modules), by = {}, pick = [];
+  var size = testSize(), mods = Object.keys(BANK.modules), by = {}, pick = [];
   mods.forEach(function(m){ by[m] = shuffle(BANK.questions.filter(function(q){ return q.module === m; }), rng); });
   mods = mods.filter(function(m){ return by[m].length; });
   // Round-robin over the modules, so each gets its share.
@@ -839,7 +841,7 @@ function renderHome(){
   if(STATS.passed){ $('test-t').textContent = 'Your certificate';
     $('test-sub').textContent = 'Passed ' + STATS.passed.score + '/' + STATS.passed.total + ' on ' + STATS.passed.date; }
   else { $('test-t').textContent = 'Final test'; $('test-sub').textContent = live0 && !ROUND.test ? 'Finish your round first'
-    : TR.test.size + ' questions \u00b7 pass ' + Math.round(TR.test.pass * 100) + '% for a certificate'; }
+    : (TR.test.all ? 'All ' : '') + testSize() + ' questions \u00b7 pass ' + Math.round(TR.test.pass * 100) + '% for a certificate'; }
   $('st-streak').textContent = STATS.bestStreak || 0;
   $('st-badges').textContent = badgeCount() + '/' + Object.keys(BANK.modules).length;
   $('st-mastered').textContent = masteredIn() + '/' + BANK.questions.length;
@@ -1349,7 +1351,7 @@ function renderSummary(){
        (m ? '<button class="btn btn-ghost" id="btn-drill" type="button"><span>Drill ' + esc(m.name) + '<br><span class="sub">' + DRILL_SIZE + ' questions on your weak spot</span></span></button>' : '') +
        '<button class="btn btn-ghost" id="btn-s-blitz" type="button"><span>Lightning round<br><span class="sub">60 seconds of true or false</span></span></button>' +
        '<button class="btn btn-ghost" id="btn-s-test" type="button"><span>' + (STATS.passed ? 'Your certificate' : 'Final test') + '<br><span class="sub">' +
-         (STATS.passed ? 'Passed ' + esc(STATS.passed.date) : TR.test.size + ' questions &middot; pass ' + Math.round(TR.test.pass * 100) + '% for a certificate') + '</span></span></button></div></div>';
+         (STATS.passed ? 'Passed ' + esc(STATS.passed.date) : (TR.test.all ? 'All ' : '') + testSize() + ' questions &middot; pass ' + Math.round(TR.test.pass * 100) + '% for a certificate') + '</span></span></button></div></div>';
   if(L.missed && L.missed.length){
     h += '<div class="review"><h2>What you missed</h2>';
     L.missed.forEach(function(id){ var q = BANK.byId[id]; if(!q) return;
@@ -1560,7 +1562,7 @@ function renderVerify(){
     '</div><button class="btn btn-ghost" id="vf-home" type="button" style="width:100%">Chart Rx home</button>';
   show('v-verify');
   $('vf-test').addEventListener('change', function(){
-    var t = $('vf-test').value; $('vf-total').value = t === 'round' ? 8 : TRACKS[t].test.size; $('vf-total').disabled = t === 'round';
+    var t = $('vf-test').value; $('vf-total').value = t === 'round' ? 8 : t === TRACK ? testSize() : TRACKS[t].test.size; $('vf-total').disabled = t === 'round';
   });
   $('vf').addEventListener('submit', function(e){
     e.preventDefault();

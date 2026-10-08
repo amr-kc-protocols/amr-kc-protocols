@@ -1,576 +1,215 @@
 {
- "version": "2026-10.2",
+ "version": "2026-10.3",
  "writing_guide": [
-  "Every answer comes from the AMR Kansas City 2026 Medical Protocols; each question cites its section in 'source'.",
-  "Which drips an AEMT may take follows Procedure 401.4-KC, the Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols, pending Medical Director approval). If that list and the protocols differ, the protocols govern.",
-  "Items with no ruling yet (glucagon, atropine auto-injector, oral diphenhydramine as an AEMT medication) are left out.",
+  "Every question comes from Procedure 401.4-KC, the Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols, pending Medical Director approval). If the list and the protocols differ, the protocols govern.",
+  "Name drugs the way a nurse says them on the phone: the brand, with the generic in brackets.",
   "Prompts and statements 12 words or fewer; explanations two sentences or fewer."
  ],
  "modules": {
-  "drips": {
-   "name": "Hospital Drips",
+  "fluids": {
+   "name": "Fluids & Antibiotics",
    "badge": "💧",
-   "tip": "Every drip has to be on the AEMT list. One off it, or any drip on an intubated or sedated patient: Paramedic."
+   "tip": "Crystalloids, dextrose, potassium on a pump and antibiotics are AEMT. Hypertonic saline, colloids, TPN, blood and antifungals aren't."
   },
-  "hands": {
-   "name": "Monitor, Don't Titrate",
-   "badge": "🎛️",
-   "tip": "Watch the patient and the pump. When in doubt, stop it, keep NS running and call DMO."
-  },
-  "procs": {
-   "name": "Procedures & Devices",
-   "badge": "🩺",
-   "tip": "Chest tubes, IO and deep trach suction are yours. Vents, art lines, central lines and pacing aren't."
-  },
-  "meds": {
-   "name": "Your Own Meds",
+  "comfort": {
+   "name": "Pain, Calm & Comfort",
    "badge": "💊",
-   "tip": "Drug, route and indication all have to be in scope."
+   "tip": "Opioid and benzo drips and PCAs are AEMT only if the patient isn't intubated or sedated."
+  },
+  "als": {
+   "name": "Paramedic Only",
+   "badge": "🚑",
+   "tip": "Pressors, BP and rate drips, heparin, insulin, sedation, Pitocin, Pepcid, Protonix, Keppra, IV Tylenol: Paramedic."
+  },
+  "rules": {
+   "name": "Read the Whole List",
+   "badge": "📋",
+   "tip": "One drug off the AEMT list, or on neither list, makes the call Paramedic."
   }
  },
  "questions": [
   {
-   "id": "aemt-drip-01",
-   "module": "drips",
+   "id": "aemt-fl-01",
+   "module": "fluids",
    "type": "mc",
-   "context": "Nurse: \"Just normal saline at 125 mL/hr.\"",
+   "context": "Plasma-Lyte running at 125 mL/hr.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "c",
-     "text": "Only if you turn it off first"
+     "text": "No — only NS and LR are AEMT"
     }
    ],
    "answer": "a",
-   "explain": "Normal saline is on the AEMT list. You may monitor it and adjust the rate per standing orders.",
+   "explain": "Normal saline and other crystalloids (½NS, Plasma-Lyte, Normosol) and LR are on the AEMT list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-02",
-   "module": "drips",
+   "id": "aemt-fl-02",
+   "module": "fluids",
    "type": "mc",
-   "context": "Norepinephrine (Levophed) running at 8 mcg/min.",
+   "context": "D5½NS running at 75 mL/hr.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
-     "text": "Yes, if you don't change the rate"
+     "text": "No — dextrose needs a Paramedic"
     }
    ],
    "answer": "b",
-   "explain": "Vasopressors aren't on the AEMT list. Call dispatch before you leave; this is a Paramedic transport.",
+   "explain": "Dextrose fluids (D5W, D10W, D5NS, D5½NS, D5LR) are on the AEMT list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-03",
-   "module": "drips",
+   "id": "aemt-fl-03",
+   "module": "fluids",
    "type": "mc",
-   "context": "Heparin running at 18 units/kg/hr for a PE.",
+   "context": "\"20 of K in NS\" on a pump.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "Yes, if the pump stays locked"
+     "text": "Yes — and gravity is fine if slow"
     },
     {
      "id": "c",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — on the pump the whole ride"
     }
    ],
    "answer": "c",
-   "explain": "Heparin isn't on the AEMT list. You may not depart with it running; call dispatch for a Paramedic crew.",
+   "explain": "Potassium in IV fluid is on the AEMT list, on a pump. Never let potassium run free.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-04",
-   "module": "drips",
+   "id": "aemt-fl-04",
+   "module": "fluids",
    "type": "mc",
-   "context": "Fentanyl drip at 50 mcg/hr for rib fractures. Alert, not intubated.",
+   "context": "Maxipime (cefepime) piggyback running.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "c",
-     "text": "No — opioid drips are never AEMT"
+     "text": "No — only Zosyn and vancomycin are AEMT"
     }
    ],
    "answer": "a",
-   "explain": "Fentanyl is on the list for non-intubated, non-sedated patients. Watch breathing and keep naloxone ready.",
+   "explain": "Cefepime is on the AEMT list. Antibiotics often end in -cillin, -mycin or -penem, or start with cef-.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-05",
-   "module": "drips",
+   "id": "aemt-fl-05",
+   "module": "fluids",
    "type": "mc",
-   "context": "Fentanyl drip at 100 mcg/hr. Patient is intubated and sedated.",
+   "context": "Merrem (meropenem) running.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
-     "text": "Yes — fentanyl is on your list"
+     "text": "No — -penem drugs are Paramedic only"
     }
    ],
    "answer": "b",
-   "explain": "Opioid drips are AEMT only when the patient isn't intubated or sedated. Any drip on an intubated or sedated patient is a Paramedic call.",
+   "explain": "Meropenem is on the AEMT list with the other antibiotics.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-06",
-   "module": "drips",
+   "id": "aemt-fl-06",
+   "module": "fluids",
    "type": "mc",
-   "context": "Midazolam (Versed) drip for sedation. Patient is intubated.",
+   "context": "Rocephin (ceftriaxone) running in a 3-day-old.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — midazolam is on your list"
+     "text": "Yes — Rocephin is on your list"
     },
     {
      "id": "c",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     }
    ],
    "answer": "c",
-   "explain": "Benzodiazepine drips are AEMT only when the patient isn't intubated or sedated. This one is a Paramedic transport.",
+   "explain": "Ceftriaxone is AEMT for everyone except a newborn. In a newborn it's a Paramedic transport.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-07",
-   "module": "drips",
+   "id": "aemt-fl-07",
+   "module": "fluids",
    "type": "mc",
-   "context": "Propofol running at 20 mcg/kg/min.",
+   "context": "Rocephin (ceftriaxone) running in an adult with a UTI.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "c",
-     "text": "Yes, if the patient is breathing on their own"
+     "text": "No — ceftriaxone is Paramedic only"
     }
    ],
    "answer": "a",
-   "explain": "Propofol isn't on the AEMT list. Call dispatch for a Paramedic crew.",
+   "explain": "Ceftriaxone is on the AEMT list for anyone but a newborn.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-08",
-   "module": "drips",
+   "id": "aemt-fl-08",
+   "module": "fluids",
    "type": "mc",
-   "context": "Dexmedetomidine (Precedex) at 0.4 mcg/kg/hr.",
+   "context": "Zosyn piggyback running for pneumonia.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "c",
-     "text": "Yes — it causes little breathing depression"
-    }
-   ],
-   "answer": "b",
-   "explain": "Precedex isn't on the AEMT list, however gentle it seems. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-09",
-   "module": "drips",
-   "type": "mc",
-   "context": "Insulin drip at 6 units/hr for DKA.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "b",
-     "text": "Yes, if you check glucose every 30 minutes"
-    },
-    {
-     "id": "c",
-     "text": "No — call dispatch for a Paramedic"
-    }
-   ],
-   "answer": "c",
-   "explain": "Insulin isn't on the AEMT list. It's a Paramedic transport; call dispatch before you leave.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-10",
-   "module": "drips",
-   "type": "mc",
-   "context": "Diltiazem drip at 10 mg/hr for A-fib with RVR.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "b",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if the heart rate is under 110"
-    }
-   ],
-   "answer": "a",
-   "explain": "Diltiazem isn't on the AEMT list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-11",
-   "module": "drips",
-   "type": "mc",
-   "context": "Nicardipine drip for blood pressure after a brain bleed.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "b",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if BP is at the ordered target"
-    }
-   ],
-   "answer": "b",
-   "explain": "Nicardipine isn't on the AEMT list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-12",
-   "module": "drips",
-   "type": "mc",
-   "context": "Hydromorphone (Dilaudid) drip for pain. Alert, not intubated.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "b",
-     "text": "No — only fentanyl drips are AEMT"
-    },
-    {
-     "id": "c",
-     "text": "Yes — it's on your monitoring list"
-    }
-   ],
-   "answer": "c",
-   "explain": "Hydromorphone drips and PCAs are on the AEMT list when the patient isn't intubated or sedated. Watch breathing and keep naloxone ready.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-13",
-   "module": "drips",
-   "type": "mc",
-   "context": "A unit of packed red cells is hanging.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "b",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if the unit was checked at the bedside"
-    }
-   ],
-   "answer": "a",
-   "explain": "Blood products are on the Paramedic list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-14",
-   "module": "drips",
-   "type": "mc",
-   "context": "3% saline running for a low sodium.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "b",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "c",
-     "text": "Yes — it's saline, like NS"
-    }
-   ],
-   "answer": "b",
-   "explain": "Hypertonic saline isn't normal saline and isn't on the AEMT list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-15",
-   "module": "drips",
-   "type": "mc",
-   "context": "Magnesium sulfate drip for preeclampsia.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "b",
-     "text": "Yes, if reflexes are checked en route"
-    },
-    {
-     "id": "c",
-     "text": "No — call dispatch for a Paramedic"
-    }
-   ],
-   "answer": "c",
-   "explain": "Magnesium is Paramedic scope and isn't on the AEMT list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-16",
-   "module": "drips",
-   "type": "mc",
-   "context": "Nitroglycerin drip for chest pain.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "b",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "c",
-     "text": "Yes — you give nitro SL already"
-    }
-   ],
-   "answer": "a",
-   "explain": "SL nitro is in your scope, but a nitro drip isn't on the AEMT list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-17",
-   "module": "drips",
-   "type": "mc",
-   "context": "Esmolol drip for heart rate control.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "b",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if the rate never changes"
-    }
-   ],
-   "answer": "b",
-   "explain": "Esmolol isn't on the AEMT list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-18",
-   "module": "drips",
-   "type": "mc",
-   "context": "Dobutamine at 5 mcg/kg/min for heart failure.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "b",
-     "text": "Yes — it's not a vasopressor"
-    },
-    {
-     "id": "c",
-     "text": "No — call dispatch for a Paramedic"
-    }
-   ],
-   "answer": "c",
-   "explain": "Inotropes like dobutamine aren't on the AEMT list. Call dispatch for a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-19",
-   "module": "drips",
-   "type": "mc",
-   "context": "Amiodarone running at 0.5 mg/min after a VT episode.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — monitor it, don't change the rate"
-    },
-    {
-     "id": "b",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "c",
-     "text": "Yes — and titrate it as the nurse asks"
-    }
-   ],
-   "answer": "a",
-   "explain": "Amiodarone is on the AEMT list to monitor. Don't adjust the rate without explicit orders and DMO guidance.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-drip-20",
-   "module": "drips",
-   "type": "mc",
-   "context": "Lidocaine running at 2 mg/min.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "b",
-     "text": "Yes — monitor it and watch for toxicity"
-    },
-    {
-     "id": "c",
-     "text": "Yes — raise it if the patient feels fine"
-    }
-   ],
-   "answer": "b",
-   "explain": "Lidocaine is on the AEMT list to monitor. Watch for ringing ears, numb lips and confusion.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-drip-21",
-   "module": "drips",
-   "type": "mc",
-   "context": "NS with 20 mEq KCl, running on a pump.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "b",
-     "text": "Yes — gravity is fine if it runs slowly"
-    },
-    {
-     "id": "c",
-     "text": "Yes — and it must stay on a pump"
-    }
-   ],
-   "answer": "c",
-   "explain": "NS with KCl is on the AEMT list. Potassium runs on a pump at all times; free-flow potassium can stop the heart.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-drip-22",
-   "module": "drips",
-   "type": "mc",
-   "context": "Vancomycin running in NS; about an hour left.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's on your monitoring list"
-    },
-    {
-     "id": "b",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "c",
-     "text": "No — antibiotics are Paramedic only"
-    }
-   ],
-   "answer": "a",
-   "explain": "NS with an antibiotic like vancomycin is on the AEMT list. Watch for flushing and itching (red man syndrome).",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-23",
-   "module": "drips",
-   "type": "mc",
-   "context": "Piperacillin-tazobactam (Zosyn) piggyback running.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — call dispatch for a Paramedic"
-    },
-    {
-     "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
@@ -578,302 +217,280 @@
     }
    ],
    "answer": "b",
-   "explain": "NS with antibiotics like Zosyn is on the AEMT list. Watch for an infusion reaction the whole ride.",
+   "explain": "Zosyn is on the AEMT list. Watch for an infusion reaction the whole ride.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-24",
-   "module": "drips",
+   "id": "aemt-fl-09",
+   "module": "fluids",
    "type": "mc",
-   "context": "D10 running for a low blood sugar.",
+   "context": "Normosol running at 100 mL/hr.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "No — dextrose drips are Paramedic only"
+     "text": "No — only NS is AEMT"
     },
     {
      "id": "c",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     }
    ],
    "answer": "c",
-   "explain": "Dextrose drips are on the AEMT list. Check the glucose every 30 minutes.",
+   "explain": "Normosol is one of the crystalloids on the AEMT list, with NS, ½NS, Plasma-Lyte and LR.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-25",
-   "module": "drips",
+   "id": "aemt-fl-10",
+   "module": "fluids",
    "type": "mc",
-   "context": "Naloxone drip after an opioid overdose.",
+   "context": "3% saline running for a low sodium.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
-     "text": "No — naloxone is only a push"
+     "text": "Yes — saline is on your list"
     }
    ],
    "answer": "a",
-   "explain": "A naloxone drip is on the AEMT list. Watch for re-sedation and for withdrawal.",
+   "explain": "Hypertonic saline (3% or 23.4%) is on the Paramedic list. Only NS, ½NS and the other isotonic crystalloids are AEMT.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-26",
-   "module": "drips",
+   "id": "aemt-fl-11",
+   "module": "fluids",
    "type": "mc",
-   "context": "Ondansetron (Zofran) infusion running.",
+   "context": "TPN with lipids running.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "c",
-     "text": "No — Zofran drips are Paramedic only"
+     "text": "Yes — it's only nutrition"
     }
    ],
    "answer": "b",
-   "explain": "Ondansetron is on the AEMT list. Watch for QT prolongation in high-risk patients.",
+   "explain": "TPN, with or without lipids, is on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-27",
-   "module": "drips",
-   "type": "spot",
-   "context": "The nurse's report lists three drips.",
-   "prompt": "Tap the drip that needs a Paramedic crew.",
-   "chart": {
-    "narrative": [
-     {
-      "id": "n1",
-      "text": "NS at 100 mL/hr"
-     },
-     {
-      "id": "n2",
-      "text": "Amiodarone at 0.5 mg/min"
-     },
-     {
-      "id": "n3",
-      "text": "Heparin at 1,000 units/hr"
-     }
-    ]
-   },
-   "answer": [
-    "n3"
-   ],
-   "explain": "NS and amiodarone are on the AEMT list; heparin isn't. One drip off the list makes it a Paramedic transport.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-28",
-   "module": "drips",
-   "type": "spot",
-   "context": "The nurse's report lists three drips.",
-   "prompt": "Tap the drip that needs a Paramedic crew.",
-   "chart": {
-    "narrative": [
-     {
-      "id": "n1",
-      "text": "NS with 20 mEq KCl on a pump"
-     },
-     {
-      "id": "n2",
-      "text": "Fentanyl at 25 mcg/hr; alert and talking"
-     },
-     {
-      "id": "n3",
-      "text": "Insulin at 6 units/hr"
-     }
-    ]
-   },
-   "answer": [
-    "n3"
-   ],
-   "explain": "KCl in NS and fentanyl in an alert patient are on the AEMT list. Insulin isn't.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-29",
-   "module": "drips",
-   "type": "spot",
-   "context": "The nurse's report lists three drips.",
-   "prompt": "Tap the drip that needs a Paramedic crew.",
-   "chart": {
-    "narrative": [
-     {
-      "id": "n1",
-      "text": "Vancomycin in NS"
-     },
-     {
-      "id": "n2",
-      "text": "D10 at 50 mL/hr"
-     },
-     {
-      "id": "n3",
-      "text": "Esmolol at 50 mcg/kg/min"
-     }
-    ]
-   },
-   "answer": [
-    "n3"
-   ],
-   "explain": "Vancomycin in NS and D10 are on the AEMT list. Esmolol isn't.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-30",
-   "module": "drips",
-   "type": "spot",
-   "context": "The nurse's report lists three drips.",
-   "prompt": "Tap the drip that needs a Paramedic crew.",
-   "chart": {
-    "narrative": [
-     {
-      "id": "n1",
-      "text": "Lidocaine at 2 mg/min"
-     },
-     {
-      "id": "n2",
-      "text": "Ondansetron infusion"
-     },
-     {
-      "id": "n3",
-      "text": "Dobutamine at 5 mcg/kg/min"
-     }
-    ]
-   },
-   "answer": [
-    "n3"
-   ],
-   "explain": "Lidocaine and ondansetron are on the AEMT list. Dobutamine isn't.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-31",
-   "module": "drips",
-   "type": "spot",
-   "context": "The nurse's report lists three drips.",
-   "prompt": "Tap the drip that needs a Paramedic crew.",
-   "chart": {
-    "narrative": [
-     {
-      "id": "n1",
-      "text": "Naloxone drip"
-     },
-     {
-      "id": "n2",
-      "text": "NS at 75 mL/hr"
-     },
-     {
-      "id": "n3",
-      "text": "Propofol at 10 mcg/kg/min"
-     }
-    ]
-   },
-   "answer": [
-    "n3"
-   ],
-   "explain": "Naloxone and NS are on the AEMT list. Propofol isn't.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-32",
-   "module": "drips",
-   "type": "swipe",
-   "prompt": "Any drip in a drug class you carry is yours to monitor.",
-   "answer": false,
-   "explain": "Only drips named on the AEMT list are yours. Midazolam is on it; propofol, also a sedative, isn't.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-33",
-   "module": "drips",
-   "type": "swipe",
-   "context": "At the bedside you find a drip that isn't on the AEMT list.",
-   "prompt": "You may still leave if the unlisted drip looks stable.",
-   "answer": false,
-   "explain": "You may not depart with an unauthorized drip running. Call dispatch; the call needs a Paramedic crew.",
-   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-drip-35",
-   "module": "drips",
+   "id": "aemt-fl-12",
+   "module": "fluids",
    "type": "mc",
-   "context": "Morphine PCA for post-op pain. Patient is awake and talking.",
+   "context": "Albumin infusing for low pressure.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "No — PCAs are Paramedic only"
+     "text": "Yes — it's a fluid like NS"
     },
     {
      "id": "c",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     }
    ],
    "answer": "c",
-   "explain": "Morphine drips and PCAs are on the AEMT list for patients who aren't intubated or sedated. Keep naloxone ready.",
+   "explain": "Albumin and other colloids are on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-36",
-   "module": "drips",
+   "id": "aemt-fl-13",
+   "module": "fluids",
    "type": "mc",
-   "context": "Hydromorphone PCA. The patient is intubated.",
+   "context": "Zovirax (acyclovir) running for shingles.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
-     "text": "Yes — hydromorphone is on your list"
+     "text": "Yes — it's an antibiotic"
     }
    ],
    "answer": "a",
-   "explain": "Opioid PCAs are AEMT only when the patient isn't intubated or sedated. This one needs a Paramedic crew.",
+   "explain": "Acyclovir is an antiviral, not an antibiotic, and it's on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-37",
-   "module": "drips",
+   "id": "aemt-fl-14",
+   "module": "fluids",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "D5W at 50 mL/hr"
+     },
+     {
+      "id": "n2",
+      "text": "Vancomycin"
+     },
+     {
+      "id": "n3",
+      "text": "Diflucan (fluconazole)"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "Antibiotics like vancomycin are AEMT; antifungals like Diflucan are on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-fl-15",
+   "module": "fluids",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "LR at 125 mL/hr"
+     },
+     {
+      "id": "n2",
+      "text": "KCl in NS on a pump"
+     },
+     {
+      "id": "n3",
+      "text": "Packed red cells"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "LR and potassium in NS on a pump are AEMT. Blood products are on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-fl-16",
+   "module": "fluids",
+   "type": "swipe",
+   "prompt": "Antifungals count as antibiotics on the AEMT list.",
+   "answer": false,
+   "explain": "Antifungals such as Diflucan and Mycamine are on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-01",
+   "module": "comfort",
    "type": "mc",
-   "context": "Lorazepam (Ativan) drip for alcohol withdrawal. Awake and calm.",
+   "context": "Dilaudid PCA after surgery. Awake and talking.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "c",
+     "text": "No — only fentanyl is AEMT"
+    }
+   ],
+   "answer": "b",
+   "explain": "Hydromorphone drips and PCAs are on the AEMT list when the patient isn't intubated or sedated.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-02",
+   "module": "comfort",
+   "type": "mc",
+   "context": "Infumorph (morphine) drip. Patient is alert.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "No — morphine drips are Paramedic only"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it's on the AEMT list"
+    }
+   ],
+   "answer": "c",
+   "explain": "Morphine drips and PCAs (Duramorph, Infumorph) are on the AEMT list for patients who aren't intubated or sedated.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-03",
+   "module": "comfort",
+   "type": "mc",
+   "context": "Sublimaze (fentanyl) drip for rib fractures. Alert.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "c",
+     "text": "No — opioid drips are Paramedic only"
+    }
+   ],
+   "answer": "a",
+   "explain": "Fentanyl drips are on the AEMT list when the patient isn't intubated or sedated. Keep naloxone ready.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-04",
+   "module": "comfort",
+   "type": "mc",
+   "context": "Ativan drip for alcohol withdrawal. Awake, calm, not intubated.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
@@ -881,91 +498,163 @@
     }
    ],
    "answer": "b",
-   "explain": "Lorazepam drips are on the AEMT list when the patient isn't intubated or sedated. Watch breathing and mental status.",
+   "explain": "Lorazepam drips are on the AEMT list when the patient isn't intubated or sedated.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-38",
-   "module": "drips",
+   "id": "aemt-cf-05",
+   "module": "comfort",
    "type": "mc",
-   "context": "Tranexamic acid (TXA) running after a GI bleed.",
+   "context": "Versed (midazolam) drip. The patient is intubated.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "No — TXA is a blood product"
+     "text": "Yes — Versed is on your list"
     },
     {
      "id": "c",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     }
    ],
    "answer": "c",
-   "explain": "TXA is on the AEMT list. Watch vital signs and for signs of a clot.",
+   "explain": "Benzodiazepine drips are AEMT only when the patient isn't intubated or sedated. This one is a Paramedic transport.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-39",
-   "module": "drips",
+   "id": "aemt-cf-06",
+   "module": "comfort",
    "type": "mc",
-   "context": "Ceftriaxone (Rocephin) running in a 2-day-old newborn.",
+   "context": "Nexterone (amiodarone) drip running.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "c",
-     "text": "Yes — ceftriaxone is on your list"
+     "text": "No — heart drips are Paramedic only"
     }
    ],
    "answer": "a",
-   "explain": "Ceftriaxone is AEMT except in a newborn; in a newborn it's a Paramedic transport.",
+   "explain": "Amiodarone (Nexterone, Pacerone, Cordarone) is on the AEMT list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-40",
-   "module": "drips",
+   "id": "aemt-cf-07",
+   "module": "comfort",
    "type": "mc",
-   "context": "Ceftriaxone (Rocephin) running in a 60-year-old with pneumonia.",
+   "context": "Xylocaine (lidocaine) drip running.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
-     "text": "No — antibiotics are Paramedic only"
+     "text": "No — lidocaine is Paramedic only"
     }
    ],
    "answer": "b",
-   "explain": "Ceftriaxone is on the AEMT list for anyone but a newborn. Watch for an infusion reaction.",
+   "explain": "Lidocaine drips are on the AEMT list. Watch for ringing ears, numb lips and confusion.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-41",
-   "module": "drips",
+   "id": "aemt-cf-08",
+   "module": "comfort",
    "type": "mc",
-   "context": "Methylprednisolone (Solu-Medrol) infusing for COPD.",
+   "context": "Narcan drip after an opioid overdose.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "No — Narcan is a push only"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it's on the AEMT list"
+    }
+   ],
+   "answer": "c",
+   "explain": "Naloxone drips are on the AEMT list. Watch for re-sedation and withdrawal.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-09",
+   "module": "comfort",
+   "type": "mc",
+   "context": "Toradol given for pain; nothing else running.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "c",
+     "text": "No — Toradol is Paramedic only"
+    }
+   ],
+   "answer": "a",
+   "explain": "Ketorolac (Toradol) is on the AEMT list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-10",
+   "module": "comfort",
+   "type": "mc",
+   "context": "Phenergan running for nausea.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "c",
+     "text": "No — only Zofran is AEMT"
+    }
+   ],
+   "answer": "b",
+   "explain": "Antiemetics (Zofran, Reglan, Phenergan) are on the AEMT list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-11",
+   "module": "comfort",
+   "type": "mc",
+   "context": "Solu-Cortef (hydrocortisone) infusing.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
@@ -973,27 +662,361 @@
     },
     {
      "id": "c",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     }
    ],
    "answer": "c",
-   "explain": "Corticosteroids such as Solu-Medrol, Solu-Cortef and Decadron are on the AEMT list.",
+   "explain": "Corticosteroids (Solu-Medrol, Solu-Cortef, Decadron) are on the AEMT list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-42",
-   "module": "drips",
+   "id": "aemt-cf-12",
+   "module": "comfort",
    "type": "mc",
-   "context": "Acetaminophen IV (Ofirmev) running for a fever.",
+   "context": "Cyklokapron (TXA) running after a GI bleed.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "c",
+     "text": "No — TXA is a blood product"
+    }
+   ],
+   "answer": "a",
+   "explain": "Tranexamic acid (TXA, Cyklokapron) is on the AEMT list. It isn't a blood product.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-13",
+   "module": "comfort",
+   "type": "mc",
+   "context": "Benadryl running for itching.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "c",
+     "text": "No — Benadryl drips are Paramedic only"
+    }
+   ],
+   "answer": "b",
+   "explain": "Diphenhydramine (Benadryl) is on the AEMT list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-14",
+   "module": "comfort",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "Dilaudid PCA; alert and talking"
+     },
+     {
+      "id": "n2",
+      "text": "Reglan"
+     },
+     {
+      "id": "n3",
+      "text": "Precedex at 0.4 mcg/kg/hr"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "Dilaudid in an alert patient and Reglan are AEMT. Dexmedetomidine (Precedex) is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-15",
+   "module": "comfort",
+   "type": "swipe",
+   "prompt": "A Dilaudid PCA is AEMT if the patient isn't intubated or sedated.",
+   "answer": true,
+   "explain": "Opioid and benzodiazepine drips and PCAs are AEMT only for patients who are neither intubated nor sedated.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-cf-16",
+   "module": "comfort",
+   "type": "swipe",
+   "prompt": "Only Zofran is an AEMT antiemetic; Reglan needs a Paramedic.",
+   "answer": false,
+   "explain": "Zofran, Reglan and Phenergan are all on the AEMT list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-01",
+   "module": "als",
+   "type": "mc",
+   "context": "Levophed running at 8 mcg/min.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if the rate never changes"
+    },
+    {
+     "id": "c",
+     "text": "No — it needs a Paramedic crew"
+    }
+   ],
+   "answer": "c",
+   "explain": "Norepinephrine (Levophed) is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-02",
+   "module": "als",
+   "type": "mc",
+   "context": "Cardene drip for blood pressure.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it's like a nitro tablet"
+    }
+   ],
+   "answer": "a",
+   "explain": "Nicardipine (Cardene) is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-03",
+   "module": "als",
+   "type": "mc",
+   "context": "Cardizem drip for A-fib.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if the heart rate is controlled"
+    }
+   ],
+   "answer": "b",
+   "explain": "Diltiazem (Cardizem) is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-04",
+   "module": "als",
+   "type": "mc",
+   "context": "Heparin drip for a PE.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "Yes, if the pump is locked"
+    },
+    {
+     "id": "c",
+     "text": "No — it needs a Paramedic crew"
+    }
+   ],
+   "answer": "c",
+   "explain": "Heparin is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-05",
+   "module": "als",
+   "type": "mc",
+   "context": "Insulin drip for DKA.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if you check sugar every 30 minutes"
+    }
+   ],
+   "answer": "a",
+   "explain": "Insulin is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-06",
+   "module": "als",
+   "type": "mc",
+   "context": "Propofol running at 20 mcg/kg/min.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "c",
+     "text": "Yes, if the patient is breathing alone"
+    }
+   ],
+   "answer": "b",
+   "explain": "Propofol is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-07",
+   "module": "als",
+   "type": "mc",
+   "context": "Pitocin running after a delivery.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's routine after birth"
+    },
+    {
+     "id": "c",
+     "text": "No — it needs a Paramedic crew"
+    }
+   ],
+   "answer": "c",
+   "explain": "Oxytocin (Pitocin) is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-08",
+   "module": "als",
+   "type": "mc",
+   "context": "Pepcid IV given for heartburn.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it's just an antacid"
+    }
+   ],
+   "answer": "a",
+   "explain": "Famotidine (Pepcid) and other H2 blockers are on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-09",
+   "module": "als",
+   "type": "mc",
+   "context": "Protonix drip for a GI bleed.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "c",
+     "text": "Yes — it only lowers stomach acid"
+    }
+   ],
+   "answer": "b",
+   "explain": "Pantoprazole (Protonix) and other PPIs are on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-10",
+   "module": "als",
+   "type": "mc",
+   "context": "Keppra running after a seizure.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "Yes — you treat seizures already"
+    },
+    {
+     "id": "c",
+     "text": "No — it needs a Paramedic crew"
+    }
+   ],
+   "answer": "c",
+   "explain": "Levetiracetam (Keppra) is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-als-11",
+   "module": "als",
+   "type": "mc",
+   "context": "Ofirmev (IV Tylenol) running for a fever.",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
@@ -1001,156 +1024,156 @@
     }
    ],
    "answer": "a",
-   "explain": "IV acetaminophen is on the Paramedic list, however familiar it sounds. Call dispatch.",
+   "explain": "IV acetaminophen (Ofirmev) is on the Paramedic list, however familiar it sounds.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-43",
-   "module": "drips",
+   "id": "aemt-als-12",
+   "module": "als",
    "type": "mc",
-   "context": "Pantoprazole (Protonix) drip for a GI bleed.",
+   "context": "Vasostrict (vasopressin) running.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "c",
-     "text": "Yes — it's just an antacid"
+     "text": "Yes, if it's a fixed rate"
     }
    ],
    "answer": "b",
-   "explain": "Protonix and other PPIs are on the Paramedic list. Call dispatch.",
+   "explain": "Vasopressin (Vasostrict) is on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-44",
-   "module": "drips",
+   "id": "aemt-als-13",
+   "module": "als",
    "type": "mc",
-   "context": "Levetiracetam (Keppra) running after a seizure.",
+   "context": "Calcium gluconate running.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — seizures are in your scope"
+     "text": "Yes — it's an electrolyte, like potassium"
     },
     {
      "id": "c",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     }
    ],
    "answer": "c",
-   "explain": "Keppra is on the Paramedic list. Call dispatch.",
+   "explain": "Calcium chloride and gluconate are on the Paramedic list. Potassium in IV fluid is the electrolyte that's AEMT.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-45",
-   "module": "drips",
+   "id": "aemt-als-14",
+   "module": "als",
    "type": "mc",
-   "context": "Lactated Ringer's at 100 mL/hr.",
+   "context": "Magnesium sulfate drip for preeclampsia.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
-     "text": "No — only normal saline is AEMT"
+     "text": "Yes — it's an electrolyte"
     }
    ],
    "answer": "a",
-   "explain": "LR and other crystalloids (½NS, Plasma-Lyte, Normosol) are on the AEMT list. EMT crews may take NS or LR at a fixed rate.",
+   "explain": "Magnesium sulfate is on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-46",
-   "module": "drips",
+   "id": "aemt-als-15",
+   "module": "als",
    "type": "mc",
-   "context": "Ketorolac (Toradol) given IV for pain, nothing else running.",
+   "context": "Brevibloc (esmolol) drip for heart rate.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "c",
-     "text": "No — ketorolac is Paramedic only"
+     "text": "Yes, if the rate doesn't change"
     }
    ],
    "answer": "b",
-   "explain": "Ketorolac is on the AEMT list.",
+   "explain": "Esmolol (Brevibloc) is on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-47",
-   "module": "drips",
+   "id": "aemt-als-16",
+   "module": "als",
    "type": "mc",
-   "context": "tPA finished 6 hours ago for a stroke. Nothing running now.",
+   "context": "Integrilin running after a cardiac cath.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "b",
-     "text": "Yes — the tPA is done"
+     "text": "Yes — the cath is already done"
     },
     {
      "id": "c",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     }
    ],
    "answer": "c",
-   "explain": "Alteplase or tenecteplase running, or given in the last 24 hours, makes it a Paramedic transport.",
+   "explain": "Eptifibatide (Integrilin) and tirofiban (Aggrastat) are on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-48",
-   "module": "drips",
+   "id": "aemt-als-17",
+   "module": "als",
    "type": "mc",
-   "context": "The nurse names a drug that's on neither list.",
+   "context": "Cleviprex drip for blood pressure.",
    "prompt": "Can your AEMT crew take this patient?",
    "options": [
     {
      "id": "a",
-     "text": "No — call dispatch for a Paramedic"
+     "text": "No — it needs a Paramedic crew"
     },
     {
      "id": "b",
-     "text": "Yes — it's on your monitoring list"
+     "text": "Yes — it's on the AEMT list"
     },
     {
      "id": "c",
-     "text": "Yes, if it looks harmless"
+     "text": "Yes, if BP is at target"
     }
    ],
    "answer": "a",
-   "explain": "A drug on neither list means a Paramedic crew. Ask Clinical Education to add it.",
+   "explain": "Clevidipine (Cleviprex) is on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-49",
-   "module": "drips",
+   "id": "aemt-als-18",
+   "module": "als",
    "type": "spot",
    "context": "The nurse's report lists three drips.",
    "prompt": "Tap the drip that needs a Paramedic crew.",
@@ -1158,27 +1181,27 @@
     "narrative": [
      {
       "id": "n1",
-      "text": "Morphine PCA; alert and talking"
+      "text": "Normosol at 100 mL/hr"
      },
      {
       "id": "n2",
-      "text": "Ceftriaxone in an adult"
+      "text": "Zofran"
      },
      {
       "id": "n3",
-      "text": "Pantoprazole drip"
+      "text": "Labetalol drip"
      }
     ]
    },
    "answer": [
     "n3"
    ],
-   "explain": "Morphine in an alert patient and adult ceftriaxone are on the AEMT list. Protonix isn't.",
+   "explain": "Normosol and Zofran are AEMT. Labetalol is on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-50",
-   "module": "drips",
+   "id": "aemt-als-19",
+   "module": "als",
    "type": "spot",
    "context": "The nurse's report lists three drips.",
    "prompt": "Tap the drip that needs a Paramedic crew.",
@@ -1186,1170 +1209,302 @@
     "narrative": [
      {
       "id": "n1",
-      "text": "D5½NS at 75 mL/hr"
+      "text": "Amiodarone"
      },
      {
       "id": "n2",
-      "text": "Ketorolac"
+      "text": "Fentanyl drip; alert"
      },
      {
       "id": "n3",
-      "text": "Acetaminophen IV (Ofirmev)"
+      "text": "Dopamine drip"
      }
     ]
    },
    "answer": [
     "n3"
    ],
-   "explain": "Dextrose fluids and ketorolac are on the AEMT list. IV acetaminophen isn't.",
+   "explain": "Amiodarone and fentanyl in an alert patient are AEMT. Dopamine is on the Paramedic list.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-drip-51",
-   "module": "drips",
+   "id": "aemt-als-20",
+   "module": "als",
+   "type": "spot",
+   "context": "The nurse's report lists three drips.",
+   "prompt": "Tap the drip that needs a Paramedic crew.",
+   "chart": {
+    "narrative": [
+     {
+      "id": "n1",
+      "text": "Solu-Medrol"
+     },
+     {
+      "id": "n2",
+      "text": "D10W at 50 mL/hr"
+     },
+     {
+      "id": "n3",
+      "text": "Dilantin (phenytoin)"
+     }
+    ]
+   },
+   "answer": [
+    "n3"
+   ],
+   "explain": "Steroids and dextrose fluids are AEMT. Phenytoin and fosphenytoin are on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-rule-01",
+   "module": "rules",
+   "type": "mc",
+   "context": "The nurse lists NS, Zosyn and Protonix.",
+   "prompt": "Who takes this call?",
+   "options": [
+    {
+     "id": "a",
+     "text": "An AEMT crew — two of three are fine"
+    },
+    {
+     "id": "b",
+     "text": "A Paramedic crew — one is off the list"
+    },
+    {
+     "id": "c",
+     "text": "An EMT crew, at a fixed rate"
+    }
+   ],
+   "answer": "b",
+   "explain": "Check every drug named. If any one is on the Paramedic list, the call is Paramedic.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-rule-02",
+   "module": "rules",
+   "type": "mc",
+   "context": "One drug the nurse names is on neither list.",
+   "prompt": "Who takes this call?",
+   "options": [
+    {
+     "id": "a",
+     "text": "An AEMT crew, if it seems harmless"
+    },
+    {
+     "id": "b",
+     "text": "An EMT crew, if it's a fluid"
+    },
+    {
+     "id": "c",
+     "text": "A Paramedic crew"
+    }
+   ],
+   "answer": "c",
+   "explain": "A drug on neither list makes the call Paramedic. Report the missing drug to Clinical Education.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-rule-03",
+   "module": "rules",
    "type": "swipe",
    "prompt": "One drip off the AEMT list makes the whole call Paramedic.",
    "answer": true,
-   "explain": "Check every drug the nurse names. One off the list, or on neither list, makes it a Paramedic transport.",
+   "explain": "Every drug named has to be on the AEMT list. One on the Paramedic list, or on neither, makes it Paramedic.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-hands-01",
-   "module": "hands",
+   "id": "aemt-rule-04",
+   "module": "rules",
    "type": "mc",
-   "context": "Amiodarone drip running. En route, the rhythm worsens.",
-   "prompt": "Can you increase it?",
+   "context": "tPA finished 6 hours ago for a stroke. Only NS is running now.",
+   "prompt": "Who takes this call?",
    "options": [
     {
      "id": "a",
-     "text": "Yes — the note is enough"
+     "text": "A Paramedic crew"
     },
     {
      "id": "b",
-     "text": "Only with explicit orders and DMO guidance"
+     "text": "An AEMT crew — the tPA is finished"
     },
     {
      "id": "c",
-     "text": "Never, under any circumstances"
-    }
-   ],
-   "answer": "b",
-   "explain": "AEMTs don't titrate without explicit sending-physician parameters and DMO guidance. When in doubt, keep the current rate and call DMO.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-02",
-   "module": "hands",
-   "type": "mc",
-   "context": "Vancomycin running. The patient becomes flushed, itchy and hypotensive.",
-   "prompt": "What do you do first?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Stop it, keep NS running, check ABCs"
-    },
-    {
-     "id": "b",
-     "text": "Slow the rate and keep going"
-    },
-    {
-     "id": "c",
-     "text": "Give diphenhydramine and keep it running"
-    },
-    {
-     "id": "d",
-     "text": "Wait and report it at arrival"
+     "text": "An EMT crew"
     }
    ],
    "answer": "a",
-   "explain": "For an infusion reaction: stop the infusion, keep the line open with NS, and assess airway, breathing and circulation. Then notify DMO and the receiving facility.",
-   "source": "2026 Protocols §IV-C5, Infusion reaction response (p. 78)"
+   "explain": "Alteplase or tenecteplase running, or given in the last 24 hours, is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-hands-03",
-   "module": "hands",
-   "type": "swipe",
-   "prompt": "Monitoring a drip means you may titrate it to effect.",
-   "answer": false,
-   "explain": "Monitoring means watching the patient and the pump. It doesn't include adjusting the drug.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-04",
-   "module": "hands",
-   "type": "swipe",
-   "prompt": "The fallback is: stop the drip, keep NS running, call DMO.",
-   "answer": true,
-   "explain": "That's the protocol's fallback for AEMTs. Stopping in an emergency and keeping access open with NS is in your scope.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-05",
-   "module": "hands",
+   "id": "aemt-rule-05",
+   "module": "rules",
    "type": "mc",
-   "context": "AEMT crew, two drips running at pickup.",
-   "prompt": "Who confirms the pre-departure infusion check?",
+   "prompt": "What may an EMT crew take?",
    "options": [
     {
      "id": "a",
-     "text": "Nobody; the hospital already did it"
+     "text": "Any crystalloid, adjusted as needed"
     },
     {
      "id": "b",
-     "text": "You confirm it has been done"
+     "text": "NS or LR at a fixed rate, monitor only"
     },
     {
      "id": "c",
-     "text": "Dispatch confirms it by radio"
-    },
-    {
-     "id": "d",
-     "text": "The receiving nurse, at handoff"
+     "text": "NS plus an antibiotic piggyback"
     }
    ],
    "answer": "b",
-   "explain": "On AEMT and EMT crews, the crew member confirms the infusion verification was completed before leaving.",
-   "source": "2026 Protocols §IV-A, Pre-departure verification (p. 72)"
+   "explain": "BLS crews take only normal saline or lactated Ringer's at a fixed rate, and monitor it.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-hands-06",
-   "module": "hands",
+   "id": "aemt-rule-06",
+   "module": "rules",
+   "type": "swipe",
+   "prompt": "An EMT crew may adjust the rate of an LR drip.",
+   "answer": false,
+   "explain": "EMT crews take NS or LR at a fixed rate, monitor only.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-rule-07",
+   "module": "rules",
    "type": "mc",
-   "prompt": "Which is part of pre-departure infusion verification?",
+   "context": "Fentanyl drip running. The patient is intubated.",
+   "prompt": "Who takes this call?",
    "options": [
     {
      "id": "a",
-     "text": "Set the pump to your preferred rate"
+     "text": "An AEMT crew — fentanyl is on your list"
     },
     {
      "id": "b",
-     "text": "Take the hospital pump off the patient"
+     "text": "An AEMT crew, if the rate is low"
     },
     {
      "id": "c",
-     "text": "Trace the tubing from bag to patient"
-    },
-    {
-     "id": "d",
-     "text": "Flush the central line before moving"
+     "text": "A Paramedic crew"
     }
    ],
    "answer": "c",
-   "explain": "Verify drug and concentration, ordered rate vs pump rate, and trace and label each line. Confirm enough volume and a pump-failure plan.",
-   "source": "2026 Protocols §IV-A, Pre-departure verification (pp. 72–73)"
+   "explain": "Any drip on an intubated or sedated patient is a Paramedic transport, even one from the AEMT list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-hands-07",
-   "module": "hands",
+   "id": "aemt-rule-08",
+   "module": "rules",
+   "type": "swipe",
+   "prompt": "Any drip on an intubated or sedated patient needs a Paramedic.",
+   "answer": true,
+   "explain": "The list's last line: any drip for an intubated or sedated patient is on the Paramedic list.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-rule-09",
+   "module": "rules",
    "type": "mc",
-   "context": "NS with KCl running. The pump fails halfway through the ride.",
+   "context": "\"Cefazolin is running.\"",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "b",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "c",
+     "text": "Only if the nurse confirms it's an antibiotic"
+    }
+   ],
+   "answer": "a",
+   "explain": "Antibiotics are on the AEMT list, and many start with cef-. Look it up if you're unsure.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-rule-10",
+   "module": "rules",
+   "type": "mc",
+   "context": "\"Azithromycin is running.\"",
+   "prompt": "Can your AEMT crew take this patient?",
+   "options": [
+    {
+     "id": "a",
+     "text": "No — it needs a Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "Yes — it's on the AEMT list"
+    },
+    {
+     "id": "c",
+     "text": "Only if the nurse confirms it's an antibiotic"
+    }
+   ],
+   "answer": "b",
+   "explain": "Antibiotics are on the AEMT list, and many end in -mycin. Look it up if you're unsure.",
+   "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
+  },
+  {
+   "id": "aemt-rule-11",
+   "module": "rules",
+   "type": "mc",
+   "context": "The nurse names a brand you don't recognize.",
    "prompt": "What do you do?",
    "options": [
     {
      "id": "a",
-     "text": "Run the KCl by gravity, slowly"
+     "text": "Assume it's fine if the patient is stable"
     },
     {
      "id": "b",
-     "text": "Push the rest of the KCl"
+     "text": "Take the call and ask the receiving nurse"
     },
     {
      "id": "c",
-     "text": "Count drops and keep it going"
-    },
-    {
-     "id": "d",
-     "text": "Stop the KCl, keep NS running, call DMO"
-    }
-   ],
-   "answer": "d",
-   "explain": "Potassium must always run on a pump; free-flow potassium can cause cardiac arrest. Stop it, keep access with NS and call DMO.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-08",
-   "module": "hands",
-   "type": "mc",
-   "context": "NS running. BP drops and your standing orders call for a fluid bolus.",
-   "prompt": "Can you give the bolus?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — only a Paramedic can change NS"
-    },
-    {
-     "id": "b",
-     "text": "Only after the receiving nurse agrees"
-    },
-    {
-     "id": "c",
-     "text": "Yes — NS rate is yours per standing orders"
+     "text": "Look it up; on neither list means Paramedic"
     }
    ],
    "answer": "c",
-   "explain": "Normal saline is the one drip an AEMT may maintain and adjust per standing orders.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-09",
-   "module": "hands",
-   "type": "swipe",
-   "prompt": "You may adjust a lidocaine drip if the patient feels tingly.",
-   "answer": false,
-   "explain": "Don't change the rate. For signs of toxicity, stop the drip, keep NS running and call DMO.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-10",
-   "module": "hands",
-   "type": "mc",
-   "context": "Fentanyl drip running. The patient is hard to wake; RR is 8.",
-   "prompt": "What do you do?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Stop it, support breathing, give naloxone per protocol"
-    },
-    {
-     "id": "b",
-     "text": "Halve the rate and recheck"
-    },
-    {
-     "id": "c",
-     "text": "Let them sleep and recheck at arrival"
-    },
-    {
-     "id": "d",
-     "text": "Give midazolam to settle them"
-    }
-   ],
-   "answer": "a",
-   "explain": "On a fentanyl drip, naloxone must be at hand. Stop the drip, support breathing, give naloxone per protocol and call DMO.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-11",
-   "module": "hands",
-   "type": "mc",
-   "context": "D10 drip running on a 90-minute transfer.",
-   "prompt": "How often do you check the glucose?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Every 2 hours"
-    },
-    {
-     "id": "b",
-     "text": "Every 30 minutes"
-    },
-    {
-     "id": "c",
-     "text": "Only at arrival"
-    },
-    {
-     "id": "d",
-     "text": "Only if the patient complains"
-    }
-   ],
-   "answer": "b",
-   "explain": "Check the blood glucose every 30 minutes on a dextrose drip.",
-   "source": "2026 Protocols §IV-B, AEMT authorized infusions (pp. 72–75)"
-  },
-  {
-   "id": "aemt-hands-12",
-   "module": "hands",
-   "type": "swipe",
-   "prompt": "A steady midazolam drip on an intubated patient is AEMT scope.",
-   "answer": false,
-   "explain": "Any drip on an intubated or sedated patient is a Paramedic transport, however steady.",
+   "explain": "Look the name up. If it isn't on either list, the call is Paramedic.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-hands-13",
-   "module": "hands",
+   "id": "aemt-rule-12",
+   "module": "rules",
    "type": "swipe",
-   "prompt": "EMT-only crews may take only NS or LR, at a fixed rate.",
-   "answer": true,
-   "explain": "BLS crews monitor normal saline or lactated Ringer's at a fixed rate. Any other drip needs an AEMT or Paramedic crew.",
+   "prompt": "If the list and the protocols differ, follow the list.",
+   "answer": false,
+   "explain": "The protocols govern. Report the difference to Clinical Education.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
   },
   {
-   "id": "aemt-hands-14",
-   "module": "hands",
-   "type": "swipe",
-   "prompt": "Potassium in NS must run on a pump for the whole ride.",
-   "answer": true,
-   "explain": "Free-flow or bolus potassium can cause cardiac arrest. Confirm pump programming before you leave and after any line change.",
-   "source": "2026 Protocols §IV-B and KCl safety (pp. 75–78)"
-  },
-  {
-   "id": "aemt-drip-34",
-   "module": "drips",
-   "type": "swipe",
-   "prompt": "NS with an antibiotic like vancomycin is on the AEMT list.",
-   "answer": true,
-   "explain": "Antibiotics such as vancomycin, Zosyn, cefepime and meropenem are on the AEMT list. Watch for an infusion reaction the whole ride.",
+   "id": "aemt-rule-13",
+   "module": "rules",
+   "type": "mc",
+   "context": "Versed drip; the patient is sedated but not intubated.",
+   "prompt": "Who takes this call?",
+   "options": [
+    {
+     "id": "a",
+     "text": "A Paramedic crew"
+    },
+    {
+     "id": "b",
+     "text": "An AEMT crew — Versed is on your list"
+    },
+    {
+     "id": "c",
+     "text": "An AEMT crew, if the airway is open"
+    }
+   ],
+   "answer": "a",
+   "explain": "Benzo and opioid drips are AEMT only if the patient is neither intubated nor sedated.",
    "source": "Procedure 401.4-KC, Kansas City Medication List by Level (draft 09/29/2026, from the 2027 Protocols)"
-  },
-  {
-   "id": "aemt-procs-01",
-   "module": "procs",
-   "type": "mc",
-   "context": "Patient has a chest tube draining to a collection device.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — passive chest tube monitoring is AEMT+"
-    },
-    {
-     "id": "b",
-     "text": "No — chest tubes are Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Only with a nurse riding along"
-    }
-   ],
-   "answer": "a",
-   "explain": "Passive chest tube monitoring is AEMT and Paramedic scope. An EMT-only crew can't take this patient.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-02",
-   "module": "procs",
-   "type": "mc",
-   "context": "Patient has an arterial line in the radial artery.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — just watch the waveform"
-    },
-    {
-     "id": "b",
-     "text": "No — arterial lines are Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if the line is capped"
-    }
-   ],
-   "answer": "b",
-   "explain": "Arterial line monitoring is Paramedic only. Call dispatch for a Paramedic crew.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-03",
-   "module": "procs",
-   "type": "mc",
-   "context": "Patient is on a ventilator through a trach.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes, if the settings don't change"
-    },
-    {
-     "id": "b",
-     "text": "Yes, if RT sets it up first"
-    },
-    {
-     "id": "c",
-     "text": "No — ventilators are Paramedic only"
-    }
-   ],
-   "answer": "c",
-   "explain": "Ventilator management is Paramedic only. Call dispatch for a Paramedic crew.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-04",
-   "module": "procs",
-   "type": "mc",
-   "context": "Stable LVAD patient going home; the device is running normally.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — passive LVAD monitoring is all levels"
-    },
-    {
-     "id": "b",
-     "text": "No — LVADs are Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Only with a perfusionist"
-    }
-   ],
-   "answer": "a",
-   "explain": "Passive LVAD monitoring is authorized at every level. Bring the patient's backup equipment and know who to call.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-05",
-   "module": "procs",
-   "type": "mc",
-   "context": "The nurse asks you to flush the PICC before you leave.",
-   "prompt": "Can you do it?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes, with a saline syringe"
-    },
-    {
-     "id": "b",
-     "text": "No — central line flushes are Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if you use sterile technique"
-    }
-   ],
-   "answer": "b",
-   "explain": "Accessing or flushing a central line is Paramedic only. Leave the PICC alone and use peripheral access if you need it.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-06",
-   "module": "procs",
-   "type": "mc",
-   "context": "The patient's peripheral IV infiltrates en route.",
-   "prompt": "Can you start a new IV?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — only a Paramedic restarts lines"
-    },
-    {
-     "id": "b",
-     "text": "Only through the existing site"
-    },
-    {
-     "id": "c",
-     "text": "Yes — peripheral IVs are AEMT scope"
-    }
-   ],
-   "answer": "c",
-   "explain": "Peripheral IV access is AEMT and Paramedic scope.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-07",
-   "module": "procs",
-   "type": "mc",
-   "prompt": "Can you place an external jugular IV?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — EJ access is Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — any peripheral vein is fine"
-    },
-    {
-     "id": "c",
-     "text": "Only in cardiac arrest"
-    }
-   ],
-   "answer": "a",
-   "explain": "External jugular access is Paramedic only. Consider IO if access is urgent.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-08",
-   "module": "procs",
-   "type": "mc",
-   "context": "Cardiac arrest. No IV, and peripheral attempts fail.",
-   "prompt": "Can you place an IO?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — IO is Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — IO access is AEMT scope"
-    },
-    {
-     "id": "c",
-     "text": "Only in a child"
-    }
-   ],
-   "answer": "b",
-   "explain": "IO access is AEMT and Paramedic scope, for unstable or arrest patients when an IV isn't quick.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-09",
-   "module": "procs",
-   "type": "mc",
-   "context": "Trach patient with thick secretions blocking the airway.",
-   "prompt": "Can you suction past the stoma?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — only surface suctioning"
-    },
-    {
-     "id": "b",
-     "text": "Only with a nurse's order"
-    },
-    {
-     "id": "c",
-     "text": "Yes — deep trach suction is AEMT+"
-    }
-   ],
-   "answer": "c",
-   "explain": "Deep tracheal and stoma suctioning is AEMT and Paramedic scope. EMTs suction only the surface of the stoma.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-10",
-   "module": "procs",
-   "type": "mc",
-   "context": "Patient goes into VF on the monitor.",
-   "prompt": "Can you manually defibrillate?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — manual defibrillation is AEMT scope"
-    },
-    {
-     "id": "b",
-     "text": "No — use the AED mode only"
-    },
-    {
-     "id": "c",
-     "text": "Only after a Paramedic arrives"
-    }
-   ],
-   "answer": "a",
-   "explain": "Manual defibrillation is AEMT and Paramedic scope.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-11",
-   "module": "procs",
-   "type": "mc",
-   "context": "Symptomatic bradycardia that isn't improving.",
-   "prompt": "Can you pace?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — pacing is AEMT scope"
-    },
-    {
-     "id": "b",
-     "text": "No — pacing is Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Yes, at the lowest current"
-    }
-   ],
-   "answer": "b",
-   "explain": "Transcutaneous pacing is Paramedic only. Call DMO and consider diverting.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-12",
-   "module": "procs",
-   "type": "mc",
-   "context": "Unstable narrow-complex tachycardia en route.",
-   "prompt": "Can you cardiovert?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's like defibrillation"
-    },
-    {
-     "id": "b",
-     "text": "Yes, if the patient is sedated"
-    },
-    {
-     "id": "c",
-     "text": "No — cardioversion is Paramedic only"
-    }
-   ],
-   "answer": "c",
-   "explain": "Synchronized cardioversion is Paramedic only. Call DMO and consider diverting.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-13",
-   "module": "procs",
-   "type": "mc",
-   "context": "You acquire a 12-lead on a chest pain patient.",
-   "prompt": "Can you interpret it?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — to recognize a STEMI"
-    },
-    {
-     "id": "b",
-     "text": "No — acquisition only"
-    },
-    {
-     "id": "c",
-     "text": "Yes — for any diagnosis"
-    }
-   ],
-   "answer": "a",
-   "explain": "AMR KC medical direction lets AEMTs read 12-leads to recognize a STEMI. Beyond that, consult a Paramedic or DMO.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-14",
-   "module": "procs",
-   "type": "mc",
-   "context": "Receiving hospital wants time-critical labs drawn.",
-   "prompt": "Can you draw the blood?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — phlebotomy is Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — phlebotomy is AEMT scope"
-    },
-    {
-     "id": "c",
-     "text": "Only from the existing IV"
-    }
-   ],
-   "answer": "b",
-   "explain": "AEMTs and Paramedics may draw blood samples for time-critical diagnoses per approved procedures.",
-   "source": "2026 Protocols, Obtaining blood samples (p. 12)"
-  },
-  {
-   "id": "aemt-procs-15",
-   "module": "procs",
-   "type": "mc",
-   "context": "Combative patient who is a danger to the crew.",
-   "prompt": "Can you give sedation per the behavioral protocol?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's a standing order"
-    },
-    {
-     "id": "b",
-     "text": "Yes, at half the dose"
-    },
-    {
-     "id": "c",
-     "text": "No — behavioral sedation is Paramedic only"
-    }
-   ],
-   "answer": "c",
-   "explain": "Behavioral sedation is Paramedic only. Physical restraint per protocol is in your scope.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-16",
-   "module": "procs",
-   "type": "mc",
-   "context": "The nurse asks you to put on a new nitroglycerin patch.",
-   "prompt": "Can you apply it?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — transdermal patches are Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — you give nitro SL already"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if BP is over 100"
-    }
-   ],
-   "answer": "a",
-   "explain": "Applying or adjusting a prescription transdermal patch is Paramedic scope at AMR KC.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-17",
-   "module": "procs",
-   "type": "mc",
-   "context": "Patient is on CPAP for CHF.",
-   "prompt": "Can your AEMT crew take this patient?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — CPAP is Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — CPAP is all levels"
-    },
-    {
-     "id": "c",
-     "text": "Only with RT riding along"
-    }
-   ],
-   "answer": "b",
-   "explain": "CPAP (Flow-Safe II) is authorized at every level.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-18",
-   "module": "procs",
-   "type": "mc",
-   "context": "The airway fails and BVM isn't working well.",
-   "prompt": "Can you place an iGel?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — airways are Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Only in cardiac arrest"
-    },
-    {
-     "id": "c",
-     "text": "Yes — an SGA is all levels"
-    }
-   ],
-   "answer": "c",
-   "explain": "A supraglottic airway (iGel) is authorized at every level. Intubation is Paramedic only.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-19",
-   "module": "procs",
-   "type": "mc",
-   "context": "Signs of a tension pneumothorax en route.",
-   "prompt": "Can you decompress the chest?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — needle decompression is Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — it's lifesaving"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if DMO is busy"
-    }
-   ],
-   "answer": "a",
-   "explain": "Needle decompression is Paramedic only. Call DMO and divert for a suspected tension pneumothorax.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-20",
-   "module": "procs",
-   "type": "swipe",
-   "prompt": "Working with a Paramedic gives you Paramedic authority.",
-   "answer": false,
-   "explain": "You work within your own credentialed scope. You don't inherit your partner's.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-21",
-   "module": "procs",
-   "type": "swipe",
-   "prompt": "An EMT-only crew can take a patient with a chest tube.",
-   "answer": false,
-   "explain": "A chest tube needs at least an AEMT on the crew. Contact the sending facility and DMO before accepting.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-procs-22",
-   "module": "procs",
-   "type": "swipe",
-   "prompt": "AEMTs may push meds IV but may not start new drips.",
-   "answer": true,
-   "explain": "IV push is AEMT scope; IV infusion administration is Paramedic only. Monitoring listed hospital drips is a separate authority.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-meds-01",
-   "module": "meds",
-   "type": "mc",
-   "context": "Patient begins seizing en route.",
-   "prompt": "Can you give midazolam?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — for active seizures"
-    },
-    {
-     "id": "c",
-     "text": "Yes, and for agitation too"
-    }
-   ],
-   "answer": "b",
-   "explain": "AEMT midazolam is authorized for active seizures only. It isn't for agitation or sedation.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-02",
-   "module": "meds",
-   "type": "mc",
-   "context": "Agitated patient. The nurse asks for midazolam to calm him.",
-   "prompt": "Can you give it?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's in your formulary"
-    },
-    {
-     "id": "b",
-     "text": "Yes, at a lower dose"
-    },
-    {
-     "id": "c",
-     "text": "No — AEMT midazolam is seizures only"
-    }
-   ],
-   "answer": "c",
-   "explain": "AEMT midazolam is limited to active seizures. Agitation needs a Paramedic or DMO.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-03",
-   "module": "meds",
-   "type": "mc",
-   "context": "Symptomatic bradycardia; the patient has an IV.",
-   "prompt": "Can you give atropine IV?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — IV atropine is Paramedic scope"
-    },
-    {
-     "id": "b",
-     "text": "Yes — atropine is AEMT"
-    },
-    {
-     "id": "c",
-     "text": "Yes, half the usual dose"
-    }
-   ],
-   "answer": "a",
-   "explain": "IV/IO atropine for bradycardia is Paramedic scope. Call DMO.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-04",
-   "module": "meds",
-   "type": "mc",
-   "context": "Glucose is 42; patient can't swallow. IV in place.",
-   "prompt": "Can you give D10?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — dextrose is Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — D10 IV is AEMT scope"
-    },
-    {
-     "id": "c",
-     "text": "Only oral glucose"
-    }
-   ],
-   "answer": "b",
-   "explain": "D10 IV is in AEMT scope. Recheck the glucose after you give it.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-05",
-   "module": "meds",
-   "type": "mc",
-   "context": "Anaphylaxis. You have epinephrine 1:1,000 in a vial.",
-   "prompt": "Can you draw it up and give it IM?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — auto-injector only"
-    },
-    {
-     "id": "b",
-     "text": "Only into the thigh muscle by a Paramedic"
-    },
-    {
-     "id": "c",
-     "text": "Yes — drawn-up IM epi is AEMT"
-    }
-   ],
-   "answer": "c",
-   "explain": "Drawing up and giving IM epinephrine is AEMT and Paramedic scope. EMTs use the auto-injector only.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-06",
-   "module": "meds",
-   "type": "mc",
-   "context": "Cardiac arrest with IO access.",
-   "prompt": "Can you give epinephrine 1:10,000?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — arrest epi IV/IO is AEMT"
-    },
-    {
-     "id": "b",
-     "text": "No — IV epi is Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Only after three shocks"
-    }
-   ],
-   "answer": "a",
-   "explain": "Epinephrine 1:10,000 for cardiac arrest is in AEMT scope.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-07",
-   "module": "meds",
-   "type": "mc",
-   "context": "Hypotensive after intubation at the sending hospital.",
-   "prompt": "Can you give push-dose epinephrine?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's the same drug"
-    },
-    {
-     "id": "b",
-     "text": "No — push-dose pressors are Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Yes, if BP is under 70"
-    }
-   ],
-   "answer": "b",
-   "explain": "Push-dose epinephrine is Paramedic scope. An intubated patient is a Paramedic transport anyway.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-08",
-   "module": "meds",
-   "type": "mc",
-   "context": "Severe pain from a femur fracture; IV in place.",
-   "prompt": "Can you give fentanyl?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — opioids are Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Only intranasal"
-    },
-    {
-     "id": "c",
-     "text": "Yes — fentanyl IV/IN/IM is AEMT"
-    }
-   ],
-   "answer": "c",
-   "explain": "Fentanyl is in AEMT scope by IV/IO, IN or IM. Watch breathing and have naloxone ready.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-09",
-   "module": "meds",
-   "type": "mc",
-   "context": "Patient is vomiting; IV in place.",
-   "prompt": "Can you give ondansetron IV?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — IV ondansetron is AEMT"
-    },
-    {
-     "id": "b",
-     "text": "No — only the ODT tablet"
-    },
-    {
-     "id": "c",
-     "text": "Only with a nurse's order"
-    }
-   ],
-   "answer": "a",
-   "explain": "IV/IO, IM and IN ondansetron are AEMT scope. EMTs give it by mouth (ODT) only.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-10",
-   "module": "meds",
-   "type": "mc",
-   "context": "Opioid overdose with slow breathing; IV in place.",
-   "prompt": "Can you give naloxone IV?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — IN or IM only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — IV naloxone is AEMT"
-    },
-    {
-     "id": "c",
-     "text": "Only after BVM fails"
-    }
-   ],
-   "answer": "b",
-   "explain": "IV/IO naloxone is AEMT scope; EMTs use IN, IM or the auto-injector.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-11",
-   "module": "meds",
-   "type": "mc",
-   "context": "Stable SVT at 190.",
-   "prompt": "Can you give adenosine?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's a push"
-    },
-    {
-     "id": "b",
-     "text": "Yes, if vagal maneuvers fail"
-    },
-    {
-     "id": "c",
-     "text": "No — adenosine is Paramedic only"
-    }
-   ],
-   "answer": "c",
-   "explain": "Adenosine is Paramedic scope. Try vagal maneuvers and call DMO.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-12",
-   "module": "meds",
-   "type": "mc",
-   "context": "The nurse suggests ketamine for pain.",
-   "prompt": "Can you give it?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — ketamine is Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — low-dose ketamine is AEMT"
-    },
-    {
-     "id": "c",
-     "text": "Yes, intranasal only"
-    }
-   ],
-   "answer": "a",
-   "explain": "Ketamine is Paramedic scope at AMR KC.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-13",
-   "module": "meds",
-   "type": "mc",
-   "context": "Hives and itching after an antibiotic; IV in place.",
-   "prompt": "Can you give diphenhydramine IV?",
-   "options": [
-    {
-     "id": "a",
-     "text": "No — Paramedic only"
-    },
-    {
-     "id": "b",
-     "text": "Yes — IV/IM diphenhydramine is AEMT"
-    },
-    {
-     "id": "c",
-     "text": "Only by mouth"
-    }
-   ],
-   "answer": "b",
-   "explain": "Diphenhydramine IV or IM is AEMT scope. Stop the antibiotic infusion first.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-14",
-   "module": "meds",
-   "type": "mc",
-   "context": "Pregnant patient starts seizing; eclampsia suspected.",
-   "prompt": "Can you give magnesium?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — it's an electrolyte"
-    },
-    {
-     "id": "b",
-     "text": "Yes, a half dose"
-    },
-    {
-     "id": "c",
-     "text": "No — magnesium is Paramedic only"
-    }
-   ],
-   "answer": "c",
-   "explain": "Magnesium is Paramedic scope. Treat the active seizure with midazolam per protocol and call DMO.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-15",
-   "module": "meds",
-   "type": "mc",
-   "context": "Stable VT with a pulse; IV in place.",
-   "prompt": "Can you give amiodarone?",
-   "options": [
-    {
-     "id": "a",
-     "text": "Yes — amiodarone is AEMT"
-    },
-    {
-     "id": "b",
-     "text": "No — Paramedic only"
-    },
-    {
-     "id": "c",
-     "text": "Only in cardiac arrest"
-    }
-   ],
-   "answer": "a",
-   "explain": "Amiodarone for stable VT and arrest is in the AEMT formulary.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
-  },
-  {
-   "id": "aemt-meds-16",
-   "module": "meds",
-   "type": "swipe",
-   "prompt": "Any drug you can push, you may also start as a drip.",
-   "answer": false,
-   "explain": "IV push and IV infusion are separate. Starting an infusion is Paramedic only.",
-   "source": "2026 Protocols, Scope of Practice table (pp. 7–11)"
-  },
-  {
-   "id": "aemt-meds-17",
-   "module": "meds",
-   "type": "swipe",
-   "prompt": "A drug can be AEMT scope by one route but not another.",
-   "answer": true,
-   "explain": "Atropine and epinephrine are examples. Check the drug, the route and the indication.",
-   "source": "2026 Protocols §III, Ambulance Medication Formulary"
   }
  ]
 }
