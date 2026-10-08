@@ -1197,7 +1197,7 @@ function renderHome(){
   // which is where Alaris and Medication Math went when LIFEPAK arrived, and
   // where LIFEPAK went when Chart Rx arrived.
   h += '<div class="home-feats">';
-  h += '<a class="feat-card feat-hero" href="chart-rx.html">';
+  h += '<a class="feat-card feat-hero" href="chart-rx.html#charting">';
   h += '<svg class="feat-ecg" viewBox="0 0 104 50" aria-hidden="true">';
   h += '<path class="base" d="M8 12h44M8 22h56M8 32h38M8 42h50"/>';
   h += '<path class="trace" d="M68 27l9 10 20-25"/></svg>';
@@ -2729,8 +2729,10 @@ function renderMore(){
   h += '</div>';
 
   h += moreSec('quiz') + '<div class="more-list">';
-  h += moreCard({href:'chart-rx.html', ac:'ac-blue', ico:'i-clipboard', title:'Chart Rx',
+  h += moreCard({href:'chart-rx.html#charting', ac:'ac-blue', ico:'i-clipboard', title:'Chart Rx',
                  sub:'PCR documentation game &mdash; 8 charts, 3 minutes, find what&rsquo;s wrong'});
+  h += moreCard({href:'chart-rx.html#aemt', ac:'ac-blue', ico:'i-clipboard', title:'AEMT Scope Check',
+                 sub:'Which drips can an AEMT crew take? The KC medication list &mdash; with a certificate test'});
   h += moreCard({href:'quiz-daily5.html', ac:'ac-orange', ico:'i-calendar', title:'Daily 5',
                  sub:'Five questions a day &mdash; build a streak'});
   h += moreCard({href:'quiz-rhythms.html', ac:'ac-pink', ico:'i-pulse', title:'Rhythm Strip ID',
