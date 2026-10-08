@@ -1018,7 +1018,7 @@ console.log('\nE1 AEMT scope bank');
   ok('E1 #aemt opens the AEMT track', b.track === 'aemt');
   ok(`E1 every AEMT question passes the schema (${AQ.length})`, b.errors.length === 0 && b.n === AQ.length && AQ.length >= 60, b.errors.join(' | '));
   await p.context().close(); }
-ok('E1 every AEMT question cites its protocol source', AQ.every(q => typeof q.source === 'string' && /Protocol/.test(q.source)), AQ.filter(q => !q.source).map(q => q.id).join(','));
+ok('E1 every AEMT question cites its protocol source', AQ.every(q => typeof q.source === 'string' && /Protocol|Procedure 401\.4-KC/.test(q.source)), AQ.filter(q => !q.source).map(q => q.id).join(','));
 ok('E1 prompts and statements are 12 words or fewer', AQ.every(q => q.prompt.split(/\s+/).length <= 12), AQ.filter(q => q.prompt.split(/\s+/).length > 12).map(q => q.id).join(','));
 ok('E1 explanations are two sentences or fewer', AQ.every(q => q.explain.trim().split(/(?<=[.!?])\s+/).filter(Boolean).length <= 2));
 ok('E1 every "tap the drip" chart has exactly one answer', AQ.filter(q => q.type === 'spot').every(q => q.answer.length === 1));
@@ -1030,7 +1030,13 @@ ok('E1 every "tap the drip" chart has exactly one answer', AQ.filter(q => q.type
   ok('E1 the right answer is usually not the longest choice', L.length <= W.length / 2, L.length + ' of ' + W.length);
   const sw = AQ.filter(q => q.type === 'swipe');
   ok('E1 true/false statements are a real mix', sw.filter(q => q.answer).length >= sw.length / 3 && sw.filter(q => !q.answer).length >= sw.length / 3); }
-ok('E1 items awaiting a Medical Director ruling are left out (TXA, glucagon)', !/tranexamic|\bTXA\b|glucagon/i.test(JSON.stringify(AQ)));
+ok('E1 items with no ruling yet are left out (glucagon)', !/glucagon/i.test(JSON.stringify(AQ)));
+{ const drip = (re) => AQ.find(q => q.module === 'drips' && q.type === 'mc' && re.test(q.context || ''));
+  const yes = (q) => q && /^Yes — it's on your monitoring list/.test(q.options.find(o => o.id === q.answer).text);
+  ok('E1 drips follow the Kansas City Medication List: hydromorphone, morphine PCA, TXA, LR are AEMT',
+     yes(drip(/^Hydromorphone \(Dilaudid\) drip for pain/)) && yes(drip(/^Morphine PCA/)) && yes(drip(/TXA/)) && yes(drip(/^Lactated Ringer/)));
+  ok('E1 and IV acetaminophen, Protonix, Keppra, newborn ceftriaxone and recent tPA are Paramedic',
+     [/Ofirmev/, /Protonix/, /Keppra/, /newborn/, /^tPA/].every(re => drip(re) && !yes(drip(re)))); }
 ok('E1 every module has enough questions for the test', Object.keys(AEMT.modules).every(m => AQ.filter(q => q.module === m).length >= 8));
 
 console.log('\nE2 two tracks, separate progress');
