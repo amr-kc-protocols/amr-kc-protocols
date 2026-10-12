@@ -441,6 +441,9 @@ canvas#pip-canvas{display:none}
 .tl-lung.on{border-color:var(--purple-dark);background:#efeaf9;color:var(--purple-dark)}
 .tl-lung:active{transform:scale(0.96)}
 .tl-mech{font-family:var(--mono);font-size:9.5px;color:var(--sub);margin-top:6px}
+.tl-group{font-size:8px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;margin-top:8px}
+.tl-group+.tl-lungs{margin-top:4px}
+.tl-who{font-size:11px;line-height:1.45;color:var(--text);margin-top:8px;padding:7px 9px;border-radius:8px;background:#f4f1fb;border:1px solid #ddd3f3}
 .tl-mech b{color:var(--text)}
 
 /* Scenario mission card elements */
@@ -1942,9 +1945,11 @@ var _alarmTimer=null;
 function estMinuteVolume(){
   // Litres/min delivered, estimated from current mode + settings
   if(ventMode==='cpap'||ventMode==='nppv'){
-    // Spontaneous patient generates their own tidal (~400 mL) augmented by support
-    var spontRate=15;
-    var tidal=400 + vals.ps.v*lung.compliance;
+    // Spontaneous patient generates their own tidal (~400 mL adult, ~6 mL/kg
+    // for a child on a pediatric test lung) augmented by support
+    var fl=(typeof freeLung==='function')?freeLung():null;
+    var spontRate=fl&&fl.kg?fl.spontRate:15;
+    var tidal=(fl&&fl.kg?6*fl.kg:400) + vals.ps.v*lung.compliance;
     return (tidal*spontRate)/1000;
   }
   if(breathType==='volume') return (vals.vt.v*vals.rate.v)/1000;
@@ -3674,11 +3679,15 @@ function renderTestLung(bar){
   var pf=peakFlowLPM(),pfTxt,pfStat;
   if(pf===null){ pfTxt='—'; pfStat='neutral'; }
   else { pfTxt=Math.round(pf)+' L/min'; pfStat=(pf>=MIN_PEAK_FLOW&&pf<=MAX_PEAK_FLOW)?'good':'warn'; }
-  // Minute volume
-  var mv=estMinuteVolume(), mvStat=(mv>=4&&mv<=12)?'good':'warn';
+  // Minute volume — adults 4–12 L/min; a child is judged per kg against that patient's range
+  var fl=freeLung(), kg=fl&&fl.kg;
+  var mv=estMinuteVolume(), mvKg=kg?mv*1000/kg:0;
+  var mvStat=kg ? ((mvKg>=fl.mvKg[0]&&mvKg<=fl.mvKg[1])?'good':'warn') : ((mv>=4&&mv<=12)?'good':'warn');
+  if(kg && pf!==null) pfStat=(pf<=MAX_PEAK_FLOW)?'good':'warn';   // small patients run low flows by design
   // Pressures
   var d=(typeof calcPplat==='function')?calcPplat():null, pTxt,pStat,pLbl;
-  if(d){ pLbl='PIP / Pplat'; pTxt=d.pip+' / '+d.pplat; pStat=(d.pplat<=30)?'good':'warn'; }
+  var pplatMax=(fl&&fl.pplatMax)||30;
+  if(d){ pLbl='PIP / Pplat'; pTxt=d.pip+' / '+d.pplat; pStat=(d.pplat<=pplatMax)?'good':'warn'; }
   else if(spont){ pLbl=(ventMode==='nppv')?'IPAP / EPAP':'CPAP'; pTxt=(ventMode==='nppv')?((vals.peep.v+vals.ps.v)+' / '+vals.peep.v):(vals.peep.v+''); pStat='neutral'; }
   else { pLbl='PIP (est)'; pTxt=(vals.peep.v+vals.pc.v)+''; pStat=((vals.peep.v+vals.pc.v)<=35)?'good':'warn'; }
   bar.innerHTML=
@@ -3686,18 +3695,32 @@ function renderTestLung(bar){
     +'<div class="scen-header"><div class="mission-stage">Free Play · Test Lung</div>'
     +'<span class="scen-badge tl-badge">SANDBOX</span></div>'
     +'<div class="scen-text">Dial any settings you like — the vent enforces only what it can physically deliver. Inspiratory time is capped by the rate, and tidal volume by the peak flow the blower can produce. Pick a test lung: each has its own compliance and airway resistance, so the same settings behave differently.</div>'
-    +'<div class="tl-lungs">'
-      +Object.keys(FREE_LUNGS).map(function(k){
-        return '<button class="tl-lung'+(k===freeLungKey?' on':'')+'" onclick="setFreeLung(\''+k+'\')">'+FREE_LUNGS[k].label+'</button>';
-      }).join('')
-    +'</div>'
+    +_tlLungRow('Adult', false)
+    +_tlLungRow('Pediatric', true)
+    +(kg ? '<div class="tl-who"><b>'+fl.who+'</b> '+fl.tip+'</div>' : '')
     +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP ≈ <b>'+effectiveAutoPEEP()+'</b> cmH₂O (dynamic)':'')+'</div>'
     +'<div class="tl-grid">'
       +_tlChip('I:E', ieTxt, ieStat)
       +_tlChip('Peak Flow', pfTxt, pfStat)
-      +_tlChip('Min. Vol.', mv.toFixed(1)+' L/min', mvStat)
+      +_tlChip(kg?'Min. Vol. ('+fl.mvKg[0]+'–'+fl.mvKg[1]+' mL/kg)':'Min. Vol.', mv.toFixed(1)+' L/min'+(kg?' · '+Math.round(mvKg):''), mvStat)
       +_tlChip(pLbl, pTxt+(d||spont?'':' cmH₂O'), pStat)
+      +(kg ? _tlVtPerKg(fl, spont) : '')
     +'</div>';
+}
+function _tlLungRow(title, peds){
+  return '<div class="tl-group">'+title+'</div><div class="tl-lungs">'
+    +Object.keys(FREE_LUNGS).filter(function(k){ return !!FREE_LUNGS[k].peds===peds; }).map(function(k){
+      return '<button class="tl-lung'+(k===freeLungKey?' on':'')+'" aria-pressed="'+(k===freeLungKey)+'" onclick="setFreeLung(\''+k+'\')">'+FREE_LUNGS[k].label+'</button>';
+    }).join('')+'</div>';
+}
+// Tidal volume per kilogram, the number that matters in a child. In pressure
+// control the delivered volume is estimated from the pressure and compliance.
+function _tlVtPerKg(fl, spont){
+  var vt = spont ? (6*fl.kg + vals.ps.v*lung.compliance)
+         : (breathType==='volume' ? vals.vt.v : vals.pc.v*lung.compliance);
+  var perKg=vt/fl.kg, ok=perKg>=fl.vtKg[0]&&perKg<=fl.vtKg[1];
+  return _tlChip('Vt / kg ('+fl.vtKg[0]+'–'+fl.vtKg[1]+')', Math.round(vt)+' mL · '+perKg.toFixed(1)+' mL/kg', ok?'good':'warn')
+    +_tlChip('Patient', fl.kg+' kg', 'neutral');
 }
 
 // ── MISSION CARD RENDER ───────────────────────────────────────
@@ -4143,15 +4166,58 @@ function loadScenario(s){
 // ── FREE PLAY · TEST LUNG ─────────────────────────────────────
 // Selectable test-lung profiles — each changes the mechanics the waveform,
 // PIP/Pplat, and Vte respond to, so the same settings behave differently.
+// Pediatric lungs carry the patient too (weight, starting settings, and the
+// weight-based targets the readout judges against), because a child's numbers
+// only mean something per kilogram. Mechanics are teaching approximations:
+// small airways and small ETTs raise resistance; compliance scales with size
+// (normal ≈ 1–1.5 mL/cmH₂O/kg, falling to ≈ 0.5 in pediatric ARDS).
+// Targets follow PALICC-2 (2023): Vt 5–8 mL/kg with preserved compliance,
+// 3–6 mL/kg when compliance is poor, plateau ≤ 28 cmH₂O.
 var FREE_LUNGS={
   normal:{compliance:50,resistance:8, autoPEEP:0,label:'Normal'},
   ards:  {compliance:25,resistance:10,autoPEEP:0,label:'ARDS (stiff)'},
   copd:  {compliance:55,resistance:24,autoPEEP:6,label:'COPD'},
-  asthma:{compliance:45,resistance:32,autoPEEP:8,label:'Asthma'}
+  asthma:{compliance:45,resistance:32,autoPEEP:8,label:'Asthma'},
+  pedNormal:{compliance:25,resistance:20,autoPEEP:0,label:'Child — healthy lungs', peds:true, kg:20,
+    who:'6-year-old, 20 kg, intubated for surgery. Healthy lungs.',
+    tip:'Start at 6–8 mL/kg and a rate of 18–25. A child needs about 100–200 mL/kg/min of minute volume.',
+    vtKg:[5,8], mvKg:[100,200], pplatMax:28, spontRate:22,
+    start:{mode:'ac',bt:'volume',rate:20,vt:140,it:0.8,pc:12,ps:8,peep:5,fio2:40,sens:2,hipres:30,lowpres:8,lowmv:1.5,apnea:20}},
+  pedArds:{compliance:10,resistance:22,autoPEEP:0,label:'Pediatric ARDS', peds:true, kg:20,
+    who:'6-year-old, 20 kg, pneumonia progressing to ARDS. Stiff lungs.',
+    tip:'Poor compliance: aim for 3–6 mL/kg and keep the plateau ≤ 28. Raise PEEP for oxygenation and accept some CO₂.',
+    vtKg:[3,6], mvKg:[100,200], pplatMax:28, spontRate:30,
+    start:{mode:'ac',bt:'volume',rate:25,vt:120,it:0.7,pc:15,ps:10,peep:8,fio2:60,sens:2,hipres:35,lowpres:10,lowmv:1.5,apnea:20}},
+  pedAsthma:{compliance:20,resistance:60,autoPEEP:6,label:'Child — status asthmaticus', peds:true, kg:25,
+    who:'8-year-old, 25 kg, intubated for status asthmaticus. Very high airway resistance.',
+    tip:'Give the lungs time to empty: a low rate and short inspiratory time lengthen expiration. Watch auto-PEEP, not the peak pressure, and accept a higher CO₂.',
+    vtKg:[5,8], mvKg:[80,200], pplatMax:28, spontRate:30,
+    start:{mode:'ac',bt:'volume',rate:14,vt:150,it:0.8,pc:15,ps:10,peep:5,fio2:40,sens:2,hipres:45,lowpres:10,lowmv:1,apnea:20}},
+  pedBronch:{compliance:4,resistance:80,autoPEEP:4,label:'Infant — bronchiolitis', peds:true, kg:6,
+    who:'3-month-old, 6 kg, bronchiolitis (RSV). Small airways and a 3.5 ETT.',
+    tip:'The LTV\'s smallest volume breath is 50 mL — over 8 mL/kg here. Use pressure control and watch the delivered volume per kg. Infants need more minute volume per kg than older children.',
+    vtKg:[5,8], mvKg:[150,300], pplatMax:28, spontRate:45,
+    start:{mode:'ac',bt:'pressure',rate:30,vt:50,it:0.5,pc:12,ps:8,peep:6,fio2:50,sens:1,hipres:30,lowpres:8,lowmv:0.5,apnea:20}}
 };
+var FREE_ADULT_START={mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,pc:15,ps:10,peep:5,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20};
 var freeLungKey='normal';
+function freeLung(){ return freeMode ? FREE_LUNGS[freeLungKey] : null; }
+// Load a set of starting settings onto the panel.
+function applyFreeStart(st){
+  ventMode=st.mode; breathType=st.bt;
+  ['rate','vt','it','pc','ps','peep','fio2','sens','hipres','lowpres','lowmv','apnea'].forEach(function(k){ vals[k].v=st[k]; });
+  enforceITLimit();
+  _modeCandidate=null; _btCandidate=null; deselect();
+  ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(updateKnob);
+}
 function setFreeLung(k){
+  var was=FREE_LUNGS[freeLungKey];
   freeLungKey=k; setLung(FREE_LUNGS[k]);
+  // A pediatric lung brings its own patient, so it loads that patient's
+  // starting settings; going back to an adult lung restores adult settings.
+  // Switching between adult lungs leaves your settings alone.
+  if(FREE_LUNGS[k].start) applyFreeStart(FREE_LUNGS[k].start);
+  else if(was && was.peds) applyFreeStart(FREE_ADULT_START);
   simTime=0; pressureHistory=[]; resetMeasuredPIP();
   scanMessage('LUNG: '+FREE_LUNGS[k].label.toUpperCase(),1400);
   updateUI();
@@ -4161,12 +4227,7 @@ function startFree(){
   freeLungKey='normal'; setLung(FREE_LUNGS.normal);
   var ov=document.getElementById('lvlsel-overlay'); if(ov) ov.classList.add('hidden');
   if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
-  ventMode='ac'; breathType='volume';
-  vals.rate.v=14; vals.vt.v=500; vals.it.v=1.0; vals.peep.v=5; vals.fio2.v=40;
-  vals.pc.v=15; vals.ps.v=10; vals.sens.v=3; vals.hipres.v=40; vals.lowpres.v=10; vals.lowmv.v=3; vals.apnea.v=20;
-  enforceITLimit();
-  _modeCandidate=null; _btCandidate=null; deselect();
-  ['rate','vt','pc','it','ps','fio2','sens','peep','hipres','lowpres','lowmv','apnea'].forEach(updateKnob);
+  applyFreeStart(FREE_ADULT_START);
   simTime=0; pressureHistory=[]; resetMeasuredPIP();
   updateUI();
   var bar=document.getElementById('mission-bar');
@@ -4557,12 +4618,12 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
       <div class="lvl-desc">3 cases where something was working and stopped. Read the alarm, find the cause, fix what can be fixed at the vent — and recognize what cannot.</div>
       <span class="lvl-arrow">›</span>
     </div>
-    <div class="lvl-card lvl-card-free" onclick="startFree()" role="button" tabindex="0" aria-label="Free Play, Test Lung sandbox. Dial any settings you want.">
+    <div class="lvl-card lvl-card-free" onclick="startFree()" role="button" tabindex="0" aria-label="Free Play, Test Lung sandbox, adult and pediatric lungs. Dial any settings you want.">
       <div class="lvl-card-top">
         <div class="lvl-name">Free Play — Test Lung</div>
         <span class="lvl-badge lvl-badge-free">Sandbox</span>
       </div>
-      <div class="lvl-desc">No missions. Dial any settings you want; the vent enforces only what it can physically deliver (I:E capped by rate, tidal volume capped by peak flow). Live plausibility readout.</div>
+      <div class="lvl-desc">No missions. Dial any settings you want on adult or pediatric test lungs (healthy child, pediatric ARDS, status asthmaticus, infant bronchiolitis); the vent enforces only what it can physically deliver. Live plausibility readout, judged per kilogram for children.</div>
       <span class="lvl-arrow">›</span>
     </div>
     <button id="lvl-reset" onclick="resetProgress()" style="display:none">Reset progress</button>
