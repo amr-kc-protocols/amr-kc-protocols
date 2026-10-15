@@ -111,13 +111,19 @@ const oxy = p => p >= 80 ? 'normal' : p >= 60 ? 'mild' : p >= 40 ? 'moderate' : 
                       g.hco3 >= 5 && g.hco3 <= 45 && g.ph >= 6.95 && g.ph <= 7.65 && g.pao2 >= 30 && g.pao2 <= 100));
     ok(`A2 ${t}: not the same gas every time`, new Set(list.map(g => g.ph + '/' + g.co2 + '/' + g.hco3)).size > 10);
   }
+  // Alveolar gas equation, room air at sea level: PaO2 can't exceed PAO2.
+  const PAO2 = co2 => 0.21 * 713 - co2 / 0.8;
+  const impossible = Object.values(out.gases).flat().filter(g => g.pao2 > PAO2(g.co2) - 5);
+  ok('A2 every PaO₂ is physically possible for its PaCO₂ on room air', impossible.length === 0, JSON.stringify(impossible[0]));
+  const hiCo2 = out.gases['resp-acid-partial'].filter(g => g.co2 >= 80);
+  ok('A2 a PaCO₂ of 80+ on room air never shows a normal or mild PaO₂', hiCo2.length > 0 && hiCo2.every(g => g.pao2 < 45), JSON.stringify(hiCo2.find(g => g.pao2 >= 45)));
   const fullPh = Object.entries(out.gases).filter(([t]) => /full/.test(t)).flatMap(([, l]) => l);
   ok('A2 no fully-compensated gas sits on the 7.40 tie', fullPh.every(g => g.ph !== 7.4));
   await p.context().close(); }
 
 /* A3 — the case bank */
 { const p = await fresh();
-  const cases = await p.evaluate(() => window.ABG.CASES.map(c => ({ id: c.id, gas: c.gas, qs: c.qs.map(q => ({ o: q.o, a: q.a, e: q.e })), point: c.point })));
+  const cases = await p.evaluate(() => window.ABG.CASES.map(c => ({ id: c.id, gas: c.gas, extra: c.extra, qs: c.qs.map(q => ({ o: q.o, a: q.a, e: q.e })), point: c.point })));
   ok('A3 twelve cases', cases.length === 12);
   ok('A3 ids unique', new Set(cases.map(c => c.id)).size === cases.length);
   for (const c of cases) {
@@ -125,6 +131,8 @@ const oxy = p => p >= 80 ? 'normal' : p >= 60 ? 'mild' : p >= 40 ? 'moderate' : 
        `${c.gas.ph} vs ${hh(c.gas.co2, c.gas.hco3).toFixed(3)}`);
     ok(`A3 ${c.id}: first question's answer is the gas's interpretation`, c.qs[0].o[c.qs[0].a] === ref(c.gas).label,
        c.qs[0].o[c.qs[0].a] + ' vs ' + ref(c.gas).label);
+    if (/FiO₂ 21%/.test(c.extra))
+      ok(`A3 ${c.id}: room-air PaO₂ is below the alveolar PO₂`, c.gas.pao2 <= 0.21 * 713 - c.gas.co2 / 0.8 - 5);
     ok(`A3 ${c.id}: every question well formed`, c.qs.every(q => q.o.length >= 3 && q.a >= 0 && q.a < q.o.length &&
        new Set(q.o).size === q.o.length && q.e.length > 40) && c.point.length > 20);
   }

@@ -489,12 +489,20 @@ var TYPES_BASIC = ['resp-acid-none','resp-acid-partial','resp-acid-full','resp-a
 var TYPES_EXTRA = ['mixed-acid','mixed-alk','normal'];
 var TYPES_ALL = TYPES_BASIC.concat(TYPES_EXTRA);
 
-function genPao2(rnd){
-  var x = (rnd || Math.random)();
-  if(x < 0.5) return rint(80, 100, rnd);
-  if(x < 0.75) return rint(60, 79, rnd);
-  if(x < 0.9) return rint(40, 59, rnd);
-  return rint(32, 39, rnd);
+/* PaO2 on room air can't exceed the alveolar PO2, and the alveolar gas
+   equation ties that to the PaCO2: PAO2 = 0.21 × (760 − 47) − PaCO2 / 0.8.
+   A patient with a PaCO2 of 85 cannot have a PaO2 of 95 on room air, so the
+   band is drawn first and then capped at PAO2 minus a minimal 5 mmHg A–a
+   gradient (sea level; Kansas City's altitude lowers it slightly further). */
+function maxPao2(co2){ return Math.floor(0.21 * 713 - co2 / 0.8 - 5); }
+function genPao2(rnd, co2){
+  var cap = co2 ? maxPao2(co2) : 100;
+  var bands = [[80, 100, 0.5], [60, 79, 0.25], [40, 59, 0.15], [32, 39, 0.10]].filter(function(b){ return b[0] <= cap; });
+  var tot = bands.reduce(function(a, b){ return a + b[2]; }, 0), x = (rnd || Math.random)() * tot;
+  for(var i = 0; i < bands.length; i++){
+    if(x < bands[i][2] || i === bands.length - 1) return rint(bands[i][0], Math.min(bands[i][1], cap), rnd);
+    x -= bands[i][2];
+  }
 }
 function generate(type, rnd){
   var R = RANGES[type];
@@ -502,7 +510,7 @@ function generate(type, rnd){
     var co2 = rint(R[0], R[1], rnd), hco3 = rint(R[2], R[3], rnd);
     var ph = Math.round(hh(co2, hco3) * 100) / 100;
     var g = { ph:ph, co2:co2, hco3:hco3 };
-    if(ph >= 6.95 && ph <= 7.65 && classify(g).key === type){ g.pao2 = genPao2(rnd); g.type = type; return g; }
+    if(ph >= 6.95 && ph <= 7.65 && classify(g).key === type){ g.pao2 = genPao2(rnd, co2); g.type = type; return g; }
   }
   throw new Error('no gas for ' + type);
 }
@@ -543,7 +551,8 @@ function whyPrimary(c){
 function fmtPhLean(c){ return c.dir === 'acid' ? 'below 7.40, the acid side' : 'above 7.40, the base side'; }
 function whyComp(c){
   var other = c.primary === 'resp' ? 'HCO₃' : 'PaCO₂', organ = c.primary === 'resp' ? 'the kidneys' : 'the lungs';
-  if(c.comp === 'none') return other + ' is still normal — ' + organ + ' haven\'t responded yet. <b>Uncompensated.</b>';
+  if(c.comp === 'none') return other + ' is still normal — ' + organ + ' haven\'t responded yet. <b>Uncompensated.</b>' +
+    (c.primary === 'met' ? ' (In real patients the lungs respond within minutes, so a normal PaCO₂ here usually means they <i>can\'t</i> — see Learn card 7.)' : '');
   if(c.comp === 'partial') return other + ' has moved the opposite way (' + BANDW[c.primary === 'resp' ? c.bands.hco3 : c.bands.co2] + ') to pull the pH back, but the pH is still abnormal. <b>Partially compensated.</b>';
   return other + ' has moved the opposite way <i>and</i> the pH is back inside normal. <b>Fully compensated.</b>';
 }
@@ -815,7 +824,7 @@ var CASES = [
       { q:'Interpret the gas.', o:['Fully compensated respiratory acidosis','Fully compensated metabolic alkalosis','Partially compensated respiratory acidosis','Normal acid–base status'], a:0,
         e:'pH normal but below 7.40 — leans acid. PaCO₂ is acid, so respiratory is the original problem. HCO₃ is base and the pH is back in range: fully compensated. The kidneys have had months to build that bicarbonate.' },
       { q:'What SpO₂ do you titrate oxygen to?', o:['88–92%','94–98%','100%','Remove the oxygen'], a:0,
-        e:'In a randomized trial of prehospital COPD exacerbations, titrating oxygen to 88–92% cut mortality compared with high-flow oxygen (Austin et al., BMJ 2010). Too much oxygen can push the CO₂ higher.', ev:'RCT' } ],
+        e:'In a cluster-randomized trial of prehospital patients with suspected COPD exacerbations, titrating oxygen to 88–92% cut mortality compared with high-flow oxygen (Austin et al., <i>BMJ</i> 2010; relative risk 0.42 overall, 0.22 in confirmed COPD, with wide confidence intervals). GOLD and BTS guidance use the same target. Too much oxygen can push the CO₂ higher.', ev:'RCT' } ],
     point:'High CO₂ + high bicarb + normal pH = chronic. This is their baseline — protect it.' },
 
   { id:'copdO2', lvl:2, title:'Same COPD patient, now sleepy', sub:'Was put on 15 L NRB',
@@ -824,7 +833,7 @@ var CASES = [
     qs:[
       { q:'Interpret the gas.', o:['Partially compensated respiratory acidosis','Fully compensated respiratory acidosis','Uncompensated respiratory acidosis','Mixed respiratory & metabolic acidosis'], a:0,
         e:'pH acid, PaCO₂ acid — respiratory. HCO₃ is base (it was already high from the chronic disease) but the pH has fallen below 7.35. This is acute-on-chronic: the bicarbonate can\'t keep up with a sudden CO₂ rise.' },
-      { q:'What is the most likely cause, and the fix?', o:['Too much oxygen — titrate back to 88–92% and support ventilation (CPAP/BVM per protocol)','The kidneys failed — give bicarbonate','Pneumothorax — needle decompress','Normal — they\'re just tired'], a:0,
+      { q:'What is the most likely cause, and the fix?', o:['Too much oxygen — titrate back to 88–92% and support ventilation (noninvasive ventilation or BVM per protocol)','The kidneys failed — give bicarbonate','Pneumothorax — needle decompress','Normal — they\'re just tired'], a:0,
         e:'High-flow oxygen worsens ventilation–perfusion matching and frees CO₂ from hemoglobin (the Haldane effect), so PaCO₂ rises and the patient becomes narcotized. Titrate the oxygen down — don\'t remove it — and support breathing if mentation is falling.', ev:'RCT + physiology' } ],
     point:'Compare to the baseline: same disease, but the pH tells you it\'s acute now.' },
 
@@ -835,7 +844,7 @@ var CASES = [
       { q:'Interpret the gas.', o:['Partially compensated metabolic acidosis','Uncompensated metabolic acidosis','Mixed respiratory & metabolic acidosis','Partially compensated respiratory alkalosis'], a:0,
         e:'pH acid, HCO₃ acid — metabolic. PaCO₂ 17 is base: maximal compensation from the deep fast breathing, but pH is still low. Winter\'s: 1.5 × 6 + 8 = 17 — exactly where it should be.' },
       { q:'Anion gap = Na⁺ − (Cl⁻ + HCO₃). What is it?', o:['30 — high','12 — normal','42 — high','6 — low'], a:0,
-        e:'136 − (100 + 6) = 30. A normal gap is roughly 8–12 (labs vary). A high gap means an unmeasured acid — here, ketones.', ev:'Calculation' },
+        e:'136 − (100 + 6) = 30. A normal gap is roughly 3–11 on modern analyzers (older references say 8–12; use the lab\'s range). A high gap means an unmeasured acid — here, ketones.', ev:'Calculation' },
       { q:'This patient is intubated for transport. The vent is set at RR 14, Vt 450. What happens?', o:['The CO₂ rises and the pH can drop dangerously','Nothing — the vent takes over','The pH rises because acidosis is corrected','The bicarbonate climbs to compensate'], a:0,
         e:'They were breathing 34 times a minute to hold the CO₂ at 17. A "normal" rate lets the CO₂ climb within minutes, and with almost no bicarbonate left, the pH falls fast — peri-intubation arrest is a recognised risk. If intubation is unavoidable, match their pre-intubation minute ventilation and get a gas early.', ev:'Physiology + expert consensus' } ],
     point:'In severe metabolic acidosis, the breathing is keeping them alive. Don\'t take it away.' },
@@ -877,7 +886,7 @@ var CASES = [
       { q:'Interpret the gas.', o:['Mixed respiratory & metabolic acidosis','Partially compensated respiratory acidosis','Partially compensated metabolic acidosis','Uncompensated respiratory acidosis'], a:0,
         e:'pH acid, PaCO₂ acid, HCO₃ acid — both columns line up with the pH. Two problems at once: under-ventilation <i>and</i> lactic acid from no perfusion. Nothing is compensating, which is why the pH is so low.' },
       { q:'What PaCO₂ do you ventilate toward?', o:['Normal — about 35–45','As low as possible to fix the pH','Leave it high to protect the brain','It doesn\'t matter after ROSC'], a:0,
-        e:'Post-arrest guidance targets normocapnia (PaCO₂ 35–45 mmHg). Over-ventilating to drive the CO₂ low constricts cerebral vessels and can worsen brain injury; leaving it high deepens the acidosis. The evidence is mostly observational, so the recommendation is a moderate one.', ev:'Guideline · low–moderate evidence' } ],
+        e:'The 2025 AHA and ERC–ESICM post-arrest guidelines target normocapnia (PaCO₂ about 35–45 mmHg). Low CO₂ constricts cerebral vessels and risks ischemia. A randomized trial of deliberate mild hypercapnia (50–55 mmHg) found no neurologic benefit (TAME, <i>NEJM</i> 2023). Also turn the oxygen down from 100% once you have a reliable SpO₂ — guidelines advise avoiding hyperoxia.', ev:'Guideline + RCT' } ],
     point:'Both columns match the pH → two disorders. Fix the one you control: ventilation.' },
 
   { id:'aspirin', lvl:3, title:'Overdose, ringing ears', sub:'"Took a bottle of aspirin"',
@@ -963,7 +972,7 @@ var LEARN = [
       '<tr><td>PaO₂</td><td class="m">80–100</td><td>Oxygenation — a separate question.</td></tr></table></div>' +
       '<div class="big"><div class="big-t">Question 1: <b>acid–base</b> (pH, CO₂, HCO₃).<br>Question 2: <b>oxygen</b> (PaO₂).</div>' +
       '<div class="big-s">Answer them separately. A gas can be perfectly balanced and badly hypoxic.</div></div>' +
-      '<div class="note info"><span class="ni">ℹ</span><span><b>VBG?</b> A venous pH runs about 0.03 lower and venous PCO₂ about 4–5 mmHg higher than arterial on average, but the PCO₂ agreement is wide. A normal venous PCO₂ makes arterial hypercapnia unlikely; it can\'t measure it precisely (Byrne et al., <i>Respirology</i> 2014, meta-analysis).</span></div>',
+      '<div class="note info"><span class="ni">ℹ</span><span><b>VBG?</b> Venous pH runs about 0.03 lower than arterial and is close enough to use. Venous PCO₂ runs higher on average, but its agreement with arterial is too wide to substitute one for the other (Byrne et al., <i>Respirology</i> 2014, meta-analysis of 18 studies). Use a VBG for pH and bicarb trends, and an ABG when you need the true PaCO₂ or the PaO₂.</span></div>',
     check:{ q:'Which value tells you what the lungs are doing?', o:['PaCO₂','HCO₃','pH','PaO₂ alone'], a:0,
       e:'Breathing controls CO₂ in minutes. Breathe less, CO₂ goes up; breathe more, it goes down. (PaO₂ is about oxygen transfer, not acid–base.)' } },
 
@@ -1006,7 +1015,7 @@ var LEARN = [
       '<li><b>Partially compensated</b> — it has moved the <i>opposite</i> way, but the pH is still abnormal.</li>' +
       '<li><b>Fully compensated</b> — it has moved the opposite way and the pH is back to 7.35–7.45. Use 7.40 as the tie-breaker: below leans acid, above leans base, and that side is the original problem.</li>' +
       '<li><b>Mixed</b> — CO₂ and HCO₃ are <i>both</i> in the pH\'s column. Two problems pushing the same way.</li></ul></div>' +
-      '<div class="blk"><h3>Speed matters</h3><p>The lungs compensate in <b>minutes</b>. The kidneys take <b>3–5 days</b>. So an acute respiratory problem usually arrives uncompensated; a chronic one (COPD) arrives compensated.</p></div>' +
+      '<div class="blk"><h3>Speed matters</h3><p>The lungs start compensating within <b>minutes</b> (fully within about 12–24 hours). The kidneys take <b>3–5 days</b>. So an acute respiratory problem usually arrives uncompensated; a chronic one (COPD) arrives compensated.</p></div>' +
       '<div class="note warn"><span class="ni">⚠</span><span><b>Real life is messier.</b> The body rarely brings the pH all the way back to normal — chronic respiratory alkalosis (pregnancy, altitude) is the usual exception. A normal pH with two very abnormal values should also make you consider a mixed disorder. Card 7 shows how to check.</span></div>',
     check:{ q:'pH 7.31 · PaCO₂ 28 · HCO₃ 14. Compensation?', o:['Partially compensated','Uncompensated','Fully compensated','Mixed'], a:0,
       e:'pH acid, HCO₃ acid → metabolic acidosis. CO₂ 28 has moved the opposite way (base) but the pH is still below 7.35 → partial.' } },
@@ -1015,7 +1024,7 @@ var LEARN = [
     body:'<div class="blk"><h3>On room air</h3><table class="tbl">' +
       '<tr><td>Normal</td><td class="m">80–100</td></tr><tr><td>Mild hypoxemia</td><td class="m">60–79</td></tr>' +
       '<tr><td>Moderate</td><td class="m">40–59</td></tr><tr><td>Severe</td><td class="m">&lt; 40</td></tr></table>' +
-      '<p style="margin-top:8px">Normal PaO₂ falls a little with age — a 75-year-old in the high 70s may be at baseline.</p></div>' +
+      '<p style="margin-top:8px">Normal PaO₂ falls with age — a healthy 75-year-old can sit in the high 70s to low 80s on room air. Altitude lowers it too.</p></div>' +
       '<div class="blk"><h3>On oxygen: the P/F ratio</h3><p><b>PaO₂ ÷ FiO₂</b> (as a decimal). A healthy lung on room air: 95 ÷ 0.21 ≈ 450.</p>' +
       '<p>Berlin ARDS ranges: <b>≤300</b> mild · <b>≤200</b> moderate · <b>≤100</b> severe (with PEEP ≥5 and bilateral opacities not explained by heart failure).</p></div>',
     check:{ q:'PaO₂ 90 on FiO₂ 60%. P/F ratio?', o:['150','90','300','540'], a:0,
@@ -1025,8 +1034,9 @@ var LEARN = [
     body:'<div class="blk"><h3>Winter\'s formula — is the breathing keeping up?</h3>' +
       '<p>In a metabolic acidosis, <b>expected PaCO₂ = 1.5 × HCO₃ + 8 (±2)</b>.</p><ul class="plain">' +
       '<li>Actual CO₂ in range → appropriate compensation.</li><li>Actual CO₂ <b>higher</b> → a respiratory acidosis too (they\'re tiring).</li>' +
-      '<li>Actual CO₂ <b>lower</b> → a respiratory alkalosis too (e.g. aspirin, sepsis).</li></ul></div>' +
-      '<div class="blk"><h3>Anion gap — what kind of metabolic acidosis?</h3><p><b>Na⁺ − (Cl⁻ + HCO₃)</b>. Normal is roughly 8–12, but labs differ — use theirs. Low albumin hides a gap: add about 2.5 for every 1 g/dL of albumin below 4.</p>' +
+      '<li>Actual CO₂ <b>lower</b> → a respiratory alkalosis too (e.g. aspirin, sepsis).</li></ul>' +
+      '<p style="margin-top:8px">This is also why a truly "uncompensated" metabolic acidosis is rare: the lungs respond within minutes. A low bicarb with a normal PaCO₂ usually means the patient <b>can\'t</b> breathe it off — a second, respiratory problem.</p></div>' +
+      '<div class="blk"><h3>Anion gap — what kind of metabolic acidosis?</h3><p><b>Na⁺ − (Cl⁻ + HCO₃)</b>. Normal is roughly 3–11 on modern analyzers (older references say 8–12) — use the lab\'s own range. Low albumin hides a gap: add about 2.5 for every 1 g/dL of albumin below 4.</p>' +
       '<p>High gap = an added acid: <b>lactate, ketones, toxins (methanol, ethylene glycol, salicylate), uremia</b>. Normal gap = bicarbonate lost (diarrhea) or large-volume saline.</p></div>',
     check:{ q:'HCO₃ is 10. Winter\'s says the PaCO₂ should be…', o:['21–25','28–32','35–45','10–14'], a:0,
       e:'1.5 × 10 + 8 = 23, ±2 → 21–25. If the patient\'s PaCO₂ is 34, they aren\'t compensating — they\'re tiring.' } }
