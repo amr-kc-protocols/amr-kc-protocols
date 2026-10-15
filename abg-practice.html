@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<!--
+  ABG Interpretation — AMR KC Field Guide
+  A practice page, not a course. Seven short cards teach one method (the
+  tic-tac-toe read: pH, PaCO2, HCO3 into Acid / Normal / Base columns), then
+  the rest of the page is reps:
+
+    - Guided practice: an endless supply of fresh gases, read one tap at a
+      time, with the reason shown after every tap.
+    - Speed round: ten gases, pick the full interpretation.
+    - Clinical cases: a patient around the gas, and a question about what to
+      do with it.
+
+  Every generated gas is built from the Henderson–Hasselbalch equation
+  (pH = 6.1 + log10(HCO3 / (0.03 × PaCO2))), so the three numbers always
+  agree with each other the way a real analyzer's do. The answer key is never
+  the generator's intent: it is classify() run on the numbers as displayed,
+  so the learner is graded on exactly what they can see.
+
+  The deeper acid–base material lives in the Metabolic & Lab Data Academy;
+  this page links to it rather than repeating it.
+
+  Progress persists in localStorage (key: abg_practice_v1).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ABG Practice">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="ABG interpretation practice for AMR Kansas City — one simple method, then unlimited guided gases, a speed round and clinical cases.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>ABG Interpretation — AMR KC Field Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --teal:#173a68;--teal2:#1b63c4;--white:#152238;--gray:#66707c;--dim:#f1f4f8;
+  --surface:#ffffff;--surface2:#f4f6f9;--border:#e2e6ec;
+  --green:#15803d;--green-bg:#eafbf1;--green-line:#bfe6cd;
+  --red:#dc2626;--red-bg:#fdecec;--red-line:#f3c6c6;
+  --warn:#a1590b;--warn-bg:#fef3e2;--warn-line:#f3d9ab;
+  --acid:#c2410c;--acid-bg:#fff1e8;--base:#6d28d9;--base-bg:#f3edff;
+  --sans:'IBM Plex Sans',sans-serif;--mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{font-family:var(--sans);background:var(--surface2);color:var(--white);line-height:1.55}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-webkit-appearance:none}
+button:focus-visible{outline:2px solid var(--teal2);outline-offset:2px}
+button:disabled{cursor:default}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid var(--border);
+  padding:10px 14px;display:flex;align-items:center;gap:10px}
+.hdr-logo{width:32px;height:32px;border-radius:9px;background:var(--teal);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:14.5px;font-weight:700;color:var(--teal);line-height:1.15}
+.hdr-sub{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-back{font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;padding:6px 10px;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface2);white-space:nowrap}
+
+.wrap{max-width:620px;margin:0 auto;padding:14px 14px 80px}
+.view{display:none}
+.view.on{display:block}
+
+/* HOME */
+.hero{background:linear-gradient(150deg,#7c2d12,#c2410c 45%,#6d28d9);border-radius:16px;
+  padding:18px 17px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-70px;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(255,255,255,.22),transparent 68%)}
+.hero h1{font-size:21px;font-weight:700;line-height:1.2;margin-bottom:6px;position:relative}
+.hero p{font-size:13.5px;opacity:.94;position:relative}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center}
+.stat-n{font-family:var(--mono);font-size:19px;font-weight:800;color:var(--teal2);line-height:1.1}
+.stat-l{font-size:10.5px;color:var(--gray);margin-top:3px;line-height:1.25}
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gray);margin:16px 4px 8px}
+.topic{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;
+  border:1px solid var(--border);border-radius:13px;padding:13px 14px;margin-bottom:8px}
+.topic:active{transform:translateY(1px)}
+.topic-ico{width:38px;height:38px;flex-shrink:0;border-radius:10px;background:var(--dim);
+  display:flex;align-items:center;justify-content:center;color:var(--teal2);font-size:18px}
+.topic-b{flex:1;min-width:0}
+.topic-q{display:block;font-size:14.5px;font-weight:700;line-height:1.3}
+.topic-s{display:block;font-size:12px;color:var(--gray);margin-top:2px}
+.topic-arr{color:#b7c0cc;font-size:19px;flex-shrink:0}
+.toggle{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:#fff;
+  border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-top:4px}
+.sw{width:38px;height:22px;border-radius:999px;background:#cbd3dd;position:relative;flex-shrink:0;transition:background .2s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s}
+.toggle[aria-pressed="true"] .sw{background:var(--teal2)}
+.toggle[aria-pressed="true"] .sw::after{left:19px}
+.toggle-t{display:block;font-size:13.5px;font-weight:600}
+.toggle-s{display:block;font-size:11.5px;color:var(--gray)}
+
+/* NORMALS STRIP */
+.norms{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:10px 8px;margin-bottom:10px}
+.norm{text-align:center;min-width:0}
+.norm-k{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--gray);letter-spacing:.04em}
+.norm-v{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--teal)}
+
+/* COMMON */
+.back{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;
+  font-weight:700;letter-spacing:.05em;color:var(--teal2);padding:6px 0;margin-bottom:6px}
+.t-kick{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gray)}
+.t-title{font-size:21px;font-weight:700;line-height:1.2;margin:3px 0 12px}
+.blk{background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px 15px;margin-bottom:10px}
+.blk h3{font-size:14.5px;font-weight:700;line-height:1.3;margin-bottom:7px}
+.blk p{font-size:14px;color:#3c4655;margin-bottom:8px}
+.blk p:last-child{margin-bottom:0}
+.blk b{color:var(--white)}
+ul.plain{list-style:none}
+ul.plain li{position:relative;padding:0 0 7px 18px;font-size:14px;color:#3c4655}
+ul.plain li:last-child{padding-bottom:0}
+ul.plain li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--teal2)}
+ol.steps{list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 10px 32px;font-size:14px;color:#3c4655}
+ol.steps li:last-child{padding-bottom:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22px;height:22px;
+  border-radius:50%;background:var(--teal2);color:#fff;font-family:var(--mono);font-size:11px;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+.big{background:var(--teal);color:#fff;border-radius:13px;padding:15px;margin-bottom:10px;text-align:center}
+.big-t{font-size:16.5px;font-weight:700;line-height:1.35}
+.big-t b{color:#fed7aa}
+.big-s{font-size:12.5px;color:#c3d8f2;margin-top:5px}
+.note{border-radius:11px;padding:11px 13px;margin-bottom:10px;font-size:13.5px;display:flex;gap:9px}
+.note .ni{flex-shrink:0;font-size:15px;line-height:1.35}
+.note.warn{background:var(--warn-bg);border:1px solid var(--warn-line);color:#7a4208}
+.note.info{background:#eaf1fd;border:1px solid #c9dcfb;color:#123a72}
+.note b{font-weight:700}
+.ev{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;border-radius:5px;padding:1px 6px;margin-right:4px;vertical-align:1px;
+  background:#e7eefb;color:#1e40af}
+.acid{color:var(--acid);font-weight:700}
+.basec{color:var(--base);font-weight:700}
+.next{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  background:var(--teal2);color:#fff;border-radius:12px;padding:14px;font-size:14.5px;font-weight:700;
+  margin-top:12px;text-align:center;line-height:1.3}
+.next.ghost{background:#fff;color:var(--teal2);border:1px solid var(--border)}
+.foot{font-size:11.5px;color:var(--gray);line-height:1.6;margin-top:20px;padding:0 4px}
+.foot a{color:var(--teal2);font-weight:600}
+.foot p+p{margin-top:7px}
+
+/* GAS PANEL */
+.gas{background:#0f2744;border-radius:14px;padding:13px 12px;margin-bottom:12px;color:#fff}
+.gas-k{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:#7dd3fc;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+.gas-k span:last-child{color:#bfd8f2;letter-spacing:.04em}
+.gas-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.gas-row.three{grid-template-columns:repeat(3,1fr)}
+.gv{background:#0b1d33;border-radius:9px;padding:8px 4px;text-align:center;min-width:0}
+.gv-k{font-family:var(--mono);font-size:10px;font-weight:700;color:#93b4d6}
+.gv-v{font-family:var(--mono);font-size:20px;font-weight:800;line-height:1.2;color:#fff}
+.gv-u{font-size:9.5px;color:#7f9cbc}
+.gas-x{font-family:var(--mono);font-size:11.5px;color:#bfd8f2;margin-top:8px;line-height:1.5}
+
+/* TIC-TAC-TOE GRID */
+.step{background:#fff;border:2px solid var(--teal2);border-radius:14px;padding:14px;margin-bottom:12px}
+.step.done{border-color:var(--border)}
+.step,.answer,.qc,.next{scroll-margin-top:68px;scroll-margin-bottom:12px}
+.step-k{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--teal2);margin-bottom:5px}
+.step-q{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:10px}
+.ttt{display:grid;grid-template-columns:minmax(0,1.15fr) repeat(3,minmax(0,1fr));gap:6px;align-items:stretch}
+.ttt-h{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.08em;text-align:center;
+  color:var(--gray);padding-bottom:2px}
+.ttt-h.a{color:var(--acid)}.ttt-h.b{color:var(--base)}
+.ttt-l{display:flex;flex-direction:column;justify-content:center;font-family:var(--mono);font-size:11px;
+  font-weight:700;color:var(--gray);line-height:1.2}
+.ttt-l b{font-size:15px;color:var(--white)}
+.cell{min-height:46px;border:1.5px dashed #c3ccd8;border-radius:10px;background:var(--surface2);
+  font-family:var(--mono);font-size:12px;font-weight:700;color:#9aa5b3}
+.cell:not(:disabled):active{background:#e3ebf6}
+.cell.pick{border-style:solid}
+.cell.right{background:var(--green-bg);border:2px solid var(--green);color:#14532d}
+.cell.wrong{background:var(--red-bg);border:2px solid var(--red);color:#8f1d1d}
+.why{list-style:none;margin-top:10px}
+.why li{font-size:13px;color:#3c4655;padding:6px 0 6px 24px;position:relative;border-top:1px dashed var(--border)}
+.why li::before{position:absolute;left:2px;top:6px;font-weight:800}
+.why li.ok::before{content:"✓";color:var(--green)}
+.why li.no::before{content:"✗";color:var(--red)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.opts.one{grid-template-columns:1fr}
+.opt{display:flex;gap:9px;align-items:center;border:1px solid var(--border);border-radius:10px;
+  padding:11px 11px;font-size:13.5px;font-weight:600;color:#3c4655;width:100%;text-align:left;background:#fff;line-height:1.3}
+.opt small{display:block;font-weight:400;font-size:11.5px;color:var(--gray)}
+.opt.right{background:var(--green-bg);border-color:var(--green);color:#14532d}
+.opt.wrong{background:var(--red-bg);border-color:var(--red);color:#8f1d1d}
+.opt:disabled:not(.right):not(.wrong){opacity:.72}
+.exp{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13.5px;color:#3c4655}
+.exp b{color:var(--white)}
+.verdict{font-weight:800;margin-bottom:3px}
+.verdict.good{color:var(--green)}
+.verdict.bad{color:var(--red)}
+.answer{background:linear-gradient(150deg,#0f2744,#173a68);color:#fff;border-radius:14px;padding:15px;margin-bottom:12px}
+.answer-k{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7dd3fc}
+.answer-t{font-size:18px;font-weight:700;line-height:1.3;margin:4px 0 2px}
+.answer-s{font-size:13px;color:#bfd8f2}
+.streak{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--teal2);text-align:right;margin:-4px 2px 8px}
+
+/* SPEED */
+.sp-bar{height:6px;background:#e3e9f0;border-radius:999px;overflow:hidden;margin:0 0 12px}
+.sp-bar i{display:block;height:100%;background:linear-gradient(90deg,#c2410c,#6d28d9);transition:width .25s}
+.score-big{font-family:var(--mono);font-size:44px;font-weight:800;color:var(--teal2);text-align:center;line-height:1.1}
+.score-s{text-align:center;font-size:13px;color:var(--gray);margin-bottom:12px}
+.miss{border-top:1px solid var(--border);padding:9px 0;font-size:13px;color:#3c4655}
+.miss:first-child{border-top:none}
+.miss .mv{font-family:var(--mono);font-size:12px;color:var(--gray)}
+
+/* CASES */
+.case-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:#fff;
+  border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:7px}
+.case-item.done{background:var(--green-bg);border-color:var(--green-line)}
+.case-n{width:28px;height:28px;border-radius:50%;background:var(--dim);color:var(--teal2);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:800}
+.case-item.done .case-n{background:var(--green);color:#fff}
+.case-t{display:block;font-size:14px;font-weight:700;line-height:1.3}
+.case-s{display:block;font-size:12px;color:var(--gray)}
+.lvl{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 6px;border-radius:5px;flex-shrink:0}
+.lvl.l1{background:#e6f6ec;color:#166534}.lvl.l2{background:#fef3e2;color:#92400e}.lvl.l3{background:#fdecec;color:#991b1b}
+.vign{font-size:14.5px;color:#3c4655}
+
+/* LEARN */
+.dots{display:flex;gap:5px;justify-content:center;margin:2px 0 12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#cbd3dd}
+.dot.on{background:var(--teal2);width:20px;border-radius:999px}
+.dot.done{background:var(--green)}
+.navrow{display:flex;gap:8px}
+.navrow .next{margin-top:0}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl td{padding:7px 4px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl td.m{font-family:var(--mono);font-weight:700;color:var(--teal2);white-space:nowrap}
+.mini{display:grid;grid-template-columns:auto repeat(3,1fr);gap:4px;font-family:var(--mono);font-size:11.5px;
+  text-align:center;margin:8px 0}
+.mini div{padding:5px 2px;border-radius:6px;background:var(--surface2);min-width:0}
+.mini .h{background:none;font-weight:800;color:var(--gray);font-size:10px}
+.mini .lab{background:none;text-align:left;font-weight:700}
+.mini .x{background:#fde68a;font-weight:800;color:#78350f}
+.pg-out{text-align:center;padding:10px 0 4px}
+.pg-ph{font-family:var(--mono);font-size:38px;font-weight:800;line-height:1}
+.pg-lbl{font-size:13.5px;font-weight:700;margin-top:4px}
+.pg-scale{position:relative;height:12px;border-radius:999px;margin:12px 4px 4px;
+  background:linear-gradient(90deg,#c2410c 0%,#fb923c 40%,#22c55e 45%,#22c55e 55%,#a78bfa 60%,#6d28d9 100%)}
+.pg-pin{position:absolute;top:-4px;width:4px;height:20px;border-radius:2px;background:#152238;transform:translateX(-2px)}
+.pg-ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--gray);margin:0 2px 8px}
+.sl{margin:10px 0 2px}
+.sl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.sl label span{font-family:var(--mono);color:var(--teal2)}
+.sl input{width:100%;margin-top:6px;accent-color:var(--teal2)}
+.qc{background:#fff;border:2px solid var(--teal2);border-radius:14px;padding:14px;margin:4px 0 12px}
+.qc-k{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal2);margin-bottom:6px}
+.qc-q{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:10px}
+.hidden{display:none !important}
+</style></head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">ABG</div>
+  <div class="hdr-txt">
+    <div class="hdr-title">ABG Interpretation</div>
+    <div class="hdr-sub">AMR Kansas City &middot; read the gas</div>
+  </div>
+  <a class="hdr-back" href="index.html">&#x2190; Field Guide</a>
+</div>
+
+<div class="wrap">
+
+  <!-- ══ HOME ══════════════════════════════════════════════════════ -->
+  <div class="view on" id="v-home">
+    <div class="hero">
+      <h1>One method. Lots of gases.</h1>
+      <p>Learn the tic-tac-toe read in seven short cards, then practice it until it's automatic.
+         Every gas is new, and every tap tells you why.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="stGas">0</div><div class="stat-l">gases read</div></div>
+      <div class="stat"><div class="stat-n" id="stSpeed">&ndash;</div><div class="stat-l">best speed round</div></div>
+      <div class="stat"><div class="stat-n" id="stCases">0/12</div><div class="stat-l">cases solved</div></div>
+    </div>
+
+    <div class="sec">Start here</div>
+    <button class="topic" data-go="learn">
+      <span class="topic-ico" aria-hidden="true">1</span>
+      <span class="topic-b"><span class="topic-q">Learn the method</span>
+        <span class="topic-s" id="learnSub">Seven cards, a quick check on each</span></span>
+      <span class="topic-arr" aria-hidden="true">&#x203A;</span>
+    </button>
+
+    <div class="sec">Practise</div>
+    <button class="topic" data-go="tutor">
+      <span class="topic-ico" aria-hidden="true">2</span>
+      <span class="topic-b"><span class="topic-q">Guided practice</span>
+        <span class="topic-s">Read a gas step by step &mdash; unlimited, new every time</span></span>
+      <span class="topic-arr" aria-hidden="true">&#x203A;</span>
+    </button>
+    <button class="topic" data-go="speed">
+      <span class="topic-ico" aria-hidden="true">3</span>
+      <span class="topic-b"><span class="topic-q">Speed round</span>
+        <span class="topic-s">Ten gases, name each one &mdash; beat your best</span></span>
+      <span class="topic-arr" aria-hidden="true">&#x203A;</span>
+    </button>
+    <button class="topic" data-go="cases">
+      <span class="topic-ico" aria-hidden="true">4</span>
+      <span class="topic-b"><span class="topic-q">Clinical cases</span>
+        <span class="topic-s">A patient around the gas &mdash; and what you'd do about it</span></span>
+      <span class="topic-arr" aria-hidden="true">&#x203A;</span>
+    </button>
+
+    <button class="toggle" id="mixToggle" aria-pressed="false">
+      <span class="sw" aria-hidden="true"></span>
+      <span><span class="toggle-t">Include mixed &amp; normal gases</span>
+        <span class="toggle-s">Harder: adds double disorders and gases with nothing wrong</span></span>
+    </button>
+
+    <div class="sec">The normals</div>
+    <div class="norms" aria-label="Normal values">
+      <div class="norm"><div class="norm-k">pH</div><div class="norm-v">7.35&ndash;7.45</div></div>
+      <div class="norm"><div class="norm-k">PaCO&#x2082;</div><div class="norm-v">35&ndash;45</div></div>
+      <div class="norm"><div class="norm-k">HCO&#x2083;</div><div class="norm-v">22&ndash;26</div></div>
+      <div class="norm"><div class="norm-k">PaO&#x2082;</div><div class="norm-v">80&ndash;100</div></div>
+    </div>
+
+    <div class="foot">
+      <p>Practice gases are generated from the Henderson&ndash;Hasselbalch equation, so the numbers
+         agree with each other the way a real analyzer's do. Reference ranges vary slightly between
+         labs &mdash; use your receiving facility's. Follow AMR KC protocols and medical direction for
+         treatment.</p>
+      <p>Want the full physiology? The <a href="metabolic-academy.html">Metabolic &amp; Lab Data Academy</a>
+         covers acid&ndash;base in depth.</p>
+    </div>
+  </div>
+
+  <!-- ══ LEARN ═════════════════════════════════════════════════════ -->
+  <div class="view" id="v-learn">
+    <button class="back" data-home>&#x2039; HOME</button>
+    <div class="dots" id="lDots"></div>
+    <div class="t-kick" id="lKick"></div>
+    <h2 class="t-title" id="lTitle"></h2>
+    <div id="lBody"></div>
+    <div id="lCheck"></div>
+    <div class="navrow">
+      <button class="next ghost" id="lPrev">&#x2039; Back</button>
+      <button class="next" id="lNext">Next &#x203A;</button>
+    </div>
+  </div>
+
+  <!-- ══ GUIDED PRACTICE ═══════════════════════════════════════════ -->
+  <div class="view" id="v-tutor">
+    <button class="back" data-home>&#x2039; HOME</button>
+    <div class="streak" id="tStreak"></div>
+    <div id="tGas"></div>
+    <div id="tSteps"></div>
+  </div>
+
+  <!-- ══ SPEED ROUND ═══════════════════════════════════════════════ -->
+  <div class="view" id="v-speed">
+    <button class="back" data-home>&#x2039; HOME</button>
+    <div id="spBody"></div>
+  </div>
+
+  <!-- ══ CASES ═════════════════════════════════════════════════════ -->
+  <div class="view" id="v-cases">
+    <button class="back" data-home>&#x2039; HOME</button>
+    <div class="t-kick">Clinical cases</div>
+    <h2 class="t-title">A patient around the gas</h2>
+    <div id="caseList"></div>
+  </div>
+
+  <div class="view" id="v-case">
+    <button class="back" id="caseBack">&#x2039; ALL CASES</button>
+    <div id="caseBody"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ── STATE ──────────────────────────────────────────────────────── */
+var KEY = 'abg_practice_v1';
+function load(){ try{ var r = localStorage.getItem(KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+var state = load();
+state.learn = state.learn || {};
+state.cases = state.cases || {};
+state.gases = state.gases || 0;
+state.perfect = state.perfect || 0;
+state.bestStreak = state.bestStreak || 0;
+state.speedBest = (typeof state.speedBest === 'number') ? state.speedBest : null;
+state.mixed = !!state.mixed;
+
+function $(id){ return document.getElementById(id); }
+function rint(a, b, rnd){ return a + Math.floor((rnd || Math.random)() * (b - a + 1)); }
+function shuffle(a, rnd){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor((rnd || Math.random)() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function show(id){
+  var v = document.querySelectorAll('.view');
+  for(var i = 0; i < v.length; i++) v[i].classList.toggle('on', v[i].id === id);
+  window.scrollTo(0, 0);
+}
+
+/* ── THE METHOD ─────────────────────────────────────────────────────
+   One classifier. Everything on the page — the tutor's answer key, the
+   speed round, the playground label — is this function run on the numbers
+   the learner can see. Boundaries are inclusive of normal: 7.35, 45, 22 and
+   26 are all normal, as on the reference card. */
+function bandPh(v){ return v < 7.35 ? 'acid' : v > 7.45 ? 'base' : 'normal'; }
+function bandCo2(v){ return v > 45 ? 'acid' : v < 35 ? 'base' : 'normal'; }
+function bandHco3(v){ return v < 22 ? 'acid' : v > 26 ? 'base' : 'normal'; }
+function oxyBand(p){ return p >= 80 ? 'normal' : p >= 60 ? 'mild' : p >= 40 ? 'moderate' : 'severe'; }
+function hh(co2, hco3){ return 6.1 + Math.log(hco3 / (0.03 * co2)) / Math.LN10; }
+
+function classify(g){
+  var b = { ph:bandPh(g.ph), co2:bandCo2(g.co2), hco3:bandHco3(g.hco3) };
+  var r = { bands:b, primary:null, dir:null, comp:null };
+  if(b.ph === 'normal'){
+    if(b.co2 === 'normal' && b.hco3 === 'normal'){ r.primary = 'normal'; }
+    else if(b.co2 !== 'normal' && b.hco3 !== 'normal' && b.co2 !== b.hco3 && g.ph !== 7.40){
+      // Fully compensated: the pH sits inside normal but leans toward the
+      // original problem. Below 7.40 leans acid; above leans base.
+      r.dir = g.ph < 7.40 ? 'acid' : 'base';
+      r.primary = (b.co2 === r.dir) ? 'resp' : 'met';
+      r.comp = 'full';
+    }
+  } else {
+    var d = b.ph;
+    if(b.co2 === d && b.hco3 === d){ r.primary = 'mixed'; r.dir = d; }
+    else if(b.co2 === d){ r.primary = 'resp'; r.dir = d; r.comp = b.hco3 === 'normal' ? 'none' : 'partial'; }
+    else if(b.hco3 === d){ r.primary = 'met'; r.dir = d; r.comp = b.co2 === 'normal' ? 'none' : 'partial'; }
+  }
+  r.key = keyOf(r);
+  r.label = labelOf(r);
+  return r;
+}
+function primKey(r){
+  if(!r.primary) return null;
+  if(r.primary === 'normal' || r.primary === 'mixed') return r.primary;
+  return r.primary + '-' + (r.dir === 'acid' ? 'acid' : 'alk');
+}
+function keyOf(r){
+  if(!r.primary) return null;
+  if(r.primary === 'normal') return 'normal';
+  if(r.primary === 'mixed') return 'mixed-' + (r.dir === 'acid' ? 'acid' : 'alk');
+  return primKey(r) + '-' + r.comp;
+}
+var COMP_WORD = { none:'Uncompensated', partial:'Partially compensated', full:'Fully compensated' };
+function labelOf(r){
+  if(!r.primary) return 'Borderline — no single pattern';
+  if(r.primary === 'normal') return 'Normal acid–base status';
+  var osis = r.dir === 'acid' ? 'acidosis' : 'alkalosis';
+  if(r.primary === 'mixed') return 'Mixed respiratory & metabolic ' + osis;
+  return COMP_WORD[r.comp] + ' ' + (r.primary === 'resp' ? 'respiratory' : 'metabolic') + ' ' + osis;
+}
+function labelFor(key){
+  var p = key.split('-');
+  if(key === 'normal') return labelOf({primary:'normal'});
+  if(p[0] === 'mixed') return labelOf({primary:'mixed', dir:p[1] === 'acid' ? 'acid' : 'base'});
+  return labelOf({primary:p[0], dir:p[1] === 'acid' ? 'acid' : 'base', comp:p[2]});
+}
+
+/* ── GENERATOR ──────────────────────────────────────────────────────
+   Pick PaCO2 and HCO3 from ranges that make the intended picture, compute
+   the pH with Henderson–Hasselbalch, round it the way an analyzer prints
+   it, and keep the gas only if classify() on the printed numbers agrees
+   and the pH is one a transport crew would plausibly see (6.95–7.65).
+   Ranges: [co2 lo, co2 hi, hco3 lo, hco3 hi]. */
+var RANGES = {
+  'resp-acid-none':    [46, 80, 22, 26], 'resp-acid-partial': [50, 85, 27, 38], 'resp-acid-full': [46, 70, 27, 40],
+  'resp-alk-none':     [20, 34, 22, 26], 'resp-alk-partial':  [18, 32, 15, 21], 'resp-alk-full':  [22, 34, 14, 21],
+  'met-acid-none':     [35, 45, 14, 21], 'met-acid-partial':  [15, 34,  5, 20], 'met-acid-full':  [20, 34, 12, 21],
+  'met-alk-none':      [35, 45, 27, 40], 'met-alk-partial':   [46, 55, 28, 45], 'met-alk-full':   [46, 58, 27, 38],
+  'mixed-acid':        [46, 80, 10, 21], 'mixed-alk':         [20, 34, 27, 38],
+  'normal':            [35, 45, 22, 26]
+};
+var TYPES_BASIC = ['resp-acid-none','resp-acid-partial','resp-acid-full','resp-alk-none','resp-alk-partial','resp-alk-full',
+                   'met-acid-none','met-acid-partial','met-acid-full','met-alk-none','met-alk-partial','met-alk-full'];
+var TYPES_EXTRA = ['mixed-acid','mixed-alk','normal'];
+var TYPES_ALL = TYPES_BASIC.concat(TYPES_EXTRA);
+
+/* PaO2 on room air can't exceed the alveolar PO2, and the alveolar gas
+   equation ties that to the PaCO2: PAO2 = 0.21 × (760 − 47) − PaCO2 / 0.8.
+   A patient with a PaCO2 of 85 cannot have a PaO2 of 95 on room air, so the
+   band is drawn first and then capped at PAO2 minus a minimal 5 mmHg A–a
+   gradient (sea level; Kansas City's altitude lowers it slightly further). */
+function maxPao2(co2){ return Math.floor(0.21 * 713 - co2 / 0.8 - 5); }
+function genPao2(rnd, co2){
+  var cap = co2 ? maxPao2(co2) : 100;
+  var bands = [[80, 100, 0.5], [60, 79, 0.25], [40, 59, 0.15], [32, 39, 0.10]].filter(function(b){ return b[0] <= cap; });
+  var tot = bands.reduce(function(a, b){ return a + b[2]; }, 0), x = (rnd || Math.random)() * tot;
+  for(var i = 0; i < bands.length; i++){
+    if(x < bands[i][2] || i === bands.length - 1) return rint(bands[i][0], Math.min(bands[i][1], cap), rnd);
+    x -= bands[i][2];
+  }
+}
+function generate(type, rnd){
+  var R = RANGES[type];
+  for(var i = 0; i < 2000; i++){
+    var co2 = rint(R[0], R[1], rnd), hco3 = rint(R[2], R[3], rnd);
+    var ph = Math.round(hh(co2, hco3) * 100) / 100;
+    var g = { ph:ph, co2:co2, hco3:hco3 };
+    if(ph >= 6.95 && ph <= 7.65 && classify(g).key === type){ g.pao2 = genPao2(rnd, co2); g.type = type; return g; }
+  }
+  throw new Error('no gas for ' + type);
+}
+function pickType(mixed, rnd){
+  if(mixed && (rnd || Math.random)() < 0.25) return TYPES_EXTRA[rint(0, TYPES_EXTRA.length - 1, rnd)];
+  return TYPES_BASIC[rint(0, TYPES_BASIC.length - 1, rnd)];
+}
+function fmtPh(v){ return v.toFixed(2); }
+
+/* ── EXPLANATIONS ───────────────────────────────────────────────── */
+var BANDW = { acid:'ACID', normal:'NORMAL', base:'BASE' };
+function whyRow(row, g){
+  if(row === 'ph'){
+    var v = fmtPh(g.ph), b = bandPh(g.ph);
+    return b === 'acid' ? 'pH ' + v + ' is below 7.35 → acid.'
+         : b === 'base' ? 'pH ' + v + ' is above 7.45 → base.'
+         : 'pH ' + v + ' is inside 7.35–7.45 → normal.';
+  }
+  if(row === 'co2'){
+    var c = bandCo2(g.co2);
+    return c === 'acid' ? 'PaCO₂ ' + g.co2 + ' is above 45 → acid. CO₂ is the acid: more CO₂, more acid.'
+         : c === 'base' ? 'PaCO₂ ' + g.co2 + ' is below 35 → base. Blowing off CO₂ removes acid.'
+         : 'PaCO₂ ' + g.co2 + ' is inside 35–45 → normal.';
+  }
+  var h = bandHco3(g.hco3);
+  return h === 'acid' ? 'HCO₃ ' + g.hco3 + ' is below 22 → acid. Bicarb is the base: less of it, more acid.'
+       : h === 'base' ? 'HCO₃ ' + g.hco3 + ' is above 26 → base.'
+       : 'HCO₃ ' + g.hco3 + ' is inside 22–26 → normal.';
+}
+function whyPrimary(c){
+  var b = c.bands;
+  if(c.primary === 'normal') return 'All three are normal — nothing to match. <b>Normal acid–base status.</b>';
+  if(c.primary === 'mixed') return 'PaCO₂ <i>and</i> HCO₃ are both on the ' + BANDW[c.dir] + ' side with the pH — the lungs and the kidneys are both pushing the same way. <b>' + c.label + '.</b> Nobody is compensating, which is why these gases are so far off.';
+  var who = c.primary === 'resp' ? 'PaCO₂' : 'HCO₃', sys = c.primary === 'resp' ? 'respiratory' : 'metabolic';
+  if(c.comp === 'full') return 'The pH is normal, so look at which side of 7.40 it leans: ' + fmtPhLean(c) + '. ' + who + ' is on that side, so the problem is <b>' + sys + '</b>.';
+  return who + ' is in the same column as the pH (' + BANDW[b.ph] + '), so the problem is <b>' + sys + ' ' + (c.dir === 'acid' ? 'acidosis' : 'alkalosis') + '</b>.';
+}
+function fmtPhLean(c){ return c.dir === 'acid' ? 'below 7.40, the acid side' : 'above 7.40, the base side'; }
+function whyComp(c){
+  var other = c.primary === 'resp' ? 'HCO₃' : 'PaCO₂', organ = c.primary === 'resp' ? 'the kidneys' : 'the lungs';
+  if(c.comp === 'none') return other + ' is still normal — ' + organ + ' haven\'t responded yet. <b>Uncompensated.</b>' +
+    (c.primary === 'met' ? ' (In real patients the lungs respond within minutes, so a normal PaCO₂ here usually means they <i>can\'t</i> — see Learn card 7.)' : '');
+  if(c.comp === 'partial') return other + ' has moved the opposite way (' + BANDW[c.primary === 'resp' ? c.bands.hco3 : c.bands.co2] + ') to pull the pH back, but the pH is still abnormal. <b>Partially compensated.</b>';
+  return other + ' has moved the opposite way <i>and</i> the pH is back inside normal. <b>Fully compensated.</b>';
+}
+var OXY_LABEL = { normal:'Normal oxygenation', mild:'Mild hypoxemia', moderate:'Moderate hypoxemia', severe:'Severe hypoxemia' };
+function whyOxy(p){
+  var b = oxyBand(p);
+  return 'PaO₂ ' + p + ' on room air: ' + (b === 'normal' ? '80 or above' : b === 'mild' ? '60–79' : b === 'moderate' ? '40–59' : 'below 40') + ' → <b>' + OXY_LABEL[b].toLowerCase() + '</b>.';
+}
+
+/* ── GAS PANEL ──────────────────────────────────────────────────── */
+function gasPanel(g, opts){
+  opts = opts || {};
+  var tiles = [['pH', fmtPh(g.ph), ''], ['PaCO₂', g.co2, 'mmHg'], ['HCO₃', g.hco3, 'mEq/L']];
+  if(opts.oxy && g.pao2 != null) tiles.push(['PaO₂', g.pao2, 'mmHg']);
+  var h = '<div class="gas" data-ph="' + g.ph + '" data-co2="' + g.co2 + '" data-hco3="' + g.hco3 + '"' + (g.pao2 != null ? ' data-pao2="' + g.pao2 + '"' : '') + '>' +
+          '<div class="gas-k"><span>' + (opts.title || 'Arterial blood gas') + '</span><span>' + (opts.right || '') + '</span></div>' +
+          '<div class="gas-row' + (tiles.length === 3 ? ' three' : '') + '">';
+  tiles.forEach(function(t){
+    h += '<div class="gv"><div class="gv-k">' + t[0] + '</div><div class="gv-v">' + t[1] + '</div><div class="gv-u">' + (t[2] || '&nbsp;') + '</div></div>';
+  });
+  h += '</div>';
+  if(opts.extra) h += '<div class="gas-x">' + opts.extra + '</div>';
+  return h + '</div>';
+}
+
+/* ── GUIDED PRACTICE ────────────────────────────────────────────── */
+var T = null, streak = 0;
+var PRIMS = [['resp-acid','Respiratory acidosis'],['met-acid','Metabolic acidosis'],['resp-alk','Respiratory alkalosis'],
+             ['met-alk','Metabolic alkalosis'],['mixed','Mixed — both match'],['normal','Normal gas']];
+var COMPS = [['none','Uncompensated','Other value still normal'],['partial','Partially compensated','Other value moved, pH still off'],
+             ['full','Fully compensated','pH back inside normal']];
+var OXYS = [['normal','Normal','80+'],['mild','Mild hypoxemia','60–79'],['moderate','Moderate','40–59'],['severe','Severe','under 40']];
+
+function newGas(){
+  var g = generate(pickType(state.mixed));
+  T = { gas:g, cls:classify(g), rows:{}, prim:null, comp:null, oxy:null, misses:0 };
+  renderTutor();
+}
+function needComp(){ return T.cls.primary !== 'normal' && T.cls.primary !== 'mixed'; }
+function renderTutor(){
+  var g = T.gas, c = T.cls;
+  $('tStreak').textContent = streak > 1 ? 'Streak: ' + streak + ' perfect in a row' : '';
+  $('tGas').innerHTML = gasPanel(g, { oxy:true, title:'Gas #' + (state.gases + (finished() ? 0 : 1)), right:'FiO₂ 21% · room air' });
+  var rowsDone = ['ph','co2','hco3'].every(function(r){ return T.rows[r]; });
+  var N = needComp() ? 4 : 3;
+
+  // Step 1 — the grid
+  var h = '<div class="step' + (rowsDone ? ' done' : '') + '" id="step1"><div class="step-k">Step 1 of ' + N + '</div>' +
+          '<div class="step-q">Put each value in its column.</div><div class="ttt">' +
+          '<div></div><div class="ttt-h a">ACID</div><div class="ttt-h">NORMAL</div><div class="ttt-h b">BASE</div>';
+  [['ph','pH',fmtPh(g.ph)],['co2','PaCO₂',g.co2],['hco3','HCO₃',g.hco3]].forEach(function(row){
+    var ans = c.bands[row[0]], pick = T.rows[row[0]];
+    h += '<div class="ttt-l">' + row[1] + '<b>' + row[2] + '</b></div>';
+    ['acid','normal','base'].forEach(function(col){
+      var cls = 'cell';
+      if(pick){ if(col === ans) cls += ' right'; else if(col === pick) cls += ' wrong'; }
+      h += '<button class="' + cls + '" data-row="' + row[0] + '" data-col="' + col + '"' + (pick ? ' disabled' : '') +
+           ' aria-label="' + row[1] + ' ' + col + '">' + (pick && col === ans ? row[1] : '') + '</button>';
+    });
+  });
+  h += '</div><ul class="why">';
+  ['ph','co2','hco3'].forEach(function(r){
+    if(T.rows[r]) h += '<li class="' + (T.rows[r] === c.bands[r] ? 'ok' : 'no') + '">' + whyRow(r, g) + '</li>';
+  });
+  h += '</ul></div>';
+
+  // Step 2 — what's the problem
+  if(rowsDone){
+    h += '<div class="step' + (T.prim ? ' done' : '') + '" id="step2"><div class="step-k">Step 2 of ' + N + '</div>' +
+         '<div class="step-q">Which value lines up with the pH? Name the problem.</div>' + optGrid(PRIMS, 'prim', T.prim, primKey(c));
+    if(T.prim) h += expBlock(T.prim === primKey(c), whyPrimary(c));
+    h += '</div>';
+  }
+  // Step 3 — compensation
+  if(T.prim && needComp()){
+    h += '<div class="step' + (T.comp ? ' done' : '') + '" id="step3"><div class="step-k">Step 3 of 4</div>' +
+         '<div class="step-q">Is the body compensating?</div>' + optGrid(COMPS, 'comp', T.comp, c.comp, true);
+    if(T.comp) h += expBlock(T.comp === c.comp, whyComp(c));
+    h += '</div>';
+  }
+  // Step 4 — oxygenation
+  if(T.prim && (!needComp() || T.comp)){
+    var ob = oxyBand(g.pao2);
+    h += '<div class="step' + (T.oxy ? ' done' : '') + '" id="step4"><div class="step-k">Step ' + N + ' of ' + N + '</div>' +
+         '<div class="step-q">Oxygenation is a separate question. PaO₂ ' + g.pao2 + ' on room air — how is it?</div>' + optGrid(OXYS, 'oxy', T.oxy, ob);
+    if(T.oxy) h += expBlock(T.oxy === ob, whyOxy(g.pao2));
+    h += '</div>';
+  }
+  if(finished()){
+    h += '<div class="answer" id="tAnswer"><div class="answer-k">' + (T.misses === 0 ? 'Perfect read' : T.misses + ' miss' + (T.misses > 1 ? 'es' : '') + ' — keep going') + '</div>' +
+         '<div class="answer-t">' + c.label + '</div><div class="answer-s">with ' + OXY_LABEL[oxyBand(g.pao2)].toLowerCase() + '</div></div>' +
+         '<button class="next" id="tNext">Next gas &#x203A;</button>';
+  }
+  $('tSteps').innerHTML = h;
+}
+function finished(){ return !!(T && T.oxy); }
+function optGrid(list, kind, picked, ans, one){
+  var h = '<div class="opts' + (one ? ' one' : '') + '">';
+  list.forEach(function(o){
+    var cls = 'opt';
+    if(picked){ if(o[0] === ans) cls += ' right'; else if(o[0] === picked) cls += ' wrong'; }
+    h += '<button class="' + cls + '" data-' + kind + '="' + o[0] + '"' + (picked ? ' disabled' : '') + '>' +
+         '<span>' + o[1] + (o[2] ? '<small>' + o[2] + '</small>' : '') + '</span></button>';
+  });
+  return h + '</div>';
+}
+function expBlock(good, html){
+  return '<div class="exp"><div class="verdict ' + (good ? 'good' : 'bad') + '">' + (good ? 'Correct' : 'Not quite') + '</div>' + html + '</div>';
+}
+function scrollToLast(){
+  var steps = document.querySelectorAll('#tSteps .step:not(.done), #tAnswer');
+  var el = steps[steps.length - 1];
+  if(el && el.scrollIntoView) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+$('tSteps').addEventListener('click', function(e){
+  var b = e.target.closest('button');
+  if(!b || b.disabled || !T) return;
+  if(b.id === 'tNext'){ newGas(); window.scrollTo(0, 0); return; }
+  var c = T.cls;
+  if(b.dataset.row){ T.rows[b.dataset.row] = b.dataset.col; if(b.dataset.col !== c.bands[b.dataset.row]) T.misses++; }
+  else if(b.dataset.prim){ T.prim = b.dataset.prim; if(T.prim !== primKey(c)) T.misses++; }
+  else if(b.dataset.comp){ T.comp = b.dataset.comp; if(T.comp !== c.comp) T.misses++; }
+  else if(b.dataset.oxy){
+    T.oxy = b.dataset.oxy; if(T.oxy !== oxyBand(T.gas.pao2)) T.misses++;
+    state.gases++;
+    if(T.misses === 0){ state.perfect++; streak++; state.bestStreak = Math.max(state.bestStreak, streak); } else streak = 0;
+    save();
+  } else return;
+  renderTutor();
+  scrollToLast();
+});
+
+/* ── SPEED ROUND ────────────────────────────────────────────────── */
+var SP = null, SP_N = 10;
+function distractors(key, rnd){
+  var pool = (state.mixed ? TYPES_ALL : TYPES_BASIC).filter(function(k){ return k !== key; });
+  // Prefer the near misses — same disorder, different compensation, or the
+  // mirror-image system — because that's the confusion being trained.
+  var p = key.split('-');
+  var near = pool.filter(function(k){ var q = k.split('-'); return (q[0] === p[0] && q[1] === p[1]) || (q[1] === p[1] && q[2] === p[2]); });
+  var far = pool.filter(function(k){ return near.indexOf(k) < 0; });
+  return shuffle(near, rnd).slice(0, 2).concat(shuffle(far, rnd)).slice(0, 3);
+}
+function startSpeed(){
+  var qs = [], seen = {};
+  while(qs.length < SP_N){
+    var t = pickType(state.mixed);
+    if(seen[t] >= 2) continue;              // no type more than twice a round
+    seen[t] = (seen[t] || 0) + 1;
+    var g = generate(t), c = classify(g);
+    qs.push({ gas:g, cls:c, opts:shuffle([c.key].concat(distractors(c.key))), pick:null });
+  }
+  SP = { qs:qs, i:0, score:0, start:Date.now() };
+  renderSpeed();
+}
+function renderSpeed(){
+  var h;
+  if(SP.i >= SP_N){
+    var secs = Math.round((SP.end - SP.start) / 1000);
+    var missed = SP.qs.filter(function(q){ return q.pick !== q.cls.key; });
+    h = '<div class="t-kick">Speed round</div><h2 class="t-title">Round complete</h2>' +
+        '<div class="blk"><div class="score-big" id="spScore">' + SP.score + '/' + SP_N + '</div>' +
+        '<div class="score-s">' + Math.floor(secs / 60) + ':' + ('0' + secs % 60).slice(-2) + ' · ' +
+        (SP.newBest ? 'New personal best!' : 'Best: ' + state.speedBest + '/' + SP_N) + '</div>';
+    if(missed.length){
+      h += '<h3>Review the ones you missed</h3>';
+      missed.forEach(function(q){
+        h += '<div class="miss"><div class="mv">pH ' + fmtPh(q.gas.ph) + ' · PaCO₂ ' + q.gas.co2 + ' · HCO₃ ' + q.gas.hco3 + '</div>' +
+             '<div><b>' + q.cls.label + '</b></div><div style="color:var(--gray);font-size:12px">You said: ' + labelFor(q.pick) + '</div></div>';
+      });
+    } else h += '<p style="text-align:center">Ten for ten. Turn on mixed &amp; normal gases on the home screen for a harder round.</p>';
+    h += '</div><button class="next" id="spAgain">Play again &#x203A;</button>' +
+         '<button class="next ghost" data-home>Home</button>';
+    $('spBody').innerHTML = h;
+    return;
+  }
+  var q = SP.qs[SP.i];
+  h = '<div class="t-kick">Speed round · gas ' + (SP.i + 1) + ' of ' + SP_N + ' · score ' + SP.score + '</div>' +
+      '<div class="sp-bar"><i style="width:' + (SP.i / SP_N * 100) + '%"></i></div>' +
+      gasPanel(q.gas, { title:'Name this gas' }) + '<div class="opts one">';
+  q.opts.forEach(function(k){
+    var cls = 'opt sp-opt';
+    if(q.pick){ if(k === q.cls.key) cls += ' right'; else if(k === q.pick) cls += ' wrong'; }
+    h += '<button class="' + cls + '" data-key="' + k + '"' + (q.pick ? ' disabled' : '') + '>' + labelFor(k) + '</button>';
+  });
+  h += '</div>';
+  if(q.pick){
+    var b = q.cls.bands;
+    h += '<div class="blk" style="margin-top:10px">' + expBlock(q.pick === q.cls.key,
+         'pH <b>' + BANDW[b.ph] + '</b> · PaCO₂ <b>' + BANDW[b.co2] + '</b> · HCO₃ <b>' + BANDW[b.hco3] + '</b>. ' + whyPrimary(q.cls) +
+         (q.cls.comp ? ' ' + whyComp(q.cls) : '')).replace('class="exp"', 'class="exp" style="margin:0;padding:0;border:0"') + '</div>' +
+         '<button class="next" id="spNext">' + (SP.i === SP_N - 1 ? 'See score' : 'Next gas') + ' &#x203A;</button>';
+  }
+  $('spBody').innerHTML = h;
+}
+$('spBody').addEventListener('click', function(e){
+  var b = e.target.closest('button');
+  if(!b || b.disabled || !SP) return;
+  if(b.id === 'spAgain'){ startSpeed(); return; }
+  if(b.id === 'spNext'){
+    SP.i++;
+    if(SP.i >= SP_N){
+      SP.end = Date.now();
+      SP.newBest = state.speedBest === null || SP.score > state.speedBest;
+      if(SP.newBest) state.speedBest = SP.score;
+      save();
+    }
+    renderSpeed(); window.scrollTo(0, 0); return;
+  }
+  if(b.dataset.key){
+    var q = SP.qs[SP.i];
+    q.pick = b.dataset.key;
+    if(q.pick === q.cls.key) SP.score++;
+    renderSpeed();
+    var n = $('spNext'); if(n && n.scrollIntoView) n.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+});
+
+/* ── CLINICAL CASES ─────────────────────────────────────────────────
+   Hand-written. Every gas below satisfies Henderson–Hasselbalch to within
+   0.02 (the test suite checks), and each first question's answer is what
+   classify() says about it. `ev` tags the strength of the evidence behind
+   the management point, so a learner can tell physiology from trial data
+   from expert consensus. */
+var CASES = [
+  { id:'opioid', lvl:1, title:'Found down, pinpoint pupils', sub:'Respiratory rate 6',
+    vign:'A 34-year-old found unresponsive in a bathroom. RR 6 and shallow, SpO₂ 84% on room air, pupils pinpoint. The ED drew a gas before you arrived for transfer.',
+    gas:{ ph:7.23, co2:62, hco3:25, pao2:58 }, extra:'FiO₂ 21%',
+    qs:[
+      { q:'Interpret the gas.', o:['Uncompensated respiratory acidosis','Partially compensated respiratory acidosis','Uncompensated metabolic acidosis','Mixed respiratory & metabolic acidosis'], a:0,
+        e:'pH acid, PaCO₂ acid, HCO₃ normal. CO₂ lines up with the pH and the kidneys haven\'t had time to respond — they need days, not minutes.' },
+      { q:'What fixes this gas fastest?', o:['Ventilate — BVM, and naloxone per protocol','Sodium bicarbonate IV','Non-rebreather and observe','Fluid bolus'], a:0,
+        e:'The problem is ventilation, so the fix is ventilation. Oxygen alone raises the SpO₂ but leaves the CO₂ where it is. Bicarbonate is not the answer to a respiratory acidosis: it is converted to CO₂, which a patient who isn\'t breathing can\'t clear.', ev:'Physiology' } ],
+    point:'High CO₂ + normal bicarb = the lungs failed fast. Breathe for them.' },
+
+  { id:'anxious', lvl:1, title:'Tingling fingers, breathing fast', sub:'RR 32, "anxious"',
+    vign:'A 22-year-old with RR 32, numb lips and carpopedal spasm. Triage wrote "anxiety." SpO₂ 99%.',
+    gas:{ ph:7.52, co2:28, hco3:22, pao2:98 }, extra:'FiO₂ 21%',
+    qs:[
+      { q:'Interpret the gas.', o:['Uncompensated respiratory alkalosis','Partially compensated respiratory alkalosis','Uncompensated metabolic alkalosis','Fully compensated respiratory alkalosis'], a:0,
+        e:'pH base, PaCO₂ base (low), HCO₃ normal. Fast breathing blew off CO₂; the kidneys haven\'t caught up.' },
+      { q:'Before you accept "anxiety," what should you think about?', o:['PE, sepsis, pain, early aspirin toxicity — anxiety is a diagnosis of exclusion','Nothing — the gas confirms panic','Have them breathe into a paper bag','Give sodium bicarbonate'], a:0,
+        e:'A respiratory alkalosis tells you <i>that</i> they are hyperventilating, not <i>why</i>. Rule out the dangerous drivers first. Paper-bag rebreathing is not recommended: it can drop the oxygen level, and deaths have been reported in patients whose "anxiety" turned out to be hypoxia or an MI.', ev:'Case reports + consensus' } ],
+    point:'Low CO₂ is a symptom. Find the reason they\'re breathing fast.' },
+
+  { id:'vomit', lvl:1, title:'Three days of vomiting', sub:'Weak, dizzy, dry',
+    vign:'A 58-year-old with three days of persistent vomiting, orthostatic and dry. Breathing is slow and shallow.',
+    gas:{ ph:7.51, co2:47, hco3:36, pao2:82 }, extra:'FiO₂ 21% · K⁺ 2.9',
+    qs:[
+      { q:'Interpret the gas.', o:['Partially compensated metabolic alkalosis','Uncompensated metabolic alkalosis','Partially compensated respiratory acidosis','Fully compensated metabolic alkalosis'], a:0,
+        e:'pH base, HCO₃ base — metabolic. PaCO₂ 47 is acid: the lungs are slowing down to hold CO₂ and pull the pH back, but it\'s still above 7.45. Partial.' },
+      { q:'Why is the bicarbonate high?', o:['Stomach acid (HCl) has been lost','The lungs are retaining it','The kidneys are failing','Lactic acid from shock'], a:0,
+        e:'Every liter of vomit takes hydrogen and chloride with it, leaving bicarbonate behind. Volume and chloride replacement (normal saline) plus potassium is the usual fix — the low K⁺ travels with this picture.', ev:'Physiology' } ],
+    point:'Vomiting loses acid → metabolic alkalosis. Watch the potassium.' },
+
+  { id:'sepsis', lvl:2, title:'Septic, mottled knees', sub:'Lactate 5.2',
+    vign:'A 71-year-old with urosepsis: HR 124, BP 84/50, RR 28, mottled. Lactate 5.2 mmol/L.',
+    gas:{ ph:7.29, co2:30, hco3:14, pao2:76 }, extra:'FiO₂ 21% · lactate 5.2',
+    qs:[
+      { q:'Interpret the gas.', o:['Partially compensated metabolic acidosis','Uncompensated metabolic acidosis','Mixed respiratory & metabolic acidosis','Partially compensated respiratory alkalosis'], a:0,
+        e:'pH acid, HCO₃ acid — metabolic. PaCO₂ 30 is base: the fast breathing is the lungs compensating. pH still below 7.35, so partial.' },
+      { q:'Winter\'s formula: expected PaCO₂ = 1.5 × HCO₃ + 8 (±2). Is the breathing keeping up?', o:['Yes — expected 27–31, actual 30','No — CO₂ is too high, they\'re tiring','No — CO₂ is too low, a second disorder','Can\'t tell without a lactate'], a:0,
+        e:'1.5 × 14 + 8 = 29, so 27–31. A PaCO₂ of 30 is right where it should be — appropriate compensation, no second problem. If it were climbing above 31 in a patient with RR 28, they\'re tiring — that\'s the patient heading for respiratory failure.', ev:'Validated formula' } ],
+    point:'Fast breathing in sepsis is compensation. When the CO₂ starts rising, they\'re tiring.' },
+
+  { id:'copd', lvl:2, title:'COPD, "baseline" gas', sub:'Home O₂ 2 L',
+    vign:'A 66-year-old with severe COPD for a scheduled transfer. Says they feel "about normal." On 2 L nasal cannula.',
+    gas:{ ph:7.36, co2:58, hco3:32, pao2:62 }, extra:'2 L NC (~FiO₂ 28%)',
+    qs:[
+      { q:'Interpret the gas.', o:['Fully compensated respiratory acidosis','Fully compensated metabolic alkalosis','Partially compensated respiratory acidosis','Normal acid–base status'], a:0,
+        e:'pH normal but below 7.40 — leans acid. PaCO₂ is acid, so respiratory is the original problem. HCO₃ is base and the pH is back in range: fully compensated. The kidneys have had months to build that bicarbonate.' },
+      { q:'What SpO₂ do you titrate oxygen to?', o:['88–92%','94–98%','100%','Remove the oxygen'], a:0,
+        e:'In a cluster-randomized trial of prehospital patients with suspected COPD exacerbations, titrating oxygen to 88–92% cut mortality compared with high-flow oxygen (Austin et al., <i>BMJ</i> 2010; relative risk 0.42 overall, 0.22 in confirmed COPD, with wide confidence intervals). GOLD and BTS guidance use the same target. Too much oxygen can push the CO₂ higher.', ev:'RCT' } ],
+    point:'High CO₂ + high bicarb + normal pH = chronic. This is their baseline — protect it.' },
+
+  { id:'copdO2', lvl:2, title:'Same COPD patient, now sleepy', sub:'Was put on 15 L NRB',
+    vign:'The same patient was placed on a 15 L non-rebreather by a well-meaning crew. Forty minutes later they\'re drowsy and hard to rouse.',
+    gas:{ ph:7.25, co2:80, hco3:34, pao2:180 }, extra:'15 L NRB',
+    qs:[
+      { q:'Interpret the gas.', o:['Partially compensated respiratory acidosis','Fully compensated respiratory acidosis','Uncompensated respiratory acidosis','Mixed respiratory & metabolic acidosis'], a:0,
+        e:'pH acid, PaCO₂ acid — respiratory. HCO₃ is base (it was already high from the chronic disease) but the pH has fallen below 7.35. This is acute-on-chronic: the bicarbonate can\'t keep up with a sudden CO₂ rise.' },
+      { q:'What is the most likely cause, and the fix?', o:['Too much oxygen — titrate back to 88–92% and support ventilation (noninvasive ventilation or BVM per protocol)','The kidneys failed — give bicarbonate','Pneumothorax — needle decompress','Normal — they\'re just tired'], a:0,
+        e:'High-flow oxygen worsens ventilation–perfusion matching and frees CO₂ from hemoglobin (the Haldane effect), so PaCO₂ rises and the patient becomes narcotized. Titrate the oxygen down — don\'t remove it — and support breathing if mentation is falling.', ev:'RCT + physiology' } ],
+    point:'Compare to the baseline: same disease, but the pH tells you it\'s acute now.' },
+
+  { id:'dka', lvl:2, title:'DKA, breathing deep and fast', sub:'Glucose 540',
+    vign:'A 19-year-old type 1 diabetic: glucose 540, Kussmaul respirations at 34/min, fruity breath. Na⁺ 136, Cl⁻ 100.',
+    gas:{ ph:7.17, co2:17, hco3:6, pao2:105 }, extra:'FiO₂ 21% · Na⁺ 136 · Cl⁻ 100',
+    qs:[
+      { q:'Interpret the gas.', o:['Partially compensated metabolic acidosis','Uncompensated metabolic acidosis','Mixed respiratory & metabolic acidosis','Partially compensated respiratory alkalosis'], a:0,
+        e:'pH acid, HCO₃ acid — metabolic. PaCO₂ 17 is base: maximal compensation from the deep fast breathing, but pH is still low. Winter\'s: 1.5 × 6 + 8 = 17 — exactly where it should be.' },
+      { q:'Anion gap = Na⁺ − (Cl⁻ + HCO₃). What is it?', o:['30 — high','12 — normal','42 — high','6 — low'], a:0,
+        e:'136 − (100 + 6) = 30. A normal gap is roughly 3–11 on modern analyzers (older references say 8–12; use the lab\'s range). A high gap means an unmeasured acid — here, ketones.', ev:'Calculation' },
+      { q:'This patient is intubated for transport. The vent is set at RR 14, Vt 450. What happens?', o:['The CO₂ rises and the pH can drop dangerously','Nothing — the vent takes over','The pH rises because acidosis is corrected','The bicarbonate climbs to compensate'], a:0,
+        e:'They were breathing 34 times a minute to hold the CO₂ at 17. A "normal" rate lets the CO₂ climb within minutes, and with almost no bicarbonate left, the pH falls fast — peri-intubation arrest is a recognised risk. If intubation is unavoidable, match their pre-intubation minute ventilation and get a gas early.', ev:'Physiology + expert consensus' } ],
+    point:'In severe metabolic acidosis, the breathing is keeping them alive. Don\'t take it away.' },
+
+  { id:'vent', lvl:2, title:'Vented patient, routine gas', sub:'Settings RR 24',
+    vign:'An intubated overdose patient, now sedated and not over-breathing the vent. Settings: AC, Vt 500, RR 24, PEEP 5, FiO₂ 40%.',
+    gas:{ ph:7.55, co2:26, hco3:22, pao2:110 }, extra:'FiO₂ 40% · PEEP 5',
+    qs:[
+      { q:'Interpret the gas.', o:['Uncompensated respiratory alkalosis','Uncompensated metabolic alkalosis','Partially compensated respiratory alkalosis','Fully compensated respiratory alkalosis'], a:0,
+        e:'pH base, PaCO₂ base, HCO₃ normal. The vent is blowing off too much CO₂.' },
+      { q:'Which change fixes this gas?', o:['Decrease the rate','Increase the rate','Increase FiO₂','Increase PEEP'], a:0,
+        e:'CO₂ is controlled by minute ventilation (rate × tidal volume). Too little CO₂ → ventilate less: turn the rate down. FiO₂ and PEEP are the oxygenation knobs, not the CO₂ knobs. Check with medical direction / the sending physician per protocol.', ev:'Physiology' } ],
+    point:'CO₂ is a ventilation number. Rate and volume move it; FiO₂ and PEEP don\'t.' },
+
+  { id:'pneumonia', lvl:3, title:'Pneumonia on the vent', sub:'FiO₂ 60%, PEEP 10',
+    vign:'A 63-year-old intubated with bilateral pneumonia for transfer to a higher level of care. FiO₂ 60%, PEEP 10.',
+    gas:{ ph:7.34, co2:48, hco3:25, pao2:90 }, extra:'FiO₂ 60% · PEEP 10',
+    qs:[
+      { q:'Interpret the acid–base status.', o:['Uncompensated respiratory acidosis','Partially compensated respiratory acidosis','Normal acid–base status','Uncompensated metabolic acidosis'], a:0,
+        e:'pH 7.34 — just acid. PaCO₂ 48 acid, HCO₃ normal. Mild, uncompensated respiratory acidosis.' },
+      { q:'PaO₂ 90 looks normal. What is the P/F ratio (PaO₂ ÷ FiO₂)?', o:['150 — moderate ARDS range','90 — severe','300 — normal','540 — normal'], a:0,
+        e:'90 ÷ 0.60 = 150. The Berlin definition calls ≤300 mild, ≤200 moderate and ≤100 severe ARDS (with PEEP ≥5 and bilateral opacities not explained by heart failure). A "normal" PaO₂ on 60% oxygen is a very sick lung.', ev:'Consensus definition' } ],
+    point:'Always read the PaO₂ against the FiO₂ it took to get it.' },
+
+  { id:'pregnant', lvl:3, title:'Third trimester, routine gas', sub:'34 weeks',
+    vign:'A healthy 29-year-old at 34 weeks, being transferred for obstetric reasons. Comfortable, RR 18.',
+    gas:{ ph:7.45, co2:30, hco3:20, pao2:104 }, extra:'FiO₂ 21%',
+    qs:[
+      { q:'Interpret the gas.', o:['Fully compensated respiratory alkalosis','Fully compensated metabolic acidosis','Partially compensated respiratory alkalosis','Normal acid–base status'], a:0,
+        e:'pH 7.45 — normal, leaning base. PaCO₂ is base, so respiratory is the original change; HCO₃ dropped to compensate. Fully compensated respiratory alkalosis.' },
+      { q:'What does this gas mean in late pregnancy?', o:['Expected — and a PaCO₂ of 40 here would be a warning sign','Hyperventilation from anxiety — reassure','Early sepsis — start antibiotics','Lab error — redraw'], a:0,
+        e:'Progesterone drives breathing, so a PaCO₂ around 28–32 is normal in late pregnancy, with the kidneys lowering bicarbonate to match. A "normal" adult PaCO₂ of 40 in a pregnant patient means they\'re retaining CO₂ — think tiring asthma or impending respiratory failure.', ev:'Physiology' } ],
+    point:'Know the patient\'s normal. In pregnancy, normal is a compensated respiratory alkalosis.' },
+
+  { id:'rosc', lvl:3, title:'Post-arrest, just got ROSC', sub:'Ten minutes of CPR',
+    vign:'A 55-year-old after a witnessed VF arrest, ROSC after 10 minutes. Intubated, bagged inconsistently during the code.',
+    gas:{ ph:7.05, co2:60, hco3:16, pao2:140 }, extra:'FiO₂ 100% · lactate 8',
+    qs:[
+      { q:'Interpret the gas.', o:['Mixed respiratory & metabolic acidosis','Partially compensated respiratory acidosis','Partially compensated metabolic acidosis','Uncompensated respiratory acidosis'], a:0,
+        e:'pH acid, PaCO₂ acid, HCO₃ acid — both columns line up with the pH. Two problems at once: under-ventilation <i>and</i> lactic acid from no perfusion. Nothing is compensating, which is why the pH is so low.' },
+      { q:'What PaCO₂ do you ventilate toward?', o:['Normal — about 35–45','As low as possible to fix the pH','Leave it high to protect the brain','It doesn\'t matter after ROSC'], a:0,
+        e:'The 2025 AHA and ERC–ESICM post-arrest guidelines target normocapnia (PaCO₂ about 35–45 mmHg). Low CO₂ constricts cerebral vessels and risks ischemia. A randomized trial of deliberate mild hypercapnia (50–55 mmHg) found no neurologic benefit (TAME, <i>NEJM</i> 2023). Also turn the oxygen down from 100% once you have a reliable SpO₂ — guidelines advise avoiding hyperoxia.', ev:'Guideline + RCT' } ],
+    point:'Both columns match the pH → two disorders. Fix the one you control: ventilation.' },
+
+  { id:'aspirin', lvl:3, title:'Overdose, ringing ears', sub:'"Took a bottle of aspirin"',
+    vign:'A 40-year-old six hours after an aspirin overdose: tinnitus, vomiting, RR 30. Na⁺ 140, Cl⁻ 104.',
+    gas:{ ph:7.46, co2:22, hco3:15, pao2:96 }, extra:'FiO₂ 21% · Na⁺ 140 · Cl⁻ 104',
+    qs:[
+      { q:'Run the tic-tac-toe. What does it call this gas?', o:['Partially compensated respiratory alkalosis','Partially compensated metabolic acidosis','Uncompensated respiratory alkalosis','Normal acid–base status'], a:0,
+        e:'pH 7.46 base, PaCO₂ base, HCO₃ acid. PaCO₂ lines up with the pH → respiratory alkalosis, with the HCO₃ looking like partial compensation. That\'s what the grid says — but check it.' },
+      { q:'Winter\'s: 1.5 × 15 + 8 = 30.5 (±2). The PaCO₂ is 22. What\'s really going on?', o:['Two primary problems: metabolic acidosis AND respiratory alkalosis','The tic-tac-toe answer is complete','Respiratory acidosis','Lab error'], a:0,
+        e:'If the low bicarbonate were the only problem, the lungs would bring the CO₂ to about 28–33. At 22, something else is driving the breathing — salicylate stimulates the respiratory centre directly. The anion gap is 140 − (104 + 15) = 21: high. A high-gap acidosis plus a primary respiratory alkalosis is the classic salicylate pattern.', ev:'Validated formula' } ],
+    point:'When a gas looks "compensated" but the numbers don\'t fit Winter\'s, look for a second disorder. And if this patient is intubated, their high minute ventilation must be matched — toxicology guidance treats intubation as a high-risk step.' }
+];
+
+function renderCaseList(){
+  var h = '';
+  CASES.forEach(function(c, i){
+    var done = !!state.cases[c.id];
+    h += '<button class="case-item' + (done ? ' done' : '') + '" data-case="' + c.id + '">' +
+         '<span class="case-n">' + (done ? '✓' : (i + 1)) + '</span>' +
+         '<span class="topic-b"><span class="case-t">' + esc(c.title) + '</span><span class="case-s">' + esc(c.sub) + '</span></span>' +
+         '<span class="lvl l' + c.lvl + '">' + ['', 'Core', 'Applied', 'Advanced'][c.lvl] + '</span></button>';
+  });
+  $('caseList').innerHTML = h;
+}
+var CS = null;
+function openCase(id){
+  for(var i = 0; i < CASES.length; i++) if(CASES[i].id === id){ CS = { c:CASES[i], idx:i, picks:[] }; }
+  show('v-case'); renderCase();
+}
+function renderCase(){
+  var c = CS.c;
+  var h = '<div class="t-kick">Case ' + (CS.idx + 1) + ' of ' + CASES.length + '</div><h2 class="t-title">' + esc(c.title) + '</h2>' +
+          '<div class="blk"><p class="vign">' + esc(c.vign) + '</p></div>' +
+          gasPanel(c.gas, { oxy:true, extra:c.extra });
+  for(var i = 0; i < c.qs.length; i++){
+    var q = c.qs[i], pick = CS.picks[i];
+    if(i > 0 && CS.picks[i - 1] == null) break;
+    h += '<div class="step' + (pick != null ? ' done' : '') + ' cq" data-q="' + i + '"><div class="step-k">Question ' + (i + 1) + ' of ' + c.qs.length + '</div>' +
+         '<div class="step-q">' + q.q + '</div><div class="opts one">';
+    // Options are stored with the right answer first; shuffle once per visit.
+    if(!CS['o' + i]) CS['o' + i] = shuffle(q.o.map(function(_, k){ return k; }));
+    CS['o' + i].forEach(function(k){
+      var cls = 'opt';
+      if(pick != null){ if(k === q.a) cls += ' right'; else if(k === pick) cls += ' wrong'; }
+      h += '<button class="' + cls + '" data-i="' + k + '"' + (pick != null ? ' disabled' : '') + '>' + q.o[k] + '</button>';
+    });
+    h += '</div>';
+    if(pick != null) h += expBlock(pick === q.a, (q.ev ? '<span class="ev">' + q.ev + '</span>' : '') + q.e);
+    h += '</div>';
+  }
+  if(CS.picks.length === c.qs.length){
+    h += '<div class="answer" id="caseDone"><div class="answer-k">Take-home</div><div class="answer-t" style="font-size:15.5px">' + c.point + '</div></div>';
+    h += CS.idx < CASES.length - 1 ? '<button class="next" id="caseNext">Next case &#x203A;</button>' : '<button class="next" id="caseAll">All cases &#x203A;</button>';
+  }
+  $('caseBody').innerHTML = h;
+}
+$('caseBody').addEventListener('click', function(e){
+  var b = e.target.closest('button');
+  if(!b || b.disabled || !CS) return;
+  if(b.id === 'caseNext'){ openCase(CASES[CS.idx + 1].id); return; }
+  if(b.id === 'caseAll'){ renderCaseList(); show('v-cases'); return; }
+  var qEl = b.closest('.cq');
+  if(!qEl || b.dataset.i == null) return;
+  CS.picks[+qEl.dataset.q] = +b.dataset.i;
+  if(CS.picks.length === CS.c.qs.length){ state.cases[CS.c.id] = true; save(); }
+  renderCase();
+  var steps = document.querySelectorAll('#caseBody .step:not(.done), #caseDone');
+  var last = steps[steps.length - 1];
+  if(last && last.scrollIntoView) last.scrollIntoView({ behavior:'smooth', block:'nearest' });
+});
+$('caseBack').addEventListener('click', function(){ renderCaseList(); show('v-cases'); });
+$('caseList').addEventListener('click', function(e){
+  var b = e.target.closest('[data-case]'); if(b) openCase(b.dataset.case);
+});
+
+/* ── LEARN ──────────────────────────────────────────────────────── */
+var LEARN = [
+  { id:'normals', kick:'Card 1 · the numbers', title:'Four numbers, two questions',
+    body:'<div class="blk"><table class="tbl">' +
+      '<tr><td>pH</td><td class="m">7.35–7.45</td><td>How acid is the blood?</td></tr>' +
+      '<tr><td>PaCO₂</td><td class="m">35–45</td><td>The <b>lungs</b>. CO₂ acts as an acid.</td></tr>' +
+      '<tr><td>HCO₃</td><td class="m">22–26</td><td>The <b>kidneys</b>. Bicarb is a base.</td></tr>' +
+      '<tr><td>PaO₂</td><td class="m">80–100</td><td>Oxygenation — a separate question.</td></tr></table></div>' +
+      '<div class="big"><div class="big-t">Question 1: <b>acid–base</b> (pH, CO₂, HCO₃).<br>Question 2: <b>oxygen</b> (PaO₂).</div>' +
+      '<div class="big-s">Answer them separately. A gas can be perfectly balanced and badly hypoxic.</div></div>' +
+      '<div class="note info"><span class="ni">ℹ</span><span><b>VBG?</b> Venous pH runs about 0.03 lower than arterial and is close enough to use. Venous PCO₂ runs higher on average, but its agreement with arterial is too wide to substitute one for the other (Byrne et al., <i>Respirology</i> 2014, meta-analysis of 18 studies). Use a VBG for pH and bicarb trends, and an ABG when you need the true PaCO₂ or the PaO₂.</span></div>',
+    check:{ q:'Which value tells you what the lungs are doing?', o:['PaCO₂','HCO₃','pH','PaO₂ alone'], a:0,
+      e:'Breathing controls CO₂ in minutes. Breathe less, CO₂ goes up; breathe more, it goes down. (PaO₂ is about oxygen transfer, not acid–base.)' } },
+
+  { id:'direction', kick:'Card 2 · which way is acid', title:'CO₂ runs backwards',
+    body:'<div class="blk"><ul class="plain">' +
+      '<li><b>pH</b> low = <span class="acid">acid</span>, high = <span class="basec">base</span>.</li>' +
+      '<li><b>HCO₃</b> works like pH: low = <span class="acid">acid</span>, high = <span class="basec">base</span>.</li>' +
+      '<li><b>PaCO₂ is backwards</b>: high = <span class="acid">acid</span>, low = <span class="basec">base</span>. CO₂ dissolves into carbonic acid, so more CO₂ means more acid.</li></ul></div>' +
+      '<div class="big"><div class="big-t">High CO₂ = <b>acid</b>. Low bicarb = <b>acid</b>.</div><div class="big-s">Say it until it\'s automatic — this is where most misreads start.</div></div>',
+    check:{ q:'PaCO₂ is 30. Which column?', o:['Base','Acid','Normal'], a:0,
+      e:'Below 35 means CO₂ has been blown off — less acid in the blood — so it goes in the BASE column.' } },
+
+  { id:'playground', kick:'Card 3 · see it move', title:'The pH playground',
+    body:'<div class="blk"><p>Drag the sliders. The pH comes from the real equation the analyzer uses. Watch what the lungs and the kidneys do to it.</p>' +
+      '<div class="pg-out"><div class="pg-ph" id="pgPh">7.40</div><div class="pg-lbl" id="pgLbl"></div></div>' +
+      '<div class="pg-scale"><div class="pg-pin" id="pgPin"></div></div><div class="pg-ends"><span>6.90 acid</span><span>7.40</span><span>base 7.90</span></div>' +
+      '<div class="sl"><label for="pgCo2">PaCO₂ — the lungs <span id="pgCo2v">40</span></label><input type="range" id="pgCo2" min="15" max="90" value="40"></div>' +
+      '<div class="sl"><label for="pgHco3">HCO₃ — the kidneys <span id="pgHco3v">24</span></label><input type="range" id="pgHco3" min="5" max="45" value="24"></div></div>' +
+      '<div class="note info"><span class="ni">↔</span><span>Try it: push PaCO₂ up to 60 (acidosis), then raise HCO₃ until the pH is back near normal. That\'s what the kidneys do over 3–5 days in chronic lung disease.</span></div>',
+    check:{ q:'After fentanyl, a patient\'s RR drops from 18 to 6. What happens to the pH?', o:['It falls — CO₂ builds up','It rises — less CO₂','It doesn\'t change'], a:0,
+      e:'Slower breathing → CO₂ accumulates → more acid → pH falls. A respiratory acidosis.' } },
+
+  { id:'ttt', kick:'Card 4 · the method', title:'Tic-tac-toe',
+    body:'<div class="blk"><ol class="steps">' +
+      '<li>Draw three columns: <b>Acid · Normal · Base</b>.</li>' +
+      '<li>Put <b>pH</b>, <b>PaCO₂</b> and <b>HCO₃</b> each in its column.</li>' +
+      '<li>Whichever of CO₂ or HCO₃ is in the <b>same column as the pH</b> is the problem. CO₂ → <b>respiratory</b>. HCO₃ → <b>metabolic</b>.</li></ol></div>' +
+      '<div class="blk"><h3>Example: pH 7.28 · PaCO₂ 55 · HCO₃ 24</h3><div class="mini">' +
+      '<div class="h"></div><div class="h">ACID</div><div class="h">NORMAL</div><div class="h">BASE</div>' +
+      '<div class="lab">pH</div><div class="x">7.28</div><div></div><div></div>' +
+      '<div class="lab">CO₂</div><div class="x">55</div><div></div><div></div>' +
+      '<div class="lab">HCO₃</div><div></div><div>24</div><div></div></div>' +
+      '<p>pH and CO₂ share the Acid column, so the lungs are the problem. <b>Respiratory acidosis.</b></p></div>',
+    check:{ q:'pH 7.50 · PaCO₂ 40 · HCO₃ 33. What\'s the problem?', o:['Metabolic alkalosis','Respiratory alkalosis','Metabolic acidosis','Respiratory acidosis'], a:0,
+      e:'pH base, CO₂ normal, HCO₃ base. HCO₃ lines up with the pH → metabolic alkalosis.' } },
+
+  { id:'comp', kick:'Card 5 · compensation', title:'Is the body fighting back?',
+    body:'<div class="blk"><p>Look at the value that <b>isn\'t</b> the problem:</p><ul class="plain">' +
+      '<li><b>Uncompensated</b> — it\'s still normal. The body hasn\'t responded yet.</li>' +
+      '<li><b>Partially compensated</b> — it has moved the <i>opposite</i> way, but the pH is still abnormal.</li>' +
+      '<li><b>Fully compensated</b> — it has moved the opposite way and the pH is back to 7.35–7.45. Use 7.40 as the tie-breaker: below leans acid, above leans base, and that side is the original problem.</li>' +
+      '<li><b>Mixed</b> — CO₂ and HCO₃ are <i>both</i> in the pH\'s column. Two problems pushing the same way.</li></ul></div>' +
+      '<div class="blk"><h3>Speed matters</h3><p>The lungs start compensating within <b>minutes</b> (fully within about 12–24 hours). The kidneys take <b>3–5 days</b>. So an acute respiratory problem usually arrives uncompensated; a chronic one (COPD) arrives compensated.</p></div>' +
+      '<div class="note warn"><span class="ni">⚠</span><span><b>Real life is messier.</b> The body rarely brings the pH all the way back to normal — chronic respiratory alkalosis (pregnancy, altitude) is the usual exception. A normal pH with two very abnormal values should also make you consider a mixed disorder. Card 7 shows how to check.</span></div>',
+    check:{ q:'pH 7.31 · PaCO₂ 28 · HCO₃ 14. Compensation?', o:['Partially compensated','Uncompensated','Fully compensated','Mixed'], a:0,
+      e:'pH acid, HCO₃ acid → metabolic acidosis. CO₂ 28 has moved the opposite way (base) but the pH is still below 7.35 → partial.' } },
+
+  { id:'oxy', kick:'Card 6 · oxygenation', title:'Then read the oxygen',
+    body:'<div class="blk"><h3>On room air</h3><table class="tbl">' +
+      '<tr><td>Normal</td><td class="m">80–100</td></tr><tr><td>Mild hypoxemia</td><td class="m">60–79</td></tr>' +
+      '<tr><td>Moderate</td><td class="m">40–59</td></tr><tr><td>Severe</td><td class="m">&lt; 40</td></tr></table>' +
+      '<p style="margin-top:8px">Normal PaO₂ falls with age — a healthy 75-year-old can sit in the high 70s to low 80s on room air. Altitude lowers it too.</p></div>' +
+      '<div class="blk"><h3>On oxygen: the P/F ratio</h3><p><b>PaO₂ ÷ FiO₂</b> (as a decimal). A healthy lung on room air: 95 ÷ 0.21 ≈ 450.</p>' +
+      '<p>Berlin ARDS ranges: <b>≤300</b> mild · <b>≤200</b> moderate · <b>≤100</b> severe (with PEEP ≥5 and bilateral opacities not explained by heart failure).</p></div>',
+    check:{ q:'PaO₂ 90 on FiO₂ 60%. P/F ratio?', o:['150','90','300','540'], a:0,
+      e:'90 ÷ 0.6 = 150 — moderate ARDS range. A "normal" PaO₂ can hide a very sick lung if it took 60% oxygen to get there.' } },
+
+  { id:'deeper', kick:'Card 7 · optional · going deeper', title:'Two formulas worth knowing',
+    body:'<div class="blk"><h3>Winter\'s formula — is the breathing keeping up?</h3>' +
+      '<p>In a metabolic acidosis, <b>expected PaCO₂ = 1.5 × HCO₃ + 8 (±2)</b>.</p><ul class="plain">' +
+      '<li>Actual CO₂ in range → appropriate compensation.</li><li>Actual CO₂ <b>higher</b> → a respiratory acidosis too (they\'re tiring).</li>' +
+      '<li>Actual CO₂ <b>lower</b> → a respiratory alkalosis too (e.g. aspirin, sepsis).</li></ul>' +
+      '<p style="margin-top:8px">This is also why a truly "uncompensated" metabolic acidosis is rare: the lungs respond within minutes. A low bicarb with a normal PaCO₂ usually means the patient <b>can\'t</b> breathe it off — a second, respiratory problem.</p></div>' +
+      '<div class="blk"><h3>Anion gap — what kind of metabolic acidosis?</h3><p><b>Na⁺ − (Cl⁻ + HCO₃)</b>. Normal is roughly 3–11 on modern analyzers (older references say 8–12) — use the lab\'s own range. Low albumin hides a gap: add about 2.5 for every 1 g/dL of albumin below 4.</p>' +
+      '<p>High gap = an added acid: <b>lactate, ketones, toxins (methanol, ethylene glycol, salicylate), uremia</b>. Normal gap = bicarbonate lost (diarrhea) or large-volume saline.</p></div>',
+    check:{ q:'HCO₃ is 10. Winter\'s says the PaCO₂ should be…', o:['21–25','28–32','35–45','10–14'], a:0,
+      e:'1.5 × 10 + 8 = 23, ±2 → 21–25. If the patient\'s PaCO₂ is 34, they aren\'t compensating — they\'re tiring.' } }
+];
+var LI = 0, LPICK = {};
+function renderLearn(){
+  var c = LEARN[LI];
+  var d = '';
+  LEARN.forEach(function(x, i){ d += '<span class="dot' + (i === LI ? ' on' : state.learn[x.id] ? ' done' : '') + '"></span>'; });
+  $('lDots').innerHTML = d;
+  $('lKick').textContent = c.kick;
+  $('lTitle').textContent = c.title;
+  $('lBody').innerHTML = c.body;
+  renderLearnCheck();
+  $('lPrev').classList.toggle('hidden', LI === 0);
+  $('lNext').innerHTML = LI === LEARN.length - 1 ? 'Start practicing &#x203A;' : 'Next &#x203A;';
+  if(c.id === 'playground') initPlayground();
+}
+function renderLearnCheck(){
+  var c = LEARN[LI], k = c.check, pick = LPICK[c.id];
+  if(!LPICK['o' + c.id]) LPICK['o' + c.id] = shuffle(k.o.map(function(_, i){ return i; }));
+  var h = '<div class="qc" id="lQc"><div class="qc-k">Quick check</div><div class="qc-q">' + k.q + '</div><div class="opts one">';
+  LPICK['o' + c.id].forEach(function(i){
+    var cls = 'opt';
+    if(pick != null){ if(i === k.a) cls += ' right'; else if(i === pick) cls += ' wrong'; }
+    h += '<button class="' + cls + '" data-i="' + i + '"' + (pick != null ? ' disabled' : '') + '>' + k.o[i] + '</button>';
+  });
+  h += '</div>' + (pick != null ? expBlock(pick === k.a, k.e) : '') + '</div>';
+  $('lCheck').innerHTML = h;
+}
+$('lCheck').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b || b.disabled || b.dataset.i == null) return;
+  var c = LEARN[LI];
+  LPICK[c.id] = +b.dataset.i;
+  state.learn[c.id] = true; save();
+  renderLearnCheck(); updateHome();
+});
+$('lPrev').addEventListener('click', function(){ if(LI > 0){ LI--; renderLearn(); window.scrollTo(0, 0); } });
+$('lNext').addEventListener('click', function(){
+  if(LI < LEARN.length - 1){ LI++; renderLearn(); window.scrollTo(0, 0); }
+  else { go('tutor'); }
+});
+function initPlayground(){
+  var co2 = $('pgCo2'), hc = $('pgHco3');
+  function upd(){
+    var c = +co2.value, h = +hc.value, ph = Math.round(hh(c, h) * 100) / 100;
+    var cl = classify({ ph:ph, co2:c, hco3:h });
+    $('pgCo2v').textContent = c; $('pgHco3v').textContent = h;
+    $('pgPh').textContent = fmtPh(ph);
+    $('pgPh').style.color = ph < 7.35 ? 'var(--acid)' : ph > 7.45 ? 'var(--base)' : 'var(--green)';
+    var b = cl.bands;
+    $('pgLbl').textContent = cl.primary ? cl.label
+      : (ph === 7.40 && b.co2 !== 'normal' && b.hco3 !== 'normal' && b.co2 !== b.hco3)
+        ? 'Compensated — at exactly 7.40 you can\'t tell which came first'
+        : 'Values at the edge of normal — no single pattern';
+    $('pgPin').style.left = Math.max(0, Math.min(100, (ph - 6.9) / 1.0 * 100)) + '%';
+  }
+  co2.addEventListener('input', upd); hc.addEventListener('input', upd); upd();
+}
+
+/* ── NAVIGATION ─────────────────────────────────────────────────── */
+function updateHome(){
+  $('stGas').textContent = state.gases;
+  $('stSpeed').textContent = state.speedBest === null ? '–' : state.speedBest + '/' + SP_N;
+  var nc = 0; CASES.forEach(function(c){ if(state.cases[c.id]) nc++; });
+  $('stCases').textContent = nc + '/' + CASES.length;
+  var nl = 0; LEARN.forEach(function(c){ if(state.learn[c.id]) nl++; });
+  $('learnSub').textContent = nl === 0 ? 'Seven cards, a quick check on each' : nl + ' of ' + LEARN.length + ' cards checked';
+  $('mixToggle').setAttribute('aria-pressed', state.mixed ? 'true' : 'false');
+}
+function go(where){
+  if(where === 'learn'){ show('v-learn'); renderLearn(); }
+  else if(where === 'tutor'){ show('v-tutor'); if(!T || finished()) newGas(); }
+  else if(where === 'speed'){ show('v-speed'); startSpeed(); }
+  else if(where === 'cases'){ show('v-cases'); renderCaseList(); }
+}
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-go]'); if(b){ go(b.dataset.go); return; }
+  if(e.target.closest('[data-home]')){ updateHome(); show('v-home'); }
+});
+$('mixToggle').addEventListener('click', function(){
+  state.mixed = !state.mixed; save(); updateHome();
+  T = null;   // the next guided gas follows the new setting
+});
+updateHome();
+
+// For the test suite: the method and the bank, so they can be checked
+// independently of the UI.
+window.ABG = { classify:classify, generate:generate, oxyBand:oxyBand, hh:hh, labelFor:labelFor,
+               CASES:CASES, LEARN:LEARN, TYPES_BASIC:TYPES_BASIC, TYPES_ALL:TYPES_ALL };
+})();
+</script>
+</body>
+</html>

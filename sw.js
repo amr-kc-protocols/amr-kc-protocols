@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v42';
+const CACHE = 'amrkc-2026-v43';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -15,6 +15,9 @@ const ASSETS = [
   './alaris-pump.html',
   // Medication math — same reason: it gets opened to check a dose, not to browse
   './med-math.html',
+  // ABG practice — generated gases and the case bank are all in the page,
+  // so it drills offline between calls
+  './abg-practice.html',
   // Chart Rx — played between calls, often with no signal. The shell and the
   // question bank both have to be here, or a round cannot start offline.
   './chart-rx.html', './chart-rx/questions.json', './chart-rx/aemt-scope.json',
