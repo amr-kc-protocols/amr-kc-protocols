@@ -45,6 +45,16 @@ These suites live here:
   in `index.html` — so a protocol change fails the suite instead of quietly
   leaving last year's numbers in the training.
 
+- **`abg.test.mjs`** — the ABG Interpretation practice page
+  ([`abg-practice.html`](../abg-practice.html)) in headless Chromium. Every
+  gas the generator produces is checked against the Henderson–Hasselbalch
+  equation and graded by an independent classifier written in the test, so the
+  page's answer key cannot quietly drift from the reference card. The twelve
+  hand-written cases are held to the same standard, along with the anion gap,
+  Winter's and P/F arithmetic they quote. It also drives the guided practice,
+  speed round, learn cards and cases end to end, at 320px and with storage
+  blocked, and checks the page is listed in More and precached.
+
 - **`aemt.test.mjs`** — the AEMT Series Phase 1 engine
   ([`aemt-series.html`](../aemt-series.html)), built to the Clinical Education
   build framework for Chapters 1–4. Nothing is stubbed: it drives the real page
