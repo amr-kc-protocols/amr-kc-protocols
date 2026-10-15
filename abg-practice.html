@@ -60,7 +60,7 @@ button:disabled{cursor:default}
   display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px}
 .hdr-txt{flex:1;min-width:0}
 .hdr-title{font-size:14.5px;font-weight:700;color:var(--teal);line-height:1.15}
-.hdr-sub{font-size:11px;color:var(--gray)}
+.hdr-sub{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-back{font-size:12px;font-weight:600;color:var(--teal);text-decoration:none;padding:6px 10px;
   border:1px solid var(--border);border-radius:8px;background:var(--surface2);white-space:nowrap}
 
@@ -165,6 +165,7 @@ ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22
 /* TIC-TAC-TOE GRID */
 .step{background:#fff;border:2px solid var(--teal2);border-radius:14px;padding:14px;margin-bottom:12px}
 .step.done{border-color:var(--border)}
+.step,.answer,.qc,.next{scroll-margin-top:68px;scroll-margin-bottom:12px}
 .step-k{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
   color:var(--teal2);margin-bottom:5px}
 .step-q{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:10px}
@@ -193,7 +194,7 @@ ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22
 .opt small{display:block;font-weight:400;font-size:11.5px;color:var(--gray)}
 .opt.right{background:var(--green-bg);border-color:var(--green);color:#14532d}
 .opt.wrong{background:var(--red-bg);border-color:var(--red);color:#8f1d1d}
-.opt:disabled:not(.right):not(.wrong){opacity:.55}
+.opt:disabled:not(.right):not(.wrong){opacity:.72}
 .exp{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13.5px;color:#3c4655}
 .exp b{color:var(--white)}
 .verdict{font-weight:800;margin-bottom:3px}
@@ -597,9 +598,10 @@ function renderTutor(){
   $('tStreak').textContent = streak > 1 ? 'Streak: ' + streak + ' perfect in a row' : '';
   $('tGas').innerHTML = gasPanel(g, { oxy:true, title:'Gas #' + (state.gases + (finished() ? 0 : 1)), right:'FiO₂ 21% · room air' });
   var rowsDone = ['ph','co2','hco3'].every(function(r){ return T.rows[r]; });
+  var N = needComp() ? 4 : 3;
 
   // Step 1 — the grid
-  var h = '<div class="step' + (rowsDone ? ' done' : '') + '" id="step1"><div class="step-k">Step 1 of ' + (needComp() ? 4 : 3) + '</div>' +
+  var h = '<div class="step' + (rowsDone ? ' done' : '') + '" id="step1"><div class="step-k">Step 1 of ' + N + '</div>' +
           '<div class="step-q">Put each value in its column.</div><div class="ttt">' +
           '<div></div><div class="ttt-h a">ACID</div><div class="ttt-h">NORMAL</div><div class="ttt-h b">BASE</div>';
   [['ph','pH',fmtPh(g.ph)],['co2','PaCO₂',g.co2],['hco3','HCO₃',g.hco3]].forEach(function(row){
@@ -620,14 +622,14 @@ function renderTutor(){
 
   // Step 2 — what's the problem
   if(rowsDone){
-    h += '<div class="step' + (T.prim ? ' done' : '') + '" id="step2"><div class="step-k">Step 2</div>' +
+    h += '<div class="step' + (T.prim ? ' done' : '') + '" id="step2"><div class="step-k">Step 2 of ' + N + '</div>' +
          '<div class="step-q">Which value lines up with the pH? Name the problem.</div>' + optGrid(PRIMS, 'prim', T.prim, primKey(c));
     if(T.prim) h += expBlock(T.prim === primKey(c), whyPrimary(c));
     h += '</div>';
   }
   // Step 3 — compensation
   if(T.prim && needComp()){
-    h += '<div class="step' + (T.comp ? ' done' : '') + '" id="step3"><div class="step-k">Step 3</div>' +
+    h += '<div class="step' + (T.comp ? ' done' : '') + '" id="step3"><div class="step-k">Step 3 of 4</div>' +
          '<div class="step-q">Is the body compensating?</div>' + optGrid(COMPS, 'comp', T.comp, c.comp, true);
     if(T.comp) h += expBlock(T.comp === c.comp, whyComp(c));
     h += '</div>';
@@ -635,8 +637,8 @@ function renderTutor(){
   // Step 4 — oxygenation
   if(T.prim && (!needComp() || T.comp)){
     var ob = oxyBand(g.pao2);
-    h += '<div class="step' + (T.oxy ? ' done' : '') + '" id="step4"><div class="step-k">Last step</div>' +
-         '<div class="step-q">Oxygenation is a separate question. How is the PaO₂?</div>' + optGrid(OXYS, 'oxy', T.oxy, ob);
+    h += '<div class="step' + (T.oxy ? ' done' : '') + '" id="step4"><div class="step-k">Step ' + N + ' of ' + N + '</div>' +
+         '<div class="step-q">Oxygenation is a separate question. PaO₂ ' + g.pao2 + ' on room air — how is it?</div>' + optGrid(OXYS, 'oxy', T.oxy, ob);
     if(T.oxy) h += expBlock(T.oxy === ob, whyOxy(g.pao2));
     h += '</div>';
   }
@@ -1005,7 +1007,7 @@ var LEARN = [
       '<div class="lab">pH</div><div class="x">7.28</div><div></div><div></div>' +
       '<div class="lab">CO₂</div><div class="x">55</div><div></div><div></div>' +
       '<div class="lab">HCO₃</div><div></div><div>24</div><div></div></div>' +
-      '<p>pH and CO₂ share the Acid column — three in a row for the lungs. <b>Respiratory acidosis.</b></p></div>',
+      '<p>pH and CO₂ share the Acid column, so the lungs are the problem. <b>Respiratory acidosis.</b></p></div>',
     check:{ q:'pH 7.50 · PaCO₂ 40 · HCO₃ 33. What\'s the problem?', o:['Metabolic alkalosis','Respiratory alkalosis','Metabolic acidosis','Respiratory acidosis'], a:0,
       e:'pH base, CO₂ normal, HCO₃ base. HCO₃ lines up with the pH → metabolic alkalosis.' } },
 
