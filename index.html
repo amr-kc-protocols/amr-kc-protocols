@@ -64,6 +64,10 @@
   --emt:#15803d;--aemt:#1d4ed8;--pm:#6d28d9;
   --danger:#dc2626;--danger-bg:#fdecec;--warn:#a1590b;
   --emt-bg:#eafbf1;--aemt-bg:#eaf1fd;--pm-bg:#f3ecfd;--info-bg:#eaf4fc;--warn-bg:#fef3e2;
+  /* Brand — sampled from amr.net and globalmedicalresponse.com. AMR blue is
+     the site bar and the "MR" of the logo; AMR red is the "A". The GMR
+     blues are the three facets of its star. */
+  --amr-blue:#0056a2;--amr-red:#ce1f41;--gmr-navy:#004987;--gmr-blue:#0076bc;--gmr-cyan:#00aeef;
   --mono:'Inter',-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--sans:'Inter',-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -97,14 +101,14 @@ border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var
    way the detail header already does. */
 #hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg);
 padding-top:env(safe-area-inset-top,0px);
-border-bottom:1px solid var(--teal);box-shadow:0 4px 14px rgba(15,23,42,0.10)}
+border-bottom:3px solid var(--amr-blue);box-shadow:0 4px 14px rgba(0,40,90,0.08)}
 .ht{display:flex;align-items:center;gap:10px;padding:11px 14px 7px}
 .hbadge{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
-.hico{width:32px;height:32px;background:var(--teal);border-radius:8px;
+.hico{width:32px;height:32px;background:linear-gradient(135deg,var(--amr-blue),var(--gmr-blue));border-radius:8px;
 display:flex;align-items:center;justify-content:center;font-family:var(--mono);
-font-size:13px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(23,58,104,0.35)}
+font-size:13px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(0,86,162,0.35)}
 .hname{min-width:0}
-.hname .l1{font-size:12px;font-weight:700;color:var(--teal2);letter-spacing:0.08em;
+.hname .l1{font-size:12px;font-weight:700;color:var(--amr-blue);letter-spacing:0.08em;
 display:flex;align-items:center;gap:6px;white-space:nowrap}
 .hname .l2{font-size:9px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdot{width:6px;height:6px;border-radius:50%;background:var(--emt);animation:pulse 2s infinite;flex-shrink:0}
@@ -113,7 +117,7 @@ display:flex;align-items:center;gap:6px;white-space:nowrap}
 #srch{width:100%;height:40px;background:var(--dim);border:1.5px solid var(--border);border-radius:8px;
 color:var(--white);font-family:var(--mono);font-size:16px;padding:0 44px 0 36px;
 outline:none;-webkit-appearance:none;transition:border-color 0.15s,box-shadow 0.15s}
-#srch:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(23,58,104,0.18)}
+#srch:focus{border-color:var(--amr-blue);box-shadow:0 0 0 3px rgba(0,86,162,0.18)}
 #srch::placeholder{color:var(--gray)}
 #srch::-webkit-search-cancel-button,#srch::-webkit-search-decoration{-webkit-appearance:none;display:none}
 .si{position:absolute;left:26px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:15px;pointer-events:none}
@@ -140,13 +144,13 @@ white-space:nowrap}
 .nb.on{color:var(--ac,var(--teal2));border-top-color:var(--ac,var(--teal2))}
 .nb-ic{font-size:22px;line-height:1;color:var(--ac,inherit)}
 .nb-home{flex:0 0 clamp(46px,13.5vw,58px);border-top:none;padding:0 1px 6px;justify-content:flex-start}
-.nb-home-circle{width:50px;height:50px;border-radius:50%;background:var(--teal);
+.nb-home-circle{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--amr-blue),var(--gmr-blue));
 display:flex;align-items:center;justify-content:center;color:#fff;margin-top:-22px;
-box-shadow:0 4px 14px rgba(23,58,104,0.45),0 0 0 4px var(--bg);transition:transform 0.12s,background 0.12s}
+box-shadow:0 4px 14px rgba(0,86,162,0.42),0 0 0 4px var(--bg);transition:transform 0.12s,background 0.12s}
 .nb-home-circle .icon{width:24px;height:24px}
 .nb-home:active .nb-home-circle{transform:scale(0.93)}
-.nb-home.on{color:var(--teal2)}
-.nb-home.on .nb-home-circle{background:var(--teal2)}
+.nb-home.on{color:var(--amr-blue)}
+.nb-home.on .nb-home-circle{background:linear-gradient(135deg,var(--gmr-navy),var(--amr-blue))}
 .nb-home span:last-child{margin-top:4px}
 .hlink{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;
 border-radius:8px;border:none;background:none;
@@ -434,8 +438,8 @@ button.more-card{width:calc(100% - 24px);background:none;border:0;
 
 /* ── HOME BRAND TILES (blue = prep, purple = game) ────────────────── */
 .stat-tile.tile-blue,.stat-tile.tile-purple{padding:17px 15px;gap:13px;border-radius:14px}
-.stat-tile.tile-blue{background:linear-gradient(135deg,#173a68 0%,#1b63c4 100%);border-color:transparent;
-  box-shadow:0 6px 18px rgba(27,99,196,0.26)}
+.stat-tile.tile-blue{background:linear-gradient(135deg,var(--gmr-navy) 0%,var(--amr-blue) 55%,var(--gmr-blue) 100%);border-color:transparent;
+  box-shadow:0 6px 18px rgba(0,86,162,0.28)}
 .stat-tile.tile-purple{background:linear-gradient(135deg,#6d28d9 0%,#c026d3 100%);border-color:transparent;
   box-shadow:0 6px 18px rgba(124,58,237,0.28)}
 .stat-tile.tile-blue .stat-tile-ico,.stat-tile.tile-purple .stat-tile-ico{color:#fff;font-size:23px;width:30px}
@@ -480,22 +484,27 @@ button.more-card{width:calc(100% - 24px);background:none;border:0;
    room as the one being introduced. Red and amber because it is a
    defibrillator: the blue and the violet are already spoken for, and a crew
    should be able to pick this card out of the page without reading it. */
-.feat-card.feat-hero{background:linear-gradient(135deg,#7f1d1d 0%,#b91c1c 44%,#ea580c 100%);
-  box-shadow:0 12px 34px rgba(185,28,28,0.38);padding:22px 22px 20px}
-.feat-card.feat-hero:hover{box-shadow:0 16px 40px rgba(185,28,28,0.46)}
-.feat-hero .feat-badge{color:#9f1239}
+.feat-card.feat-hero{background:linear-gradient(135deg,#8e1230 0%,var(--amr-red) 60%,#e0384f 100%);
+  box-shadow:0 1px 2px rgba(120,10,30,0.12),0 16px 36px -12px rgba(206,31,65,0.55);padding:22px 22px 20px;border-radius:20px}
+.feat-card.feat-hero:hover{box-shadow:0 2px 4px rgba(120,10,30,0.14),0 20px 42px -12px rgba(206,31,65,0.62)}
+/* The blue half of the livery, cut on the same slant as the masthead's. */
+.feat-card.feat-hero::after{content:"";position:absolute;top:0;right:0;bottom:0;width:34%;pointer-events:none;
+  background:linear-gradient(160deg,var(--amr-blue),var(--gmr-navy));
+  clip-path:polygon(42% 0,100% 0,100% 100%,0 100%);opacity:.95}
+.feat-hero .feat-badge{color:var(--amr-red)}
+.feat-hero .feat-badge .dot{background:var(--gmr-cyan)}
 .feat-hero .feat-title{font-size:30px;margin:13px 0 6px}
-.feat-hero .feat-title .fa{color:#ffd9c2}
-.feat-hero .feat-sub{font-size:14px;color:#ffe8dc;max-width:62%}
-.feat-hero .feat-chip{color:#ffe0d0}
-.feat-hero .feat-go{color:#b91c1c;font-size:13px;padding:9px 17px 9px 15px;margin-top:16px}
+.feat-hero .feat-title .fa{color:#ffd3dc}
+.feat-hero .feat-sub{font-size:14px;color:#ffe9ed;max-width:62%}
+.feat-hero .feat-chip{color:#fff;background:rgba(255,255,255,0.16)}
+.feat-hero .feat-go{color:var(--amr-red);font-size:13px;padding:9px 17px 9px 15px;margin-top:16px}
 
 /* The trace sweeps the way the monitor's does. It is decoration, so it is
    hidden from assistive tech and stands still where motion is unwelcome. */
-.feat-ecg{position:absolute;top:16px;right:16px;width:104px;height:50px;pointer-events:none;opacity:.95}
+.feat-ecg{position:absolute;z-index:1;top:16px;right:16px;width:104px;height:50px;pointer-events:none;opacity:.95}
 .feat-ecg .base{stroke:rgba(255,255,255,0.22);stroke-width:1.3;fill:none}
-.feat-ecg .trace{stroke:#ffd9c2;stroke-width:2.3;fill:none;stroke-linecap:round;stroke-linejoin:round;
-  filter:drop-shadow(0 0 5px rgba(255,180,140,0.8));
+.feat-ecg .trace{stroke:#8fe0ff;stroke-width:2.3;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 5px rgba(0,174,239,0.8));
   stroke-dasharray:190;stroke-dashoffset:190;animation:featsweep 2.8s linear infinite}
 @keyframes featsweep{0%{stroke-dashoffset:190}58%{stroke-dashoffset:0}
   82%{stroke-dashoffset:0}100%{stroke-dashoffset:-190}}
@@ -511,6 +520,7 @@ button.more-card{width:calc(100% - 24px);background:none;border:0;
   .feat-hero .feat-title{font-size:25px}
   .feat-hero .feat-sub{font-size:13px;max-width:100%}
   .feat-ecg{width:74px;height:38px;top:14px;right:13px;opacity:.75}
+  .feat-card.feat-hero::after{width:24%}
 }
 
 .sub-back{display:inline-flex;align-items:center;gap:5px;margin:12px 14px 4px;
@@ -624,20 +634,33 @@ background:var(--acb);color:var(--ac);font-size:16px}
 /* ── HOME MASTHEAD ─────────────────────────────────────────────────
    This is the first thing a crew sees when they open the Toughbook, so it
    has to say whose guide this is and what is inside it without being read. */
-.mast{position:relative;overflow:hidden;margin:10px 12px 12px;padding:20px 18px 30px;
-border-radius:18px;color:#fff;background:linear-gradient(135deg,#0b3f75 0%,#14406f 42%,#0e7490 100%);
-box-shadow:0 10px 30px rgba(11,63,117,0.28)}
+.mast{position:relative;overflow:hidden;margin:12px 12px 14px;padding:20px 18px 30px;
+border-radius:20px;color:#fff;
+background:linear-gradient(135deg,var(--gmr-navy) 0%,var(--amr-blue) 52%,var(--gmr-blue) 100%);
+box-shadow:0 1px 2px rgba(0,40,90,0.10),0 14px 34px -10px rgba(0,73,135,0.45)}
 .mast::before{content:"";position:absolute;inset:0;pointer-events:none;
-background:radial-gradient(240px 240px at 92% -20%,rgba(255,255,255,0.22),rgba(255,255,255,0) 70%)}
-.mast-in{position:relative;z-index:1}
-.mast-eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.18em;
-text-transform:uppercase;color:#8fd3ea}
-.mast-title{font-size:30px;font-weight:800;letter-spacing:-0.025em;line-height:1.05;margin:7px 0 5px;
+background:radial-gradient(260px 220px at 8% -30%,rgba(0,174,239,0.30),rgba(0,174,239,0) 70%)}
+/* The brand bar under it: AMR red, then GMR cyan — the accents the two
+   sites share. */
+.mast::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;pointer-events:none;
+background:linear-gradient(90deg,var(--amr-red) 0 34%,#fff 34% 35%,var(--gmr-cyan) 35% 100%)}
+/* The livery stripe — the red sweep down the side of the truck. Decoration
+   only, so it is hidden from assistive tech. */
+.mast-livery{position:absolute;top:0;right:0;width:96px;height:calc(100% - 4px);pointer-events:none}
+.mast-livery .lv-red{fill:var(--amr-red)}
+.mast-livery .lv-cyan{fill:var(--gmr-cyan);opacity:.85}
+.mast-livery .lv-sheen{fill:#fff;opacity:.09}
+.mast-in{position:relative;z-index:1;padding-right:62px}
+.mast-eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.18em;
+text-transform:uppercase;color:#bfe9fb}
+.mast-eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--amr-red);
+box-shadow:0 0 0 2px rgba(255,255,255,0.85)}
+.mast-title{font-size:clamp(26px,7.4vw,30px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin:8px 0 6px;
 text-shadow:0 2px 12px rgba(0,0,0,0.18)}
-.mast-title span{color:#8ee7ff}
-.mast-sub{font-size:13px;color:#cfe3f5;line-height:1.5;max-width:52ch}
-.mast-ecg{position:absolute;left:0;right:0;bottom:0;height:46px;width:100%;pointer-events:none;opacity:0.5}
-.mast-ecg path{fill:none;stroke:#7fe3ff;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;
+.mast-title span{color:var(--gmr-cyan)}
+.mast-sub{font-size:13px;color:#dcebf8;line-height:1.5;max-width:52ch}
+.mast-ecg{position:absolute;left:0;right:0;bottom:4px;height:46px;width:100%;pointer-events:none;opacity:0.4}
+.mast-ecg path{fill:none;stroke:#9fe2ff;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;
 vector-effect:non-scaling-stroke;animation:mastpulse 3.6s ease-in-out infinite}
 @keyframes mastpulse{0%,100%{opacity:.35}50%{opacity:.85}}
 @media (prefers-reduced-motion:reduce){.mast-ecg path{animation:none;opacity:.5}}
@@ -662,7 +685,30 @@ border-radius:8px;padding:8px 14px;letter-spacing:0.01em}
    take keyboard focus. Their text is in spans, which a button may contain. */
 button.stat-tile{font:inherit;text-align:left;width:100%;cursor:pointer}
 .stat-tile-val,.stat-tile-lbl{display:block}
-.home-sec{padding-top:10px}
+.home-sec{display:flex;align-items:center;gap:8px;padding-top:16px;color:var(--amr-blue);font-weight:700}
+.home-sec::before{content:"";width:16px;height:3px;border-radius:2px;flex-shrink:0;
+background:linear-gradient(90deg,var(--amr-red) 0 50%,var(--gmr-cyan) 50% 100%)}
+/* Homepage tiles are cards: white, a hairline, a soft lift on hover. */
+.stat-strip .stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+padding:13px 14px;box-shadow:0 1px 2px rgba(0,40,90,0.05),0 6px 16px -10px rgba(0,40,90,0.22);
+transition:border-color .15s,box-shadow .15s,transform .15s}
+.stat-strip .stat-tile:hover{transform:translateY(-1px);
+box-shadow:0 2px 4px rgba(0,40,90,0.06),0 12px 24px -12px rgba(0,73,135,0.35)}
+.stat-strip .stat-tile:active{transform:translateY(0)}
+.stat-strip .stat-tile:focus-visible{outline:2px solid var(--amr-blue);outline-offset:2px}
+.stat-strip .stat-tile.tile-blue{background:linear-gradient(135deg,var(--gmr-navy) 0%,var(--amr-blue) 55%,var(--gmr-blue) 100%);
+border-color:transparent;box-shadow:0 1px 2px rgba(0,40,90,0.10),0 10px 22px -10px rgba(0,86,162,0.55)}
+.stat-strip .stat-tile.tile-blue .stat-tile-lbl{color:#d6ebfb}
+.home-feats{margin-top:12px}
+.stat-strip .stat-tile.ac-chip .stat-tile-ico{width:34px;height:34px;border-radius:10px;font-size:17px}
+.stat-strip .stat-tile-val{font-size:13.5px;font-weight:700}
+.stat-strip .stat-tile-lbl{font-size:10.5px}
+/* Brand accents for the homepage tiles. */
+.ac-amr{--ac:var(--amr-blue);--acb:#e3eef9}
+.ac-gmr{--ac:var(--gmr-blue);--acb:#e0f1fb}
+.ac-navy{--ac:var(--gmr-navy);--acb:#e2eaf3}
+.ac-cyan-b{--ac:#0084b8;--acb:#dcf4fd}
+.ac-amr-red{--ac:var(--amr-red);--acb:#fbe7eb}
 .stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 12px}
 .stat-tile{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid transparent;
 border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:border-color 0.12s}
@@ -680,8 +726,10 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
   #lv{max-width:1180px;margin:0 auto}
   #hdr .ht,#hdr .sw{max-width:1180px;margin-left:auto;margin-right:auto}
   .stat-strip{grid-template-columns:repeat(auto-fit,minmax(228px,1fr))}
-  .mast{padding:28px 26px 36px}
-  .mast-title{font-size:38px}
+  .mast{padding:28px 30px 38px}
+  .mast-livery{width:300px}
+  .mast-in{padding-right:240px}
+  .mast-title{font-size:40px}
   .mast-sub{font-size:14px}
 
   /* There is room for the whole vital-target strip, so it stops being a
@@ -1168,6 +1216,10 @@ function renderHome(){
   h += '<div class="mast-sub">Protocols, doses and door codes &mdash; on the truck, offline, '
      + 'in your hand. Standing orders under Dr. Ameet Deshmukh, MD.</div>';
   h += '</div>';
+  h += '<svg class="mast-livery" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'
+     + '<polygon class="lv-sheen" points="70,0 100,0 100,100 30,100"/>'
+     + '<polygon class="lv-red" points="52,0 66,0 26,100 12,100"/>'
+     + '<polygon class="lv-cyan" points="71,0 75,0 35,100 31,100"/></svg>';
   h += '<svg class="mast-ecg" viewBox="0 0 1200 46" preserveAspectRatio="none" aria-hidden="true">';
   h += '<path d="M0 30 H150 l14 -18 l12 32 l11 -24 l9 10 H430 l14 -18 l12 32 l11 -24 l9 10 '
      + 'H710 l14 -18 l12 32 l11 -24 l9 10 H990 l14 -18 l12 32 l11 -24 l9 10 H1200"/></svg>';
@@ -1182,13 +1234,13 @@ function renderHome(){
   // no tool. Now it opens on the shift tools the tab bar does not have.
   h += '<div class="sec home-sec">On shift</div>';
   h += '<div class="stat-strip">';
-  h += tile({href:'ift-call-guide.html', ac:'ac-teal', ico:'i-ambulance',
+  h += tile({href:'ift-call-guide.html', ac:'ac-amr', ico:'i-ambulance',
              val:'IFT Call Guide', lbl:'Specialty transfers &amp; charting'});
-  h += tile({href:'imagetrend-job-aid.html', ac:'ac-green', ico:'i-clipboard',
+  h += tile({href:'imagetrend-job-aid.html', ac:'ac-gmr', ico:'i-clipboard',
              val:'Charting Help', lbl:'ImageTrend Job Aid'});
-  h += tile({href:'narcotics-logging.html', ac:'ac-amber', ico:'i-lock',
+  h += tile({href:'narcotics-logging.html', ac:'ac-navy', ico:'i-lock',
              val:'Narcotics Logging', lbl:'Operative IQ &middot; 7 videos'});
-  h += tile({goto:'forms', ac:'ac-stone', ico:'i-edit',
+  h += tile({goto:'forms', ac:'ac-cyan-b', ico:'i-edit',
              val:'Caregiver Signature', lbl:'Missing PCR signature'});
   h += '</div>';
 
@@ -1226,9 +1278,9 @@ function renderHome(){
              val:'Start your streak', lbl:'Daily 5 questions'});
   h += tile({goto:'more', sec:'cc', cls:'tile-blue', ico:'i-cap', val:'Critical Care Prep',
              lbl: ccDone>0 ? ccDone+' of 5 certified' : '5-course FP-C track'});
-  h += tile({href:'https://gmrlearning.com/kansas/', ext:true, ac:'ac-red', ico:'i-heart',
+  h += tile({href:'https://gmrlearning.com/kansas/', ext:true, ac:'ac-amr-red', ico:'i-heart',
              val:'AHA Classes', lbl:'Sign up &middot; GMR Learning'});
-  h += tile({goto:'more', sec:'training', ac:'ac-slate', ico:'i-cards',
+  h += tile({goto:'more', sec:'training', ac:'ac-gmr', ico:'i-cards',
              val:'All training', lbl:'Courses, quizzes &amp; flashcards'});
   h += '</div>';
 
