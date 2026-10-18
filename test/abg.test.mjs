@@ -83,7 +83,7 @@ const oxy = p => p >= 80 ? 'normal' : p >= 60 ? 'mild' : p >= 40 ? 'moderate' : 
 /* A1 — home */
 { const p = await fresh();
   await p.waitForSelector('.hero h1');
-  ok('A1 four ways in', (await p.locator('.topic[data-go]').count()) === 4);
+  ok('A1 five ways in', (await p.locator('.topic[data-go]').count()) === 5);
   ok('A1 stats start at zero', (await p.locator('#stGas').textContent()) === '0' &&
      (await p.locator('#stCases').textContent()) === '0/12');
   ok('A1 normals on the home screen', /7\.35–7\.45/.test(await p.locator('.norms').textContent()));
@@ -331,7 +331,79 @@ async function solve(p, wrongFirst = false) {
   await ctx.close();
   const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');
   ok('A11 service worker precaches the page', /'\.\/abg-practice\.html'/.test(sw));
-  ok('A11 cache version bumped past v42', /amrkc-2026-v(?:4[3-9]|[5-9]\d)/.test(sw)); }
+  ok('A11 cache version bumped past v44', /amrkc-2026-v(?:4[5-9]|[5-9]\d)/.test(sw)); }
+
+/* A12 — ROME board: solved with ROME itself, written here from the mnemonic
+   (raw Low / Normal / High, CO2 opposite the pH, HCO3 equal to it), and the
+   result must match the independent Acid / Base read for every gas. */
+function romeSolve(g) {
+  const dir = (v, lo, hi) => v < lo ? 'low' : v > hi ? 'high' : 'normal';
+  const ph = dir(g.ph, 7.35, 7.45), co2 = dir(g.co2, 35, 45), hco3 = dir(g.hco3, 22, 26);
+  const flip = d => d === 'low' ? 'high' : 'low';
+  let p = ph, full = false;
+  if (ph === 'normal') {
+    if (co2 === 'normal' && hco3 === 'normal') return { raw: { ph, co2, hco3 }, prim: 'normal', comp: null };
+    p = g.ph < 7.4 ? 'low' : 'high'; full = true;
+  }
+  const osis = p === 'low' ? 'acid' : 'alk';
+  const R = co2 === flip(p), M = hco3 === p;
+  if (R && M) return { raw: { ph, co2, hco3 }, prim: 'mixed', comp: null };
+  const other = R ? hco3 : co2;
+  const comp = full ? 'full' : other === 'normal' ? 'none' : 'partial';
+  return { raw: { ph, co2, hco3 }, prim: (R ? 'resp-' : 'met-') + osis, comp };
+}
+{ const p = await fresh();
+  await p.click('#mixToggle');
+  await p.click('.topic[data-go="rome"]');
+  ok('A12 ROME board opens with a gas', await p.locator('#rGas .gas').isVisible());
+  ok('A12 board columns are Low / Normal / High', (await p.locator('#rSteps .ttt-h').allTextContents()).join('/') === 'LOW/NORMAL/HIGH');
+  const seen = new Set();
+  for (let i = 0; i < 40; i++) {
+    const el = p.locator('#rGas .gas');
+    const g = { ph: +(await el.getAttribute('data-ph')), co2: +(await el.getAttribute('data-co2')), hco3: +(await el.getAttribute('data-hco3')) };
+    const s = romeSolve(g);
+    for (const row of ['ph', 'co2', 'hco3']) await p.click(`#rSteps .cell[data-rrow="${row}"][data-rcol="${s.raw[row]}"]`);
+    await p.click(`#rSteps [data-rprim="${s.prim}"]`);
+    if (s.comp) await p.click(`#rSteps [data-rcomp="${s.comp}"]`);
+    const label = await p.locator('#rAnswer .answer-t').textContent();
+    seen.add(s.prim);
+    ok(`A12 gas ${i + 1}: ROME read graded perfect`, /Perfect read/.test(await p.locator('#rAnswer').textContent()) &&
+       (await p.locator('#rSteps .wrong').count()) === 0, JSON.stringify(g));
+    ok(`A12 gas ${i + 1}: same answer as the Acid / Base read`, label === ref(g).label, label + ' vs ' + ref(g).label);
+    await p.click('#rNext');
+  }
+  ok('A12 drill covers respiratory, metabolic and mixed', [...seen].some(k => /^resp/.test(k)) && [...seen].some(k => /^met/.test(k)) && seen.has('mixed'), [...seen].join(','));
+  ok('A12 streak shown', /40 perfect/.test(await p.locator('#rStreak').textContent()));
+  // A high CO2 put in the High column is right here (it would be "Acid" on the other board)
+  const el = p.locator('#rGas .gas');
+  const g = { ph: +(await el.getAttribute('data-ph')), co2: +(await el.getAttribute('data-co2')), hco3: +(await el.getAttribute('data-hco3')) };
+  const wrongCol = romeSolve(g).raw.ph === 'low' ? 'high' : 'low';
+  await p.click(`#rSteps .cell[data-rrow="ph"][data-rcol="${wrongCol}"]`);
+  ok('A12 a wrong cell is marked and explained', (await p.locator('#rSteps .cell.wrong').count()) === 1 && (await p.locator('#rSteps .why li.no').count()) === 1);
+  ok('A12 gases count toward the home total', (await p.evaluate(() => JSON.parse(localStorage.getItem('abg_practice_v1')).gases)) === 40);
+  // Card 4 carries the ROME note and a way into the drill
+  await p.click('.back[data-home] >> visible=true');
+  await p.click('.topic[data-go="learn"]');
+  for (let i = 0; i < 3; i++) await p.click('#lNext');
+  ok('A12 Card 4 explains ROME', /Respiratory Opposite|espiratory.*pposite/.test(await p.locator('#lBody').textContent()) &&
+     /same direction, not the same number/.test(await p.locator('#lBody').textContent()));
+  await p.click('#lBody [data-go="rome"]');
+  ok('A12 Card 4 button opens the ROME board', await p.locator('#v-rome').isVisible());
+  ok('A12 no errors', p._errs.length === 0, p._errs.join('|'));
+  await p.context().close(); }
+{ const p = await fresh(320);
+  await p.click('.topic[data-go="rome"]');
+  const el = p.locator('#rGas .gas');
+  const g = { ph: +(await el.getAttribute('data-ph')), co2: +(await el.getAttribute('data-co2')), hco3: +(await el.getAttribute('data-hco3')) };
+  const s = romeSolve(g);
+  for (const row of ['ph', 'co2', 'hco3']) await p.click(`#rSteps .cell[data-rrow="${row}"][data-rcol="${s.raw[row]}"]`);
+  await p.click(`#rSteps [data-rprim="${s.prim}"]`);
+  if (s.comp) await p.click(`#rSteps [data-rcomp="${s.comp}"]`);
+  ok('A12 ROME board fits 320px', !(await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)));
+  await p.click('.back[data-home] >> visible=true'); await p.click('.topic[data-go="learn"]');
+  for (let i = 0; i < 3; i++) await p.click('#lNext');
+  ok('A12 Card 4 with the ROME note fits 320px', !(await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)));
+  await p.context().close(); }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 if (fails.length) console.log('FAILURES:\n - ' + fails.join('\n - '));

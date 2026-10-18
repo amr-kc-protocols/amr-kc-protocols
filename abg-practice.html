@@ -7,6 +7,8 @@
 
     - Guided practice: an endless supply of fresh gases, read one tap at a
       time, with the reason shown after every tap.
+    - ROME board: the same gases read on a Low / Normal / High board with
+      "Respiratory Opposite, Metabolic Equal", for crews who learned it that way.
     - Speed round: ten gases, pick the full interpretation.
     - Clinical cases: a patient around the gas, and a question about what to
       do with it.
@@ -311,6 +313,12 @@ ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22
         <span class="topic-s">Ten gases, name each one &mdash; beat your best</span></span>
       <span class="topic-arr" aria-hidden="true">&#x203A;</span>
     </button>
+    <button class="topic" data-go="rome">
+      <span class="topic-ico" aria-hidden="true">R</span>
+      <span class="topic-b"><span class="topic-q">ROME board</span>
+        <span class="topic-s">Learned it as Respiratory Opposite, Metabolic Equal? Practice it here</span></span>
+      <span class="topic-arr" aria-hidden="true">&#x203A;</span>
+    </button>
     <button class="topic" data-go="cases">
       <span class="topic-ico" aria-hidden="true">4</span>
       <span class="topic-b"><span class="topic-q">Clinical cases</span>
@@ -376,6 +384,18 @@ ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22
     <div class="t-kick">Clinical cases</div>
     <h2 class="t-title">A patient around the gas</h2>
     <div id="caseList"></div>
+  </div>
+
+  <!-- ══ ROME BOARD ════════════════════════════════════════════════ -->
+  <div class="view" id="v-rome">
+    <button class="back" data-home>&#x2039; HOME</button>
+    <div class="t-kick">ROME board</div>
+    <h2 class="t-title">Respiratory Opposite, Metabolic Equal</h2>
+    <div class="note info"><span class="ni">&#x2195;</span><span>This board sorts by the <b>number</b>:
+      Low &middot; Normal &middot; High. It is not the Acid / Base board from guided practice, so a high CO&#x2082; goes on the <b>High</b> side here.</span></div>
+    <div class="streak" id="rStreak"></div>
+    <div id="rGas"></div>
+    <div id="rSteps"></div>
   </div>
 
   <div class="view" id="v-case">
@@ -684,6 +704,118 @@ $('tSteps').addEventListener('click', function(e){
   } else return;
   renderTutor();
   scrollToLast();
+});
+
+/* ── ROME BOARD ─────────────────────────────────────────────────────
+   The same gases and the same answer key as guided practice, read the ROME
+   way: each value goes in Low / Normal / High by its raw number, then
+   "Respiratory Opposite" (pH and CO2 point opposite ways) and "Metabolic
+   Equal" (pH and HCO3 point the same way). The two boards always give the
+   same answer — the Acid / Base board just flips CO2 when it is placed — so
+   grading reuses classify(). */
+var RW = { low:'LOW', normal:'NORMAL', high:'HIGH' };
+function rawBand(row, v){
+  if(row === 'ph') return v < 7.35 ? 'low' : v > 7.45 ? 'high' : 'normal';
+  if(row === 'co2') return v < 35 ? 'low' : v > 45 ? 'high' : 'normal';
+  return v < 22 ? 'low' : v > 26 ? 'high' : 'normal';
+}
+function rawBands(g){ return { ph:rawBand('ph', g.ph), co2:rawBand('co2', g.co2), hco3:rawBand('hco3', g.hco3) }; }
+function romeRow(row, g){
+  var v = row === 'ph' ? fmtPh(g.ph) : g[row], b = rawBand(row, g[row]);
+  var name = { ph:'pH', co2:'PaCO₂', hco3:'HCO₃' }[row], rng = { ph:['7.35', '7.45'], co2:['35', '45'], hco3:['22', '26'] }[row];
+  return name + ' ' + v + (b === 'low' ? ' is below ' + rng[0] + ' → LOW.' : b === 'high' ? ' is above ' + rng[1] + ' → HIGH.' : ' is inside ' + rng[0] + '–' + rng[1] + ' → NORMAL.');
+}
+function romePrimary(c, g){
+  var r = rawBands(g), osis = c.dir === 'acid' ? 'acidosis' : 'alkalosis';
+  if(c.primary === 'normal') return 'All three are normal — nothing to compare. <b>Normal acid–base status.</b>';
+  var p = r.ph, lead = '';
+  if(c.comp === 'full'){
+    p = g.ph < 7.40 ? 'low' : 'high';
+    lead = 'The pH is normal, so use the tie-breaker: ' + fmtPh(g.ph) + ' is ' + (p === 'low' ? 'below' : 'above') + ' 7.40, so treat it as <b>' + RW[p] + '</b>. ';
+  }
+  if(c.primary === 'mixed') return 'PaCO₂ is ' + RW[r.co2] + ' — <i>opposite</i> the pH — and HCO₃ is ' + RW[r.hco3] + ' — <i>equal</i> to it. Both ROME rules fire: the lungs and the kidneys are pushing the same way. <b>' + c.label + '.</b>';
+  if(c.primary === 'resp') return lead + 'pH ' + RW[p] + ', PaCO₂ ' + RW[r.co2] + ' — opposite directions. <b>Respiratory Opposite → respiratory ' + osis + '.</b>';
+  return lead + 'pH ' + RW[p] + ', HCO₃ ' + RW[r.hco3] + ' — the same direction. <b>Metabolic Equal → metabolic ' + osis + '.</b>';
+}
+function romeComp(c, g){
+  var r = rawBands(g), resp = c.primary === 'resp';
+  var other = resp ? 'HCO₃' : 'PaCO₂', mine = resp ? 'PaCO₂' : 'HCO₃', organ = resp ? 'the kidneys' : 'the lungs';
+  var ob = resp ? r.hco3 : r.co2;
+  if(c.comp === 'none') return other + ' is still NORMAL — ' + organ + ' haven\'t responded yet. <b>Uncompensated.</b>';
+  var s = other + ' is ' + RW[ob] + ', pointing the same way as the ' + mine + '. On this board, <b>CO₂ and HCO₃ pointing the same way = compensation</b>; pointing opposite ways = a second problem. ';
+  if(!resp) s += '(The CO₂ sits on the same side as the pH here. That is the lungs compensating, not "Metabolic Equal" — the equal rule is only for HCO₃.) ';
+  return s + (c.comp === 'partial' ? 'The pH is still out of range. <b>Partially compensated.</b>' : 'The pH is back inside 7.35–7.45. <b>Fully compensated.</b>');
+}
+var R = null, rStreak = 0;
+function newRome(){
+  var g = generate(pickType(state.mixed));
+  R = { gas:g, cls:classify(g), raw:rawBands(g), rows:{}, prim:null, comp:null, misses:0, counted:false };
+  renderRome();
+}
+function romeNeedComp(){ return R.cls.primary !== 'normal' && R.cls.primary !== 'mixed'; }
+function romeDone(){ return !!(R && R.prim && (!romeNeedComp() || R.comp)); }
+function renderRome(){
+  var g = R.gas, c = R.cls;
+  $('rStreak').textContent = rStreak > 1 ? 'Streak: ' + rStreak + ' perfect in a row' : '';
+  $('rGas').innerHTML = gasPanel(g, { title:'ROME gas' });
+  var rowsDone = ['ph','co2','hco3'].every(function(r){ return R.rows[r]; });
+  var N = romeNeedComp() ? 3 : 2;
+  var h = '<div class="step' + (rowsDone ? ' done' : '') + '"><div class="step-k">Step 1 of ' + N + '</div>' +
+          '<div class="step-q">Put each value on the board by its number.</div><div class="ttt">' +
+          '<div></div><div class="ttt-h">LOW</div><div class="ttt-h">NORMAL</div><div class="ttt-h">HIGH</div>';
+  [['ph','pH',fmtPh(g.ph)],['co2','PaCO₂',g.co2],['hco3','HCO₃',g.hco3]].forEach(function(row){
+    var ans = R.raw[row[0]], pick = R.rows[row[0]];
+    h += '<div class="ttt-l">' + row[1] + '<b>' + row[2] + '</b></div>';
+    ['low','normal','high'].forEach(function(col){
+      var cls = 'cell';
+      if(pick){ if(col === ans) cls += ' right'; else if(col === pick) cls += ' wrong'; }
+      h += '<button class="' + cls + '" data-rrow="' + row[0] + '" data-rcol="' + col + '"' + (pick ? ' disabled' : '') +
+           ' aria-label="' + row[1] + ' ' + col + '">' + (pick && col === ans ? row[1] : '') + '</button>';
+    });
+  });
+  h += '</div><ul class="why">';
+  ['ph','co2','hco3'].forEach(function(r){
+    if(R.rows[r]) h += '<li class="' + (R.rows[r] === R.raw[r] ? 'ok' : 'no') + '">' + romeRow(r, g) + '</li>';
+  });
+  h += '</ul></div>';
+  if(rowsDone){
+    h += '<div class="step' + (R.prim ? ' done' : '') + '"><div class="step-k">Step 2 of ' + N + '</div>' +
+         '<div class="step-q">CO₂ opposite the pH → respiratory. HCO₃ equal to the pH → metabolic. Name the problem.</div>' +
+         optGrid(PRIMS, 'rprim', R.prim, primKey(c));
+    if(R.prim) h += expBlock(R.prim === primKey(c), romePrimary(c, g));
+    h += '</div>';
+  }
+  if(R.prim && romeNeedComp()){
+    h += '<div class="step' + (R.comp ? ' done' : '') + '"><div class="step-k">Step 3 of 3</div>' +
+         '<div class="step-q">Is the body compensating?</div>' + optGrid(COMPS, 'rcomp', R.comp, c.comp, true);
+    if(R.comp) h += expBlock(R.comp === c.comp, romeComp(c, g));
+    h += '</div>';
+  }
+  if(romeDone()){
+    h += '<div class="answer" id="rAnswer"><div class="answer-k">' + (R.misses === 0 ? 'Perfect read' : R.misses + ' miss' + (R.misses > 1 ? 'es' : '') + ' — keep going') + '</div>' +
+         '<div class="answer-t">' + c.label + '</div><div class="answer-s">Same answer the Acid / Base board gives</div></div>' +
+         '<button class="next" id="rNext">Next gas &#x203A;</button>';
+  }
+  $('rSteps').innerHTML = h;
+}
+$('rSteps').addEventListener('click', function(e){
+  var b = e.target.closest('button');
+  if(!b || b.disabled || !R) return;
+  if(b.id === 'rNext'){ newRome(); window.scrollTo(0, 0); return; }
+  var c = R.cls;
+  if(b.dataset.rrow){ R.rows[b.dataset.rrow] = b.dataset.rcol; if(b.dataset.rcol !== R.raw[b.dataset.rrow]) R.misses++; }
+  else if(b.dataset.rprim){ R.prim = b.dataset.rprim; if(R.prim !== primKey(c)) R.misses++; }
+  else if(b.dataset.rcomp){ R.comp = b.dataset.rcomp; if(R.comp !== c.comp) R.misses++; }
+  else return;
+  if(romeDone() && !R.counted){
+    R.counted = true; state.gases++;
+    if(R.misses === 0) rStreak++; else rStreak = 0;
+    save();
+  }
+  renderRome();
+  var steps = document.querySelectorAll('#rSteps .step:not(.done), #rAnswer');
+  var el = steps[steps.length - 1];
+  if(el && el.scrollIntoView) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
 });
 
 /* ── SPEED ROUND ────────────────────────────────────────────────── */
@@ -1007,7 +1139,18 @@ var LEARN = [
       '<div class="lab">pH</div><div class="x">7.28</div><div></div><div></div>' +
       '<div class="lab">CO₂</div><div class="x">55</div><div></div><div></div>' +
       '<div class="lab">HCO₃</div><div></div><div>24</div><div></div></div>' +
-      '<p>pH and CO₂ share the Acid column, so the lungs are the problem. <b>Respiratory acidosis.</b></p></div>',
+      '<p>pH and CO₂ share the Acid column, so the lungs are the problem. <b>Respiratory acidosis.</b></p></div>' +
+      '<div class="blk"><h3>Learned ROME? Same rule, different board.</h3>' +
+      '<p><b>R</b>espiratory <b>O</b>pposite, <b>M</b>etabolic <b>E</b>qual. Sort the values by their number — Low · Normal · High — and compare each one with the pH:</p><ul class="plain">' +
+      '<li><b>Respiratory:</b> pH and CO₂ point <i>opposite</i> ways.</li>' +
+      '<li><b>Metabolic:</b> pH and HCO₃ point the <i>same</i> way. "Equal" means same direction, not the same number.</li></ul>' +
+      '<div class="mini">' +
+      '<div class="h"></div><div class="h">LOW</div><div class="h">NORMAL</div><div class="h">HIGH</div>' +
+      '<div class="lab">pH</div><div class="x">7.28</div><div></div><div></div>' +
+      '<div class="lab">CO₂</div><div></div><div></div><div class="x">55</div>' +
+      '<div class="lab">HCO₃</div><div></div><div>24</div><div></div></div>' +
+      '<p>pH low, CO₂ high — opposite. <b>Respiratory acidosis</b>, same answer. The Acid / Base board just flips CO₂ when you place it, so the problem always lines up. Pick one board and stay with it: mixing the column labels is where misreads start.</p>' +
+      '<button class="next ghost" data-go="rome">Practice the ROME board &#x203A;</button></div>',
     check:{ q:'pH 7.50 · PaCO₂ 40 · HCO₃ 33. What\'s the problem?', o:['Metabolic alkalosis','Respiratory alkalosis','Metabolic acidosis','Respiratory acidosis'], a:0,
       e:'pH base, CO₂ normal, HCO₃ base. HCO₃ lines up with the pH → metabolic alkalosis.' } },
 
@@ -1112,6 +1255,7 @@ function updateHome(){
 function go(where){
   if(where === 'learn'){ show('v-learn'); renderLearn(); }
   else if(where === 'tutor'){ show('v-tutor'); if(!T || finished()) newGas(); }
+  else if(where === 'rome'){ show('v-rome'); if(!R || romeDone()) newRome(); }
   else if(where === 'speed'){ show('v-speed'); startSpeed(); }
   else if(where === 'cases'){ show('v-cases'); renderCaseList(); }
 }
