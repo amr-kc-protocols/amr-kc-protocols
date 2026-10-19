@@ -2,9 +2,9 @@
   "name": "amrkc-tests",
   "private": true,
   "type": "module",
-  "description": "Tests for the Kansas Class Builder, the Supabase sync layer, the health forms (including the TB risk assessment), the training pages, the AEMT series engine, the simulators and the homepage",
+  "description": "Tests for the Kansas Class Builder, the Supabase sync layer, the health forms (including the TB risk assessment), the training pages, the AEMT series engine, the simulators, the homepage and the Kansas license renewal guide",
   "scripts": {
-    "test": "node kcb.test.mjs && node backend.test.mjs && node sync.e2e.mjs && node fitform.test.mjs && node alaris.test.mjs && node medmath.test.mjs && node tbform.test.mjs && node aemt.test.mjs && node homepage.test.mjs && node lifepak.test.mjs && node formulary.test.mjs && node refresher.test.mjs && node chartrx.test.mjs && node ventpeds.test.mjs && node abg.test.mjs",
+    "test": "node kcb.test.mjs && node backend.test.mjs && node sync.e2e.mjs && node fitform.test.mjs && node alaris.test.mjs && node medmath.test.mjs && node tbform.test.mjs && node aemt.test.mjs && node homepage.test.mjs && node lifepak.test.mjs && node formulary.test.mjs && node refresher.test.mjs && node chartrx.test.mjs && node ventpeds.test.mjs && node abg.test.mjs && node relicensure.test.mjs",
     "test:kcb": "node kcb.test.mjs",
     "test:backend": "node backend.test.mjs",
     "test:sync": "node sync.e2e.mjs",
@@ -19,7 +19,8 @@
     "test:refresher": "node refresher.test.mjs",
     "test:chartrx": "node chartrx.test.mjs",
     "test:ventpeds": "node ventpeds.test.mjs",
-    "test:abg": "node abg.test.mjs"
+    "test:abg": "node abg.test.mjs",
+    "test:relicensure": "node relicensure.test.mjs"
   },
   "devDependencies": {
     "axe-core": "^4.14.0",
