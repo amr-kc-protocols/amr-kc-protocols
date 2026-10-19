@@ -88,6 +88,32 @@ for (const w of [320, 390, 1024]) {
   ok('R4 precached for offline', sw.includes("'./kansas-relicensure.html'"));
   ok('R4 cache version bumped past v45', /amrkc-2026-v(?:4[6-9]|[5-9]\d)/.test(sw)); }
 
+/* R5 — the home renewal bar: on Aug 1 – Dec 31, counts down to Dec 1,
+   turns late after it, and is gone the rest of the year */
+{ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+  const p = await ctx.newPage();
+  await p.goto(ORIGIN + '/index.html');
+  const gate = p.locator('text=I Understand');
+  if (await gate.count()) await gate.first().click();
+  await p.waitForSelector('.mast');
+  const card = (y, m, d) => p.evaluate(([y, m, d]) => window.renewalCard(new Date(y, m - 1, d, 12)), [y, m, d]);
+  ok('R5 hidden in July', (await card(2026, 7, 31)) === '');
+  ok('R5 hidden in January', (await card(2027, 1, 1)) === '');
+  ok('R5 shows Aug 1', /due Dec 1/.test(await card(2026, 8, 1)));
+  const oct = await card(2026, 10, 19);
+  ok('R5 counts down to Dec 1', /<b>43<\/b>/.test(oct) && !/late/.test(oct), oct);
+  ok('R5 due today on Dec 1', /due today/.test(await card(2026, 12, 1)));
+  const dec2 = await card(2026, 12, 2);
+  ok('R5 late from Dec 2', /class="rnw late"/.test(dec2) && /<b>29<\/b>/.test(dec2), dec2);
+  ok('R5 links to the guide', /href="kansas-relicensure\.html"/.test(oct));
+  // Rendered on the real home screen, above everything but the masthead.
+  await p.evaluate(() => { const c = window.renewalCard(new Date(2026, 9, 19, 12));
+    document.querySelector('.mast').insertAdjacentHTML('afterend', c.replace('class="rnw"', 'class="rnw" data-probe'));
+  });
+  const box = await p.locator('[data-probe]').boundingBox();
+  ok('R5 the bar stays two lines tall', box && box.height <= 80, box && Math.round(box.height) + 'px');
+  await ctx.close(); }
+
 await browser.close(); srv.close();
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) { console.log(fails.map(f => '  - ' + f).join('\n')); process.exit(1); }
