@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v45';
+const CACHE = 'amrkc-2026-v46';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -20,6 +20,8 @@ const ASSETS = [
   './abg-practice.html',
   // Chart Rx — played between calls, often with no signal. The shell and the
   // question bank both have to be here, or a round cannot start offline.
+  // Kansas license renewal guide — read on a phone, often far from signal
+  './kansas-relicensure.html',
   './chart-rx.html', './chart-rx/questions.json', './chart-rx/aemt-scope.json',
   // Certificates are made on the device, so the PDF library has to be here offline too
   './pdf-lib.min.js',

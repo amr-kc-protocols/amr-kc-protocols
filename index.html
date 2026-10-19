@@ -664,6 +664,24 @@ text-shadow:0 2px 12px rgba(0,0,0,0.18)}
 vector-effect:non-scaling-stroke;animation:mastpulse 3.6s ease-in-out infinite}
 @keyframes mastpulse{0%,100%{opacity:.35}50%{opacity:.85}}
 @media (prefers-reduced-motion:reduce){.mast-ecg path{animation:none;opacity:.5}}
+/* Kansas license renewal bar. Shown Aug 1 – Dec 31 every year (some crew
+   expire every December). Counts down to the Dec 1 regular-fee deadline,
+   then turns red for the late-fee window. Kept to two short lines so the
+   shift tools below still fit on the first phone screen. */
+.rnw{display:flex;align-items:center;gap:11px;margin:0 12px 10px;padding:10px 14px;text-decoration:none;color:inherit;
+background:var(--info-bg,#eaf4fc);border:1px solid #bcd6f2;border-left:4px solid var(--teal2);border-radius:12px}
+.rnw.late{background:#fdecec;border-color:#f3c3c0;border-left-color:#c0392b}
+.rnw-body{flex:1;min-width:0}
+.rnw-title{display:block;font-size:14.5px;font-weight:700;color:var(--white);line-height:1.3}
+.rnw-sub{display:block;font-size:12px;color:var(--gray);line-height:1.4;margin-top:1px}
+.rnw-days{flex-shrink:0;text-align:center;font-family:var(--mono);font-weight:700;color:var(--teal2);line-height:1}
+.rnw.late .rnw-days{color:#c0392b}
+.rnw-days b{display:block;font-size:22px}
+.rnw-days small{font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase}
+.rnw-arr{flex-shrink:0;color:var(--gray);font-size:20px}
+/* With the renewal bar up, the refresher card drops its separate button
+   (the whole card is still the link) so the shift tools stay on screen. */
+.rnw + .rfr .rfr-go{display:none}
 /* Refresher sign-up banner. Sits between the masthead and the featured
    training, and takes itself down after the last session — see REFRESHER. */
 .rfr{display:block;margin:0 12px 12px;padding:14px 16px;text-decoration:none;color:inherit;
@@ -1204,6 +1222,33 @@ function refresherRow(now){
 }
 if(typeof window !== 'undefined') window.refresherCard = refresherCard;
 
+// Kansas license renewal bar — see the .rnw styles. `now` is injectable
+// for tests. Returns '' outside Aug 1 – Dec 31.
+function renewalCard(now){
+  now = now || new Date();
+  var y = now.getFullYear(), m = now.getMonth();
+  if(m < 7) return '';
+  var today = new Date(y, m, now.getDate());
+  var due = new Date(y, 11, 1), exp = new Date(y, 11, 31);
+  var late = today > due;
+  var days = Math.round(((late ? exp : due) - today) / 86400000);
+  var title, sub;
+  if(!late){
+    title = days === 0 ? 'Kansas license renewal is due today' : 'Kansas license renewal due Dec 1';
+    sub = 'Expiring this year? Steps, CE hours &amp; fees';
+  } else {
+    title = 'Late fee now &mdash; renew by Dec 31';
+    sub = 'License expires after Dec 31. Tap for steps';
+  }
+  var h = '<a class="rnw' + (late ? ' late' : '') + '" href="kansas-relicensure.html">';
+  h += '<span class="rnw-body"><span class="rnw-title">' + title + '</span>';
+  h += '<span class="rnw-sub">' + sub + '</span></span>';
+  if(days > 0) h += '<span class="rnw-days"><b>' + days + '</b><small>' + (days === 1 ? 'day' : 'days') + '</small></span>';
+  h += '<span class="rnw-arr" aria-hidden="true">&#x203A;</span></a>';
+  return h;
+}
+if(typeof window !== 'undefined') window.renewalCard = renewalCard;
+
 function renderHome(){
   var c = $('lv');
   var h = '';
@@ -1225,6 +1270,7 @@ function renderHome(){
      + 'H710 l14 -18 l12 32 l11 -24 l9 10 H990 l14 -18 l12 32 l11 -24 l9 10 H1200"/></svg>';
   h += '</div>';
 
+  h += renewalCard();
   h += refresherCard();
 
   // The tab bar already carries doses, hospital meds, the formulary, the
@@ -2803,6 +2849,8 @@ function renderMore(){
   h += refresherRow();
   h += moreCard({href:'https://gmrlearning.com/kansas/', ext:true, ac:'ac-red', ico:'i-heart', title:'AHA Classes',
                  sub:'BLS, ACLS &amp; PALS sign-up through GMR Learning'});
+  h += moreCard({href:'kansas-relicensure.html', ac:'ac-blue', ico:'i-calendar', title:'Kansas License Renewal',
+                 sub:'Renew your EMT, AEMT or Paramedic license &mdash; dates, CE hours, fees &amp; CE questions'});
   h += moreCard({href:'kansas-class-builder.html', ac:'ac-lime', ico:'i-cap', title:'Kansas Class Builder',
                  sub:'Generate a print-ready Kansas CE submission packet'});
   h += '</div>';

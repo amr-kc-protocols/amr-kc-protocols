@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<!--
+  Kansas EMS relicensure guide — EMT, AEMT, Paramedic.
+
+  Written for a first-time renewer: short sentences, one idea per line.
+  Every rule here comes from the Kansas Board of EMS (KBEMS) or the Kansas
+  Administrative Regulations (K.A.R. 109). Main sources:
+    - K.A.R. 109-6-2  renewal: expiry date, Aug 1 – Dec 1 online window
+                      (amended, effective 11/1/2024)
+    - K.A.R. 109-7-1  fees (amended, effective 11/1/2024)
+    - K.A.R. 109-5-1  CE rules: 12 h/day cap, keep records 3 years
+    - K.A.R. 109-5-5  retroactive CE approval, 180 days
+    - K.A.R. 109-15-1 reinstating an expired certificate
+    - KBEMS Kansas Continuing Education Plan (Feb 2019): core/flex hours
+    - KBEMS FAQ, "How to Check and Enter CE", Retro-Active CE Approval,
+      CE Audit Policy (2017)
+  Last checked: October 2026. Re-check fees and dates each year before
+  August 1, when the renewal window opens.
+
+  Self-contained so it can be copied as-is between the AMR KC and Linn County
+  sites. No storage, no network calls; works offline once cached.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#173a68">
+<title>Kansas License Renewal</title>
+<meta name="description" content="Plain-language guide to renewing a Kansas EMT, AEMT or Paramedic certificate: dates, CE hours, fees, steps and CE questions.">
+<style>
+:root{
+  --bg:#ffffff;--card:#f4f6f9;--line:#dfe4eb;--ink:#152238;--muted:#5d6876;
+  --brand:#173a68;--link:#1b5fbf;--ok:#15703a;--ok-bg:#e8f7ee;
+  --warn:#8a4b06;--warn-bg:#fdf1de;--bad:#b42318;--bad-bg:#fdecec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1720;--card:#18222e;--line:#2a3746;--ink:#e8edf3;--muted:#9aa7b6;
+    --brand:#8fb6ec;--link:#8fb6ec;--ok:#7fd6a0;--ok-bg:#15301f;
+    --warn:#f2c879;--warn-bg:#3a2a10;--bad:#f59a90;--bad-bg:#3a1714;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1720;--card:#18222e;--line:#2a3746;--ink:#e8edf3;--muted:#9aa7b6;
+  --brand:#8fb6ec;--link:#8fb6ec;--ok:#7fd6a0;--ok-bg:#15301f;
+  --warn:#f2c879;--warn-bg:#3a2a10;--bad:#f59a90;--bad-bg:#3a1714;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-bottom:48px}
+a{color:var(--link);font-weight:600}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+.back{display:inline-block;margin:14px 0 0;font-size:14px;text-decoration:none}
+header{padding:10px 0 18px;border-bottom:1px solid var(--line)}
+h1{font-size:26px;line-height:1.2;margin-top:6px}
+.sub{color:var(--muted);font-size:15px;margin-top:6px}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+nav.toc a{font-size:13px;padding:6px 11px;border:1px solid var(--line);border-radius:20px;text-decoration:none;background:var(--card)}
+h2{font-size:21px;line-height:1.3;margin:30px 0 10px;scroll-margin-top:12px}
+h3{font-size:17px;margin:18px 0 6px}
+p{margin:0 0 10px}
+ul,ol{margin:0 0 10px 22px}
+li{margin-bottom:6px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.box.ok{background:var(--ok-bg);border-color:transparent;border-left:4px solid var(--ok)}
+.box.warn{background:var(--warn-bg);border-color:transparent;border-left:4px solid var(--warn)}
+.box.bad{background:var(--bad-bg);border-color:transparent;border-left:4px solid var(--bad)}
+.box p:last-child,.box ul:last-child{margin-bottom:0}
+.big{font-size:18px;font-weight:700}
+.tbl{width:100%;border-collapse:collapse;font-size:15px;margin:8px 0 12px}
+.tbl th,.tbl td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-size:13px;color:var(--muted);font-weight:600}
+.tbl td.n,.tbl th.n{text-align:center}
+.tbl tr.tot td{font-weight:700;border-top:2px solid var(--ink)}
+.steps{counter-reset:s;list-style:none;margin-left:0}
+.steps>li{counter-increment:s;position:relative;padding-left:40px;margin-bottom:14px}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--bg);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+summary{cursor:pointer;padding:13px 14px;font-weight:600;list-style:none;position:relative;padding-right:34px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:14px;top:10px;font-size:20px;color:var(--muted)}
+details[open] summary::after{content:"\2212"}
+details>div{padding:0 14px 12px}
+.word{font-weight:700}
+.src{font-size:13px;color:var(--muted)}
+footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media print{.back,nav.toc{display:none} details{border:none} details>div{display:block}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">&larr; Back to home</a>
+
+<header>
+  <h1>How to renew your Kansas EMS license</h1>
+  <p class="sub">For EMTs, AEMTs and Paramedics. Plain steps for first-timers.</p>
+  <nav class="toc" aria-label="On this page">
+    <a href="#short">Short version</a>
+    <a href="#dates">Dates</a>
+    <a href="#hours">CE hours</a>
+    <a href="#steps">Steps</a>
+    <a href="#fees">Fees</a>
+    <a href="#late">Missed it?</a>
+    <a href="#faq">CE questions</a>
+    <a href="#links">Links</a>
+  </nav>
+</header>
+
+<h2 id="short">The short version</h2>
+<div class="box ok">
+  <ol>
+    <li>Get your training hours (called <span class="word">CE</span>, continuing education) before your license runs out.</li>
+    <li>Put every CE certificate into the <a href="https://www.kemsis.org/lms/public/portal#/login" target="_blank" rel="noopener">KBEMS online portal</a>.</li>
+    <li>Fill out the renewal and pay in the portal <b>between August 1 and December 1</b> of the year your license runs out.</li>
+  </ol>
+</div>
+<p><b>KBEMS</b> is the Kansas Board of Emergency Medical Services. They issue your license. In Kansas the license is called a <b>certificate</b>, so you will see both words.</p>
+<p>Renewing with Kansas is <b>not</b> the same as renewing with the <b>National Registry (NREMT)</b>. They are two separate things with their own rules. This guide is only about Kansas.</p>
+
+<h2 id="dates">Know your dates</h2>
+<div class="box">
+  <p class="big">Your license runs out on December 31.</p>
+  <p>It lasts until December 31 of the <b>second full year</b> after it was issued.</p>
+  <p><b>Example:</b> licensed in June 2025 &rarr; the 2 full years are 2026 and 2027 &rarr; it runs out <b>December 31, 2027</b>. That means your first license can last a bit more than 2 years.</p>
+  <p>Not sure? Log in to the portal. Your expiration date is shown there and on your card.</p>
+</div>
+<table class="tbl">
+  <tr><th>Date (year you expire)</th><th>What it means</th></tr>
+  <tr><td><b>August 1</b></td><td>Renewal opens in the portal.</td></tr>
+  <tr><td><b>December 1</b></td><td>Last day for the regular fee. Submit by now, with all CE done, and you get your new card before the old one runs out.</td></tr>
+  <tr><td><b>Dec 2 &ndash; Dec 31</b></td><td>You can still renew, but the fee doubles.</td></tr>
+  <tr><td><b>After Dec 31</b></td><td>Your license has expired. <b>You cannot work as an EMT/AEMT/Paramedic until it is fixed.</b> See <a href="#late">Missed it?</a></td></tr>
+</table>
+
+<h2 id="hours">How many CE hours you need</h2>
+<p>You need these hours <b>once every 2-year cycle</b>. Each level has <b>core</b> hours (set topics) and <b>flex</b> hours (any approved EMS topic).</p>
+<table class="tbl">
+  <tr><th>Topic</th><th class="n">EMT</th><th class="n">AEMT</th><th class="n">Paramedic</th></tr>
+  <tr><td>Airway, breathing &amp; ventilation</td><td class="n">4</td><td class="n">4</td><td class="n">4</td></tr>
+  <tr><td>Cardiovascular (heart)</td><td class="n">6</td><td class="n">8</td><td class="n">10</td></tr>
+  <tr><td>Medical</td><td class="n">6</td><td class="n">7</td><td class="n">7</td></tr>
+  <tr><td>Operations</td><td class="n">2</td><td class="n">3</td><td class="n">5</td></tr>
+  <tr><td>Trauma</td><td class="n">2</td><td class="n">3</td><td class="n">4</td></tr>
+  <tr><td>Pediatrics (kids)</td><td class="n">1</td><td class="n">2</td><td class="n">2</td></tr>
+  <tr><td><b>Core total</b></td><td class="n"><b>21</b></td><td class="n"><b>27</b></td><td class="n"><b>32</b></td></tr>
+  <tr><td>Flex (any approved topic)</td><td class="n">7</td><td class="n">17</td><td class="n">28</td></tr>
+  <tr class="tot"><td>Total hours</td><td class="n">28</td><td class="n">44</td><td class="n">60</td></tr>
+</table>
+<div class="box warn">
+  <p><b>Watch out:</b> some CE websites say Kansas EMTs need 40 hours and AEMTs need 50. Those are <b>National Registry</b> numbers. Kansas needs <b>28 (EMT), 44 (AEMT), 60 (Paramedic)</b>.</p>
+</div>
+<ul>
+  <li><b>Fill every core topic.</b> Extra hours in one topic do not fill a different topic.</li>
+  <li>Extra <b>core</b> hours do count toward <b>flex</b>.</li>
+  <li>You can earn the hours any time in your cycle, even all in one year.</li>
+  <li>You can claim at most <b>12 hours in one day</b>.</li>
+</ul>
+
+<h2 id="steps">Step by step</h2>
+<ol class="steps">
+  <li><b>Log in to the portal.</b> Go to the <a href="https://www.kemsis.org/lms/public/portal#/login" target="_blank" rel="noopener">KBEMS licensing portal</a>. First time? Create an account. Every Kansas-certified EMS provider is required to have one. (<a href="https://ksbems.org/html%20pages/pdf/CreateAccount.pdf" target="_blank" rel="noopener">How to create an account, PDF</a>)</li>
+  <li><b>Check your expiration date and your CE.</b> The portal shows the CE hours already on file. Some Kansas classes add hours for you, but don't count on it. Compare what's there to the hours table below.</li>
+  <li><b>Take the CE you still need.</b> Use approved courses only. See <a href="#faq">CE questions</a>.</li>
+  <li><b>Add any missing hours.</b> Pick the topic, tap the <b>+</b> sign, enter the course and upload the certificate. (<a href="https://ksbems.org/html%20pages/pdf/How%20to%20Check%20and%20Enter%20Continuing%20Education.pdf" target="_blank" rel="noopener">KBEMS guide: How to Check and Enter CE, PDF</a>)</li>
+  <li><b>Fill out the renewal application</b> in the portal between <b>August 1 and December 1</b>. Kansas does not take paper renewals.</li>
+  <li><b>Pay the fee</b> in the portal. See <a href="#fees">Fees</a>.</li>
+  <li><b>Watch your email and the portal.</b> Once approved, you can print your new card from the portal.</li>
+  <li><b>Keep your CE certificates for at least 3 years.</b> KBEMS can audit you. See <a href="#audit">Audits</a>.</li>
+</ol>
+
+<h2 id="fees">Fees</h2>
+<table class="tbl">
+  <tr><th>Level</th><th class="n">By Dec 1</th><th class="n">Dec 2&ndash;31</th><th class="n">After it expires</th></tr>
+  <tr><td>EMT</td><td class="n">$30</td><td class="n">$60</td><td class="n">$120</td></tr>
+  <tr><td>AEMT</td><td class="n">$30</td><td class="n">$60</td><td class="n">$120</td></tr>
+  <tr><td>Paramedic</td><td class="n">$50</td><td class="n">$100</td><td class="n">$200</td></tr>
+</table>
+<p class="src">From K.A.R. 109-7-1, in effect since November 1, 2024. Fees can change. The portal shows the amount you actually owe.</p>
+
+<h2 id="late">Missed the deadline?</h2>
+<div class="box bad">
+  <p><b>Once your license expires, stop working at that level right away.</b> Tell your supervisor. Don't run calls until KBEMS reinstates you.</p>
+</div>
+<h3>Expired less than 2 years ago</h3>
+<ul>
+  <li>Log in to the portal and fill out the <b>Reinstatement Application for Expired Provider Certification</b>.</li>
+  <li>Pay the reinstatement fee ($120 EMT/AEMT, $200 Paramedic).</li>
+  <li>Show your completed CE.</li>
+</ul>
+<h3>Expired more than 2 years ago</h3>
+<ul>
+  <li><b>EMT and AEMT:</b> you have to take the whole course again.</li>
+  <li><b>Paramedic:</b> the rules are different. Call KBEMS at <a href="tel:+17852967296">785-296-7296</a> before you do anything.</li>
+</ul>
+<p class="src">From K.A.R. 109-15-1 and the KBEMS FAQ.</p>
+
+<h2 id="faq">CE questions</h2>
+
+<details>
+  <summary>What counts as CE?</summary>
+  <div>
+    <p>Training that is <b>approved</b> for EMS credit. A course counts if it is approved by one of these:</p>
+    <ul>
+      <li><b>Kansas</b> (a KBEMS-approved class or provider)</li>
+      <li><b>CAPCE</b> (see the next question)</li>
+      <li><b>Another state's EMS office</b></li>
+    </ul>
+    <p>If none of these approved it, it does not count, unless you get it approved after the fact. See <a href="#retro">My course wasn't approved</a>.</p>
+  </div>
+</details>
+
+<details>
+  <summary>What is CAPCE?</summary>
+  <div>
+    <p><b>CAPCE</b> (the Commission on Accreditation for Pre-Hospital Continuing Education) is the national group that approves EMS CE. Most online EMS CE companies are CAPCE-approved.</p>
+    <p><b>Rule for online and self-paced courses:</b> Kansas only accepts them if they are CAPCE-approved. <b>The certificate itself must say it is CAPCE-approved.</b> If it doesn't, Kansas won't accept it.</p>
+    <p><b>Check before you pay.</b> Look for &ldquo;CAPCE&rdquo; and a course or provider number on the course page. You can also look up providers on <a href="https://www.capce.org/" target="_blank" rel="noopener">capce.org</a>.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Can I use hours from another state?</summary>
+  <div>
+    <p><b>Yes.</b> A course approved by another state's EMS office can count in Kansas.</p>
+    <ol>
+      <li>In the portal, go to the topic and tap <b>+</b>.</li>
+      <li>Choose <b>KS-781 Other State CE</b>.</li>
+      <li>Enter the course details and <b>upload the certificate</b>.</li>
+    </ol>
+    <p>The certificate should show which state approved the course. If it doesn't, ask the course provider for proof before you enter it.</p>
+    <p>CAPCE-approved courses from anywhere in the country count too. They don't need to be from Kansas.</p>
+  </div>
+</details>
+
+<details id="retro">
+  <summary>My course wasn't approved. Can I still get credit?</summary>
+  <div>
+    <p>Maybe. Kansas has a <b>retroactive approval</b> process:</p>
+    <ul>
+      <li>You must apply within <b>180 days</b> of finishing the course.</li>
+      <li>Apply in the portal. Paper forms are not accepted.</li>
+      <li>Upload your certificate (or college transcript) and the <b>course objectives</b>.</li>
+      <li>You name a <b>Medical Director</b> who approves the course for credit.</li>
+      <li>If KBEMS finds a problem, you have <b>15 days</b> to fix it or the request is dropped.</li>
+    </ul>
+    <p><b>Wait for approval before entering the hours.</b> Once approved, enter them under <b>KS-9999</b>.</p>
+    <p><a href="https://ksbems.org/html%20pages/pdf/RetroActiveCEApproval.pdf" target="_blank" rel="noopener">KBEMS: Retro-Active Approval for CE (PDF)</a></p>
+  </div>
+</details>
+
+<details>
+  <summary>Do ACLS, PALS, PHTLS or BLS count?</summary>
+  <div>
+    <p>They count only when the class is approved for EMS CE (Kansas, CAPCE or another state), the same as any other course. Many are, but not all. Check the certificate or ask your training officer before you count on it.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Is there a limit on online hours?</summary>
+  <div>
+    <p>We could not find a Kansas limit on online hours in the rules. Every online course still has to be CAPCE-approved.</p>
+    <p>If you also keep your <b>National Registry</b> card, NREMT has its own limits on self-paced online hours. Those are NREMT rules, not Kansas rules.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Can the same hours count for Kansas and the National Registry?</summary>
+  <div>
+    <p>Often yes, if the course is approved for both. But the two renewals are separate: different hour totals, different deadlines, different websites. Renewing one does <b>not</b> renew the other.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Can I do all my hours at once?</summary>
+  <div>
+    <p>Yes, any time during your 2-year cycle. But you can only claim <b>12 hours per day</b>. Don't leave it to November. Classes fill up and the December 1 deadline comes fast.</p>
+  </div>
+</details>
+
+<details>
+  <summary>I took a class but the hours aren't in the portal.</summary>
+  <div>
+    <p>Not every class sends hours to the portal for you. Online and out-of-state courses almost never do. Add them yourself with the certificate (Step 4 above). If a Kansas class still isn't showing after a few weeks, ask the class sponsor.</p>
+  </div>
+</details>
+
+<details id="audit">
+  <summary>What is a CE audit?</summary>
+  <div>
+    <p>KBEMS can check that your CE hours are real. You might be picked <b>at random</b>, or because of a <b>complaint</b>.</p>
+    <p>If you are picked, you get a letter asking for proof of your CE.</p>
+    <ul>
+      <li>Keep every CE certificate for <b>at least 3 years</b>.</li>
+      <li>Upload certificates to the portal as you go. That is the easiest way to keep them.</li>
+      <li>A good certificate shows: your name, course title, date, hours, provider name, and the approval (CAPCE number or state approval).</li>
+    </ul>
+    <p>Hours you can't prove can be taken away, and that can put your license at risk.</p>
+  </div>
+</details>
+
+<details>
+  <summary>What if my hours are short on December 1?</summary>
+  <div>
+    <p>Finish the hours and renew before <b>December 31</b>. You pay the late fee, but your license doesn't expire. After December 31 you need the reinstatement process. See <a href="#late">Missed it?</a></p>
+  </div>
+</details>
+
+<details>
+  <summary>Who do I call with questions?</summary>
+  <div>
+    <p>Start with your <b>training officer or supervisor</b>.</p>
+    <p>For your own license, call <b>KBEMS</b> at <a href="tel:+17852967296">785-296-7296</a>, or visit <a href="https://www.ksbems.org/" target="_blank" rel="noopener">ksbems.org</a>.</p>
+  </div>
+</details>
+
+<h2 id="links">Links</h2>
+<ul>
+  <li><a href="https://www.kemsis.org/lms/public/portal#/login" target="_blank" rel="noopener">KBEMS licensing portal</a>: renew, enter CE, print your card</li>
+  <li><a href="https://www.ksbems.org/" target="_blank" rel="noopener">Kansas Board of EMS (ksbems.org)</a></li>
+  <li><a href="https://www.ksbems.org/ems/?page_id=48" target="_blank" rel="noopener">KBEMS FAQ</a></li>
+  <li><a href="https://ksbems.org/html%20pages/Kansas%20Continuing%20Education%20plan.pdf" target="_blank" rel="noopener">Kansas Continuing Education Plan (PDF)</a>: hours by topic</li>
+  <li><a href="https://ksbems.org/html%20pages/pdf/How%20to%20Check%20and%20Enter%20Continuing%20Education.pdf" target="_blank" rel="noopener">How to Check and Enter CE (PDF)</a></li>
+  <li><a href="https://ksbems.org/html%20pages/pdf/RetroActiveCEApproval.pdf" target="_blank" rel="noopener">Retro-Active Approval for CE (PDF)</a></li>
+  <li><a href="https://ksbems.org/html%20pages/pdf/CreateAccount.pdf" target="_blank" rel="noopener">How to create a portal account (PDF)</a></li>
+  <li><a href="https://www.capce.org/" target="_blank" rel="noopener">CAPCE</a>: check if a CE provider is approved</li>
+  <li><a href="https://www.ksbems.org/html%20pages/KAR%20109%20EMS.pdf" target="_blank" rel="noopener">Kansas EMS regulations, K.A.R. 109 (PDF)</a></li>
+</ul>
+
+<footer>
+  <p><b>Last checked: October 2026.</b> Rules and fees can change. If this page and KBEMS don't match, KBEMS is right.</p>
+  <p>Sources: K.A.R. 109-5-1, 109-5-5, 109-6-2, 109-7-1, 109-15-1; KBEMS Kansas Continuing Education Plan (2019); KBEMS FAQ, CE entry and retroactive approval guides; KBEMS CE Audit Policy (2017).</p>
+</footer>
+</div>
+</body>
+</html>
