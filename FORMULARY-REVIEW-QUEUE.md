@@ -1,6 +1,6 @@
 # Formulary Review Queue
 
-Audit of the 21-drug AMR Kansas City formulary as stated in the Field Guide
+Audit of the AMR Kansas City formulary (21 drugs at audit time; glucagon added as III-22 since) as stated in the Field Guide
 (`index.html` → `D.formulary`) and the formulary card deck (`flashcards.html`),
 against the **Kansas Board of EMS Approved Medication List, dated June 4, 2021**
 (EMR / EMT / AEMT).
@@ -44,14 +44,16 @@ Nothing below was changed. Each is a place where our stated scope and the state
 list do not line up, and the resolution depends on what AMR KC actually carries
 and what the Medical Director intends.
 
-1. **Glucagon is described as Paramedic scope, and the state puts it at EMR.**
-   The D10 card (III-7) advises: *"If no IV access and patient cannot swallow:
-   glucagon 1 mg IM (PM scope)."* The state list authorizes glucagon `IM; IN` at
-   **EMR, EMT and AEMT** — every level. Glucagon is also not one of the 21
-   carried drugs. So either it is not carried (and the note should say that
-   rather than assign it a scope) or it is carried and the scope label is wrong.
-   This is the one item in the audit where our text and the state list directly
-   contradict each other.
+1. **Glucagon — now carried (III-22), Paramedic scope. Scope question still open.**
+   Glucagon has been added to the formulary as III-22, tagged PM, which matches
+   the protocol's own standing orders (VIII-A5 and II-26 put glucagon 1 mg IM/IN
+   in the PM column; II-28 and VIII-A10 give 3–5 mg IV/IM for beta blocker / CCB
+   toxicity). The state list authorizes glucagon `IM; IN` at **EMR, EMT and
+   AEMT**, so PM-only is *narrower than Kansas allows* — confirm that is the
+   intended local restriction. Also open: the protocol gives **no pediatric
+   dose** (the card says "contact DMO"), and "1 mg IN" should be checked against
+   the product actually stocked — the FDA-approved nasal product (Baqsimi) is a
+   fixed 3 mg dose.
 
 2. **Atropine is tagged AEMT+, but antidote-by-auto-injector is an EMT route.**
    III-5 notes *"AEMT authorization: autoinjector route only in OPG context."*
@@ -81,7 +83,7 @@ and what the Medical Director intends.
 
 6. **TXA — state-approved for AEMT, treated here as Paramedic.**
    State: `Tranexamic Acid (TXA)` at **AEMT `IV/IO`**. Protocol §IV-C6 groups TXA
-   with blood products under Paramedic-managed. TXA is not carried in the 21-drug
+   with blood products under Paramedic-managed. TXA is not carried in the ambulance
    formulary, so this only bites on hospital-supplied infusions during IFT — but
    §IV's own stated principle is that an AEMT may monitor an infusion *"when the
    medication corresponds to a drug within their KBEMS-authorized scope,"* and

@@ -245,9 +245,9 @@ border:1px solid var(--border)}
     <div class="sc-icon">&#x1F48A;</div>
     <div class="sc-label">Ambulance Formulary</div>
     <div class="sc-title">AMR KC Carried Medications</div>
-    <div class="sc-desc">The 21 medications stocked on AMR Kansas City ambulances. Mechanism, dosing, contraindications, and clinical notes by scope level.</div>
+    <div class="sc-desc">The 22 medications stocked on AMR Kansas City ambulances. Mechanism, dosing, contraindications, and clinical notes by scope level.</div>
     <div class="sc-meta">
-      <span class="sc-tag">21 Cards</span>
+      <span class="sc-tag">22 Cards</span>
       <span class="sc-tag">Scope Tiered</span>
       <span class="sc-tag">Tap to Flip</span>
     </div>
@@ -257,7 +257,7 @@ border:1px solid var(--border)}
       <div class="sf-btn" data-scope="aemt">AEMT+</div>
       <div class="sf-btn" data-scope="pm">PM Only</div>
     </div>
-    <div class="sf-hint" id="scope-hint">Showing all 21 cards</div>
+    <div class="sf-hint" id="scope-hint">Showing all 22 cards</div>
     <button class="start-btn" id="start-amb">Start Ambulance Stack &rarr;</button>
   </div>
 </div>
@@ -369,7 +369,7 @@ var AMB = [
 
   {num:'III-7',name:'Dextrose 10% (D10W)',scope:'aemt',mechanism:'Hypertonic glucose solution. Raises blood glucose rapidly.',
    doses:[{route:'Adult IV',dose:'100–250 mL IV. Recheck glucose in 10 minutes.'},{route:'Pediatric IV/IO',dose:'2–4 mL/kg IV/IO. Recheck BG 5 min after.'}],
-   notes:['D10% is the ONLY dextrose concentration carried by AMR KC — no D50%.','If no IV access and patient cannot swallow: glucagon 1 mg IM (PM scope).'],
+   notes:['D10% is the ONLY dextrose concentration carried by AMR KC — no D50%.','If no IV access and patient cannot swallow: glucagon 1 mg IM or IN (PM scope — see III-22).'],
    contra:['Hyperglycemia','Do not give in ischemic stroke with normal glucose']},
 
   {num:'III-8',name:'Epinephrine 1:1,000 (IM)',scope:'all',mechanism:'Alpha and beta adrenergic agonist. Reverses vasodilation, bronchospasm, and angioedema in anaphylaxis.',
@@ -441,6 +441,11 @@ var AMB = [
    doses:[{route:'Adult nebulized',dose:'0.5 mg combined with albuterol — first treatment only.'},{route:'Pediatric nebulized',dose:'0.25–0.5 mg combined with albuterol — first treatment only.'}],
    notes:['Combine with albuterol for first nebulized treatment only — do NOT repeat ipratropium.','Avoid aerosol exposure to eyes — can precipitate acute angle-closure glaucoma.'],
    contra:['Hypersensitivity to ipratropium or atropine','Narrow-angle glaucoma']},
+
+  {num:'III-22',name:'Glucagon',scope:'pm',mechanism:'Pancreatic hormone. Stimulates hepatic glycogenolysis to raise blood glucose. Positive inotrope and chronotrope independent of beta receptors.',
+   doses:[{route:'Hypoglycemia IM/IN',dose:'1 mg IM or IN — unconscious patient without IV/IO access.'},{route:'Beta blocker / CCB toxicity IV/IM',dose:'3–5 mg IV/IM; contact DMO.'},{route:'Pediatric',dose:'Not specified in these protocols — contact DMO.'}],
+   notes:['D10 IV/IO is first-line for hypoglycemia — glucagon is for the patient with no IV/IO access. Give D10 once access is obtained.','Recheck glucose 15 min after dose. Less effective when glycogen is depleted (chronic alcohol use, starvation).','Nausea and vomiting are common — protect the airway.'],
+   contra:['Hypersensitivity','Pheochromocytoma','Insulinoma']},
 ];
 
 var HOSP = [
@@ -715,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function(){
     btn.classList.add('on');
     var filtered = filterAmb();
     var hints = {
-      'all': 'Showing all 21 cards',
+      'all': 'Showing all 22 cards',
       'emt-only': 'Showing ' + filtered.length + ' EMT-authorized cards',
       'aemt': 'Showing ' + filtered.length + ' AEMT+ cards (includes EMT)',
       'pm': 'Showing ' + filtered.length + ' PM Only cards'
