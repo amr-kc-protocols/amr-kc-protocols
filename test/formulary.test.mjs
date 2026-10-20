@@ -50,13 +50,20 @@ function cardsFormulary() {
 console.log('\nFormulary — scope');
 const idx = indexFormulary(), cards = cardsFormulary();
 
-ok('both files carry all 21 drugs', idx.length === 21 && cards.length === 21,
+ok('both files carry all 22 drugs', idx.length === 22 && cards.length === 22,
    `index.html ${idx.length}, flashcards.html ${cards.length}`);
 
 const byNum = Object.fromEntries(cards.map(c => [c.num, c]));
 const drift = idx.filter(d => byNum[d.num] && byNum[d.num].scope !== d.scope)
                  .map(d => `${d.num} ${d.name}: index.html=${d.scope} flashcards.html=${byNum[d.num].scope}`);
 ok('the two files agree on every scope tag', drift.length === 0, drift.join('\n       '));
+
+// --- glucagon (III-22): Paramedic scope, per VIII-A5 / II-26 standing orders --
+const glu = idx.find(d => d.num === 'III-22');
+ok('III-22 is glucagon, Paramedic scope', glu && /glucagon/i.test(glu.name) && glu.scope === 'pm',
+   glu ? `${glu.name} scope=${glu.scope}` : 'missing');
+ok('III-22 carries the 1 mg IM/IN hypoglycemia dose',
+   glu && glu.doses.some(d => /1 mg IM or IN/.test(d.dose)));
 
 // --- epinephrine 1:1,000: EMT is auto-injector only -------------------------
 const epi = idx.find(d => d.num === 'III-8');

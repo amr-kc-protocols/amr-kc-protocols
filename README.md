@@ -17,7 +17,7 @@ Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.htm
 
 - 28 IFT Clinical Protocols (Section II)
 - 34 Section VIII 911 Mutual Aid Protocols
-- 21-drug Formulary with full dosing by route and age
+- 22-drug Formulary with full dosing by route and age
 - 11 Procedure Cards
 - Reference: Vital targets, Pediatric dosing calculator, LTV 1200 alarms, GCS, Cincinnati Stroke Scale, Broselow, Rule of Nines, APGAR
 
