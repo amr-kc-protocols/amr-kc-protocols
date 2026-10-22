@@ -21,8 +21,8 @@
  *       answers both earn credit)
  *   A9  the debrief accepts an honest "unclear yet" only where the case says so
  *   A10 a case resumes after the page is closed mid-case
- *   A11 scene art is present, light and described; missing art or audio
- *       shows nothing broken
+ *   A11 scene art is present, light and described; missing art shows
+ *       nothing broken; no audio button while audio is on hold
  *   A12 a 320 px phone never scrolls sideways, on every screen
  *   A13 it works with storage blocked
  *   A14 it is reachable from the Field Guide and precached for offline
@@ -430,7 +430,7 @@ for (const c of DATA.cases) {
   await page.waitForFunction(() => { const i = document.querySelector('#app img'); return i && i.complete && i.naturalWidth > 0; }, null, { timeout: 5000 }).catch(() => {});
   ok('A11 the scene art loads on the first impression', await page.$eval('#app img', i => i.naturalWidth > 0).catch(() => false));
   ok('A11 the art keeps the faces in frame (object-position from the case)', await page.$eval('#app img', i => i.style.objectPosition === '50% 25%').catch(() => false));
-  ok('A11 the audio button stays hidden until the file exists', await page.$eval('[data-audio]', b => b.hidden));
+  ok('A11 no audio button while audio is on hold', (await page.$$('[data-audio]')).length === 0);
   await ctx.close();
   const mod = JSON.parse(JSON.stringify(DATA)); mod.cases[0].art.scene = 'assessment-detective/img/missing.webp';
   OVERRIDE = JSON.stringify(mod);

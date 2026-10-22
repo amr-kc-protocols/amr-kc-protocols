@@ -8,6 +8,7 @@
     "Accept more than one reasonable path. Mark choices best, ok or poor, and say why in 'why'. Poor choices that could hurt the patient are 'harm'.",
     "Do not ask for a diagnosis the information cannot support. If 'Unclear yet' is a fair working impression, say so with answer.unclear_ok.",
     "Art is optional. Give a path and alt text. Until the image exists, the scene text carries the case.",
+    "Audio is on hold. The page still supports it: add \"audio\": \"assessment-detective/audio/<file>.mp3\" to a first-impression stage and a Hear the patient button appears once the file exists.",
     "review.status stays 'draft' until the Medical Director or Clinical Education has signed off. Drafts are labeled in the game."
   ],
   "cases": [
@@ -126,7 +127,6 @@
         { "id": "first", "type": "first",
           "scene": "A kitchen. She sits at the breakfast table, staring past you. Her right arm hangs at her side and her face is damp with sweat.",
           "quote": { "who": "Husband", "text": "She's not making sense. She was fine when I left for the store." },
-          "audio": "assessment-detective/audio/not-herself-husband.mp3",
           "concerns": [
             { "id": "ams", "label": "Altered mental status", "good": true },
             { "id": "sweat", "label": "Pale, sweaty skin", "good": true },
@@ -325,7 +325,6 @@
         { "id": "first", "type": "first",
           "scene": "A kitchen. She's perched on a chair, braced on the table with both hands, breathing fast. Her daughter hovers behind her.",
           "quote": { "who": "Patient", "text": "Can't… get… air." },
-          "audio": "assessment-detective/audio/cant-breathe-patient.mp3",
           "concerns": [
             { "id": "wob", "label": "Severe work of breathing", "good": true },
             { "id": "speech", "label": "Speaking only a few words", "good": true },
@@ -521,7 +520,6 @@
         { "id": "first", "type": "first",
           "scene": "A living room. She sits hunched on the couch, arms around her belly, damp with sweat. Her roommate says she fainted in the bathroom.",
           "quote": { "who": "Patient", "text": "I'm fine. I just got dizzy. This is so embarrassing." },
-          "audio": "assessment-detective/audio/fainted-patient.mp3",
           "concerns": [
             { "id": "pale", "label": "Pale, sweaty skin", "good": true },
             { "id": "syncope", "label": "She fainted", "good": true },
