@@ -226,8 +226,9 @@ async function rates(page) {
 
 /* ── A2 scope and doses ─────────────────────────────────────────── */
 {
-  const ADV = /\bIV\b|\bIO\b|D10|Dextrose|saline|Nitro|Glucagon|Ondansetron|Fentanyl|Midazolam/i;
-  const PM_ONLY = /Nitro|Glucagon|blood pressure|Norepinephrine|Fentanyl|1:10,000/i;
+  // Nitro is AEMT+ (VIII-A11, III-16). No oral diphenhydramine is carried, so it is AEMT+ too.
+  const ADV = /\bIV\b|\bIO\b|D10|Dextrose|saline|Nitro|Glucagon|Ondansetron|Fentanyl|Midazolam|Diphenhydramine/i;
+  const PM_ONLY = /Glucagon|blood pressure|Norepinephrine|Fentanyl|1:10,000|Atropine/i;
   const DOSES = [   // the 2026 protocol wording each label must match
     [/Oral glucose/, /15–25 g/], [/Dextrose 10%/, /100–250 mL/], [/Glucagon/, /1 mg IM/],
     [/Nitroglycerin/, /0\.4 mg SL/], [/Aspirin/, /324 mg/], [/Albuterol/, /2\.5 mg/],
@@ -244,7 +245,7 @@ async function rates(page) {
       for (const [re, want] of DOSES) if (re.test(a.label) && /\d/.test(a.label) && !want.test(a.label)) dose.push(c.id + ':' + a.id + ' "' + a.label + '"');
     }
   }
-  ok('A2 no EMT option is an IV, IO or advanced drug; PM-only drugs stay PM-only', bad.length === 0, bad.join(', '));
+  ok('A2 no EMT option is an IV, IO or AEMT+ drug (incl. nitro, diphenhydramine); PM-only drugs stay PM-only', bad.length === 0, bad.join(', '));
   ok('A2 every quoted dose matches the protocol', dose.length === 0, dose.join(', '));
   ok('A2 every case names its protocol sources and stays labeled draft until signed off',
     DATA.cases.every(c => c.review && c.review.sources.length && ['draft', 'approved'].includes(c.review.status)));

@@ -20,7 +20,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-A2 Altered Mental Status", "VIII-A5 Diabetic Emergencies", "VIII-A9 Stroke / CVA", "III-7 Dextrose 10%", "III-22 Glucagon", "V-20 Glucometry"],
-        "check": "EMT oral glucose: VIII-A5 says 'alert patient who can swallow'. She is E4, confused (GCS 14), follows commands and passes a sip test, with a facial droop. Confirm that counts as alert, or make IV dextrose / ALS the EMT best path. Treat-and-release is excluded because of the sulfonylurea."
+        "check": "Medical direction, Oct 2026: a patient who is confused but follows commands and passes a sip test counts as 'alert and can swallow' for EMT oral glucose (VIII-A5). Treat-and-release is excluded because of the sulfonylurea."
       },
       "art": { "scene": "assessment-detective/img/not-herself-scene.webp", "alt": "An older woman sits at a breakfast table, staring past the camera, her right arm hanging at her side. Her husband leans in, talking to her.", "pos": "50% 30%" },
       "dispatch": "0915. Confused 68-year-old woman at home. Husband on scene.",
@@ -220,14 +220,14 @@
       "minutes": 7,
       "review": {
         "status": "draft",
-        "sources": ["II-6 Acute Pulmonary Edema", "V-5 CPAP (Flow-Safe II)", "VIII-C2 Bronchospasm / Respiratory Distress", "VIII-B2 Chest Pain / ACS", "III-16 Nitroglycerin"],
-        "check": "This is a 911 call, but the pulmonary edema standing orders are II-6, an IFT protocol; Section VIII has no 911 heart-failure protocol. Confirm II-6 applies on 911. Nitro is offered to Paramedics only, following II-6 and VIII-B2, while the formulary (III-16) lists SL nitro as AEMT+; confirm which. CPAP is offered at all levels per the scope table and V-5."
+        "sources": ["VIII-A11 Hypertensive Emergency", "V-5 CPAP (Flow-Safe II)", "VIII-C2 Bronchospasm / Respiratory Distress", "VIII-B2 Chest Pain / ACS", "III-16 Nitroglycerin"],
+        "check": "Built on VIII-A11 Hypertensive Emergency: acute heart failure is the end-organ injury and pulmonary edema is the sign (medical direction, Oct 2026). Nitro 0.4 mg SL at AEMT and PM per VIII-A11 and III-16; CPAP at all levels per V-5."
       },
       "art": { "scene": "assessment-detective/img/cant-breathe-scene.webp", "alt": "An older woman sits at a kitchen table, braced on both hands, mouth open, struggling to breathe. Her daughter leans in behind her.", "pos": "50% 25%" },
       "dispatch": "0710. 74-year-old woman, trouble breathing. Daughter on scene.",
       "status0": { "label": "Critical", "tone": "bad", "hr": 118, "bp": "204/112", "rr": 34, "spo2": 85, "ms": "Anxious" },
       "dx": [
-        { "id": "chf", "label": "Fluid in the lungs (heart failure)" },
+        { "id": "chf", "label": "Hypertensive emergency: acute heart failure" },
         { "id": "copd", "label": "COPD flare" },
         { "id": "pna", "label": "Pneumonia / sepsis", "danger": true },
         { "id": "acs", "label": "Heart attack", "danger": true },
@@ -239,7 +239,7 @@
         "likely": ["chf"],
         "danger": ["acs", "pe", "pna"],
         "alt": ["acs", "pe", "pna", "copd"],
-        "note": "Acute pulmonary edema from heart failure: off her water pill, a salty meal, sleeping upright, crackles, JVD and swelling, and a fast response to CPAP. A heart attack can trigger this and is not ruled out in the field."
+        "note": "A hypertensive emergency with acute heart failure. Pulmonary edema is the sign; the heart failure, driven by a BP of 204/112, is the problem. Off her water pill and after a salty meal, she can't lie flat and has crackles, JVD and leg swelling, and she responds fast to CPAP. A heart attack can trigger this and can't be ruled out in the field."
       },
       "findings": {
         "airway":    { "cat": "Primary", "text": "Airway open. Speaking 2–3 words at a time. Coughing up frothy white sputum.", "effect": { "chf": "supports", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "weakens" } },
@@ -249,6 +249,8 @@
         "gcs":       { "cat": "Primary", "text": "Alert and oriented, very anxious. GCS 15.", "effect": { "chf": "neutral", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "neutral" } },
         "jvd":       { "cat": "Exam", "text": "Neck veins distended sitting up. 2+ pitting swelling in both legs, equal.", "key": true, "effect": { "chf": "supports", "copd": "neutral", "pna": "weakens", "acs": "neutral", "pe": "weakens", "anx": "weakens" },
                        "why": "JVD and swelling in both legs fit fluid overload. Long-standing COPD can strain the right heart too, so they don't fully rule it out." },
+        "arms":      { "cat": "Exam", "key": true, "text": "BP right arm 204/112, left arm 200/110.", "effect": { "chf": "neutral", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "neutral" },
+                       "why": "Equal arm pressures: no sign of a dissection, which would change how fast her BP may come down." },
         "temp":      { "cat": "Exam", "text": "Temperature 98.9 °F.", "effect": { "chf": "neutral", "copd": "neutral", "pna": "weakens", "acs": "neutral", "pe": "neutral", "anx": "neutral" } },
         "ecg": { "cat": "Exam", "key": true, "text": "12-lead: sinus tachycardia 118, LVH. No ST elevation.", "text_emt": "12-lead acquired and sent to the receiving hospital. Interpretation is outside EMT scope.",
                  "effect": { "chf": "neutral", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "neutral" },
@@ -271,7 +273,7 @@
             { "if": "care:cpap",
               "text": "On CPAP 10 minutes: SpO2 93%, RR 24, BP 176/98. Speaking in full sentences.",
               "effect": { "chf": "supports", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "weakens", "anx": "neutral" },
-              "why": "A fast response to CPAP fits pulmonary edema. It helps COPD too, so it's supportive, not proof." },
+              "why": "A fast response to CPAP fits acute heart failure. It helps COPD too, so it's supportive, not proof." },
             { "if": "care:o2",
               "text": "On oxygen only: SpO2 88%, RR 34. Still 2–3 words at a time.",
               "effect": { "chf": "neutral", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "weakens" },
@@ -289,6 +291,7 @@
           { "id": "circ", "label": "Pulse, skin and BP", "phase": "primary", "min": 1, "reveals": "circ" },
           { "id": "gcs", "label": "Mental status", "phase": "primary", "min": 0.5, "reveals": "gcs" },
           { "id": "jvd", "label": "Neck veins and leg swelling", "min": 1, "reveals": "jvd" },
+          { "id": "arms", "label": "BP in both arms", "min": 1, "reveals": "arms" },
           { "id": "temp", "label": "Temperature", "min": 1, "reveals": "temp" },
           { "id": "ecg", "label": "12-lead ECG", "min": 3, "reveals": "ecg" },
           { "id": "bgl", "label": "Blood glucose", "min": 1, "reveals": "bgl" },
@@ -304,18 +307,18 @@
           { "id": "salt", "label": "Anything different the last few days?", "min": 0.5, "reveals": "salt" }
         ],
         "care": [
-          { "id": "upright", "label": "Sit her fully upright, legs down", "min": 0.5, "value": "best", "why": "Upright, legs dependent: less blood returns to the lungs and she breathes easier.", "src": "II-6" },
+          { "id": "upright", "label": "Sit her fully upright, legs down", "min": 0.5, "value": "best", "why": "Upright, legs dependent: less blood returns to the lungs and she breathes easier.", "src": "VIII-A11" },
           { "id": "o2", "label": "Oxygen by non-rebreather", "min": 1, "value": "ok", "why": "A good start, but at 85% with crackles she needs CPAP, not just oxygen.", "src": "V-2",
             "status": { "spo2": 88 } },
-          { "id": "cpap", "label": "CPAP 5 cmH2O, titrate to 10", "min": 3, "value": "best", "why": "She's alert, cooperative and SBP is well above 90. CPAP is the key treatment here, at every level.", "src": "V-5",
+          { "id": "cpap", "label": "CPAP 5 cmH2O, titrate to 10", "min": 3, "value": "best", "why": "She's alert, cooperative and SBP is well above 90. CPAP is the key treatment here, at every level.", "src": "V-5, VIII-A11",
             "status": { "label": "Improving", "tone": "ok", "spo2": 93, "rr": 24, "bp": "176/98", "hr": 106, "ms": "Full sentences" } },
           { "id": "albuterol", "label": "Albuterol 2.5 mg nebulized", "min": 2, "value": "poor", "why": "Her own inhaler didn't help, and the wheeze is likely from fluid. A neb delays CPAP and may speed her heart rate.", "src": "VIII-C2" },
-          { "id": "iv", "label": "Peripheral IV", "levels": ["aemt", "pm"], "min": 2, "value": "ok", "src": "II-6" },
-          { "id": "fluid", "label": "Normal saline 250 mL bolus", "levels": ["aemt", "pm"], "min": 2, "value": "harm", "why": "No fluid in suspected pulmonary edema. It adds to the fluid in her lungs.", "src": "II-6",
+          { "id": "iv", "label": "Peripheral IV", "levels": ["aemt", "pm"], "min": 2, "value": "ok", "src": "VIII-A11" },
+          { "id": "fluid", "label": "Normal saline 250 mL bolus", "levels": ["aemt", "pm"], "min": 2, "value": "harm", "why": "No fluid with pulmonary edema. It adds to the fluid in her lungs.", "src": "VIII-B2",
             "status": { "label": "Worse", "tone": "bad", "spo2": 82, "rr": 38 } },
-          { "id": "nitro", "label": "Nitroglycerin 0.4 mg SL", "levels": ["pm"], "min": 1, "value": "best", "needs": "meds",
-            "why": "SBP ≥100 and no sildenafil-type drugs: nitro lowers preload. Recheck BP before every dose.",
-            "why_unchecked": "Right drug, but you hadn't asked about sildenafil-type drugs. Ask before the first dose.", "src": "VIII-B2, III-16",
+          { "id": "nitro", "label": "Nitroglycerin 0.4 mg SL", "levels": ["aemt", "pm"], "min": 1, "value": "best", "needs": "meds",
+            "why": "Pulmonary edema with SBP over 100 and no sildenafil-type drugs: nitro with CPAP. Recheck BP before every dose, and don't drop it more than 20–25% in the first hour.",
+            "why_unchecked": "Right drug, but you hadn't asked about sildenafil-type drugs. Ask before the first dose.", "src": "VIII-A11, III-16",
             "status": { "bp": "168/94" } },
           { "id": "asa", "label": "Aspirin 324 mg chewed", "min": 1, "value": "ok", "why": "Reasonable if you suspect a cardiac cause and she has no contraindication. It won't fix the fluid.", "src": "VIII-B2" },
           { "id": "transport", "label": "Package and begin transport", "min": 3, "value": "ok", "transport": true }
@@ -337,7 +340,7 @@
         { "id": "primary", "type": "primary",
           "prompt": "Run your primary. Use Assess, and treat what can't wait.",
           "required": ["airway", "breathing", "circ", "gcs"],
-          "why": "Find and treat the breathing problem in the primary. In pulmonary edema, CPAP early is what changes the outcome." },
+          "why": "Find and treat the breathing problem in the primary. With crackles and an SpO2 of 85%, CPAP early is what changes the outcome." },
         { "id": "ddx", "type": "differential",
           "prompt": "What could explain this? Pick up to three." },
         { "id": "investigate", "type": "investigate",
@@ -362,7 +365,7 @@
                 "prompt": "What's your next step?",
                 "options": [
                   { "id": "keep", "label": "Coach her, keep CPAP on, BP every 5 minutes", "grade": "best", "why": "She's better because of the CPAP. Taking it off now brings the fluid back." },
-                  { "id": "nitro2", "label": "Nitro 0.4 mg SL after a BP check; keep CPAP", "levels": ["pm"], "grade": "best", "why": "SBP well over 100: nitro and CPAP together. Check BP before each dose.", "care": "nitro" },
+                  { "id": "nitro2", "label": "Nitro 0.4 mg SL after a BP check; keep CPAP", "levels": ["aemt", "pm"], "grade": "best", "why": "SBP well over 100: nitro and CPAP together. Check BP before each dose.", "care": "nitro" },
                   { "id": "off", "label": "Switch to nasal cannula since she's better", "grade": "harm", "why": "Removing CPAP early is the most common reason these patients crash again." },
                   { "id": "neb", "label": "Add an albuterol neb for the wheezing", "grade": "poor", "why": "The wheeze is fluid. Treat the fluid." }
                 ]
@@ -383,7 +386,7 @@
           ] },
         { "id": "handoff", "type": "handoff",
           "problems": [
-            { "id": "p1", "label": "74F, acute pulmonary edema off her furosemide; improving on CPAP", "grade": "best" },
+            { "id": "p1", "label": "74F hypertensive emergency with acute heart failure, off her furosemide; improving on CPAP", "grade": "best" },
             { "id": "p2", "label": "74F with a COPD flare", "grade": "poor", "why": "Her inhaler didn't help, and crackles, JVD and swelling point to fluid." },
             { "id": "p3", "label": "74F short of breath; heart failure most likely, heart attack not excluded", "grade": "best" }
           ],
@@ -391,7 +394,7 @@
             { "id": "q1", "label": "Keep CPAP; watch work of breathing and SpO2", "good": true },
             { "id": "q2", "label": "BP every 5 minutes", "good": true },
             { "id": "q3", "label": "Repeat the 12-lead; a heart attack isn't excluded", "good": true },
-            { "id": "q4", "label": "Give a fluid bolus for the fast heart rate", "good": false, "why": "No fluid in pulmonary edema." },
+            { "id": "q4", "label": "Give a fluid bolus for the fast heart rate", "good": false, "why": "No fluid with crackles in her lungs." },
             { "id": "q5", "label": "Lay her flat for the transfer", "good": false, "why": "Flat pushes fluid back to her lungs. Keep her upright." }
           ] }
       ],
@@ -403,13 +406,14 @@
         { "id": "nitro_safe", "area": "safety", "w": 1, "test": "!care:nitro|found:meds<care:nitro", "well": "You checked for sildenafil-type drugs before nitro.", "miss": "Nitro went in before asking about sildenafil-type drugs." },
         { "id": "history", "area": "assess", "w": 2, "test": "found:meds", "well": "You found the missed furosemide: the trigger.", "miss": "You didn't ask about missed medicines. Running out of her water pill was the trigger." },
         { "id": "orthopnea", "area": "assess", "w": 2, "test": "found:onset|found:jvd", "well": "You looked for signs that separate fluid from COPD.", "miss": "Neither orthopnea nor JVD and swelling were checked. Those separate fluid from COPD." },
+        { "id": "arms", "area": "assess", "w": 1, "test": "found:arms", "well": "You checked BP in both arms.", "miss": "Protocol: BP in both arms in a hypertensive emergency. Unequal readings suggest dissection." },
         { "id": "ecg", "area": "assess", "w": 2, "test": "found:ecg", "well": "You got a 12-lead.", "miss": "No 12-lead. A heart attack can cause this, and it can't be excluded without one." },
         { "id": "danger_dx", "area": "reason", "w": 2, "test": "dx:acs@ddx|dx:pe@ddx|dx:pna@ddx", "well": "You kept a dangerous cause on the list.", "miss": "No dangerous cause on your list. Ask what kills her if you're wrong." },
         { "id": "lead_end", "area": "reason", "w": 3, "test": "lead:chf@handoff", "well": "Your working impression fit the evidence.", "miss": "Your final impression didn't fit: crackles, JVD, swelling and the CPAP response point to heart failure." },
         { "id": "recheck", "area": "reassess", "w": 2, "test": "found:recheck", "well": "You rechecked after treatment.", "miss": "No recheck after treatment. Did the CPAP work?" },
         { "id": "change", "area": "reassess", "w": 3, "test": "pick:change:keep|pick:change:nitro2|pick:change:cpap_now|pick:change:bvm", "well": "You responded well when things changed.", "miss": "When her condition changed, the response didn't help." }
       ],
-      "takeaway": "Crackles, JVD and a patient who can't lie flat point to fluid. CPAP early, upright, no fluids, and keep the mask on."
+      "takeaway": "Pulmonary edema is a sign. Here it means acute heart failure in a hypertensive emergency: CPAP early, upright, nitro if your scope allows, no fluids, and keep the mask on."
     },
 
     {
@@ -420,7 +424,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-A1 Abdominal Pain", "VIII-D6 Shock and Hemorrhage", "VIII-F1 Obstetric Emergencies", "V-14 12-Lead ECG"],
-        "check": "Fluid volumes: VIII-A1 lists 250–500 mL for hypotension, VIII-F1 500 mL, VIII-D6 250–500 mL. The case uses 250–500 mL toward SBP 90; evidence for permissive hypotension outside trauma is limited, so confirm the target. Scene-time feedback triggers past 16 minutes; that threshold is a teaching choice, not a protocol number."
+        "check": "Medical direction, Oct 2026: 250–500 mL boluses toward SBP ~90 is the target, and scene-time feedback past 16 minutes stands."
       },
       "art": { "scene": "assessment-detective/img/passed-out-scene.webp", "alt": "A young woman sits hunched on a couch, sweaty, arms wrapped around her belly. Her roommate sits beside her, a hand on her shoulder.", "pos": "50% 25%" },
       "dispatch": "1400. 26-year-old woman fainted at home. Roommate on scene.",
@@ -613,7 +617,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-A3 Anaphylaxis and Allergic Reaction", "III-8 Epinephrine 1:1,000 (IM)", "III-9 Epinephrine 1:10,000", "III-6 Diphenhydramine", "VIII-C2 Bronchospasm"],
-        "check": "IM epinephrine at every level (VIII-A3 EMT step 1). Diphenhydramine PO for EMTs per VIII-A3 step 5, though the formulary header lists diphenhydramine as AEMT+ with PO at EMT. Albuterol is offered at every level: VIII-A3 lists it under AEMT, VIII-C2 under EMT; confirm. IV epinephrine 0.1 mg push (VIII-A3 PM step 3) is shown as a poor first choice; it is a large bolus for a patient with a pulse, so the protocol dose is worth a look."
+        "check": "Medical direction, Oct 2026: no oral diphenhydramine is carried, so diphenhydramine is AEMT+ (IV) only; albuterol at all levels. Protocol-level note: VIII-A3's PM IV epinephrine 0.1 mg push is a large bolus for a patient with a pulse; the case shows it as a poor first choice."
       },
       "art": {
         "scene": "assessment-detective/img/throat-tight-scene.webp",
@@ -765,7 +769,6 @@
           },
           { "id": "o2", "label": "Oxygen, target SpO2 ≥94%", "min": 1, "value": "ok", "why": "Right target, but oxygen alone does nothing for the swelling.", "src": "VIII-A3" },
           { "id": "position", "label": "Sit him up for his breathing; don't let him stand or walk", "min": 0.5, "value": "ok", "why": "Protocol: supine with legs up unless breathing needs upright. His does. Never stand an anaphylaxis patient up.", "src": "VIII-A3" },
-          { "id": "diphen_po", "label": "Diphenhydramine 25–50 mg PO", "min": 1, "value": "ok", "why": "An add-on after epinephrine, never instead of it. With a swelling throat, swallowing pills is risky.", "src": "VIII-A3" },
           { "id": "albuterol", "label": "Albuterol 2.5 mg nebulized", "min": 2, "value": "ok", "why": "Helps the wheeze after epinephrine. It does nothing for the throat or the BP.", "src": "VIII-C2" },
           {
             "id": "iv",
@@ -875,7 +878,7 @@
                 "options": [
                   { "id": "repeat_epi", "label": "Repeat epinephrine IM", "grade": "best", "why": "Protocol: repeat every 5–10 minutes if not improving. Symptoms are returning, so give it.", "care": "epi2" },
                   { "id": "neb", "label": "Albuterol neb for the wheeze, then reassess", "grade": "ok", "why": "Reasonable for the wheeze, but the hoarse voice needs more epinephrine." },
-                  { "id": "benadryl", "label": "Diphenhydramine will handle it", "grade": "poor", "why": "Too slow and it does not reverse airway swelling." },
+                  { "id": "benadryl", "label": "Diphenhydramine will handle it", "levels": ["aemt", "pm"], "grade": "poor", "why": "Too slow and it does not reverse airway swelling." },
                   { "id": "watch", "label": "He improved once; just watch him", "grade": "harm", "why": "Returning symptoms are a rebound. Treat them now." }
                 ]
               }
@@ -901,7 +904,7 @@
                 "options": [
                   { "id": "epi_now", "label": "Epinephrine IM now; legs up, as flat as his breathing allows", "grade": "best", "why": "Late, but the right move. Epinephrine is the treatment.", "care": "epi" },
                   { "id": "airway", "label": "Prepare BVM and airway; call for ALS", "grade": "ok", "why": "Get ready, but epinephrine first. It can stop the swelling." },
-                  { "id": "benadryl2", "label": "Diphenhydramine first, then reassess", "grade": "harm", "why": "Diphenhydramine will not save his airway. Epinephrine will." }
+                  { "id": "benadryl2", "label": "Diphenhydramine first, then reassess", "levels": ["aemt", "pm"], "grade": "harm", "why": "Diphenhydramine will not save his airway. Epinephrine will." }
                 ]
               }
             }
@@ -926,7 +929,7 @@
       ],
       "scoring": [
         { "id": "epi_early", "area": "safety", "w": 3, "test": "care:epi@primary", "well": "You gave epinephrine in the primary.", "miss": "Epinephrine waited until after the primary. Airway swelling with a low BP needs it now." },
-        { "id": "epi_first", "area": "safety", "w": 2, "test": "!care:diphen_po&!care:diphen_iv|care:epi<care:diphen_po|care:epi<care:diphen_iv", "well": "Epinephrine came before diphenhydramine.", "miss": "Diphenhydramine went in before epinephrine. Antihistamines are add-ons only." },
+        { "id": "epi_first", "area": "safety", "w": 2, "levels": ["aemt", "pm"], "test": "!care:diphen_iv|care:epi<care:diphen_iv", "well": "Epinephrine came before diphenhydramine.", "miss": "Diphenhydramine went in before epinephrine. Antihistamines are add-ons only." },
         { "id": "no_iv_epi", "area": "safety", "w": 2, "test": "!care:epi_iv", "well": "You used IM epinephrine, not IV.", "miss": "IV epinephrine first is the wrong route here and risks dangerous dosing errors." },
         { "id": "airway", "area": "assess", "w": 2, "test": "found:airway@primary", "well": "You checked his airway and voice first.", "miss": "The airway check was missed in the primary." },
         { "id": "skin", "area": "assess", "w": 2, "test": "found:skin", "well": "You looked at the skin.", "miss": "You never looked at his skin. Hives are what separate allergy from panic or asthma." },
@@ -947,7 +950,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-B2 Chest Pain / ACS", "VIII-B3 Bradycardia", "III-5 Atropine", "III-4 Aspirin", "III-16 Nitroglycerin", "III-10 Fentanyl", "V-14 12-Lead ECG"],
-        "check": "Nitro offered to Paramedics only (VIII-B2); same III-16 conflict as case 2. V4R is offered at every level, but V-14 describes only standard 12-lead placement, and AEMT interpretation is limited to STEMI identification: confirm a right-sided lead is taught and who may read it (EMTs get the hospital's read). Atropine for the hypotensive bradycardia is offered to Paramedics per VIII-B3."
+        "check": "Medical direction, Oct 2026: AEMTs may read V4R. Open: nitro is offered to PMs only here, following VIII-B2's PM column, while VIII-A11 and III-16 allow SL nitro at AEMT. It is a harm choice in this case either way. Atropine for the hypotensive bradycardia is PM per VIII-B3."
       },
       "art": {
         "scene": "assessment-detective/img/heartburn-scene.webp",
