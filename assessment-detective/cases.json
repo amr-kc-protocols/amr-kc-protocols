@@ -18,7 +18,7 @@
       "teaser": "68-year-old woman. Her husband says she isn't making sense.",
       "minutes": 6,
       "review": {
-        "status": "draft",
+        "status": "approved", "approved": "Clinical review passed, October 2026",
         "sources": ["VIII-A2 Altered Mental Status", "VIII-A5 Diabetic Emergencies", "VIII-A9 Stroke / CVA", "III-7 Dextrose 10%", "III-22 Glucagon", "V-20 Glucometry"],
         "check": "Medical direction, Oct 2026: a patient who is confused but follows commands and passes a sip test counts as 'alert and can swallow' for EMT oral glucose (VIII-A5). Treat-and-release is excluded because of the sulfonylurea."
       },
@@ -219,9 +219,9 @@
       "teaser": "74-year-old woman, gasping at her kitchen table.",
       "minutes": 7,
       "review": {
-        "status": "draft",
+        "status": "approved", "approved": "Clinical review passed, October 2026",
         "sources": ["VIII-A11 Hypertensive Emergency", "V-5 CPAP (Flow-Safe II)", "VIII-C2 Bronchospasm / Respiratory Distress", "VIII-B2 Chest Pain / ACS", "III-16 Nitroglycerin"],
-        "check": "Built on VIII-A11 Hypertensive Emergency: acute heart failure is the end-organ injury and pulmonary edema is the sign (medical direction, Oct 2026). Nitro 0.4 mg SL at AEMT and PM per VIII-A11 and III-16; CPAP at all levels per V-5."
+        "check": "Built on VIII-A11 Hypertensive Emergency: acute heart failure is the end-organ injury and pulmonary edema is the sign (medical direction, Oct 2026). Nitro 0.4 mg SL at AEMT and PM, after a 12-lead and the PDE-5 question; CPAP at all levels per V-5."
       },
       "art": { "scene": "assessment-detective/img/cant-breathe-scene.webp", "alt": "An older woman sits at a kitchen table, braced on both hands, mouth open, struggling to breathe. Her daughter leans in behind her.", "pos": "50% 25%" },
       "dispatch": "0710. 74-year-old woman, trouble breathing. Daughter on scene.",
@@ -316,9 +316,9 @@
           { "id": "iv", "label": "Peripheral IV", "levels": ["aemt", "pm"], "min": 2, "value": "ok", "src": "VIII-A11" },
           { "id": "fluid", "label": "Normal saline 250 mL bolus", "levels": ["aemt", "pm"], "min": 2, "value": "harm", "why": "No fluid with pulmonary edema. It adds to the fluid in her lungs.", "src": "VIII-B2",
             "status": { "label": "Worse", "tone": "bad", "spo2": 82, "rr": 38 } },
-          { "id": "nitro", "label": "Nitroglycerin 0.4 mg SL", "levels": ["aemt", "pm"], "min": 1, "value": "best", "needs": "meds",
-            "why": "Pulmonary edema with SBP over 100 and no sildenafil-type drugs: nitro with CPAP. Recheck BP before every dose, and don't drop it more than 20–25% in the first hour.",
-            "why_unchecked": "Right drug, but you hadn't asked about sildenafil-type drugs. Ask before the first dose.", "src": "VIII-A11, III-16",
+          { "id": "nitro", "label": "Nitroglycerin 0.4 mg SL", "levels": ["aemt", "pm"], "min": 1, "value": "best", "needs": ["meds", "ecg"],
+            "why": "Pulmonary edema with SBP over 100, a 12-lead done and no sildenafil-type drugs: nitro with CPAP. Recheck BP before every dose, and don't drop it more than 20–25% in the first hour.",
+            "why_unchecked": "Right drug, but get a 12-lead and ask about sildenafil-type drugs before the first dose.", "src": "VIII-A11, III-16",
             "status": { "bp": "168/94" } },
           { "id": "asa", "label": "Aspirin 324 mg chewed", "min": 1, "value": "ok", "why": "Reasonable if you suspect a cardiac cause and she has no contraindication. It won't fix the fluid.", "src": "VIII-B2" },
           { "id": "transport", "label": "Package and begin transport", "min": 3, "value": "ok", "transport": true }
@@ -403,7 +403,7 @@
         { "id": "upright", "area": "safety", "w": 1, "test": "care:upright", "well": "You sat her upright.", "miss": "Positioning was missed: fully upright with legs down." },
         { "id": "no_fluid", "area": "safety", "w": 3, "test": "!care:fluid&!pick:change:fluid2", "well": "You withheld fluids.", "miss": "A fluid bolus added to the fluid in her lungs." },
         { "id": "no_off", "area": "safety", "w": 2, "test": "!pick:change:off", "well": "You kept CPAP on when she asked to take it off.", "miss": "Taking CPAP off early brings the fluid back." },
-        { "id": "nitro_safe", "area": "safety", "w": 1, "test": "!care:nitro|found:meds<care:nitro", "well": "You checked for sildenafil-type drugs before nitro.", "miss": "Nitro went in before asking about sildenafil-type drugs." },
+        { "id": "nitro_safe", "area": "safety", "w": 2, "test": "!care:nitro|found:meds<care:nitro&found:ecg<care:nitro", "well": "You got a 12-lead and asked about sildenafil-type drugs before nitro.", "miss": "Nitro went in before a 12-lead and the sildenafil question. Both come first." },
         { "id": "history", "area": "assess", "w": 2, "test": "found:meds", "well": "You found the missed furosemide: the trigger.", "miss": "You didn't ask about missed medicines. Running out of her water pill was the trigger." },
         { "id": "orthopnea", "area": "assess", "w": 2, "test": "found:onset|found:jvd", "well": "You looked for signs that separate fluid from COPD.", "miss": "Neither orthopnea nor JVD and swelling were checked. Those separate fluid from COPD." },
         { "id": "arms", "area": "assess", "w": 1, "test": "found:arms", "well": "You checked BP in both arms.", "miss": "Protocol: BP in both arms in a hypertensive emergency. Unequal readings suggest dissection." },
@@ -422,7 +422,7 @@
       "teaser": "26-year-old fainted in her bathroom. Now she's holding her belly.",
       "minutes": 6,
       "review": {
-        "status": "draft",
+        "status": "approved", "approved": "Clinical review passed, October 2026",
         "sources": ["VIII-A1 Abdominal Pain", "VIII-D6 Shock and Hemorrhage", "VIII-F1 Obstetric Emergencies", "V-14 12-Lead ECG"],
         "check": "Medical direction, Oct 2026: 250–500 mL boluses toward SBP ~90 is the target, and scene-time feedback past 16 minutes stands."
       },
@@ -615,7 +615,7 @@
       "teaser": "34-year-old at a restaurant. Says his throat is closing.",
       "minutes": 6,
       "review": {
-        "status": "draft",
+        "status": "approved", "approved": "Clinical review passed, October 2026",
         "sources": ["VIII-A3 Anaphylaxis and Allergic Reaction", "III-8 Epinephrine 1:1,000 (IM)", "III-9 Epinephrine 1:10,000", "III-6 Diphenhydramine", "VIII-C2 Bronchospasm"],
         "check": "Medical direction, Oct 2026: no oral diphenhydramine is carried, so diphenhydramine is AEMT+ (IV) only; albuterol at all levels. Protocol-level note: VIII-A3's PM IV epinephrine 0.1 mg push is a large bolus for a patient with a pulse; the case shows it as a poor first choice."
       },
@@ -948,9 +948,9 @@
       "teaser": "58-year-old says it’s indigestion. His wife isn’t so sure.",
       "minutes": 7,
       "review": {
-        "status": "draft",
+        "status": "approved", "approved": "Clinical review passed, October 2026",
         "sources": ["VIII-B2 Chest Pain / ACS", "VIII-B3 Bradycardia", "III-5 Atropine", "III-4 Aspirin", "III-16 Nitroglycerin", "III-10 Fentanyl", "V-14 12-Lead ECG"],
-        "check": "Medical direction, Oct 2026: AEMTs may read V4R. Open: nitro is offered to PMs only here, following VIII-B2's PM column, while VIII-A11 and III-16 allow SL nitro at AEMT. It is a harm choice in this case either way. Atropine for the hypotensive bradycardia is PM per VIII-B3."
+        "check": "Medical direction, Oct 2026: AEMTs may give SL nitro after a 12-lead, and may read V4R. Nitro is the harmful choice in this case (SBP under 100, RV involvement, tadalafil), so AEMTs and PMs both face the trap. Atropine for the hypotensive bradycardia is PM per VIII-B3."
       },
       "art": {
         "scene": "assessment-detective/img/heartburn-scene.webp",
@@ -1144,7 +1144,7 @@
           {
             "id": "nitro",
             "label": "Nitroglycerin 0.4 mg SL",
-            "levels": ["pm"],
+            "levels": ["aemt", "pm"],
             "min": 1,
             "value": "harm",
             "why": "SBP under 100, right-ventricle involvement and tadalafil last night: three reasons to hold nitro.",
@@ -1245,7 +1245,7 @@
                   {
                     "id": "nitro2",
                     "label": "Second nitro: the pain is still there",
-                    "levels": ["pm"],
+                    "levels": ["aemt", "pm"],
                     "grade": "harm",
                     "why": "More nitro will drop his BP further."
                   }
@@ -1295,7 +1295,7 @@
                   {
                     "id": "nitro_pain",
                     "label": "Nitro for the pain",
-                    "levels": ["pm"],
+                    "levels": ["aemt", "pm"],
                     "grade": "harm",
                     "why": "SBP under 100 and RV involvement: no nitro."
                   },
@@ -1344,7 +1344,7 @@
       "teaser": "81-year-old. Her caregiver says she isn’t herself today.",
       "minutes": 7,
       "review": {
-        "status": "draft",
+        "status": "approved", "approved": "Clinical review passed, October 2026",
         "sources": ["VIII-A12 Sepsis and Septic Shock", "VIII-A2 Altered Mental Status", "VIII-A9 Stroke / CVA", "V-20 Glucometry"],
         "check": "Fluid: 500 mL boluses toward 30 mL/kg if SBP <90 and lungs clear, stopping for signs of pulmonary edema (VIII-A12). Her starting BP is 88/52 so the first bolus meets the SBP <90 trigger. Norepinephrine offered to PMs only, as premature before fluids. qSOFA is taught as the protocol screen; a negative qSOFA does not exclude sepsis (SSC 2021 advises against qSOFA alone)."
       },

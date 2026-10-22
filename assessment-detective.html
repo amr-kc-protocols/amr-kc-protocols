@@ -379,9 +379,12 @@ function reveal(id, min){
 function giveCare(a){
   if(RUN.care[a.id]) return null;
   var pre = [];
-  if(a.needs && careById(a.needs) && !RUN.care[a.needs]){ var n = careById(a.needs); giveCare(n); pre.push(n.label); }
+  // needs: a care step that comes with it (an IV) or a finding that must come first (a 12-lead), one or several
+  var needs = [].concat(a.needs || []);
+  needs.forEach(function(id){ var n = careById(id); if(n && !RUN.care[id]){ giveCare(n); pre.push(n.label); } });
+  var unchecked = needs.filter(function(id){ return !careById(id) && !RUN.found[id]; });
   var value = a.value || 'ok', why = a.why || '';
-  if(a.needs && !careById(a.needs) && !RUN.found[a.needs] && a.why_unchecked){ why = a.why_unchecked; if(value === 'best') value = 'ok'; RUN.unchecked = (RUN.unchecked || []).concat(a.id); }
+  if(unchecked.length && a.why_unchecked){ why = a.why_unchecked; if(value === 'best') value = 'ok'; RUN.unchecked = (RUN.unchecked || []).concat(a.id); }
   if(a.why_iv && RUN.level !== 'emt'){ why = a.why_iv; if(value === 'best') value = 'ok'; }
   tick(a.min);
   RUN.care[a.id] = { seq:stamp(), t:RUN.time, si:RUN.si, value:value };

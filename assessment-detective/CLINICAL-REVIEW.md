@@ -1,7 +1,7 @@
 # Assessment Detective — clinical review, October 2026
 
-A pre-review of the six draft cases, written to make medical director sign-off quick. It is
-not the sign-off: every case stays `draft` until Dr. Deshmukh or Clinical Education approves it.
+A pre-review of the six cases, with the decisions medical direction made on it.
+**Clinical review passed, October 2026.** All six cases are marked `approved`.
 
 **What was checked:** every care option, dose and scope level against the AMR KC protocols
 (effective 15 May 2026); whether the vitals, findings and responses are physiologically
@@ -9,7 +9,7 @@ plausible and consistent with each other; whether the "best" answers match the p
 current evidence; and whether the teaching points overstate the evidence.
 
 **Result:** no case teaches anything unsafe. Four errors were fixed (below). Eight
-questions went to medical direction; seven are settled and recorded below, one is open.
+questions went to medical direction; all are settled and recorded below.
 
 ---
 
@@ -28,7 +28,7 @@ questions went to medical direction; seven are settled and recorded below, one i
 
 | # | Question | Decision | What changed |
 |---|---|---|---|
-| 1 | Nitroglycerin scope | Partly settled. VIII-A11 gives AEMTs SL nitro for pulmonary edema with SBP >100. | Case 2: nitro is now AEMT+. Case 5 still follows VIII-B2's PM column (still open, below). |
+| 1 | Nitroglycerin scope | AEMTs may give SL nitro, after a 12-lead. | Cases 2 and 5: nitro is AEMT+. A dose given before a 12-lead is marked down with feedback; case 2 also requires the PDE-5 question first. |
 | 2 | Protocol for case 2 | Pulmonary edema is a sign, not a diagnosis. Use the 911 protocol. | Case 2 is rebuilt on VIII-A11 Hypertensive Emergency: the working impression is acute heart failure in a hypertensive emergency, and BP in both arms is now an assessment. |
 | 3 | Who reads V4R | AEMTs can read it. | Already shown to AEMT and PM; EMTs get the hospital's read. |
 | 4 | EMT oral glucose with a facial droop | Counts as alert and able to swallow. | No change. |
@@ -37,9 +37,8 @@ questions went to medical direction; seven are settled and recorded below, one i
 | 7 | Fluid target in non-traumatic hemorrhage | SBP ~90 is a good target. | No change. |
 | 8 | 16-minute scene time | Keep. | No change. |
 
-**Still open:** nitro in case 5 is offered to PMs only, per VIII-B2. VIII-A11 and the
-formulary allow SL nitro at AEMT. Nitro is the wrong choice in that case either way. Should
-AEMTs face the same trap?
+In case 5 nitro is the harmful choice (SBP under 100, RV involvement, tadalafil), so AEMTs
+and PMs now both face that trap.
 
 ---
 
@@ -56,8 +55,8 @@ VIII-A5, III-7 and III-22. Decision 4 confirmed.
 Rebuilt on VIII-A11 after review. Pulmonary edema is the sign; acute heart failure driven by
 a BP of 204/112 is the problem. CPAP is the key treatment, supported by moderate-quality
 evidence (Cochrane review: fewer intubations and lower mortality in cardiogenic pulmonary
-edema). Nitro 0.4 mg SL is offered to AEMT and PM with SBP >100, after asking about
-PDE-5 drugs, with the protocol's limit of no more than a 20–25% drop in the first hour.
+edema). Nitro 0.4 mg SL is offered to AEMT and PM with SBP >100, after a 12-lead and
+the PDE-5 question, with the protocol's limit of no more than a 20–25% drop in the first hour.
 Withholding fluid is correct. BP in both arms is assessed, per VIII-A11. Rating albuterol
 "not ideal" is reasonable: it doesn't treat the cause, and observational data link
 beta-agonists to arrhythmia in heart failure.
@@ -91,7 +90,7 @@ pharmacological basis), and RV involvement. The RV reason is the weakest: a 2016
 observational study found nitro-related hypotension no more common in RV infarction. The
 case is right to stack all three. Equal arm BPs are presented as making dissection less
 likely, not excluding it, which is correct; pulse differentials are insensitive. AEMTs
-may read V4R (decision 3). Open item: nitro scope, above.
+may read V4R and give nitro after a 12-lead (decisions 1 and 3); here nitro is the trap.
 
 ### 6 · Just Weak — septic shock, urinary source
 Sound, with the BP and wording fixes above. The metoprolol teaching point (HR 112 despite a

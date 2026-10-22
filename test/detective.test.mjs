@@ -120,7 +120,7 @@ const CARE = {
   'heartburn':       { emt: [['assess', 'ecg'], ['care', 'asa'], ['care', 'rest']], aemt: [['assess', 'ecg'], ['care', 'asa'], ['care', 'rest']], pm: [['assess', 'ecg'], ['care', 'asa'], ['care', 'rest']] },
   'just-weak':       { emt: [['care', 'alert']], aemt: [['care', 'alert'], ['care', 'fluid']], pm: [['care', 'alert'], ['care', 'fluid']] }
 };
-const LATE = { 'cant-breathe': { pm: [['ask', 'meds'], ['care', 'nitro']] },
+const LATE = { 'cant-breathe': { aemt: [['ask', 'meds'], ['care', 'nitro']], pm: [['ask', 'meds'], ['care', 'nitro']] },
   'heartburn': { emt: [['care', 'stemi_alert']], aemt: [['care', 'stemi_alert']], pm: [['care', 'stemi_alert']] } };
 
 async function playStrong(page, c, level, mode = 'guided', opts = {}) {
@@ -215,7 +215,7 @@ async function rates(page) {
   await t.page.goto(PAGE + '#review'); await t.page.waitForSelector('.rv');
   const txt = await t.page.textContent('#app');
   ok('A1 #review lists why each skipped case failed', /cant-breathe:.*effect for copd/.test(txt) && /passed-out:.*stages must be/.test(txt), txt.slice(-300));
-  ok('A1 #review shows draft status and sources', /draft/.test(txt) && /VIII-A5/.test(txt));
+  ok('A1 #review shows review status and sources', /approved|draft/.test(txt) && /VIII-A5/.test(txt));
   await t.ctx.close();
   OVERRIDE = '{ not json';
   const t2 = await fresh();
@@ -247,8 +247,9 @@ async function rates(page) {
   }
   ok('A2 no EMT option is an IV, IO or AEMT+ drug (incl. nitro, diphenhydramine); PM-only drugs stay PM-only', bad.length === 0, bad.join(', '));
   ok('A2 every quoted dose matches the protocol', dose.length === 0, dose.join(', '));
-  ok('A2 every case names its protocol sources and stays labeled draft until signed off',
+  ok('A2 every case names its protocol sources and a review status',
     DATA.cases.every(c => c.review && c.review.sources.length && ['draft', 'approved'].includes(c.review.status)));
+  ok('A2 an approved case says when it passed review', DATA.cases.every(c => c.review.status !== 'approved' || /\d{4}/.test(c.review.approved || '')));
 }
 
 /* ── A3 strong paths at every level ─────────────────────────────── */
@@ -420,6 +421,20 @@ for (const c of DATA.cases) {
   await page.click(`[data-case="passed-out"]`);
   const r = await run(page);
   ok('A10 resumes at the same stage with findings kept', r.si === 1 && r.found.circ && /84\/52/.test(await page.textContent('.strip')));
+  await ctx.close();
+}
+
+/* ── A10b review labels and the nitro rule ───────────────────────────────────────────── */
+{
+  const { ctx, page } = await fresh();
+  ok('A10b approved cases show no draft label', (await page.$$('.tag.draft')).length === DATA.cases.filter(c => c.review.status !== 'approved').length);
+  // Medical direction: AEMTs may give nitro, but only after a 12-lead.
+  await page.click('[data-level="aemt"]'); await page.click('[data-mode="guided"]'); await page.click('[data-case="cant-breathe"]');
+  await opt(page, 'wob'); await go(page); await next(page); await opt(page, 'sick'); await next(page);
+  await act(page, 'ask', 'meds');
+  await act(page, 'care', 'nitro');
+  const r = await run(page);
+  ok('A10b AEMT nitro before a 12-lead is marked down, with feedback', r.care.nitro && r.care.nitro.value === 'ok' && /12-lead/.test(await page.textContent('#toast')));
   await ctx.close();
 }
 
