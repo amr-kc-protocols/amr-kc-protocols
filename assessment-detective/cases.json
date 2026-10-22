@@ -12,17 +12,17 @@
   ],
   "cases": [
     {
-      "id": "not-himself",
-      "title": "Not Himself",
-      "teaser": "68-year-old man. His wife says he isn't making sense.",
+      "id": "not-herself",
+      "title": "Not Herself",
+      "teaser": "68-year-old woman. Her husband says she isn't making sense.",
       "minutes": 6,
       "review": {
         "status": "draft",
         "sources": ["VIII-A2 Altered Mental Status", "VIII-A5 Diabetic Emergencies", "VIII-A9 Stroke / CVA", "III-7 Dextrose 10%", "III-22 Glucagon", "V-20 Glucometry"],
         "check": "Oral glucose for an EMT patient who is confused but follows commands and swallows safely. Recurrent hypoglycemia on glipizide and why release at home is not offered."
       },
-      "art": { "scene": "assessment-detective/img/not-himself-scene.webp", "alt": "An older man sits at a kitchen table, pale and sweaty, staring past his wife." },
-      "dispatch": "0915. Confused 68-year-old man at home. Wife on scene.",
+      "art": { "scene": "assessment-detective/img/not-herself-scene.webp", "alt": "An older woman sits at a breakfast table, staring past the camera, her right arm hanging at her side. Her husband leans in, talking to her.", "pos": "50% 30%" },
+      "dispatch": "0915. Confused 68-year-old woman at home. Husband on scene.",
       "status0": { "label": "Concerning", "tone": "warn", "hr": 104, "bp": "162/90", "rr": 18, "spo2": 96, "ms": "Confused" },
       "dx": [
         { "id": "hypo", "label": "Low blood sugar" },
@@ -37,7 +37,7 @@
         "likely": ["hypo"],
         "danger": ["stroke"],
         "alt": ["stroke", "head", "sepsis"],
-        "note": "Low sugar from glipizide and a skipped breakfast. The right-sided signs went away once his sugar came up, so stroke is less likely. It is not ruled out: a returning deficit means a stroke alert."
+        "note": "Low sugar from glipizide and a skipped breakfast. The right-sided signs went away once her sugar came up, so stroke is less likely. It is not ruled out: a returning deficit means a stroke alert."
       },
       "findings": {
         "airway":     { "cat": "Primary", "text": "Airway open. Talking in slurred sentences. No secretions.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
@@ -46,21 +46,21 @@
         "gcs":        { "cat": "Primary", "text": "GCS 14 (E4 V4 M6). Confused to time and place. Follows commands slowly.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
         "bgl":        { "cat": "Primary", "text": "Blood glucose 38 mg/dL.", "key": true, "effect": { "hypo": "supports", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" },
                         "why": "A sugar of 38 explains confusion and sweating. It does not rule out a stroke: you only know after the sugar is fixed." },
-        "swallow":    { "cat": "Exam", "text": "Sips water on request without coughing. Keeps his head up on his own.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
+        "swallow":    { "cat": "Exam", "text": "Sips water on request without coughing. Keeps her head up on her own.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
         "cincinnati": { "cat": "Exam", "text": "Cincinnati: mild right facial droop. Right arm drifts down. Speech slurred.", "key": true, "effect": { "hypo": "neutral", "stroke": "supports", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" },
                         "why": "Low sugar can cause one-sided weakness that looks exactly like a stroke. On its own, this finding does not tell them apart." },
         "pupils":     { "cat": "Exam", "text": "Pupils 4 mm, equal, react to light.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "weakens", "tox": "weakens" } },
         "temp":       { "cat": "Exam", "text": "Temperature 98.2 °F.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "weakens", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
-        "headcheck":  { "cat": "Exam", "text": "No marks on his head or face. No tongue bite. No incontinence.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "weakens", "head": "weakens", "tox": "neutral" } },
+        "headcheck":  { "cat": "Exam", "text": "No marks on her head or face. No tongue bite. No incontinence.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "weakens", "head": "weakens", "tox": "neutral" } },
         "monitor":    { "cat": "Exam", "text": "Monitor: sinus tachycardia 104.", "text_emt": "Monitor on. Pulse 104 and regular. Rhythm interpretation is outside EMT scope.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
-        "meds":       { "cat": "History", "text": "Takes glipizide and metformin. His glipizide dose went up last week. Took it at 0700.", "key": true, "effect": { "hypo": "supports", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" },
-                        "why": "Glipizide is a sulfonylurea. It lasts for hours, so his sugar can drop again after you fix it." },
-        "meal":       { "cat": "History", "text": "Skipped breakfast. 'Wasn't hungry.'", "effect": { "hypo": "supports", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
-        "lkw":        { "cat": "History", "text": "Last known well 0800, when his wife left for the store. Found like this at 0855.", "key": true, "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" },
+        "meds":       { "cat": "History", "text": "Takes glipizide and metformin. Her glipizide dose went up last week. Took it at 0700.", "key": true, "effect": { "hypo": "supports", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" },
+                        "why": "Glipizide is a sulfonylurea. It lasts for hours, so her sugar can drop again after you fix it." },
+        "meal":       { "cat": "History", "text": "Breakfast is in front of her, barely touched. 'Wasn't hungry.'", "effect": { "hypo": "supports", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" } },
+        "lkw":        { "cat": "History", "text": "Last known well 0800, when her husband left for the store. Found like this at 0855.", "key": true, "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "neutral" },
                         "why": "Last known well is the most important time in a stroke workup. Get it early, whatever you think is going on." },
         "pmh":        { "cat": "History", "text": "Type 2 diabetes, high blood pressure, high cholesterol. No past stroke or seizures.", "effect": { "hypo": "supports", "stroke": "neutral", "sepsis": "neutral", "seizure": "weakens", "head": "neutral", "tox": "neutral" } },
         "ill":        { "cat": "History", "text": "No fever, cough or urinary symptoms. No fall. No headache.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "weakens", "seizure": "neutral", "head": "weakens", "tox": "neutral" } },
-        "etoh":       { "cat": "History", "text": "No alcohol or other drugs. Wife is sure.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "weakens" } },
+        "etoh":       { "cat": "History", "text": "No alcohol or other drugs. Husband is sure.", "effect": { "hypo": "neutral", "stroke": "neutral", "sepsis": "neutral", "seizure": "neutral", "head": "neutral", "tox": "weakens" } },
         "neuro2": {
           "cat": "Recheck",
           "key": true,
@@ -82,7 +82,7 @@
           { "id": "circ", "label": "Pulse, skin and BP", "phase": "primary", "min": 1, "reveals": "circ" },
           { "id": "gcs", "label": "Mental status (GCS)", "phase": "primary", "min": 0.5, "reveals": "gcs" },
           { "id": "bgl", "label": "Blood glucose", "phase": "primary", "min": 1, "reveals": "bgl" },
-          { "id": "swallow", "label": "Can he swallow safely?", "min": 0.5, "reveals": "swallow" },
+          { "id": "swallow", "label": "Can she swallow safely?", "min": 0.5, "reveals": "swallow" },
           { "id": "cincinnati", "label": "Cincinnati stroke scale", "min": 1, "reveals": "cincinnati" },
           { "id": "pupils", "label": "Pupils", "min": 0.5, "reveals": "pupils" },
           { "id": "temp", "label": "Temperature", "min": 1, "reveals": "temp" },
@@ -91,42 +91,42 @@
           { "id": "neuro2", "label": "Recheck glucose and neuro exam", "min": 2, "reveals": "neuro2", "recheck": true }
         ],
         "ask": [
-          { "id": "meds", "label": "What medicines does he take?", "min": 1, "reveals": "meds" },
-          { "id": "meal", "label": "Has he eaten today?", "min": 0.5, "reveals": "meal" },
-          { "id": "lkw", "label": "When was he last normal?", "min": 0.5, "reveals": "lkw" },
+          { "id": "meds", "label": "What medicines does she take?", "min": 1, "reveals": "meds" },
+          { "id": "meal", "label": "Has she eaten today?", "min": 0.5, "reveals": "meal" },
+          { "id": "lkw", "label": "When was she last normal?", "min": 0.5, "reveals": "lkw" },
           { "id": "pmh", "label": "Medical history?", "min": 1, "reveals": "pmh" },
           { "id": "ill", "label": "Recent illness, fall or headache?", "min": 1, "reveals": "ill" },
           { "id": "etoh", "label": "Alcohol or other drugs?", "min": 0.5, "reveals": "etoh" }
         ],
         "care": [
-          { "id": "lateral", "label": "Protect the airway; position of comfort, ready to roll him to his side", "min": 0.5, "value": "ok",
-            "why": "Reasonable. His airway is open now, but stay ready if his mental status drops." },
+          { "id": "lateral", "label": "Protect the airway; position of comfort, ready to roll her to her side", "min": 0.5, "value": "ok",
+            "why": "Reasonable. Her airway is open now, but stay ready if her mental status drops." },
           { "id": "o2", "label": "Oxygen by non-rebreather", "min": 1, "value": "poor",
             "why": "SpO2 is 96%. Protocol targets ≥94% and says to avoid routine oxygen in a possible stroke.", "src": "VIII-A9" },
           { "id": "oralglucose", "label": "Oral glucose 15–25 g", "levels": ["emt", "aemt", "pm"], "min": 3, "value": "best", "needs": "swallow",
-            "why": "Right for an EMT: he is awake, follows commands and can swallow.",
-            "why_unchecked": "The right drug, but you gave it before confirming he can swallow. Check that first in anyone who is confused.",
-            "why_iv": "Fine if he swallows safely, but with an IV available, D10 is faster and more reliable.", "src": "VIII-A5",
+            "why": "Right for an EMT: she is awake, follows commands and can swallow.",
+            "why_unchecked": "The right drug, but you gave it before confirming she can swallow. Check that first in anyone who is confused.",
+            "why_iv": "Fine if she swallows safely, but with an IV available, D10 is faster and more reliable.", "src": "VIII-A5",
             "status": { "label": "Improving", "tone": "ok", "ms": "Waking up", "hr": 96 } },
           { "id": "iv", "label": "Peripheral IV", "levels": ["aemt", "pm"], "min": 2, "value": "ok", "src": "VIII-A2" },
           { "id": "d10", "label": "Dextrose 10%, 100–250 mL IV", "levels": ["aemt", "pm"], "min": 3, "value": "best", "needs": "iv", "needs_auto": true,
             "why": "Right drug, right route. Recheck glucose in 5 minutes.", "src": "VIII-A2, III-7",
             "status": { "label": "Improving", "tone": "ok", "ms": "Alert", "hr": 92 } },
           { "id": "glucagon", "label": "Glucagon 1 mg IM", "levels": ["pm"], "min": 2, "value": "ok",
-            "why": "Glucagon is for an unconscious patient without IV access. He has a good vein, and D10 works faster.", "src": "III-22",
+            "why": "Glucagon is for an unconscious patient without IV access. She has a good vein, and D10 works faster.", "src": "III-22",
             "status": { "label": "Improving", "tone": "ok", "ms": "Waking up", "hr": 98 } },
           { "id": "stroke_alert", "label": "Pre-alert a stroke center now", "min": 1, "value": "ok",
             "why": "Low sugar is the most likely cause, but if you can't fix the sugar fast this is reasonable. If deficits persist after the sugar is corrected, it is required.", "src": "VIII-A9" },
-          { "id": "lower_bp", "label": "Lower his blood pressure", "levels": ["pm"], "min": 2, "value": "harm",
+          { "id": "lower_bp", "label": "Lower her blood pressure", "levels": ["pm"], "min": 2, "value": "harm",
             "why": "Never lower BP in a possible stroke without a physician order. Permissive hypertension protects the brain.", "src": "VIII-A9" },
           { "id": "transport", "label": "Package and begin transport", "min": 3, "value": "ok", "transport": true }
         ]
       },
       "stages": [
         { "id": "first", "type": "first",
-          "scene": "A kitchen. A man sits at the table, staring. He is pale and his shirt is damp with sweat.",
-          "quote": { "who": "Wife", "text": "He's not making sense. He was fine when I left for the store." },
-          "audio": "assessment-detective/audio/not-himself-wife.mp3",
+          "scene": "A kitchen. She sits at the breakfast table, staring past you. Her right arm hangs at her side and her face is damp with sweat.",
+          "quote": { "who": "Husband", "text": "She's not making sense. She was fine when I left for the store." },
+          "audio": "assessment-detective/audio/not-herself-husband.mp3",
           "concerns": [
             { "id": "ams", "label": "Altered mental status", "good": true },
             { "id": "sweat", "label": "Pale, sweaty skin", "good": true },
@@ -135,7 +135,7 @@
             { "id": "speech", "label": "Abnormal speech", "good": true }
           ],
           "sick": "sick",
-          "why": "Confusion with pale, sweaty skin is a sick patient until proven otherwise, even though he is talking." },
+          "why": "Confusion with pale, sweaty skin is a sick patient until proven otherwise, even though she is talking." },
         { "id": "primary", "type": "primary",
           "prompt": "Run your primary. Use Assess, and give care for anything urgent.",
           "required": ["airway", "breathing", "circ", "gcs", "bgl"],
@@ -156,7 +156,7 @@
         { "id": "change", "type": "change",
           "variants": [
             { "if": "care:oralglucose|care:d10|care:glucagon",
-              "text": "En route, 20 minutes later. He says, 'I feel shaky again.' He's sweating. Glucose 61.",
+              "text": "En route, 20 minutes later. She says, 'I feel shaky again.' She's sweating. Glucose 61.",
               "time": 20,
               "status": { "label": "Concerning", "tone": "warn", "hr": 102, "ms": "Alert, shaky" },
               "reveal": { "cat": "Recheck", "text": "En route: shaky and sweaty again. Glucose 61." },
@@ -164,51 +164,51 @@
                 "prompt": "What's your next step?",
                 "options": [
                   { "id": "repeat_d10", "label": "Repeat D10 IV and recheck in 5 minutes", "levels": ["aemt", "pm"], "grade": "best", "why": "Sulfonylurea lows come back. Repeat dextrose and tell the hospital about the glipizide.", "care": "d10_repeat" },
-                  { "id": "repeat_oral", "label": "More oral glucose; he's still swallowing well", "levels": ["emt"], "grade": "best", "why": "He's awake and swallowing. Repeat oral glucose and recheck in 15 minutes.", "care": "oral_repeat" },
-                  { "id": "stroke_now", "label": "Call a stroke alert", "grade": "poor", "why": "No deficit has come back. This is his glipizide wearing on, not a new stroke." },
-                  { "id": "watch", "label": "Recheck at the hospital; he's talking now", "grade": "harm", "why": "61 and symptomatic is hypoglycemia. Treat it now; it will keep falling." }
+                  { "id": "repeat_oral", "label": "More oral glucose; she's still swallowing well", "levels": ["emt"], "grade": "best", "why": "She's awake and swallowing. Repeat oral glucose and recheck in 15 minutes.", "care": "oral_repeat" },
+                  { "id": "stroke_now", "label": "Call a stroke alert", "grade": "poor", "why": "No deficit has come back. This is her glipizide wearing on, not a new stroke." },
+                  { "id": "watch", "label": "Recheck at the hospital; she's talking now", "grade": "harm", "why": "61 and symptomatic is hypoglycemia. Treat it now; it will keep falling." }
                 ]
               } },
-            { "text": "Five minutes later. He's harder to wake, mumbling, not following commands. GCS 11. Glucose 31.",
+            { "text": "Five minutes later. She's harder to wake, mumbling, not following commands. GCS 11. Glucose 31.",
               "time": 5,
               "status": { "label": "Critical", "tone": "bad", "hr": 112, "ms": "GCS 11", "spo2": 95 },
               "reveal": { "cat": "Recheck", "text": "Deteriorating: GCS 11, glucose 31. Can no longer follow commands." },
               "question": {
-                "prompt": "His sugar is still untreated. What now?",
+                "prompt": "Her sugar is still untreated. What now?",
                 "options": [
                   { "id": "d10_now", "label": "IV and D10 now; recheck in 5 minutes", "levels": ["aemt", "pm"], "grade": "best", "why": "Late, but the right move. Glucose should have been fixed in the primary.", "care": "d10" },
                   { "id": "glucagon_now", "label": "Glucagon 1 mg IM if no IV is quick", "levels": ["pm"], "grade": "ok", "why": "Reasonable if IV access will be slow; D10 is faster if you have a line.", "care": "glucagon" },
-                  { "id": "oral_now", "label": "Oral glucose between his cheek and gum", "levels": ["emt", "aemt", "pm"], "grade": "harm", "why": "He can't follow commands or protect his airway. Oral glucose now risks aspiration." },
-                  { "id": "airway_go", "label": "Side position, airway, ALS intercept, rapid transport", "levels": ["emt"], "grade": "best", "why": "Without IV dextrose in your scope, protect the airway and get him to definitive care fast." }
+                  { "id": "oral_now", "label": "Oral glucose between her cheek and gum", "levels": ["emt", "aemt", "pm"], "grade": "harm", "why": "She can't follow commands or protect her airway. Oral glucose now risks aspiration." },
+                  { "id": "airway_go", "label": "Side position, airway, ALS intercept, rapid transport", "levels": ["emt"], "grade": "best", "why": "Without IV dextrose in your scope, protect the airway and get her to definitive care fast." }
                 ]
               } }
           ] },
         { "id": "handoff", "type": "handoff",
           "problems": [
-            { "id": "p1", "label": "68M on glipizide, symptomatic low sugar; right-sided deficits resolved with glucose", "grade": "best" },
-            { "id": "p2", "label": "68M with acute stroke, last known well 0800", "grade": "poor", "why": "His deficits cleared with sugar. Calling it a stroke sends the hospital the wrong way." },
-            { "id": "p3", "label": "68M confused; cause not yet clear", "grade": "ok", "why": "Honest, but you have strong evidence. Say what you think and what you're still watching for." }
+            { "id": "p1", "label": "68F on glipizide, symptomatic low sugar; right-sided deficits resolved with glucose", "grade": "best" },
+            { "id": "p2", "label": "68F with acute stroke, last known well 0800", "grade": "poor", "why": "Her deficits cleared with sugar. Calling it a stroke sends the hospital the wrong way." },
+            { "id": "p3", "label": "68F confused; cause not yet clear", "grade": "ok", "why": "Honest, but you have strong evidence. Say what you think and what you're still watching for." }
           ],
           "priorities": [
             { "id": "q1", "label": "Recheck glucose often: glipizide lows come back", "good": true },
             { "id": "q2", "label": "Repeat GCS and Cincinnati; any deficit returns = stroke alert", "good": true },
             { "id": "q3", "label": "Report last known well 0800", "good": true },
-            { "id": "q4", "label": "OK to release home once glucose is over 80", "good": false, "why": "Not on a sulfonylurea. His low will recur for hours; he needs the hospital." },
-            { "id": "q5", "label": "Start lowering his blood pressure", "good": false, "why": "Don't lower BP in a possible stroke without a physician order." }
+            { "id": "q4", "label": "OK to release home once glucose is over 80", "good": false, "why": "Not on a sulfonylurea. Her low will recur for hours; she needs the hospital." },
+            { "id": "q5", "label": "Start lowering her blood pressure", "good": false, "why": "Don't lower BP in a possible stroke without a physician order." }
           ] }
       ],
       "scoring": [
         { "id": "bgl_primary", "area": "safety", "w": 3, "test": "found:bgl@primary", "well": "You checked glucose in the primary: the most common reversible cause of altered mental status.", "miss": "Glucose wasn't checked in the primary. In any confused patient, it's part of D." },
-        { "id": "treat_sugar", "area": "safety", "w": 3, "test": "care:oralglucose@investigate|care:d10@investigate|care:glucagon@investigate", "well": "You treated the low sugar before moving on.", "miss": "The low sugar wasn't treated until he got worse. Fix reversible causes as you find them." },
-        { "id": "swallow_first", "area": "safety", "w": 1, "test": "!care:oralglucose|found:swallow<care:oralglucose", "well": "You confirmed he could swallow before oral glucose.", "miss": "Oral glucose went in before you checked he could swallow." },
-        { "id": "no_harm", "area": "safety", "w": 2, "test": "!care:lower_bp", "well": "You left his blood pressure alone.", "miss": "Lowering BP in a possible stroke without an order can widen the injury." },
+        { "id": "treat_sugar", "area": "safety", "w": 3, "test": "care:oralglucose@investigate|care:d10@investigate|care:glucagon@investigate", "well": "You treated the low sugar before moving on.", "miss": "The low sugar wasn't treated until she got worse. Fix reversible causes as you find them." },
+        { "id": "swallow_first", "area": "safety", "w": 1, "test": "!care:oralglucose|found:swallow<care:oralglucose", "well": "You confirmed she could swallow before oral glucose.", "miss": "Oral glucose went in before you checked she could swallow." },
+        { "id": "no_harm", "area": "safety", "w": 2, "test": "!care:lower_bp", "well": "You left her blood pressure alone.", "miss": "Lowering BP in a possible stroke without an order can widen the injury." },
         { "id": "lkw", "area": "assess", "w": 2, "test": "found:lkw", "well": "You got the last-known-well time.", "miss": "Last known well wasn't asked. Without it, a stroke center can't decide on treatment." },
-        { "id": "meds", "area": "assess", "w": 2, "test": "found:meds", "well": "You found the glipizide, which predicts the low coming back.", "miss": "You didn't ask about his medicines. The glipizide explains the low and predicts it will recur." },
+        { "id": "meds", "area": "assess", "w": 2, "test": "found:meds", "well": "You found the glipizide, which predicts the low coming back.", "miss": "You didn't ask about her medicines. The glipizide explains the low and predicts it will recur." },
         { "id": "cincinnati", "area": "assess", "w": 2, "test": "found:cincinnati", "well": "You did a stroke scale.", "miss": "No stroke scale. Document the deficit so the hospital can see it resolve." },
         { "id": "danger_dx", "area": "reason", "w": 2, "test": "dx:stroke@ddx", "well": "You kept stroke on the list even with a low sugar.", "miss": "Stroke wasn't on your differential. Low sugar and stroke look alike until the sugar is fixed." },
         { "id": "lead_end", "area": "reason", "w": 3, "test": "lead:hypo@handoff", "well": "Your working impression fit the evidence.", "miss": "Your final impression didn't match the evidence: deficits that clear with glucose point to low sugar." },
         { "id": "recheck", "area": "reassess", "w": 3, "test": "found:neuro2", "well": "You rechecked glucose and the neuro exam after treatment.", "miss": "No recheck after treatment. That's the step that tells low sugar from stroke." },
-        { "id": "recur", "area": "reassess", "w": 2, "test": "pick:change:repeat_d10|pick:change:repeat_oral|pick:change:d10_now|pick:change:glucagon_now|pick:change:airway_go", "well": "You acted on the change instead of waiting.", "miss": "When his status changed, the response didn't fix the problem." }
+        { "id": "recur", "area": "reassess", "w": 2, "test": "pick:change:repeat_d10|pick:change:repeat_oral|pick:change:d10_now|pick:change:glucagon_now|pick:change:airway_go", "well": "You acted on the change instead of waiting.", "miss": "When her status changed, the response didn't fix the problem." }
       ],
       "takeaway": "Check glucose in every confused patient, fix it, then recheck the neuro exam. A sulfonylurea low can come back."
     },
@@ -216,15 +216,15 @@
     {
       "id": "cant-breathe",
       "title": "Can't Catch Her Breath",
-      "teaser": "74-year-old woman woke up gasping at 0230.",
+      "teaser": "74-year-old woman, gasping at her kitchen table.",
       "minutes": 7,
       "review": {
         "status": "draft",
         "sources": ["II-6 Acute Pulmonary Edema", "V-5 CPAP (Flow-Safe II)", "VIII-C2 Bronchospasm / Respiratory Distress", "VIII-B2 Chest Pain / ACS", "III-16 Nitroglycerin"],
         "check": "Nitroglycerin is offered to Paramedics only, following II-6 and VIII-B2. The formulary (III-16) lists SL nitro as AEMT+. Confirm which applies. CPAP is offered at all levels per the scope table and V-5."
       },
-      "art": { "scene": "assessment-detective/img/cant-breathe-scene.webp", "alt": "An older woman sits on the edge of her bed, leaning forward on her knees, struggling to breathe." },
-      "dispatch": "0310. 74-year-old woman, trouble breathing. Daughter on scene.",
+      "art": { "scene": "assessment-detective/img/cant-breathe-scene.webp", "alt": "An older woman sits at a kitchen table, braced on both hands, mouth open, struggling to breathe. Her daughter leans in behind her.", "pos": "50% 25%" },
+      "dispatch": "0710. 74-year-old woman, trouble breathing. Daughter on scene.",
       "status0": { "label": "Critical", "tone": "bad", "hr": 118, "bp": "204/112", "rr": 34, "spo2": 85, "ms": "Anxious" },
       "dx": [
         { "id": "chf", "label": "Fluid in the lungs (heart failure)" },
@@ -257,7 +257,7 @@
         "pmh":       { "cat": "History", "text": "Heart failure and mild COPD. Never on home oxygen. Has had 'fluid' before.", "effect": { "chf": "supports", "copd": "supports", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "neutral" } },
         "meds":      { "cat": "History", "text": "Ran out of her furosemide 4 days ago. Lisinopril, an albuterol inhaler (used 3 times tonight, no help). No sildenafil-type drugs.", "key": true, "effect": { "chf": "supports", "copd": "weakens", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "neutral" },
                        "why": "Off her water pill: a classic trigger. An inhaler that didn't help points away from a pure COPD flare." },
-        "onset":     { "cat": "History", "text": "Sleeping in her recliner for 3 nights; can't lie flat. Woke at 0230 gasping.", "key": true, "effect": { "chf": "supports", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "weakens" },
+        "onset":     { "cat": "History", "text": "Sleeping in her recliner for 3 nights; can't lie flat. Woke at 0500 gasping and it's gotten worse.", "key": true, "effect": { "chf": "supports", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "weakens" },
                        "why": "Can't lie flat and waking up gasping are textbook fluid overload." },
         "cp":        { "cat": "History", "text": "'No chest pain. I just can't breathe.'", "effect": { "chf": "neutral", "copd": "neutral", "pna": "neutral", "acs": "neutral", "pe": "neutral", "anx": "neutral" },
                        "why": "Older women and people with diabetes often have heart attacks without chest pain. This doesn't rule one out." },
@@ -323,18 +323,18 @@
       },
       "stages": [
         { "id": "first", "type": "first",
-          "scene": "A dim bedroom. She sits on the edge of the bed, hands on her knees, breathing fast. Her lips look dusky.",
+          "scene": "A kitchen. She's perched on a chair, braced on the table with both hands, breathing fast. Her daughter hovers behind her.",
           "quote": { "who": "Patient", "text": "Can't… get… air." },
           "audio": "assessment-detective/audio/cant-breathe-patient.mp3",
           "concerns": [
             { "id": "wob", "label": "Severe work of breathing", "good": true },
             { "id": "speech", "label": "Speaking only a few words", "good": true },
-            { "id": "color", "label": "Dusky color", "good": true },
+            { "id": "brace", "label": "Bracing on her arms to breathe", "good": true },
             { "id": "bleed", "label": "Major bleeding", "good": false },
             { "id": "cool", "label": "She's calm and resting", "good": false }
           ],
           "sick": "sick",
-          "why": "Tripod position, a few words per breath and dusky lips: she is critically ill from the doorway." },
+          "why": "Braced on her arms, a few words per breath: she is critically ill from the doorway." },
         { "id": "primary", "type": "primary",
           "prompt": "Run your primary. Use Assess, and treat what can't wait.",
           "required": ["airway", "breathing", "circ", "gcs"],
@@ -414,17 +414,17 @@
     },
 
     {
-      "id": "fainted-at-work",
-      "title": "Fainted at Work",
-      "teaser": "26-year-old passed out in a restaurant restroom.",
+      "id": "passed-out",
+      "title": "Passed Out at Home",
+      "teaser": "26-year-old fainted in her bathroom. Now she's holding her belly.",
       "minutes": 6,
       "review": {
         "status": "draft",
         "sources": ["VIII-A1 Abdominal Pain", "VIII-D6 Shock and Hemorrhage", "VIII-F1 Obstetric Emergencies", "V-14 12-Lead ECG"],
         "check": "Fluid volumes: VIII-A1 lists 250–500 mL for hypotension, VIII-F1 500 mL, VIII-D6 250–500 mL. The case uses 250–500 mL toward SBP 90. Confirm the target."
       },
-      "art": { "scene": "assessment-detective/img/fainted-scene.webp", "alt": "A young woman lies on a break-room floor, pale, one arm across her lower belly, a coworker kneeling beside her." },
-      "dispatch": "1400. 26-year-old woman, fainted. Coworker on scene.",
+      "art": { "scene": "assessment-detective/img/passed-out-scene.webp", "alt": "A young woman sits hunched on a couch, sweaty, arms wrapped around her belly. Her roommate sits beside her, a hand on her shoulder.", "pos": "50% 25%" },
+      "dispatch": "1400. 26-year-old woman fainted at home. Roommate on scene.",
       "status0": { "label": "Concerning", "tone": "warn", "hr": 124, "bp": "84/52", "rr": 22, "spo2": 98, "ms": "Alert" },
       "dx": [
         { "id": "ectopic", "label": "Ruptured ectopic pregnancy", "danger": true },
@@ -444,14 +444,14 @@
       "findings": {
         "airway":    { "cat": "Primary", "text": "Airway open. Talking in full sentences.", "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" } },
         "breathing": { "cat": "Primary", "text": "RR 22, clear on both sides. SpO2 98%.", "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" } },
-        "circ":      { "cat": "Primary", "text": "Radial pulse weak, 124. BP 84/52 lying flat. Skin pale, cool, clammy. No outside bleeding.", "key": true, "effect": { "ectopic": "supports", "vaso": "weakens", "dehyd": "neutral", "gib": "supports", "ovary": "neutral", "cardiac": "neutral" },
-                       "why": "A simple faint recovers once she's flat. Still fast and low lying down means shock." },
+        "circ":      { "cat": "Primary", "text": "Radial pulse weak, 124. BP 84/52 sitting up. Skin pale, cool, clammy. No outside bleeding.", "key": true, "effect": { "ectopic": "supports", "vaso": "neutral", "dehyd": "neutral", "gib": "supports", "ovary": "neutral", "cardiac": "neutral" },
+                       "why": "Fast and low sitting up after a faint. Lay her flat and recheck: a simple faint recovers lying down; shock doesn't." },
         "gcs":       { "cat": "Primary", "text": "Alert, anxious. Dizzy when she lifts her head.", "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" } },
         "abd":       { "cat": "Exam", "text": "Tender right lower belly with guarding. Belly slightly swollen.", "key": true, "effect": { "ectopic": "supports", "vaso": "weakens", "dehyd": "weakens", "gib": "neutral", "ovary": "supports", "cardiac": "weakens" } },
         "ecg":       { "cat": "Exam", "text": "Monitor and 12-lead: sinus tachycardia 124. No arrhythmia.", "text_emt": "Monitor on, 12-lead sent. Pulse 124 and regular. Interpretation is outside EMT scope.", "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "weakens" } },
         "bgl":       { "cat": "Exam", "text": "Blood glucose 96 mg/dL.", "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" } },
-        "ortho":     { "cat": "Exam", "text": "You sit her up. She goes gray and nearly faints again. HR 140.", "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" },
-                       "why": "She was already in shock lying flat. Orthostatics add nothing and nearly dropped her again." },
+        "ortho":     { "cat": "Exam", "text": "You stand her up. She goes gray and nearly faints again. HR 140.", "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" },
+                       "why": "She was already in shock. Orthostatics add nothing and nearly dropped her again." },
         "lmp":       { "cat": "History", "text": "Last period about 7 weeks ago. 'They're irregular.' Could be pregnant: not using birth control.", "key": true, "effect": { "ectopic": "supports", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" },
                        "why": "A missed period plus belly pain and shock: ectopic until proven otherwise." },
         "pain":      { "cat": "History", "text": "Sharp right lower belly pain since this morning. Much worse the last hour.", "effect": { "ectopic": "supports", "vaso": "weakens", "dehyd": "neutral", "gib": "neutral", "ovary": "supports", "cardiac": "weakens" } },
@@ -470,6 +470,10 @@
               "text": "After 500 mL: HR 116, BP 92/58. Still pale.",
               "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" },
               "why": "A small rise after fluid doesn't mean she's fixed. She is still bleeding inside." },
+            { "if": "!care:supine",
+              "text": "Still sitting up: HR 130, BP 80/50. Grayer. 'The room is spinning.'",
+              "effect": { "ectopic": "neutral", "vaso": "neutral", "dehyd": "neutral", "gib": "neutral", "ovary": "neutral", "cardiac": "neutral" },
+              "why": "Sitting up keeps her pressure down whatever the cause. Lay her flat, then recheck: that's what separates a faint from bleeding." },
             { "text": "Lying flat: HR 128, BP 82/50. Still pale and clammy.",
               "effect": { "ectopic": "supports", "vaso": "weakens", "dehyd": "neutral", "gib": "supports", "ovary": "neutral", "cardiac": "neutral" },
               "why": "A faint would be better by now. Persistent shock while lying flat points to blood loss." }
@@ -500,7 +504,7 @@
           { "id": "pmh", "label": "Medical history and medicines?", "min": 0.5, "reveals": "pmh" }
         ],
         "care": [
-          { "id": "supine", "label": "Keep her flat and warm", "min": 0.5, "value": "best", "why": "Shock positioning per protocol: supine and warm.", "src": "VIII-D6" },
+          { "id": "supine", "label": "Lay her flat and keep her warm", "min": 0.5, "value": "best", "why": "She's sitting up in shock. Supine and warm, per protocol.", "src": "VIII-D6" },
           { "id": "o2", "label": "Oxygen", "min": 1, "value": "ok", "why": "SpO2 is 98%, but protocol allows oxygen for signs of shock.", "src": "VIII-A1" },
           { "id": "iv", "label": "Two large-bore IVs", "levels": ["aemt", "pm"], "min": 3, "value": "best", "src": "VIII-D6" },
           { "id": "fluid", "label": "Normal saline 250–500 mL bolus", "levels": ["aemt", "pm"], "min": 2, "value": "best", "needs": "iv", "needs_auto": true,
@@ -515,22 +519,22 @@
       },
       "stages": [
         { "id": "first", "type": "first",
-          "scene": "A restaurant break room. A young woman lies on the floor, pale, an arm across her lower belly. A coworker kneels beside her.",
+          "scene": "A living room. She sits hunched on the couch, arms around her belly, damp with sweat. Her roommate says she fainted in the bathroom.",
           "quote": { "who": "Patient", "text": "I'm fine. I just got dizzy. This is so embarrassing." },
           "audio": "assessment-detective/audio/fainted-patient.mp3",
           "concerns": [
-            { "id": "pale", "label": "Pale, clammy skin", "good": true },
+            { "id": "pale", "label": "Pale, sweaty skin", "good": true },
             { "id": "syncope", "label": "She fainted", "good": true },
-            { "id": "belly", "label": "Holding her lower belly", "good": true },
+            { "id": "belly", "label": "Holding her belly", "good": true },
             { "id": "airway", "label": "Airway obstruction", "good": false },
             { "id": "fine", "label": "She says she's fine, so she's fine", "good": false }
           ],
           "sick": "sick",
-          "why": "Pale, clammy, still lying down and guarding her belly. 'I'm fine' doesn't change what you see." },
+          "why": "Sweaty, pale and doubled over her belly after a faint. 'I'm fine' doesn't change what you see." },
         { "id": "primary", "type": "primary",
           "prompt": "Run your primary. Use Assess, and treat what can't wait.",
           "required": ["airway", "breathing", "circ", "gcs"],
-          "why": "The circulation check is where this case turns: fast, weak and low while lying flat." },
+          "why": "The circulation check is where this case turns: fast, weak and low. Lay her flat, then see whether it recovers." },
         { "id": "ddx", "type": "differential",
           "prompt": "What could explain this? Pick up to three." },
         { "id": "investigate", "type": "investigate",
@@ -540,7 +544,7 @@
               { "id": "lmp", "grade": "best", "why": "A possible pregnancy changes everything in a young woman with belly pain and shock." },
               { "id": "abd", "grade": "ok", "why": "Useful, but tenderness alone doesn't separate an ectopic from an ovarian problem." },
               { "id": "ecg", "grade": "ok", "why": "Reasonable for fainting, but a rhythm problem doesn't explain the belly pain." },
-              { "id": "ortho", "grade": "poor", "why": "She's already in shock lying flat. Sitting her up risks another faint and tells you nothing new." }
+              { "id": "ortho", "grade": "poor", "why": "She's already in shock. Standing her up risks another faint and tells you nothing new." }
             ]
           },
           "prompt": "Gather what you need. Use Assess and Ask, then continue. Remember: scene time counts in shock." },
@@ -568,7 +572,7 @@
                 "options": [
                   { "id": "notify", "label": "Update the ED: suspected ruptured ectopic in shock; ask for OB/surgery", "grade": "best", "why": "An early, clear call gets the surgeon ready." },
                   { "id": "more_fluid", "label": "Another 250–500 mL bolus toward SBP 90; reassess", "levels": ["aemt", "pm"], "grade": "best", "why": "Small boluses, reassess after each. Don't chase a normal BP." },
-                  { "id": "ortho2", "label": "Check orthostatics to confirm blood loss", "grade": "harm", "why": "She's in shock lying flat. Never stand or sit her up to prove it." },
+                  { "id": "ortho2", "label": "Check orthostatics to confirm blood loss", "grade": "harm", "why": "She's in shock. Never stand her up to prove it." },
                   { "id": "closer", "label": "Divert to the closest clinic", "grade": "poor", "why": "She needs an ED with surgery and OB, not just the nearest door." }
                 ]
               } }
@@ -583,12 +587,13 @@
             { "id": "q1", "label": "OB/surgery ready on arrival", "good": true },
             { "id": "q2", "label": "Vitals every 5 minutes; keep her flat and warm", "good": true },
             { "id": "q3", "label": "Report the volume of fluid given and her response", "good": true },
-            { "id": "q4", "label": "Orthostatic vitals on arrival", "good": false, "why": "She's in shock. Don't sit her up to measure it." },
+            { "id": "q4", "label": "Orthostatic vitals on arrival", "good": false, "why": "She's in shock. Don't stand her up to measure it." },
             { "id": "q5", "label": "She can wait in triage; she's talking", "good": false, "why": "Talking doesn't mean stable. She needs a room and a surgeon." }
           ] }
       ],
       "scoring": [
         { "id": "shock", "area": "safety", "w": 3, "test": "found:circ@primary", "well": "You found shock in the primary.", "miss": "Circulation wasn't checked in the primary, and that's where the shock was." },
+        { "id": "supine", "area": "safety", "w": 2, "test": "care:supine@primary", "well": "You laid her flat as soon as you found shock.", "miss": "She stayed sitting up in shock. Lay her flat as soon as you find a low BP." },
         { "id": "flat", "area": "safety", "w": 2, "test": "!care:walk&!found:ortho&!pick:change:ortho2", "well": "You kept her flat; no orthostatics, no walking.", "miss": "Sitting or standing a patient in shock risks another collapse." },
         { "id": "scene", "area": "safety", "w": 3, "test": "care:transport@investigate&scene<=16@investigate", "well": "You moved her quickly. Scene time matters in internal bleeding.", "miss": "Scene time ran long. Shock with internal bleeding needs a surgeon: treat en route." },
         { "id": "lmp", "area": "assess", "w": 3, "test": "found:lmp", "well": "You asked about her period and pregnancy.", "miss": "No pregnancy history. Protocol: belly pain in a woman of childbearing age is ectopic until proven otherwise." },

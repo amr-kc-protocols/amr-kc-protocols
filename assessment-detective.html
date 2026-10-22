@@ -135,7 +135,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--brand2);outline-off
 /* ── scene card and decisions ── */
 .stage-lbl{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--brand2);margin:16px 2px 6px}
 .scene{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-.scene img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--card2)}
+.scene img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:50% 25%;background:var(--card2)}
 .scene-body{padding:14px}
 .scene-text{font-size:16px}
 .quote{margin-top:10px;padding:9px 12px;border-left:4px solid var(--brand2);background:var(--card2);border-radius:0 10px 10px 0;font-size:15px}
@@ -522,7 +522,8 @@ function slotsHtml(){
 }
 function sceneCard(text, quote, audio, art){
   var h = '<div class="scene">';
-  if(art && art.scene) h += '<img src="' + esc(art.scene) + '" alt="' + esc(art.alt || '') + '" data-art>';
+  if(art && art.scene) h += '<img src="' + esc(art.scene) + '" alt="' + esc(art.alt || '') + '" data-art'
+    + (art.pos && /^[\d.]+% [\d.]+%$/.test(art.pos) ? ' style="object-position:' + art.pos + '"' : '') + '>';
   h += '<div class="scene-body"><p class="scene-text">' + esc(text) + '</p>';
   if(quote) h += '<div class="quote"><small>' + esc(quote.who) + '</small>&ldquo;' + esc(quote.text) + '&rdquo;</div>';
   if(audio) h += '<button type="button" class="audio-btn" data-audio="' + esc(audio) + '" hidden>&#9654; Hear the patient</button>';

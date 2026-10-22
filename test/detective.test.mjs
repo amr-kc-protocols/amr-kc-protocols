@@ -21,7 +21,8 @@
  *       answers both earn credit)
  *   A9  the debrief accepts an honest "unclear yet" only where the case says so
  *   A10 a case resumes after the page is closed mid-case
- *   A11 missing art or audio shows nothing broken
+ *   A11 scene art is present, light and described; missing art or audio
+ *       shows nothing broken
  *   A12 a 320 px phone never scrolls sideways, on every screen
  *   A13 it works with storage blocked
  *   A14 it is reachable from the Field Guide and precached for offline
@@ -112,9 +113,9 @@ async function answerEv(page, right = true) {
 
 /* Strong paths. What a sound crew would do, per case and level. */
 const CARE = {
-  'not-himself':     { emt: [['assess', 'swallow'], ['care', 'oralglucose']], aemt: [['care', 'd10']], pm: [['care', 'd10']] },
+  'not-herself':     { emt: [['assess', 'swallow'], ['care', 'oralglucose']], aemt: [['care', 'd10']], pm: [['care', 'd10']] },
   'cant-breathe':    { emt: [['care', 'upright'], ['care', 'cpap']], aemt: [['care', 'upright'], ['care', 'cpap']], pm: [['care', 'upright'], ['care', 'cpap']] },
-  'fainted-at-work': { emt: [['care', 'supine']], aemt: [['care', 'supine'], ['care', 'fluid']], pm: [['care', 'supine'], ['care', 'fluid']] }
+  'passed-out': { emt: [['care', 'supine']], aemt: [['care', 'supine'], ['care', 'fluid']], pm: [['care', 'supine'], ['care', 'fluid']] }
 };
 const LATE = { 'cant-breathe': { pm: [['ask', 'meds'], ['care', 'nitro']] } };
 
@@ -209,7 +210,7 @@ async function rates(page) {
   ok('A1 broken cases are skipped, the good one still plays', n === 1, n);
   await t.page.goto(PAGE + '#review'); await t.page.waitForSelector('.rv');
   const txt = await t.page.textContent('#app');
-  ok('A1 #review lists why each skipped case failed', /cant-breathe:.*effect for copd/.test(txt) && /fainted-at-work:.*stages must be/.test(txt), txt.slice(-300));
+  ok('A1 #review lists why each skipped case failed', /cant-breathe:.*effect for copd/.test(txt) && /passed-out:.*stages must be/.test(txt), txt.slice(-300));
   ok('A1 #review shows draft status and sources', /draft/.test(txt) && /VIII-A5/.test(txt));
   await t.ctx.close();
   OVERRIDE = '{ not json';
@@ -345,7 +346,7 @@ for (const c of DATA.cases) {
 /* ── A7 care across stages, filtered by level ───────────────────── */
 {
   const { ctx, page } = await fresh();
-  await page.click('[data-level="emt"]'); await page.click(`[data-case="not-himself"]`);
+  await page.click('[data-level="emt"]'); await page.click(`[data-case="not-herself"]`);
   ok('A7 care is not offered before the first impression is done', await page.isDisabled('#act-care'));
   await opt(page, 'ams'); await go(page); await next(page); await opt(page, 'sick'); await next(page);
   ok('A7 care is available from the primary', !(await page.isDisabled('#act-care')));
@@ -361,7 +362,7 @@ for (const c of DATA.cases) {
   await page.click('#sheet-x');
   await ctx.close();
   const p2 = await fresh();
-  await p2.page.click('[data-level="pm"]'); await p2.page.click(`[data-case="not-himself"]`);
+  await p2.page.click('[data-level="pm"]'); await p2.page.click(`[data-case="not-herself"]`);
   await opt(p2.page, 'ams'); await go(p2.page); await next(p2.page); await opt(p2.page, 'sick'); await next(p2.page);
   await p2.page.click('#act-care');
   const pm = await p2.page.$$eval('#sheet [data-act]', e => e.map(x => x.dataset.act));
@@ -405,26 +406,41 @@ for (const c of DATA.cases) {
 /* ── A10 resume ─────────────────────────────────────────────────── */
 {
   const { ctx, page } = await fresh();
-  await page.click(`[data-case="fainted-at-work"]`);
+  await page.click(`[data-case="passed-out"]`);
   await opt(page, 'pale'); await go(page); await next(page); await opt(page, 'sick'); await next(page);
   await act(page, 'assess', 'circ');
   await page.reload(); await page.waitForSelector('.case-card');
-  ok('A10 home offers to resume the case', /Resume where you left off/.test(await page.textContent('[data-case="fainted-at-work"]')));
-  await page.click(`[data-case="fainted-at-work"]`);
+  ok('A10 home offers to resume the case', /Resume where you left off/.test(await page.textContent('[data-case="passed-out"]')));
+  await page.click(`[data-case="passed-out"]`);
   const r = await run(page);
   ok('A10 resumes at the same stage with findings kept', r.si === 1 && r.found.circ && /84\/52/.test(await page.textContent('.strip')));
   await ctx.close();
 }
 
-/* ── A11 missing art and audio ──────────────────────────────────── */
+/* ── A11 scene art, and missing art or audio ───────────────────── */
+for (const c of DATA.cases) {
+  const f = join(ROOT, c.art.scene);
+  const size = fs.existsSync(f) ? fs.statSync(f).size : 0;
+  ok(`A11 ${c.id}: scene art exists and is small enough for a phone on one bar`, size > 0 && size <= 250 * 1024, size);
+  ok(`A11 ${c.id}: scene art has alt text`, (c.art.alt || '').length > 30);
+}
 {
   const { ctx, page } = await fresh();
-  await page.click(`[data-case="not-himself"]`);
-  await page.waitForTimeout(400);
-  ok('A11 a missing scene image is removed, not shown broken', (await page.$$('#app img')).length === 0);
+  await page.click(`[data-case="cant-breathe"]`);
+  await page.waitForFunction(() => { const i = document.querySelector('#app img'); return i && i.complete && i.naturalWidth > 0; }, null, { timeout: 5000 }).catch(() => {});
+  ok('A11 the scene art loads on the first impression', await page.$eval('#app img', i => i.naturalWidth > 0).catch(() => false));
+  ok('A11 the art keeps the faces in frame (object-position from the case)', await page.$eval('#app img', i => i.style.objectPosition === '50% 25%').catch(() => false));
   ok('A11 the audio button stays hidden until the file exists', await page.$eval('[data-audio]', b => b.hidden));
-  ok('A11 the scene text carries the case without art', /kitchen/i.test(await page.textContent('.scene-text')));
   await ctx.close();
+  const mod = JSON.parse(JSON.stringify(DATA)); mod.cases[0].art.scene = 'assessment-detective/img/missing.webp';
+  OVERRIDE = JSON.stringify(mod);
+  const t = await fresh();
+  await t.page.click(`[data-case="not-herself"]`);
+  await t.page.waitForTimeout(400);
+  ok('A11 a missing scene image is removed, not shown broken', (await t.page.$$('#app img')).length === 0);
+  ok('A11 the scene text carries the case without art', /kitchen/i.test(await t.page.textContent('.scene-text')));
+  await t.ctx.close();
+  OVERRIDE = null;
 }
 
 /* ── A12 phone width ────────────────────────────────────────────── */
@@ -451,7 +467,8 @@ for (const c of DATA.cases) {
   const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');
   ok('A14 linked from the Field Guide', idx.includes("href:'assessment-detective.html'"));
   ok('A14 page and cases precached for offline', sw.includes("'./assessment-detective.html'") && sw.includes("'./assessment-detective/cases.json'"));
-  ok('A14 cache version bumped past v50', /amrkc-2026-v(?:5[1-9]|[6-9]\d)/.test(sw));
+  ok('A14 every case\'s scene art precached', DATA.cases.every(c => sw.includes("'./" + c.art.scene + "'")));
+  ok('A14 cache version bumped past v51', /amrkc-2026-v(?:5[2-9]|[6-9]\d)/.test(sw));
 }
 
 await browser.close(); srv.close();
