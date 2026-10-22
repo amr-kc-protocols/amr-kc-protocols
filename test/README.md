@@ -55,6 +55,18 @@ These suites live here:
   speed round, learn cards and cases end to end, at 320px and with storage
   blocked, and checks the page is listed in More and precached.
 
+- **`detective.test.mjs`** — You're the Lead: Assessment Detective
+  ([`assessment-detective.html`](../assessment-detective.html) +
+  `assessment-detective/cases.json`) in headless Chromium. Every case is played
+  end to end at EMT, AEMT and Paramedic along a strong path (all four debrief
+  areas Strong) and a weak one (Safety and Reasoning called out). It defends
+  the scope of the care offered at each level and the doses quoted against the
+  2026 protocols, that the evidence check grades against the learner's own
+  leading explanation, that reading time never moves the case clock, that
+  more than one reasonable path earns credit, that a broken case is skipped
+  and listed on `#review`, and that it works at 320 px, offline and with
+  storage blocked.
+
 - **`aemt.test.mjs`** — the AEMT Series Phase 1 engine
   ([`aemt-series.html`](../aemt-series.html)), built to the Clinical Education
   build framework for Chapters 1–4. Nothing is stubbed: it drives the real page

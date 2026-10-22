@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<!--
+  You're the Lead: Assessment Detective · AMR KC Field Guide
+  The learner runs a call while building and revising a working differential:
+  first impression, primary, differential, investigation, change, handoff.
+  The question that drives it is "what would help you tell these apart?",
+  not "what's the diagnosis?".
+
+  Every case lives in assessment-detective/cases.json. Nothing in this file is
+  case content: add or edit cases there. A case that fails the schema is
+  skipped rather than breaking the game; assessment-detective.html#review
+  lists every case, its review status and sources, and anything skipped.
+
+  Time on the case clock moves only when the learner does something (an
+  assessment, a question, a treatment, a stage that takes time). Reading
+  speed never decides whether the patient does well. There is no countdown.
+
+  Art and audio are optional per case (art.scene, stage.audio). Until a file
+  exists the scene text carries the case; nothing broken is shown.
+
+  Made-up practice cases. No patient data is stored. Progress and a case in
+  progress persist in localStorage under the "detective." prefix.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Detective">
+<meta name="theme-color" content="#f4f6f9" id="theme-color">
+<meta name="description" content="You're the Lead: Assessment Detective. Run the call, build a differential, and work out what would tell the possibilities apart.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Assessment Detective — AMR KC Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script>
+/* Theme before first paint. Dark from 1900 to 0700 unless the provider chose
+   otherwise; a manual choice lasts until the next 0700/1900 switch. */
+(function(){
+  var t=null, now=new Date();
+  try{ var s=JSON.parse(localStorage.getItem('detective.theme')||'null');
+       if(s&&s.until>now.getTime()) t=s.theme; }catch(e){}
+  if(!t){ var h=now.getHours(); t=(h>=19||h<7)?'dark':'light'; }
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+<style>
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --card2:#eef2f7; --ink:#152238; --ink2:#4b5768; --ink3:#5b6676;
+  --line:#dde3ea; --brand:#173a68; --brand2:#1b63c4; --brand-ink:#ffffff;
+  --ok:#15803d; --ok-bg:#e6f6ec; --ok-line:#9ed6b3;
+  --warn:#8a5a00; --warn-bg:#fff4dc; --warn-line:#e7c675;
+  --no:#c2271d; --no-bg:#fdebea; --no-line:#f1b7b2;
+  --shadow:0 1px 2px rgba(21,34,56,.06),0 8px 24px -14px rgba(21,34,56,.35);
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+[data-theme="dark"]{
+  --bg:#0b1220; --card:#141e31; --card2:#1b2740; --ink:#e7edf6; --ink2:#b3bfd0; --ink3:#8d9ab0;
+  --line:#26344f; --brand:#9cc3ff; --brand2:#5b9cff; --brand-ink:#0b1220;
+  --ok:#4ade80; --ok-bg:#0f2a1b; --ok-line:#21603a;
+  --warn:#f6c453; --warn-bg:#2c2410; --warn-line:#6b5420;
+  --no:#ff7a6e; --no-bg:#33140f; --no-line:#7a2a22;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-appearance:none;text-align:inherit}
+button:disabled{cursor:default}
+button:focus-visible,a:focus-visible{outline:3px solid var(--brand2);outline-offset:2px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.hdr{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);
+  padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+.hdr-logo{width:32px;height:32px;border-radius:9px;background:#173a68;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px}
+.hdr-txt{flex:1;min-width:0}
+.hdr-title{font-size:14.5px;font-weight:700;color:var(--brand);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-sub{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-btn{font-size:12px;font-weight:600;color:var(--brand);text-decoration:none;padding:7px 10px;min-height:36px;
+  display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:8px;background:var(--card2);white-space:nowrap}
+.hdr-btn.icon{width:38px;justify-content:center;padding:0;font-size:16px}
+.badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:99px;background:var(--brand2);color:#fff;font-size:11px;text-align:center;line-height:18px}
+[data-theme="dark"] .badge{color:#06101f}
+
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 28px}
+.wrap.playing{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+/* ── HOME ── */
+.hero{border-radius:20px;padding:20px;color:#fff;background:linear-gradient(140deg,#0f2f57 0%,#173a68 45%,#1b63c4 100%);box-shadow:var(--shadow)}
+.hero-eye{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#9fd0ff}
+.hero h1{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:6px 0}
+.hero p{font-size:14.5px;color:#d6e6fb}
+.sec{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:20px 2px 8px}
+.seg{display:grid;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg.c3{grid-template-columns:repeat(3,1fr)} .seg.c2{grid-template-columns:repeat(2,1fr)}
+.seg button{min-height:44px;border-radius:9px;font-size:14px;font-weight:600;text-align:center;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--brand);box-shadow:var(--shadow)}
+.hint{font-size:13px;color:var(--ink3);margin:6px 2px 0}
+.case-card{display:block;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.cc-t{display:block;font-size:17px;font-weight:700;line-height:1.25}
+.cc-p{display:block;font-size:14px;color:var(--ink2);margin-top:3px}
+.case-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px;color:var(--ink3)}
+.tag{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:99px;padding:1px 8px;background:var(--card2)}
+.tag.draft{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.tag.done{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok)}
+.resume{display:block;margin-top:10px;font-size:13px;font-weight:700;color:var(--brand2)}
+
+/* ── PLAY: status strip, differential slots ── */
+.strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13px}
+.st{display:inline-flex;align-items:center;gap:5px;font-weight:700;border-radius:99px;padding:2px 9px;border:1px solid}
+.st.ok{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-line)}
+.st.warn{color:var(--warn);background:var(--warn-bg);border-color:var(--warn-line)}
+.st.bad{color:var(--no);background:var(--no-bg);border-color:var(--no-line)}
+.vit{font-family:var(--mono);font-size:12px;color:var(--ink2);display:flex;gap:9px;flex-wrap:wrap;flex:1;min-width:0}
+.vit b{color:var(--ink)}
+.vit>span{white-space:nowrap}
+.clock{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:3px 8px;background:var(--card2);min-height:30px}
+.slots{margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;width:100%;display:block}
+.slots-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.slots-top span:last-child{color:var(--brand2);letter-spacing:0;text-transform:none;font-size:12px}
+.slot-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.slot{display:block;font-size:12.5px;font-weight:600;line-height:1.25;border:1.5px dashed var(--line);border-radius:9px;padding:6px 7px;min-height:44px;color:var(--ink3);overflow-wrap:anywhere}
+.slot.full{border-style:solid;color:var(--ink);background:var(--card2)}
+.slot i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--brand2);margin-bottom:1px}
+.two-q{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;font-size:12px;color:var(--ink2)}
+.two-q>span{display:block}
+.two-q b{display:block;color:var(--ink);font-size:12.5px}
+
+/* ── scene card and decisions ── */
+.stage-lbl{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--brand2);margin:16px 2px 6px}
+.scene{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.scene img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--card2)}
+.scene-body{padding:14px}
+.scene-text{font-size:16px}
+.quote{margin-top:10px;padding:9px 12px;border-left:4px solid var(--brand2);background:var(--card2);border-radius:0 10px 10px 0;font-size:15px}
+.quote small{display:block;font-size:11.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+.audio-btn{margin-top:10px;font-size:13.5px;font-weight:700;color:var(--brand2);min-height:40px;display:inline-flex;align-items:center;gap:6px}
+.q{font-size:18px;font-weight:700;line-height:1.3;margin:16px 2px 10px}
+.q small{display:block;font-size:13px;font-weight:500;color:var(--ink3);margin-top:3px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:11px 14px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);font-size:15.5px;font-weight:600;line-height:1.3}
+.opt .mk{flex-shrink:0;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px}
+.opt.radio .mk{border-radius:50%}
+.opt[aria-pressed="true"]{border-color:var(--brand2);background:var(--card2)}
+.opt[aria-pressed="true"] .mk{background:var(--brand2);border-color:var(--brand2);color:#fff}
+.opt.r-best,.opt.r-good{border-color:var(--ok-line);background:var(--ok-bg)}
+.opt.r-ok{border-color:var(--warn-line);background:var(--warn-bg)}
+.opt.r-poor,.opt.r-harm{border-color:var(--no-line);background:var(--no-bg)}
+.opt .rt{margin-left:auto;font-size:12px;font-weight:700;white-space:nowrap}
+.opt:disabled{opacity:1}
+.opt .sub{display:block;font-size:12.5px;font-weight:500;color:var(--ink3);margin-top:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;text-align:center;gap:8px;width:100%;min-height:54px;padding:12px 18px;border-radius:14px;font-size:16px;font-weight:700;margin-top:14px}
+.btn-primary{background:var(--brand2);color:#fff}
+[data-theme="dark"] .btn-primary{color:#06101f}
+.btn-primary:disabled{opacity:.45}
+.btn-ghost{background:var(--card);border:1.5px solid var(--line)}
+.fb{margin-top:12px;border-radius:12px;padding:11px 13px;font-size:14.5px;border:1px solid var(--line);background:var(--card)}
+.fb b{display:block;font-size:13px;letter-spacing:.02em;margin-bottom:2px}
+.fb.good{border-color:var(--ok-line);background:var(--ok-bg)} .fb.good b{color:var(--ok)}
+.fb.ok{border-color:var(--warn-line);background:var(--warn-bg)} .fb.ok b{color:var(--warn)}
+.fb.bad{border-color:var(--no-line);background:var(--no-bg)} .fb.bad b{color:var(--no)}
+.got{display:grid;gap:6px;margin-top:10px}
+.got div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:14px}
+.got small{display:block;font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+.empty{font-size:14px;color:var(--ink3);background:var(--card);border:1px dashed var(--line);border-radius:10px;padding:11px;margin-top:10px}
+.finding-card{margin-top:12px;background:var(--card);border:1.5px solid var(--brand2);border-radius:12px;padding:12px 14px;font-size:15.5px}
+.finding-card small{display:block;font-size:11px;font-weight:700;color:var(--brand2);text-transform:uppercase;letter-spacing:.06em}
+
+/* ── action bar ── */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-top:1px solid var(--line);
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+.bar-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.act{min-height:60px;border-radius:12px;background:var(--card2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13.5px;font-weight:700;color:var(--brand)}
+.act span{font-size:20px;line-height:1}
+.act:disabled{color:var(--ink3);opacity:.55}
+
+/* ── sheets ── */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(5,10,20,.5)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:86vh;overflow:auto;background:var(--bg);border-radius:18px 18px 0 0;
+  padding:14px 14px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}
+.sheet-in{max-width:560px;margin:0 auto}
+.sheet-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sheet-hd h2{flex:1;font-size:18px}
+.sheet h3{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:14px 2px 6px}
+.item{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:15px;font-weight:600;margin-bottom:6px;line-height:1.3}
+.item .t{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--ink3);white-space:nowrap}
+.item.did{color:var(--ink3);font-weight:500}
+.item .ck{color:var(--ok);font-weight:700}
+.tl{font-size:14px;border-left:2px solid var(--line);margin-left:6px;padding-left:12px}
+.tl div{margin-bottom:8px}
+.tl small{font-family:var(--mono);color:var(--ink3);margin-right:6px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:50;max-width:min(520px,calc(100vw - 24px));width:max-content;
+  background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-size:14px;box-shadow:var(--shadow)}
+.toast b{display:block;font-size:12px;opacity:.8}
+
+/* ── debrief ── */
+.area{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.area-hd{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.area-hd h3{font-size:16px}
+.area .qq{font-size:13px;color:var(--ink3);margin-top:1px}
+.area ul{margin:8px 0 0 18px;font-size:14px}
+.area li{margin-bottom:4px}
+.rate{font-size:12.5px;font-weight:700;border-radius:99px;padding:2px 9px;border:1px solid;white-space:nowrap}
+.rate.strong{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-line)}
+.rate.track{color:var(--warn);background:var(--warn-bg);border-color:var(--warn-line)}
+.rate.focus{color:var(--no);background:var(--no-bg);border-color:var(--no-line)}
+.three{display:grid;gap:8px;margin-top:6px}
+.three div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:14.5px}
+.three small{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+.what{margin-top:12px;background:var(--card2);border-radius:12px;padding:12px 14px;font-size:14.5px}
+
+/* ── review page ── */
+.rv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:14px}
+.rv h3{font-size:16px}
+.rv ul{margin:6px 0 0 18px}
+.err{color:var(--no)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="hdr" id="hdr">
+  <div class="hdr-logo" aria-hidden="true">KC</div>
+  <div class="hdr-txt"><div class="hdr-title" id="hdr-title">Assessment Detective</div><div class="hdr-sub" id="hdr-sub">You're the Lead &middot; AMR KC Field Guide</div></div>
+  <button class="hdr-btn" id="btn-findings" type="button" hidden>Findings <span class="badge" id="find-n">0</span></button>
+  <button class="hdr-btn icon" id="theme-btn" type="button" aria-label="Switch theme">&#9790;</button>
+  <a class="hdr-btn" id="hdr-home" href="index.html">&#x2190; Field Guide</a>
+</header>
+
+<main class="wrap" id="app" aria-live="polite"></main>
+
+<nav class="bar" id="bar" hidden aria-label="Actions">
+  <div class="bar-in">
+    <button class="act" id="act-assess" type="button"><span aria-hidden="true">&#x1FA7A;</span>Assess</button>
+    <button class="act" id="act-ask" type="button"><span aria-hidden="true">&#x1F4AC;</span>Ask</button>
+    <button class="act" id="act-care" type="button"><span aria-hidden="true">&#x271A;</span>Care</button>
+    <button class="act" id="act-review" type="button"><span aria-hidden="true">&#x1F4CB;</span>Review</button>
+  </div>
+</nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="sheet-in" id="sheet-in"></div></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+var CONFIG = { cases: 'assessment-detective/cases.json' };
+var LS = 'detective.';
+var LEVELS = { emt:'EMT', aemt:'AEMT', pm:'Paramedic' };
+var STAGE_NAMES = { first:'First impression', primary:'Primary assessment', differential:'Initial differential',
+  investigate:'Investigation', change:'Change and reassessment', handoff:'Working impression and handoff' };
+var AREAS = [
+  { id:'safety',   name:'Safety and priorities', q:'Did you recognize and address immediate threats?' },
+  { id:'assess',   name:'Assessment quality',    q:'Did you gather the information needed for this patient?' },
+  { id:'reason',   name:'Clinical reasoning',    q:'Did your differential fit the evidence, and did you revise it appropriately?' },
+  { id:'reassess', name:'Reassessment',          q:'Did you check for change and evaluate the response to care?' }
+];
+var EFFECTS = [
+  { id:'supports', label:'Supports my leading explanation' },
+  { id:'weakens',  label:'Weakens it' },
+  { id:'neutral',  label:"Doesn't distinguish much" }
+];
+var VITALS_FROM = { hr:'circ', bp:'circ', rr:'breathing', spo2:'breathing', ms:'gcs' };
+var MAX_EV = 2;      // evidence checks per case in guided mode: a few meaningful ones, not every pulse check
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+function load(k, d){ try{ var v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(LS + k, JSON.stringify(v)); }catch(e){} }
+function drop(k){ try{ localStorage.removeItem(LS + k); }catch(e){} }
+
+var CASES = [], ERRORS = [], BY = {};
+var PREF = { level: load('level', 'emt'), mode: load('mode', 'guided') };
+if(!LEVELS[PREF.level]) PREF.level = 'emt';
+if(PREF.mode !== 'guided' && PREF.mode !== 'independent') PREF.mode = 'guided';
+var RESULTS = load('results', {});
+var RUN = null, C = null;
+
+/* ── VALIDATION ─────────────────────────────────────────────────── */
+var STAGE_ORDER = ['first', 'primary', 'differential', 'investigate', 'change', 'handoff'];
+function validate(raw){
+  var out = [], errs = [];
+  var list = raw && Array.isArray(raw.cases) ? raw.cases : null;
+  if(!list){ errs.push('cases.json has no "cases" list.'); return { cases:out, errors:errs }; }
+  var seen = {};
+  list.forEach(function(c, i){
+    var id = c && c.id ? c.id : ('#' + (i + 1)), e = [];
+    function need(cond, msg){ if(!cond) e.push(msg); }
+    need(c && typeof c.id === 'string' && /^[a-z0-9-]+$/.test(c.id), 'id must be lowercase letters, digits and dashes');
+    need(!seen[c.id], 'duplicate id'); seen[c.id] = 1;
+    need(c.title && c.dispatch && c.status0 && c.takeaway, 'needs title, dispatch, status0 and takeaway');
+    need(Array.isArray(c.dx) && c.dx.length >= 3, 'needs at least three possibilities in dx');
+    var dxIds = {}; (c.dx || []).forEach(function(d){ dxIds[d.id] = 1; });
+    need(dxIds.unclear, 'dx needs an "unclear" option');
+    need(c.answer && (c.answer.likely || []).every(function(x){ return dxIds[x]; }), 'answer.likely must name dx ids');
+    need(c.answer && (c.answer.danger || []).every(function(x){ return dxIds[x]; }), 'answer.danger must name dx ids');
+    var F = c.findings || {};
+    Object.keys(F).forEach(function(k){
+      var f = F[k], vs = f.variants || [f];
+      vs.forEach(function(v){
+        need(typeof v.text === 'string' && v.text, 'finding ' + k + ' needs text');
+        Object.keys(dxIds).forEach(function(d){ if(d !== 'unclear') need(v.effect && /^(supports|weakens|neutral)$/.test(v.effect[d] || ''), 'finding ' + k + ' needs an effect for ' + d); });
+      });
+      if(f.variants) need(!f.variants[f.variants.length - 1].if, 'finding ' + k + ': last variant must have no "if"');
+    });
+    var A = c.actions || {}, actIds = {};
+    ['assess', 'ask', 'care'].forEach(function(kind){
+      need(Array.isArray(A[kind]) && A[kind].length, 'actions.' + kind + ' is empty');
+      (A[kind] || []).forEach(function(a){
+        need(a.id && a.label, kind + ' action needs id and label'); actIds[a.id] = kind;
+        if(a.reveals) need(F[a.reveals], kind + ' ' + a.id + ' reveals a missing finding');
+        (a.levels || []).forEach(function(l){ need(LEVELS[l], kind + ' ' + a.id + ' has unknown level ' + l); });
+      });
+    });
+    var types = (c.stages || []).map(function(s){ return s.type; });
+    need(types.join() === STAGE_ORDER.join(), 'stages must be ' + STAGE_ORDER.join(', '));
+    (c.stages || []).forEach(function(s){
+      if(s.type === 'investigate' && s.distinguish) s.distinguish.options.forEach(function(o){ need(actIds[o.id] && actIds[o.id] !== 'care', 'distinguish option ' + o.id + ' is not an assess or ask action'); });
+      if(s.type === 'change'){
+        need(s.variants && s.variants.length && !s.variants[s.variants.length - 1].if, 'change: last variant must have no "if"');
+        (s.variants || []).forEach(function(v){ need(v.question && v.question.options && v.question.options.length >= 2, 'change variant needs a question'); });
+      }
+      if(s.type === 'handoff') need(s.problems && s.priorities, 'handoff needs problems and priorities');
+    });
+    (c.scoring || []).forEach(function(r){ need(AREAS.some(function(a){ return a.id === r.area; }) && r.test && r.well && r.miss, 'scoring ' + r.id + ' needs area, test, well and miss'); });
+    if(e.length) errs.push(id + ': ' + e.join('; '));
+    else out.push(c);
+  });
+  return { cases:out, errors:errs };
+}
+
+/* ── RUN STATE ──────────────────────────────────────────────────── */
+function newRun(c){
+  return { id:c.id, level:PREF.level, mode:PREF.mode, si:0, step:null, seq:0, time:0, scene:0,
+    log:[], found:{}, care:{}, picks:{}, stageEnd:{}, stageTime:{}, snap:{}, fb:null,
+    ddx:{ slots:[], lead:null, danger:null }, revisions:0, ev:[], evCount:0, pendingEv:null,
+    status:JSON.parse(JSON.stringify(c.status0)), first:{}, handoff:{}, nudged:false, distinguished:null, variant:null };
+}
+function stage(){ return C.stages[RUN.si]; }
+function guided(){ return RUN.mode === 'guided'; }
+function persist(){ if(RUN) save('run', RUN); }
+function tick(min){
+  min = +min || 0;
+  RUN.time += min;
+  if(!RUN.care.transport) RUN.scene += min;
+}
+function stamp(){ return ++RUN.seq; }
+function addLog(kind, id, text){ RUN.log.push({ k:kind, id:id, t:RUN.time, s:RUN.si, text:text }); }
+function patch(st){ if(!st) return; Object.keys(st).forEach(function(k){ RUN.status[k] = st[k]; }); }
+function levelOk(o){ return !o.levels || o.levels.indexOf(RUN.level) >= 0; }
+function fmtT(t){ var m = Math.round(t); return m + ' min'; }
+
+/* A finding can have variants that depend on what the learner did first
+   (e.g. a recheck after glucose vs before). The variant is fixed at the
+   moment it is revealed. */
+function resolveFinding(id){
+  var f = C.findings[id], v = f;
+  if(f.variants){ for(var i = 0; i < f.variants.length; i++){ if(!f.variants[i].if || test(f.variants[i].if)){ v = f.variants[i]; break; } } }
+  var text = (RUN.level === 'emt' && (v.text_emt || f.text_emt)) || v.text;
+  return { id:id, cat:f.cat, key:!!f.key, text:text, effect:v.effect || f.effect, why:v.why || f.why };
+}
+function reveal(id, min){
+  if(RUN.found[id]) return RUN.found[id].f;
+  tick(min);
+  var f = resolveFinding(id);
+  RUN.found[id] = { seq:stamp(), t:RUN.time, si:RUN.si, f:f };
+  addLog('find', id, f.text);
+  return f;
+}
+function giveCare(a){
+  if(RUN.care[a.id]) return null;
+  var pre = [];
+  if(a.needs && careById(a.needs) && !RUN.care[a.needs]){ var n = careById(a.needs); giveCare(n); pre.push(n.label); }
+  var value = a.value || 'ok', why = a.why || '';
+  if(a.needs && !careById(a.needs) && !RUN.found[a.needs] && a.why_unchecked){ why = a.why_unchecked; if(value === 'best') value = 'ok'; RUN.unchecked = (RUN.unchecked || []).concat(a.id); }
+  if(a.why_iv && RUN.level !== 'emt'){ why = a.why_iv; if(value === 'best') value = 'ok'; }
+  tick(a.min);
+  RUN.care[a.id] = { seq:stamp(), t:RUN.time, si:RUN.si, value:value };
+  patch(a.status);
+  addLog('care', a.id, a.label);
+  return { value:value, why:why, pre:pre };
+}
+function careById(id){ var l = C.actions.care; for(var i = 0; i < l.length; i++) if(l[i].id === id) return l[i]; return null; }
+function actById(id){
+  var kinds = ['assess', 'ask', 'care'];
+  for(var k = 0; k < kinds.length; k++){ var l = C.actions[kinds[k]]; for(var i = 0; i < l.length; i++) if(l[i].id === id) return { a:l[i], kind:kinds[k] }; }
+  return null;
+}
+
+/* ── CONDITIONS ─────────────────────────────────────────────────────
+   Case files say when something happened with a small vocabulary:
+     found:X  care:X            done at any point
+     found:X@stage              done before that stage ended
+     found:X<care:Y             X came before Y
+     dx:X@stage lead:X@stage    in the differential / most likely at the end of a stage
+     pick:stage:option          chose that option at that stage
+     time<=N  scene>N  (@stage) case clock / scene time in minutes
+   joined with & (and), | (or), and ! (not). & binds tighter than |. */
+function seqOf(kind, id){
+  var m = kind === 'found' ? RUN.found : RUN.care;
+  return m[id] ? m[id].seq : null;
+}
+function snapAt(sid){
+  if(RUN.snap[sid]) return RUN.snap[sid];
+  return { slots:RUN.ddx.slots.slice(), lead:RUN.ddx.lead, danger:RUN.ddx.danger };
+}
+function cmp(a, op, b){ return op === '<=' ? a <= b : op === '>=' ? a >= b : op === '<' ? a < b : a > b; }
+function atom(a){
+  a = a.trim(); var m;
+  if(a.charAt(0) === '!') return !atom(a.slice(1));
+  if((m = /^(time|scene)(<=|>=|<|>)(\d+(?:\.\d+)?)(?:@(\w+))?$/.exec(a))){
+    var t = m[4] && RUN.stageTime[m[4]] ? RUN.stageTime[m[4]][m[1]] : RUN[m[1]];
+    return cmp(t, m[2], +m[3]);
+  }
+  if((m = /^(found|care):([\w-]+)<(found|care):([\w-]+)$/.exec(a))){
+    var x = seqOf(m[1], m[2]), y = seqOf(m[3], m[4]);
+    return x != null && (y == null || x < y);
+  }
+  if((m = /^(found|care):([\w-]+)(?:@(\w+))?$/.exec(a))){
+    var s = seqOf(m[1], m[2]);
+    if(s == null) return false;
+    if(!m[3]) return true;
+    var e = RUN.stageEnd[m[3]];
+    return e == null || s < e;
+  }
+  if((m = /^(dx|lead|danger):([\w-]+)@(\w+)$/.exec(a))){
+    var sn = snapAt(m[3]);
+    if(m[1] === 'dx') return sn.slots.indexOf(m[2]) >= 0;
+    return sn[m[1]] === m[2];
+  }
+  if((m = /^pick:(\w+):([\w-]+)$/.exec(a))) return RUN.picks[m[1]] === m[2];
+  return false;
+}
+function test(expr){ return String(expr).split('|').some(function(alt){ return alt.split('&').every(atom); }); }
+
+/* ── RENDER: HOME ───────────────────────────────────────────────── */
+var app = $('app');
+function setPlaying(on){
+  $('bar').hidden = !on; $('btn-findings').hidden = !on;
+  app.classList.toggle('playing', !!on);
+  $('hdr-home').hidden = !!on;
+}
+function renderHome(){
+  RUN = null; C = null; setPlaying(false); closeSheet();
+  $('hdr-title').textContent = 'Assessment Detective';
+  $('hdr-sub').innerHTML = 'You&rsquo;re the Lead &middot; AMR KC Field Guide';
+  var saved = load('run', null);
+  var h = '<section class="hero"><div class="hero-eye">You&rsquo;re the Lead</div><h1>Assessment Detective</h1>'
+    + '<p>Run the call. Build a differential. Work out what would tell the possibilities apart.</p></section>';
+  h += '<div class="sec" id="lvl-lbl">Your level</div><div class="seg c3" role="group" aria-labelledby="lvl-lbl">';
+  Object.keys(LEVELS).forEach(function(l){ h += '<button type="button" data-level="' + l + '" aria-pressed="' + (PREF.level === l) + '">' + LEVELS[l] + '</button>'; });
+  h += '</div><p class="hint">Same assessment for every level. Your care options match your scope.</p>';
+  h += '<div class="sec" id="mode-lbl">Mode</div><div class="seg c2" role="group" aria-labelledby="mode-lbl">'
+    + '<button type="button" data-mode="guided" aria-pressed="' + (PREF.mode === 'guided') + '">Guided</button>'
+    + '<button type="button" data-mode="independent" aria-pressed="' + (PREF.mode === 'independent') + '">Independent</button></div>'
+    + '<p class="hint">' + (PREF.mode === 'guided' ? 'Reasoning prompts along the way, with feedback as you go.' : 'Run it your way. Feedback at the end.') + '</p>';
+  h += '<div class="sec">Cases</div>';
+  CASES.forEach(function(c){
+    var r = RESULTS[c.id], resume = saved && saved.id === c.id;
+    h += '<button type="button" class="case-card" data-case="' + c.id + '"><span class="cc-t">' + esc(c.title) + '</span><span class="cc-p">' + esc(c.teaser) + '</span>'
+      + '<span class="case-meta"><span class="tag">~' + (c.minutes || 6) + ' min</span>'
+      + (c.review && c.review.status !== 'approved' ? '<span class="tag draft">Draft &middot; pending clinical review</span>' : '')
+      + (r ? '<span class="tag done">&#10003; Done ' + esc(LEVELS[r.level] || '') + '</span>' : '') + '</span>'
+      + (resume ? '<span class="resume">Resume where you left off &rsaquo;</span>' : '') + '</button>';
+  });
+  if(!CASES.length) h += '<p class="empty">No cases could be loaded.</p>';
+  app.innerHTML = h;
+  app.querySelectorAll('[data-level]').forEach(function(b){ b.onclick = function(){ PREF.level = b.dataset.level; save('level', PREF.level); renderHome(); }; });
+  app.querySelectorAll('[data-mode]').forEach(function(b){ b.onclick = function(){ PREF.mode = b.dataset.mode; save('mode', PREF.mode); renderHome(); }; });
+  app.querySelectorAll('[data-case]').forEach(function(b){ b.onclick = function(){
+    var c = BY[b.dataset.case], s = load('run', null);
+    if(s && s.id === c.id){ start(c, s); } else { start(c); }
+  }; });
+  window.scrollTo(0, 0);
+}
+
+/* ── RENDER: PLAY ───────────────────────────────────────────────── */
+function start(c, saved){
+  C = c; RUN = saved || newRun(c);
+  if(!saved){ drop('run'); }
+  setPlaying(true);
+  $('hdr-title').textContent = c.title;
+  $('hdr-sub').textContent = LEVELS[RUN.level] + ' · ' + (RUN.mode === 'guided' ? 'Guided' : 'Independent');
+  render();
+}
+function status(){
+  var s = RUN.status, h = '<div class="strip">';
+  if(RUN.si > 0 || RUN.step === 'sick' || RUN.fb){
+    var icon = s.tone === 'ok' ? '&#9679;' : s.tone === 'bad' ? '&#9632;' : '&#9650;';
+    h += '<span class="st ' + esc(s.tone || 'warn') + '"><span aria-hidden="true">' + icon + '</span> ' + esc(s.label) + '</span>';
+  } else h += '<span class="st warn">Status: first look</span>';
+  var v = [];
+  function known(k){ return RUN.found[VITALS_FROM[k]]; }
+  v.push('<span>HR <b>' + (known('hr') ? esc(s.hr) : '–') + '</b></span>');
+  v.push('<span>BP <b>' + (known('bp') ? esc(s.bp) : '–') + '</b></span>');
+  v.push('<span>RR <b>' + (known('rr') ? esc(s.rr) : '–') + '</b></span>');
+  v.push('<span>SpO&#8322; <b>' + (known('spo2') ? esc(s.spo2) + '%' : '–') + '</b></span>');
+  h += '<span class="vit" aria-label="Vital signs">' + v.join('') + '</span>';
+  h += '<button type="button" class="clock" id="clock" aria-label="Case time ' + fmtT(RUN.time) + '. Open the timeline">&#9201; ' + fmtT(RUN.time) + '</button></div>';
+  if(RUN.si >= 3 || (RUN.si === 2 && RUN.step === 'rank')) h += slotsHtml();
+  return h;
+}
+function dxLabel(id){ for(var i = 0; i < C.dx.length; i++) if(C.dx[i].id === id) return C.dx[i].label; return '—'; }
+function slotsHtml(){
+  var d = RUN.ddx, h = '<button type="button" class="slots" id="slots"><span class="slots-top"><span>Working differential</span><span>Change</span></span><span class="slot-row">';
+  for(var i = 0; i < 3; i++){
+    var id = d.slots[i];
+    h += '<span class="slot' + (id ? ' full' : '') + '">' + (id ? ((id === d.lead ? '<i>Most likely</i>' : id === d.danger ? '<i>Don&rsquo;t miss</i>' : '') + esc(dxLabel(id))) : 'Empty') + '</span>';
+  }
+  h += '</span><span class="two-q"><span>What is most likely?<b>' + esc(d.lead ? dxLabel(d.lead) : '—') + '</b></span>'
+    + '<span>What dangerous possibility still needs consideration?<b>' + esc(d.danger ? dxLabel(d.danger) : '—') + '</b></span></span></button>';
+  return h;
+}
+function sceneCard(text, quote, audio, art){
+  var h = '<div class="scene">';
+  if(art && art.scene) h += '<img src="' + esc(art.scene) + '" alt="' + esc(art.alt || '') + '" data-art>';
+  h += '<div class="scene-body"><p class="scene-text">' + esc(text) + '</p>';
+  if(quote) h += '<div class="quote"><small>' + esc(quote.who) + '</small>&ldquo;' + esc(quote.text) + '&rdquo;</div>';
+  if(audio) h += '<button type="button" class="audio-btn" data-audio="' + esc(audio) + '" hidden>&#9654; Hear the patient</button>';
+  return h + '</div></div>';
+}
+function wireMedia(){
+  app.querySelectorAll('img[data-art]').forEach(function(img){ img.onerror = function(){ img.remove(); }; });
+  app.querySelectorAll('[data-audio]').forEach(function(b){
+    var src = b.dataset.audio;
+    try{
+      fetch(src, { method:'HEAD' }).then(function(r){ if(r.ok) b.hidden = false; }).catch(function(){});
+    }catch(e){}
+    b.onclick = function(){ try{ var a = new Audio(src); a.play().catch(function(){ toast('Audio could not play.'); }); }catch(e){} };
+  });
+}
+function lbl(){ var s = stage(); return '<div class="stage-lbl">' + (RUN.si + 1) + ' / ' + C.stages.length + ' &middot; ' + STAGE_NAMES[s.type] + '</div>'; }
+function opt(id, label, pressed, kind, extra){
+  return '<button type="button" class="opt ' + (kind || '') + ' ' + (extra || '') + '" data-opt="' + esc(id) + '" aria-pressed="' + (!!pressed) + '"><span class="mk" aria-hidden="true">' + (pressed ? '&#10003;' : '') + '</span><span>' + label + '</span></button>';
+}
+function rated(id, label, grade, pressed, why){
+  var word = { best:'Best', good:'Good', ok:'OK', poor:'Not ideal', harm:'Could harm' }[grade] || '';
+  return '<button type="button" class="opt radio r-' + grade + '" aria-pressed="' + (!!pressed) + '" disabled><span class="mk" aria-hidden="true">' + (pressed ? '&#10003;' : '') + '</span><span>' + label
+    + (pressed && why ? '<span class="sub">' + esc(why) + '</span>' : '') + '</span><span class="rt">' + word + (pressed ? ' &middot; you' : '') + '</span></button>';
+}
+function fbBox(tone, title, text){ return '<div class="fb ' + tone + '"><b>' + esc(title) + '</b>' + esc(text) + '</div>'; }
+function gradeTone(g){ return g === 'best' || g === 'good' ? 'good' : g === 'ok' ? 'ok' : 'bad'; }
+function gradeWord(g){ return { best:'Strong choice', good:'Good', ok:'Reasonable', poor:'Not the best choice', harm:'This could harm the patient' }[g] || ''; }
+
+function render(){
+  closeSheet();
+  var s = stage();
+  if(!RUN.step) RUN.step = firstStep(s);
+  persist();
+  $('find-n').textContent = Object.keys(RUN.found).length;
+  var bar = { assess:false, ask:false, care:false };
+  if(RUN.si >= 1){ bar.assess = bar.ask = bar.care = true; }
+  $('act-assess').disabled = !bar.assess; $('act-ask').disabled = !bar.ask; $('act-care').disabled = !bar.care;
+  var h = status() + lbl();
+  var fn = SCREENS[s.type + ':' + RUN.step];
+  h += fn ? fn(s) : '';
+  app.innerHTML = h;
+  wireMedia();
+  var sl = $('slots'); if(sl) sl.onclick = openDdxSheet;
+  $('clock').onclick = openReview;
+  (WIRES[s.type + ':' + RUN.step] || function(){})(s);
+  var f = app.querySelector('.q'); if(f){ f.setAttribute('tabindex', '-1'); }
+  window.scrollTo(0, 0);
+}
+function firstStep(s){
+  return { first:'concerns', primary:'work', differential:'pick', investigate:(s.distinguish ? 'dist' : 'work'), change:'event', handoff:'problem' }[s.type];
+}
+function endStage(){
+  var s = stage();
+  RUN.stageEnd[s.id] = stamp();
+  RUN.stageTime[s.id] = { time:RUN.time, scene:RUN.scene };
+  RUN.snap[s.id] = { slots:RUN.ddx.slots.slice(), lead:RUN.ddx.lead, danger:RUN.ddx.danger };
+  RUN.fb = null; RUN.nudged = false;
+  if(RUN.si + 1 >= C.stages.length){ finish(); return; }
+  RUN.si++; RUN.step = null;
+  render();
+}
+function goStep(step){ RUN.step = step; RUN.fb = null; render(); }
+
+var SCREENS = {}, WIRES = {};
+
+/* 1 · First impression: concerns, then sick / not sick */
+SCREENS['first:concerns'] = function(s){
+  var h = '<p class="hint" style="margin:0 2px 8px">Dispatch: ' + esc(C.dispatch) + '</p>' + sceneCard(s.scene, s.quote, s.audio, C.art);
+  h += '<h2 class="q">What are your immediate concerns?<small>Pick all that apply.</small></h2><div class="opts">';
+  var picked = RUN.first.concerns || [];
+  if(RUN.fb){
+    s.concerns.forEach(function(o){
+      var mine = picked.indexOf(o.id) >= 0;
+      h += rated(o.id, esc(o.label), o.good ? 'good' : 'poor', mine, '');
+    });
+    h += '</div>' + fbBox(RUN.fb.tone, RUN.fb.title, RUN.fb.text) + '<button type="button" class="btn btn-primary" id="next">Continue</button>';
+  } else {
+    s.concerns.forEach(function(o){ h += opt(o.id, esc(o.label), picked.indexOf(o.id) >= 0); });
+    h += '</div><button type="button" class="btn btn-primary" id="go"' + (picked.length ? '' : ' disabled') + '>Next</button>';
+  }
+  return h;
+};
+WIRES['first:concerns'] = function(s){
+  if(RUN.fb){ $('next').onclick = function(){ goStep('sick'); }; return; }
+  var picked = RUN.first.concerns = RUN.first.concerns || [];
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var i = picked.indexOf(b.dataset.opt); if(i >= 0) picked.splice(i, 1); else picked.push(b.dataset.opt);
+    render();
+  }; });
+  $('go').onclick = function(){
+    var good = s.concerns.filter(function(o){ return o.good; }).map(function(o){ return o.id; });
+    var hit = picked.filter(function(x){ return good.indexOf(x) >= 0; }).length, wrong = picked.length - hit;
+    RUN.first.concernScore = good.length ? Math.max(0, hit - wrong) / good.length : 1;
+    addLog('stage', 'first', 'Concerns: ' + picked.map(function(x){ return s.concerns.filter(function(o){ return o.id === x; })[0].label; }).join(', '));
+    if(guided()){
+      var tone = RUN.first.concernScore >= 0.99 ? 'good' : RUN.first.concernScore >= 0.5 ? 'ok' : 'bad';
+      RUN.fb = { tone:tone, title:tone === 'good' ? 'You saw it' : 'Look again', text:'Green: the concerns this scene shows.' + (wrong ? " Red: not what's in front of you." : '') };
+      render();
+    } else goStep('sick');
+  };
+};
+SCREENS['first:sick'] = function(s){
+  var h = sceneCard(s.scene, s.quote, null, null);
+  h += '<h2 class="q">Does this patient look critically ill?</h2><div class="opts">';
+  if(RUN.fb){
+    h += rated('sick', 'Sick: looks critically ill', s.sick === 'sick' ? 'good' : 'poor', RUN.first.sick === 'sick');
+    h += rated('not', 'Not sick right now', s.sick === 'not' ? 'good' : 'poor', RUN.first.sick === 'not');
+    h += '</div>' + fbBox(RUN.fb.tone, RUN.fb.title, s.why || '') + '<button type="button" class="btn btn-primary" id="next">Start your primary</button>';
+  } else {
+    h += opt('sick', 'Sick: looks critically ill', false, 'radio') + opt('not', 'Not sick right now', false, 'radio') + '</div>';
+  }
+  return h;
+};
+WIRES['first:sick'] = function(s){
+  if(RUN.fb){ $('next').onclick = endStage; return; }
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    RUN.first.sick = b.dataset.opt;
+    addLog('stage', 'first', RUN.first.sick === 'sick' ? 'First impression: sick' : 'First impression: not sick');
+    if(guided()){ var ok = RUN.first.sick === s.sick; RUN.fb = { tone:ok ? 'good' : 'bad', title:ok ? 'Agreed' : 'Look again' }; render(); }
+    else endStage();
+  }; });
+};
+
+/* 2 · Primary: free use of Assess and Care, then move on */
+function gotList(si){
+  var ids = Object.keys(RUN.found).filter(function(k){ return si == null || RUN.found[k].si === si; })
+    .sort(function(a, b){ return RUN.found[a].seq - RUN.found[b].seq; });
+  if(!ids.length) return '<p class="empty">Nothing yet. Tap <b>Assess</b> or <b>Ask</b> below.</p>';
+  return '<div class="got">' + ids.map(function(k){ var f = RUN.found[k].f; return '<div><small>' + esc(f.cat) + '</small>' + esc(f.text) + '</div>'; }).join('') + '</div>';
+}
+SCREENS['primary:work'] = function(s){
+  var h = '<h2 class="q">' + esc(s.prompt) + '<small>Tap <b>Assess</b> to examine and <b>Care</b> to treat. Then move on.</small></h2>';
+  h += gotList(RUN.si);
+  if(RUN.fb) h += fbBox(RUN.fb.tone, RUN.fb.title, RUN.fb.text);
+  h += '<button type="button" class="btn btn-primary" id="go">Primary done</button>';
+  return h;
+};
+WIRES['primary:work'] = function(s){
+  $('go').onclick = function(){
+    var miss = (s.required || []).filter(function(id){ return !RUN.found[id]; });
+    if(guided() && miss.length && !RUN.nudged){
+      RUN.nudged = true;
+      RUN.fb = { tone:'ok', title:'Anything left in your primary?', text:'You haven\'t checked: ' + miss.map(function(id){ var a = actById(id); return a ? a.a.label : id; }).join(', ') + '. Tap Primary done again to move on anyway.' };
+      render(); return;
+    }
+    endStage();
+  };
+};
+
+/* 3 · Differential: up to three, then most likely and don't-miss */
+function pickHtml(sel){
+  var h = '<div class="opts">';
+  C.dx.forEach(function(d){
+    var on = sel.indexOf(d.id) >= 0;
+    h += opt(d.id, esc(d.label), on, '', (!on && sel.length >= 3) ? 'full' : '');
+  });
+  return h + '</div>';
+}
+function rankHtml(slots, lead, danger){
+  var h = '<h2 class="q">What is most likely?</h2><div class="opts">';
+  slots.forEach(function(id){ h += opt('L:' + id, esc(dxLabel(id)), lead === id, 'radio'); });
+  h += '</div><h2 class="q">What dangerous possibility still needs consideration?<small>It can be the same as most likely.</small></h2><div class="opts">';
+  slots.forEach(function(id){ h += opt('D:' + id, esc(dxLabel(id)), danger === id, 'radio'); });
+  return h + '</div>';
+}
+SCREENS['differential:pick'] = function(s){
+  var sel = RUN.ddx.slots;
+  return '<h2 class="q">' + esc(s.prompt) + '<small>&ldquo;Unclear yet&rdquo; is a fair answer. You can change this any time.</small></h2>' + pickHtml(sel)
+    + '<button type="button" class="btn btn-primary" id="go"' + (sel.length ? '' : ' disabled') + '>Next</button>';
+};
+function wirePick(sel, after){
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var id = b.dataset.opt, i = sel.indexOf(id);
+    if(i >= 0) sel.splice(i, 1);
+    else if(sel.length < 3) sel.push(id);
+    else { toast('Three at most. Take one off first.'); return; }
+    after();
+  }; });
+}
+WIRES['differential:pick'] = function(){
+  wirePick(RUN.ddx.slots, render);
+  $('go').onclick = function(){
+    var d = RUN.ddx;
+    if(d.slots.indexOf(d.lead) < 0) d.lead = d.slots[0];
+    if(d.slots.indexOf(d.danger) < 0) d.danger = null;
+    goStep('rank');
+  };
+};
+SCREENS['differential:rank'] = function(){
+  var d = RUN.ddx;
+  return rankHtml(d.slots, d.lead, d.danger) + '<button type="button" class="btn btn-primary" id="go"' + (d.lead && d.danger ? '' : ' disabled') + '>Lock in my thinking</button>';
+};
+function wireRank(d, after){
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var p = b.dataset.opt.split(':'); if(p[0] === 'L') d.lead = p[1]; else d.danger = p[1]; after();
+  }; });
+}
+WIRES['differential:rank'] = function(){
+  wireRank(RUN.ddx, render);
+  $('go').onclick = function(){
+    addLog('ddx', 'ddx', 'Differential: ' + RUN.ddx.slots.map(dxLabel).join(', ') + '. Most likely: ' + dxLabel(RUN.ddx.lead) + '.');
+    endStage();
+  };
+};
+
+/* 4 · Investigation: the distinguishing question, the evidence check, then free work */
+function evTarget(){
+  var d = RUN.ddx;
+  if(d.lead && d.lead !== 'unclear') return d.lead;
+  if(d.danger && d.danger !== 'unclear') return d.danger;
+  return null;
+}
+SCREENS['investigate:dist'] = function(s){
+  var D = s.distinguish, h = '<h2 class="q">' + esc(D.prompt) + '</h2><div class="opts">';
+  if(RUN.distinguished){
+    D.options.forEach(function(o){
+      var a = actById(o.id).a, mine = RUN.distinguished === o.id;
+      h += guided() ? rated(o.id, esc(a.label), o.grade, mine, o.why) : opt(o.id, esc(a.label), mine, 'radio');
+    });
+    var f = RUN.found[RUN.distinguished].f;
+    h += '</div><div class="finding-card"><small>' + esc(f.cat) + ' &middot; result</small>' + esc(f.text) + '</div>'
+      + '<button type="button" class="btn btn-primary" id="next">Continue</button>';
+  } else {
+    D.options.forEach(function(o){ var a = actById(o.id).a; h += opt(o.id, esc(a.label) + (RUN.found[o.id] ? '<span class="sub">Already done: see the result again</span>' : ''), false, 'radio'); });
+    h += '</div>';
+  }
+  return h;
+};
+WIRES['investigate:dist'] = function(s){
+  if(RUN.distinguished){
+    $('next').onclick = function(){
+      if(guided() && evTarget() && RUN.evCount < MAX_EV){ RUN.pendingEv = RUN.distinguished; goStep('ev'); }
+      else goStep('work');
+    };
+    return;
+  }
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var id = b.dataset.opt, a = actById(id).a;
+    RUN.distinguished = id; RUN.picks[stage().id] = id;
+    reveal(a.reveals, a.min); applyActStatus(a);
+    render();
+  }; });
+};
+SCREENS['investigate:ev'] = function(){
+  var f = RUN.found[RUN.pendingEv].f, t = evTarget();
+  var h = '<div class="finding-card"><small>' + esc(f.cat) + '</small>' + esc(f.text) + '</div>'
+    + '<h2 class="q">How does this finding change your thinking?<small>Your leading explanation: <b>' + esc(dxLabel(t)) + '</b></small></h2><div class="opts">';
+  var mine = RUN.evAns;
+  EFFECTS.forEach(function(e){
+    if(RUN.fb){ h += rated(e.id, esc(e.label), e.id === f.effect[t] ? 'good' : (e.id === mine ? 'poor' : 'neutral'), e.id === mine); }
+    else h += opt(e.id, esc(e.label), false, 'radio');
+  });
+  h += '</div>';
+  if(RUN.fb){
+    h += fbBox(RUN.fb.tone, RUN.fb.title, RUN.fb.text) + '<p class="hint">You can update your working differential any time: tap it above.</p><button type="button" class="btn btn-primary" id="next">Continue</button>';
+  }
+  return h;
+};
+WIRES['investigate:ev'] = function(){
+  if(RUN.fb){ $('next').onclick = function(){ RUN.pendingEv = null; RUN.evAns = null; goStep('work'); }; return; }
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var f = RUN.found[RUN.pendingEv].f, t = evTarget(), right = f.effect[t], ok = b.dataset.opt === right;
+    RUN.evAns = b.dataset.opt; RUN.evCount++;
+    RUN.ev.push({ finding:RUN.pendingEv, target:t, answer:b.dataset.opt, right:right, ok:ok });
+    var word = EFFECTS.filter(function(e){ return e.id === right; })[0].label.replace(' my leading explanation', '').toLowerCase();
+    RUN.fb = { tone:ok ? 'good' : 'bad', title:ok ? 'That\'s how it reads' : 'For ' + dxLabel(t) + ', this ' + (right === 'neutral' ? "doesn't distinguish much" : word),
+      text:f.why || '' };
+    render();
+  }; });
+};
+SCREENS['investigate:work'] = function(s){
+  return '<h2 class="q">' + esc(s.prompt) + '</h2>' + gotList(RUN.si)
+    + '<button type="button" class="btn btn-primary" id="go">Done investigating</button>';
+};
+WIRES['investigate:work'] = function(){ $('go').onclick = endStage; };
+
+/* 5 · Change and reassessment */
+function pickVariant(s){
+  if(RUN.variant != null) return s.variants[RUN.variant];
+  for(var i = 0; i < s.variants.length; i++){
+    if(!s.variants[i].if || test(s.variants[i].if)){
+      RUN.variant = i; var v = s.variants[i];
+      tick(v.time); patch(v.status);
+      if(!RUN.care.transport){ RUN.care.transport = { seq:stamp(), t:RUN.time, si:RUN.si, value:'ok', implied:true }; }
+      if(v.reveal){ RUN.found['_change'] = { seq:stamp(), t:RUN.time, si:RUN.si, f:{ id:'_change', cat:v.reveal.cat, text:v.reveal.text, effect:{} } }; addLog('find', '_change', v.reveal.text); }
+      persist();
+      return v;
+    }
+  }
+}
+SCREENS['change:event'] = function(s){
+  var v = pickVariant(s), q = v.question, mine = RUN.picks[s.id];
+  var h = sceneCard(v.text, null, null, null) + '<h2 class="q">' + esc(q.prompt) + '</h2><div class="opts">';
+  q.options.filter(levelOk).forEach(function(o){
+    h += (RUN.fb || (mine && !guided())) ? (guided() ? rated(o.id, esc(o.label), o.grade, mine === o.id, o.why) : opt(o.id, esc(o.label), mine === o.id, 'radio')) : opt(o.id, esc(o.label), false, 'radio');
+  });
+  h += '</div>';
+  if(RUN.fb) h += '<button type="button" class="btn btn-primary" id="next">Continue to handoff</button>';
+  return h;
+};
+WIRES['change:event'] = function(s){
+  if(RUN.fb){ $('next').onclick = endStage; return; }
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var v = s.variants[RUN.variant], o = v.question.options.filter(function(x){ return x.id === b.dataset.opt; })[0];
+    RUN.picks[s.id] = o.id;
+    if(o.care){ var a = careById(o.care); if(a) giveCare(a); else if(!RUN.care[o.care]){ RUN.care[o.care] = { seq:stamp(), t:RUN.time, si:RUN.si, value:o.grade }; } }
+    addLog('pick', o.id, o.label);
+    if(guided()){ RUN.fb = { tone:gradeTone(o.grade) }; render(); } else endStage();
+  }; });
+};
+
+/* 6 · Handoff: problem, impression with uncertainty, priorities */
+SCREENS['handoff:problem'] = function(s){
+  var h = '<h2 class="q">Sum up the problem for the receiving team.</h2><div class="opts">', mine = RUN.handoff.problem;
+  s.problems.forEach(function(o){ h += opt(o.id, esc(o.label), mine === o.id, 'radio'); });
+  return h + '</div><button type="button" class="btn btn-primary" id="go"' + (mine ? '' : ' disabled') + '>Next</button>';
+};
+WIRES['handoff:problem'] = function(){
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){ RUN.handoff.problem = b.dataset.opt; render(); }; });
+  $('go').onclick = function(){ goStep('impression'); };
+};
+SCREENS['handoff:impression'] = function(){
+  var H = RUN.handoff;
+  if(H.lead === undefined){ H.lead = RUN.ddx.lead; H.alt = (RUN.ddx.danger !== RUN.ddx.lead) ? RUN.ddx.danger : null; }
+  var h = '<h2 class="q">Your working impression<small>Say what you think, with the uncertainty you really have.</small></h2>'
+    + '<h2 class="q" style="font-size:15.5px;margin-top:4px">Leading explanation</h2><div class="opts">';
+  C.dx.forEach(function(d){ h += opt('L:' + d.id, esc(d.label), H.lead === d.id, 'radio'); });
+  h += '</div><h2 class="q" style="font-size:15.5px">Most important alternative to keep in mind</h2><div class="opts">';
+  C.dx.forEach(function(d){ if(d.id !== H.lead && d.id !== 'unclear') h += opt('A:' + d.id, esc(d.label), H.alt === d.id, 'radio'); });
+  return h + '</div><button type="button" class="btn btn-primary" id="go"' + (H.lead && H.alt ? '' : ' disabled') + '>Next</button>';
+};
+WIRES['handoff:impression'] = function(){
+  var H = RUN.handoff;
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var p = b.dataset.opt.split(':'); if(p[0] === 'L'){ H.lead = p[1]; if(H.alt === H.lead) H.alt = null; } else H.alt = p[1];
+    var y = window.scrollY; render(); window.scrollTo(0, y);
+  }; });
+  $('go').onclick = function(){ goStep('priorities'); };
+};
+SCREENS['handoff:priorities'] = function(s){
+  var sel = RUN.handoff.pri = RUN.handoff.pri || [];
+  var h = '<h2 class="q">Next priorities<small>Pick up to three.</small></h2><div class="opts">';
+  s.priorities.forEach(function(o){ h += opt(o.id, esc(o.label), sel.indexOf(o.id) >= 0); });
+  return h + '</div><button type="button" class="btn btn-primary" id="go"' + (sel.length ? '' : ' disabled') + '>Hand off and debrief</button>';
+};
+WIRES['handoff:priorities'] = function(){
+  var sel = RUN.handoff.pri;
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
+    var i = sel.indexOf(b.dataset.opt); if(i >= 0) sel.splice(i, 1); else if(sel.length < 3) sel.push(b.dataset.opt); else { toast('Three at most.'); return; }
+    var y = window.scrollY; render(); window.scrollTo(0, y);
+  }; });
+  $('go').onclick = function(){
+    var H = RUN.handoff;
+    RUN.ddx.lead = H.lead;
+    addLog('handoff', 'handoff', 'Handoff: ' + dxLabel(H.lead) + ', keeping ' + dxLabel(H.alt) + ' in mind.');
+    endStage();
+  };
+};
+
+/* ── ACTION SHEETS ─────────────────────────────────────────────── */
+var lastFocus = null;
+function openSheet(title, body, wire){
+  lastFocus = document.activeElement;
+  $('toast').hidden = true;
+  $('sheet-in').innerHTML = '<div class="sheet-hd"><h2 id="sheet-title">' + esc(title) + '</h2><button type="button" class="hdr-btn" id="sheet-x">Close</button></div>' + body;
+  $('sheet').hidden = false; $('scrim').hidden = false;
+  $('sheet-x').onclick = closeSheet;
+  if(wire) wire();
+  $('sheet-x').focus();
+}
+function closeSheet(){
+  if($('sheet').hidden) return;
+  $('sheet').hidden = true; $('scrim').hidden = true;
+  if(lastFocus && lastFocus.focus) try{ lastFocus.focus(); }catch(e){}
+}
+$('scrim').onclick = closeSheet;
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeSheet(); });
+
+function applyActStatus(a){ if(a.status) patch(a.status); if(a.harm) RUN.harmful = (RUN.harmful || []).concat(a.id); }
+function actItems(kind){
+  var list = C.actions[kind].filter(levelOk), h = '';
+  function row(a){
+    var did = kind === 'care' ? RUN.care[a.id] : RUN.found[a.reveals];
+    return '<button type="button" class="item' + (did ? ' did' : '') + '" data-act="' + a.id + '"' + (did && kind === 'care' ? ' disabled' : '') + '>'
+      + (did ? '<span class="ck" aria-hidden="true">&#10003;</span>' : '') + '<span>' + esc(a.label) + (did ? '<span class="sr"> (done)</span>' : '') + '</span>'
+      + '<span class="t">' + (a.min ? '+' + a.min + ' min' : '') + '</span></button>';
+  }
+  if(kind === 'assess'){
+    var p = list.filter(function(a){ return a.phase === 'primary'; }), o = list.filter(function(a){ return a.phase !== 'primary'; });
+    h += '<h3>Primary</h3>' + p.map(row).join('');
+    if(RUN.si >= 1) h += '<h3>Secondary and rechecks</h3>' + o.map(row).join('');
+  } else h = list.map(row).join('');
+  return h;
+}
+function onAct(kind, id){
+  var a = actById(id).a;
+  if(kind === 'care'){
+    var r = giveCare(a);
+    closeSheet();
+    if(!r) return;
+    var msg = (r.pre.length ? 'First: ' + r.pre.join(', ') + '. ' : '') + a.label + '.';
+    if(guided() && r.why) toast(r.why, gradeWord(r.value)); else toast(msg, 'Done');
+    render(); return;
+  }
+  var already = RUN.found[a.reveals];
+  var f = reveal(a.reveals, a.min);
+  if(!already) applyActStatus(a);
+  closeSheet();
+  toast(f.text, f.cat);
+  var s = stage();
+  if(!already && guided() && s.type === 'investigate' && RUN.step === 'work' && f.key && f.why && evTarget() && RUN.evCount < MAX_EV && f.effect[evTarget()] !== 'neutral'){
+    RUN.pendingEv = a.reveals; goStep('ev'); return;
+  }
+  render();
+}
+['assess', 'ask', 'care'].forEach(function(kind){
+  $('act-' + kind).onclick = function(){
+    var title = { assess:'Assess', ask:'Ask', care:'Care' }[kind];
+    var sub = kind === 'care' ? '<p class="hint" style="margin:0 2px 8px">Showing ' + LEVELS[RUN.level] + ' scope.</p>' : '';
+    openSheet(title, sub + actItems(kind), function(){
+      $('sheet-in').querySelectorAll('[data-act]').forEach(function(b){ b.onclick = function(){ onAct(kind, b.dataset.act); }; });
+    });
+  };
+});
+$('btn-findings').onclick = function(){
+  var ids = Object.keys(RUN.found).sort(function(a, b){ return RUN.found[a].seq - RUN.found[b].seq; });
+  var h = ids.length ? ids.map(function(k){ var x = RUN.found[k]; return '<div class="item"><span><small class="sr">' + esc(x.f.cat) + ': </small>' + esc(x.f.text) + '</span><span class="t">' + fmtT(x.t) + '</span></div>'; }).join('')
+    : '<p class="empty">No findings yet.</p>';
+  openSheet('Findings', h);
+};
+function openReview(){
+  var h = '<h3>Dispatch</h3><p>' + esc(C.dispatch) + '</p><h3>Timeline</h3><div class="tl">';
+  RUN.log.forEach(function(l){ h += '<div><small>' + fmtT(l.t) + '</small>' + esc(l.text) + '</div>'; });
+  if(!RUN.log.length) h += '<div>Nothing yet.</div>';
+  h += '</div><h3>Care given</h3>';
+  var cg = Object.keys(RUN.care).filter(function(k){ return !RUN.care[k].implied && careById(k); });
+  h += cg.length ? '<ul style="margin-left:18px">' + cg.map(function(k){ return '<li>' + esc(careById(k).label) + '</li>'; }).join('') + '</ul>' : '<p class="hint">None yet.</p>';
+  h += '<button type="button" class="btn btn-ghost" id="quit">Leave this case</button>';
+  openSheet('Review', h, function(){ $('quit').onclick = function(){ closeSheet(); renderHome(); }; });
+}
+$('act-review').onclick = openReview;
+
+function openDdxSheet(){
+  var d = { slots:RUN.ddx.slots.slice(), lead:RUN.ddx.lead, danger:RUN.ddx.danger };
+  function body(){
+    return '<p class="hint" style="margin:0 2px 6px">Up to three. Change them as the evidence comes in.</p>' + pickHtml(d.slots)
+      + (d.slots.length ? rankHtml(d.slots, d.lead, d.danger) : '') + '<button type="button" class="btn btn-primary" id="ddx-save">Save</button>';
+  }
+  function wire(){
+    var root = $('sheet-in');
+    root.querySelectorAll('[data-opt]').forEach(function(b){
+      var v = b.dataset.opt;
+      if(/^[LD]:/.test(v)) return;
+      b.onclick = function(){
+        var i = d.slots.indexOf(v);
+        if(i >= 0) d.slots.splice(i, 1); else if(d.slots.length < 3) d.slots.push(v); else { toast('Three at most. Take one off first.'); return; }
+        if(d.slots.indexOf(d.lead) < 0) d.lead = d.slots[0] || null;
+        if(d.slots.indexOf(d.danger) < 0) d.danger = null;
+        redraw();
+      };
+    });
+    root.querySelectorAll('[data-opt^="L:"],[data-opt^="D:"]').forEach(function(b){ b.onclick = function(){
+      var p = b.dataset.opt.split(':'); if(p[0] === 'L') d.lead = p[1]; else d.danger = p[1]; redraw();
+    }; });
+    $('ddx-save').disabled = !(d.slots.length && d.lead && d.danger);
+    $('ddx-save').onclick = function(){
+      var changed = d.slots.join() !== RUN.ddx.slots.join() || d.lead !== RUN.ddx.lead || d.danger !== RUN.ddx.danger;
+      RUN.ddx = d;
+      if(changed){ RUN.revisions++; addLog('ddx', 'ddx', 'Revised: ' + d.slots.map(dxLabel).join(', ') + '. Most likely: ' + dxLabel(d.lead) + '.'); }
+      closeSheet(); render();
+    };
+    $('sheet-x').onclick = closeSheet;
+  }
+  function redraw(){ var y = $('sheet').scrollTop; $('sheet-in').innerHTML = '<div class="sheet-hd"><h2 id="sheet-title">Working differential</h2><button type="button" class="hdr-btn" id="sheet-x">Close</button></div>' + body(); wire(); $('sheet').scrollTop = y; }
+  openSheet('Working differential', body(), wire);
+}
+
+var toastT = null;
+function toast(text, title){
+  var t = $('toast');
+  t.innerHTML = (title ? '<b>' + esc(title) + '</b>' : '') + esc(text);
+  t.hidden = false;
+  clearTimeout(toastT);
+  toastT = setTimeout(function(){ t.hidden = true; }, Math.min(9000, 2600 + String(text).length * 45));
+}
+
+/* ── DEBRIEF ────────────────────────────────────────────────────── */
+function score(){
+  var items = [];
+  function add(area, w, hit, well, miss){ items.push({ area:area, w:w, hit:!!hit, well:well, miss:miss }); }
+  var H = RUN.handoff, hs = C.stages[5];
+  var unclearOk = H.lead === 'unclear' && C.answer.unclear_ok;
+  // A rule that starts with "!" is a guard (didn't give fluids, didn't stand her up).
+  // Missing it costs; keeping it earns nothing, or doing nothing would score well.
+  (C.scoring || []).forEach(function(r){
+    var hit = test(r.test) || (unclearOk && /^lead:/.test(r.test));
+    add(r.area, (hit && /^!/.test(r.test)) ? 0 : (r.w || 1), hit, r.well, r.miss);
+  });
+  var first = C.stages[0];
+  add('safety', 1, RUN.first.sick === first.sick, 'You recognized how sick the patient was from the doorway.', 'Your first impression underestimated how sick the patient was.');
+  Object.keys(RUN.care).forEach(function(k){
+    var a = careById(k);
+    if(a && a.value === 'harm') add('safety', 2, false, '', a.label + ': ' + (a.why || 'could harm this patient.'));
+  });
+  (RUN.harmful || []).forEach(function(id){ var a = actById(id).a; add('safety', 2, false, '', a.label + ': ' + (C.findings[a.reveals].why || 'could harm this patient.')); });
+  RUN.ev.forEach(function(e){
+    var f = RUN.found[e.finding].f;
+    add('reason', 1, e.ok, 'You read a key finding correctly against ' + dxLabel(e.target) + '.', 'You misread what "' + f.text + '" means for ' + dxLabel(e.target) + '.');
+  });
+  var D = C.stages[3].distinguish;
+  if(D && RUN.distinguished){
+    var o = D.options.filter(function(x){ return x.id === RUN.distinguished; })[0];
+    add('reason', 2, o.grade === 'best', 'You chose the assessment that best separates your possibilities.', 'A better distinguishing step was available: ' + (D.options.filter(function(x){ return x.grade === 'best'; }).map(function(x){ return actById(x.id).a.label; }).join(' or ')) + '.');
+  }
+  var prob = hs.problems.filter(function(p){ return p.id === H.problem; })[0];
+  if(prob) add('reason', 1, prob.grade === 'best', 'Your problem statement was clear and fit the evidence.', prob.why || 'Your problem statement could be sharper.');
+  var altOk = (C.answer.alt || []).concat(C.answer.danger || []).indexOf(H.alt) >= 0;
+  add('reason', 1, altOk, 'You named a sensible alternative to keep in mind.', 'The alternative you named isn\'t the one that most needs watching: ' + C.answer.danger.map(dxLabel).join(' or ') + '.');
+  var good = hs.priorities.filter(function(p){ return p.good; }).map(function(p){ return p.id; });
+  var pri = H.pri || [], pg = pri.filter(function(x){ return good.indexOf(x) >= 0; }).length, pb = pri.length - pg;
+  add('reassess', 2, pg >= 2 && !pb, 'Your next priorities were on target.', pb ? 'One of your priorities could hurt: ' + hs.priorities.filter(function(p){ return pri.indexOf(p.id) >= 0 && !p.good; }).map(function(p){ return p.why; }).join(' ') : 'Your priorities missed key next steps.');
+  var ds = RUN.snap[C.stages[2].id];
+  var revised = ds && C.answer.likely.indexOf(ds.lead) < 0 && C.answer.likely.indexOf(H.lead) >= 0;
+  var bonus = revised ? 'You changed your leading explanation as the evidence came in. That\'s the skill.' : null;
+  var out = {};
+  AREAS.forEach(function(a){
+    var mine = items.filter(function(i){ return i.area === a.id; });
+    var tot = mine.reduce(function(s, i){ return s + i.w; }, 0), got = mine.reduce(function(s, i){ return s + (i.hit ? i.w : 0); }, 0);
+    var p = tot ? got / tot : 1;
+    out[a.id] = { p:p, rate:p >= 0.8 ? 'strong' : p >= 0.5 ? 'track' : 'focus', items:mine };
+  });
+  if(bonus) out.reason.items.unshift({ area:'reason', w:0, hit:true, well:bonus });
+  var order = ['safety', 'reason', 'reassess', 'assess'];
+  function best(hit){
+    var pool = items.filter(function(i){ return i.hit === hit && (hit ? i.well : i.miss); });
+    pool.sort(function(a, b){ return (b.w - a.w) || (order.indexOf(a.area) - order.indexOf(b.area)); });
+    return pool[0] || null;
+  }
+  var w = bonus ? { well:bonus } : best(true), m = best(false);
+  return { areas:out, well:w && w.well, miss:m && m.miss };
+}
+function finish(){
+  var r = score();
+  RESULTS[C.id] = { date:new Date().toISOString().slice(0, 10), level:RUN.level, mode:RUN.mode, rates:AREAS.map(function(a){ return r.areas[a.id].rate; }) };
+  save('results', RESULTS); drop('run');
+  RUN.done = true;
+  setPlaying(false);
+  $('hdr-home').hidden = false;
+  var words = { strong:'&#10003; Strong', track:'&#9680; On track', focus:'&#10007; Focus here' };
+  var h = '<div class="stage-lbl">Debrief &middot; ' + esc(C.title) + ' &middot; ' + fmtT(RUN.time) + '</div>';
+  h += '<div class="three"><div><small>One thing done well</small>' + esc(r.well || 'You worked the case through to a handoff.') + '</div>'
+    + '<div><small>One missed opportunity</small>' + esc(r.miss || 'Nothing major missed. Try it at another level or in Independent mode.') + '</div>'
+    + '<div><small>One takeaway</small>' + esc(C.takeaway) + '</div></div>';
+  h += '<div class="sec">Four areas</div>';
+  AREAS.forEach(function(a){
+    var x = r.areas[a.id];
+    h += '<div class="area"><div class="area-hd"><h3>' + a.name + '</h3><span class="rate ' + x.rate + '">' + words[x.rate] + '</span></div><p class="qq">' + esc(a.q) + '</p><ul>';
+    x.items.forEach(function(i){ h += '<li>' + (i.hit ? '<span aria-hidden="true">&#10003;</span><span class="sr">Done well:</span> ' + esc(i.well) : '<span aria-hidden="true">&#9675;</span><span class="sr">Missed:</span> ' + esc(i.miss)) + '</li>'; });
+    h += '</ul></div>';
+  });
+  h += '<div class="what"><b>What was going on</b><br>' + esc(C.answer.note) + '</div>';
+  h += '<button type="button" class="btn btn-primary" id="again">Run it again</button><button type="button" class="btn btn-ghost" id="home">All cases</button>';
+  app.innerHTML = h;
+  $('again').onclick = function(){ start(C); };
+  $('home').onclick = renderHome;
+  window.scrollTo(0, 0);
+  window.Detective.lastScore = r;
+}
+
+/* ── REVIEW PAGE (#review): status, sources, skipped cases ───────── */
+function renderReview(){
+  setPlaying(false);
+  $('hdr-title').textContent = 'Assessment Detective · Review';
+  var h = '<div class="sec">Cases</div>';
+  CASES.forEach(function(c){
+    h += '<div class="rv"><h3>' + esc(c.title) + ' <span class="tag ' + (c.review && c.review.status === 'approved' ? 'done' : 'draft') + '">' + esc(c.review ? c.review.status : 'draft') + '</span></h3>'
+      + '<p>' + esc(c.teaser) + '</p><p><b>Sources:</b> ' + esc((c.review && c.review.sources || []).join('; ')) + '</p>'
+      + (c.review && c.review.check ? '<p><b>Check:</b> ' + esc(c.review.check) + '</p>' : '') + '<p><b>Working answer:</b> ' + esc(c.answer.note) + '</p></div>';
+  });
+  if(ERRORS.length) h += '<div class="sec">Skipped</div>' + ERRORS.map(function(e){ return '<div class="rv err">' + esc(e) + '</div>'; }).join('');
+  h += '<a class="btn btn-ghost" href="assessment-detective.html">Back to the game</a>';
+  app.innerHTML = h;
+}
+
+/* ── THEME ──────────────────────────────────────────────────────── */
+function paintTheme(){
+  var t = document.documentElement.getAttribute('data-theme');
+  $('theme-btn').innerHTML = t === 'dark' ? '&#9728;' : '&#9790;';
+  $('theme-btn').setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  $('theme-color').setAttribute('content', t === 'dark' ? '#0b1220' : '#f4f6f9');
+}
+$('theme-btn').onclick = function(){
+  var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  var n = new Date(), until = new Date(n); until.setMinutes(0, 0, 0);
+  var h = n.getHours(); until.setHours(h < 7 ? 7 : h < 19 ? 19 : 31);
+  save('theme', { theme:t, until:until.getTime() });
+  paintTheme();
+};
+paintTheme();
+
+/* ── BOOT ───────────────────────────────────────────────────────── */
+function boot(raw){
+  var v = validate(raw);
+  CASES = v.cases; ERRORS = v.errors; BY = {};
+  CASES.forEach(function(c){ BY[c.id] = c; });
+  if(ERRORS.length && window.console) console.warn('Assessment Detective skipped:\n' + ERRORS.join('\n'));
+  if(location.hash === '#review'){ renderReview(); return; }
+  renderHome();
+}
+window.addEventListener('hashchange', function(){ if(location.hash === '#review') renderReview(); else if(!RUN) renderHome(); });
+fetch(CONFIG.cases, { cache:'no-cache' })
+  .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(boot)
+  .catch(function(){
+    app.innerHTML = '<p class="empty">Assessment Detective could not load its cases. Open it once with a signal and it will work offline after that.</p>';
+  });
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+
+// For tests.
+window.Detective = {
+  validate:validate, test:function(e){ return test(e); },
+  run:function(){ return RUN; }, cases:function(){ return CASES; }, errors:function(){ return ERRORS; },
+  score:function(){ return score(); }
+};
+})();
+</script>
+</body>
+</html>
