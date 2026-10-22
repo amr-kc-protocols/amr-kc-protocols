@@ -112,12 +112,14 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--brand2);outline-off
 .resume{display:block;margin-top:10px;font-size:13px;font-weight:700;color:var(--brand2)}
 
 /* ── PLAY: status strip, differential slots ── */
-.strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13px}
+.strip{display:grid;grid-template-columns:1fr auto;grid-template-areas:'st clock' 'vit vit';align-items:center;gap:6px 8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13px}
 .st{display:inline-flex;align-items:center;gap:5px;font-weight:700;border-radius:99px;padding:2px 9px;border:1px solid}
 .st.ok{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-line)}
 .st.warn{color:var(--warn);background:var(--warn-bg);border-color:var(--warn-line)}
 .st.bad{color:var(--no);background:var(--no-bg);border-color:var(--no-line)}
-.vit{font-family:var(--mono);font-size:12px;color:var(--ink2);display:flex;gap:9px;flex-wrap:wrap;flex:1;min-width:0}
+.vit{grid-area:vit;font-family:var(--mono);font-size:12.5px;color:var(--ink2);display:flex;gap:4px 14px;flex-wrap:wrap;min-width:0}
+.strip>.st{grid-area:st;justify-self:start}
+.strip>.clock{grid-area:clock}
 .vit b{color:var(--ink)}
 .vit>span{white-space:nowrap}
 .clock{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:3px 8px;background:var(--card2);min-height:30px}
@@ -168,6 +170,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--brand2);outline-off
 .fb.bad{border-color:var(--no-line);background:var(--no-bg)} .fb.bad b{color:var(--no)}
 .got{display:grid;gap:6px;margin-top:10px}
 .got div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:14px}
+.got div.new{border-color:var(--brand2);box-shadow:0 0 0 2px var(--brand2) inset;animation:newf 1.6s ease-out}
+@keyframes newf{from{background:var(--card2)}to{background:var(--card)}}
 .got small{display:block;font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
 .empty{font-size:14px;color:var(--ink3);background:var(--card);border:1px dashed var(--line);border-radius:10px;padding:11px;margin-top:10px}
 .finding-card{margin-top:12px;background:var(--card);border:1.5px solid var(--brand2);border-radius:12px;padding:12px 14px;font-size:15.5px}
@@ -197,7 +201,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--brand2);outline-off
 .tl div{margin-bottom:8px}
 .tl small{font-family:var(--mono);color:var(--ink3);margin-right:6px}
 
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:50;max-width:min(520px,calc(100vw - 24px));width:max-content;
+.toast{cursor:pointer;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:50;max-width:min(520px,calc(100vw - 24px));width:max-content;
   background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-size:14px;box-shadow:var(--shadow)}
 .toast b{display:block;font-size:12px;opacity:.8}
 
@@ -556,8 +560,9 @@ function fbBox(tone, title, text){ return '<div class="fb ' + tone + '"><b>' + e
 function gradeTone(g){ return g === 'best' || g === 'good' ? 'good' : g === 'ok' ? 'ok' : 'bad'; }
 function gradeWord(g){ return { best:'Strong choice', good:'Good', ok:'Reasonable', poor:'Not the best choice', harm:'This could harm the patient' }[g] || ''; }
 
-function render(){
+function render(stay){
   closeSheet();
+  var y = window.scrollY;
   var s = stage();
   if(!RUN.step) RUN.step = firstStep(s);
   persist();
@@ -574,7 +579,12 @@ function render(){
   $('clock').onclick = openReview;
   (WIRES[s.type + ':' + RUN.step] || function(){})(s);
   var f = app.querySelector('.q'); if(f){ f.setAttribute('tabindex', '-1'); }
-  window.scrollTo(0, 0);
+  // A new screen starts at the top. An action on the same screen keeps the
+  // learner's place and brings what it found into view.
+  if(!stay){ window.scrollTo(0, 0); return; }
+  window.scrollTo(0, y);
+  var n = app.querySelector('.got .new') || app.querySelector('.fb, .finding-card');
+  if(n && n.scrollIntoView) try{ n.scrollIntoView({ block:'nearest' }); }catch(e){}
 }
 function firstStep(s){
   return { first:'concerns', primary:'work', differential:'pick', investigate:(s.distinguish ? 'dist' : 'work'), change:'event', handoff:'problem' }[s.type];
@@ -586,10 +596,10 @@ function endStage(){
   RUN.snap[s.id] = { slots:RUN.ddx.slots.slice(), lead:RUN.ddx.lead, danger:RUN.ddx.danger };
   RUN.fb = null; RUN.nudged = false;
   if(RUN.si + 1 >= C.stages.length){ finish(); return; }
-  RUN.si++; RUN.step = null;
+  RUN.si++; RUN.step = null; RUN.lastFound = null;
   render();
 }
-function goStep(step){ RUN.step = step; RUN.fb = null; render(); }
+function goStep(step){ RUN.step = step; RUN.fb = null; RUN.lastFound = null; render(); }
 
 var SCREENS = {}, WIRES = {};
 
@@ -615,7 +625,7 @@ WIRES['first:concerns'] = function(s){
   var picked = RUN.first.concerns = RUN.first.concerns || [];
   app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
     var i = picked.indexOf(b.dataset.opt); if(i >= 0) picked.splice(i, 1); else picked.push(b.dataset.opt);
-    render();
+    render(true);
   }; });
   $('go').onclick = function(){
     var good = s.concerns.filter(function(o){ return o.good; }).map(function(o){ return o.id; });
@@ -625,7 +635,7 @@ WIRES['first:concerns'] = function(s){
     if(guided()){
       var tone = RUN.first.concernScore >= 0.99 ? 'good' : RUN.first.concernScore >= 0.5 ? 'ok' : 'bad';
       RUN.fb = { tone:tone, title:tone === 'good' ? 'You saw it' : 'Look again', text:'Green: the concerns this scene shows.' + (wrong ? " Red: not what's in front of you." : '') };
-      render();
+      render(true);
     } else goStep('sick');
   };
 };
@@ -646,7 +656,7 @@ WIRES['first:sick'] = function(s){
   app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
     RUN.first.sick = b.dataset.opt;
     addLog('stage', 'first', RUN.first.sick === 'sick' ? 'First impression: sick' : 'First impression: not sick');
-    if(guided()){ var ok = RUN.first.sick === s.sick; RUN.fb = { tone:ok ? 'good' : 'bad', title:ok ? 'Agreed' : 'Look again' }; render(); }
+    if(guided()){ var ok = RUN.first.sick === s.sick; RUN.fb = { tone:ok ? 'good' : 'bad', title:ok ? 'Agreed' : 'Look again' }; render(true); }
     else endStage();
   }; });
 };
@@ -656,7 +666,7 @@ function gotList(si){
   var ids = Object.keys(RUN.found).filter(function(k){ return si == null || RUN.found[k].si === si; })
     .sort(function(a, b){ return RUN.found[a].seq - RUN.found[b].seq; });
   if(!ids.length) return '<p class="empty">Nothing yet. Tap <b>Assess</b> or <b>Ask</b> below.</p>';
-  return '<div class="got">' + ids.map(function(k){ var f = RUN.found[k].f; return '<div><small>' + esc(f.cat) + '</small>' + esc(f.text) + '</div>'; }).join('') + '</div>';
+  return '<div class="got">' + ids.map(function(k){ var f = RUN.found[k].f; return '<div' + (k === RUN.lastFound ? ' class="new"' : '') + '><small>' + esc(f.cat) + '</small>' + esc(f.text) + '</div>'; }).join('') + '</div>';
 }
 SCREENS['primary:work'] = function(s){
   var h = '<h2 class="q">' + esc(s.prompt) + '<small>Tap <b>Assess</b> to examine and <b>Care</b> to treat. Then move on.</small></h2>';
@@ -671,7 +681,7 @@ WIRES['primary:work'] = function(s){
     if(guided() && miss.length && !RUN.nudged){
       RUN.nudged = true;
       RUN.fb = { tone:'ok', title:'Anything left in your primary?', text:'You haven\'t checked: ' + miss.map(function(id){ var a = actById(id); return a ? a.a.label : id; }).join(', ') + '. Tap Primary done again to move on anyway.' };
-      render(); return;
+      render(true); return;
     }
     endStage();
   };
@@ -708,7 +718,7 @@ function wirePick(sel, after){
   }; });
 }
 WIRES['differential:pick'] = function(){
-  wirePick(RUN.ddx.slots, render);
+  wirePick(RUN.ddx.slots, function(){ render(true); });
   $('go').onclick = function(){
     var d = RUN.ddx;
     if(d.slots.indexOf(d.lead) < 0) d.lead = d.slots[0];
@@ -726,7 +736,7 @@ function wireRank(d, after){
   }; });
 }
 WIRES['differential:rank'] = function(){
-  wireRank(RUN.ddx, render);
+  wireRank(RUN.ddx, function(){ render(true); });
   $('go').onclick = function(){
     addLog('ddx', 'ddx', 'Differential: ' + RUN.ddx.slots.map(dxLabel).join(', ') + '. Most likely: ' + dxLabel(RUN.ddx.lead) + '.');
     endStage();
@@ -768,7 +778,7 @@ WIRES['investigate:dist'] = function(s){
     var id = b.dataset.opt, a = actById(id).a;
     RUN.distinguished = id; RUN.picks[stage().id] = id;
     reveal(a.reveals, a.min); applyActStatus(a);
-    render();
+    render(true);
   }; });
 };
 SCREENS['investigate:ev'] = function(){
@@ -795,7 +805,7 @@ WIRES['investigate:ev'] = function(){
     var word = EFFECTS.filter(function(e){ return e.id === right; })[0].label.replace(' my leading explanation', '').toLowerCase();
     RUN.fb = { tone:ok ? 'good' : 'bad', title:ok ? 'That\'s how it reads' : 'For ' + dxLabel(t) + ', this ' + (right === 'neutral' ? "doesn't distinguish much" : word),
       text:f.why || '' };
-    render();
+    render(true);
   }; });
 };
 SCREENS['investigate:work'] = function(s){
@@ -835,7 +845,7 @@ WIRES['change:event'] = function(s){
     RUN.picks[s.id] = o.id;
     if(o.care){ var a = careById(o.care); if(a) giveCare(a); else if(!RUN.care[o.care]){ RUN.care[o.care] = { seq:stamp(), t:RUN.time, si:RUN.si, value:o.grade }; } }
     addLog('pick', o.id, o.label);
-    if(guided()){ RUN.fb = { tone:gradeTone(o.grade) }; render(); } else endStage();
+    if(guided()){ RUN.fb = { tone:gradeTone(o.grade) }; render(true); } else endStage();
   }; });
 };
 
@@ -846,7 +856,7 @@ SCREENS['handoff:problem'] = function(s){
   return h + '</div><button type="button" class="btn btn-primary" id="go"' + (mine ? '' : ' disabled') + '>Next</button>';
 };
 WIRES['handoff:problem'] = function(){
-  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){ RUN.handoff.problem = b.dataset.opt; render(); }; });
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){ RUN.handoff.problem = b.dataset.opt; render(true); }; });
   $('go').onclick = function(){ goStep('impression'); };
 };
 SCREENS['handoff:impression'] = function(){
@@ -863,7 +873,7 @@ WIRES['handoff:impression'] = function(){
   var H = RUN.handoff;
   app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
     var p = b.dataset.opt.split(':'); if(p[0] === 'L'){ H.lead = p[1]; if(H.alt === H.lead) H.alt = null; } else H.alt = p[1];
-    var y = window.scrollY; render(); window.scrollTo(0, y);
+    render(true);
   }; });
   $('go').onclick = function(){ goStep('priorities'); };
 };
@@ -877,7 +887,7 @@ WIRES['handoff:priorities'] = function(){
   var sel = RUN.handoff.pri;
   app.querySelectorAll('[data-opt]').forEach(function(b){ b.onclick = function(){
     var i = sel.indexOf(b.dataset.opt); if(i >= 0) sel.splice(i, 1); else if(sel.length < 3) sel.push(b.dataset.opt); else { toast('Three at most.'); return; }
-    var y = window.scrollY; render(); window.scrollTo(0, y);
+    render(true);
   }; });
   $('go').onclick = function(){
     var H = RUN.handoff;
@@ -918,7 +928,10 @@ function actItems(kind){
   if(kind === 'assess'){
     var p = list.filter(function(a){ return a.phase === 'primary'; }), o = list.filter(function(a){ return a.phase !== 'primary'; });
     h += '<h3>Primary</h3>' + p.map(row).join('');
-    if(RUN.si >= 1) h += '<h3>Secondary and rechecks</h3>' + o.map(row).join('');
+    // A recheck means nothing until something has been done.
+    var treated = Object.keys(RUN.care).some(function(k){ return !RUN.care[k].implied; });
+    o = o.filter(function(a){ return !a.recheck || treated || RUN.found[a.reveals]; });
+    if(o.length) h += '<h3>' + (stage().type === 'primary' ? 'More assessments' : 'Secondary and rechecks') + '</h3>' + o.map(row).join('');
   } else h = list.map(row).join('');
   return h;
 }
@@ -930,18 +943,20 @@ function onAct(kind, id){
     if(!r) return;
     var msg = (r.pre.length ? 'First: ' + r.pre.join(', ') + '. ' : '') + a.label + '.';
     if(guided() && r.why) toast(r.why, gradeWord(r.value)); else toast(msg, 'Done');
-    render(); return;
+    render(true); return;
   }
   var already = RUN.found[a.reveals];
   var f = reveal(a.reveals, a.min);
   if(!already) applyActStatus(a);
   closeSheet();
-  toast(f.text, f.cat);
   var s = stage();
   if(!already && guided() && s.type === 'investigate' && RUN.step === 'work' && f.key && f.why && evTarget() && RUN.evCount < MAX_EV && f.effect[evTarget()] !== 'neutral'){
     RUN.pendingEv = a.reveals; goStep('ev'); return;
   }
-  render();
+  RUN.lastFound = a.reveals;
+  // Work screens list findings as they come; anywhere else a pop-up is the only place to show it.
+  if(RUN.step !== 'work') toast(f.text, f.cat); else $('toast').hidden = true;
+  render(true);
 }
 ['assess', 'ask', 'care'].forEach(function(kind){
   $('act-' + kind).onclick = function(){
@@ -997,7 +1012,7 @@ function openDdxSheet(){
       var changed = d.slots.join() !== RUN.ddx.slots.join() || d.lead !== RUN.ddx.lead || d.danger !== RUN.ddx.danger;
       RUN.ddx = d;
       if(changed){ RUN.revisions++; addLog('ddx', 'ddx', 'Revised: ' + d.slots.map(dxLabel).join(', ') + '. Most likely: ' + dxLabel(d.lead) + '.'); }
-      closeSheet(); render();
+      closeSheet(); render(true);
     };
     $('sheet-x').onclick = closeSheet;
   }
@@ -1011,8 +1026,9 @@ function toast(text, title){
   t.innerHTML = (title ? '<b>' + esc(title) + '</b>' : '') + esc(text);
   t.hidden = false;
   clearTimeout(toastT);
-  toastT = setTimeout(function(){ t.hidden = true; }, Math.min(9000, 2600 + String(text).length * 45));
+  toastT = setTimeout(function(){ t.hidden = true; }, Math.min(7000, 2500 + String(text).length * 35));
 }
+$('toast').onclick = function(){ $('toast').hidden = true; };
 
 /* ── DEBRIEF ────────────────────────────────────────────────────── */
 function score(){

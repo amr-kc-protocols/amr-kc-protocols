@@ -26,6 +26,8 @@
  *   A12 a 320 px phone never scrolls sideways, on every screen
  *   A13 it works with storage blocked
  *   A14 it is reachable from the Field Guide and precached for offline
+ *   A15 the primary screen on a phone: vitals row, no duplicate pop-ups,
+ *       no premature rechecks, and taps keep your place
  *
  * Run:  cd test && node detective.test.mjs
  */
@@ -492,6 +494,45 @@ ok('A11 all six shipped cases have their art', ['not-herself', 'cant-breathe', '
   const { ctx, page, errors } = await fresh({ blockStorage: true });
   await playStrong(page, DATA.cases[2], 'aemt');
   ok('A13 plays end to end with storage blocked', (await page.$$('.area')).length === 4 && errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+
+/* ── A15 the primary-assessment screen (2/6) on a phone ─────────── */
+{
+  const { ctx, page } = await fresh({ width: 320 });
+  await page.click('[data-level="pm"]'); await page.click('[data-case="passed-out"]');
+  await opt(page, 'pale'); await go(page); await next(page); await opt(page, 'sick'); await next(page);
+  await act(page, 'assess', 'circ');
+  const strip = await page.evaluate(() => {
+    const st = document.querySelector('.strip > .st').getBoundingClientRect(), v = document.querySelector('.vit').getBoundingClientRect();
+    const spans = [...document.querySelectorAll('.vit > span')].map(s => s.getBoundingClientRect().height);
+    return { below: v.top >= st.bottom - 1, oneLine: spans.every(h => h < 24) };
+  });
+  ok('A15 vitals sit on their own row under the status, never squeezed beside it', strip.below, JSON.stringify(strip));
+  ok('A15 each vital keeps its label and value on one line', strip.oneLine, JSON.stringify(strip));
+  ok('A15 a finding on the primary screen shows in the list, not a second pop-up', await page.$eval('#toast', e => e.hidden) && (await page.$$('.got .new')).length === 1);
+  await page.click('#act-assess');
+  const before = await page.$$eval('#sheet [data-act]', e => e.map(x => x.dataset.act));
+  await page.click('#sheet-x');
+  ok('A15 no "recheck" offered before anything has been treated', !before.includes('recheck'), before.join());
+  await act(page, 'care', 'supine');
+  await page.click('#act-assess');
+  const after = await page.$$eval('#sheet [data-act]', e => e.map(x => x.dataset.act));
+  await page.click('#sheet-x');
+  ok('A15 the recheck appears once there is something to recheck', after.includes('recheck'));
+  for (const id of ['airway', 'breathing', 'gcs', 'abd', 'bgl']) await act(page, 'assess', id);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  const y0 = await page.evaluate(() => window.scrollY);
+  await act(page, 'assess', 'ecg');
+  const y1 = await page.evaluate(() => window.scrollY);
+  ok('A15 an action keeps your place instead of jumping to the top', y0 > 0 && y1 > 0, y0 + ' → ' + y1);
+  ok('A15 the newest finding is in view', await page.$eval('.got .new', e => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= window.innerHeight; }));
+  await go(page);
+  ok('A15 the next screen starts at the top', await page.evaluate(() => window.scrollY) === 0);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  const y2 = await page.evaluate(() => window.scrollY);
+  await page.click('#app [data-opt="cardiac"]');
+  ok('A15 tapping a possibility on the differential screen keeps your place', y2 > 0 && await page.evaluate(() => window.scrollY) > 0);
   await ctx.close();
 }
 
