@@ -7,7 +7,7 @@
     "A finding's 'effect' says what it does to each possibility: supports, weakens or neutral. The evidence check grades the learner against the possibility they chose as most likely, so fill in every possibility.",
     "Accept more than one reasonable path. Mark choices best, ok or poor, and say why in 'why'. Poor choices that could hurt the patient are 'harm'.",
     "Do not ask for a diagnosis the information cannot support. If 'Unclear yet' is a fair working impression, say so with answer.unclear_ok.",
-    "Art is optional. Give a path and alt text. Until the image exists, the scene text carries the case.",
+    "Art is optional. Give a path and alt text. Until the image exists, the scene text carries the case. The phone shows a 4:3 crop; set art.pos to move it, or art.ratio (e.g. \"1/1\") when a clue sits outside that crop.",
     "Audio is on hold. The page still supports it: add \"audio\": \"assessment-detective/audio/<file>.mp3\" to a first-impression stage and a Hear the patient button appears once the file exists.",
     "review.status stays 'draft' until the Medical Director or Clinical Education has signed off. Drafts are labeled in the game."
   ],
@@ -617,7 +617,7 @@
       },
       "art": {
         "scene": "assessment-detective/img/throat-tight-scene.webp",
-        "alt": "A man in his thirties sits at a restaurant table, flushed, one hand at his throat, red welts on his neck and forearms. A friend leans across the table, worried.",
+        "alt": "A man in his thirties sits at a candlelit restaurant table, flushed and frightened, one hand at his throat, red welts on his neck and forearms. His friend reaches across to push a plate of shrimp noodles away.",
         "pos": "50% 25%"
       },
       "dispatch": "1930. 34-year-old man, allergic reaction at a restaurant. Friend on scene.",
@@ -684,7 +684,7 @@
         },
         "food": {
           "cat": "History",
-          "text": "Ate shrimp pad thai 20 minutes ago. Allergic to shellfish: 'I thought it was mild.'",
+          "text": "Ate shrimp noodles 20 minutes ago. Allergic to shellfish: 'I thought it was mild.'",
           "key": true,
           "effect": { "ana": "supports", "allergic": "supports", "asthma": "weakens", "panic": "weakens", "choke": "neutral", "angio": "weakens" },
           "why": "A known allergen and symptoms within minutes. The timing fits an allergic cause, mild or severe."
@@ -812,7 +812,7 @@
         {
           "id": "first",
           "type": "first",
-          "scene": "A busy restaurant. He sits at a table, flushed, one hand at his throat. Red welts climb his neck. His friend pushes the plate away.",
+          "scene": "A busy restaurant. He sits at the table, flushed and wide-eyed, one hand at his throat. Red welts cover his neck and forearms. His friend shoves the shrimp plate away.",
           "quote": {
             "who": "Patient",
             "text": "My throat feels tight. Like it’s closing."
@@ -951,7 +951,7 @@
       },
       "art": {
         "scene": "assessment-detective/img/heartburn-scene.webp",
-        "alt": "A man in his late fifties sits on the step of an open garage next to a lawnmower, pale and sweaty, a fist pressed to his upper belly. His wife stands over him holding a bottle of antacid.",
+        "alt": "A heavy-set man in his late fifties sits on the step of an open garage, sweat-soaked and grimacing, a fist pressed under his breastbone, holding up his other hand to wave off his wife. She leans over him holding a white pill bottle. A lawnmower sits on the grass behind them.",
         "pos": "50% 25%"
       },
       "dispatch": "1615. 58-year-old man, indigestion. Wife on scene.",
@@ -1171,7 +1171,7 @@
         {
           "id": "first",
           "type": "first",
-          "scene": "An open garage on a hot afternoon. He sits on the step beside the lawnmower, pale and sweating, a fist pressed under his breastbone. His wife holds a bottle of antacid.",
+          "scene": "An open garage on a hot afternoon, the mower left on the lawn. He sits on the step, soaked in sweat, a fist pressed under his breastbone, waving his wife off. She holds a bottle of antacid.",
           "quote": {
             "who": "Patient",
             "text": "It's just heartburn. She worries too much."
@@ -1339,8 +1339,9 @@
       },
       "art": {
         "scene": "assessment-detective/img/just-weak-scene.webp",
-        "alt": "An elderly woman slumps in a recliner under a knitted blanket, flushed and drowsy, eyes half open. A home caregiver in scrubs kneels beside her, holding her hand and a phone.",
-        "pos": "50% 30%"
+        "alt": "An elderly woman slumps in a recliner under a knitted blanket, drowsy, eyes half open, one bare blotchy foot on the footrest. A home caregiver in scrubs kneels beside her, holding her hand and a phone. A pill organizer and a full glass of water sit on the side table; an old dog sleeps on the rug.",
+        "pos": "50% 42%",
+        "ratio": "1/1"
       },
       "dispatch": "1100. 81-year-old woman, weakness. Caregiver on scene.",
       "status0": {
@@ -1526,14 +1527,14 @@
         {
           "id": "first",
           "type": "first",
-          "scene": "A small living room, curtains half drawn. She is slumped in a recliner under a blanket, cheeks flushed, eyes half open. Her caregiver kneels beside her.",
+          "scene": "A living room in late morning. She is slumped in a recliner under a blanket, eyes half open. One bare foot on the footrest looks blotchy. Her caregiver kneels beside her.",
           "quote": {
             "who": "Caregiver",
             "text": "She's just weak today. She's never like this."
           },
           "concerns": [
             { "id": "ams", "label": "Drowsy, not responding normally", "good": true },
-            { "id": "flushed", "label": "Flushed face", "good": true },
+            { "id": "mottled", "label": "Blotchy, mottled skin on her foot", "good": true },
             { "id": "baseline", "label": "Caregiver says this is new", "good": true },
             { "id": "old", "label": "She's elderly; this is probably normal", "good": false },
             { "id": "bleed", "label": "Major bleeding", "good": false }

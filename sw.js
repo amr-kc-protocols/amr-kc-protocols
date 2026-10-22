@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v52';
+const CACHE = 'amrkc-2026-v53';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -30,6 +30,9 @@ const ASSETS = [
   './assessment-detective/img/not-herself-scene.webp',
   './assessment-detective/img/cant-breathe-scene.webp',
   './assessment-detective/img/passed-out-scene.webp',
+  './assessment-detective/img/throat-tight-scene.webp',
+  './assessment-detective/img/heartburn-scene.webp',
+  './assessment-detective/img/just-weak-scene.webp',
   // Certificates are made on the device, so the PDF library has to be here offline too
   './pdf-lib.min.js',
   // AEMT series — a study block is opened on a post-run window in a bay, and

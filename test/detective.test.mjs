@@ -433,13 +433,21 @@ for (const c of ART) {
   const size = fs.statSync(join(ROOT, c.art.scene)).size;
   ok(`A11 ${c.id}: scene art is small enough for a phone on one bar`, size <= 250 * 1024, size);
 }
-ok('A11 the first three cases have their art', ['not-herself', 'cant-breathe', 'passed-out'].every(id => ART.some(c => c.id === id)));
+ok('A11 all six shipped cases have their art', ['not-herself', 'cant-breathe', 'passed-out', 'throat-tight', 'heartburn', 'just-weak'].every(id => ART.some(c => c.id === id)));
 {
   const { ctx, page } = await fresh();
   await page.click(`[data-case="cant-breathe"]`);
   await page.waitForFunction(() => { const i = document.querySelector('#app img'); return i && i.complete && i.naturalWidth > 0; }, null, { timeout: 5000 }).catch(() => {});
   ok('A11 the scene art loads on the first impression', await page.$eval('#app img', i => i.naturalWidth > 0).catch(() => false));
   ok('A11 the art keeps the faces in frame (object-position from the case)', await page.$eval('#app img', i => i.style.objectPosition === '50% 25%').catch(() => false));
+  await ctx.close();
+}
+{
+  const { ctx, page } = await fresh();
+  await page.click(`[data-case="just-weak"]`);
+  await page.waitForSelector('#app img');
+  const box = await page.$eval('#app img', i => { const r = i.getBoundingClientRect(); return { w: r.width, h: r.height }; });
+  ok('A11 a case can ask for a taller frame when a clue sits low (art.ratio)', Math.abs(box.w - box.h) < 2, JSON.stringify(box));
   ok('A11 no audio button while audio is on hold', (await page.$$('[data-audio]')).length === 0);
   await ctx.close();
   const mod = JSON.parse(JSON.stringify(DATA)); mod.cases[0].art.scene = 'assessment-detective/img/missing.webp';
@@ -480,7 +488,7 @@ ok('A11 the first three cases have their art', ['not-herself', 'cant-breathe', '
   // Only art that exists: a precache entry for a missing file fails the whole service-worker install.
   ok('A14 every existing scene art precached', ART.every(c => sw.includes("'./" + c.art.scene + "'")));
   ok('A14 no precache entry for art that does not exist yet', DATA.cases.filter(c => !ART.includes(c)).every(c => !sw.includes(c.art.scene)));
-  ok('A14 cache version bumped past v51', /amrkc-2026-v(?:5[2-9]|[6-9]\d)/.test(sw));
+  ok('A14 cache version bumped past v52', /amrkc-2026-v(?:5[3-9]|[6-9]\d)/.test(sw));
 }
 
 await browser.close(); srv.close();
