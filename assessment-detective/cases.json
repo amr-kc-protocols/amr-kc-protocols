@@ -20,7 +20,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-A2 Altered Mental Status", "VIII-A5 Diabetic Emergencies", "VIII-A9 Stroke / CVA", "III-7 Dextrose 10%", "III-22 Glucagon", "V-20 Glucometry"],
-        "check": "Oral glucose for an EMT patient who is confused but follows commands and swallows safely. Recurrent hypoglycemia on glipizide and why release at home is not offered."
+        "check": "EMT oral glucose: VIII-A5 says 'alert patient who can swallow'. She is E4, confused (GCS 14), follows commands and passes a sip test, with a facial droop. Confirm that counts as alert, or make IV dextrose / ALS the EMT best path. Treat-and-release is excluded because of the sulfonylurea."
       },
       "art": { "scene": "assessment-detective/img/not-herself-scene.webp", "alt": "An older woman sits at a breakfast table, staring past the camera, her right arm hanging at her side. Her husband leans in, talking to her.", "pos": "50% 30%" },
       "dispatch": "0915. Confused 68-year-old woman at home. Husband on scene.",
@@ -221,7 +221,7 @@
       "review": {
         "status": "draft",
         "sources": ["II-6 Acute Pulmonary Edema", "V-5 CPAP (Flow-Safe II)", "VIII-C2 Bronchospasm / Respiratory Distress", "VIII-B2 Chest Pain / ACS", "III-16 Nitroglycerin"],
-        "check": "Nitroglycerin is offered to Paramedics only, following II-6 and VIII-B2. The formulary (III-16) lists SL nitro as AEMT+. Confirm which applies. CPAP is offered at all levels per the scope table and V-5."
+        "check": "This is a 911 call, but the pulmonary edema standing orders are II-6, an IFT protocol; Section VIII has no 911 heart-failure protocol. Confirm II-6 applies on 911. Nitro is offered to Paramedics only, following II-6 and VIII-B2, while the formulary (III-16) lists SL nitro as AEMT+; confirm which. CPAP is offered at all levels per the scope table and V-5."
       },
       "art": { "scene": "assessment-detective/img/cant-breathe-scene.webp", "alt": "An older woman sits at a kitchen table, braced on both hands, mouth open, struggling to breathe. Her daughter leans in behind her.", "pos": "50% 25%" },
       "dispatch": "0710. 74-year-old woman, trouble breathing. Daughter on scene.",
@@ -420,7 +420,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-A1 Abdominal Pain", "VIII-D6 Shock and Hemorrhage", "VIII-F1 Obstetric Emergencies", "V-14 12-Lead ECG"],
-        "check": "Fluid volumes: VIII-A1 lists 250–500 mL for hypotension, VIII-F1 500 mL, VIII-D6 250–500 mL. The case uses 250–500 mL toward SBP 90. Confirm the target."
+        "check": "Fluid volumes: VIII-A1 lists 250–500 mL for hypotension, VIII-F1 500 mL, VIII-D6 250–500 mL. The case uses 250–500 mL toward SBP 90; evidence for permissive hypotension outside trauma is limited, so confirm the target. Scene-time feedback triggers past 16 minutes; that threshold is a teaching choice, not a protocol number."
       },
       "art": { "scene": "assessment-detective/img/passed-out-scene.webp", "alt": "A young woman sits hunched on a couch, sweaty, arms wrapped around her belly. Her roommate sits beside her, a hand on her shoulder.", "pos": "50% 25%" },
       "dispatch": "1400. 26-year-old woman fainted at home. Roommate on scene.",
@@ -613,7 +613,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-A3 Anaphylaxis and Allergic Reaction", "III-8 Epinephrine 1:1,000 (IM)", "III-9 Epinephrine 1:10,000", "III-6 Diphenhydramine", "VIII-C2 Bronchospasm"],
-        "check": "IM epinephrine offered at every level (VIII-A3 EMT step 1). Diphenhydramine PO offered to EMTs per VIII-A3 step 5; the formulary header lists diphenhydramine as AEMT+ with PO at EMT. Albuterol offered at every level per VIII-C2."
+        "check": "IM epinephrine at every level (VIII-A3 EMT step 1). Diphenhydramine PO for EMTs per VIII-A3 step 5, though the formulary header lists diphenhydramine as AEMT+ with PO at EMT. Albuterol is offered at every level: VIII-A3 lists it under AEMT, VIII-C2 under EMT; confirm. IV epinephrine 0.1 mg push (VIII-A3 PM step 3) is shown as a poor first choice; it is a large bolus for a patient with a pulse, so the protocol dose is worth a look."
       },
       "art": {
         "scene": "assessment-detective/img/throat-tight-scene.webp",
@@ -899,7 +899,7 @@
               "question": {
                 "prompt": "He still has not had epinephrine. What now?",
                 "options": [
-                  { "id": "epi_now", "label": "Epinephrine IM now; lay him down, legs up", "grade": "best", "why": "Late, but the right move. Epinephrine is the treatment.", "care": "epi" },
+                  { "id": "epi_now", "label": "Epinephrine IM now; legs up, as flat as his breathing allows", "grade": "best", "why": "Late, but the right move. Epinephrine is the treatment.", "care": "epi" },
                   { "id": "airway", "label": "Prepare BVM and airway; call for ALS", "grade": "ok", "why": "Get ready, but epinephrine first. It can stop the swelling." },
                   { "id": "benadryl2", "label": "Diphenhydramine first, then reassess", "grade": "harm", "why": "Diphenhydramine will not save his airway. Epinephrine will." }
                 ]
@@ -946,8 +946,8 @@
       "minutes": 7,
       "review": {
         "status": "draft",
-        "sources": ["VIII-B2 Chest Pain / ACS", "III-4 Aspirin", "III-16 Nitroglycerin", "III-10 Fentanyl", "V-14 12-Lead ECG"],
-        "check": "Nitroglycerin offered to Paramedics only (VIII-B2); see the note on case 2 about III-16 listing AEMT+. A right-sided lead (V4R) is offered; confirm it is taught. EMTs acquire the 12-lead and the receiving hospital reads it."
+        "sources": ["VIII-B2 Chest Pain / ACS", "VIII-B3 Bradycardia", "III-5 Atropine", "III-4 Aspirin", "III-16 Nitroglycerin", "III-10 Fentanyl", "V-14 12-Lead ECG"],
+        "check": "Nitro offered to Paramedics only (VIII-B2); same III-16 conflict as case 2. V4R is offered at every level, but V-14 describes only standard 12-lead placement, and AEMT interpretation is limited to STEMI identification: confirm a right-sided lead is taught and who may read it (EMTs get the hospital's read). Atropine for the hypotensive bradycardia is offered to Paramedics per VIII-B3."
       },
       "art": {
         "scene": "assessment-detective/img/heartburn-scene.webp",
@@ -1282,6 +1282,14 @@
                     "why": "Help his preload and give the cath lab the new numbers."
                   },
                   {
+                    "id": "atropine",
+                    "label": "Atropine 1 mg IV; recheck HR, BP and lungs",
+                    "levels": ["pm"],
+                    "grade": "best",
+                    "why": "Hypotension with HR 50 is symptomatic bradycardia (VIII-B3). Atropine 1 mg, and a small fluid bolus if he stays low.",
+                    "care": "atropine"
+                  },
+                  {
                     "id": "nitro_pain",
                     "label": "Nitro for the pain",
                     "levels": ["pm"],
@@ -1322,7 +1330,7 @@
         { "id": "danger_dx", "area": "reason", "w": 2, "test": "dx:acs@ddx", "well": "Heart attack was on your list from the start.", "miss": "Heart attack wasn't on your first list. 'Heartburn' in a sweaty 58-year-old is cardiac until proven otherwise." },
         { "id": "lead_end", "area": "reason", "w": 3, "test": "lead:acs@handoff", "well": "Your working impression fit the evidence.", "miss": "Your final impression did not fit the 12-lead." },
         { "id": "recheck", "area": "reassess", "w": 2, "test": "found:recheck", "well": "You rechecked his vitals and pain.", "miss": "No recheck. His BP was drifting." },
-        { "id": "change", "area": "reassess", "w": 3, "test": "pick:change:bolus|pick:change:flat_update|pick:change:flat_fluid|pick:change:flat", "well": "You supported his BP without nitro.", "miss": "When his BP fell, the response did not help it." }
+        { "id": "change", "area": "reassess", "w": 3, "test": "pick:change:bolus|pick:change:atropine|pick:change:flat_update|pick:change:flat_fluid|pick:change:flat", "well": "You supported his BP without nitro.", "miss": "When his BP fell, the response did not help it." }
       ],
       "takeaway": "Pale, sweaty \"heartburn\" is cardiac until a 12-lead says otherwise. Inferior STEMI: check V4R, ask about PDE-5 drugs, and hold the nitro."
     },
@@ -1335,7 +1343,7 @@
       "review": {
         "status": "draft",
         "sources": ["VIII-A12 Sepsis and Septic Shock", "VIII-A2 Altered Mental Status", "VIII-A9 Stroke / CVA", "V-20 Glucometry"],
-        "check": "Fluid: 500 mL boluses toward 30 mL/kg if SBP <90 and lungs clear, stopping for signs of pulmonary edema (VIII-A12). Her starting BP is 92/54, so the first bolus is offered as reasonable and becomes clearly indicated as BP falls. Norepinephrine offered to PMs only as premature."
+        "check": "Fluid: 500 mL boluses toward 30 mL/kg if SBP <90 and lungs clear, stopping for signs of pulmonary edema (VIII-A12). Her starting BP is 88/52 so the first bolus meets the SBP <90 trigger. Norepinephrine offered to PMs only, as premature before fluids. qSOFA is taught as the protocol screen; a negative qSOFA does not exclude sepsis (SSC 2021 advises against qSOFA alone)."
       },
       "art": {
         "scene": "assessment-detective/img/just-weak-scene.webp",
@@ -1348,7 +1356,7 @@
         "label": "Concerning",
         "tone": "warn",
         "hr": 112,
-        "bp": "92/54",
+        "bp": "88/52",
         "rr": 24,
         "spo2": 94,
         "ms": "Drowsy, confused"
@@ -1366,7 +1374,7 @@
         "likely": ["sepsis"],
         "danger": ["sepsis", "gib", "stroke"],
         "alt": ["dehyd", "gib", "stroke"],
-        "note": "Septic shock from a urinary infection. qSOFA is 3 of 3: new confusion, RR 24, SBP 92. She's on metoprolol, which normally holds her heart rate down, so 112 means she's working hard. Fluids help, but older hearts tip into pulmonary edema; recheck the lungs after every bolus."
+        "note": "Septic shock from a urinary infection. qSOFA is 3 of 3: new confusion, RR 24, SBP 88. She's on metoprolol, which normally holds her heart rate down, so 112 means she's working hard. Fluids help, but older hearts tip into pulmonary edema; recheck the lungs after every bolus."
       },
       "findings": {
         "airway": {
@@ -1381,7 +1389,7 @@
         },
         "circ": {
           "cat": "Primary",
-          "text": "Pulse 112, weak. BP 92/54. Skin hot and dry. Feet mottled.",
+          "text": "Pulse 112, weak. BP 88/52. Skin hot and dry. Feet mottled.",
           "key": true,
           "effect": { "sepsis": "supports", "dehyd": "supports", "stroke": "neutral", "gib": "weakens", "hypo": "weakens", "meds": "neutral" },
           "why": "Hot skin with a fast pulse and soft BP points to infection. A bleed usually leaves skin cool and pale."
@@ -1420,7 +1428,7 @@
           "text": "Burning when she pees for 3 days. Urine cloudy and strong-smelling.",
           "key": true,
           "effect": { "sepsis": "supports", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" },
-          "why": "A likely source. Urinary infection is the most common cause of sepsis in older women."
+          "why": "A likely source. Urinary infection is one of the most common sources of sepsis in older adults, second to pneumonia."
         },
         "intake": {
           "cat": "History",
@@ -1501,7 +1509,7 @@
             "min": 3,
             "value": "best",
             "needs": "iv",
-            "why": "Soft BP with clear lungs: 500 mL, then reassess the lungs before the next one.",
+            "why": "SBP under 90 with clear lungs: 500 mL, then reassess the lungs before the next one.",
             "src": "VIII-A12",
             "status": {
               "label": "Improving",
@@ -1661,7 +1669,7 @@
           "id": "handoff",
           "type": "handoff",
           "problems": [
-            { "id": "p1", "label": "81F with septic shock, likely urinary source: fever, new confusion, RR 24, SBP 92", "grade": "best" },
+            { "id": "p1", "label": "81F with septic shock, likely urinary source: fever, new confusion, RR 24, SBP 88", "grade": "best" },
             { "id": "p2", "label": "81F dehydrated from not drinking", "grade": "poor", "why": "Dehydration does not cause a fever of 101.8. Missing sepsis delays antibiotics." },
             { "id": "p3", "label": "81F, new weakness and confusion; sepsis most likely, GI bleed less likely", "grade": "best" }
           ],
