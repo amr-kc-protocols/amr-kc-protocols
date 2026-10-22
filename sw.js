@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v50';
+const CACHE = 'amrkc-2026-v53';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -23,6 +23,16 @@ const ASSETS = [
   // Kansas license renewal guide — read on a phone, often far from signal
   './kansas-relicensure.html',
   './chart-rx.html', './chart-rx/questions.json', './chart-rx/aemt-scope.json',
+  // Assessment Detective — a case runs between calls with no signal, so the
+  // page, every case and its scene art have to be here. Audio is optional and
+  // gets cached the first time it plays.
+  './assessment-detective.html', './assessment-detective/cases.json',
+  './assessment-detective/img/not-herself-scene.webp',
+  './assessment-detective/img/cant-breathe-scene.webp',
+  './assessment-detective/img/passed-out-scene.webp',
+  './assessment-detective/img/throat-tight-scene.webp',
+  './assessment-detective/img/heartburn-scene.webp',
+  './assessment-detective/img/just-weak-scene.webp',
   // Certificates are made on the device, so the PDF library has to be here offline too
   './pdf-lib.min.js',
   // AEMT series — a study block is opened on a post-run window in a bay, and
