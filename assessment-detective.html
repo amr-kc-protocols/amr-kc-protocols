@@ -331,7 +331,7 @@ function validate(raw){
       }
       if(s.type === 'handoff') need(s.problems && s.priorities, 'handoff needs problems and priorities');
     });
-    (c.scoring || []).forEach(function(r){ need(AREAS.some(function(a){ return a.id === r.area; }) && r.test && r.well && r.miss, 'scoring ' + r.id + ' needs area, test, well and miss'); });
+    (c.scoring || []).forEach(function(r){ (r.levels || []).forEach(function(l){ need(LEVELS[l], 'scoring ' + r.id + ' has unknown level ' + l); }); need(AREAS.some(function(a){ return a.id === r.area; }) && r.test && r.well && r.miss, 'scoring ' + r.id + ' needs area, test, well and miss'); });
     if(e.length) errs.push(id + ': ' + e.join('; '));
     else out.push(c);
   });
@@ -1019,6 +1019,7 @@ function score(){
   // A rule that starts with "!" is a guard (didn't give fluids, didn't stand her up).
   // Missing it costs; keeping it earns nothing, or doing nothing would score well.
   (C.scoring || []).forEach(function(r){
+    if(r.levels && r.levels.indexOf(RUN.level) < 0) return;   // e.g. IV fluids can't be expected of an EMT
     var hit = test(r.test) || (unclearOk && /^lead:/.test(r.test));
     add(r.area, (hit && /^!/.test(r.test)) ? 0 : (r.w || 1), hit, r.well, r.miss);
   });

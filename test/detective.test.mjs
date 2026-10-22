@@ -115,9 +115,13 @@ async function answerEv(page, right = true) {
 const CARE = {
   'not-herself':     { emt: [['assess', 'swallow'], ['care', 'oralglucose']], aemt: [['care', 'd10']], pm: [['care', 'd10']] },
   'cant-breathe':    { emt: [['care', 'upright'], ['care', 'cpap']], aemt: [['care', 'upright'], ['care', 'cpap']], pm: [['care', 'upright'], ['care', 'cpap']] },
-  'passed-out': { emt: [['care', 'supine']], aemt: [['care', 'supine'], ['care', 'fluid']], pm: [['care', 'supine'], ['care', 'fluid']] }
+  'passed-out': { emt: [['care', 'supine']], aemt: [['care', 'supine'], ['care', 'fluid']], pm: [['care', 'supine'], ['care', 'fluid']] },
+  'throat-tight':    { emt: [['care', 'epi']], aemt: [['care', 'epi']], pm: [['care', 'epi']] },
+  'heartburn':       { emt: [['assess', 'ecg'], ['care', 'asa'], ['care', 'rest']], aemt: [['assess', 'ecg'], ['care', 'asa'], ['care', 'rest']], pm: [['assess', 'ecg'], ['care', 'asa'], ['care', 'rest']] },
+  'just-weak':       { emt: [['care', 'alert']], aemt: [['care', 'alert'], ['care', 'fluid']], pm: [['care', 'alert'], ['care', 'fluid']] }
 };
-const LATE = { 'cant-breathe': { pm: [['ask', 'meds'], ['care', 'nitro']] } };
+const LATE = { 'cant-breathe': { pm: [['ask', 'meds'], ['care', 'nitro']] },
+  'heartburn': { emt: [['care', 'stemi_alert']], aemt: [['care', 'stemi_alert']], pm: [['care', 'stemi_alert']] } };
 
 async function playStrong(page, c, level, mode = 'guided', opts = {}) {
   await page.click(`[data-level="${level}"]`);
@@ -196,7 +200,7 @@ async function rates(page) {
 {
   const { ctx, page, errors } = await fresh();
   const v = await page.evaluate(() => ({ n: window.Detective.cases().length, e: window.Detective.errors() }));
-  ok('A1 three shipped cases load', v.n === 3, v.n);
+  ok('A1 six shipped cases load', v.n === 6, v.n);
   ok('A1 no shipped case fails validation', v.e.length === 0, v.e.join(' | '));
   ok('A1 no page errors on load', errors.length === 0, errors.join(' | '));
   await ctx.close();
@@ -207,7 +211,7 @@ async function rates(page) {
   OVERRIDE = JSON.stringify(bad);
   const t = await fresh();
   const n = await t.page.$$eval('.case-card', e => e.length);
-  ok('A1 broken cases are skipped, the good one still plays', n === 1, n);
+  ok('A1 broken cases are skipped, the good ones still play', n === DATA.cases.length - 2, n);
   await t.page.goto(PAGE + '#review'); await t.page.waitForSelector('.rv');
   const txt = await t.page.textContent('#app');
   ok('A1 #review lists why each skipped case failed', /cant-breathe:.*effect for copd/.test(txt) && /passed-out:.*stages must be/.test(txt), txt.slice(-300));
@@ -223,11 +227,12 @@ async function rates(page) {
 /* ── A2 scope and doses ─────────────────────────────────────────── */
 {
   const ADV = /\bIV\b|\bIO\b|D10|Dextrose|saline|Nitro|Glucagon|Ondansetron|Fentanyl|Midazolam/i;
-  const PM_ONLY = /Nitro|Glucagon|blood pressure/i;
+  const PM_ONLY = /Nitro|Glucagon|blood pressure|Norepinephrine|Fentanyl|1:10,000/i;
   const DOSES = [   // the 2026 protocol wording each label must match
     [/Oral glucose/, /15–25 g/], [/Dextrose 10%/, /100–250 mL/], [/Glucagon/, /1 mg IM/],
     [/Nitroglycerin/, /0\.4 mg SL/], [/Aspirin/, /324 mg/], [/Albuterol/, /2\.5 mg/],
-    [/^CPAP/, /5 cmH2O, titrate to 10/], [/Ondansetron/, /4 mg/], [/saline/i, /250(–500)? mL/]
+    [/^CPAP/, /5 cmH2O, titrate to 10/], [/Ondansetron/, /4 mg/], [/saline/i, /250(–500)? mL|500 mL( bolus|–1 L)/],
+    [/^Epinephrine 0/, /0\.3–0\.5 mg IM/], [/1:10,000/, /0\.1 mg IV/], [/Diphenhydramine \d/, /25–50 mg/], [/Fentanyl/, /25–50 mcg/]
   ];
   const bad = [], dose = [];
   for (const c of DATA.cases) {
@@ -418,12 +423,17 @@ for (const c of DATA.cases) {
 }
 
 /* ── A11 scene art, and missing art or audio ───────────────────── */
+// Art arrives after a case is written. A case may ship before its art; once
+// the file exists it must be light enough for a phone on one bar.
+const ART = DATA.cases.filter(c => fs.existsSync(join(ROOT, c.art.scene)));
 for (const c of DATA.cases) {
-  const f = join(ROOT, c.art.scene);
-  const size = fs.existsSync(f) ? fs.statSync(f).size : 0;
-  ok(`A11 ${c.id}: scene art exists and is small enough for a phone on one bar`, size > 0 && size <= 250 * 1024, size);
-  ok(`A11 ${c.id}: scene art has alt text`, (c.art.alt || '').length > 30);
+  ok(`A11 ${c.id}: names a scene art file and describes it`, /^assessment-detective\/img\/[a-z0-9-]+\.webp$/.test(c.art.scene) && (c.art.alt || '').length > 30);
 }
+for (const c of ART) {
+  const size = fs.statSync(join(ROOT, c.art.scene)).size;
+  ok(`A11 ${c.id}: scene art is small enough for a phone on one bar`, size <= 250 * 1024, size);
+}
+ok('A11 the first three cases have their art', ['not-herself', 'cant-breathe', 'passed-out'].every(id => ART.some(c => c.id === id)));
 {
   const { ctx, page } = await fresh();
   await page.click(`[data-case="cant-breathe"]`);
@@ -467,7 +477,9 @@ for (const c of DATA.cases) {
   const sw = await readFile(join(ROOT, 'sw.js'), 'utf8');
   ok('A14 linked from the Field Guide', idx.includes("href:'assessment-detective.html'"));
   ok('A14 page and cases precached for offline', sw.includes("'./assessment-detective.html'") && sw.includes("'./assessment-detective/cases.json'"));
-  ok('A14 every case\'s scene art precached', DATA.cases.every(c => sw.includes("'./" + c.art.scene + "'")));
+  // Only art that exists: a precache entry for a missing file fails the whole service-worker install.
+  ok('A14 every existing scene art precached', ART.every(c => sw.includes("'./" + c.art.scene + "'")));
+  ok('A14 no precache entry for art that does not exist yet', DATA.cases.filter(c => !ART.includes(c)).every(c => !sw.includes(c.art.scene)));
   ok('A14 cache version bumped past v51', /amrkc-2026-v(?:5[2-9]|[6-9]\d)/.test(sw));
 }
 

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10.1",
+  "version": "2026-10.2",
   "writing_guide": [
     "Cases are made up for practice. No patient names, dates of birth, addresses or incident numbers.",
     "One decision per screen. Scene text: three short sentences at most. A finding: one or two lines.",
@@ -603,6 +603,1098 @@
         { "id": "change", "area": "reassess", "w": 2, "test": "pick:change:notify|pick:change:more_fluid|pick:change:go_now", "well": "You responded well when she got worse.", "miss": "When she worsened, the response didn't help her." }
       ],
       "takeaway": "A faint that stays in shock lying flat isn't a faint. In a woman of childbearing age with belly pain, think ectopic, and move."
+    },
+
+    {
+      "id": "throat-tight",
+      "title": "Throat Feels Tight",
+      "teaser": "34-year-old at a restaurant. Says his throat is closing.",
+      "minutes": 6,
+      "review": {
+        "status": "draft",
+        "sources": ["VIII-A3 Anaphylaxis and Allergic Reaction", "III-8 Epinephrine 1:1,000 (IM)", "III-9 Epinephrine 1:10,000", "III-6 Diphenhydramine", "VIII-C2 Bronchospasm"],
+        "check": "IM epinephrine offered at every level (VIII-A3 EMT step 1). Diphenhydramine PO offered to EMTs per VIII-A3 step 5; the formulary header lists diphenhydramine as AEMT+ with PO at EMT. Albuterol offered at every level per VIII-C2."
+      },
+      "art": {
+        "scene": "assessment-detective/img/throat-tight-scene.webp",
+        "alt": "A man in his thirties sits at a restaurant table, flushed, one hand at his throat, red welts on his neck and forearms. A friend leans across the table, worried.",
+        "pos": "50% 25%"
+      },
+      "dispatch": "1930. 34-year-old man, allergic reaction at a restaurant. Friend on scene.",
+      "status0": {
+        "label": "Concerning",
+        "tone": "warn",
+        "hr": 118,
+        "bp": "96/60",
+        "rr": 26,
+        "spo2": 93,
+        "ms": "Anxious"
+      },
+      "dx": [
+        { "id": "ana", "label": "Anaphylaxis", "danger": true },
+        { "id": "allergic", "label": "Mild allergic reaction (skin only)" },
+        { "id": "asthma", "label": "Asthma attack" },
+        { "id": "panic", "label": "Panic attack" },
+        { "id": "choke", "label": "Food stuck in the airway", "danger": true },
+        { "id": "angio", "label": "Swelling from a BP pill (ACE inhibitor)" },
+        { "id": "unclear", "label": "Unclear yet" }
+      ],
+      "answer": {
+        "likely": ["ana"],
+        "danger": ["ana", "choke"],
+        "alt": ["choke", "asthma", "angio"],
+        "note": "Anaphylaxis to shellfish: skin, airway, breathing, gut and blood pressure all involved within 20 minutes of eating. Epinephrine IM is the treatment at every level. Symptoms can come back as the first dose wears off, and late reactions happen, so he goes to the hospital even when he looks better."
+      },
+      "findings": {
+        "airway": {
+          "cat": "Primary",
+          "text": "Voice hoarse. Says his throat feels tight. Lips swelling. No stridor yet.",
+          "key": true,
+          "effect": { "ana": "supports", "allergic": "weakens", "asthma": "neutral", "panic": "weakens", "choke": "weakens", "angio": "supports" },
+          "why": "A hoarse voice and swelling lips mean the airway is involved. That's no longer a skin-only reaction."
+        },
+        "breathing": {
+          "cat": "Primary",
+          "text": "RR 26. Wheezes on both sides. SpO2 93%.",
+          "effect": { "ana": "supports", "allergic": "weakens", "asthma": "supports", "panic": "weakens", "choke": "neutral", "angio": "neutral" }
+        },
+        "circ": {
+          "cat": "Primary",
+          "text": "Pulse 118. BP 96/60. Skin flushed and warm.",
+          "effect": { "ana": "supports", "allergic": "weakens", "asthma": "weakens", "panic": "weakens", "choke": "neutral", "angio": "neutral" }
+        },
+        "gcs": {
+          "cat": "Primary",
+          "text": "Alert. Very anxious: 'Something bad is happening to me.'",
+          "key": true,
+          "effect": { "ana": "supports", "allergic": "neutral", "asthma": "neutral", "panic": "supports", "choke": "neutral", "angio": "neutral" },
+          "why": "A sense of doom fits anaphylaxis and panic equally. It does not tell them apart."
+        },
+        "skin": {
+          "cat": "Exam",
+          "text": "Raised hives on his neck, chest and both arms. Eyelids puffy.",
+          "key": true,
+          "effect": { "ana": "supports", "allergic": "supports", "asthma": "weakens", "panic": "weakens", "choke": "weakens", "angio": "weakens" },
+          "why": "Hives plus a breathing or blood pressure problem is two systems: anaphylaxis. ACE-inhibitor swelling doesn't cause hives."
+        },
+        "mouth": {
+          "cat": "Exam",
+          "text": "Tongue and uvula swollen. No food or object in the mouth.",
+          "effect": { "ana": "supports", "allergic": "neutral", "asthma": "neutral", "panic": "neutral", "choke": "weakens", "angio": "supports" }
+        },
+        "food": {
+          "cat": "History",
+          "text": "Ate shrimp pad thai 20 minutes ago. Allergic to shellfish: 'I thought it was mild.'",
+          "key": true,
+          "effect": { "ana": "supports", "allergic": "supports", "asthma": "weakens", "panic": "weakens", "choke": "neutral", "angio": "weakens" },
+          "why": "A known allergen and symptoms within minutes. The timing fits an allergic cause, mild or severe."
+        },
+        "choking": {
+          "cat": "History",
+          "text": "No choking or coughing fit while eating. The tightness came on over 10 minutes.",
+          "effect": { "ana": "neutral", "allergic": "neutral", "asthma": "neutral", "panic": "neutral", "choke": "weakens", "angio": "neutral" }
+        },
+        "meds": {
+          "cat": "History",
+          "text": "No daily medicines. No inhaler. Never prescribed an EpiPen.",
+          "effect": { "ana": "neutral", "allergic": "neutral", "asthma": "weakens", "panic": "neutral", "choke": "neutral", "angio": "weakens" }
+        },
+        "pmh": {
+          "cat": "History",
+          "text": "Asthma as a kid, nothing since. No anxiety history.",
+          "effect": { "ana": "neutral", "allergic": "neutral", "asthma": "neutral", "panic": "weakens", "choke": "neutral", "angio": "neutral" }
+        },
+        "gi": {
+          "cat": "History",
+          "text": "Cramping belly pain and nausea started 10 minutes ago.",
+          "effect": { "ana": "supports", "allergic": "weakens", "asthma": "weakens", "panic": "neutral", "choke": "neutral", "angio": "neutral" },
+          "why": "Gut symptoms are another system. Skin plus gut plus breathing is anaphylaxis."
+        },
+        "recheck": {
+          "cat": "Recheck",
+          "key": true,
+          "variants": [
+            {
+              "if": "care:epi",
+              "text": "5 minutes after epi: voice clearer, wheeze softer. BP 118/72, HR 112. SpO2 96%.",
+              "effect": { "ana": "supports", "allergic": "neutral", "asthma": "neutral", "panic": "weakens", "choke": "weakens", "angio": "neutral" },
+              "why": "A fast response to epinephrine fits anaphylaxis. Keep watching: it can come back."
+            },
+            {
+              "text": "No epi yet: voice now muffled. New stridor breathing in. BP 84/50.",
+              "effect": { "ana": "supports", "allergic": "weakens", "asthma": "neutral", "panic": "weakens", "choke": "neutral", "angio": "neutral" },
+              "why": "Untreated anaphylaxis gets worse fast. Epinephrine IM now."
+            }
+          ]
+        }
+      },
+      "actions": {
+        "assess": [
+          { "id": "airway", "label": "Airway and voice", "phase": "primary", "min": 0.5, "reveals": "airway" },
+          { "id": "breathing", "label": "Breathing, lung sounds, SpO2", "phase": "primary", "min": 1, "reveals": "breathing" },
+          { "id": "circ", "label": "Pulse, skin and BP", "phase": "primary", "min": 1, "reveals": "circ" },
+          { "id": "gcs", "label": "Mental status", "phase": "primary", "min": 0.5, "reveals": "gcs" },
+          { "id": "skin", "label": "Look at the skin all over", "min": 0.5, "reveals": "skin" },
+          { "id": "mouth", "label": "Look in his mouth", "min": 0.5, "reveals": "mouth" },
+          { "id": "recheck", "label": "Recheck airway, breathing and BP", "min": 1, "reveals": "recheck", "recheck": true }
+        ],
+        "ask": [
+          { "id": "food", "label": "What did he eat? Any allergies?", "min": 0.5, "reveals": "food" },
+          { "id": "choking", "label": "Did he choke on anything?", "min": 0.5, "reveals": "choking" },
+          { "id": "meds", "label": "Medicines? EpiPen? Inhaler?", "min": 0.5, "reveals": "meds" },
+          { "id": "pmh", "label": "Medical history?", "min": 0.5, "reveals": "pmh" },
+          { "id": "gi", "label": "Any belly pain or nausea?", "min": 0.5, "reveals": "gi" }
+        ],
+        "care": [
+          {
+            "id": "epi",
+            "label": "Epinephrine 0.3–0.5 mg IM, outer thigh",
+            "min": 1,
+            "value": "best",
+            "why": "Two systems plus a low BP: epinephrine IM right away, at every level.",
+            "src": "VIII-A3, III-8",
+            "status": {
+              "label": "Improving",
+              "tone": "ok",
+              "hr": 112,
+              "bp": "118/72",
+              "spo2": 96,
+              "rr": 20,
+              "ms": "Calmer"
+            }
+          },
+          { "id": "o2", "label": "Oxygen, target SpO2 ≥94%", "min": 1, "value": "ok", "why": "Right target, but oxygen alone does nothing for the swelling.", "src": "VIII-A3" },
+          { "id": "position", "label": "Sit him up for his breathing; don't let him stand or walk", "min": 0.5, "value": "ok", "why": "Protocol: supine with legs up unless breathing needs upright. His does. Never stand an anaphylaxis patient up.", "src": "VIII-A3" },
+          { "id": "diphen_po", "label": "Diphenhydramine 25–50 mg PO", "min": 1, "value": "ok", "why": "An add-on after epinephrine, never instead of it. With a swelling throat, swallowing pills is risky.", "src": "VIII-A3" },
+          { "id": "albuterol", "label": "Albuterol 2.5 mg nebulized", "min": 2, "value": "ok", "why": "Helps the wheeze after epinephrine. It does nothing for the throat or the BP.", "src": "VIII-C2" },
+          {
+            "id": "iv",
+            "label": "Peripheral IV",
+            "levels": ["aemt", "pm"],
+            "min": 2,
+            "value": "ok",
+            "src": "VIII-A3"
+          },
+          {
+            "id": "fluid",
+            "label": "Normal saline 500 mL–1 L bolus",
+            "levels": ["aemt", "pm"],
+            "min": 2,
+            "value": "ok",
+            "needs": "iv",
+            "why": "For hypotension. Give the epinephrine first.",
+            "src": "VIII-A3"
+          },
+          {
+            "id": "diphen_iv",
+            "label": "Diphenhydramine 25–50 mg IV",
+            "levels": ["aemt", "pm"],
+            "min": 1,
+            "value": "ok",
+            "needs": "iv",
+            "why": "An add-on after epinephrine, never instead of it.",
+            "src": "VIII-A3"
+          },
+          {
+            "id": "epi_iv",
+            "label": "Epinephrine 1:10,000 0.1 mg IV",
+            "levels": ["pm"],
+            "min": 2,
+            "value": "poor",
+            "needs": "iv",
+            "why": "IV epinephrine is for severe bronchospasm that fails albuterol. Start with IM.",
+            "src": "VIII-A3"
+          },
+          { "id": "transport", "label": "Package and begin transport", "min": 3, "value": "ok", "transport": true }
+        ]
+      },
+      "stages": [
+        {
+          "id": "first",
+          "type": "first",
+          "scene": "A busy restaurant. He sits at a table, flushed, one hand at his throat. Red welts climb his neck. His friend pushes the plate away.",
+          "quote": {
+            "who": "Patient",
+            "text": "My throat feels tight. Like it’s closing."
+          },
+          "concerns": [
+            { "id": "airway", "label": "Possible airway swelling", "good": true },
+            { "id": "hives", "label": "Hives / welts", "good": true },
+            { "id": "anx", "label": "Very anxious", "good": false },
+            { "id": "bleed", "label": "Major bleeding", "good": false },
+            { "id": "food", "label": "Just ate", "good": true }
+          ],
+          "sick": "sick",
+          "why": "A hand at the throat and welts after eating: assume anaphylaxis until you prove otherwise. He's sick."
+        },
+        {
+          "id": "primary",
+          "type": "primary",
+          "prompt": "Run your primary. Use Assess, and treat what can't wait.",
+          "required": ["airway", "breathing", "circ", "gcs"],
+          "why": "Airway and BP findings decide this one. Treat as soon as you find them."
+        },
+        { "id": "ddx", "type": "differential", "prompt": "What could explain this? Pick up to three." },
+        {
+          "id": "investigate",
+          "type": "investigate",
+          "distinguish": {
+            "prompt": "Which assessment would most help you narrow your differential right now?",
+            "options": [
+              { "id": "skin", "grade": "best", "why": "Hives plus airway or BP trouble means anaphylaxis. Their absence points elsewhere." },
+              { "id": "food", "grade": "best", "why": "A known allergen minutes before is strong evidence." },
+              { "id": "choking", "grade": "ok", "why": "Rules choking in or out, but he is talking, so it is already less likely." },
+              { "id": "gcs", "grade": "poor", "why": "His anxiety fits panic and anaphylaxis equally." }
+            ]
+          },
+          "prompt": "Gather what you need. Use Assess and Ask, then continue."
+        },
+        {
+          "id": "change",
+          "type": "change",
+          "variants": [
+            {
+              "if": "care:epi",
+              "text": "En route, 15 minutes after epi. The hives are fading, but his voice is getting hoarse again and the wheeze is back. BP 100/64.",
+              "time": 15,
+              "status": {
+                "label": "Concerning",
+                "tone": "warn",
+                "hr": 116,
+                "bp": "100/64",
+                "spo2": 93,
+                "rr": 24,
+                "ms": "Anxious"
+              },
+              "reveal": {
+                "cat": "Recheck",
+                "text": "Symptoms returning 15 minutes after epi: hoarse, wheezing, BP 100/64."
+              },
+              "question": {
+                "prompt": "What's your next step?",
+                "options": [
+                  { "id": "repeat_epi", "label": "Repeat epinephrine IM", "grade": "best", "why": "Protocol: repeat every 5–10 minutes if not improving. Symptoms are returning, so give it.", "care": "epi2" },
+                  { "id": "neb", "label": "Albuterol neb for the wheeze, then reassess", "grade": "ok", "why": "Reasonable for the wheeze, but the hoarse voice needs more epinephrine." },
+                  { "id": "benadryl", "label": "Diphenhydramine will handle it", "grade": "poor", "why": "Too slow and it does not reverse airway swelling." },
+                  { "id": "watch", "label": "He improved once; just watch him", "grade": "harm", "why": "Returning symptoms are a rebound. Treat them now." }
+                ]
+              }
+            },
+            {
+              "text": "His voice is muffled now. You hear stridor when he breathes in. BP 84/50. He is slumping.",
+              "time": 5,
+              "status": {
+                "label": "Critical",
+                "tone": "bad",
+                "hr": 128,
+                "bp": "84/50",
+                "spo2": 89,
+                "rr": 30,
+                "ms": "Drowsy"
+              },
+              "reveal": {
+                "cat": "Recheck",
+                "text": "Deteriorating: stridor, muffled voice, BP 84/50."
+              },
+              "question": {
+                "prompt": "He still has not had epinephrine. What now?",
+                "options": [
+                  { "id": "epi_now", "label": "Epinephrine IM now; lay him down, legs up", "grade": "best", "why": "Late, but the right move. Epinephrine is the treatment.", "care": "epi" },
+                  { "id": "airway", "label": "Prepare BVM and airway; call for ALS", "grade": "ok", "why": "Get ready, but epinephrine first. It can stop the swelling." },
+                  { "id": "benadryl2", "label": "Diphenhydramine first, then reassess", "grade": "harm", "why": "Diphenhydramine will not save his airway. Epinephrine will." }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "handoff",
+          "type": "handoff",
+          "problems": [
+            { "id": "p1", "label": "34M anaphylaxis to shellfish: airway swelling, wheeze, low BP; symptoms came back after the first epi", "grade": "best" },
+            { "id": "p2", "label": "34M allergic reaction with hives", "grade": "poor", "why": "Hives alone undersells it. Airway and BP make this anaphylaxis." },
+            { "id": "p3", "label": "34M panic attack after eating", "grade": "harm", "why": "Hives, wheezing and a low BP are not panic." }
+          ],
+          "priorities": [
+            { "id": "q1", "label": "Watch his airway: voice, stridor, tongue", "good": true },
+            { "id": "q2", "label": "Repeat epinephrine if symptoms return", "good": true },
+            { "id": "q3", "label": "Keep him for observation even if he looks well", "good": true },
+            { "id": "q4", "label": "OK to discharge once the hives fade", "good": false, "why": "Late reactions happen. All anaphylaxis needs hospital evaluation." },
+            { "id": "q5", "label": "Use diphenhydramine instead of more epinephrine", "good": false, "why": "Diphenhydramine is an add-on, never a replacement for epinephrine." }
+          ]
+        }
+      ],
+      "scoring": [
+        { "id": "epi_early", "area": "safety", "w": 3, "test": "care:epi@primary", "well": "You gave epinephrine in the primary.", "miss": "Epinephrine waited until after the primary. Airway swelling with a low BP needs it now." },
+        { "id": "epi_first", "area": "safety", "w": 2, "test": "!care:diphen_po&!care:diphen_iv|care:epi<care:diphen_po|care:epi<care:diphen_iv", "well": "Epinephrine came before diphenhydramine.", "miss": "Diphenhydramine went in before epinephrine. Antihistamines are add-ons only." },
+        { "id": "no_iv_epi", "area": "safety", "w": 2, "test": "!care:epi_iv", "well": "You used IM epinephrine, not IV.", "miss": "IV epinephrine first is the wrong route here and risks dangerous dosing errors." },
+        { "id": "airway", "area": "assess", "w": 2, "test": "found:airway@primary", "well": "You checked his airway and voice first.", "miss": "The airway check was missed in the primary." },
+        { "id": "skin", "area": "assess", "w": 2, "test": "found:skin", "well": "You looked at the skin.", "miss": "You never looked at his skin. Hives are what separate allergy from panic or asthma." },
+        { "id": "food", "area": "assess", "w": 2, "test": "found:food", "well": "You found the shellfish.", "miss": "You didn't ask what he ate or about allergies." },
+        { "id": "danger_dx", "area": "reason", "w": 2, "test": "dx:ana@ddx", "well": "Anaphylaxis was on your list from the start.", "miss": "Anaphylaxis was not on your first list." },
+        { "id": "lead_end", "area": "reason", "w": 3, "test": "lead:ana@handoff", "well": "Your working impression fit the evidence.", "miss": "Your final impression did not fit. Two systems plus a low BP after an allergen is anaphylaxis." },
+        { "id": "recheck", "area": "reassess", "w": 2, "test": "found:recheck", "well": "You rechecked after treatment.", "miss": "No recheck after treatment. Did the epinephrine work?" },
+        { "id": "change", "area": "reassess", "w": 3, "test": "pick:change:repeat_epi|pick:change:epi_now", "well": "You treated the rebound with more epinephrine.", "miss": "When symptoms returned, more epinephrine was the answer." }
+      ],
+      "takeaway": "Two systems after an allergen, or a low BP, is anaphylaxis. Epinephrine IM first, at every level, and repeat it if symptoms return."
+    },
+
+    {
+      "id": "heartburn",
+      "title": "Just Heartburn",
+      "teaser": "58-year-old says it’s indigestion. His wife isn’t so sure.",
+      "minutes": 7,
+      "review": {
+        "status": "draft",
+        "sources": ["VIII-B2 Chest Pain / ACS", "III-4 Aspirin", "III-16 Nitroglycerin", "III-10 Fentanyl", "V-14 12-Lead ECG"],
+        "check": "Nitroglycerin offered to Paramedics only (VIII-B2); see the note on case 2 about III-16 listing AEMT+. A right-sided lead (V4R) is offered; confirm it is taught. EMTs acquire the 12-lead and the receiving hospital reads it."
+      },
+      "art": {
+        "scene": "assessment-detective/img/heartburn-scene.webp",
+        "alt": "A man in his late fifties sits on the step of an open garage next to a lawnmower, pale and sweaty, a fist pressed to his upper belly. His wife stands over him holding a bottle of antacid.",
+        "pos": "50% 25%"
+      },
+      "dispatch": "1615. 58-year-old man, indigestion. Wife on scene.",
+      "status0": {
+        "label": "Concerning",
+        "tone": "warn",
+        "hr": 52,
+        "bp": "98/64",
+        "rr": 20,
+        "spo2": 95,
+        "ms": "Alert"
+      },
+      "dx": [
+        { "id": "acs", "label": "Heart attack", "danger": true },
+        { "id": "gerd", "label": "Heartburn / reflux" },
+        { "id": "dissect", "label": "Torn aorta (dissection)", "danger": true },
+        { "id": "pe", "label": "Blood clot in the lungs (PE)", "danger": true },
+        { "id": "gb", "label": "Gallbladder attack" },
+        { "id": "msk", "label": "Pulled chest muscle" },
+        { "id": "unclear", "label": "Unclear yet" }
+      ],
+      "answer": {
+        "likely": ["acs"],
+        "danger": ["acs", "dissect"],
+        "alt": ["dissect", "pe", "gb"],
+        "note": "An inferior STEMI with right-ventricle involvement, sold to him as heartburn. The slow pulse and soft BP fit an inferior MI. The right heart needs its filling pressure, so nitro could crash his BP, and he took tadalafil last night. Aspirin, a 12-lead early, a STEMI pre-alert, and small fluid boluses if his BP falls."
+      },
+      "findings": {
+        "airway": {
+          "cat": "Primary",
+          "text": "Airway open. Talking in full sentences.",
+          "effect": { "acs": "neutral", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" }
+        },
+        "breathing": {
+          "cat": "Primary",
+          "text": "RR 20. Lungs clear. SpO2 95% on room air.",
+          "effect": { "acs": "neutral", "gerd": "neutral", "dissect": "neutral", "pe": "weakens", "gb": "neutral", "msk": "neutral" }
+        },
+        "circ": {
+          "cat": "Primary",
+          "text": "Pulse 52, regular. BP 98/64. Pale, cool and sweaty.",
+          "key": true,
+          "effect": { "acs": "supports", "gerd": "weakens", "dissect": "neutral", "pe": "neutral", "gb": "weakens", "msk": "weakens" },
+          "why": "Sweaty and pale with a slow pulse and a soft BP isn't heartburn. That pattern fits an inferior heart attack."
+        },
+        "gcs": {
+          "cat": "Primary",
+          "text": "Alert and oriented. Wants everyone to stop fussing.",
+          "effect": { "acs": "neutral", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" }
+        },
+        "onset": {
+          "cat": "History",
+          "text": "Started 40 minutes ago while mowing. Pressure in his upper belly and lower chest, 7/10. Two antacids didn't help.",
+          "key": true,
+          "effect": { "acs": "supports", "gerd": "weakens", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "weakens" },
+          "why": "Pain that started with exertion and does not respond to antacids points away from reflux."
+        },
+        "radiate": {
+          "cat": "History",
+          "text": "The pain goes into his jaw. Not tearing. Nothing in his back.",
+          "effect": { "acs": "supports", "gerd": "neutral", "dissect": "weakens", "pe": "neutral", "gb": "weakens", "msk": "weakens" },
+          "why": "Jaw pain fits the heart. No tearing pain into the back makes dissection less likely."
+        },
+        "nausea": {
+          "cat": "History",
+          "text": "Nauseated. Threw up once.",
+          "effect": { "acs": "supports", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "supports", "msk": "neutral" },
+          "why": "Nausea goes with heart attacks and gallbladder attacks alike. It does not separate them."
+        },
+        "pmh": {
+          "cat": "History",
+          "text": "High BP, high cholesterol, smokes a pack a day. His father had a heart attack at 60.",
+          "effect": { "acs": "supports", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" }
+        },
+        "meds": {
+          "cat": "History",
+          "text": "Takes lisinopril and atorvastatin. Took tadalafil (Cialis) last night.",
+          "key": true,
+          "effect": { "acs": "neutral", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" },
+          "why": "Tadalafil within 48 hours plus nitro can drop BP dangerously. No nitro."
+        },
+        "ecg": {
+          "cat": "Exam",
+          "text": "12-lead: ST elevation in II, III and aVF. ST depression in I and aVL.",
+          "text_emt": "12-lead acquired and sent. The hospital calls back: 'That's a STEMI. Cath lab is activated.'",
+          "key": true,
+          "effect": { "acs": "supports", "gerd": "weakens", "dissect": "neutral", "pe": "neutral", "gb": "weakens", "msk": "weakens" },
+          "why": "Inferior STEMI. A dissection can occasionally cause this too, so check both arms."
+        },
+        "rightecg": {
+          "cat": "Exam",
+          "text": "Right-sided lead V4R: ST elevation.",
+          "text_emt": "Right-sided lead V4R acquired and sent. The hospital notes right-ventricle involvement.",
+          "key": true,
+          "effect": { "acs": "supports", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" },
+          "why": "The right ventricle is involved. It depends on filling pressure: no nitro, and small fluid boluses if his BP drops."
+        },
+        "arms": {
+          "cat": "Exam",
+          "text": "BP right arm 98/64, left arm 96/62. Radial pulses equal.",
+          "key": true,
+          "effect": { "acs": "neutral", "gerd": "neutral", "dissect": "weakens", "pe": "neutral", "gb": "neutral", "msk": "neutral" },
+          "why": "Equal arm pressures make dissection less likely. They do not rule it out."
+        },
+        "abd": {
+          "cat": "Exam",
+          "text": "Upper belly soft, not tender to press.",
+          "effect": { "acs": "neutral", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "weakens", "msk": "neutral" }
+        },
+        "chestwall": {
+          "cat": "Exam",
+          "text": "Pressing on his chest does not change the pain.",
+          "effect": { "acs": "neutral", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "weakens" }
+        },
+        "recheck": {
+          "cat": "Recheck",
+          "key": true,
+          "variants": [
+            {
+              "if": "care:nitro",
+              "text": "After nitro: BP 72/40, HR 48. Gray and dizzy.",
+              "effect": { "acs": "supports", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" },
+              "why": "A big BP drop after nitro is the classic sign of right-ventricle involvement."
+            },
+            {
+              "if": "care:fluid",
+              "text": "After 250 mL: BP 108/68, HR 56. Lungs still clear. Pain 7/10.",
+              "effect": { "acs": "supports", "gerd": "neutral", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" },
+              "why": "A preload-dependent heart responds to small fluid boluses. Keep checking the lungs."
+            },
+            {
+              "text": "HR 50. BP 94/60. Pain still 7/10. Lungs clear.",
+              "effect": { "acs": "supports", "gerd": "weakens", "dissect": "neutral", "pe": "neutral", "gb": "neutral", "msk": "neutral" },
+              "why": "Still slow, soft and in pain: this isn't settling like heartburn would."
+            }
+          ]
+        }
+      },
+      "actions": {
+        "assess": [
+          { "id": "airway", "label": "Airway", "phase": "primary", "min": 0.5, "reveals": "airway" },
+          { "id": "breathing", "label": "Breathing and SpO2", "phase": "primary", "min": 1, "reveals": "breathing" },
+          { "id": "circ", "label": "Pulse, skin and BP", "phase": "primary", "min": 1, "reveals": "circ" },
+          { "id": "gcs", "label": "Mental status", "phase": "primary", "min": 0.5, "reveals": "gcs" },
+          { "id": "ecg", "label": "12-lead ECG", "min": 3, "reveals": "ecg" },
+          { "id": "rightecg", "label": "Right-sided lead (V4R)", "min": 1, "reveals": "rightecg" },
+          { "id": "arms", "label": "BP in both arms", "min": 1, "reveals": "arms" },
+          { "id": "abd", "label": "Belly exam", "min": 1, "reveals": "abd" },
+          { "id": "chestwall", "label": "Press on the chest wall", "min": 0.5, "reveals": "chestwall" },
+          { "id": "recheck", "label": "Recheck vitals and pain", "min": 1, "reveals": "recheck", "recheck": true }
+        ],
+        "ask": [
+          { "id": "onset", "label": "When and how did it start?", "min": 0.5, "reveals": "onset" },
+          { "id": "radiate", "label": "Does it go anywhere? What does it feel like?", "min": 0.5, "reveals": "radiate" },
+          { "id": "nausea", "label": "Nausea or vomiting?", "min": 0.5, "reveals": "nausea" },
+          { "id": "pmh", "label": "Medical and family history?", "min": 1, "reveals": "pmh" },
+          { "id": "meds", "label": "Medicines? Anything like Viagra or Cialis?", "min": 0.5, "reveals": "meds" }
+        ],
+        "care": [
+          { "id": "asa", "label": "Aspirin 324 mg chewed", "min": 1, "value": "best", "why": "Suspected ACS, no bleeding, no tearing pain into the back: chew it now.", "src": "VIII-B2, III-4" },
+          { "id": "o2", "label": "Oxygen by non-rebreather", "min": 1, "value": "poor", "why": "SpO2 is 95%. Protocol: oxygen only if under 94%.", "src": "VIII-B2" },
+          { "id": "rest", "label": "Keep him at rest; carry him, no walking", "min": 0.5, "value": "best", "why": "Minimize exertion. Walking him to the truck adds work to a starving heart.", "src": "VIII-B2" },
+          { "id": "stemi_alert", "label": "Pre-alert a STEMI center", "min": 1, "value": "best", "needs": "ecg", "why": "STEMI: the cath lab needs to know now.", "why_unchecked": "Pre-alert, yes, but get the 12-lead first. It is what the cath lab needs.", "src": "VIII-B2" },
+          { "id": "antacid", "label": "Let him take another antacid", "min": 0.5, "value": "poor", "why": "Two already did nothing. Treat this as cardiac." },
+          {
+            "id": "iv",
+            "label": "Peripheral IV",
+            "levels": ["aemt", "pm"],
+            "min": 2,
+            "value": "ok",
+            "src": "VIII-B2"
+          },
+          {
+            "id": "fluid",
+            "label": "Normal saline 250 mL bolus; recheck lungs",
+            "levels": ["aemt", "pm"],
+            "min": 2,
+            "value": "ok",
+            "needs": "iv",
+            "why": "For hypotension without pulmonary edema. Reasonable here with RV involvement; check the lungs after.",
+            "src": "VIII-B2",
+            "status": {
+              "bp": "108/68",
+              "hr": 56
+            }
+          },
+          {
+            "id": "nitro",
+            "label": "Nitroglycerin 0.4 mg SL",
+            "levels": ["pm"],
+            "min": 1,
+            "value": "harm",
+            "why": "SBP under 100, right-ventricle involvement and tadalafil last night: three reasons to hold nitro.",
+            "src": "VIII-B2, III-16",
+            "status": {
+              "label": "Critical",
+              "tone": "bad",
+              "bp": "72/40",
+              "hr": 48,
+              "ms": "Gray, dizzy"
+            }
+          },
+          {
+            "id": "fentanyl",
+            "label": "Fentanyl 25–50 mcg IV",
+            "levels": ["pm"],
+            "min": 1,
+            "value": "ok",
+            "needs": "iv",
+            "why": "Allowed for ACS pain, but his BP is soft. Small dose and recheck.",
+            "src": "VIII-B2"
+          },
+          { "id": "transport", "label": "Package and go to a STEMI center", "min": 3, "value": "best", "transport": true, "why": "Highest priority to a STEMI-receiving hospital.", "src": "VIII-B2" }
+        ]
+      },
+      "stages": [
+        {
+          "id": "first",
+          "type": "first",
+          "scene": "An open garage on a hot afternoon. He sits on the step beside the lawnmower, pale and sweating, a fist pressed under his breastbone. His wife holds a bottle of antacid.",
+          "quote": {
+            "who": "Patient",
+            "text": "It's just heartburn. She worries too much."
+          },
+          "concerns": [
+            { "id": "sweat", "label": "Pale and sweaty", "good": true },
+            { "id": "pain", "label": "Pain under the breastbone", "good": true },
+            { "id": "heat", "label": "He just overheated mowing", "good": false },
+            { "id": "denial", "label": "He says it's nothing", "good": true },
+            { "id": "bleed", "label": "Major bleeding", "good": false }
+          ],
+          "sick": "sick",
+          "why": "Pale, sweaty and pressing on his chest. 'Just heartburn' is a symptom of denial, not a diagnosis."
+        },
+        {
+          "id": "primary",
+          "type": "primary",
+          "prompt": "Run your primary. Use Assess, and give care for anything urgent.",
+          "required": ["airway", "breathing", "circ", "gcs"],
+          "why": "Chest pain: 12-lead within 10 minutes of contact."
+        },
+        { "id": "ddx", "type": "differential", "prompt": "What could explain this? Pick up to three." },
+        {
+          "id": "investigate",
+          "type": "investigate",
+          "distinguish": {
+            "prompt": "Which assessment would most help you narrow your differential right now?",
+            "options": [
+              { "id": "ecg", "grade": "best", "why": "The 12-lead is what separates a heart attack from everything else on the list." },
+              { "id": "arms", "grade": "ok", "why": "Useful for dissection, but the 12-lead answers more." },
+              { "id": "radiate", "grade": "ok", "why": "Helpful, but history alone cannot rule out a heart attack." },
+              { "id": "chestwall", "grade": "poor", "why": "Tenderness doesn't rule out a heart attack, and nothing here suggests a muscle strain." }
+            ]
+          },
+          "prompt": "Gather what you need. Use Assess and Ask, then continue."
+        },
+        {
+          "id": "change",
+          "type": "change",
+          "variants": [
+            {
+              "if": "care:nitro",
+              "text": "Two minutes after the nitro he goes gray. \"I feel like I'm going to pass out.\" BP 72/40, HR 48.",
+              "time": 3,
+              "status": {
+                "label": "Critical",
+                "tone": "bad",
+                "bp": "72/40",
+                "hr": 48,
+                "ms": "Gray, dizzy"
+              },
+              "reveal": {
+                "cat": "Recheck",
+                "text": "After nitro: BP 72/40, HR 48, near syncope."
+              },
+              "question": {
+                "prompt": "What's your next step?",
+                "options": [
+                  {
+                    "id": "flat_fluid",
+                    "label": "Lay him flat; 250 mL NS bolus, recheck lungs and BP",
+                    "levels": ["aemt", "pm"],
+                    "grade": "best",
+                    "why": "Restore preload. Small boluses, checking the lungs after each.",
+                    "care": "fluid"
+                  },
+                  { "id": "flat", "label": "Lay him flat and update the hospital", "grade": "ok", "why": "Right first step. Add fluid if it is in your scope." },
+                  {
+                    "id": "nitro2",
+                    "label": "Second nitro: the pain is still there",
+                    "levels": ["pm"],
+                    "grade": "harm",
+                    "why": "More nitro will drop his BP further."
+                  }
+                ]
+              }
+            },
+            {
+              "text": "En route, his BP drifts to 86/54. HR 50. Still 7/10, still sweating. Lungs clear.",
+              "time": 8,
+              "status": {
+                "label": "Concerning",
+                "tone": "warn",
+                "bp": "86/54",
+                "hr": 50,
+                "ms": "Alert"
+              },
+              "reveal": {
+                "cat": "Recheck",
+                "text": "En route: BP 86/54, HR 50, lungs clear."
+              },
+              "question": {
+                "prompt": "His BP is falling. What now?",
+                "options": [
+                  {
+                    "id": "bolus",
+                    "label": "250 mL NS bolus; recheck lungs and BP",
+                    "levels": ["aemt", "pm"],
+                    "grade": "best",
+                    "why": "Hypotension with clear lungs and RV involvement: small fluid bolus per protocol.",
+                    "care": "fluid"
+                  },
+                  {
+                    "id": "flat_update",
+                    "label": "Lay him flat (lungs are clear); update the cath lab",
+                    "levels": ["emt"],
+                    "grade": "best",
+                    "why": "Help his preload and give the cath lab the new numbers."
+                  },
+                  {
+                    "id": "nitro_pain",
+                    "label": "Nitro for the pain",
+                    "levels": ["pm"],
+                    "grade": "harm",
+                    "why": "SBP under 100 and RV involvement: no nitro."
+                  },
+                  { "id": "closer", "label": "Divert to the closest hospital, even without a cath lab", "grade": "poor", "why": "STEMI goes to a STEMI-receiving hospital. Diverting adds a transfer and delays the cath lab." }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "handoff",
+          "type": "handoff",
+          "problems": [
+            { "id": "p1", "label": "58M inferior STEMI with right-ventricle involvement; soft BP; took tadalafil last night", "grade": "best" },
+            { "id": "p2", "label": "58M with heartburn after mowing", "grade": "harm", "why": "The 12-lead shows a STEMI. 'Heartburn' sends him to the waiting room." },
+            { "id": "p3", "label": "58M chest pain; heart attack most likely, dissection less likely with equal arm BPs", "grade": "best" }
+          ],
+          "priorities": [
+            { "id": "q1", "label": "No nitro: RV involvement, soft BP, tadalafil", "good": true },
+            { "id": "q2", "label": "Straight to the cath lab", "good": true },
+            { "id": "q3", "label": "Small fluid boluses for low BP, checking the lungs", "good": true },
+            { "id": "q4", "label": "Give nitro if the pain comes back", "good": false, "why": "Every reason to hold nitro still applies." },
+            { "id": "q5", "label": "Repeat the aspirin dose", "good": false, "why": "One 324 mg dose. He has had it." }
+          ]
+        }
+      ],
+      "scoring": [
+        { "id": "ecg_early", "area": "safety", "w": 3, "test": "found:ecg@primary", "well": "You got the 12-lead during your primary.", "miss": "The 12-lead waited. Chest pain needs one within 10 minutes of contact." },
+        { "id": "asa", "area": "safety", "w": 2, "test": "care:asa", "well": "You gave aspirin.", "miss": "No aspirin. Suspected ACS without a contraindication gets 324 mg chewed." },
+        { "id": "no_nitro", "area": "safety", "w": 3, "test": "!care:nitro&!pick:change:nitro2&!pick:change:nitro_pain", "well": "You held the nitro.", "miss": "Nitro with a soft BP, RV involvement and tadalafil can crash his pressure." },
+        { "id": "alert", "area": "safety", "w": 2, "test": "care:stemi_alert@investigate", "well": "You pre-alerted the STEMI center.", "miss": "No STEMI pre-alert. The cath lab needs time to assemble." },
+        { "id": "meds", "area": "assess", "w": 2, "test": "found:meds", "well": "You found the tadalafil.", "miss": "You did not ask about medicines like tadalafil." },
+        { "id": "right", "area": "assess", "w": 2, "test": "found:rightecg", "well": "You checked a right-sided lead with an inferior STEMI.", "miss": "Inferior STEMI: check V4R for right-ventricle involvement." },
+        { "id": "arms", "area": "assess", "w": 1, "test": "found:arms|found:radiate", "well": "You looked for signs of dissection.", "miss": "Nothing was done to look for dissection before aspirin." },
+        { "id": "danger_dx", "area": "reason", "w": 2, "test": "dx:acs@ddx", "well": "Heart attack was on your list from the start.", "miss": "Heart attack wasn't on your first list. 'Heartburn' in a sweaty 58-year-old is cardiac until proven otherwise." },
+        { "id": "lead_end", "area": "reason", "w": 3, "test": "lead:acs@handoff", "well": "Your working impression fit the evidence.", "miss": "Your final impression did not fit the 12-lead." },
+        { "id": "recheck", "area": "reassess", "w": 2, "test": "found:recheck", "well": "You rechecked his vitals and pain.", "miss": "No recheck. His BP was drifting." },
+        { "id": "change", "area": "reassess", "w": 3, "test": "pick:change:bolus|pick:change:flat_update|pick:change:flat_fluid|pick:change:flat", "well": "You supported his BP without nitro.", "miss": "When his BP fell, the response did not help it." }
+      ],
+      "takeaway": "Pale, sweaty \"heartburn\" is cardiac until a 12-lead says otherwise. Inferior STEMI: check V4R, ask about PDE-5 drugs, and hold the nitro."
+    },
+
+    {
+      "id": "just-weak",
+      "title": "Just Weak",
+      "teaser": "81-year-old. Her caregiver says she isn’t herself today.",
+      "minutes": 7,
+      "review": {
+        "status": "draft",
+        "sources": ["VIII-A12 Sepsis and Septic Shock", "VIII-A2 Altered Mental Status", "VIII-A9 Stroke / CVA", "V-20 Glucometry"],
+        "check": "Fluid: 500 mL boluses toward 30 mL/kg if SBP <90 and lungs clear, stopping for signs of pulmonary edema (VIII-A12). Her starting BP is 92/54, so the first bolus is offered as reasonable and becomes clearly indicated as BP falls. Norepinephrine offered to PMs only as premature."
+      },
+      "art": {
+        "scene": "assessment-detective/img/just-weak-scene.webp",
+        "alt": "An elderly woman slumps in a recliner under a knitted blanket, flushed and drowsy, eyes half open. A home caregiver in scrubs kneels beside her, holding her hand and a phone.",
+        "pos": "50% 30%"
+      },
+      "dispatch": "1100. 81-year-old woman, weakness. Caregiver on scene.",
+      "status0": {
+        "label": "Concerning",
+        "tone": "warn",
+        "hr": 112,
+        "bp": "92/54",
+        "rr": 24,
+        "spo2": 94,
+        "ms": "Drowsy, confused"
+      },
+      "dx": [
+        { "id": "sepsis", "label": "Infection / sepsis", "danger": true },
+        { "id": "dehyd", "label": "Dehydration" },
+        { "id": "stroke", "label": "Stroke", "danger": true },
+        { "id": "gib", "label": "GI bleed", "danger": true },
+        { "id": "hypo", "label": "Low blood sugar" },
+        { "id": "meds", "label": "Medicine side effect" },
+        { "id": "unclear", "label": "Unclear yet" }
+      ],
+      "answer": {
+        "likely": ["sepsis"],
+        "danger": ["sepsis", "gib", "stroke"],
+        "alt": ["dehyd", "gib", "stroke"],
+        "note": "Septic shock from a urinary infection. qSOFA is 3 of 3: new confusion, RR 24, SBP 92. She's on metoprolol, which normally holds her heart rate down, so 112 means she's working hard. Fluids help, but older hearts tip into pulmonary edema; recheck the lungs after every bolus."
+      },
+      "findings": {
+        "airway": {
+          "cat": "Primary",
+          "text": "Airway open. Mumbles short answers.",
+          "effect": { "sepsis": "neutral", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" }
+        },
+        "breathing": {
+          "cat": "Primary",
+          "text": "RR 24, shallow. Lungs clear. SpO2 94%.",
+          "effect": { "sepsis": "supports", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "weakens", "meds": "weakens" }
+        },
+        "circ": {
+          "cat": "Primary",
+          "text": "Pulse 112, weak. BP 92/54. Skin hot and dry. Feet mottled.",
+          "key": true,
+          "effect": { "sepsis": "supports", "dehyd": "supports", "stroke": "neutral", "gib": "weakens", "hypo": "weakens", "meds": "neutral" },
+          "why": "Hot skin with a fast pulse and soft BP points to infection. A bleed usually leaves skin cool and pale."
+        },
+        "gcs": {
+          "cat": "Primary",
+          "text": "GCS 14. Knows her name, not the day. Caregiver: 'She's usually sharp.'",
+          "key": true,
+          "effect": { "sepsis": "supports", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" },
+          "why": "New confusion counts. Ask what her baseline is; never assume confusion is her dementia."
+        },
+        "bgl": {
+          "cat": "Exam",
+          "text": "Blood glucose 134 mg/dL.",
+          "effect": { "sepsis": "neutral", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "weakens", "meds": "neutral" }
+        },
+        "temp": {
+          "cat": "Exam",
+          "text": "Temperature 101.8 °F.",
+          "key": true,
+          "effect": { "sepsis": "supports", "dehyd": "weakens", "stroke": "neutral", "gib": "weakens", "hypo": "neutral", "meds": "weakens" },
+          "why": "Fever plus fast breathing, low BP and new confusion: qSOFA 3 of 3. Suspect sepsis."
+        },
+        "cincinnati": {
+          "cat": "Exam",
+          "text": "No facial droop or arm drift. Speech slow but clear.",
+          "effect": { "sepsis": "neutral", "dehyd": "neutral", "stroke": "weakens", "gib": "neutral", "hypo": "neutral", "meds": "neutral" }
+        },
+        "sacrum": {
+          "cat": "Exam",
+          "text": "No wounds on her back, hips or heels. Mottling up to the ankles.",
+          "effect": { "sepsis": "neutral", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" }
+        },
+        "urine": {
+          "cat": "History",
+          "text": "Burning when she pees for 3 days. Urine cloudy and strong-smelling.",
+          "key": true,
+          "effect": { "sepsis": "supports", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" },
+          "why": "A likely source. Urinary infection is the most common cause of sepsis in older women."
+        },
+        "intake": {
+          "cat": "History",
+          "text": "Barely eating or drinking for 2 days.",
+          "effect": { "sepsis": "neutral", "dehyd": "supports", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" },
+          "why": "Poor intake can come with any illness. It supports dehydration but does not explain the fever."
+        },
+        "stool": {
+          "cat": "History",
+          "text": "No black or bloody stools. No vomiting blood.",
+          "effect": { "sepsis": "neutral", "dehyd": "neutral", "stroke": "neutral", "gib": "weakens", "hypo": "neutral", "meds": "neutral" }
+        },
+        "meds": {
+          "cat": "History",
+          "text": "Lisinopril, metoprolol and donepezil. No new medicines.",
+          "effect": { "sepsis": "neutral", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "weakens" },
+          "why": "Metoprolol usually holds her heart rate down. 112 on a beta blocker means she is working hard."
+        },
+        "pmh": {
+          "cat": "History",
+          "text": "Mild dementia, high BP, frequent bladder infections.",
+          "effect": { "sepsis": "supports", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" }
+        },
+        "recheck": {
+          "cat": "Recheck",
+          "key": true,
+          "variants": [
+            {
+              "if": "care:fluid",
+              "text": "After 500 mL: BP 104/60, HR 102. Lungs still clear.",
+              "effect": { "sepsis": "supports", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" },
+              "why": "She responds to fluid. Recheck the lungs after every bolus."
+            },
+            {
+              "text": "No fluids yet: BP 86/50, HR 118. Mottling to her knees.",
+              "effect": { "sepsis": "supports", "dehyd": "neutral", "stroke": "neutral", "gib": "neutral", "hypo": "neutral", "meds": "neutral" },
+              "why": "Worsening perfusion. She needs fluid and a fast trip."
+            }
+          ]
+        }
+      },
+      "actions": {
+        "assess": [
+          { "id": "airway", "label": "Airway", "phase": "primary", "min": 0.5, "reveals": "airway" },
+          { "id": "breathing", "label": "Breathing, lung sounds, SpO2", "phase": "primary", "min": 1, "reveals": "breathing" },
+          { "id": "circ", "label": "Pulse, skin and BP", "phase": "primary", "min": 1, "reveals": "circ" },
+          { "id": "gcs", "label": "Mental status (GCS)", "phase": "primary", "min": 0.5, "reveals": "gcs" },
+          { "id": "bgl", "label": "Blood glucose", "min": 1, "reveals": "bgl" },
+          { "id": "temp", "label": "Temperature", "min": 1, "reveals": "temp" },
+          { "id": "cincinnati", "label": "Cincinnati stroke scale", "min": 1, "reveals": "cincinnati" },
+          { "id": "sacrum", "label": "Check her skin for wounds", "min": 1, "reveals": "sacrum" },
+          { "id": "recheck", "label": "Recheck BP, pulse and lungs", "min": 1, "reveals": "recheck", "recheck": true }
+        ],
+        "ask": [
+          { "id": "urine", "label": "Any urinary symptoms? Cough?", "min": 0.5, "reveals": "urine" },
+          { "id": "intake", "label": "Eating and drinking?", "min": 0.5, "reveals": "intake" },
+          { "id": "stool", "label": "Black stools or vomiting blood?", "min": 0.5, "reveals": "stool" },
+          { "id": "meds", "label": "Medicines? Anything new?", "min": 1, "reveals": "meds" },
+          { "id": "pmh", "label": "Medical history? What is her normal?", "min": 1, "reveals": "pmh" }
+        ],
+        "care": [
+          { "id": "o2", "label": "Oxygen, target SpO2 ≥94%", "min": 1, "value": "ok", "why": "She is right at 94%. Reasonable, but it does not fix her perfusion.", "src": "VIII-A12" },
+          { "id": "warm", "label": "Blanket on; don't let her get cold", "min": 0.5, "value": "ok", "why": "Protocol: keep septic patients warm. They can drop their temperature fast.", "src": "VIII-A12" },
+          { "id": "alert", "label": "Pre-alert: suspected sepsis", "min": 1, "value": "best", "why": "Pre-alert as a sepsis activation with vitals and mental status.", "src": "VIII-A12" },
+          { "id": "drink", "label": "Give her sips of water", "min": 1, "value": "poor", "why": "A drowsy patient can aspirate, and sips will not fix shock." },
+          {
+            "id": "iv",
+            "label": "Two large-bore IVs",
+            "levels": ["aemt", "pm"],
+            "min": 3,
+            "value": "best",
+            "src": "VIII-A12"
+          },
+          {
+            "id": "fluid",
+            "label": "Normal saline 500 mL bolus; recheck lungs",
+            "levels": ["aemt", "pm"],
+            "min": 3,
+            "value": "best",
+            "needs": "iv",
+            "why": "Soft BP with clear lungs: 500 mL, then reassess the lungs before the next one.",
+            "src": "VIII-A12",
+            "status": {
+              "label": "Improving",
+              "tone": "ok",
+              "bp": "104/60",
+              "hr": 102
+            }
+          },
+          {
+            "id": "levo",
+            "label": "Start norepinephrine",
+            "levels": ["pm"],
+            "min": 3,
+            "value": "poor",
+            "needs": "iv",
+            "why": "Only for shock that fails 30 mL/kg of fluid. She has not had any yet.",
+            "src": "VIII-A12"
+          },
+          { "id": "transport", "label": "Package and begin transport", "min": 3, "value": "ok", "transport": true }
+        ]
+      },
+      "stages": [
+        {
+          "id": "first",
+          "type": "first",
+          "scene": "A small living room, curtains half drawn. She is slumped in a recliner under a blanket, cheeks flushed, eyes half open. Her caregiver kneels beside her.",
+          "quote": {
+            "who": "Caregiver",
+            "text": "She's just weak today. She's never like this."
+          },
+          "concerns": [
+            { "id": "ams", "label": "Drowsy, not responding normally", "good": true },
+            { "id": "flushed", "label": "Flushed face", "good": true },
+            { "id": "baseline", "label": "Caregiver says this is new", "good": true },
+            { "id": "old", "label": "She's elderly; this is probably normal", "good": false },
+            { "id": "bleed", "label": "Major bleeding", "good": false }
+          ],
+          "sick": "sick",
+          "why": "\"Just weak\" in an older adult who is new-onset drowsy is a sick patient until proven otherwise."
+        },
+        {
+          "id": "primary",
+          "type": "primary",
+          "prompt": "Run your primary. Use Assess, and give care for anything urgent.",
+          "required": ["airway", "breathing", "circ", "gcs"],
+          "why": "Mental status, breathing rate and BP: the primary gives you qSOFA."
+        },
+        { "id": "ddx", "type": "differential", "prompt": "What could explain this? Pick up to three." },
+        {
+          "id": "investigate",
+          "type": "investigate",
+          "distinguish": {
+            "prompt": "Which assessment would most help you narrow your differential right now?",
+            "options": [
+              { "id": "temp", "grade": "best", "why": "A fever moves infection to the top. Dehydration and a bleed rarely cause one." },
+              { "id": "urine", "grade": "best", "why": "Finding a source turns suspected sepsis into a working diagnosis." },
+              { "id": "cincinnati", "grade": "ok", "why": "Worth doing with new confusion, but nothing here looks focal." },
+              { "id": "intake", "grade": "poor", "why": "Poor intake fits almost everything on the list." }
+            ]
+          },
+          "prompt": "Gather what you need. Use Assess and Ask, then continue."
+        },
+        {
+          "id": "change",
+          "type": "change",
+          "variants": [
+            {
+              "if": "care:fluid",
+              "text": "En route, after a second 500 mL: BP 98/58, HR 104. Her breathing is faster and you now hear crackles at both bases. SpO2 91%.",
+              "time": 12,
+              "status": {
+                "label": "Concerning",
+                "tone": "warn",
+                "bp": "98/58",
+                "hr": 104,
+                "spo2": 91,
+                "rr": 28,
+                "ms": "Drowsy"
+              },
+              "reveal": {
+                "cat": "Recheck",
+                "text": "After 1 L: new crackles at both bases, SpO2 91%, BP 98/58."
+              },
+              "question": {
+                "prompt": "What's your next step?",
+                "options": [
+                  {
+                    "id": "stop_fluid",
+                    "label": "Stop fluids, sit her up, oxygen to ≥94%; tell the ED",
+                    "levels": ["aemt", "pm"],
+                    "grade": "best",
+                    "why": "Protocol: stop fluids if signs of pulmonary edema develop."
+                  },
+                  {
+                    "id": "more_fluid",
+                    "label": "Keep going to 30 mL/kg",
+                    "levels": ["aemt", "pm"],
+                    "grade": "harm",
+                    "why": "Crackles mean the lungs are filling. Stop the fluid."
+                  },
+                  {
+                    "id": "levo_now",
+                    "label": "BP 98: hold fluids; contact DMO if it falls again",
+                    "levels": ["pm"],
+                    "grade": "ok",
+                    "why": "Reasonable. Norepinephrine comes in if she becomes hypotensive and fluid is no longer an option."
+                  }
+                ]
+              }
+            },
+            {
+              "text": "En route, she is harder to wake. BP 84/50, HR 120. Mottling has reached her knees.",
+              "time": 8,
+              "status": {
+                "label": "Critical",
+                "tone": "bad",
+                "bp": "84/50",
+                "hr": 120,
+                "ms": "Hard to rouse"
+              },
+              "reveal": {
+                "cat": "Recheck",
+                "text": "En route: harder to wake, BP 84/50, HR 120, mottled to the knees."
+              },
+              "question": {
+                "prompt": "She is getting worse. What now?",
+                "options": [
+                  {
+                    "id": "bolus_now",
+                    "label": "IV and 500 mL NS now; recheck lungs",
+                    "levels": ["aemt", "pm"],
+                    "grade": "best",
+                    "why": "SBP under 90 with clear lungs: fluid now.",
+                    "care": "fluid"
+                  },
+                  {
+                    "id": "update",
+                    "label": "Update the sepsis alert; oxygen, warmth, vitals every 5 min",
+                    "levels": ["emt"],
+                    "grade": "best",
+                    "why": "Without IV fluids in scope, a fast trip and a clear pre-alert are her treatment."
+                  },
+                  {
+                    "id": "als",
+                    "label": "Request an ALS intercept if it will not delay arrival",
+                    "levels": ["emt"],
+                    "grade": "ok",
+                    "why": "Reasonable, if it does not slow her trip."
+                  },
+                  { "id": "oral", "label": "Sit her up and give fluids by mouth", "grade": "harm", "why": "She can barely stay awake. She will aspirate." }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "handoff",
+          "type": "handoff",
+          "problems": [
+            { "id": "p1", "label": "81F with septic shock, likely urinary source: fever, new confusion, RR 24, SBP 92", "grade": "best" },
+            { "id": "p2", "label": "81F dehydrated from not drinking", "grade": "poor", "why": "Dehydration does not cause a fever of 101.8. Missing sepsis delays antibiotics." },
+            { "id": "p3", "label": "81F, new weakness and confusion; sepsis most likely, GI bleed less likely", "grade": "best" }
+          ],
+          "priorities": [
+            { "id": "q1", "label": "Sepsis activation; vitals every 5 minutes", "good": true },
+            { "id": "q2", "label": "Report her baseline: 'usually sharp'", "good": true },
+            { "id": "q3", "label": "Fluids in boluses, lungs checked after each", "good": true },
+            { "id": "q4", "label": "Her confusion is probably her dementia", "good": false, "why": "Her caregiver says this is new. New confusion is a sign of sepsis." },
+            { "id": "q5", "label": "Withhold all fluids because of her age", "good": false, "why": "Give fluids carefully and watch the lungs. Age is not a reason to withhold them." }
+          ]
+        }
+      ],
+      "scoring": [
+        { "id": "qsofa", "area": "safety", "w": 3, "test": "found:circ@primary&found:breathing@primary&found:gcs@primary", "well": "Your primary gave you all three qSOFA signs.", "miss": "Your primary missed part of qSOFA: mental status, breathing rate or BP." },
+        { "id": "alert", "area": "safety", "w": 2, "test": "care:alert|pick:change:update", "well": "You pre-alerted sepsis.", "miss": "No sepsis pre-alert. Early recognition gets antibiotics in sooner." },
+        {
+          "id": "fluid",
+          "area": "safety",
+          "w": 3,
+          "levels": ["aemt", "pm"],
+          "test": "care:fluid@investigate",
+          "well": "You started fluids on scene or early en route.",
+          "miss": "Fluids waited. Soft BP with clear lungs needs a 500 mL bolus."
+        },
+        { "id": "no_harm", "area": "safety", "w": 2, "test": "!care:drink&!pick:change:oral&!pick:change:more_fluid", "well": "You avoided oral fluids and fluid overload.", "miss": "Oral fluids in a drowsy patient, or fluid past crackles, can hurt her." },
+        { "id": "temp", "area": "assess", "w": 2, "test": "found:temp", "well": "You took her temperature.", "miss": "No temperature. The fever is what points to infection." },
+        { "id": "source", "area": "assess", "w": 2, "test": "found:urine", "well": "You found the urinary source.", "miss": "No source found. Ask about urine, cough and wounds." },
+        { "id": "bgl", "area": "assess", "w": 1, "test": "found:bgl", "well": "You checked her glucose.", "miss": "No glucose. Protocol: glucose in every altered or septic patient." },
+        { "id": "danger_dx", "area": "reason", "w": 2, "test": "dx:sepsis@ddx", "well": "Sepsis was on your list from the start.", "miss": "Sepsis was not on your first list, despite qSOFA." },
+        { "id": "lead_end", "area": "reason", "w": 3, "test": "lead:sepsis@handoff", "well": "Your working impression fit the evidence.", "miss": "Your final impression did not fit. Fever, a source and qSOFA 3 point to sepsis." },
+        { "id": "recheck", "area": "reassess", "w": 2, "test": "found:recheck", "well": "You rechecked after treatment.", "miss": "No recheck. Did the fluid help, and are the lungs still clear?" },
+        { "id": "change", "area": "reassess", "w": 3, "test": "pick:change:stop_fluid|pick:change:levo_now|pick:change:bolus_now|pick:change:update|pick:change:als", "well": "You responded well when things changed.", "miss": "When she changed, the response did not help her." }
+      ],
+      "takeaway": "'Just weak' in an older adult can be sepsis. qSOFA in the primary, find the source, fluids with a lung check after every bolus, and pre-alert."
     }
   ]
 }
