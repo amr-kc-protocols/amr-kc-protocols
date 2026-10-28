@@ -722,7 +722,7 @@ var FORMS={
         '<span aria-hidden="true">&darr;</span></button>'+
 
       '<div class="card"><div class="card-lbl">Employee Information</div>'+
-        fieldRow([{id:'fit-name',label:'Employee Name / ID',req:true}])+
+        fieldRow([{id:'fit-name',label:'Employee Name',req:true},{id:'fit-empid',label:'Employee ID',req:true}])+
         '<div class="field"><label>Job Title <span class="req">*</span></label>'+
           chips('fit-job',['EMT','Paramedic','Other'])+
           '<input class="input hidden" id="fit-job-other" placeholder="If other, specify" style="margin-top:8px">'+
@@ -794,7 +794,9 @@ var FORMS={
     },
     collect:function(st){
       var name=val('fit-name');
-      if(!name) return err(st,'Employee name / ID is required.');
+      if(!name) return err(st,'Employee name is required.');
+      var empid=val('fit-empid');
+      if(!empid) return err(st,'Employee ID is required.');
       if(!val('fit-clear')) return err(st,'Medical clearance date is required — do not proceed without one.');
       if(!val('fit-date')) return err(st,'Fit test date is required.');
 
@@ -829,7 +831,8 @@ var FORMS={
         title:'Respirator Fit Test Record',
         src:'GMR / AMR SR-100.03.1 — Revision 02 — Effective 24 FEB 2026',
         info:[
-          ['Employee Name / ID',name],
+          ['Employee Name',name],
+          ['Employee ID',empid],
           ['Job Title',job],
           ['Operation',val('fit-op')||'—'],
           ['Location',val('fit-loc')||'—'],
