@@ -159,6 +159,23 @@ letter-spacing:0.04em;transition:color 0.12s;flex-shrink:0}
 .hlink:active,.hlink:hover{color:var(--teal2)}
 .hlink-ic{font-size:15px;line-height:1}
 .hlinks{display:flex;gap:6px;align-items:center;margin-left:6px;flex-shrink:0}
+.hlink.hlink-dmo{color:var(--amr-red);font-weight:700}
+.hlink.hlink-dmo:active,.hlink.hlink-dmo:hover{color:#8e1230}
+/* DMO call card — first thing under the masthead */
+.dmo-card{display:flex;align-items:center;gap:14px;margin:0 12px 14px;padding:14px 16px;
+border-radius:14px;background:#fff;border:2px solid var(--amr-red);text-decoration:none;color:var(--white);
+box-shadow:0 4px 14px rgba(206,31,65,0.12)}
+.dmo-card:active{transform:scale(0.99);background:#fbe7eb}
+.dmo-card:focus-visible{outline:3px solid var(--amr-blue);outline-offset:2px}
+.dmo-ic{flex-shrink:0;width:46px;height:46px;border-radius:50%;background:var(--amr-red);color:#fff;
+display:flex;align-items:center;justify-content:center}
+.dmo-ic .icon{width:24px;height:24px}
+.dmo-txt{min-width:0}
+.dmo-lbl{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--amr-red)}
+.dmo-num{font-size:24px;font-weight:800;letter-spacing:0.01em;color:var(--white);line-height:1.15;white-space:nowrap}
+.dmo-sub{font-size:12px;color:var(--gray);line-height:1.4;margin-top:2px}
+/* every "DMO" in protocol text dials the line */
+a.dmo-tel{color:var(--amr-red);font-weight:700;text-decoration:underline dotted;text-underline-offset:2px}
 
 /* MAIN */
 /* The tab bar is 64px plus whatever the home indicator claims, so the bottom
@@ -810,6 +827,7 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
 <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12.5"/><path d="M7 11l5 5 5-5"/><path d="M4 19.5h16"/></symbol>
 <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c1 3-3 4.5-3 8a3 3 0 0 0 6 0c1 1 1.5 2.3 1.5 3.5a4.5 4.5 0 0 1-9 0c0-4 3-6 2.5-9.5-1.5 1-3.5 3.8-3.5 7a6 6 0 0 0 12 0c0-4.5-3-6.8-6.5-9z"/></symbol>
 <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 7.2 7.2l1.4-2.1 4.2 1.6V19a1.6 1.6 0 0 1-1.7 1.6A16.5 16.5 0 0 1 3.4 5.2 1.6 1.6 0 0 1 5 3.5z"/></symbol>
 <symbol id="i-ambulance" viewBox="0 0 24 24"><path d="M2.5 7.5h10.5v9H2.5z"/><path d="M13 10.5h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/><path d="M6 10.2v3M4.5 11.7h3"/></symbol>
 </defs>
 </svg>
@@ -881,6 +899,7 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
       </div>
     </div>
     <div class="hlinks">
+      <a class="hlink hlink-dmo" href="tel:+18338059381" aria-label="Call Direct Medical Oversight, 1-833-805-9381"><span class="hlink-ic"><svg class="icon"><use href="#i-phone"></use></svg></span>DMO</a>
       <a class="hlink" href="protocols-2026.pdf" target="_blank" aria-label="Open protocol PDF"><span class="hlink-ic"><svg class="icon"><use href="#i-doc"></use></svg></span>PDF</a>
       <a class="hlink" href="quiz.html" aria-label="Protocol quiz"><span class="hlink-ic"><svg class="icon"><use href="#i-cap"></use></svg></span>Quiz</a>
     </div>
@@ -1249,6 +1268,51 @@ function renewalCard(now){
 }
 if(typeof window !== 'undefined') window.renewalCard = renewalCard;
 
+var DMO_NUM = '1-833-805-9381', DMO_TEL = '+18338059381';
+
+// Turn every "DMO" / "Direct Medical Oversight" in rendered content into a
+// tap-to-call link. Works on text nodes, so it never touches markup.
+function linkDmo(root){
+  if(!root) return;
+  var re = /\b(DMO|Direct Medical Oversight)\b/g;
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode:function(n){
+    if(!re.test(n.nodeValue)){ re.lastIndex = 0; return NodeFilter.FILTER_REJECT; }
+    re.lastIndex = 0;
+    for(var e = n.parentNode; e && e !== root; e = e.parentNode){
+      var t = e.nodeName;
+      if(t==='A'||t==='BUTTON'||t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA'||t==='INPUT'||t==='SVG') return NodeFilter.FILTER_REJECT;
+    }
+    return NodeFilter.FILTER_ACCEPT;
+  }});
+  var nodes = []; while(w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(function(n){
+    var f = document.createDocumentFragment(), txt = n.nodeValue, last = 0, m;
+    re.lastIndex = 0;
+    while((m = re.exec(txt))){
+      if(m.index > last) f.appendChild(document.createTextNode(txt.slice(last, m.index)));
+      var a = document.createElement('a');
+      a.className = 'dmo-tel'; a.href = 'tel:' + DMO_TEL; a.textContent = m[0];
+      a.setAttribute('aria-label', m[0] + ', call ' + DMO_NUM);
+      f.appendChild(a); last = m.index + m[0].length;
+    }
+    if(last < txt.length) f.appendChild(document.createTextNode(txt.slice(last)));
+    n.parentNode.replaceChild(f, n);
+  });
+}
+(function(){
+  function watch(id){
+    var el = document.getElementById(id); if(!el || !window.MutationObserver) return;
+    var busy = false;
+    new MutationObserver(function(){
+      if(busy) return; busy = true;
+      try { linkDmo(el); } finally { busy = false; }
+    }).observe(el, {childList:true, subtree:true});
+    linkDmo(el);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ watch('lv'); watch('dv-body'); });
+  else { watch('lv'); watch('dv-body'); }
+})();
+
 function renderHome(){
   var c = $('lv');
   var h = '';
@@ -1269,6 +1333,14 @@ function renderHome(){
   h += '<path d="M0 30 H150 l14 -18 l12 32 l11 -24 l9 10 H430 l14 -18 l12 32 l11 -24 l9 10 '
      + 'H710 l14 -18 l12 32 l11 -24 l9 10 H990 l14 -18 l12 32 l11 -24 l9 10 H1200"/></svg>';
   h += '</div>';
+
+  // DMO line — front and center, above everything else on the home screen.
+  h += '<a class="dmo-card" href="tel:'+DMO_TEL+'" aria-label="Call Direct Medical Oversight, '+DMO_NUM+'">'
+     + '<span class="dmo-ic"><svg class="icon"><use href="#i-phone"></use></svg></span>'
+     + '<span class="dmo-txt"><span class="dmo-lbl">Direct Medical Oversight &middot; DMO</span>'
+     + '<span class="dmo-num" style="display:block">'+DMO_NUM+'</span>'
+     + '<span class="dmo-sub" style="display:block">Contact dispatch first. If unsuccessful, call this recorded line &mdash; '
+     + 'the operator connects you to the on-call physician.</span></span></a>';
 
   h += renewalCard();
   h += refresherCard();
