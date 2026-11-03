@@ -174,8 +174,34 @@ display:flex;align-items:center;justify-content:center}
 .dmo-lbl{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--amr-red)}
 .dmo-num{font-size:24px;font-weight:800;letter-spacing:0.01em;color:var(--white);line-height:1.15;white-space:nowrap}
 .dmo-sub{font-size:12px;color:var(--gray);line-height:1.4;margin-top:2px}
-/* every "DMO" in protocol text dials the line */
+/* every "DMO" in rendered text opens the medical control algorithm */
 a.dmo-tel{color:var(--amr-red);font-weight:700;text-decoration:underline dotted;text-underline-offset:2px}
+button.dmo-card{width:calc(100% - 24px);text-align:left;font:inherit;cursor:pointer}
+button.dmo-card .dmo-txt{flex:1}
+.dmo-arr{font-size:26px;color:var(--amr-red);flex-shrink:0}
+button.hlink{cursor:pointer}
+/* Medical control algorithm */
+.fc{display:flex;flex-direction:column}
+.fc-step{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:10px 12px}
+.fc-n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-family:var(--mono);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.fc-body{min-width:0;flex:1}
+.fc-title{font-weight:700;color:var(--white);line-height:1.3;font-size:15px}
+.fc-text{font-size:14px;line-height:1.5;color:var(--white);margin-top:3px}
+.fc-step.fc-backup{border-left-color:var(--amr-red)}
+.fc-step.fc-backup .fc-n{background:var(--amr-red)}
+.fc-step.fc-stop{border-left-color:#B7791F;background:#FFF8E8}
+.fc-step.fc-stop .fc-n{background:#B7791F}
+.fc-ask{margin-left:22px;padding:8px 0 8px 18px;border-left:2px dashed var(--border);font-size:13.5px;color:var(--white)}
+.fc-q{font-weight:700;margin-bottom:4px}
+.fc-yes,.fc-no{display:flex;gap:8px;align-items:baseline;line-height:1.4;margin-top:3px}
+.fc-tag{flex-shrink:0;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;color:#fff;background:#2E7D5B}
+.fc-no .fc-tag{background:var(--gray)}
+.fc-ul{margin:0 0 8px;padding-left:22px;font-size:15px;line-height:1.6;color:var(--white)}
+.fc-list{margin-top:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2)}
+.fc-list summary{cursor:pointer;padding:7px 10px;font-weight:700;font-size:13.5px}
+.fc-list .fc-ul{font-size:14px;margin:0;padding:0 10px 4px 28px;line-height:1.5}
+.fc-list-note{padding:4px 10px 8px;font-size:12.5px;color:var(--gray)}
+.dmo-inline{display:inline-block;font-size:21px;font-weight:800;color:var(--amr-red);text-decoration:underline;text-underline-offset:3px;margin:2px 0 4px}
 
 /* MAIN */
 /* The tab bar is 64px plus whatever the home indicator claims, so the bottom
@@ -899,7 +925,7 @@ border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:bo
       </div>
     </div>
     <div class="hlinks">
-      <a class="hlink hlink-dmo" href="tel:+18338059381" aria-label="Call Direct Medical Oversight, 1-833-805-9381"><span class="hlink-ic"><svg class="icon"><use href="#i-phone"></use></svg></span>DMO</a>
+      <button type="button" class="hlink hlink-dmo" id="hdr-dmo" onclick="openDmo()" aria-label="Medical control algorithm: base hospital first, backup line if unreachable"><span class="hlink-ic"><svg class="icon"><use href="#i-phone"></use></svg></span>DMO</button>
       <a class="hlink" href="protocols-2026.pdf" target="_blank" aria-label="Open protocol PDF"><span class="hlink-ic"><svg class="icon"><use href="#i-doc"></use></svg></span>PDF</a>
       <a class="hlink" href="quiz.html" aria-label="Protocol quiz"><span class="hlink-ic"><svg class="icon"><use href="#i-cap"></use></svg></span>Quiz</a>
     </div>
@@ -1270,10 +1296,78 @@ if(typeof window !== 'undefined') window.renewalCard = renewalCard;
 
 var DMO_NUM = '1-833-805-9381', DMO_TEL = '+18338059381';
 
+// Medical control algorithm: the base hospital is the first call for orders,
+// the 1-833 line is only the backup. Structure and base hospital list follow
+// the Johnson County EMS System protocols (Direct Medical Oversight page and
+// Appendix H). The number appears only at step 3.
+var BASE_HOSPITALS = ['AdventHealth Shawnee Mission','Children&rsquo;s Mercy Hospital','Children&rsquo;s Mercy Hospital Kansas',
+  'Menorah Medical Center','Overland Park Regional Medical Center','Research Medical Center','St. Joseph Hospital',
+  'St. Luke&rsquo;s Hospital &mdash; Plaza','St. Luke&rsquo;s Hospital &mdash; South','University Health Truman Medical Center',
+  'University of Kansas Hospital','University of Kansas Olathe'];
+function dmoAlgoHtml(){
+  function step(n, title, body, cls){
+    return '<div class="fc-step'+(cls?' '+cls:'')+'"><div class="fc-n">'+n+'</div><div class="fc-body"><div class="fc-title">'+title+'</div>'
+      + (body?'<div class="fc-text">'+body+'</div>':'')+'</div></div>';
+  }
+  function ask(){
+    return '<div class="fc-ask"><div class="fc-q">Physician orders received?</div>'
+      + '<div class="fc-yes"><span class="fc-tag">Yes</span>Go to <b>Receiving Orders</b> below.</div>'
+      + '<div class="fc-no"><span class="fc-tag">No</span>continue &darr;</div></div>';
+  }
+  function list(items, ordered){
+    var t = ordered ? 'ol' : 'ul';
+    return '<'+t+' class="fc-ul">' + items.map(function(x){ return '<li>'+x+'</li>'; }).join('') + '</'+t+'>';
+  }
+  var base = '<details class="fc-list" open><summary>Base hospitals ('+BASE_HOSPITALS.length+')</summary>'
+    + list(BASE_HOSPITALS) + '<div class="fc-list-note">If your destination is not on this list, it is a non-base hospital &mdash; go to step 2.</div></details>';
+  var h = '';
+  h += '<div class="cs"><div class="cl">When to Contact Medical Control</div>' + list([
+    'Approval of interventions beyond standing orders',
+    'Before deviating from protocol',
+    'A protocol specifically requires consultation',
+    'A patient refuses EMS care or transport and physician involvement may persuade them',
+    'ALS interventions were performed and the patient refuses transport (unless a protocol addresses it)',
+    'Stopping resuscitation in situations not covered by the resuscitation protocols',
+    'Findings or changes in patient condition that may warrant transport to another facility',
+    'Any time you have questions or concerns about patient care'])
+    + '<div class="info-box">Treatments that are already standing orders do not need a call, unless a question about the planned treatment arises.</div></div>';
+  h += '<div class="cs"><div class="cl">Algorithm</div><div class="fc">'
+    + step(1, 'Contact the base hospital', 'If you are transporting to a base hospital, radio or phone its ED and ask for the physician. An ED nurse may relay the physician&rsquo;s orders.' + base)
+    + ask()
+    + '<div class="fc-ask"><div class="fc-q">Also continue &darr; when:</div><div class="fc-text">The destination is a non-base hospital, there is no destination yet, the base hospital does not answer, the physician is unavailable, or radio/phone to the facility fails.</div></div>'
+    + step(2, 'Ask dispatch to reach medical control', 'Dispatch directs you to medical control.')
+    + ask()
+    + step(3, 'Backup line &mdash; only if steps 1 and 2 fail',
+        '<a class="dmo-inline" href="tel:'+DMO_TEL+'" aria-label="Call the backup DMO line, '+DMO_NUM+'">&#9742; '+DMO_NUM+'</a><br>'
+        + 'Recorded line. The operator connects you to the on-call physician. Not the first call.', 'fc-backup')
+    + ask()
+    + step(4, 'Still no contact', 'Continue care within standing orders. Do not delay stabilization or diversion waiting for medical control if the patient is critically unstable. Keep trying, and document every attempt.', 'fc-stop')
+    + '</div></div>';
+  h += '<div class="cs"><div class="cl">Receiving Orders</div>' + list([
+    'Use closed-loop communication &mdash; repeat the orders back so orders and questions are clear.',
+    'If an order is unclear or appears unsafe, request clarification before acting.',
+    'Stay with the same physician: once you reach one, take all further non-standing-order decisions on this call to that physician when possible.',
+    'Document in the PCR who gave the orders (physician&rsquo;s name and facility, or the backup line) and the orders you received.'], true) + '</div>';
+  h += '<div class="cs"><div class="cl">Non-Base Hospital Destination</div>' + list([
+    'Any intervention beyond standing orders must be approved by medical control (steps 2&ndash;3), not by the non-base ED.',
+    'Make sure the non-base hospital is told of changes in orders, patient status, or destination &mdash; directly, or by asking medical control to notify them.'], true) + '</div>';
+  h += '<div class="info-box">When in doubt, contact medical control &mdash; base hospital first. Early consultation improves patient outcomes and provides medicolegal protection.</div>';
+  return h;
+}
+function openDmo(){
+  $('dv-num').textContent = 'DMO';
+  $('dv-title').textContent = 'Medical Control';
+  $('dv-sub').textContent = 'Base hospital first · backup line if unreachable';
+  $('dv-body').innerHTML = dmoAlgoHtml();
+  $('dv-body').setAttribute('data-dmo', '1');
+  openDetailPanel();
+  if(!(history.state && history.state.detail)) history.pushState({detail:true}, '');
+}
+
 // Turn every "DMO" / "Direct Medical Oversight" in rendered content into a
-// tap-to-call link. Works on text nodes, so it never touches markup.
+// link to the medical control algorithm (base hospital first). Works on text nodes, so it never touches markup.
 function linkDmo(root){
-  if(!root) return;
+  if(!root || root.getAttribute('data-dmo')) return;
   var re = /\b(DMO|Direct Medical Oversight)\b/g;
   var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode:function(n){
     if(!re.test(n.nodeValue)){ re.lastIndex = 0; return NodeFilter.FILTER_REJECT; }
@@ -1291,8 +1385,9 @@ function linkDmo(root){
     while((m = re.exec(txt))){
       if(m.index > last) f.appendChild(document.createTextNode(txt.slice(last, m.index)));
       var a = document.createElement('a');
-      a.className = 'dmo-tel'; a.href = 'tel:' + DMO_TEL; a.textContent = m[0];
-      a.setAttribute('aria-label', m[0] + ', call ' + DMO_NUM);
+      a.className = 'dmo-tel'; a.href = '#dmo'; a.textContent = m[0];
+      a.setAttribute('aria-label', m[0] + ' — open the medical control algorithm');
+      a.addEventListener('click', function(ev){ ev.preventDefault(); openDmo(); });
       f.appendChild(a); last = m.index + m[0].length;
     }
     if(last < txt.length) f.appendChild(document.createTextNode(txt.slice(last)));
@@ -1334,13 +1429,14 @@ function renderHome(){
      + 'H710 l14 -18 l12 32 l11 -24 l9 10 H990 l14 -18 l12 32 l11 -24 l9 10 H1200"/></svg>';
   h += '</div>';
 
-  // DMO line — front and center, above everything else on the home screen.
-  h += '<a class="dmo-card" href="tel:'+DMO_TEL+'" aria-label="Call Direct Medical Oversight, '+DMO_NUM+'">'
+  // Medical control — front and center. Opens the algorithm rather than
+  // dialing: the base hospital is the first call, the 1-833 line the backup.
+  h += '<button type="button" class="dmo-card" id="dmo-card" onclick="openDmo()" aria-label="Medical control algorithm: base hospital first, backup line if unreachable">'
      + '<span class="dmo-ic"><svg class="icon"><use href="#i-phone"></use></svg></span>'
-     + '<span class="dmo-txt"><span class="dmo-lbl">Direct Medical Oversight &middot; DMO</span>'
-     + '<span class="dmo-num" style="display:block">'+DMO_NUM+'</span>'
-     + '<span class="dmo-sub" style="display:block">Contact dispatch first. If unsuccessful, call this recorded line &mdash; '
-     + 'the operator connects you to the on-call physician.</span></span></a>';
+     + '<span class="dmo-txt"><span class="dmo-lbl">Medical Control &middot; DMO</span>'
+     + '<span class="dmo-num" style="display:block">Need orders?</span>'
+     + '<span class="dmo-sub" style="display:block">Base hospital first. Backup line only if the base hospital can&rsquo;t be reached.</span></span>'
+     + '<span class="dmo-arr" aria-hidden="true">&#x203A;</span></button>';
 
   h += renewalCard();
   h += refresherCard();
@@ -1599,6 +1695,7 @@ function openHospMed(idx){
   h += '<div class="cs"><div class="cl">Typical dose / rate</div><div class="ct" style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--teal2)">'+drug.dose+'</div></div>';
   h += '<div class="cs"><div class="cl">Watch for during transport</div>';
   h += '<div class="warn-box">&#x26A0; '+drug.watch+'</div></div>';
+  $('dv-body').removeAttribute('data-dmo');
   $('dv-body').innerHTML = h;
   openDetailPanel();
   history.pushState({detail:true},'');
@@ -1653,6 +1750,7 @@ function openFormulary(idx){
     d.notes.forEach(function(n){h+='<div class="warn-box">&#x2139; '+n+'</div>';});
     h += '</div>';
   }
+  $('dv-body').removeAttribute('data-dmo');
   $('dv-body').innerHTML = h;
   openDetailPanel();
   history.pushState({detail:true},'');

@@ -21,6 +21,16 @@ Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.htm
 - 11 Procedure Cards
 - Reference: Vital targets, Pediatric dosing calculator, LTV 1200 alarms, GCS, Cincinnati Stroke Scale, Broselow, Rule of Nines, APGAR
 
+## Medical Control (DMO)
+The red **DMO** header button, the Home card ("Need orders?") and every "DMO" / "Direct Medical Oversight" in rendered text open a medical control algorithm instead of dialing:
+
+1. If transporting to a **base hospital**, contact its ED physician for orders. The 12 base hospitals are listed in this step.
+2. Non-base destination, no destination yet, or base hospital unreachable: ask dispatch to reach medical control.
+3. Only if both fail: the **backup line, 1-833-805-9381**. This is the only `tel:` link for it in the app.
+4. Still no contact: continue within standing orders, don't delay stabilization or diversion, document attempts.
+
+It also covers when to call, closed-loop orders, staying with the same physician, and non-base hospital destinations. The structure and base hospital list follow the Johnson County EMS System protocols (Direct Medical Oversight page; Appendix H, Base Hospital column), matching the Linn County app. The 2026 PDF (page 13) still says "contact dispatch first, then the DMO line," so the app and PDF differ until the PDF is updated. Code: `BASE_HOSPITALS`, `dmoAlgoHtml()` and `openDmo()` in `index.html`.
+
 ## Simulators
 
 Two interactive trainers, both single self-contained pages, both reachable
