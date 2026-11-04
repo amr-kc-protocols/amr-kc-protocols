@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0056a2">
+<title>Protocols · AMR KC Field Guide</title>
+<link rel="icon" href="favicon.ico">
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --blue:#0056a2;--navy:#004987;--red:#ce1f41;--ink:#152238;--gray:#66707c;
+  --line:#e2e6ec;--bg:#eef1f5;--surface:#fff;--surface2:#f4f6f9;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+button{font:inherit;color:inherit}
+#bar{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--surface);border-bottom:3px solid var(--blue);
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 10px rgba(21,34,56,.08)}
+.bk{flex-shrink:0;border:1px solid var(--line);background:var(--surface2);border-radius:9px;padding:8px 11px;font-weight:600;font-size:14px;color:var(--blue);cursor:pointer;min-height:40px}
+.meta{flex:1;min-width:0}
+.meta-code{font-family:var(--mono);font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta-title{font-size:14.5px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tb{flex-shrink:0;width:40px;height:40px;border:1px solid var(--line);background:var(--surface2);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--ink)}
+.tb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tb:disabled{opacity:.4}
+#doc{position:fixed;left:0;right:0;bottom:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#pages{padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 70px);margin:0 auto}
+.pg{position:relative;margin:0 auto 10px;background:#fff;box-shadow:0 1px 4px rgba(21,34,56,.18)}
+.pg canvas{position:absolute;inset:0;width:100%;height:100%}
+.pg .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#b6bec8;font-family:var(--mono);font-size:12px}
+.pg a.lnk{position:absolute;display:block;z-index:2}
+.pg a.lnk:active{background:rgba(0,86,162,.15)}
+#pill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:15;
+  background:rgba(21,34,56,.85);color:#fff;font-family:var(--mono);font-size:12px;padding:6px 12px;border-radius:20px;pointer-events:none}
+/* contents */
+#toc{position:fixed;inset:0;z-index:30;background:var(--surface);display:none;flex-direction:column}
+#toc.on{display:flex}
+.toc-hd{padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.toc-hd input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}
+.toc-list{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}
+.toc-sec{position:sticky;top:0;background:var(--surface2);padding:8px 14px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);border-bottom:1px solid var(--line)}
+.toc-row{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 14px;cursor:pointer}
+.toc-row:active{background:#e8f0fa}
+.toc-c{flex-shrink:0;min-width:58px;font-family:var(--mono);font-size:11.5px;color:var(--gray)}
+.toc-t{flex:1;font-size:15px;line-height:1.35}
+.toc-p{flex-shrink:0;font-family:var(--mono);font-size:11px;color:var(--gray)}
+.toc-ft{padding:14px;font-size:13px;color:var(--gray)}
+.toc-ft a{color:var(--blue)}
+#err{display:none;margin:90px 16px;padding:16px;background:#fff;border-left:4px solid var(--red);border-radius:8px;line-height:1.5}
+#err a{color:var(--blue);font-weight:700}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div id="bar">
+  <button class="bk" id="back" aria-label="Back to the field guide">&#x2190; Back</button>
+  <div class="meta"><div class="meta-code" id="mcode">2026 Protocols</div><div class="meta-title" id="mtitle">Loading&hellip;</div></div>
+  <button class="tb" id="zout" aria-label="Zoom out">&minus;</button>
+  <button class="tb" id="zin" aria-label="Zoom in">+</button>
+  <button class="tb" id="tocbtn" aria-label="Contents"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+</div>
+<div id="doc" role="document" aria-label="Protocol document"><div id="pages"></div></div>
+<div id="pill" aria-live="polite">&nbsp;</div>
+<div id="err" role="alert">The protocol viewer could not open on this device.
+  <a id="errlink" href="protocols-2026.pdf" target="_blank" rel="noopener">Open the protocol PDF instead</a>.</div>
+
+<div id="toc" role="dialog" aria-modal="true" aria-label="Protocol contents">
+  <div class="toc-hd">
+    <label class="sr" for="tocq">Find a protocol</label>
+    <input id="tocq" type="search" placeholder="Find a protocol&hellip;" autocomplete="off">
+    <button class="tb" id="tocx" aria-label="Close contents">&times;</button>
+  </div>
+  <div class="toc-list" id="toclist"></div>
+</div>
+
+<script src="protocols-index.js"></script>
+<script type="module">
+// Protocol viewer. Renders the signed 2026 PDF with pdf.js so a protocol opens
+// at its exact page on every phone — iOS Safari ignores #page= on PDFs, which
+// is why the guide no longer just links to the file. Offline once cached.
+const $ = id => document.getElementById(id);
+const docEl = $('doc'), pagesEl = $('pages');
+const PDF_URL = 'protocols-2026.pdf';
+const qs = new URLSearchParams(location.search);
+const start = { p: parseInt(qs.get('p'), 10) || 0, y: qs.has('y') && qs.get('y') !== '' ? parseFloat(qs.get('y')) : null };
+
+function sizeDoc(){ docEl.style.top = $('bar').offsetHeight + 'px'; }
+sizeDoc(); addEventListener('resize', sizeDoc);
+
+$('back').onclick = () => {
+  const sameOrigin = document.referrer && new URL(document.referrer).origin === location.origin;
+  if (sameOrigin && history.length > 1) history.back(); else location.href = 'index.html';
+};
+
+// ── Which protocol is this? ─────────────────────────────────────────────
+const SEC_NAME = {}; (window.PROTOCOL_SECTIONS || []).forEach(s => SEC_NAME[s.id] = s.name);
+const ORDERED = (window.PROTOCOLS || []).slice().sort((a, b) => a.p - b.p || (b.y ?? 800) - (a.y ?? 800));
+function protocolAt(page, yFromTop){ // yFromTop in PDF points
+  let cur = null;
+  for (const e of ORDERED){
+    const ey = e.y == null ? 0 : (PAGE_H - e.y);
+    if (e.p < page || (e.p === page && ey <= yFromTop + 40)) cur = e; else break;
+  }
+  return cur;
+}
+function setTitle(e){
+  $('mcode').textContent = e ? ((e.c ? e.c + ' · ' : '') + (SEC_NAME[e.s] || '')) : '2026 Protocols';
+  $('mtitle').textContent = e ? e.t : 'AMR Kansas City Protocols';
+  document.title = (e ? e.t + ' · ' : '') + 'Protocols · AMR KC';
+}
+
+// ── PDF ─────────────────────────────────────────────────────────────────
+let pdfjs, pdf, PAGE_W = 612, PAGE_H = 792, zoom = 1, cssW = 0;
+const ZOOMS = [1, 1.5, 2, 3];
+const pages = []; // {el, rendered, task}
+
+function fail(){
+  pagesEl.innerHTML = '';
+  $('errlink').href = PDF_URL + (start.p ? '#page=' + start.p : '');
+  $('err').style.display = 'block';
+  $('mtitle').textContent = 'Protocols';
+}
+
+try {
+  pdfjs = await import('./pdfjs/pdf.min.mjs');
+  pdfjs.GlobalWorkerOptions.workerSrc = './pdfjs/pdf.worker.min.mjs';
+  pdf = await pdfjs.getDocument({ url: PDF_URL, isEvalSupported: false, disableRange: true }).promise;
+  const p1 = await pdf.getPage(1);
+  const vp = p1.getViewport({ scale: 1 });
+  PAGE_W = vp.width; PAGE_H = vp.height;
+} catch (e) { console.error(e); fail(); }
+
+function layout(){
+  const avail = docEl.clientWidth;
+  cssW = Math.round(Math.min(avail - 16, 900) * zoom);
+  const cssH = Math.round(cssW * PAGE_H / PAGE_W);
+  pagesEl.style.width = (cssW + 16) + 'px';
+  pages.forEach(pg => { pg.el.style.width = cssW + 'px'; pg.el.style.height = cssH + 'px'; });
+}
+
+function build(){
+  for (let i = 1; i <= pdf.numPages; i++){
+    const el = document.createElement('div');
+    el.className = 'pg'; el.dataset.n = i;
+    el.innerHTML = '<div class="ph">Page ' + i + '</div>';
+    pagesEl.appendChild(el);
+    pages.push({ el, n: i, rendered: 0, task: null });
+  }
+  layout();
+}
+
+async function render(pg){
+  if (pg.rendered === zoom || pg.task) return;
+  const page = await pdf.getPage(pg.n);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const scale = (cssW / PAGE_W) * dpr;
+  const vp = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height);
+  canvas.setAttribute('aria-hidden', 'true');
+  const z = zoom;
+  pg.task = page.render({ canvasContext: canvas.getContext('2d'), viewport: vp });
+  try { await pg.task.promise; } catch (e) { pg.task = null; return; }
+  pg.task = null;
+  if (z !== zoom) return; // zoom changed mid-render; a fresh render is queued
+  pg.el.querySelectorAll('canvas,.ph,a.lnk').forEach(n => n.remove());
+  pg.el.appendChild(canvas);
+  pg.rendered = z;
+  addLinks(pg, page);
+  trim();
+}
+
+// Internal PDF links (the TOC, "see Procedure V-17B") jump within the viewer.
+async function addLinks(pg, page){
+  let anns = [];
+  try { anns = await page.getAnnotations({ intent: 'display' }); } catch (e) { return; }
+  const k = cssW / PAGE_W;
+  for (const a of anns){
+    if (a.subtype !== 'Link') continue;
+    const [x1, y1, x2, y2] = a.rect;
+    const ln = document.createElement('a');
+    ln.className = 'lnk';
+    ln.style.left = (x1 * k) + 'px'; ln.style.top = ((PAGE_H - y2) * k) + 'px';
+    ln.style.width = ((x2 - x1) * k) + 'px'; ln.style.height = ((y2 - y1) * k) + 'px';
+    if (a.url){ ln.href = a.url; ln.target = '_blank'; ln.rel = 'noopener'; }
+    else if (a.dest){
+      ln.href = '#';
+      ln.onclick = async ev => {
+        ev.preventDefault();
+        let d = a.dest; if (typeof d === 'string') d = await pdf.getDestination(d);
+        if (!Array.isArray(d)) return;
+        const n = (await pdf.getPageIndex(d[0])) + 1;
+        const kind = d[1] && d[1].name;
+        const top = kind === 'XYZ' ? d[3] : (kind === 'FitH' || kind === 'FitBH') ? d[2] : null;
+        goTo(n, top);
+      };
+    } else continue;
+    ln.setAttribute('aria-label', 'Link');
+    pg.el.appendChild(ln);
+  }
+}
+
+// Keep memory bounded on phones: drop canvases far from the viewport.
+function trim(){
+  const cur = currentPage();
+  pages.forEach(pg => {
+    if (pg.rendered && Math.abs(pg.n - cur) > 6){
+      pg.el.querySelectorAll('canvas,a.lnk').forEach(n => n.remove());
+      if (!pg.el.querySelector('.ph')) pg.el.insertAdjacentHTML('afterbegin', '<div class="ph">Page ' + pg.n + '</div>');
+      pg.rendered = 0;
+    }
+  });
+}
+
+function pageStride(){ return pages.length > 1 ? pages[1].el.offsetTop - pages[0].el.offsetTop : 1; }
+function currentPage(){
+  const mid = docEl.scrollTop + docEl.clientHeight * 0.35;
+  const n = Math.floor((mid - pages[0].el.offsetTop) / pageStride()) + 1;
+  return Math.max(1, Math.min(pages.length, n));
+}
+function goTo(n, yPdf){
+  const pg = pages[n - 1]; if (!pg) return;
+  const k = cssW / PAGE_W;
+  const off = yPdf == null ? 0 : Math.max(0, (PAGE_H - yPdf) * k - 12);
+  docEl.scrollTop = pg.el.offsetTop + off - 6;
+  onScroll();
+}
+
+let ticking = false;
+function onScroll(){
+  if (ticking) return; ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    const n = currentPage();
+    $('pill').textContent = 'Page ' + n + ' of ' + pages.length;
+    const pg = pages[n - 1];
+    const yTop = (docEl.scrollTop - pg.el.offsetTop + 60) * (PAGE_W / cssW);
+    setTitle(protocolAt(n, Math.max(0, yTop)));
+    for (let i = Math.max(1, n - 1); i <= Math.min(pages.length, n + 2); i++) render(pages[i - 1]);
+  });
+}
+
+function setZoom(z){
+  const n = currentPage(), pg = pages[n - 1];
+  const frac = (docEl.scrollTop - pg.el.offsetTop) / pg.el.offsetHeight;
+  const xfrac = docEl.scrollWidth > docEl.clientWidth ? (docEl.scrollLeft + docEl.clientWidth / 2) / docEl.scrollWidth : 0.5;
+  zoom = z; layout();
+  docEl.scrollTop = pg.el.offsetTop + frac * pg.el.offsetHeight;
+  docEl.scrollLeft = Math.max(0, xfrac * docEl.scrollWidth - docEl.clientWidth / 2);
+  $('zout').disabled = zoom === ZOOMS[0]; $('zin').disabled = zoom === ZOOMS[ZOOMS.length - 1];
+  onScroll();
+}
+$('zin').onclick = () => { const i = ZOOMS.indexOf(zoom); if (i < ZOOMS.length - 1) setZoom(ZOOMS[i + 1]); };
+$('zout').onclick = () => { const i = ZOOMS.indexOf(zoom); if (i > 0) setZoom(ZOOMS[i - 1]); };
+
+// ── Contents ────────────────────────────────────────────────────────────
+function renderToc(q){
+  q = (q || '').trim().toLowerCase();
+  let h = '';
+  (window.PROTOCOL_SECTIONS || []).forEach(s => {
+    const items = (window.PROTOCOLS || []).filter(e => e.s === s.id && (!q || (e.c + ' ' + e.t).toLowerCase().includes(q)));
+    if (!items.length) return;
+    h += '<div class="toc-sec">' + s.name + '</div>';
+    items.forEach(e => {
+      h += '<button class="toc-row" data-p="' + e.p + '" data-y="' + (e.y ?? '') + '">'
+         + '<span class="toc-c">' + (e.c || '') + '</span><span class="toc-t">' + e.t + '</span>'
+         + '<span class="toc-p">p.' + e.p + '</span></button>';
+    });
+  });
+  if (!h) h = '<div class="toc-ft">No protocol matches &ldquo;' + q.replace(/[<>&]/g, '') + '&rdquo;.</div>';
+  h += '<div class="toc-ft">Signed 2026 protocol document &middot; <a href="' + PDF_URL + '" target="_blank" rel="noopener">open the original PDF</a></div>';
+  $('toclist').innerHTML = h;
+}
+function openToc(){ $('toc').classList.add('on'); renderToc($('tocq').value); setTimeout(() => $('tocq').focus(), 50); }
+function closeToc(){ $('toc').classList.remove('on'); $('tocbtn').focus(); }
+$('tocbtn').onclick = openToc;
+$('tocx').onclick = closeToc;
+$('tocq').oninput = e => renderToc(e.target.value);
+$('toclist').onclick = e => {
+  const r = e.target.closest('.toc-row'); if (!r) return;
+  closeToc();
+  goTo(parseInt(r.dataset.p, 10), r.dataset.y === '' ? null : parseFloat(r.dataset.y));
+};
+addEventListener('keydown', e => { if (e.key === 'Escape' && $('toc').classList.contains('on')) closeToc(); });
+
+// ── Go ──────────────────────────────────────────────────────────────────
+if (pdf){
+  build();
+  docEl.addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', () => setZoom(zoom));
+  $('zout').disabled = true;
+  if (start.p) goTo(start.p, start.y);
+  else { onScroll(); openToc(); }
+}
+</script>
+</body>
+</html>

@@ -21,6 +21,19 @@ Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.htm
 - 11 Procedure Cards
 - Reference: Vital targets, Pediatric dosing calculator, LTV 1200 alarms, GCS, Cincinnati Stroke Scale, Broselow, Rule of Nines, APGAR
 
+## Home and the protocol viewer
+Home is field tools first, in this order:
+
+1. **Need orders? (DMO)**, which opens the medical control algorithm.
+2. **Protocols.** Six most-used (Diversion, Hospital Capability, Cardiac Rhythms, ACS/STEMI, Stroke, Hospice Transport), then a button for each of the nine PDF sections, plus "All & search". The header search also finds protocols by number or title.
+3. **On shift** tools.
+4. **Training & Education**, under its own divider: renewal and Refresher notices, the featured training, and Keep learning.
+
+Every protocol opens in **`protocols.html`**, a pdf.js viewer of the signed `protocols-2026.pdf`, scrolled to the exact spot the PDF's own table-of-contents link lands on. Linking to the PDF directly isn't enough, because iOS Safari ignores `#page=`. The viewer has zoom, a searchable contents list, tappable in-document links (e.g. "see Procedure V-17B"), and works offline once cached.
+
+- `protocols-index.js`: the 131 entries (code, title, section, page, y-position), extracted from the PDF's TOC links, plus `PROTOCOL_FAVORITES`. **Regenerate it if the PDF is re-assembled**, or entries will open at the wrong page.
+- `pdfjs/`: vendored pdf.js 4.10.38 legacy build (Apache-2.0, `pdfjs/LICENSE`).
+
 ## Medical Control (DMO)
 The red **DMO** header button, the Home card ("Need orders?") and every "DMO" / "Direct Medical Oversight" in rendered text open a medical control algorithm instead of dialing:
 

@@ -427,18 +427,27 @@ for (const [label, w, h] of [['phone 390', 390, 844], ['Toughbook 1366', 1366, 7
   ok('H12 the Caregiver tile opens from the keyboard', /#forms$/.test(await p.evaluate(() => location.hash)));
   await p.context().close(); }
 
-/* H13 — on a phone the first screen holds the shift tools, whole, above the
-   tab bar. This was the point of the reorganization: before it, the first
-   screen held a sign-up banner and a training advert and no tool. */
+/* H13 — on a phone the first screen holds the protocols: the most-used ones,
+   whole, above the tab bar. The field guide is field tools first; the shift
+   tools follow, and training sits below both under its own heading. */
 { const p = await home(390, 844);
   const m = await p.evaluate(() => {
     const nav = document.getElementById('nav').getBoundingClientRect().top;
-    const tiles = [...document.querySelectorAll('.stat-strip')][0].querySelectorAll('.stat-tile');
-    return { nav: Math.round(nav), n: tiles.length,
-             bottoms: [...tiles].map(t => Math.round(t.getBoundingClientRect().bottom)) };
+    const fav = [...document.querySelectorAll('.proto-grid .proto-tile')];
+    const shift = document.querySelector('.stat-strip');
+    const div = document.querySelector('.home-div');
+    const feat = document.querySelector('.feat-card');
+    const after = (a, b) => !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING));
+    return { nav: Math.round(nav), n: fav.length,
+             bottoms: fav.map(t => Math.round(t.getBoundingClientRect().bottom)),
+             hrefs: fav.map(t => t.getAttribute('href')),
+             protoBeforeShift: after(fav[0], shift), shiftBeforeTraining: after(shift, div) && after(div, feat) };
   });
-  ok('H13 four shift tools', m.n === 4, m.n);
+  ok('H13 six most-used protocols', m.n === 6, m.n);
   ok('H13 all of them fully on the first screen', m.bottoms.every(b => b <= m.nav), JSON.stringify(m));
+  ok('H13 each opens the viewer at a page', m.hrefs.every(h => /^protocols\.html\?p=\d+/.test(h)), JSON.stringify(m.hrefs));
+  ok('H13 protocols come before the shift tools', m.protoBeforeShift);
+  ok('H13 training sits below the shift tools under its own heading', m.shiftBeforeTraining);
   await p.context().close(); }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
