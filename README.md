@@ -33,6 +33,13 @@ Every protocol opens in **`protocols.html`**, a pdf.js viewer of the signed `pro
 
 - `protocols-index.js`: the 131 entries (code, title, section, page, y-position), extracted from the PDF's TOC links, plus `PROTOCOL_FAVORITES`. **Regenerate it if the PDF is re-assembled**, or entries will open at the wrong page.
 - `pdfjs/`: vendored pdf.js 4.10.38 legacy build (Apache-2.0, `pdfjs/LICENSE`).
+## Protocol Quiz and Daily 5
+Both run on one shared engine (`quiz-kit.js`, `quiz-kit.css`) and one question file, `quiz-bank.js`: EMT 50, AEMT 15, Paramedic 50, ventilator 20. **Fix a question there once and both quizzes get it.** Each level includes the levels below it (EMT 50, AEMT 65, Paramedic 135).
+
+- **Protocol Quiz** (`quiz.html`): pick a level, a length (10, 25 or all) and optionally one topic. You see the explanation and protocol reference after each answer; the results page breaks the score down by topic and lists every miss. Missed questions are saved on the device (`amrkc_quiz_v2`) for a "Review missed" round.
+- **Daily 5** (`quiz-daily5.html`): five a day. Streaks keep using the `d5stats` key, so existing streaks carried over. A missed day now shows the streak as 0, on Home as well.
+
+Answer choices are shuffled each time. The questions were reviewed against the 2026 PDF in November 2026, and `test/quizbank.test.mjs` guards the bank's structure and the corrections.
 
 ## Medical Control (DMO)
 The red **DMO** header button, the Home card ("Need orders?") and every "DMO" / "Direct Medical Oversight" in rendered text open a medical control algorithm instead of dialing:

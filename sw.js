@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v58';
+const CACHE = 'amrkc-2026-v60';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
@@ -6,6 +6,8 @@ const ASSETS = [
   // Protocol viewer — opens the PDF at the right page on every phone, offline
   './protocols.html', './protocols-index.js',
   './pdfjs/pdf.min.mjs', './pdfjs/pdf.worker.min.mjs',
+  // Protocol Quiz and Daily 5 — one shared question bank and engine
+  './quiz.html', './quiz-daily5.html', './quiz-bank.js', './quiz-kit.js', './quiz-kit.css',
   // Caregiver Signature Form PDF: letterhead + Calibri-metric font subset
   './amr-logo.png', './fonts/KCFormSans-Bold.ttf',
   // Shared signature pad — the caregiver form cannot be signed without it

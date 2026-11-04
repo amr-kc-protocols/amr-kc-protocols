@@ -1107,7 +1107,13 @@ function escHtml(s){
   });
 }
 function getDaily5Stats(){
-  try{ return JSON.parse(localStorage.getItem('d5stats')||'{}'); }catch(e){ return {}; }
+  var st;
+  try{ st = JSON.parse(localStorage.getItem('d5stats')||'{}') || {}; }catch(e){ st = {}; }
+  // A streak is only alive if the last set was done today or yesterday
+  var d = new Date(), y = new Date(); y.setDate(y.getDate()-1);
+  function ds(x){ return x.getFullYear()+'-'+(x.getMonth()+1)+'-'+x.getDate(); }
+  if(st.lastDone !== ds(d) && st.lastDone !== ds(y)) st.streak = 0;
+  return st;
 }
 function getVtaStats(){
   try{
