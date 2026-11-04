@@ -3,6 +3,9 @@ const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
   './educator.jpg', './protocols-2026.pdf',
+  // Protocol viewer — opens the PDF at the right page on every phone, offline
+  './protocols.html', './protocols-index.js',
+  './pdfjs/pdf.min.mjs', './pdfjs/pdf.worker.min.mjs',
   // Protocol Quiz and Daily 5 — one shared question bank and engine
   './quiz.html', './quiz-daily5.html', './quiz-bank.js', './quiz-kit.js', './quiz-kit.css',
   // Caregiver Signature Form PDF: letterhead + Calibri-metric font subset
@@ -85,7 +88,9 @@ self.addEventListener('fetch', e => {
     }).catch(() => {
       // Offline fallback — serve from cache; only fall back to the app
       // shell for page navigations, never for scripts/styles/assets
-      return caches.match(e.request).then(cached => {
+      // The protocol viewer is opened with ?p=&y= — match it without the query
+      const opts = /\/protocols\.html$/.test(url.pathname) ? { ignoreSearch: true } : undefined;
+      return caches.match(e.request, opts).then(cached => {
         if (cached) return cached;
         if (e.request.mode === 'navigate') return caches.match('./index.html');
         return Response.error();
