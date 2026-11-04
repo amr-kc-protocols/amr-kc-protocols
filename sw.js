@@ -1,8 +1,10 @@
-const CACHE = 'amrkc-2026-v57';
+const CACHE = 'amrkc-2026-v60';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-193.png', './icon-512.png',
   './educator.jpg', './protocols-2026.pdf',
+  // Protocol Quiz and Daily 5 — one shared question bank and engine
+  './quiz.html', './quiz-daily5.html', './quiz-bank.js', './quiz-kit.js', './quiz-kit.css',
   // Caregiver Signature Form PDF: letterhead + Calibri-metric font subset
   './amr-logo.png', './fonts/KCFormSans-Bold.ttf',
   // Shared signature pad — the caregiver form cannot be signed without it
