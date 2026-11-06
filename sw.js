@@ -1,6 +1,8 @@
-const CACHE = 'amrkc-2026-v61';
+const CACHE = 'amrkc-2026-v62';
 const ASSETS = [
   './', './index.html', './manifest.json',
+  // Crew login screen — every page loads it first, so it must work offline
+  './auth-gate.js',
   './icon-192.png', './icon-193.png', './icon-512.png',
   './educator.jpg', './protocols-2026.pdf',
   // Protocol viewer — opens the PDF at the right page on every phone, offline
