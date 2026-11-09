@@ -1,4 +1,4 @@
-const CACHE = 'amrkc-2026-v62';
+const CACHE = 'amrkc-2026-v63';
 const ASSETS = [
   './', './index.html', './manifest.json',
   // Crew login screen — every page loads it first, so it must work offline
