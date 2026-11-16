@@ -25,11 +25,11 @@ Legend: ☑ = already corrected in `app.js` (factual, non-guideline) · ☐ = st
 
 Each lists the current course text, the reviewer's concern, the cited source, and a proposed direction. **Please confirm the number/wording against the live guideline and your service protocols.**
 
-1. ☐ **COPD acute exacerbation — oxygen target.** Course implies "≥ 88%." Reviewer: express as a **target range 88–92%** during acute exacerbation. Source cited: GOLD. → *Proposed:* change to "titrate to SpO₂ 88–92%." **MD confirm.**
+1. ☑ **COPD acute exacerbation — oxygen target.** Course implies "≥ 88%." Reviewer: express as a **target range 88–92%** during acute exacerbation. Source cited: GOLD. → *Proposed:* change to "titrate to SpO₂ 88–92%." **MD confirm.**
 
 2. ☐ **ARDS driving pressure (ΔP < 14).** Presented as a firm "modern ARDS target." Reviewer: it's an important **risk marker**, not a stand-alone setting mandate; guidelines emphasize **4–8 mL/kg PBW and Pplat < 30**. Source cited: ATS/ARDS guideline. → *Proposed:* keep ΔP as a risk marker, lead with tidal volume 4–8 mL/kg PBW + Pplat < 30 as the mandate; soften "target." **MD confirm.**
 
-3. ☐ **TBI targets.** Course uses older numbers. Reviewer: 2023 prehospital BTF guideline recommends **EtCO₂ 35–45 mmHg** and **adult SBP ≥ 110 mmHg**. Source cited: BTF prehospital guideline (2023). → *Proposed:* update normocapnia target to 35–45 and SBP threshold to ≥ 110. **MD confirm against the current BTF edition your service follows.**
+3. ☑ **TBI targets.** Course uses older numbers. Reviewer: 2023 prehospital BTF guideline recommends **EtCO₂ 35–45 mmHg** and **adult SBP ≥ 110 mmHg**. Source cited: BTF prehospital guideline (2023). → *Proposed:* update normocapnia target to 35–45 and SBP threshold to ≥ 110. **MD confirm against the current BTF edition your service follows.**
 
 4. ☐ **General oxygen targeting language.** Reviewer flagged O₂ targets broadly. Cross-check all SpO₂ targets (post-ROSC 90–98% is already current per 2025 AHA) against your protocols for consistency. **MD confirm.**
 
@@ -72,7 +72,7 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 - ☑ **M4 terminology corrected** — **predicted body weight (PBW)** now replaces generic "ideal body weight" throughout the live app, facilitator guide, and learner-facing labels. ☐ **MD still to approve disease-specific numeric targets and final driving-pressure language.**
 - ☑ **M5 high-PIP and asthma framing corrected** — removed the instruction to switch to pressure control solely because PIP exceeds a number; learners now assess patient, tube, circuit, secretions, resistance, plateau pressure, and auto-PEEP. The mode-matching exercise no longer presents bilevel NIV as established first-line therapy for acute asthma. ☐ **MD still to approve mode-transition and NIV protocol language.**
 - ☑ **M8 universal RASS target removed** — transport goals are now individualized to pain, synchrony, hemodynamics, neurologic needs, paralytic status, and the sending plan; RASS is explicitly unusable during effective blockade. ☐ **All drug and push-dose pressor content still requires medical-director approval.** *(SCCM PADIS.)*
-- ☐ **M9 TBI** — reviewer's targets: EtCO₂ 35–40 (30–35 with active herniation), SpO₂ > 90%, adult SBP ≥ 110 — replace the module's universal SBP > 100 and SpO₂ ≥ 94. *(Brain Trauma Foundation.)* **Reconcile with the round-1 TBI item and the edition your service certifies against.**
+- ☑ **M9 TBI** (EtCO₂ 35–45 and SBP > 110 applied; SpO₂ ≥ 94 kept as a target above the BTF > 90 floor) — reviewer's targets: EtCO₂ 35–40 (30–35 with active herniation), SpO₂ > 90%, adult SBP ≥ 110 — replace the module's universal SBP > 100 and SpO₂ ≥ 94. *(Brain Trauma Foundation.)* **Reconcile with the round-1 TBI item and the edition your service certifies against.**
 - ☐ **M1** — distinguish **minute vs alveolar** ventilation; qualify PIP/plateau interpretation.
 - ☑ **M7 alarm language qualified** — removed the non-negotiable ten-second rule and claims that bagging reliably separates patient from equipment. Backup ventilation is now taught as controlled manual ventilation with appropriate rate, volume, oxygen, and PEEP while troubleshooting.
 - ☐ **M2** — EtCO₂/SpO₂ don't establish PaCO₂/pH/mixed acid-base (softened in round 1 §A; MD to confirm).
@@ -107,3 +107,19 @@ Each lists the current course text, the reviewer's concern, the cited source, an
 - ☐ **Transport module** (from round 1 §C).
 
 **Deployment position (agreed with the review):** usable as a **supervised educational supplement** with a prominent "local protocol / medical direction / manufacturer instructions control" statement. The four identified release-blocking factual/logic errors and the static-app assessment controls are now corrected. Do **not** use the final exam as proof of competency or issue a formal credential until the remaining protocol/drug/device-configuration items receive medical-director and service sign-off; auditable credentialing still requires a backend.
+
+---
+
+# Round 3 — Medical director direction: "use the most evidence-based answer"
+
+Applied to the Academy (`app.js`) and the Protocol Quiz (`quiz-bank.js`) so the two agree:
+
+- ☑ **TBI** — EtCO₂ 35–45 mmHg (avoid < 35; herniation rescue 30–35) and adult SBP > 110 mmHg, per BTF prehospital guidelines 3rd ed. (2023).
+- ☑ **Post-ROSC SpO₂** — 94–98% for transport. AHA 2025 accepts 90–98%, but the only prehospital RCT (EXACT, JAMA 2022) found more hypoxaemia and lower survival at 90–94% (stopped early, so not conclusive); ERC/ESICM 2025 also use 94–98%.
+- ☑ **COPD** — SpO₂ 88–92% (GOLD; Austin, BMJ 2010). Rate 10–12 and I:E ≥ 1:3 as the start, slower for severe asthma or persistent auto-PEEP. No trial compares specific rates; this follows the protocol.
+- ☑ **ARDS** — Vt 6 mL/kg PBW to start, down to 4 if Pplat > 30 (ARDSNet; guidelines accept 4–8); raise RR as needed for pH; PEEP per ARDSNet PEEP/FiO₂ table.
+- ☑ **Auto-PEEP** — corrected: it raises plateau pressure as well as PIP (M9.2 previously said "without rising Pplat").
+- ☑ **Needle decompression** — lateral site written as 4th–5th ICS anterior axillary line (protocol V-10; lowest failure rate in observational/cadaver data).
+- ☑ **INOP** added to the M6 core alarm list (protocol V-6).
+- ☐ **Protocol PDF still says** TBI ETCO₂ 35–40 and SBP ≥ 90 (II-10, V-6). Needs a protocol revision to match.
+- ☐ **Slide decks (`slides/*.pptx`)** not yet updated to these numbers.

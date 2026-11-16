@@ -274,7 +274,7 @@ const MODULES = [
         "SpO₂ 80% → PaO₂ ≈ 45 mmHg. SpO₂ 70% → PaO₂ ≈ 38 mmHg — minutes from arrest in most adults.",
         "Practical implication: aim for SpO₂ 92–96%. High enough to be off the cliff, low enough to detect deterioration. Targeting 100% does the patient no good and wastes oxygen reserves."
       ],
-      evidence: { title: "Hyperoxia after ROSC", body: "Multiple observational studies show worse neurologic outcomes in cardiac arrest survivors maintained at PaO₂ > 300 mmHg post-arrest. AHA recommends titrating FiO₂ to SpO₂ 90–98% post-ROSC (2025 AHA update; the prior target was 92–98%)." }
+      evidence: { title: "Hyperoxia after ROSC", body: "Multiple observational studies show worse neurologic outcomes in cardiac arrest survivors maintained at PaO₂ > 300 mmHg post-arrest. Titrate FiO₂ to SpO₂ 94–98% for transport. AHA 2025 accepts 90–98%, but the only prehospital trial (EXACT, JAMA 2022) saw more hypoxaemia and lower survival at 90–94%, so do not aim for the low end in the field." }
     },
     {
       id: "type1",
@@ -693,7 +693,7 @@ const MODULES = [
       id: "fio2-peep", kicker: "4.3 · Oxygenation Knobs", title: "FiO₂ and PEEP",
       body: [
         "FiO₂ is the fraction of oxygen in the inspired gas. Range 0.21 (room air) to 1.00 (100%). Start at 100% on every fresh intubation; wean.",
-        "Target SpO₂ ≥ 92% (adult), ≥ 88% (COPD per GOLD), ≥ 94% (TBI per BTF). Hyperoxia post-ROSC worsens neurologic outcome — AHA recommends SpO₂ 90–98% after cardiac arrest (2025 update; previously 92–98%). Oxygen is a drug, not a vital sign.",
+        "Target SpO₂ ≥ 92% (adult), 88–92% (COPD per GOLD), ≥ 94% (TBI per BTF). Hyperoxia post-ROSC worsens neurologic outcome — target SpO₂ 94–98% for transport. AHA 2025 accepts 90–98%, but the only prehospital trial (EXACT, JAMA 2022) saw more hypoxaemia and lower survival at 90–94%, so do not aim for the low end in the field. Oxygen is a drug, not a vital sign.",
         "PEEP is the pressure remaining in airways at end-exhalation. Adult default 5 cmH₂O. ARDS uses 10–15 cmH₂O paired with FiO₂ per the ARDSNet table.",
         "PEEP recruits collapsed alveoli — the fix for shunt physiology. It also reduces preload, which can drop BP in volume-depleted patients. Pair PEEP with FiO₂ together, not separately."
       ],
@@ -751,12 +751,12 @@ const MODULES = [
       { q: "Appropriate I:E ratio for a status asthmaticus patient on AC/VC:",
         choices: ["1:4 or longer", "1:1", "1:2", "Inverse 2:1"], answer: 0,
         rationale: "Obstructive disease needs prolonged exhalation. 1:4 or 1:5 prevents breath stacking and auto-PEEP. Forcing higher rates risks barotrauma." },
-      { q: "Strict normocapnia (EtCO₂ 35–40) is the target in which population?",
+      { q: "Strict normocapnia (EtCO₂ 35–45) is the target in which population?",
         choices: ["ARDS", "TBI / increased ICP", "Asthma", "Post-ROSC"], answer: 1,
-        rationale: "Brain Trauma Foundation 4th edition: maintain EtCO₂ 35–40 mmHg in TBI. Avoid prophylactic hyperventilation. Hyperventilation only as transient herniation rescue." },
+        rationale: "Brain Trauma Foundation prehospital guidelines (3rd ed., 2023): maintain EtCO₂ 35–45 mmHg in TBI and avoid EtCO₂ < 35. Avoid prophylactic hyperventilation. Hyperventilation only as transient herniation rescue." },
       { q: "Best practice for FiO₂ in a post-ROSC adult per AHA guidance:",
-        choices: ["Always 100% to maximize oxygen delivery", "Titrate to SpO₂ 90–98% — avoid hyperoxia", "Room air only", "Whatever the prior intubator chose"], answer: 1,
-        rationale: "Hyperoxia post-ROSC worsens neurologic outcome (multiple observational studies). The 2025 AHA guidelines recommend titrating FiO₂ to SpO₂ 90–98% (prior target 92–98%)." },
+        choices: ["Always 100% to maximize oxygen delivery", "Titrate to SpO₂ 94–98% — avoid hyperoxia", "Room air only", "Whatever the prior intubator chose"], answer: 1,
+        rationale: "Hyperoxia post-ROSC worsens neurologic outcome (multiple observational studies). Titrate FiO₂ to SpO₂ 94–98% for transport. AHA 2025 accepts 90–98%, but the only prehospital trial (EXACT, JAMA 2022) saw more hypoxaemia and lower survival at 90–94%, so do not aim for the low end in the field." },
       { q: "Adult target minute ventilation:",
         choices: ["6–8 L/min", "2–4 L/min", "12–14 L/min", "20+ L/min"], answer: 0,
         rationale: "Adult MV target is 6–8 L/min (RR × Vt). For a 70 kg PBW adult: Vt 480 × RR 14 = 6.7 L/min." },
@@ -1091,6 +1091,7 @@ const MODULES = [
         "APNEA — no detected breath in apnea time (default 20 sec). Triggered by complete loss of effort or sensor failure.",
         "POWER LOST / LOW BATTERY — external power lost (transfer to internal battery) or battery depleting. Restore AC promptly.",
         "GAS SUPPLY — O₂ source pressure low; check tank, regulator, and hose.",
+        "INOP — the ventilator has detected an internal fault and is NOT reliably ventilating. Disconnect immediately, bag with a PEEP valve, take the unit out of service, and contact medical control. Do not try to restart it on the patient.",
         "Triage: READ the alarm BEFORE silencing. Silencing without identifying the cause is a sentinel-level safety event.",
         "This is the core set — the operator manual lists additional device and self-test alarms. Know your unit's full alarm list before transport."
       ]
@@ -1279,7 +1280,7 @@ const MODULES = [
       body: [
         "Sudden rise in PIP, often with falling SpO₂ and BP. Decreased or absent breath sounds on the affected side. Tracheal deviation away from the affected side (LATE).",
         "Hyperresonance to percussion of the affected side. JVD + hemodynamic compromise = TENSION pneumothorax. Clinical diagnosis at the bedside, not waiting for imaging.",
-        "Decompress per protocol: needle thoracostomy at the 2nd ICS midclavicular OR 4th–5th ICS midaxillary. Then secure and monitor the catheter/device per protocol, reassess for re-tensioning, and arrange definitive thoracostomy at the receiving facility. (A chest seal treats an OPEN chest wound — it does not stop an internal air leak.)",
+        "Decompress per protocol: needle thoracostomy at the 2nd ICS midclavicular OR 4th–5th ICS anterior axillary line. The lateral site has the lowest failure rate in observational and cadaver studies; on the left, the 2nd ICS keeps the needle away from the heart. Then secure and monitor the catheter/device per protocol, reassess for re-tensioning, and arrange definitive thoracostomy at the receiving facility. (A chest seal treats an OPEN chest wound — it does not stop an internal air leak.)",
         "High-risk populations: asthma/COPD on positive pressure, trauma, recent central line placement. Suspect early."
       ]
     },
@@ -1327,7 +1328,7 @@ const MODULES = [
         rationale: "If ventilation is inadequate and the cause is not immediately corrected, disconnect and provide controlled manual ventilation with oxygen and PEEP while troubleshooting. Manual ventilation is supportive, not a perfect diagnostic test, and excessive rate or volume can cause harm." },
       { q: "A vented patient suddenly develops PIP 52, no EtCO₂ waveform, BS absent right, hypotension, JVD. The MOST urgent action is:",
         choices: ["Increase FiO₂ to 100%", "Increase sedation", "Document and continue transport", "Decompress the right chest"], answer: 3,
-        rationale: "Tension pneumothorax until proven otherwise. Decompress at the bedside (needle at 2nd ICS midclavicular OR 4th–5th midaxillary). Bag with 100% during decompression." },
+        rationale: "Tension pneumothorax until proven otherwise. Decompress at the bedside (needle at 2nd ICS midclavicular OR 4th–5th ICS anterior axillary line). Bag with 100% during decompression." },
       { q: "Most common cause of OBSTRUCTION in a post-arrest vented patient:",
         choices: ["Pneumothorax", "Bronchospasm", "Mucus plug", "Auto-PEEP"], answer: 2,
         rationale: "Mucus plugging is the most common O cause, especially in post-arrest, post-aspiration, and COPD patients. Pass a suction catheter — diagnostic and therapeutic." },
@@ -1412,7 +1413,7 @@ const MODULES = [
         choices: [
           { label: "Call medical control before doing anything", outcome: "bad",
             feedback: "She doesn't have time. Tension PTX with hemodynamic compromise is a clinical diagnosis treated at the bedside, not waiting for a call." },
-          { label: "Needle decompression at 2nd ICS midclavicular OR 4th–5th midaxillary, right side, per protocol", outcome: "good",
+          { label: "Needle decompression at 2nd ICS midclavicular OR 4th–5th ICS anterior axillary line, right side, per protocol", outcome: "good",
             feedback: "Right. Decompress now. Bag continues at 100% O₂ during decompression. Expect immediate audible air release if tension, and BP recovery within seconds to minutes." },
           { label: "Transport to ED for a chest X-ray", outcome: "bad",
             feedback: "X-ray confirms what you already diagnosed clinically. Don't wait — she'll arrest in transport. Decompress at the bedside." }
@@ -1631,7 +1632,7 @@ const MODULES = [
       id: "asthma-copd", kicker: "9.1 · Asthma & COPD", title: "Let Them Exhale",
       body: [
         "Obstructive disease is fundamentally an EXHALATION problem. Air goes in easily; getting it out takes time.",
-        "Strategy: low rate (RR 8–10), long expiratory time (I:E 1:4 or 1:5), Vt 6–8 mL/kg PBW, FiO₂ to SpO₂ ≥ 88% (COPD) or ≥ 92% (asthma), PEEP 0–5 cmH₂O. Permissive hypercapnia is acceptable; pH ≥ 7.20 typical floor.",
+        "Strategy: low rate (RR 10–12; slower still for severe asthma or persistent auto-PEEP), long expiratory time (I:E 1:3 or longer — often 1:4–1:5), Vt 6–8 mL/kg PBW, FiO₂ to SpO₂ 88–92% (COPD) or ≥ 92% (asthma), PEEP 0–5 cmH₂O. Permissive hypercapnia is acceptable; pH ≥ 7.20 typical floor.",
         "Don't chase a normal CO₂ at the cost of barotrauma. Forcing the rate up stacks breaths and drops BP via auto-PEEP."
       ]
     },
@@ -1641,7 +1642,7 @@ const MODULES = [
       kicker: "9.2 · Auto-PEEP", title: "When the Lung Doesn't Empty",
       body: [
         "Picture pouring into a glass that drains slowly: send the next splash before it empties and the level climbs until it overflows. Auto-PEEP is the same — in an obstructed lung that exhales slowly, the next breath starts before the last one finishes, so air stacks, the chest over-fills, intrathoracic pressure rises, venous return drops, and BP falls.",
-        "Clinical signs: rising PIP without rising Pplat; falling BP; patient \"fights\" the vent; expiratory flow waveform doesn't return to zero before next breath.",
+        "Clinical signs: rising PIP AND rising Pplat on a hold (the trapped gas raises end-inspiratory pressure) with measured PEEP above set PEEP; falling BP; patient \"fights\" the vent; expiratory flow waveform doesn't return to zero before next breath.",
         "Management: slow RR (often dramatically — to 8 or even 6). Lengthen exp time (I:E 1:4 or 1:5).",
         "If hemodynamically compromised: BRIEFLY DISCONNECT FROM THE VENT for 5–10 seconds. Trapped gas releases. BP often improves immediately. Reconnect on slower settings. Vented status asthmaticus has ~30% incidence of post-intubation hypotension — anticipate it."
       ],
@@ -1654,7 +1655,7 @@ const MODULES = [
       body: [
         "Acute Respiratory Distress Syndrome: diffuse alveolar damage, refractory hypoxia. Berlin definition (2012): bilateral infiltrates, not cardiac, within 1 week. Severity by P/F ratio: mild 200–300, moderate 100–200, severe < 100. A 2023/2024 Global Definition of ARDS now also allows diagnosis by SpO₂/FiO₂ and includes patients on HFNO ≥ 30 L/min or CPAP/NIV ≥ 5 cmH₂O — but the Berlin P/F severity bands remain in everyday bedside use.",
         "Goal: protect the alveoli you have left. The mental model is the 'baby lung' — in ARDS so much lung is flooded or collapsed that only a small, child-sized portion is still open to ventilate. You are not filling an adult lung; you are filling what survives. So: small breaths, modest pressure, generous PEEP — a normal-sized Vt would over-stretch those few survivors and injure them.",
-        "Settings: AC/VC or AC/PC; Vt 4–6 mL/kg PBW (LOWER than usual); RR 18–22 to maintain MV; PEEP 10–15 per ARDSNet table; Pplat < 30; driving pressure (Pplat − PEEP) < 14 cmH₂O.",
+        "Settings: AC/VC or AC/PC; Vt 6 mL/kg PBW to start, down to 4 if Pplat stays > 30 (ARDSNet; guidelines accept 4–8); raise RR as needed to hold pH ≥ 7.20–7.30 (ARDSNet allowed up to 35) while watching for auto-PEEP; PEEP per the ARDSNet PEEP/FiO₂ table — continue the sending facility's PEEP; Pplat < 30; driving pressure (Pplat − PEEP) < 14 cmH₂O.",
         "ARDSNet ARMA (NEJM 2000): mortality 31% vs 40% comparing 6 vs 12 mL/kg PBW. NNT 11. The most evidence-based ARDS intervention."
       ],
       evidence: { title: "ARDSNet PEEP/FiO₂ Lower-PEEP Table", body: "FiO₂ 0.3 → PEEP 5. FiO₂ 0.5 → PEEP 8–10. FiO₂ 0.7 → PEEP 10–14. FiO₂ 1.0 → PEEP 18–24. Carry the card." }
@@ -1674,11 +1675,11 @@ const MODULES = [
       figure: "tbi_targets",
       body: [
         "Two enemies of the injured brain: hypoxia and hypotension. A single SpO₂ < 90 or SBP < 90 doubles mortality in moderate-severe TBI (Brain Trauma Foundation 4th ed., 2017).",
-        "Strict normocapnia: target EtCO₂ 35–40 mmHg. Avoid prophylactic hyperventilation (BTF Level IIB recommendation) — drops cerebral blood flow and worsens secondary injury.",
-        "Standard TBI settings: AC/VC, Vt 6–8 mL/kg PBW, RR 12–16 titrated to EtCO₂ 35–40, PEEP 5, FiO₂ to SpO₂ ≥ 94%, pressors ready. BTF age-stratified BP target: SBP ≥ 100 (ages 50–69), SBP ≥ 110 (other ages); for simplicity, target SBP > 100 in all adult TBI.",
+        "Strict normocapnia: target EtCO₂ 35–45 mmHg. Avoid prophylactic hyperventilation (BTF) — drops cerebral blood flow and worsens secondary injury.",
+        "Standard TBI settings: AC/VC, Vt 6–8 mL/kg PBW, RR 12–16 titrated to EtCO₂ 35–45, PEEP 5, FiO₂ to SpO₂ ≥ 94%, pressors ready. Keep adult SBP > 110 mmHg (BTF prehospital guidelines, 3rd ed., 2023) — treat any drop toward 100 as hypotension, not a near-miss.",
         "Hyperventilation rescue (transient, for impending herniation only): increase RR to target EtCO₂ 30–35 mmHg (NEVER below 30). Return to normocapnia once the exam improves (typically 2–5 min)."
       ],
-      pearl: { title: "Hyperventilation past the rescue window is harmful", body: "Use brief hyperventilation only for signs of impending herniation (Cushing's triad, blown pupil, posturing). Return EtCO₂ to 35–40 as soon as exam improves. EtCO₂ < 30 worsens ischemia." }
+      pearl: { title: "Hyperventilation past the rescue window is harmful", body: "Use brief hyperventilation only for signs of impending herniation (Cushing's triad, blown pupil, posturing). Return EtCO₂ to 35–45 as soon as exam improves. EtCO₂ < 30 worsens ischemia." }
     },
     {
       id: "peds", kicker: "9.6 · Pediatrics", title: "Smaller Everything, Bigger Margins",
@@ -1698,14 +1699,14 @@ const MODULES = [
     passScore: 8,
     questions: [
       { q: "First-line strategy for status asthmaticus on the vent:",
-        choices: ["Low rate (RR 8–10), long expiratory time (I:E 1:4–1:5), permissive hypercapnia", "High rate (RR 20+) to normalize CO₂", "High PEEP to splint airways", "Inverse I:E ratio"], answer: 0,
+        choices: ["Low rate (RR 10–12 or slower), long expiratory time (I:E 1:3 or longer), permissive hypercapnia", "High rate (RR 20+) to normalize CO₂", "High PEEP to splint airways", "Inverse I:E ratio"], answer: 0,
         rationale: "Asthma is an exhalation problem. Slow rate, long exp time, accept higher CO₂ (pH ≥ 7.20). High rate stacks breaths and drops BP via auto-PEEP." },
       { q: "PROSEVA (Guérin, NEJM 2013) demonstrated that:",
         choices: ["Prone positioning has no effect in ARDS", "Prone positioning reduces mortality in severe ARDS approximately by half", "Prone positioning is harmful", "Prone positioning is only useful in pediatric ARDS"], answer: 1,
         rationale: "PROSEVA: severe ARDS, 16-hr daily prone vs supine. Mortality 33% → 16% (absolute reduction 17%, NNT 6). Standard of care in severe ARDS." },
       { q: "Routine EtCO₂ target in TBI per Brain Trauma Foundation:",
-        choices: ["35–40 mmHg", "25–30 mmHg", "30–35 mmHg", "45–50 mmHg"], answer: 0,
-        rationale: "Strict normocapnia at 35–40 mmHg. Avoid prophylactic hyperventilation (BTF Level IIB). Hyperventilation only for transient herniation rescue (to 30–35, never below 30)." },
+        choices: ["35–45 mmHg", "25–30 mmHg", "30–35 mmHg", "50–55 mmHg"], answer: 0,
+        rationale: "Strict normocapnia at 35–45 mmHg (BTF prehospital, 3rd ed., 2023). Avoid prophylactic hyperventilation. Hyperventilation only for transient herniation rescue (to 30–35, never below 30)." },
       { q: "ARDS patient (PBW 57 kg) on Vt 480 mL. Pplat is 32. The MOST appropriate next adjustment:",
         choices: ["Increase Vt to 600 mL", "Increase RR to 30 immediately", "Decrease Vt toward 4–6 mL/kg PBW (240–340 mL); accept higher CO₂ if needed", "Drop PEEP to 0"], answer: 2,
         rationale: "Pplat > 30 in ARDS = drop Vt. ARDSNet 6 mL/kg PBW (~340 mL here), down to 4 mL/kg if Pplat doesn't improve. Permissive hypercapnia OK; pH ≥ 7.20 typical floor." },
@@ -1736,7 +1737,7 @@ const MODULES = [
     bins: [
       { id: "obstructive", title: "Obstructive (low rate, long I:E)", sub: "Asthma / COPD" },
       { id: "lung-prot",   title: "Lung-Protective (low Vt)", sub: "ARDS" },
-      { id: "normo",       title: "Strict Normocapnia (EtCO₂ 35–40)", sub: "TBI" }
+      { id: "normo",       title: "Strict Normocapnia (EtCO₂ 35–45)", sub: "TBI" }
     ],
     items: [
       { id: "asthmatic",   label: "30 yo asthmatic, EtCO₂ 70, fatigued", correctBin: "obstructive" },
@@ -1782,16 +1783,16 @@ const MODULES = [
           { label: "Transient increase in RR to target EtCO₂ 30–35 mmHg (NOT below 30); mannitol/hypertonic per protocol; head of bed up 30°", outcome: "good",
             feedback: "Correct. Target EtCO₂ 30–35 transiently. Push mannitol 1 g/kg or hypertonic saline per protocol. Head of bed up 30° if not contraindicated. Notify trauma/neurosurgery now." },
           { label: "Lower EtCO₂ to 25 and maintain there for transport", outcome: "bad",
-            feedback: "Maintained hyperventilation worsens outcome. The rescue is BRIEF — return to normocapnia (35–40) within 2–5 min once the exam improves." }
+            feedback: "Maintained hyperventilation worsens outcome. The rescue is BRIEF — return to normocapnia (35–45) within 2–5 min once the exam improves." }
         ] },
       { prompt: "Q3. You bump RR from 14 to 18, push hypertonic saline. Three minutes later: EtCO₂ 32, BP 162/94, HR 68, right pupil now 5 mm and sluggishly reactive, no posturing. What now?",
         choices: [
           { label: "Continue hyperventilating to EtCO₂ 25–30 throughout transport for safety", outcome: "bad",
-            feedback: "The rescue worked. Sustained hyperventilation past the rescue window worsens outcome. Return EtCO₂ to 35–40 now that the exam is improving." },
-          { label: "Drop RR back toward 14 and return EtCO₂ to 35–40 mmHg", outcome: "good",
+            feedback: "The rescue worked. Sustained hyperventilation past the rescue window worsens outcome. Return EtCO₂ to 35–45 now that the exam is improving." },
+          { label: "Drop RR back toward 14 and return EtCO₂ to 35–45 mmHg", outcome: "good",
             feedback: "Right. The exam improved within the rescue window. Return to normocapnia. Continue normocapnic settings for the rest of transport. Document the herniation event, the maneuver, and the response." },
           { label: "Stop ventilating to let CO₂ recover", outcome: "bad",
-            feedback: "Don't ever stop ventilating a TBI patient. The strategy is gradual return — drop RR, let EtCO₂ drift back to 35–40 over a few minutes." }
+            feedback: "Don't ever stop ventilating a TBI patient. The strategy is gradual return — drop RR, let EtCO₂ drift back to 35–45 over a few minutes." }
         ] },
       { prompt: "Q4. BP creeps to 178/96 again on slow return. You're 12 min out. What's your priority?",
         choices: [
@@ -1866,11 +1867,11 @@ const FINAL_EXAM = {
       choices: ["The oximeter is usually broken", "SpO₂ tracks PaO₂ linearly", "The oxyhemoglobin curve is flat up high, then drops steeply below ~90% / PaO₂ 60 mmHg", "Saturation is unrelated to PaO₂"], answer: 2,
       rationale: "On the flat upper curve, big PaO₂ changes barely move SpO₂. Past the steep portion (~90% / 60 mmHg), saturation falls fast — the 'cliff.'" },
     { q: "After return of spontaneous circulation, FiO₂ should be titrated to an SpO₂ target of:",
-      choices: ["100% at all times", "85–90%", "90–98%", "As high as possible"], answer: 2,
-      rationale: "Hyperoxia after ROSC is linked to worse neurologic outcomes. The 2025 AHA guidelines recommend titrating to SpO₂ 90–98% (prior target 92–98%) rather than leaving FiO₂ at 100%." },
+      choices: ["100% at all times", "85–90%", "94–98%", "As high as possible"], answer: 2,
+      rationale: "Hyperoxia after ROSC is linked to worse neurologic outcomes. Titrate to SpO₂ 94–98% for transport. AHA 2025 accepts 90–98%, but the only prehospital trial (EXACT, JAMA 2022) saw more hypoxaemia and lower survival at 90–94%, so do not aim for the low end in the field — rather than leaving FiO₂ at 100%." },
     { q: "For a ventilated TBI patient WITHOUT herniation signs, the EtCO₂ target is:",
-      choices: ["25–30 mmHg", "30–35 mmHg", "35–40 mmHg", "45–50 mmHg"], answer: 2,
-      rationale: "Normocapnia (35–40) is the target. Hypercapnia raises ICP; prophylactic hyperventilation causes cerebral vasoconstriction and ischemia." },
+      choices: ["25–30 mmHg", "30–35 mmHg", "35–45 mmHg", "50–55 mmHg"], answer: 2,
+      rationale: "Normocapnia (35–45) is the target. Hypercapnia raises ICP; prophylactic hyperventilation causes cerebral vasoconstriction and ischemia." },
     { q: "Controlled mild hyperventilation (EtCO₂ ~30–35) in TBI is appropriate ONLY when:",
       choices: ["The patient is intubated", "EtCO₂ reads above 40", "There are acute herniation signs (blown pupil, posturing, Cushing response)", "On every head injury"], answer: 2,
       rationale: "Hyperventilation is a temporary rescue for active herniation only and should not drop below 30. Return to normocapnia once the crisis is managed." },
