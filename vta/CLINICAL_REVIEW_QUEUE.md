@@ -122,4 +122,4 @@ Applied to the Academy (`app.js`) and the Protocol Quiz (`quiz-bank.js`) so the 
 - ☑ **Needle decompression** — lateral site written as 4th–5th ICS anterior axillary line (protocol V-10; lowest failure rate in observational/cadaver data).
 - ☑ **INOP** added to the M6 core alarm list (protocol V-6).
 - ☐ **Protocol PDF still says** TBI ETCO₂ 35–40 and SBP ≥ 90 (II-10, V-6). Needs a protocol revision to match.
-- ☐ **Slide decks (`slides/*.pptx`)** not yet updated to these numbers.
+- ☑ **Slide decks (`slides/*.pptx`)** updated to these numbers (slides and speaker notes), including INOP on the M6 alarm slide.
