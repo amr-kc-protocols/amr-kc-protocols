@@ -125,6 +125,19 @@ These suites live here:
   a pseudo-element four pixels larger on each side, which a box measurement
   fails and a stylesheet check passes for the wrong reason.
 
+- **`ventlungview.test.mjs`** — the lung picture in the LTV 1200's Free Play
+  test lung ([`vent-ltv1200.html?free`](../vent-ltv1200.html)) in headless
+  Chromium. The picture is only worth having if it tells the truth about the
+  breath, so the suite recomputes the volume itself and holds the page to it:
+  constant-flow filling to the set Vt, emptying on τ = R × C, expiration ending
+  at auto-PEEP × compliance in an obstructed lung, a breath cut where the
+  pressure ramp meets the High Pressure limit, pressure control filling to the
+  readout's own PC × compliance, and the inspiratory hold. It also checks that
+  the volume is a pure function of the simulator's clock, so the picture
+  cannot drift from the trace, that the view is one node that survives every
+  re-render, that the atlas has a lung in every cell and nothing in its
+  gutters, and that it fits a 320px phone.
+
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
 ## Run

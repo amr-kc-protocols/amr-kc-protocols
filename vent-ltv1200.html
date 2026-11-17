@@ -446,6 +446,44 @@ canvas#pip-canvas{display:none}
 .tl-group+.tl-lungs{margin-top:4px}
 .tl-who{font-size:11px;line-height:1.45;color:var(--text);margin-top:8px;padding:7px 9px;border-radius:8px;background:#f4f1fb;border:1px solid #ddd3f3}
 .tl-mech b{color:var(--text)}
+/* Test Lung live lung view. One atlas, vent-sprites/lungs-atlas.png: six
+   conditions down (normal, COPD, asthma, ARDS, pneumonia, pulmonary edema),
+   three poses across (end-expiration, part-filled, end-inspiration). Cells are
+   254×252 with a 2px transparent gutter so neighbours never bleed in. */
+.tl-viz{display:flex;gap:10px;align-items:stretch;margin-top:8px;padding:8px;border-radius:10px;
+  background:#0f1726;border:1.5px solid #2a3a57;box-shadow:inset 0 2px 8px rgba(0,0,0,0.6)}
+.lv-stage{position:relative;flex:0 0 auto;width:min(48%,200px);aspect-ratio:254/252}
+.lv-pose{position:absolute;inset:0;background:url(vent-sprites/lungs-atlas.png) no-repeat;background-size:300% 600%;
+  opacity:0;z-index:1;transition:opacity 0s linear .14s}
+/* Short cross-fade: the incoming pose fades in on top while the outgoing one
+   stays solid underneath, so the dark panel never shows through mid-change. */
+.lv-pose.on{opacity:1;z-index:2;transition:opacity .14s ease-out}
+.lv-side{flex:1;min-width:0;display:flex;gap:8px}
+.lv-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.lv-phase{align-self:flex-start;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:0.05em;
+  padding:3px 7px;border-radius:5px;color:#8a93a8;background:rgba(138,147,168,0.12);white-space:nowrap}
+.lv-phase.insp{color:#7ee2a8;background:rgba(126,226,168,0.13)}
+.lv-phase.exp{color:#ffc46b;background:rgba(255,196,107,0.13)}
+.lv-phase.hold{color:#8fb8ff;background:rgba(143,184,255,0.14)}
+.lv-phase.cut{color:#ff7b83;background:rgba(255,123,131,0.15)}
+.lv-k{font-size:8px;font-weight:700;letter-spacing:0.08em;color:#8a96b2;text-transform:uppercase}
+.lv-v{font-family:var(--mono);font-size:13px;font-weight:700;color:#eaf0ff;line-height:1.2}
+.lv-trap.on .lv-v{color:#ffb020}
+.lv-note{font-size:8.5px;line-height:1.35;color:#7d88a3}
+.lv-note.cut{color:#ff9aa0}
+.lv-gauge{position:relative;flex:0 0 12px;border-radius:4px;background:#1b2740;border:1px solid #33456a;overflow:hidden}
+.lv-fill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(180deg,#ff8fa3,#e64a6b)}
+.lv-floor{position:absolute;left:0;right:0;height:0;border-top:2px dashed #ffb020;display:none}
+.lv-floor.on{display:block}
+.panel.standby .lv-stage{opacity:0.35}
+/* Narrowest phones: picture on top at a readable size, readout underneath */
+@media (max-width:359px){
+  .tl-viz{flex-direction:column;align-items:center}
+  .lv-stage{width:min(78%,200px)}
+  .lv-side{width:100%}
+}
+@media (prefers-reduced-motion:reduce){.lv-pose,.lv-pose.on{transition:none}}
+.tl-lungs.six{display:grid;grid-template-columns:repeat(3,1fr)}
 
 /* Scenario mission card elements */
 .scen-back-btn{font-size:9px;color:var(--sub);background:none;border:none;cursor:pointer;
@@ -2494,6 +2532,7 @@ function animLoop(ts){
     } else if(pressureHistory.length){
       clearBreathDisplays();   // just powered off — go dark
     }
+    if(freeMode && _lv) updateLungView();   // the test-lung picture rides the same clock as the trace
     // Evaluate alarms ~4×/sec (also refreshes the silence countdown / clears on standby)
     _alarmEvalAcc+=dt;
     if(_alarmEvalAcc>=250){ _alarmEvalAcc=0; evaluateAlarms(); }
@@ -3700,6 +3739,7 @@ function renderTestLung(bar){
     +_tlLungRow('Pediatric', true)
     +(kg ? '<div class="tl-who"><b>'+fl.who+'</b> '+fl.tip+'</div>' : '')
     +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP ≈ <b>'+effectiveAutoPEEP()+'</b> cmH₂O (dynamic)':'')+'</div>'
+    +'<div class="tl-viz-slot"></div>'
     +'<div class="tl-grid">'
       +_tlChip('I:E', ieTxt, ieStat)
       +_tlChip('Peak Flow', pfTxt, pfStat)
@@ -3707,10 +3747,15 @@ function renderTestLung(bar){
       +_tlChip(pLbl, pTxt+(d||spont?'':' cmH₂O'), pStat)
       +(kg ? _tlVtPerKg(fl, spont) : '')
     +'</div>';
+  // The card is rebuilt on every change; the lung view is one persistent node
+  // re-seated into it, so the art never reloads and a cross-fade survives.
+  var slot=bar.querySelector('.tl-viz-slot');
+  if(slot){ slot.replaceWith((_lv||lvBuild()).el); updateLungView(); }
 }
 function _tlLungRow(title, peds){
-  return '<div class="tl-group">'+title+'</div><div class="tl-lungs">'
-    +Object.keys(FREE_LUNGS).filter(function(k){ return !!FREE_LUNGS[k].peds===peds; }).map(function(k){
+  var keys=Object.keys(FREE_LUNGS).filter(function(k){ return !!FREE_LUNGS[k].peds===peds; });
+  return '<div class="tl-group">'+title+'</div><div class="tl-lungs'+(keys.length===6?' six':'')+'">'
+    +keys.map(function(k){
       return '<button class="tl-lung'+(k===freeLungKey?' on':'')+'" aria-pressed="'+(k===freeLungKey)+'" onclick="setFreeLung(\''+k+'\')">'+FREE_LUNGS[k].label+'</button>';
     }).join('')+'</div>';
 }
@@ -4174,27 +4219,37 @@ function loadScenario(s){
 // (normal ≈ 1–1.5 mL/cmH₂O/kg, falling to ≈ 0.5 in pediatric ARDS).
 // Targets follow PALICC-2 (2023): Vt 5–8 mL/kg with preserved compliance,
 // 3–6 mL/kg when compliance is poor, plateau ≤ 28 cmH₂O.
+// Pneumonia and cardiogenic pulmonary edema sit between normal (ventilated
+// Crs ≈ 50–100) and mild ARDS (pooled Crs ≈ 39): LUNG SAFE's cardiogenic
+// edema patients ran driving pressures of 12–15 cmH₂O at usual volumes, which
+// puts Crs in the mid-30s; edema also thickens the airway wall ("cardiac
+// asthma"), so its resistance is set a little higher. Teaching values only.
+// `sprite` picks the lung-view art (see LV_ROWS). There is no bronchiolitis
+// art, so the infant borrows the asthma set: both are small-airway
+// obstruction with gas trapping.
 var FREE_LUNGS={
-  normal:{compliance:50,resistance:8, autoPEEP:0,label:'Normal'},
-  ards:  {compliance:25,resistance:10,autoPEEP:0,label:'ARDS (stiff)'},
-  copd:  {compliance:55,resistance:24,autoPEEP:6,label:'COPD'},
-  asthma:{compliance:45,resistance:32,autoPEEP:8,label:'Asthma'},
-  pedNormal:{compliance:25,resistance:20,autoPEEP:0,label:'Child — healthy lungs', peds:true, kg:20,
+  normal:{compliance:50,resistance:8, autoPEEP:0,label:'Normal', sprite:'normal'},
+  ards:  {compliance:25,resistance:10,autoPEEP:0,label:'ARDS (stiff)', sprite:'ards'},
+  copd:  {compliance:55,resistance:24,autoPEEP:6,label:'COPD', sprite:'copd'},
+  asthma:{compliance:45,resistance:32,autoPEEP:8,label:'Asthma', sprite:'asthma'},
+  pneumonia:{compliance:40,resistance:12,autoPEEP:0,label:'Pneumonia', sprite:'pneumonia'},
+  edema: {compliance:35,resistance:15,autoPEEP:0,label:'Pulm. edema', sprite:'pulmonary_edema'},
+  pedNormal:{compliance:25,resistance:20,autoPEEP:0,label:'Child — healthy lungs', peds:true, kg:20, sprite:'normal',
     who:'6-year-old, 20 kg, intubated for surgery. Healthy lungs.',
     tip:'Start at 6–8 mL/kg and a rate of 18–25. A child needs about 100–200 mL/kg/min of minute volume.',
     vtKg:[5,8], mvKg:[100,200], pplatMax:28, spontRate:22,
     start:{mode:'ac',bt:'volume',rate:20,vt:140,it:0.8,pc:12,ps:8,peep:5,fio2:40,sens:2,hipres:30,lowpres:8,lowmv:1.5,apnea:20}},
-  pedArds:{compliance:10,resistance:22,autoPEEP:0,label:'Pediatric ARDS', peds:true, kg:20,
+  pedArds:{compliance:10,resistance:22,autoPEEP:0,label:'Pediatric ARDS', peds:true, kg:20, sprite:'ards',
     who:'6-year-old, 20 kg, pneumonia progressing to ARDS. Stiff lungs.',
     tip:'Poor compliance: aim for 3–6 mL/kg and keep the plateau ≤ 28. Raise PEEP for oxygenation and accept some CO₂.',
     vtKg:[3,6], mvKg:[100,200], pplatMax:28, spontRate:30,
     start:{mode:'ac',bt:'volume',rate:25,vt:120,it:0.7,pc:15,ps:10,peep:8,fio2:60,sens:2,hipres:35,lowpres:10,lowmv:1.5,apnea:20}},
-  pedAsthma:{compliance:20,resistance:60,autoPEEP:6,label:'Child — status asthmaticus', peds:true, kg:25,
+  pedAsthma:{compliance:20,resistance:60,autoPEEP:6,label:'Child — status asthmaticus', peds:true, kg:25, sprite:'asthma',
     who:'8-year-old, 25 kg, intubated for status asthmaticus. Very high airway resistance.',
     tip:'Give the lungs time to empty: a low rate and short inspiratory time lengthen expiration. Watch auto-PEEP, not the peak pressure, and accept a higher CO₂.',
     vtKg:[5,8], mvKg:[80,200], pplatMax:28, spontRate:30,
     start:{mode:'ac',bt:'volume',rate:14,vt:150,it:0.8,pc:15,ps:10,peep:5,fio2:40,sens:2,hipres:45,lowpres:10,lowmv:1,apnea:20}},
-  pedBronch:{compliance:4,resistance:80,autoPEEP:4,label:'Infant — bronchiolitis', peds:true, kg:6,
+  pedBronch:{compliance:4,resistance:80,autoPEEP:4,label:'Infant — bronchiolitis', peds:true, kg:6, sprite:'asthma',
     who:'3-month-old, 6 kg, bronchiolitis (RSV). Small airways and a 3.5 ETT.',
     tip:'The LTV\'s smallest volume breath is 50 mL — over 8 mL/kg here. Use pressure control and watch the delivered volume per kg. Infants need more minute volume per kg than older children.',
     vtKg:[5,8], mvKg:[150,300], pplatMax:28, spontRate:45,
@@ -4233,6 +4288,162 @@ function startFree(){
   updateUI();
   var bar=document.getElementById('mission-bar');
   if(bar){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){ window.scrollTo(0,0); } }
+}
+
+// ── FREE PLAY · LUNG VIEW ─────────────────────────────────────
+// The lung picture is driven by alveolar volume, worked out from the same
+// clock (simTime), settings and mechanics the pressure trace uses — never a
+// separate animation timer — so it cannot drift from the waveform or the
+// numbers. Volume is mL above the resting volume at set PEEP.
+//
+//  • Inspiration: volume control fills at constant flow (the trace's linear
+//    ramp); pressure control and spontaneous breaths fill fast, then slower,
+//    on the lung's time constant τ = R × C.
+//  • Expiration is passive, on τ, and ends at the gas still trapped: the
+//    displayed auto-PEEP × compliance. An obstructed lung that has not had
+//    time to empty starts the next breath partly inflated — which the airway
+//    pressure trace, back at PEEP, does not show.
+//  • A breath that reaches the High Pressure limit ends there, as the LTV
+//    ends inspiration, so the picture shows what was delivered, not what was
+//    set. An inspiratory hold keeps the lung full for the hold.
+// Delivered volume uses the readout's own estimates (set Vt in volume
+// control, PC × compliance in pressure control), so picture and numbers agree.
+//
+// The pose is judged against a normal-size breath for this patient (7 mL/kg;
+// 70 kg for an adult test lung), not against the set Vt, so a cut-short or
+// trapped breath looks different from a normal one. LV_MID and LV_FULL are
+// display thresholds, not clinical ones. The three poses are separately drawn
+// art, so they are switched with a short cross-fade, never morphed.
+var LV_ROWS={normal:0, copd:1, asthma:2, ards:3, pneumonia:4, pulmonary_edema:5};
+var LV_REF_ML_PER_KG=7, LV_ADULT_KG=70, LV_MID=0.25, LV_FULL=0.6;
+var LV_PHASE={insp:'INSPIRATION ↓', exp:'EXPIRATION ↑', hold:'INSP HOLD', cut:'INSP · HI PRES CUT', off:'STANDBY'};
+var _lv=null, lvLast=null;
+function lvRefMl(){ var fl=freeLung(); return LV_REF_ML_PER_KG*((fl&&fl.kg)||LV_ADULT_KG); }
+function lvTauMs(){ return Math.max(50, lung.resistance*lung.compliance); }   // cmH₂O/(L/s) × mL/cmH₂O = ms
+// Fraction of the breath delivered t ms into an inspiration lasting ti ms.
+function lvRise(t,ti,tau,decel){
+  if(ti<=0) return 1;
+  if(!decel) return Math.max(0,Math.min(1,t/ti));
+  return (1-Math.exp(-t/tau))/(1-Math.exp(-ti/tau));
+}
+// Fraction of the breath still in the lung t ms into an expiration lasting
+// te ms: 1 at the start, exactly 0 (back to the trapped floor) at the end.
+function lvFall(t,te,tau){
+  if(te<1) return 0;
+  var k=Math.exp(-te/tau);
+  return Math.max(0,Math.min(1,(Math.exp(-t/tau)-k)/(1-k)));
+}
+// One mandatory breath at the current settings: its timing (matching
+// calcPressure), the volume it delivers, and the gas left behind.
+function lvBreath(){
+  var C=lung.compliance, peep=vals.peep.v, hi=vals.hipres.v;
+  var cycleMs=60000/vals.rate.v, aPEEP=effectiveAutoPEEP(), b;
+  if(breathType==='pressure'){
+    b={cycleMs:cycleMs, tiMs:Math.min(vals.it.v*1000,0.80*cycleMs), vt:vals.pc.v*C, decel:true};
+    b.setVt=b.vt;
+    if(vals.pc.v>0 && peep+vals.pc.v>=hi){     // the limit is met on the pressure rise
+      var tCut=0.06*cycleMs*Math.max(0,(hi-peep)/vals.pc.v);
+      if(tCut<b.tiMs){ b.vt*=lvRise(tCut,b.tiMs,lvTauMs(),true); b.tiMs=tCut; }
+      b.cut=true;
+    }
+  } else {
+    b={cycleMs:cycleMs, tiMs:Math.min(vals.it.v*1000,0.85*cycleMs), vt:vals.vt.v, decel:false};
+    b.setVt=b.vt;
+    var pip=peep+aPEEP+vals.vt.v/C+resistivePressure();   // the trace's own peak
+    if(pip>=hi && pip>peep){                                // constant flow: cut where the ramp meets the limit
+      var f=Math.max(0,(hi-peep)/(pip-peep));
+      b.vt*=f; b.tiMs*=f; b.cut=true;
+    }
+  }
+  b.cut=!!b.cut; b.aPEEP=aPEEP; b.vee=aPEEP*C;
+  return b;
+}
+// Alveolar volume (mL above set-PEEP rest) at sim time tMs.
+function lungVolumeAt(tMs){
+  var tau=lvTauMs(), C=lung.compliance;
+  if(ventMode==='cpap'||ventMode==='nppv'){
+    var base={vee:0, aPEEP:0, cut:false};
+    if(manualBreathActive){                    // the manual mandatory breath the trace overlays
+      var mEl=tMs-manualBreathStart, mTi=vals.it.v*1000, mVt=vals.pc.v*C;
+      if(mEl>=0 && mEl<mTi)     return Object.assign(base,{v:mVt*lvRise(mEl,mTi,tau,true), phase:'insp'});
+      if(mEl>=mTi && mEl<mTi+500) return Object.assign(base,{v:mVt*Math.exp(-(mEl-mTi)/tau), phase:'exp'});
+    }
+    var fl=freeLung();
+    var sVt=((fl&&fl.kg)?6*fl.kg:400)+vals.ps.v*C;            // same estimate as the minute-volume readout
+    var bpm=15+2*Math.sin(tMs/9000)+1.5*Math.sin(tMs/3700);   // same breath clock as the trace
+    var cyc=60000/bpm, ph=(tMs%cyc)/cyc, i0=0.06, i1=0.43;    // effort dip, then rise + support plateau
+    if(ph<i0) return Object.assign(base,{v:0, phase:'insp'});
+    if(ph<i1) return Object.assign(base,{v:sVt*lvRise((ph-i0)*cyc,(i1-i0)*cyc,tau,true), phase:'insp'});
+    return Object.assign(base,{v:sVt*lvFall((ph-i1)*cyc,(1-i1)*cyc,tau), phase:'exp'});
+  }
+  var b=lvBreath(), out={vee:b.vee, aPEEP:b.aPEEP, cut:b.cut, vt:b.vt, setVt:b.setVt};
+  if(inspHoldActive && breathType==='volume'){
+    var el=inspHoldStartTs!==null?(performance.now()-inspHoldStartTs):0;
+    if(el<3800) return Object.assign(out,{v:b.vee+b.vt, phase:'hold'});
+    return Object.assign(out,{v:b.vee+b.vt*Math.max(0,1-(el-3800)/400), phase:'exp'});
+  }
+  var t=tMs%b.cycleMs;
+  if(t<b.tiMs) return Object.assign(out,{v:b.vee+b.vt*lvRise(t,b.tiMs,tau,b.decel), phase:b.cut?'cut':'insp'});
+  return Object.assign(out,{v:b.vee+b.vt*lvFall(t-b.tiMs,b.cycleMs-b.tiMs,tau), phase:'exp'});
+}
+function lvBuild(){
+  var el=document.createElement('div');
+  el.className='tl-viz'; el.id='tl-viz';
+  el.innerHTML='<div class="lv-stage" role="img">'
+      +'<div class="lv-pose"></div><div class="lv-pose"></div><div class="lv-pose"></div></div>'
+    +'<div class="lv-side"><div class="lv-info">'
+      +'<div class="lv-phase" aria-hidden="true">—</div>'
+      +'<div aria-hidden="true"><div class="lv-k">Lung volume above PEEP</div><div class="lv-v lv-vol">—</div></div>'
+      +'<div class="lv-trap"><div class="lv-k">End of expiration</div><div class="lv-v lv-trapv">—</div></div>'
+      +'<div class="lv-note"></div>'
+    +'</div><div class="lv-gauge" aria-hidden="true"><div class="lv-fill"></div><div class="lv-floor"></div></div></div>';
+  var q=function(s){ return el.querySelector(s); };
+  _lv={el:el, stage:q('.lv-stage'), poses:[].slice.call(el.querySelectorAll('.lv-pose')),
+       phase:q('.lv-phase'), vol:q('.lv-vol'), trap:q('.lv-trap'), trapv:q('.lv-trapv'), note:q('.lv-note'),
+       fill:q('.lv-fill'), floor:q('.lv-floor'), sprite:null, pose:-1, phaseKey:null, txtAt:0, staticKey:null};
+  return _lv;
+}
+// Called every animation frame in Free Play, and whenever the card re-renders.
+function updateLungView(){
+  var lv=_lv; if(!lv||!freeMode||!lv.el.isConnected) return;
+  var fl=freeLung(), sprite=(fl&&fl.sprite)||'normal';
+  if(lv.sprite!==sprite){
+    var row=LV_ROWS[sprite]||0;
+    lv.poses.forEach(function(p,i){ p.style.backgroundPosition=(i*50)+'% '+(row*20)+'%'; });
+    lv.stage.setAttribute('aria-label','Schematic of the '+fl.label+' test lung, filling and emptying with each breath the vent delivers');
+    lv.sprite=sprite;
+  }
+  var run=deviceRunning();
+  var s=run?lungVolumeAt(simTime):{v:0, phase:'off', vee:0, aPEEP:0, cut:false};
+  var ref=lvRefMl(), frac=s.v/ref;
+  var pose=frac>=LV_FULL?2:(frac>=LV_MID?1:0);
+  if(pose!==lv.pose){ lv.poses.forEach(function(p,i){ p.classList.toggle('on',i===pose); }); lv.pose=pose; }
+  if(s.phase!==lv.phaseKey){ lv.phase.textContent=LV_PHASE[s.phase]; lv.phase.className='lv-phase '+s.phase; lv.phaseKey=s.phase; }
+  var top=2*ref;                                   // the gauge spans two normal-size breaths
+  lv.fill.style.height=Math.max(0,Math.min(100,s.v/top*100)).toFixed(1)+'%';
+  var now=performance.now();
+  if(now-lv.txtAt>120){ lv.txtAt=now; lv.vol.textContent=run?Math.round(s.v)+' mL':'—'; }
+  // Lines that only change with the settings
+  var trapped=Math.round(s.vee||0);
+  var key=[run,trapped,s.aPEEP,s.cut,Math.round(s.vt||0),s.setVt,sprite].join('|');
+  if(key!==lv.staticKey){
+    lv.staticKey=key;
+    var trapOn=run && trapped>=1;
+    lv.trap.classList.toggle('on',trapOn);
+    lv.trapv.textContent=!run?'—':(trapOn?'≈ '+trapped+' mL trapped':'Back to PEEP');
+    lv.floor.classList.toggle('on',trapOn);
+    lv.floor.style.bottom=Math.min(100,trapped/top*100).toFixed(1)+'%';
+    if(run && s.cut){
+      lv.note.className='lv-note cut';
+      lv.note.textContent='High Pressure limit ended the breath: about '+Math.round(s.vt)+' of '+Math.round(s.setVt)+' mL delivered.';
+    } else {
+      lv.note.className='lv-note';
+      lv.note.textContent=trapOn
+        ?'Not enough time to empty: the next breath starts on top of trapped gas (auto-PEEP '+s.aPEEP+').'
+        :'Schematic art, not to scale. It moves with the vent’s own breaths.';
+    }
+  }
+  lvLast={pose:pose, frac:frac, v:s.v, phase:s.phase, vee:s.vee||0, cut:!!s.cut, sprite:sprite, ref:ref};
 }
 
 // ── LEVEL MANAGEMENT ──────────────────────────────────────────
