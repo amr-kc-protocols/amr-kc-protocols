@@ -273,7 +273,17 @@ The art is one atlas, `vent-sprites/lungs-atlas.png`: six conditions down
 Each pose was drawn separately and they don't line up pixel for pixel, so the
 view switches between them with a short cross-fade and never morphs one into
 another. One file means one download: every lung works offline once the page
-has been opened. The infant with bronchiolitis borrows the asthma art, because
+has been opened.
+
+`vent-sprites/build-atlas.py` builds the atlas from the art pack, either from
+its overview sheet or, better, from the 1254 px originals. It also corrects
+the pack. As delivered, asthma's full-inspiration pose was drawn in the COPD
+style (dusky, no bronchospasm) and COPD's in the asthma style (bright, with
+bronchospasm bands), so bronchospasm vanished at end-inspiration in asthma.
+The script swaps the two back and rebuilds each part-filled pose the way the
+pack made them, as the full pose at 50% over the rest pose.
+`test/ventlungview.test.mjs` checks that only asthma shows the bands, and in
+every pose. The infant with bronchiolitis borrows the asthma art, because
 there is no bronchiolitis set and both are small-airway obstruction with
 trapping.
 

@@ -128,6 +128,27 @@ console.log('\nL2 the art');
   ok('L2 the atlas is 3 poses × 6 conditions of 254×252 cells', a.w === 762 && a.h === 1512, a.w + '×' + a.h);
   ok('L2 the gutters are empty, so no cell bleeds into the next', a.gutter === 0, a.gutter + ' opaque gutter px');
   ok('L2 every cell has a lung in it', a.minFill > 0.2, a.minFill.toFixed(2));
+  // As delivered, asthma's full pose was drawn in the COPD style and COPD's in
+  // the asthma style, so bronchospasm vanished at end-inspiration. The build
+  // script swaps them back; this holds it there. Bronchospasm is drawn as
+  // saturated orange rings on the bronchi, and only asthma has them.
+  const bands = await p.evaluate(async () => {
+    const img = new Image(); img.src = 'vent-sprites/lungs-atlas.png'; await img.decode();
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const g = c.getContext('2d'); g.drawImage(img, 0, 0); const d = g.getImageData(0, 0, c.width, c.height).data;
+    const CW = 254, CH = 252, out = {};
+    Object.keys(LV_ROWS).forEach(cond => { const r = LV_ROWS[cond]; out[cond] = [0, 1, 2].map(col => { let n = 0;
+      for (let y = r * CH; y < (r + 1) * CH; y++) for (let x = col * CW; x < (col + 1) * CW; x++) {
+        const i = (y * c.width + x) * 4; if (d[i + 3] <= 200) continue;
+        const R = d[i] / 255, G = d[i + 1] / 255, B = d[i + 2] / 255, mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+        if (mx === mn || mx !== R) continue;
+        const h = (((G - B) / (mx - mn)) % 6) / 6, s = (mx - mn) / mx;
+        if (h > 0.01 && h < 0.07 && s > 0.45 && mx > 0.75) n++; }
+      return n; }); });
+    return out; });
+  ok('L2 asthma shows bronchospasm at rest and at full inspiration', bands.asthma[0] > 100 && bands.asthma[2] > 100, bands.asthma.join('/'));
+  const banded = Object.keys(bands).filter(k => k !== 'asthma' && bands[k].some(n => n > 20));
+  ok('L2 and no other condition does (COPD\'s full pose is COPD\'s own)', banded.length === 0, banded.map(k => k + ' ' + bands[k].join('/')).join(', '));
   await setup('copd');
   const pos = await p.evaluate(() => [...document.querySelectorAll('#tl-viz .lv-pose')].map(e => e.style.backgroundPosition));
   ok('L2 COPD shows the COPD row in all three poses', JSON.stringify(pos) === JSON.stringify(['0% 20%', '50% 20%', '100% 20%']), JSON.stringify(pos)); }
