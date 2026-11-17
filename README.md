@@ -236,6 +236,57 @@ medical device. Nothing here has been through clinical review by the Medical
 Director; it is checked against published sources, which is not the same
 thing.
 
+### The LTV 1200 test lung picture
+
+Free Play (`vent-ltv1200.html?free`) shows a picture of the test lung that
+fills and empties with every breath, so the learner can see what the airway
+pressure bar can't: whether the lung actually got the breath, and whether it
+emptied before the next one.
+
+**It runs on the simulator's clock, not one of its own.** The simulator only
+modelled airway pressure, so the picture needed a volume: `lungVolumeAt()`
+works it out from the same `simTime`, settings and lung mechanics as
+`calcPressure()`. A separate animation timer would drift from the trace
+within a few breaths, and a picture that disagrees with the numbers teaches
+nothing.
+
+- **Inspiration:** volume control fills at constant flow (the trace's linear
+  ramp); pressure control and spontaneous breaths fill fast, then slower, on
+  the lung's time constant τ = R × C. Delivered volume uses the readout's own
+  estimates, so the picture and the chips agree.
+- **Expiration** is passive on τ and ends at the gas still trapped, the
+  displayed auto-PEEP × compliance. COPD and asthma that haven't had time to
+  empty start the next breath partly inflated, while the pressure trace sits
+  back at PEEP. That's the finding the picture is there to show.
+- **The High Pressure limit** ends the breath where the pressure ramp meets
+  it, as the LTV ends inspiration, and the view says how much got in. An
+  inspiratory hold keeps the lung full for the hold.
+
+The pose (end-expiration, part-filled, end-inspiration) is judged against a
+normal-size breath for that patient, 7 mL/kg (70 kg for an adult test lung),
+not against the set Vt. Judged against the set Vt, every breath would look
+full, and a cut-short or trapped breath would look the same as a good one.
+The 25% and 60% thresholds are display choices, not clinical ones.
+
+The art is one atlas, `vent-sprites/lungs-atlas.png`: six conditions down
+(normal, COPD, asthma, ARDS, pneumonia, pulmonary edema), three poses across.
+Each pose was drawn separately and they don't line up pixel for pixel, so the
+view switches between them with a short cross-fade and never morphs one into
+another. One file means one download: every lung works offline once the page
+has been opened. The infant with bronchiolitis borrows the asthma art, because
+there is no bronchiolitis set and both are small-airway obstruction with
+trapping.
+
+Pneumonia and pulmonary edema were added as adult test lungs to use the art.
+Their mechanics are teaching values placed between normal and ARDS: ventilated
+compliance runs 50–100 mL/cmH₂O normally and about 39 in mild ARDS, and
+LUNG SAFE's cardiogenic-edema patients ran driving pressures of 12–15 cmH₂O,
+which puts compliance in the mid-30s. They are not measured values for any
+patient.
+
+`test/ventlungview.test.mjs` recomputes every breath independently and holds
+the picture to it.
+
 ## Backend
 
 Academy completions and Ask the Educator submissions can be mirrored to
