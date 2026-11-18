@@ -80,7 +80,7 @@ console.log('\nV3 judged per kilogram');
 { await p.evaluate(() => setFreeLung('pedNormal'));
   await p.evaluate(() => { vals.vt.v = 250; enforceITLimit(); updateKnob('vt'); updateUI(); });   // 12.5 mL/kg — an adult habit on a 20 kg child
   await p.waitForTimeout(300);
-  const chip = await p.evaluate(() => { const c = [...document.querySelectorAll('.tl-chip')].find(x => /Vt \/ kg/i.test(x.textContent)); return c && { text: c.textContent, status: c.dataset.status }; });
+  const chip = await p.evaluate(() => { const c = [...document.querySelectorAll('.tl-chip')].find(x => /Vt ?\/ ?kg/i.test(x.textContent)); return c && { text: c.textContent, status: c.dataset.status }; });
   ok('V3 a 250 mL breath on a 20 kg child reads 12.5 mL/kg', !!chip && /12\.5 mL\/kg/.test(chip.text), chip && chip.text);
   ok('V3 and turns red — far outside PALICC-2\'s 5–8', !!chip && chip.status === 'bad', chip && chip.status); }
 

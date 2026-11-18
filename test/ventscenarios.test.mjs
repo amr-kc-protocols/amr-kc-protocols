@@ -230,7 +230,7 @@ console.log('\nC5 the numbers are recomputed here, not trusted');
   const dp = 450 / r.C, pplat = 8 + r.a + dp;
   ok('C5 driving pressure = Vt ÷ compliance (450 ÷ 25 = 18)', +r.m.dp === Math.round(dp), r.m.dp);
   ok('C5 plateau = PEEP + auto-PEEP + Vt ÷ C', Math.abs(+r.m.pplat - pplat) <= 0.5, r.m.pplat + ' vs ' + pplat);
-  ok('C5 Vt per kg uses 70 kg PBW for the adult test lung (450 ÷ 70 = 6.4)', /^6\.4 mL\/kg/.test(r.m.vt) && /70 kg PBW/.test(r.m.vt), r.m.vt); }
+  ok('C5 Vt per kg uses 70 kg PBW for the adult test lung (450 ÷ 70 = 6.4)', /^6\.4 mL\/kg/.test(r.m.vt) && await p.evaluate(() => /70 kg PBW/.test(document.querySelector('.tl-mech').textContent)), r.m.vt); }
 
 console.log('\nC6 children are graded per kilogram, against PALICC-2');
 { for (const k of ['pedNormal', 'pedArds', 'pedAsthma', 'pedBronch']) {

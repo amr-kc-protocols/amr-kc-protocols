@@ -432,21 +432,29 @@ canvas#pip-canvas{display:none}
 #lvl-reset:hover,#lvl-reset:active{border-color:var(--alarm);color:var(--alarm)}
 /* Test Lung live plausibility chips */
 .tl-badge{color:var(--purple-dark);background:#efeaf9;border:1px solid var(--purple-dark)}
-.tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:7px;margin-top:8px}
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:5px;margin-top:7px}
 /* Why each flagged reading is flagged, and the colour key */
-.tl-why{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.tl-why{margin-top:6px;display:flex;flex-direction:column;gap:5px}
+.tl-why summary{cursor:pointer;list-style:none;font-size:11px;line-height:1.35;padding:6px 9px;border-radius:8px;background:#fff;border:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tl-why summary::-webkit-details-marker{display:none}
+.tl-why summary b{font-family:var(--mono)}
+.tl-n{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;color:#fff;font-size:10px;font-weight:800}
+.tl-n.bad{background:var(--alarm)}.tl-n.warn{background:#d97706}
+.tl-more{color:var(--blue);font-weight:700;margin-left:auto}
+.tl-why[open] summary .tl-more{visibility:hidden}
 .tl-why.ok{font-size:11px;font-weight:600;color:var(--green);padding:6px 9px;border-radius:8px;background:#eafbf1;border:1px solid #bfe8cf}
+.tl-why.ok .tl-legend{display:none}
 .tl-why-i{font-size:11px;line-height:1.4;color:var(--text);padding:6px 9px;border-radius:8px;border-left:4px solid}
 .tl-why-i.bad{background:#fdecec;border-color:var(--alarm)}
 .tl-why-i.warn{background:#fff6e0;border-color:#d97706}
 .tl-why-i b{font-family:var(--mono)}
 .tl-src{display:inline-block;font-size:9.5px;font-weight:700;color:var(--sub);letter-spacing:0.02em}
-.tl-legend{margin-top:7px;font-size:9.5px;color:var(--sub);line-height:1.5}
+.tl-legend{margin-top:2px;font-size:9.5px;color:var(--sub);line-height:1.5}
 .tl-legend span{font-size:11px;margin:0 2px 0 6px}.tl-legend span:first-child{margin-left:0}
 .tl-legend .g{color:var(--green)}.tl-legend .a{color:#d97706}.tl-legend .r{color:var(--alarm)}
-.tl-chip{border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;background:#fff}
-.tl-chip-k{font-size:8px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;margin-bottom:2px}
-.tl-chip-v{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1.1}
+.tl-chip{border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;background:#fff;min-width:0}
+.tl-chip-k{font-size:7.5px;font-weight:700;letter-spacing:0.06em;color:var(--sub);text-transform:uppercase;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-chip-v{font-family:var(--mono);font-size:13px;font-weight:700;line-height:1.15;white-space:nowrap}
 .tl-chip-v small{font-size:10.5px;font-weight:600;opacity:0.8;margin-left:3px;white-space:nowrap}
 .tl-lungs{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
 .tl-lung{flex:1;min-width:64px;padding:7px 4px;border-radius:8px;border:1.5px solid var(--border);
@@ -490,6 +498,19 @@ canvas#pip-canvas{display:none}
 .lv-phase.hold{color:#8fb8ff;background:rgba(143,184,255,0.14)}
 .lv-phase.cut{color:#ff7b83;background:rgba(255,123,131,0.15)}
 .lv-k{font-size:8px;font-weight:700;letter-spacing:0.08em;color:#8a96b2;text-transform:uppercase}
+.lv-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lv-vol{font-family:var(--mono);font-size:10px;color:#8a96b2;white-space:nowrap}
+/* Monitor numerics: SpO₂ cyan and EtCO₂ yellow, as on most transport monitors */
+.lv-vitals{display:flex;gap:10px}
+.lv-vit{min-width:0}
+.lv-vk{font-size:8px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase}
+.lv-vv{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1;white-space:nowrap}
+.lv-vv small{font-size:11px;margin-left:1px}
+.lv-vs{font-family:var(--mono);font-size:8.5px;color:#7d88a3;white-space:nowrap;margin-top:1px}
+.lv-vit.spo2 .lv-vk,.lv-vit.spo2 .lv-vv{color:#5fe2ef}
+.lv-vit.etco2 .lv-vk,.lv-vit.etco2 .lv-vv{color:#ffd84d}
+.lv-vit.spo2.warn .lv-vv{color:#ffb020}.lv-vit.spo2.bad .lv-vv{color:#ff6b73}
+.lv-note:empty{display:none}
 .lv-v{font-family:var(--mono);font-size:13px;font-weight:700;color:#eaf0ff;line-height:1.2}
 .lv-trap.on .lv-v{color:#ffb020}
 .lv-note{font-size:8.5px;line-height:1.35;color:#7d88a3}
@@ -3828,21 +3849,21 @@ function tlAssess(){
   var peds=!!fl.peds, kg=fl.kg||TL_ADULT_KG, C=lung.compliance;
   var spont=(ventMode==='cpap'||ventMode==='nppv'), pc=(!spont && breathType==='pressure');
   var NAME={ie:'I:E',pf:'Peak flow',mv:'Min. vol.',vt:'Vt',p:'Pressure',pplat:'Pplat',dp:'Driving pressure',pip:'PIP',peep:'PEEP',apeep:'Auto-PEEP'};
-  var out=[], add=function(k,label,text,status,tg,short){ out.push({k:k,name:NAME[k],label:label,text:text,short:short||text,status:status,why:tg&&tg.why,src:tg&&tg.src}); };
+  var out=[], add=function(k,label,text,status,tg,short,title){ out.push({k:k,name:NAME[k],label:label,text:text,short:short||text,title:title||'',status:status,why:tg&&tg.why,src:tg&&tg.src}); };
   // I:E
   if(spont) add('ie','I:E','SPONT','neutral');
-  else { var e=ieExpRatio(); add('ie',t.ie.tgt==='not inverse'?'I:E':'I:E · '+t.ie.tgt, e===null?'—':'1 : '+e.toFixed(1), _tlGrade(e,t.ie), t.ie); }
+  else { var e=ieExpRatio(); add('ie',t.ie.tgt==='not inverse'?'I:E':'I:E '+t.ie.tgt, e===null?'—':'1:'+e.toFixed(1), _tlGrade(e,t.ie), t.ie); }
   // Peak flow
   var pf=peakFlowLPM();
-  if(t.pf) add('pf','Peak flow · '+t.pf.tgt, pf===null?'—':Math.round(pf)+' L/min', spont?'neutral':_tlGrade(pf,t.pf), t.pf);
-  else add('pf','Peak flow', pf===null?'—':Math.round(pf)+' L/min', (pf!==null&&pf>MAX_PEAK_FLOW)?'bad':'neutral', {why:'Above what the blower can deliver', src:'device limit'});
+  if(t.pf) add('pf','Flow '+t.pf.tgt, pf===null?'—':Math.round(pf)+' L/min', spont?'neutral':_tlGrade(pf,t.pf), t.pf);
+  else add('pf','Flow', pf===null?'—':Math.round(pf)+' L/min', (pf!==null&&pf>MAX_PEAK_FLOW)?'bad':'neutral', {why:'Above what the blower can deliver', src:'device limit'});
   // Minute volume
   var mv=estMinuteVolume();
-  if(t.mv.perKg){ var mvKg=mv*1000/kg; add('mv','Min. vol. · '+t.mv.tgt, mv.toFixed(1)+' L/min <small>'+Math.round(mvKg)+' mL/kg</small>', spont?'neutral':_tlGrade(mvKg,t.mv), t.mv, Math.round(mvKg)+' mL/kg/min'); }
-  else add('mv','Min. vol. · '+t.mv.tgt, mv.toFixed(1)+' L/min', spont?'neutral':_tlGrade(mv,t.mv), t.mv);
+  if(t.mv.perKg){ var mvKg=mv*1000/kg; add('mv','MV/kg '+fl.mvKg[0]+'–'+fl.mvKg[1], Math.round(mvKg)+' mL/kg', spont?'neutral':_tlGrade(mvKg,t.mv), t.mv, Math.round(mvKg)+' mL/kg/min', mv.toFixed(1)+' L/min'); }
+  else add('mv','MV '+t.mv.tgt, mv.toFixed(1)+' L/min', spont?'neutral':_tlGrade(mv,t.mv), t.mv);
   // Tidal volume per kg (estimated from pressure × compliance in pressure modes)
   var vt=spont ? ((fl.kg?6*fl.kg:400)+vals.ps.v*C) : (pc ? vals.pc.v*C : vals.vt.v), vtKg=vt/kg;
-  add('vt','Vt / kg · '+t.vt.tgt, vtKg.toFixed(1)+' mL/kg <small>'+Math.round(vt)+' mL · '+kg+' kg'+(peds?'':' PBW')+'</small>', spont?'neutral':_tlGrade(vtKg,t.vt), t.vt, vtKg.toFixed(1)+' mL/kg');
+  add('vt','Vt/kg '+t.vt.tgt, vtKg.toFixed(1)+' mL/kg', spont?'neutral':_tlGrade(vtKg,t.vt), t.vt, vtKg.toFixed(1)+' mL/kg', Math.round(vt)+' mL for '+kg+' kg'+(peds?'':' PBW'));
   if(spont){
     add('p', ventMode==='nppv'?'IPAP / EPAP':'CPAP', ventMode==='nppv'?((vals.peep.v+vals.ps.v)+' / '+vals.peep.v):(vals.peep.v+''), 'neutral');
     return out;
@@ -3851,43 +3872,52 @@ function tlAssess(){
   // control: with flow reaching zero the plateau is PEEP + auto-PEEP + PC.
   var aP=effectiveAutoPEEP(), d=(typeof calcPplat==='function')?calcPplat():null;
   var pip=d?d.pip:(vals.peep.v+vals.pc.v), pplat=d?d.pplat:(vals.peep.v+aP+vals.pc.v), dp=pc?vals.pc.v:vt/C;
-  add('pplat','Pplat · '+t.pplat.tgt, (+pplat).toFixed(0), _tlGrade(+pplat,t.pplat), t.pplat);
+  add('pplat','Pplat '+t.pplat.tgt, (+pplat).toFixed(0), _tlGrade(+pplat,t.pplat), t.pplat);
   var dpSt=_tlGrade(dp,t.dp), vt15=15*C;
-  add('dp','Driving P · '+t.dp.tgt, dp.toFixed(0), dpSt, dpSt==='good'?t.dp:{src:t.dp.src,
+  add('dp','ΔP '+t.dp.tgt, dp.toFixed(0), dpSt, dpSt==='good'?t.dp:{src:t.dp.src,
       why:t.dp.why+'. On this lung that means a breath of '+Math.round(vt15)+' mL ('+(vt15/kg).toFixed(1)+' mL/kg) or less'+(pc?' — PC '+Math.floor(vt15/C)+' or less':'')+'.'});
   var atLimit=(+pip)>=vals.hipres.v-0.5;
-  add('pip','PIP · limit '+vals.hipres.v, (+pip).toFixed(0), atLimit?'bad':(key==='asthma'&&pip>50?'warn':'good'),
+  add('pip','PIP < '+vals.hipres.v, (+pip).toFixed(0), atLimit?'bad':(key==='asthma'&&pip>50?'warn':'good'),
       atLimit?{why:'Peak pressure is at the High Pressure limit — the vent is ending the breath early', src:'LTV 1200 behaviour'}
              :(key==='asthma'&&pip>50?{why:'Keep the peak under about 50 where you can — in asthma it is mostly airway resistance, so read the plateau', src:'expert consensus · weak'}:null));
   // PEEP
   if(t.peep.table){
     var tb=ardsnetPeep(vals.fio2.v), pe=vals.peep.v;
     var st=pe<tb.min?'bad':(pe>tb.max?'warn':'good');
-    add('peep','PEEP · ≥ '+tb.min+' at FiO₂ '+vals.fio2.v+'%', pe+'', st,
+    add('peep','PEEP ≥ '+tb.min, pe+'', st,
         {why:'At FiO₂ '+tb.row.toFixed(1)+' the ARDSnet table asks for PEEP '+tb.min+'–'+tb.lowMax+' (up to '+tb.max+' on the higher-PEEP table)', src:t.peep.src});
-  } else add('peep','PEEP · '+t.peep.tgt, vals.peep.v+'', _tlGrade(vals.peep.v,t.peep), t.peep);
-  if(t.apeep) add('apeep','Auto-PEEP · '+t.apeep.tgt, aP.toFixed(1), _tlGrade(aP,t.apeep), t.apeep);
+  } else add('peep','PEEP '+t.peep.tgt, vals.peep.v+'', _tlGrade(vals.peep.v,t.peep), t.peep);
+  if(t.apeep) add('apeep','Auto-PEEP '+t.apeep.tgt, aP.toFixed(1), _tlGrade(aP,t.apeep), t.apeep);
   return out;
 }
 // Amber is a true amber, not the panel's red-orange, so it can't be mistaken for red.
 var _TL_COL={good:['var(--green)','#eafbf1'], warn:['#b45309','#fff6e0'], bad:['var(--alarm)','#fdecec'], neutral:['var(--sub)','#ffffff']};
-function _tlChip(label,val,status){
+function _tlChip(label,val,status,title){
   var c=_TL_COL[status]||_TL_COL.neutral;
-  return '<div class="tl-chip" data-status="'+status+'" style="border-color:'+c[0]+';background:'+c[1]+'">'
+  return '<div class="tl-chip" data-status="'+status+'"'+(title?' title="'+title+'"':'')+' style="border-color:'+c[0]+';background:'+c[1]+'">'
     +'<div class="tl-chip-k">'+label+'</div>'
     +'<div class="tl-chip-v" style="color:'+c[0]+'">'+val+'</div></div>';
 }
 // Why each flagged reading is flagged, worst first, with its source.
+// Folded to one line so the card stays short: the worst flag and a count,
+// tap for every reason, its source and the colour key. Open/closed survives
+// the card re-rendering on every knob turn.
+var tlWhyOpen=false;
 function _tlWhy(items){
   var flagged=items.filter(function(i){ return i.status==='bad'||i.status==='warn'; })
     .sort(function(a,b){ return (a.status==='bad'?0:1)-(b.status==='bad'?0:1); });
   var spont=(ventMode==='cpap'||ventMode==='nppv');
+  var key='<div class="tl-legend"><span class="g">■</span> on target for this lung <span class="a">■</span> allowed, not the aim <span class="r">■</span> outside the evidence-based range</div>';
   if(!flagged.length) return '<div class="tl-why ok">'+(spont
-      ? 'Spontaneous mode: the patient sets the rate and size of each breath, so the readings above are estimates and aren\'t graded.'
-      : 'Every reading is inside the evidence-based targets for this lung.')+'</div>';
-  return '<div class="tl-why">'+flagged.map(function(i){
+      ? 'Spontaneous mode — the patient sets each breath, so these are estimates and aren\'t graded.'
+      : '✓ Every reading is on target for this lung.')+key+'</div>';
+  var nb=flagged.filter(function(i){ return i.status==='bad'; }).length, na=flagged.length-nb, w=flagged[0];
+  return '<details class="tl-why"'+(tlWhyOpen?' open':'')+' ontoggle="tlWhyOpen=this.open">'
+    +'<summary>'+(nb?'<span class="tl-n bad">'+nb+'</span>':'')+(na?'<span class="tl-n warn">'+na+'</span>':'')
+      +'<b>'+w.name+' '+w.short+'</b> <span class="tl-more">'+(flagged.length>1?'+'+(flagged.length-1)+' more · ':'')+'why?</span></summary>'
+    +flagged.map(function(i){
       return '<div class="tl-why-i '+i.status+'"><b>'+i.name+' '+i.short+'</b> — '+(i.why||'')+(i.src?' <span class="tl-src">'+i.src+'</span>':'')+'</div>';
-    }).join('')+'</div>';
+    }).join('')+key+'</details>';
 }
 function renderTestLung(bar){
   var fl=freeLung(), kg=fl&&fl.kg;
@@ -3896,15 +3926,14 @@ function renderTestLung(bar){
      '<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
     +'<div class="scen-header"><div class="mission-stage">Free Play · Test Lung</div>'
     +'<span class="scen-badge tl-badge">SANDBOX</span></div>'
-    +'<div class="scen-text">Dial any settings you like — the vent enforces only what it can physically deliver. Inspiratory time is capped by the rate, and tidal volume by the peak flow the blower can produce. Pick a test lung: each has its own compliance and airway resistance, so the same settings behave differently — and the readings below are graded against the evidence for <em>that</em> lung.</div>'
+    +'<div class="scen-text">Pick a lung and dial any settings. Each lung has its own mechanics, and every reading is graded against the evidence for <em>that</em> lung.</div>'
     +_tlLungRow('Adult', false)
     +_tlLungRow('Pediatric', true)
     +(kg ? '<div class="tl-who"><b>'+fl.who+'</b> '+fl.tip+'</div>' : '')
-    +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP ≈ <b>'+effectiveAutoPEEP()+'</b> cmH₂O (dynamic)':'')+'</div>'
+    +'<div class="tl-mech">C <b>'+lung.compliance+'</b> mL/cmH₂O · R <b>'+lung.resistance+'</b> cmH₂O/(L/s) · <b>'+(fl.kg||TL_ADULT_KG)+' kg'+(fl.peds?'':' PBW')+'</b>'+(lung.autoPEEP?' · auto-PEEP ≈ <b>'+effectiveAutoPEEP()+'</b>':'')+'</div>'
     +'<div class="tl-viz-slot"></div>'
-    +'<div class="tl-grid">'+items.map(function(i){ return _tlChip(i.label,i.text,i.status); }).join('')+'</div>'
-    +_tlWhy(items)
-    +'<div class="tl-legend"><span class="g">■</span> inside the target for this lung <span class="a">■</span> allowed, not the aim <span class="r">■</span> outside the evidence-based range</div>';
+    +'<div class="tl-grid">'+items.map(function(i){ return _tlChip(i.label,i.text,i.status,i.title); }).join('')+'</div>'
+    +_tlWhy(items);
   // The card is rebuilt on every change; the lung view is one persistent node
   // re-seated into it, so the art never reloads and a cross-fade survives.
   var slot=bar.querySelector('.tl-viz-slot');
@@ -4586,14 +4615,19 @@ function lvBuild(){
   el.innerHTML='<div class="lv-stage" role="img">'
       +'<div class="lv-pose rest"></div><div class="lv-pose full"></div><div class="lv-flow"></div></div>'
     +'<div class="lv-side"><div class="lv-info">'
-      +'<div class="lv-phase" aria-hidden="true">—</div>'
-      +'<div aria-hidden="true"><div class="lv-k">Lung volume above PEEP</div><div class="lv-v lv-vol">—</div></div>'
+      +'<div class="lv-top" aria-hidden="true"><div class="lv-phase" aria-hidden="true">—</div><span class="lv-vol" title="Lung volume above PEEP">—</span></div>'
+      +'<div class="lv-vitals">'
+        +'<div class="lv-vit spo2"><div class="lv-vk">SpO₂</div><div class="lv-vv"><span class="lv-spo2">—</span><small>%</small></div><div class="lv-vs lv-pao2">PaO₂ —</div></div>'
+        +'<div class="lv-vit etco2"><div class="lv-vk">EtCO₂</div><div class="lv-vv"><span class="lv-etco2">—</span></div><div class="lv-vs lv-paco2">PaCO₂ —</div></div>'
+      +'</div>'
       +'<div class="lv-trap"><div class="lv-k">End of expiration</div><div class="lv-v lv-trapv">—</div></div>'
       +'<div class="lv-note"></div>'
     +'</div><div class="lv-gauge" aria-hidden="true"><div class="lv-fill"></div><div class="lv-floor"></div></div></div>';
   var q=function(s){ return el.querySelector(s); };
   _lv={el:el, stage:q('.lv-stage'), rest:q('.lv-pose.rest'), full:q('.lv-pose.full'), flow:q('.lv-flow'),
        phase:q('.lv-phase'), vol:q('.lv-vol'), trap:q('.lv-trap'), trapv:q('.lv-trapv'), note:q('.lv-note'),
+       spo2:q('.lv-spo2'), pao2:q('.lv-pao2'), etco2:q('.lv-etco2'), paco2:q('.lv-paco2'), spo2Box:q('.lv-vit.spo2'),
+       vit:null, vitT:null, vitKey:null,
        fill:q('.lv-fill'), floor:q('.lv-floor'), sprite:null, w:null, t:0, drawn:null, phaseKey:null, txtAt:0, staticKey:null,
        fo:0, fy:0, fdir:'', fh:0, fhAt:0};
   lvMeasureBoxes();
@@ -4655,6 +4689,7 @@ function updateLungView(){
   lv.fill.style.height=Math.max(0,Math.min(100,s.v/top*100)).toFixed(1)+'%';
   var now=performance.now();
   if(now-lv.txtAt>120){ lv.txtAt=now; lv.vol.textContent=run?Math.round(s.v)+' mL':'—'; }
+  lvUpdateVitals(lv,run);
   // Lines that only change with the settings
   var trapped=Math.round(s.vee||0);
   var key=[run,trapped,s.aPEEP,s.cut,Math.round(s.vt||0),s.setVt,sprite].join('|');
@@ -4672,11 +4707,104 @@ function updateLungView(){
       lv.note.className='lv-note';
       lv.note.textContent=trapOn
         ?'Not enough time to empty: the next breath starts on top of trapped gas (auto-PEEP '+s.aPEEP+').'
-        :'Schematic art, not to scale. It moves with the vent’s own breaths.';
+        :'';
     }
   }
   lvLast={pose:pose, w:lv.w, flow:flow, flowDir:lv.fdir, frac:frac, v:s.v, phase:s.phase, vee:s.vee||0, cut:!!s.cut, sprite:sprite, ref:ref};
 }
+
+// ── FREE PLAY · SpO₂ AND EtCO₂ ────────────────────────────────
+// Modelled, not measured: textbook gas-exchange physiology, with per-lung
+// parameters that are teaching approximations, so each lung responds to the
+// vent the way its disease does.
+//
+//  CO₂ — alveolar ventilation equation: PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A.
+//    V̇A = rate × (delivered Vt − dead space). Dead space is anatomic
+//    (2.2 mL/kg), equipment (0.5 mL/kg, at most 35 mL) and the disease's
+//    alveolar dead space (vdA × Vt). V̇CO₂ is 200 mL/min at 70 kg, scaled by
+//    weight^0.75. Alveolar dead space dilutes the exhaled gas (Bohr), so
+//    EtCO₂ reads below PaCO₂, more so in ARDS and obstruction.
+//  O₂ — alveolar gas equation (PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8), so
+//    hypoventilation lowers it and oxygen can mask that. Then two defects:
+//    V/Q mismatch (vq, mmHg off the end-capillary PO₂ — extra oxygen fixes
+//    it) and true shunt (sh — extra oxygen barely helps; PEEP opens it in a
+//    recruitable lung: sh falls from sh0 at PEEP 5 toward shMin with
+//    constant k). Above `over`, PEEP overdistends the good lung in one-sided
+//    pneumonia and the shunt grows again. Mixed by the shunt equation
+//    (Hb 14 g/dL, a–v O₂ difference 5 mL/dL); SpO₂ by the Severinghaus
+//    equation.
+//  Speed — the numbers drift to their new value with time constants of 20 s
+//    (SpO₂) and 45 s (CO₂) of sim time, so a change can be watched. A real
+//    patient's CO₂ takes 10–20 minutes to settle, and recruitment can take
+//    longer. Not modelled: cardiac output (high PEEP lowering it), shock,
+//    hemoglobin, altitude.
+var VITAL_LUNG={
+  normal:   {sh0:0.03, shMin:0.02, k:6,  vq:0,  vdA:0.02},
+  ards:     {sh0:0.35, shMin:0.15, k:6,  vq:10, vdA:0.20},
+  copd:     {sh0:0.05, shMin:0.05, k:99, vq:25, vdA:0.18},
+  asthma:   {sh0:0.05, shMin:0.05, k:99, vq:20, vdA:0.15},
+  pneumonia:{sh0:0.28, shMin:0.20, k:8,  vq:10, vdA:0.08, over:10},
+  edema:    {sh0:0.25, shMin:0.08, k:5,  vq:10, vdA:0.08},
+  pedNormal:{sh0:0.03, shMin:0.02, k:6,  vq:0,  vdA:0.02},
+  pedArds:  {sh0:0.40, shMin:0.18, k:6,  vq:10, vdA:0.15},
+  pedAsthma:{sh0:0.05, shMin:0.05, k:99, vq:20, vdA:0.10},
+  pedBronch:{sh0:0.10, shMin:0.06, k:6,  vq:20, vdA:0.12}
+};
+var VIT_TAU_O2=20000, VIT_TAU_CO2=45000;          // ms of sim time
+function sevSat(po2){ var p=Math.max(0.1,po2); return 1/(23400/(p*p*p+150*p)+1); }   // Severinghaus 1979
+// Steady-state gas exchange for the settings and lung on the panel now.
+function vitalsTarget(){
+  var key=freeLungKey, fl=FREE_LUNGS[key]||FREE_LUNGS.normal, P=VITAL_LUNG[key]||VITAL_LUNG.normal;
+  var kg=fl.kg||TL_ADULT_KG, C=lung.compliance, spont=(ventMode==='cpap'||ventMode==='nppv');
+  var vt, rate;
+  if(spont){ vt=(fl.kg?6*fl.kg:400)+vals.ps.v*C; rate=fl.spontRate||15; }   // the readout's own estimate
+  else { vt=lvBreath().vt; rate=vals.rate.v; }                               // delivered, after any High Pressure cut
+  var vdAnat=2.2*kg, vdApp=Math.min(35,0.5*kg), vd=vdAnat+vdApp+P.vdA*vt;
+  var va=Math.max(0.05, rate*(vt-vd)/1000);                                  // L/min
+  var vco2=200*Math.pow(kg/70,0.75);                                         // mL/min
+  var paco2=Math.min(150, 0.863*vco2/va);
+  var etco2=paco2*Math.max(0.3, 1-P.vdA*vt/Math.max(1,vt-vdAnat-vdApp));
+  var peep=vals.peep.v, fio2=vals.fio2.v/100;
+  var sh=P.shMin+(P.sh0-P.shMin)*Math.exp(-(peep-5)/P.k);
+  sh=Math.min(0.5, sh, P.sh0*1.6);
+  if(P.over && peep>P.over) sh+=0.012*(peep-P.over);
+  var pAO2=Math.max(0, fio2*713-paco2/0.8), pc=Math.max(1, pAO2-P.vq);
+  var cap=1.34*14, cc=cap*sevSat(pc)+0.003*pc;                                // mL O₂/dL
+  var ca=cc-sh*5/(1-sh);
+  var lo=1, hi=700;                                                           // PaO₂ that carries that content
+  for(var i=0;i<40;i++){ var mid=(lo+hi)/2; if(cap*sevSat(mid)+0.003*mid<ca) lo=mid; else hi=mid; }
+  var pao2=(lo+hi)/2;
+  return {spo2:Math.max(0,Math.min(100,sevSat(pao2)*100)), pao2:pao2, paco2:paco2, etco2:etco2, shunt:sh, va:va};
+}
+function lvUpdateVitals(lv,run){
+  if(!run){
+    lv.vit=null; lv.vitT=null;
+    lv.spo2.textContent='—'; lv.etco2.textContent='—'; lv.pao2.textContent='PaO₂ —'; lv.paco2.textContent='PaCO₂ —';
+    lv.spo2Box.className='lv-vit spo2'; lvVitals=null; return;
+  }
+  var tg=vitalsTarget(), key=freeLungKey;
+  if(!lv.vit || lv.vitKey!==key || lv.vitT===null || simTime<lv.vitT || simTime-lv.vitT>600000){
+    lv.vit={spo2:tg.spo2, pao2:tg.pao2, paco2:tg.paco2, etco2:tg.etco2};      // a new patient: start where they are
+  } else {
+    var dS=simTime-lv.vitT, kO=1-Math.exp(-dS/VIT_TAU_O2), kC=1-Math.exp(-dS/VIT_TAU_CO2);
+    lv.vit.spo2+=(tg.spo2-lv.vit.spo2)*kO; lv.vit.pao2+=(tg.pao2-lv.vit.pao2)*kO;
+    lv.vit.paco2+=(tg.paco2-lv.vit.paco2)*kC; lv.vit.etco2+=(tg.etco2-lv.vit.etco2)*kC;
+  }
+  lv.vitT=simTime; lv.vitKey=key;
+  var v=lv.vit, sp=Math.round(v.spo2);
+  if(lv.spo2.textContent!==String(sp)){
+    lv.spo2.textContent=sp; lv.etco2.textContent=Math.round(v.etco2);
+    lv.pao2.textContent='PaO₂ '+Math.round(v.pao2); lv.paco2.textContent='PaCO₂ '+Math.round(v.paco2);
+  } else if(lv.etco2.textContent!==String(Math.round(v.etco2))){
+    lv.etco2.textContent=Math.round(v.etco2); lv.paco2.textContent='PaCO₂ '+Math.round(v.paco2); lv.pao2.textContent='PaO₂ '+Math.round(v.pao2);
+  }
+  // SpO₂ floor: 88% where ARDSnet and obstructive-disease practice accept 88–92/95, 92% otherwise
+  var floor=/ards|copd|asthma|Asthma|Bronch|Ards/.test(key)?88:92;
+  lv.spo2Box.className='lv-vit spo2'+(sp<floor-4?' bad':(sp<floor?' warn':''));
+  lv.spo2Box.title='SpO₂ target ≥ '+floor+'% for this lung';
+  lvVitals={shown:{spo2:v.spo2, pao2:v.pao2, paco2:v.paco2, etco2:v.etco2}, target:tg, floor:floor};
+}
+var lvVitals=null;
 
 // ── LEVEL MANAGEMENT ──────────────────────────────────────────
 function startLevel(n){

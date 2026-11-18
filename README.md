@@ -236,6 +236,33 @@ medical device. Nothing here has been through clinical review by the Medical
 Director; it is checked against published sources, which is not the same
 thing.
 
+### SpO₂ and EtCO₂ in the test lung panel
+
+The lung panel shows SpO₂ and EtCO₂, with PaO₂ and PaCO₂ under them, and
+they respond to the vent. They are modelled, not measured: textbook
+gas-exchange physiology with per-lung parameters that are teaching
+approximations, chosen so each lung behaves the way its disease does.
+
+- **CO₂:** the alveolar ventilation equation, PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A.
+  V̇A is rate × (delivered Vt − dead space), so a breath cut short by the High
+  Pressure limit raises the CO₂. Dead space is anatomic, equipment and the
+  disease's alveolar dead space, which also dilutes the exhaled gas, so EtCO₂
+  reads further below PaCO₂ in ARDS and obstruction.
+- **O₂:** the alveolar gas equation, so hypoventilation lowers it and oxygen
+  hides that. On top of that, V/Q mismatch, which oxygen fixes (COPD), and
+  true shunt, which oxygen barely touches but PEEP opens in a recruitable
+  lung (ARDS, pulmonary edema). These are mixed by the shunt equation and
+  turned into SpO₂ by the Severinghaus curve. In one-sided pneumonia, PEEP
+  above 10 overdistends the good lung and the shunt grows again.
+- **Speed:** the numbers drift to their new value over about a minute of sim
+  time (time constants of 20 s for O₂ and 45 s for CO₂), so a change can be
+  watched. A real patient's CO₂ takes 10–20 minutes to settle. Cardiac
+  output, shock, hemoglobin and altitude aren't modelled.
+
+SpO₂ turns amber below the floor for that lung and red 4 points under it.
+The floor is 88% for ARDS and obstructive disease, where 88–92/95% is the
+accepted target, and 92% otherwise.
+
 ### The LTV 1200 test lung readout
 
 Under the picture, every reading is graded against the evidence for the lung
@@ -245,7 +272,9 @@ that lung's target, amber where guidelines allow it but don't aim for it
 (ARDS at 7 mL/kg, say), and red outside the evidence-based range. A line under
 the chips says why each one is flagged, worst first, with its source and how
 strong that source is. Where it can, it says how far to go: "on this lung that
-means a breath of 375 mL (5.4 mL/kg) or less."
+means a breath of 375 mL (5.4 mL/kg) or less." To keep the card short on a
+phone, that is folded to one line: the worst flag and a count, tap for the rest
+and the colour key.
 
 | Lung | Graded on |
 |---|---|

@@ -136,7 +136,12 @@ These suites live here:
   the volume is a pure function of the simulator's clock, so the picture
   cannot drift from the trace, that the view is one node that survives every
   re-render, that the atlas has a lung in every cell and nothing in its
-  gutters, and that it fits a 320px phone.
+  gutters, and that it fits a 320px phone. It recomputes the SpO₂ and EtCO₂
+  too: PaCO₂ from the alveolar ventilation equation, a wider PaCO₂–EtCO₂ gap
+  in ARDS, oxygen masking hypoventilation that room air reveals, PEEP opening
+  an ARDS shunt that oxygen barely touches, COPD answering to oxygen, high
+  PEEP backfiring in one-sided pneumonia, the Severinghaus curve, and the
+  numbers drifting to a change rather than jumping.
 
 - **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
   grade as correct. Each scenario's `goal.check()` is the therapy the
