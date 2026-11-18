@@ -236,32 +236,98 @@ medical device. Nothing here has been through clinical review by the Medical
 Director; it is checked against published sources, which is not the same
 thing.
 
-### SpO₂ and EtCO₂ in the test lung panel
+### SpO₂, EtCO₂ and blood pressure in the test lung panel
 
-The lung panel shows SpO₂ and EtCO₂, with PaO₂ and PaCO₂ under them, and
-they respond to the vent. They are modelled, not measured: textbook
-gas-exchange physiology with per-lung parameters that are teaching
-approximations, chosen so each lung behaves the way its disease does.
+The lung panel shows SpO₂ (with PaO₂), EtCO₂ (with PaCO₂) and blood pressure
+(with MAP), and all of them respond to the vent. They are modelled, not
+measured. This is a template patient for teaching, so the goal is to be as
+close to the published evidence as the evidence allows, and to say plainly
+where it runs out. Each number below is marked:
 
-- **CO₂:** the alveolar ventilation equation, PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A.
-  V̇A is rate × (delivered Vt − dead space), so a breath cut short by the High
-  Pressure limit raises the CO₂. Dead space is anatomic, equipment and the
-  disease's alveolar dead space, which also dilutes the exhaled gas, so EtCO₂
-  reads further below PaCO₂ in ARDS and obstruction.
-- **O₂:** the alveolar gas equation, so hypoventilation lowers it and oxygen
-  hides that. On top of that, V/Q mismatch, which oxygen fixes (COPD), and
-  true shunt, which oxygen barely touches but PEEP opens in a recruitable
-  lung (ARDS, pulmonary edema). These are mixed by the shunt equation and
-  turned into SpO₂ by the Severinghaus curve. In one-sided pneumonia, PEEP
-  above 10 overdistends the good lung and the shunt grows again.
-- **Speed:** the numbers drift to their new value over about a minute of sim
-  time (time constants of 20 s for O₂ and 45 s for CO₂), so a change can be
-  watched. A real patient's CO₂ takes 10–20 minutes to settle. Cardiac
-  output, shock, hemoglobin and altitude aren't modelled.
+- **Established:** textbook physiology or a guideline target.
+- **Measured:** taken from a named study; the size of the study is given
+  because several are small.
+- **Estimate:** a teaching choice where no good number exists.
 
-SpO₂ turns amber below the floor for that lung and red 4 points under it.
-The floor is 88% for ARDS and obstructive disease, where 88–92/95% is the
-accepted target, and 92% otherwise.
+**Equations (established).** PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A, the alveolar
+ventilation equation, where V̇A = rate × (delivered Vt − anatomic −
+equipment − alveolar dead space). A breath cut short by the High Pressure
+limit therefore raises the CO₂. Alveolar dead space dilutes exhaled gas
+(Bohr), so EtCO₂ reads below PaCO₂. Then PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8,
+the alveolar gas equation at sea level, so hypoventilation lowers the O₂
+and extra oxygen hides it. The shunt equation mixes in venous blood, and
+the Severinghaus equation turns PaO₂ into SpO₂. Fixed values: V̇CO₂
+200 mL/min at 70 kg (scaled by weight^0.75 for children), anatomic dead
+space 2.2 mL/kg, Hb 14 g/dL, a–vO₂ difference 5 mL/dL. Equipment dead
+space of 0.5 mL/kg, up to 35 mL, is an estimate.
+
+| Lung | Number in the model | Source | Strength |
+|---|---|---|---|
+| Normal | Shunt 3%; PaCO₂–EtCO₂ gap 2–5 mmHg | Normal venous admixture; normal gradient | Established |
+| ARDS | Shunt 32% at PEEP 5 (49% at PEEP 0) | Inert-gas PEEP study, shunt 32 ± 14% (Am Rev Respir Dis 1985;131:54, n=16). About half of cardiac output to shunt or very-low-V/Q units (Dantzker 1979, n=16) | Measured |
+| ARDS | PEEP 5 → 10 → 15 shrinks shunt ×1 → ×0.71 → ×0.56 | COVID-19 ARDS (Florio 2024, n=14): venous admixture 33 → 23 → 18%, shunt 36 → 27 → 24% | Measured, small; some patients don't respond (7 of 12 did in Karbing 2020) |
+| ARDS | Vd/Vt ≈ 0.58 at 6 mL/kg | Nuckton 2002: 0.58 ± 0.09 | Measured |
+| Pneumonia | Shunt 22%, plus low-V/Q units | Ventilated pneumonia, inert gas (Gea 1991, n=10): shunt 22 ± 5%, low V/Q 11 ± 5% | Measured |
+| Pneumonia | Recruits poorly; PEEP above 10 overdistends the good lung | Physiology | Estimate |
+| COPD, asthma | Low-V/Q mismatch, little shunt, so oxygen corrects it | Inert-gas studies | Established direction; size is an estimate |
+| Edema | Large shunt that PEEP/CPAP recruits | CPAP improves oxygenation in cardiogenic edema (trials) | Direction established; size is an estimate |
+
+**Blood pressure.** PEEP raises intrathoracic pressure and cuts venous
+return, so cardiac output falls. Values relative to PEEP 5:
+
+| PEEP | Cardiac output | Source | Strength |
+|---|---|---|---|
+| 0 | ×1.14 | Postop cardiac surgery (Auler 2000, n=10): CI 3.90 vs 3.43 | Measured, not ARDS |
+| 10 | ×0.98 | Moderate–severe ARDS (Luo 2024, n=52): CI 3.07 / 3.00 / 2.63 | Measured |
+| 15 | ×0.86 | Same study; Florio 2024 agrees (CO 5.4 / 4.8 / 4.7) | Measured |
+| > 15 | Keeps falling at the 10→15 slope | Jardin 1981: output and mean BP fell progressively up to PEEP 30 | Extrapolation |
+
+- **Auto-PEEP counts the same as set PEEP.** The heart feels total PEEP, so
+  trapping gas lowers the pressure. Dynamic hyperinflation causes
+  hypotension: Pepe & Marini 1982 and Tuxen 1987. In Williams 1992, 18 of 88
+  ICU stays for severe asthma had hypotension, and all 18 were ventilated. Strength: mechanism established; equal
+  weighting is an estimate. The simulator caps auto-PEEP at 1.2 × the lung's
+  base value, so it understates extreme hyperinflation.
+- **Heart failure with high filling pressures (the edema lung) is the
+  exception.** In De Hoyos 1995 (n=8, wedge ≥ 12), CPAP raised cardiac index
+  from 2.47 to 2.91 to 3.12 at 0, 5 and 10 cmH₂O, by unloading the left
+  ventricle. With a normal wedge, output fell instead. Not every patient
+  responds (7 of 13 in Baratz 1992), so the model shows a responder.
+  Arterial pressure did not change on CPAP or BiPAP in heart failure
+  (Philip-Joet 1999, n=20). Strength: measured, but small studies. There
+  are no data past 10, so the model holds output flat to 15 (estimate).
+- **Blood pressure falls less than cardiac output,** because vascular
+  resistance rises. The model passes on half the change, and pulse pressure
+  follows stroke volume (estimate). For comparison, mean pressure stayed
+  flat from PEEP 10 to 20 in ARDS patients who were given fluids to hold
+  preload (Bruhn 2004, n=8). This patient gets no fluids.
+- **The starting pressures are presets, not evidence.** For example,
+  normal 120/75 and edema 160/95.
+
+**Colours (guideline thresholds).**
+
+- SpO₂: amber below the lung's floor and red 4 points under it. The floor is
+  88% for ARDS and obstructive disease, where 88–92/95% is the accepted
+  target, and 92% otherwise.
+- Adult blood pressure: red when MAP < 65 (Surviving Sepsis 2021) or
+  SBP < 90, and amber within 5 MAP or 10 SBP of those.
+- Children: red when SBP < 70 + 2 × age (PALS hypotension; 70 under one
+  year, 90 from ten years), and amber within 10 of it.
+
+**Not modelled:** fluids, vasopressors, or a baroreflex beyond the
+half-change. Also the effect of cardiac output on oxygenation, which cuts
+both ways: lower output lowers mixed venous O₂ but also shrinks the shunt
+(Dantzker 1980). And hypercapnia's effect on pressure, hemoglobin, and
+altitude. Inspiratory pressure doesn't move the cardiac output; only PEEP
+and auto-PEEP do, which matches how the studies were run.
+
+**Speed:** the numbers drift to a change, with time constants of 20 s (O₂),
+45 s (CO₂) and 10 s (blood pressure) of sim time. A real patient's CO₂
+takes 10–20 minutes to settle, and recruitment can take longer, so this is
+faster than life on purpose, so that a change can be watched.
+
+This is a teaching model, and it should be reviewed by the Medical Director
+before it is used to teach.
 
 ### The LTV 1200 test lung readout
 

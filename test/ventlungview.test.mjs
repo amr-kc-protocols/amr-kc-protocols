@@ -41,7 +41,12 @@
  *       an ARDS shunt that oxygen barely touches; COPD's V/Q mismatch answers
  *       to oxygen; high PEEP backfires in one-sided pneumonia; a breath cut by
  *       the High Pressure limit raises CO₂; the Severinghaus curve; and the
- *       numbers drift to a change rather than jump
+ *       numbers drift to a change rather than jump. ARDS shunt and dead
+ *       space checked against Florio 2024 and Nuckton 2002
+ *   L17 blood pressure, recomputed from the published cardiac-output
+ *       numbers: PEEP and auto-PEEP lower it (Auler 2000, Luo 2024); CPAP in
+ *       high-filling-pressure heart failure raises output without dropping
+ *       pressure (De Hoyos 1995); red and amber by Surviving Sepsis and PALS
  *   L13 accessible, and fits a 320px phone without sideways scroll
  *   L14 no page errors
  *
@@ -381,23 +386,32 @@ console.log('\nL16 SpO₂ and EtCO₂');
     if (!FREE_LUNGS[k].peds) { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); }
     setFreeLung(k); if (s) { for (const x of Object.keys(s)) vals[x].v = s[x]; enforceITLimit(); updateUI(); }
     return vitalsTarget(); }, [k, s || null]);
-  // CO₂, recomputed: 70 kg, dead space 2.2 mL/kg + 35 mL equipment + 2% of Vt, V̇CO₂ 200 mL/min
+  // CO₂, recomputed: 70 kg, dead space 2.2 mL/kg + 35 mL equipment + 5% of Vt, V̇CO₂ 200 mL/min
   const n = await V('normal');
-  const va = 14 * (500 - 154 - 35 - 0.02 * 500) / 1000, want = 0.863 * 200 / va;
+  const va = 14 * (500 - 154 - 35 - 0.05 * 500) / 1000, want = 0.863 * 200 / va;
   ok(`L16 normal lung, 14 × 500 mL: PaCO₂ = 0.863 × 200 ÷ ${va.toFixed(2)} L/min = ${want.toFixed(0)}`, Math.abs(n.paco2 - want) < 0.5, n.paco2.toFixed(1));
-  ok('L16 and a normal ETCO₂ a little below it', n.etco2 < n.paco2 && n.paco2 - n.etco2 < 4 && n.etco2 >= 35 && n.etco2 <= 45, n.etco2.toFixed(1));
+  ok('L16 and a normal ETCO₂ 2–5 mmHg below it', n.paco2 - n.etco2 >= 2 && n.paco2 - n.etco2 <= 5 && n.etco2 >= 35 && n.etco2 <= 45, (n.paco2 - n.etco2).toFixed(1));
   const fast = await V('normal', { rate: 28 });
   ok('L16 doubling the rate halves the PaCO₂ (alveolar ventilation doubles)', Math.abs(fast.paco2 - n.paco2 / 2) < 0.5, fast.paco2.toFixed(1));
   const a = await V('ards');
   ok('L16 ARDS dead space widens the PaCO₂–EtCO₂ gap', (a.paco2 - a.etco2) > 3 * (n.paco2 - n.etco2), (a.paco2 - a.etco2).toFixed(1));
+  const a6 = await V('ards', { vt: 420 });
+  ok('L16 ARDS physiologic Vd/Vt at 6 mL/kg is 0.58 ± 0.03 (Nuckton 2002: 0.58 ± 0.09)', Math.abs(a6.vdvt - 0.58) <= 0.03, a6.vdvt.toFixed(3));
+  const sh = [];
+  for (const pe of [5, 10, 15]) sh.push((await V('ards', { peep: pe, hipres: 60 })).shunt);
+  const r10 = sh[1] / sh[0], r15 = sh[2] / sh[0];
+  ok('L16 ARDS shunt at PEEP 5 is 0.32 (inert gas, Am Rev Respir Dis 1985: 32 ± 14%)', Math.abs(sh[0] - 0.32) < 0.005, sh[0].toFixed(3));
+  ok(`L16 and PEEP 5 → 10 → 15 shrinks it ×1 → ×${r10.toFixed(2)} → ×${r15.toFixed(2)}, inside Florio 2024 (×0.70–0.75, ×0.55–0.67)`,
+     r10 >= 0.69 && r10 <= 0.76 && r15 >= 0.54 && r15 <= 0.67, sh.map(x => x.toFixed(3)).join(' → '));
   // Oxygen
   ok('L16 normal lung on room air: SpO₂ ≥ 95 (PaO₂ ~90)', (await V('normal', { fio2: 21 })).spo2 >= 95);
   const hypoRA = await V('normal', { rate: 7, fio2: 21 }), hypoO2 = await V('normal', { rate: 7, fio2: 40 });
   ok('L16 hypoventilation on room air drops SpO₂ below 90 (alveolar gas equation)', hypoRA.spo2 < 90, hypoRA.spo2.toFixed(0));
   ok('L16 …and 40% oxygen hides it: SpO₂ ≥ 97 with PaCO₂ over 70', hypoO2.spo2 >= 97 && hypoO2.paco2 > 70, JSON.stringify({ s: hypoO2.spo2.toFixed(0), c: hypoO2.paco2.toFixed(0) }));
   const a5 = await V('ards', { peep: 5, fio2: 40 }), a5o = await V('ards', { peep: 5, fio2: 100 }), a10 = await V('ards', { peep: 10, fio2: 50 });
-  ok('L16 ARDS at PEEP 5 / 40% is hypoxemic', a5.spo2 < 90, a5.spo2.toFixed(0));
-  ok('L16 PEEP 10 on 50% does as much as 100% oxygen on PEEP 5 — a shunt answers to PEEP, not oxygen', a10.spo2 >= a5o.spo2 - 0.5 && a10.shunt < a5.shunt, JSON.stringify({ p10: a10.spo2.toFixed(1), o100: a5o.spo2.toFixed(1) }));
+  ok('L16 ARDS at PEEP 5 / 40% is hypoxemic (SpO₂ ≤ 90)', a5.spo2 < 90.5, a5.spo2.toFixed(1));
+  ok('L16 even 100% oxygen can\'t lift PaO₂ to 100 through a 32% shunt (iso-shunt)', a5o.pao2 < 100, a5o.pao2.toFixed(0));
+  ok('L16 PEEP 10 on 50% gets within 1.5 points of 100% oxygen on PEEP 5 — a shunt answers to PEEP, not oxygen', a10.spo2 >= a5o.spo2 - 1.5 && a10.shunt < a5.shunt, JSON.stringify({ p10: a10.spo2.toFixed(1), o100: a5o.spo2.toFixed(1) }));
   const c21 = await V('copd', { fio2: 21 }), c30 = await V('copd', { fio2: 30 });
   ok('L16 COPD on room air is below 90, and a little oxygen fixes it (V/Q mismatch)', c21.spo2 < 90 && c30.spo2 >= 94, JSON.stringify({ ra: c21.spo2.toFixed(0), o30: c30.spo2.toFixed(0) }));
   const p10 = await V('pneumonia', { peep: 10 }), p14 = await V('pneumonia', { peep: 14 });
@@ -420,6 +434,85 @@ console.log('\nL16 SpO₂ and EtCO₂');
   ok('L16 …and has settled within two minutes of sim time', Math.abs(d.twoMin - d.target) < 0.2, JSON.stringify(d));
   const st = await vp.evaluate(() => { deviceState = 'standby'; applyStandbyVisual(); updateLungView(); return document.querySelector('#tl-viz .lv-spo2').textContent + '|' + document.querySelector('#tl-viz .lv-etco2').textContent; });
   ok('L16 standby: no numbers', st === '—|—', st);
+  await vp.context().close(); }
+
+console.log('\nL17 blood pressure');
+{ const vp = await (await browser.newContext({ viewport: { width: 430, height: 932 }, serviceWorkers: 'block' })).newPage();
+  vp.on('pageerror', e => errs.push(String(e)));
+  await vp.goto(ORIGIN + '/vent-ltv1200.html?free');
+  await vp.waitForFunction(() => document.querySelector('#tl-viz .lv-bp'));
+  await vp.waitForTimeout(300);
+  const shown = await vp.evaluate(() => document.querySelector('#tl-viz .lv-bp').textContent + '|' + document.querySelector('#tl-viz .lv-map').textContent);
+  ok('L17 the panel shows a blood pressure and MAP', /^\d{2,3}\/\d{2,3}\|MAP \d{2,3}$/.test(shown), shown);
+  await vp.evaluate(() => { window.requestAnimationFrame = () => 0; });
+  await vp.waitForTimeout(100);
+  const V = (k, s) => vp.evaluate(([k, s]) => {
+    if (!FREE_LUNGS[k].peds) { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); }
+    setFreeLung(k); if (s) { for (const x of Object.keys(s)) vals[x].v = s[x]; enforceITLimit(); updateUI(); }
+    return vitalsTarget(); }, [k, s || null]);
+  // Independent recomputation. Cardiac output relative to PEEP 5:
+  //   0 → 3.90/3.43 (Auler 2000); 10 → 3.00/3.07, 15 → 2.63/3.07 (Luo 2024); past 15, the 10→15 slope.
+  // Heart failure, wedge ≥ 12: 0 → 2.47/2.91, 10 → 3.12/2.91 (De Hoyos 1995); flat to 15.
+  // MAP = MAP₅ × (1 + ½(CO − 1)); pulse pressure × CO.
+  const coN = x => { const pts = [[0, 3.90 / 3.43], [5, 1], [10, 3.00 / 3.07], [15, 2.63 / 3.07]];
+    for (let i = 1; i < pts.length; i++) if (x <= pts[i][0]) return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * (x - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0]);
+    return Math.max(0.35, 2.63 / 3.07 - (3.00 - 2.63) / 3.07 / 5 * (x - 15)); };
+  const bpOf = (sbp, dbp, co) => { const m0 = (sbp + 2 * dbp) / 3, m = m0 * (1 + 0.5 * (co - 1)), pp = (sbp - dbp) * co; return { map: m, sbp: m + 2 * pp / 3, dbp: m - pp / 3 }; };
+  const n5 = await V('normal', { peep: 5 });
+  ok('L17 normal lung at PEEP 5: 120/75, MAP 90', Math.round(n5.sbp) === 120 && Math.round(n5.dbp) === 75 && Math.round(n5.map) === 90, `${n5.sbp.toFixed(1)}/${n5.dbp.toFixed(1)} (${n5.map.toFixed(1)})`);
+  for (const pe of [0, 10, 15, 20]) {
+    const got = await V('normal', { peep: pe, hipres: 60 }), co = coN(pe), w = bpOf(120, 75, co);
+    ok(`L17 normal lung, PEEP ${pe}: output ×${co.toFixed(3)} → ${Math.round(w.sbp)}/${Math.round(w.dbp)} (${Math.round(w.map)})`,
+       Math.abs(got.co - co) < 1e-6 && Math.abs(got.map - w.map) < 0.05 && Math.abs(got.sbp - w.sbp) < 0.05 && Math.abs(got.dbp - w.dbp) < 0.05,
+       `${got.sbp.toFixed(1)}/${got.dbp.toFixed(1)} (${got.map.toFixed(1)}) ×${got.co.toFixed(3)}`);
+  }
+  const ladder = [];
+  for (let pe = 0; pe <= 20; pe += 2) ladder.push((await V('ards', { peep: pe, hipres: 80 })).map);
+  ok('L17 in ARDS every step up in PEEP lowers the MAP', ladder.every((m, i) => i === 0 || m < ladder[i - 1]), ladder.map(m => m.toFixed(0)).join(' → '));
+  const a5 = await V('ards', { peep: 5, hipres: 80 }), a15 = await V('ards', { peep: 15, hipres: 80 });
+  ok('L17 ARDS PEEP 5 → 15 costs the MAP about 7% (half the 14% fall in cardiac index)', Math.abs(a15.map / a5.map - (1 + 0.5 * (coN(15) - 1))) < 0.001, (a15.map / a5.map).toFixed(3));
+  // Auto-PEEP: the same set PEEP, a faster rate traps gas, and the heart sees the total
+  const c14 = await V('copd', { rate: 14, peep: 5, hipres: 80 }), c30 = await V('copd', { rate: 30, peep: 5, hipres: 80 });
+  ok('L17 COPD: trapping gas (rate 30) lowers the blood pressure at the same set PEEP', c30.peepTotal > c14.peepTotal + 3 && c30.map < c14.map - 2, JSON.stringify({ r14: [c14.peepTotal, c14.map.toFixed(1)], r30: [c30.peepTotal, c30.map.toFixed(1)] }));
+  const cw = bpOf(132, 80, coN(c30.peepTotal));
+  ok('L17 …by exactly what that much set PEEP would (auto-PEEP counts as PEEP)', Math.abs(c30.map - cw.map) < 0.05, `${c30.map.toFixed(2)} vs ${cw.map.toFixed(2)}`);
+  const cs = await vp.evaluate(() => { ventMode = 'cpap'; vals.rate.v = 30; vals.peep.v = 5; updateUI(); const t = vitalsTarget(); ventMode = 'ac'; updateUI(); return t; });
+  ok('L17 and spontaneous CPAP breathing traps none', cs.peepTotal === 5, cs.peepTotal);
+  // Heart failure with high filling pressures: CPAP unloads the ventricle
+  const e = {};
+  for (const pe of [0, 5, 10, 15, 20]) e[pe] = await V('edema', { peep: pe, hipres: 60 });
+  ok('L17 edema (heart failure): cardiac output rises with PEEP 0 → 5 → 10 as De Hoyos 1995 measured (2.47 → 2.91 → 3.12)',
+     Math.abs(e[0].co - 2.47 / 2.91) < 1e-6 && e[5].co === 1 && Math.abs(e[10].co - 3.12 / 2.91) < 1e-6, [e[0].co, e[5].co, e[10].co].map(x => x.toFixed(3)).join(' → '));
+  ok('L17 …with no change in arterial pressure from 0 to 15', [0, 10, 15].every(k => Math.abs(e[k].map - e[5].map) < 0.01 && Math.abs(e[k].sbp - e[5].sbp) < 0.01), [0, 5, 10, 15].map(k => e[k].sbp.toFixed(0) + '/' + e[k].dbp.toFixed(0)).join(', '));
+  ok('L17 …and past 15, where there are no data, it falls like any other lung', e[20].map < e[15].map - 3, e[20].map.toFixed(1));
+  // Colour by the evidence
+  const cls = (k, s) => vp.evaluate(([k, s]) => {
+    if (!FREE_LUNGS[k].peds) { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); }
+    setFreeLung(k); for (const x of Object.keys(s)) vals[x].v = s[x]; enforceITLimit(); updateUI();
+    deviceState = 'run'; simTime += 1000; _lv.vit = null; updateLungView();
+    const b = document.querySelector('#tl-viz .lv-vit.bp'); return { cls: b.className, title: b.title, bp: document.querySelector('#tl-viz .lv-bp').textContent, map: lvVitals.shown.map, sbp: lvVitals.shown.sbp }; }, [k, s]);
+  const g = await cls('normal', { peep: 5 }), am = await cls('ards', { peep: 18, fio2: 80, hipres: 80 }), rd = await cls('ards', { peep: 24, fio2: 80, hipres: 80 });
+  ok('L17 a normal pressure is not coloured', g.cls === 'lv-vit bp', g.cls);
+  ok(`L17 ARDS on PEEP 18 is amber (${am.bp}, MAP ${Math.round(am.map)}: SBP 90–99)`, /\bwarn\b/.test(am.cls) && am.sbp >= 90 && am.sbp < 100 && am.map >= 65, am.cls);
+  ok(`L17 ARDS on PEEP 24 is red (${rd.bp}, MAP ${Math.round(rd.map)}: SBP < 90 or MAP < 65)`, /\bbad\b/.test(rd.cls) && (rd.sbp < 90 || rd.map < 65), rd.cls);
+  ok('L17 and says why: the Surviving Sepsis MAP target', /MAP ≥ 65/.test(rd.title) && /Surviving Sepsis/.test(rd.title), rd.title);
+  const kid = await cls('pedArds', { peep: 22, fio2: 80, hipres: 80 }), kidOk = await cls('pedArds', { peep: 10 });
+  ok(`L17 a 6-year-old is judged by PALS (SBP < 70 + 2 × 6 = 82), not adult numbers`, /SBP < 82/.test(kid.title) && kidOk.cls === 'lv-vit bp', kid.title);
+  ok(`L17 …so ${kid.bp} on PEEP 22 is coloured`, /\b(warn|bad)\b/.test(kid.cls) && kid.sbp < 92, kid.cls);
+  const inf = await cls('pedBronch', { peep: 6 });
+  ok('L17 an infant\'s limit is SBP 70', /SBP < 70/.test(inf.title) && inf.cls === 'lv-vit bp', inf.title + ' ' + inf.bp);
+  // Drift: about 10 s of sim time
+  const d = await vp.evaluate(() => {
+    setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); vals.peep.v = 5; vals.hipres.v = 60; updateUI();
+    simTime = 200000; _lv.vit = null; updateLungView(); const before = lvVitals.shown.map;
+    vals.peep.v = 20; updateUI(); const target = vitalsTarget().map;
+    simTime += 1000; updateLungView(); const oneSec = lvVitals.shown.map;
+    for (let i = 0; i < 60; i++) { simTime += 1000; updateLungView(); } const oneMin = lvVitals.shown.map;
+    return { before, target, oneSec, oneMin }; });
+  ok('L17 after a PEEP change the pressure drifts — one second in it has moved 5–15% of the way', (d.before - d.oneSec) > 0.05 * (d.before - d.target) && (d.before - d.oneSec) < 0.15 * (d.before - d.target), JSON.stringify(d));
+  ok('L17 …and has settled within a minute', Math.abs(d.oneMin - d.target) < 0.05, JSON.stringify(d));
+  const st = await vp.evaluate(() => { deviceState = 'standby'; applyStandbyVisual(); updateLungView(); return document.querySelector('#tl-viz .lv-bp').textContent; });
+  ok('L17 standby: no pressure shown', st === '—', st);
   await vp.context().close(); }
 
 console.log('\nL13 accessible, and fits a phone');

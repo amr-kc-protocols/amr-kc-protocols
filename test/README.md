@@ -141,7 +141,13 @@ These suites live here:
   in ARDS, oxygen masking hypoventilation that room air reveals, PEEP opening
   an ARDS shunt that oxygen barely touches, COPD answering to oxygen, high
   PEEP backfiring in one-sided pneumonia, the Severinghaus curve, and the
-  numbers drifting to a change rather than jumping.
+  numbers drifting to a change rather than jumping. It checks the ARDS shunt
+  and dead space against inert-gas data (1985), Florio 2024 and Nuckton 2002. It
+  recomputes the blood pressure from the published cardiac-output numbers:
+  PEEP and auto-PEEP lower it (Auler 2000, Luo 2024), while CPAP in
+  high-filling-pressure heart failure raises output without dropping pressure
+  (De Hoyos 1995). It also checks that the pressure turns amber and red by
+  the Surviving Sepsis MAP target, and by PALS thresholds for children.
 
 - **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
   grade as correct. Each scenario's `goal.check()` is the therapy the

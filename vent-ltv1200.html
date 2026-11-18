@@ -492,7 +492,7 @@ canvas#pip-canvas{display:none}
 .lv-side{flex:1;min-width:0;display:flex;gap:8px}
 .lv-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .lv-phase{align-self:flex-start;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:0.05em;
-  padding:3px 7px;border-radius:5px;color:#8a93a8;background:rgba(138,147,168,0.12);white-space:nowrap}
+  padding:3px 7px;border-radius:5px;color:#8a93a8;background:rgba(138,147,168,0.12);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .lv-phase.insp{color:#7ee2a8;background:rgba(126,226,168,0.13)}
 .lv-phase.exp{color:#ffc46b;background:rgba(255,196,107,0.13)}
 .lv-phase.hold{color:#8fb8ff;background:rgba(143,184,255,0.14)}
@@ -500,8 +500,8 @@ canvas#pip-canvas{display:none}
 .lv-k{font-size:8px;font-weight:700;letter-spacing:0.08em;color:#8a96b2;text-transform:uppercase}
 .lv-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .lv-vol{font-family:var(--mono);font-size:10px;color:#8a96b2;white-space:nowrap}
-/* Monitor numerics: SpO₂ cyan and EtCO₂ yellow, as on most transport monitors */
-.lv-vitals{display:flex;gap:10px}
+/* Monitor numerics: SpO₂ cyan, EtCO₂ yellow, blood pressure white, as on most transport monitors */
+.lv-vitals{display:flex;flex-wrap:wrap;gap:4px 10px}
 .lv-vit{min-width:0}
 .lv-vk{font-size:8px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase}
 .lv-vv{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1;white-space:nowrap}
@@ -509,7 +509,10 @@ canvas#pip-canvas{display:none}
 .lv-vs{font-family:var(--mono);font-size:8.5px;color:#7d88a3;white-space:nowrap;margin-top:1px}
 .lv-vit.spo2 .lv-vk,.lv-vit.spo2 .lv-vv{color:#5fe2ef}
 .lv-vit.etco2 .lv-vk,.lv-vit.etco2 .lv-vv{color:#ffd84d}
-.lv-vit.spo2.warn .lv-vv{color:#ffb020}.lv-vit.spo2.bad .lv-vv{color:#ff6b73}
+.lv-vit.bp .lv-vk,.lv-vit.bp .lv-vv{color:#e8ecf8}
+.lv-vit.bp{flex-basis:100%;display:flex;align-items:baseline;flex-wrap:wrap;gap:0 5px}
+.lv-vit.bp .lv-vv{font-size:16px}.lv-vit.bp .lv-vs{margin-top:0}
+.lv-vit.warn .lv-vv{color:#ffb020}.lv-vit.bad .lv-vv{color:#ff6b73}
 .lv-note:empty{display:none}
 .lv-v{font-family:var(--mono);font-size:13px;font-weight:700;color:#eaf0ff;line-height:1.2}
 .lv-trap.on .lv-v{color:#ffb020}
@@ -4619,6 +4622,7 @@ function lvBuild(){
       +'<div class="lv-vitals">'
         +'<div class="lv-vit spo2"><div class="lv-vk">SpO₂</div><div class="lv-vv"><span class="lv-spo2">—</span><small>%</small></div><div class="lv-vs lv-pao2">PaO₂ —</div></div>'
         +'<div class="lv-vit etco2"><div class="lv-vk">EtCO₂</div><div class="lv-vv"><span class="lv-etco2">—</span></div><div class="lv-vs lv-paco2">PaCO₂ —</div></div>'
+        +'<div class="lv-vit bp"><div class="lv-vk">BP</div><div class="lv-vv lv-bp">—</div><div class="lv-vs lv-map">MAP —</div></div>'
       +'</div>'
       +'<div class="lv-trap"><div class="lv-k">End of expiration</div><div class="lv-v lv-trapv">—</div></div>'
       +'<div class="lv-note"></div>'
@@ -4627,6 +4631,7 @@ function lvBuild(){
   _lv={el:el, stage:q('.lv-stage'), rest:q('.lv-pose.rest'), full:q('.lv-pose.full'), flow:q('.lv-flow'),
        phase:q('.lv-phase'), vol:q('.lv-vol'), trap:q('.lv-trap'), trapv:q('.lv-trapv'), note:q('.lv-note'),
        spo2:q('.lv-spo2'), pao2:q('.lv-pao2'), etco2:q('.lv-etco2'), paco2:q('.lv-paco2'), spo2Box:q('.lv-vit.spo2'),
+       bp:q('.lv-bp'), map:q('.lv-map'), bpBox:q('.lv-vit.bp'),
        vit:null, vitT:null, vitKey:null,
        fill:q('.lv-fill'), floor:q('.lv-floor'), sprite:null, w:null, t:0, drawn:null, phaseKey:null, txtAt:0, staticKey:null,
        fo:0, fy:0, fdir:'', fh:0, fhAt:0};
@@ -4713,96 +4718,184 @@ function updateLungView(){
   lvLast={pose:pose, w:lv.w, flow:flow, flowDir:lv.fdir, frac:frac, v:s.v, phase:s.phase, vee:s.vee||0, cut:!!s.cut, sprite:sprite, ref:ref};
 }
 
-// ── FREE PLAY · SpO₂ AND EtCO₂ ────────────────────────────────
-// Modelled, not measured: textbook gas-exchange physiology, with per-lung
-// parameters that are teaching approximations, so each lung responds to the
-// vent the way its disease does.
+// ── FREE PLAY · SpO₂, EtCO₂ AND BLOOD PRESSURE ────────────────
+// Modelled, not measured: a "template" patient for teaching. The equations
+// are established physiology. Each per-lung number is anchored to a published
+// measurement where one exists and is marked as an estimate where it isn't.
+// The same table is in the README.
 //
-//  CO₂ — alveolar ventilation equation: PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A.
-//    V̇A = rate × (delivered Vt − dead space). Dead space is anatomic
-//    (2.2 mL/kg), equipment (0.5 mL/kg, at most 35 mL) and the disease's
-//    alveolar dead space (vdA × Vt). V̇CO₂ is 200 mL/min at 70 kg, scaled by
-//    weight^0.75. Alveolar dead space dilutes the exhaled gas (Bohr), so
-//    EtCO₂ reads below PaCO₂, more so in ARDS and obstruction.
-//  O₂ — alveolar gas equation (PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8), so
-//    hypoventilation lowers it and oxygen can mask that. Then two defects:
-//    V/Q mismatch (vq, mmHg off the end-capillary PO₂ — extra oxygen fixes
-//    it) and true shunt (sh — extra oxygen barely helps; PEEP opens it in a
-//    recruitable lung: sh falls from sh0 at PEEP 5 toward shMin with
-//    constant k). Above `over`, PEEP overdistends the good lung in one-sided
-//    pneumonia and the shunt grows again. Mixed by the shunt equation
-//    (Hb 14 g/dL, a–v O₂ difference 5 mL/dL); SpO₂ by the Severinghaus
-//    equation.
-//  Speed — the numbers drift to their new value with time constants of 20 s
-//    (SpO₂) and 45 s (CO₂) of sim time, so a change can be watched. A real
-//    patient's CO₂ takes 10–20 minutes to settle, and recruitment can take
-//    longer. Not modelled: cardiac output (high PEEP lowering it), shock,
-//    hemoglobin, altitude.
+//  Equations (established physiology)
+//   PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A                       alveolar ventilation equation
+//   V̇A = rate × (delivered Vt − anatomic − equipment − alveolar dead space)
+//   EtCO₂ = PaCO₂ × (1 − alveolar dead space ÷ alveolar Vt)    Bohr; normal gap 2–5 mmHg
+//   PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8                  alveolar gas equation, sea level
+//   CaO₂ = Cc′O₂ − shunt × (a–vO₂ difference) ÷ (1 − shunt)     shunt equation
+//   SpO₂ from PaO₂                                   Severinghaus 1979
+//
+//  Fixed values (textbook)
+//   V̇CO₂ 200 mL/min at 70 kg PBW, scaled by weight^0.75 for children;
+//   anatomic dead space 2.2 mL/kg; equipment 0.5 mL/kg, at most 35 mL
+//   (estimate); Hb 14 g/dL; a–vO₂ difference 5 mL/dL.
+//
+//  Per lung: shunt as a fraction of cardiac output, at PEEP 5
+//   Normal     0.03, the normal 2–5% venous admixture. Alveolar dead space set
+//              so the PaCO₂–EtCO₂ gap is 2–5 mmHg.
+//   ARDS       0.32: inert-gas shunt 32 ± 14% (Am Rev Respir Dis 1985;131:54,
+//              n=16); 0.49 at PEEP 0, near the half of cardiac output going
+//              to shunt or very-low-V/Q units in Dantzker 1979 (n=16). PEEP
+//              response fitted to COVID-19 ARDS, n=14 (Florio 2024): from PEEP
+//              5 to 10 to 15, venous admixture 33 → 23 → 18% and shunt
+//              36 → 27 → 24%. The model gives ×1 → ×0.71 → ×0.56. That is a
+//              PEEP responder; in a CT study 7 of 12 were (Karbing 2020).
+//              Physiologic Vd/Vt ≈ 0.58 at 6 mL/kg: Nuckton 2002, 0.58 ± 0.09.
+//   Pneumonia  0.22, plus 11% of blood flow to low-V/Q units: ventilated
+//              patients, inert gas (Gea 1991, n=10). A consolidated lobe
+//              recruits poorly, and above PEEP 10 the good lung overdistends
+//              (estimate, from physiology).
+//   COPD and asthma  low-V/Q units with little shunt (inert-gas studies), so
+//              oxygen corrects it. Size of the V/Q gap and dead space: estimates.
+//   Edema      shunt that PEEP/CPAP recruits strongly (estimate). That CPAP
+//              improves oxygenation in cardiogenic edema is trial-backed.
+//
+//  Blood pressure
+//   PEEP lowers cardiac output by cutting venous return. Relative to PEEP 5:
+//     PEEP 0  ×1.14  postop cardiac surgery, n=10 (Auler 2000: CI 3.90 vs 3.43)
+//     PEEP 10 ×0.98, PEEP 15 ×0.86   moderate–severe ARDS, n=52 (Luo 2024:
+//             CI 3.07 / 3.00 / 2.63). Florio 2024 agrees (CO 5.4 / 4.8 / 4.7).
+//     past 15 it keeps falling at the 10→15 slope: an extrapolation, in line
+//             with Jardin 1981 (CO and mean BP fell progressively to PEEP 30).
+//   Auto-PEEP counts the same as set PEEP: dynamic hyperinflation → ↓ venous
+//   return → hypotension (Pepe & Marini 1982; Tuxen 1987). In 88 ICU stays
+//   for severe asthma, hypotension occurred in 18, all of them ventilated
+//   (Williams 1992).
+//   Heart failure with high filling pressures (the edema lung) is the
+//   exception: CPAP raised cardiac index 2.47 → 2.91 → 3.12 at 0 / 5 / 10
+//   (De Hoyos 1995, n=8, wedge ≥ 12) by unloading the left ventricle. Not
+//   every patient responds (7 of 13 in Baratz 1992), so this is the responder.
+//   Arterial pressure did not change on CPAP or BiPAP in heart failure
+//   (Philip-Joet 1999, n=20). Past 10 there are no data; the model holds
+//   output flat to 15, then lets it fall like the others.
+//   Blood pressure falls less than cardiac output because vascular resistance
+//   rises. The model passes on half the change (estimate). With fluids to hold
+//   preload, mean pressure stayed flat from PEEP 10 to 20 in ARDS (Bruhn 2004,
+//   n=8); this patient gets no fluids. Pulse pressure follows stroke volume.
+//   The starting pressures are presets, not evidence.
+//   Colours: adult MAP < 65 (Surviving Sepsis 2021) or SBP < 90 red, and
+//   within 5 / 10 of those amber; children SBP < 70 + 2 × age (PALS) red,
+//   within 10 of it amber.
+//
+//  Not modelled: fluids, vasopressors, or a baroreflex beyond the half-change;
+//  the effect of cardiac output on oxygenation (it cuts both ways: lower
+//  output lowers mixed venous O₂ but also shrinks the shunt, Dantzker 1980);
+//  hypercapnia's effect on pressure; inspiratory pressure (only PEEP and
+//  auto-PEEP move the cardiac output, matching how the studies were run);
+//  hemoglobin; altitude.
+//  Speed: numbers drift with time constants of 20 s (O₂), 45 s (CO₂) and 10 s
+//  (blood pressure) of sim time. A real patient's CO₂ takes 10–20 minutes to
+//  settle and recruitment can take longer, so this is faster than life on
+//  purpose: a change has to be watchable.
 var VITAL_LUNG={
-  normal:   {sh0:0.03, shMin:0.02, k:6,  vq:0,  vdA:0.02},
-  ards:     {sh0:0.35, shMin:0.15, k:6,  vq:10, vdA:0.20},
-  copd:     {sh0:0.05, shMin:0.05, k:99, vq:25, vdA:0.18},
-  asthma:   {sh0:0.05, shMin:0.05, k:99, vq:20, vdA:0.15},
-  pneumonia:{sh0:0.28, shMin:0.20, k:8,  vq:10, vdA:0.08, over:10},
-  edema:    {sh0:0.25, shMin:0.08, k:5,  vq:10, vdA:0.08},
-  pedNormal:{sh0:0.03, shMin:0.02, k:6,  vq:0,  vdA:0.02},
-  pedArds:  {sh0:0.40, shMin:0.18, k:6,  vq:10, vdA:0.15},
-  pedAsthma:{sh0:0.05, shMin:0.05, k:99, vq:20, vdA:0.10},
-  pedBronch:{sh0:0.10, shMin:0.06, k:6,  vq:20, vdA:0.12}
+  //  s5: shunt at PEEP 5 · rec: recruitable share of the PEEP-0 shunt · vq: low-V/Q gap (mmHg)
+  //  vdA: alveolar dead space ÷ Vt · bp: preset systolic/diastolic at PEEP 5 · age: years, for PALS
+  normal:   {s5:0.03, rec:0,    vq:0,  vdA:0.05, bp:[120,75]},
+  ards:     {s5:0.32, rec:0.75, vq:10, vdA:0.14, bp:[114,68]},
+  copd:     {s5:0.04, rec:0,    vq:25, vdA:0.15, bp:[132,80]},
+  asthma:   {s5:0.03, rec:0,    vq:20, vdA:0.12, bp:[128,78]},
+  pneumonia:{s5:0.22, rec:0.25, vq:15, vdA:0.08, bp:[116,70], over:10},
+  edema:    {s5:0.25, rec:0.8,  vq:10, vdA:0.08, bp:[160,95], lvf:true},
+  pedNormal:{s5:0.03, rec:0,    vq:0,  vdA:0.05, bp:[100,60], age:6},
+  pedArds:  {s5:0.32, rec:0.75, vq:10, vdA:0.14, bp:[104,62], age:6},
+  pedAsthma:{s5:0.03, rec:0,    vq:20, vdA:0.10, bp:[108,66], age:8},
+  pedBronch:{s5:0.08, rec:0.3,  vq:15, vdA:0.10, bp:[90,55],  age:0.25}
 };
-var VIT_TAU_O2=20000, VIT_TAU_CO2=45000;          // ms of sim time
+var VIT_TAU_O2=20000, VIT_TAU_CO2=45000, VIT_TAU_BP=10000;   // ms of sim time
+var VIT_REC_K=8;                                            // cmH₂O; with rec 0.75, fits Florio 2024
 function sevSat(po2){ var p=Math.max(0.1,po2); return 1/(23400/(p*p*p+150*p)+1); }   // Severinghaus 1979
-// Steady-state gas exchange for the settings and lung on the panel now.
+// Shunt at a PEEP. A recruitable lung loses the recruitable share
+// exponentially with PEEP, scaled so the lung's own value holds at PEEP 5.
+function vitShunt(P,peep){
+  var g=function(x){ return (1-P.rec)+P.rec*Math.exp(-Math.max(0,x)/VIT_REC_K); };
+  var sh=P.s5*g(peep)/g(5);
+  if(P.over && peep>P.over) sh+=0.012*(peep-P.over);
+  return Math.max(0,Math.min(0.6,sh));
+}
+// Cardiac output relative to PEEP 5, by total PEEP (set + auto). Points
+// [PEEP, × PEEP-5 output]; past the last point it falls at `tail` per cmH₂O.
+var CO_PEEP={pts:[[0,3.90/3.43],[5,1],[10,3.00/3.07],[15,2.63/3.07]], tail:-(3.00-2.63)/3.07/5};
+var CO_PEEP_LVF={pts:[[0,2.47/2.91],[5,1],[10,3.12/2.91],[15,3.12/2.91]], tail:CO_PEEP.tail};
+function vitCardiacOutput(P,ptot){
+  var c=P.lvf?CO_PEEP_LVF:CO_PEEP, x=Math.max(0,ptot), pts=c.pts;
+  for(var i=1;i<pts.length;i++) if(x<=pts[i][0]){ var a=pts[i-1], b=pts[i]; return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0]); }
+  var l=pts[pts.length-1]; return Math.max(0.35, l[1]+c.tail*(x-l[0]));
+}
+// Blood pressure from cardiac output. Heart failure: CPAP's extra output comes
+// from unloading the ventricle, so pressure holds steady up to 15.
+function vitBP(P,ptot){
+  var co=vitCardiacOutput(P,ptot), map0=(P.bp[0]+2*P.bp[1])/3, pp0=P.bp[0]-P.bp[1], map, pp;
+  if(P.lvf){ var top=vitCardiacOutput(P,15), drop=ptot>15?co/top:1; map=map0*(1+0.5*(drop-1)); pp=pp0*drop; }
+  else { map=map0*(1+0.5*(co-1)); pp=pp0*co; }
+  return {co:co, map:map, sbp:map+2*pp/3, dbp:map-pp/3};
+}
+// Red and amber blood-pressure limits for a lung's patient
+function vitBPLimits(P){
+  if(P.age!=null){ var f=P.age<1?70:Math.min(90,70+2*P.age); return {sbpRed:f, sbpAmber:f+10, mapRed:0, mapAmber:0, why:'PALS: SBP < '+f+' is hypotension at this age'}; }
+  return {sbpRed:90, sbpAmber:100, mapRed:65, mapAmber:70, why:'MAP ≥ 65 (Surviving Sepsis 2021) and SBP ≥ 90'};
+}
+// Steady state for the settings and lung on the panel now.
 function vitalsTarget(){
   var key=freeLungKey, fl=FREE_LUNGS[key]||FREE_LUNGS.normal, P=VITAL_LUNG[key]||VITAL_LUNG.normal;
   var kg=fl.kg||TL_ADULT_KG, C=lung.compliance, spont=(ventMode==='cpap'||ventMode==='nppv');
-  var vt, rate;
+  var vt, rate, aP=spont?0:effectiveAutoPEEP();
   if(spont){ vt=(fl.kg?6*fl.kg:400)+vals.ps.v*C; rate=fl.spontRate||15; }   // the readout's own estimate
   else { vt=lvBreath().vt; rate=vals.rate.v; }                               // delivered, after any High Pressure cut
-  var vdAnat=2.2*kg, vdApp=Math.min(35,0.5*kg), vd=vdAnat+vdApp+P.vdA*vt;
+  // CO₂
+  var vdAnat=2.2*kg, vdApp=Math.min(35,0.5*kg), vdAlv=P.vdA*vt, vd=vdAnat+vdApp+vdAlv;
   var va=Math.max(0.05, rate*(vt-vd)/1000);                                  // L/min
   var vco2=200*Math.pow(kg/70,0.75);                                         // mL/min
   var paco2=Math.min(150, 0.863*vco2/va);
-  var etco2=paco2*Math.max(0.3, 1-P.vdA*vt/Math.max(1,vt-vdAnat-vdApp));
-  var peep=vals.peep.v, fio2=vals.fio2.v/100;
-  var sh=P.shMin+(P.sh0-P.shMin)*Math.exp(-(peep-5)/P.k);
-  sh=Math.min(0.5, sh, P.sh0*1.6);
-  if(P.over && peep>P.over) sh+=0.012*(peep-P.over);
+  var etco2=paco2*Math.max(0.3, 1-vdAlv/Math.max(1,vt-vdAnat-vdApp));
+  // O₂
+  var peep=vals.peep.v, fio2=vals.fio2.v/100, sh=vitShunt(P,peep);
   var pAO2=Math.max(0, fio2*713-paco2/0.8), pc=Math.max(1, pAO2-P.vq);
-  var cap=1.34*14, cc=cap*sevSat(pc)+0.003*pc;                                // mL O₂/dL
-  var ca=cc-sh*5/(1-sh);
-  var lo=1, hi=700;                                                           // PaO₂ that carries that content
+  var cap=1.34*14, cc=cap*sevSat(pc)+0.003*pc, ca=cc-sh*5/(1-sh);            // mL O₂/dL
+  var lo=1, hi=700;                                                          // PaO₂ that carries that content
   for(var i=0;i<40;i++){ var mid=(lo+hi)/2; if(cap*sevSat(mid)+0.003*mid<ca) lo=mid; else hi=mid; }
   var pao2=(lo+hi)/2;
-  return {spo2:Math.max(0,Math.min(100,sevSat(pao2)*100)), pao2:pao2, paco2:paco2, etco2:etco2, shunt:sh, va:va};
+  var bp=vitBP(P,peep+aP);
+  return {spo2:Math.max(0,Math.min(100,sevSat(pao2)*100)), pao2:pao2, paco2:paco2, etco2:etco2,
+          shunt:sh, va:va, vdvt:vd/vt, peepTotal:peep+aP, co:bp.co, map:bp.map, sbp:bp.sbp, dbp:bp.dbp};
 }
 function lvUpdateVitals(lv,run){
   if(!run){
     lv.vit=null; lv.vitT=null;
     lv.spo2.textContent='—'; lv.etco2.textContent='—'; lv.pao2.textContent='PaO₂ —'; lv.paco2.textContent='PaCO₂ —';
-    lv.spo2Box.className='lv-vit spo2'; lvVitals=null; return;
+    lv.bp.textContent='—'; lv.map.textContent='MAP —';
+    lv.spo2Box.className='lv-vit spo2'; lv.bpBox.className='lv-vit bp'; lvVitals=null; return;
   }
-  var tg=vitalsTarget(), key=freeLungKey;
+  var tg=vitalsTarget(), key=freeLungKey, P=VITAL_LUNG[key]||VITAL_LUNG.normal;
   if(!lv.vit || lv.vitKey!==key || lv.vitT===null || simTime<lv.vitT || simTime-lv.vitT>600000){
-    lv.vit={spo2:tg.spo2, pao2:tg.pao2, paco2:tg.paco2, etco2:tg.etco2};      // a new patient: start where they are
+    lv.vit={spo2:tg.spo2, pao2:tg.pao2, paco2:tg.paco2, etco2:tg.etco2, sbp:tg.sbp, dbp:tg.dbp, map:tg.map};   // a new patient: start where they are
   } else {
-    var dS=simTime-lv.vitT, kO=1-Math.exp(-dS/VIT_TAU_O2), kC=1-Math.exp(-dS/VIT_TAU_CO2);
-    lv.vit.spo2+=(tg.spo2-lv.vit.spo2)*kO; lv.vit.pao2+=(tg.pao2-lv.vit.pao2)*kO;
-    lv.vit.paco2+=(tg.paco2-lv.vit.paco2)*kC; lv.vit.etco2+=(tg.etco2-lv.vit.etco2)*kC;
+    var dS=simTime-lv.vitT, kO=1-Math.exp(-dS/VIT_TAU_O2), kC=1-Math.exp(-dS/VIT_TAU_CO2), kB=1-Math.exp(-dS/VIT_TAU_BP), v0=lv.vit;
+    v0.spo2+=(tg.spo2-v0.spo2)*kO; v0.pao2+=(tg.pao2-v0.pao2)*kO;
+    v0.paco2+=(tg.paco2-v0.paco2)*kC; v0.etco2+=(tg.etco2-v0.etco2)*kC;
+    v0.sbp+=(tg.sbp-v0.sbp)*kB; v0.dbp+=(tg.dbp-v0.dbp)*kB; v0.map+=(tg.map-v0.map)*kB;
   }
   lv.vitT=simTime; lv.vitKey=key;
-  var v=lv.vit, sp=Math.round(v.spo2);
-  if(lv.spo2.textContent!==String(sp)){
-    lv.spo2.textContent=sp; lv.etco2.textContent=Math.round(v.etco2);
-    lv.pao2.textContent='PaO₂ '+Math.round(v.pao2); lv.paco2.textContent='PaCO₂ '+Math.round(v.paco2);
-  } else if(lv.etco2.textContent!==String(Math.round(v.etco2))){
-    lv.etco2.textContent=Math.round(v.etco2); lv.paco2.textContent='PaCO₂ '+Math.round(v.paco2); lv.pao2.textContent='PaO₂ '+Math.round(v.pao2);
-  }
+  var v=lv.vit, sp=Math.round(v.spo2), set=function(el,t){ if(el.textContent!==t) el.textContent=t; };
+  set(lv.spo2,String(sp)); set(lv.etco2,String(Math.round(v.etco2)));
+  set(lv.pao2,'PaO₂ '+Math.round(v.pao2)); set(lv.paco2,'PaCO₂ '+Math.round(v.paco2));
+  var sbp=Math.round(v.sbp), dbp=Math.round(v.dbp), map=Math.round(v.map);
+  set(lv.bp,sbp+'/'+dbp); set(lv.map,'MAP '+map);
   // SpO₂ floor: 88% where ARDSnet and obstructive-disease practice accept 88–92/95, 92% otherwise
   var floor=/ards|copd|asthma|Asthma|Bronch|Ards/.test(key)?88:92;
   lv.spo2Box.className='lv-vit spo2'+(sp<floor-4?' bad':(sp<floor?' warn':''));
   lv.spo2Box.title='SpO₂ target ≥ '+floor+'% for this lung';
-  lvVitals={shown:{spo2:v.spo2, pao2:v.pao2, paco2:v.paco2, etco2:v.etco2}, target:tg, floor:floor};
+  var L=vitBPLimits(P), bpSt=(sbp<L.sbpRed||map<L.mapRed)?'bad':((sbp<L.sbpAmber||map<L.mapAmber)?'warn':'');
+  lv.bpBox.className='lv-vit bp'+(bpSt?' '+bpSt:'');
+  lv.bpBox.title='Modelled arterial pressure (a real cuff cycles every 3–5 min). '+L.why+'. Total PEEP '+Math.round(tg.peepTotal)+' cmH₂O';
+  lvVitals={shown:{spo2:v.spo2, pao2:v.pao2, paco2:v.paco2, etco2:v.etco2, sbp:v.sbp, dbp:v.dbp, map:v.map},
+            target:tg, floor:floor, bpStatus:bpSt||'ok', bpLimits:L};
 }
 var lvVitals=null;
 
