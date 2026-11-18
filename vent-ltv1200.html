@@ -2590,7 +2590,7 @@ function animLoop(ts){
     } else if(pressureHistory.length){
       clearBreathDisplays();   // just powered off — go dark
     }
-    if(freeMode && _lv) updateLungView();   // the test-lung picture rides the same clock as the trace
+    if(_lv) updateLungView();   // the lung picture rides the same clock as the trace (no-op when not on the card)
     // Evaluate alarms ~4×/sec (also refreshes the silence countdown / clears on standby)
     _alarmEvalAcc+=dt;
     if(_alarmEvalAcc>=250){ _alarmEvalAcc=0; evaluateAlarms(); }
@@ -2844,6 +2844,9 @@ document.addEventListener('keydown',function(e){
 // GAME / TUTORIAL LAYER
 // ══════════════════════════════════════════════════════════════
 
+// The tutorial's patient, for the lung view: an adult with healthy lungs on
+// the tutorial's generic lung mechanics.
+var TUTORIAL_PATIENT={sprite:'normal', label:'patient\'s lungs', vit:{s5:0.03, rec:0, q:0, vdA:0.05, bp:[120,75], floor:92}};
 var STAGE_DEFS=[
   {
     name:'Stage 1 · The Baseline Breath',
@@ -3000,6 +3003,13 @@ function ieExpRatio(){
   return expMs/inspMs;
 }
 
+// `patient` drives the lung view and its live vitals: the picture, and a
+// vitals profile (see VITAL_LUNG for the fields and their evidence). Each one
+// starts from the matching Free Play lung and is tuned, inside published
+// ranges, so the starting settings reproduce the story's monitor. `start`
+// holds story values that are not at steady state, such as a CO₂ that is
+// still climbing; they drift toward what the settings produce. Every
+// patient's numbers and reasons are in the README.
 var SCENARIO_LEVELS={
   2:[
     // ─── L2 S1 ────────────────────────────────────────────────
@@ -3007,8 +3017,9 @@ var SCENARIO_LEVELS={
       badgeCls:'scen-badge-2',
       intro:'Interfacility transfer — you\'re moving a fresh post-op patient from a community hospital to the tertiary ICU. During your pre-transport assessment the sending RT mentions the CO₂ has crept up on the last two gases. You get your LTV set before you load.',
       scenario:'45-year-old post-op man, 178 cm tall (≈ 70 kg predicted body weight), sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
-      vitals:[{k:'SpO₂',v:'93%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'PBW',v:'70 kg'},{k:'HR',v:'102'}],
+      vitals:[{k:'SpO₂',v:'98%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'PBW',v:'70 kg'},{k:'HR',v:'102'}],
       lung:{compliance:40,resistance:10,label:'Post-op'},
+      patient:{sprite:'normal', label:'post-op patient\'s lungs', vit:{s5:0.12, rec:0.5, q:0.03, vdA:0.05, bp:[128,76], floor:92}, start:{paco2:62}},
       setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'PaCO₂ 62, pH 7.28, oxygenation adequate. What is the disturbance, and what has to change?',
@@ -3035,7 +3046,8 @@ var SCENARIO_LEVELS={
       scenario:'62-year-old with ARDS. SpO₂ is stuck at 85% even on FiO₂ 60%. CXR shows dense bilateral infiltrates. PEEP is currently only 3 cmH₂O. EtCO₂ and pH are acceptable.',
       vitals:[{k:'HR',v:'118'},{k:'SpO₂',v:'85%'},{k:'EtCO₂',v:'38 mmHg'},{k:'FiO₂',v:'60%'},{k:'PEEP',v:'3 cmH₂O'}],
       lung:{compliance:28,resistance:10,label:'ARDS'},
-      setup:{mode:'ac',bt:'volume',rate:16,vt:400,it:1.0,peep:3,pc:15,ps:10,fio2:60,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
+      patient:{sprite:'ards', label:'patient\'s lungs (ARDS)', vit:{s5:0.345, rec:0.75, q:0.05, vdA:0.14, bp:[112,66], floor:88}},
+      setup:{mode:'ac',bt:'volume',rate:22,vt:400,it:1.0,peep:3,pc:15,ps:10,fio2:60,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Refractory hypoxemia on a high FiO₂ with diffuse infiltrates and PEEP of 3. What will help most?',
         choices:[
@@ -3061,6 +3073,7 @@ var SCENARIO_LEVELS={
       scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. The flow–time curve shows expiratory flow never returns to zero before the next breath begins, EtCO₂ is climbing, and the patient is beginning to fight the vent.',
       vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'pH',v:'7.30'},{k:'HR',v:'112'}],
       lung:{compliance:50,resistance:22,autoPEEP:6,label:'COPD'},
+      patient:{sprite:'copd', label:'patient\'s lungs (COPD)', vit:{s5:0.11, rec:0, q:0.28, vdA:0.32, etF:0.46, vco2:220, bp:[138,84], floor:88}, start:{etco2:52}},
       setup:{mode:'ac',bt:'volume',rate:18,vt:500,it:1.0,peep:0,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Expiratory flow never returns to baseline before the next breath, and CO₂ is rising. What is the problem?',
@@ -3088,6 +3101,7 @@ var SCENARIO_LEVELS={
       scenario:'28-year-old post-op, awake and air-hungry on AC-VC. Pulling hard at the start of each breath, the flow alarm keeps tripping, and the total rate has climbed to 28. Oxygenation and CO₂ are fine. Inspiratory time is set long at 1.2 s. Sedation is being addressed — but there is also a mechanical fix.',
       vitals:[{k:'SpO₂',v:'97%'},{k:'RR total',v:'28'},{k:'EtCO₂',v:'42 mmHg'},{k:'HR',v:'136'}],
       lung:{compliance:50,resistance:8,label:'Healthy'},
+      patient:{sprite:'normal', label:'patient\'s lungs', vit:{s5:0.12, rec:0.5, q:0.03, vdA:0.05, vco2:210, bp:[142,86], floor:92}},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.2,peep:5,pc:15,ps:8,fio2:40,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'A vigorous patient is out-pacing the vent\'s flow and stacking effort against a long inspiration. Besides sedation, what setting change helps most?',
@@ -3114,6 +3128,7 @@ var SCENARIO_LEVELS={
       scenario:'56-year-old in septic shock, lactate 6.2. ABG: pH 7.18 with PaCO₂ already low at 28. They were breathing 30+ before intubation. On the current settings MV is only 7.2 L/min — and the low PaCO₂ says they were doing much more work than that themselves.',
       vitals:[{k:'HR',v:'142'},{k:'SpO₂',v:'95%'},{k:'PaCO₂',v:'28 mmHg'},{k:'EtCO₂',v:'26 mmHg'},{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'}],
       lung:{compliance:40,resistance:10,label:'Septic'},
+      patient:{sprite:'ards', label:'patient\'s lungs (sepsis, lung injury)', vit:{s5:0.27, rec:0.4, q:0.05, vdA:0.08, vco2:230, bp:[90,52], floor:92}, start:{paco2:28, etco2:26}},
       setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:8,pc:15,ps:10,fio2:60,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'pH 7.18 but PaCO₂ is already LOW at 28. What is the vent\'s job here?',
@@ -3143,6 +3158,7 @@ var SCENARIO_LEVELS={
       scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support (FiO₂ 40%, PEEP 5) and they are hemodynamically stable. They\'re fully controlled on AC right now.',
       vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'FiO₂',v:'40%'}],
       lung:{compliance:45,resistance:10,label:'Recovering'},
+      patient:{sprite:'normal', label:'patient\'s lungs (recovering)', vit:{s5:0.13, rec:0.5, q:0.03, vdA:0.06, vco2:192, bp:[124,76], floor:92, paco2Spont:42}},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Awake, strong effort, good gas exchange on modest support, stable — the readiness screen is passed. Under your medical-control order to ease support, what is the appropriate transport step?',
@@ -3169,6 +3185,7 @@ var SCENARIO_LEVELS={
       scenario:'Intubated status asthmaticus on volume control. Peak pressure lurches breath to breath — 32 one breath, 54 the next — but an inspiratory-hold plateau is far lower, around 25. The rate is 22 and expiratory flow doesn\'t return to baseline before the next breath. SpO₂ and CO₂ are holding for now.',
       vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54'},{k:'Pplat',v:'~25 cmH₂O'},{k:'EtCO₂',v:'44 mmHg'},{k:'HR',v:'104'}],
       lung:{compliance:45,resistance:30,autoPEEP:8,label:'Status asthmaticus'},
+      patient:{sprite:'asthma', label:'patient\'s lungs (status asthmaticus)', vit:{s5:0.02, rec:0, q:0.25, vdA:0.32, etF:0.46, vco2:265, bp:[128,78], floor:88}},
       setup:{mode:'ac',bt:'volume',rate:22,vt:550,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'PIP swings to 54, but the inspiratory-hold plateau is only ~25. What does that tell you, and what is the priority?',
@@ -3192,12 +3209,13 @@ var SCENARIO_LEVELS={
     { name:'Losing the Oxygenation Battle',
       badgeCls:'scen-badge-3',
       intro:'You\'re transferring a severe ARDS patient to an ECMO center. Partway there the saturations start sliding despite everything the sending team set. The monitor keeps alarming in the back of the truck — this is the oxygenation battle, and you\'re losing it.',
-      scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82%. The latest ABG shows PaO₂ 41 mmHg on FiO₂ 0.70 — a P/F ratio around 59. The tidal volume is fine; oxygenation is the crisis.',
-      vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'PaO₂',v:'41 mmHg'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8'},{k:'P/F',v:'≈ 59'}],
+      scenario:'ARDS, day 2, already on lung-protective tidal volumes. Despite PEEP 8 and FiO₂ 70%, SpO₂ has fallen to 82%. The latest ABG shows PaO₂ 47 mmHg on FiO₂ 0.70 — a P/F ratio around 67. The tidal volume is fine; oxygenation is the crisis.',
+      vitals:[{k:'HR',v:'122'},{k:'SpO₂',v:'82%'},{k:'PaO₂',v:'47 mmHg'},{k:'FiO₂',v:'70%'},{k:'PEEP',v:'8'},{k:'P/F',v:'≈ 67'}],
       lung:{compliance:22,resistance:10,label:'Severe ARDS'},
+      patient:{sprite:'ards', label:'patient\'s lungs (severe ARDS)', vit:{s5:0.50, rec:0.5, q:0.05, vdA:0.14, bp:[112,66], floor:88}},
       setup:{mode:'ac',bt:'volume',rate:20,vt:400,it:1.0,peep:8,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
-        q:'Severe, refractory hypoxemia (P/F ≈ 59) already on lung-protective volumes. What\'s the next ventilator move?',
+        q:'Severe, refractory hypoxemia (P/F ≈ 67) already on lung-protective volumes. What\'s the next ventilator move?',
         choices:[
           'Increase the tidal volume to recruit more lung',
           'Climb the ARDSnet FiO₂/PEEP ladder — raise PEEP and FiO₂ together',
@@ -3221,6 +3239,7 @@ var SCENARIO_LEVELS={
       scenario:'24-year-old, high-speed crash, severe TBI. ICP is 28 and climbing, and the left pupil has just blown — herniation in progress. Definitive neurosurgical care is still eight minutes out. PaCO₂ is 42.',
       vitals:[{k:'HR',v:'96'},{k:'SpO₂',v:'99%'},{k:'EtCO₂',v:'40 mmHg'},{k:'PaCO₂',v:'42 mmHg'},{k:'ICP',v:'28 mmHg'},{k:'CPP',v:'62'},{k:'GCS',v:'6T'}],
       lung:{compliance:50,resistance:8,label:'TBI (lungs OK)'},
+      patient:{sprite:'normal', label:'patient\'s lungs (TBI, lungs healthy)', vit:{s5:0.03, rec:0, q:0, vdA:0.05, vco2:225, bp:[130,71], floor:92, bpLim:{sbpRed:110, sbpAmber:120, mapRed:0, mapAmber:0, why:'Brain Trauma Foundation 2016: SBP ≥ 110 at age 15–49'}}},
       setup:{mode:'ac',bt:'volume',rate:16,vt:500,it:1.0,peep:8,pc:15,ps:10,fio2:40,sens:3,hipres:50,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Acute herniation, surgeon minutes away. What emergency ventilator maneuver buys time — and what is the trap?',
@@ -4016,7 +4035,8 @@ function renderMissionCard(){
     var head=prog+'<div class="mission-stage">'+s.name+'</div>';
     // New problem-solving tutorial: decide → set → confirm
     if(s.diagnose && s.goal){
-      bar.innerHTML=head+(s.brief?'<div class="mission-hint">'+s.brief+'</div>':'')+renderSolveBody(s);
+      bar.innerHTML=head+(s.brief?'<div class="mission-hint">'+s.brief+'</div>':'')+lvSlotHtml()+renderSolveBody(s);
+      lvSeat(bar);
       return;
     }
     // Legacy target-match tutorial fallback
@@ -4042,11 +4062,13 @@ function renderMissionCard(){
     +'<span class="scen-badge '+sc.badgeCls+'">'+taskBadge(sc)+'</span>'
     +'</div>'
     +'<div class="scen-text">'+sc.scenario+'</div>'
-    +vitalsHtml;
+    +vitalsHtml
+    +lvSlotHtml();
 
   // ── NEW PROBLEM-SOLVING FORMAT (Assess → Decide → Act → Confirm) ──
   if(sc.diagnose && sc.goal){
     bar.innerHTML=header+renderSolveBody(sc);
+    lvSeat(bar);
     return;
   }
 
@@ -4055,6 +4077,14 @@ function renderMissionCard(){
     +(ready2?'✓ SETTINGS CORRECT — ANSWER THE QUESTION':'Adjust settings to match targets above')+'</button>';
 
   bar.innerHTML=header+renderTargetBadges(sc.targets)+cta2;
+  lvSeat(bar);
+}
+// The lung view in a mission card: a slot in the markup, then the one
+// persistent node seated into it, so the art never reloads between renders.
+function lvSlotHtml(){ return lvPatient()?'<div class="tl-viz-slot"></div>':''; }
+function lvSeat(bar){
+  var slot=bar.querySelector('.tl-viz-slot');
+  if(slot){ slot.replaceWith((_lv||lvBuild()).el); updateLungView(); }
 }
 
 // ── QUIZ ──────────────────────────────────────────────────────
@@ -4544,7 +4574,7 @@ function lvFit(own,to){
 }
 var LV_PHASE={insp:'INSPIRATION ↓', exp:'EXPIRATION ↑', hold:'INSP HOLD', cut:'INSP · HI PRES CUT', off:'STANDBY'};
 var _lv=null, lvLast=null;
-function lvRefMl(){ var fl=freeLung(); return LV_REF_ML_PER_KG*((fl&&fl.kg)||LV_ADULT_KG); }
+function lvRefMl(){ var pt=lvPatient(); return LV_REF_ML_PER_KG*((pt&&pt.peds&&pt.kg)||LV_ADULT_KG); }
 function lvTauMs(){ return Math.max(50, lung.resistance*lung.compliance); }   // cmH₂O/(L/s) × mL/cmH₂O = ms
 // Fraction of the breath delivered t ms into an inspiration lasting ti ms.
 function lvRise(t,ti,tau,decel){
@@ -4594,8 +4624,8 @@ function lungVolumeAt(tMs){
       if(mEl>=0 && mEl<mTi)     return Object.assign(base,{v:mVt*lvRise(mEl,mTi,tau,true), phase:'insp'});
       if(mEl>=mTi && mEl<mTi+500) return Object.assign(base,{v:mVt*Math.exp(-(mEl-mTi)/tau), phase:'exp'});
     }
-    var fl=freeLung();
-    var sVt=((fl&&fl.kg)?6*fl.kg:400)+vals.ps.v*C;            // same estimate as the minute-volume readout
+    var pt=lvPatient();
+    var sVt=((pt&&pt.peds)?6*pt.kg:400)+vals.ps.v*C;          // same estimate as the minute-volume readout
     var sb=spontBreath(tMs);                                   // same breath clock as the trace
     var cyc=sb.cycMs, ph=sb.ph, i0=0.06, i1=0.43;              // effort dip, then rise + support plateau
     if(ph<i0) return Object.assign(base,{v:0, phase:'insp'});
@@ -4653,16 +4683,18 @@ function lvDraw(lv,w){
     lv.rest.style.transform=''; lv.full.style.transform='';
   }
 }
-// Called every animation frame in Free Play, and whenever the card re-renders.
+// Called every animation frame wherever the card shows the lung view
+// (Free Play, the tutorial and the scenarios), and whenever the card re-renders.
 function updateLungView(){
-  var lv=_lv; if(!lv||!freeMode||!lv.el.isConnected) return;
-  var fl=freeLung(), sprite=(fl&&fl.sprite)||'normal';
-  if(lv.sprite!==sprite){
+  var lv=_lv; if(!lv||!lv.el.isConnected) return;
+  var pt=lvPatient(); if(!pt) return;
+  var sprite=pt.sprite||'normal';
+  if(lv.sprite!==sprite || lv.label!==pt.label){
     var row=LV_ROWS[sprite]||0;
     lv.rest.style.backgroundPosition='0% '+(row*20)+'%';
     lv.full.style.backgroundPosition='100% '+(row*20)+'%';
-    lv.stage.setAttribute('aria-label','Schematic of the '+fl.label+' test lung, filling and emptying with each breath the vent delivers');
-    lv.sprite=sprite; lv.drawn=null;
+    lv.stage.setAttribute('aria-label','Schematic of the '+pt.label+', filling and emptying with each breath the vent delivers');
+    lv.sprite=sprite; lv.label=pt.label; lv.drawn=null;
   }
   var run=deviceRunning();
   var s=run?lungVolumeAt(simTime):{v:0, phase:'off', vee:0, aPEEP:0, cut:false};
@@ -4727,13 +4759,19 @@ function updateLungView(){
 //  Equations (established physiology)
 //   PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A                       alveolar ventilation equation
 //   V̇A = rate × (delivered Vt − anatomic − equipment − alveolar dead space)
-//   EtCO₂ = PaCO₂ × (1 − alveolar dead space ÷ alveolar Vt)    Bohr; normal gap 2–5 mmHg
+//   EtCO₂ = PaCO₂ × (1 − f × alveolar dead space ÷ alveolar Vt)   Bohr; normal gap 2–5 mmHg.
+//          f = 1 for unperfused (parallel) dead space; less in obstruction,
+//          where slow units empty last and lift the end-tidal value
 //   PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8                  alveolar gas equation, sea level
-//   CaO₂ = Cc′O₂ − shunt × (a–vO₂ difference) ÷ (1 − shunt)     shunt equation
+//   Three compartments (Riley; the shape inert-gas studies report): blood
+//   flow to shunt, to low-V/Q units (V/Q 0.08) and to ideal units. A
+//   low-V/Q unit's PO₂ comes from its own O₂ balance,
+//   V/Q × (FiO₂ − PAO₂/713) = Cc′O₂ − Cv̄O₂, so oxygen fixes it and not a shunt.
 //   SpO₂ from PaO₂                                   Severinghaus 1979
 //
 //  Fixed values (textbook)
-//   V̇CO₂ 200 mL/min at 70 kg PBW, scaled by weight^0.75 for children;
+//   V̇CO₂ 200 mL/min at 70 kg PBW, scaled by weight^0.75 for children
+//   (a patient can carry its own, e.g. sepsis);
 //   anatomic dead space 2.2 mL/kg; equipment 0.5 mL/kg, at most 35 mL
 //   (estimate); Hb 14 g/dL; a–vO₂ difference 5 mL/dL.
 //
@@ -4752,8 +4790,16 @@ function updateLungView(){
 //              patients, inert gas (Gea 1991, n=10). A consolidated lobe
 //              recruits poorly, and above PEEP 10 the good lung overdistends
 //              (estimate, from physiology).
-//   COPD and asthma  low-V/Q units with little shunt (inert-gas studies), so
-//              oxygen corrects it. Size of the V/Q gap and dead space: estimates.
+//   Asthma     no shunt; 10.5% of blood flow to low-V/Q units in acute severe
+//              asthma (Ballester 1989, n=19).
+//   COPD       low-V/Q units and essentially no shunt (Wagner 1977); 20% of
+//              flow is an estimate.
+//   COPD and asthma dead space: physiologic Vd/Vt ≈ 0.70 in ventilated
+//              severe obstruction (COPD, 0.69–0.71 in a crossover study;
+//              Tuxen 1987's patients needed 15.7 L/min for normocapnia, which
+//              implies about the same). EtCO₂ ≈ 0.76 × PaCO₂ in ventilated
+//              COPD (Tyagi 2021, n=73: 61 vs 80 mmHg), so f ≈ 0.46. Asthma
+//              borrows the COPD numbers (estimate).
 //   Edema      shunt that PEEP/CPAP recruits strongly (estimate). That CPAP
 //              improves oxygenation in cardiogenic edema is trial-backed.
 //
@@ -4789,25 +4835,28 @@ function updateLungView(){
 //  output lowers mixed venous O₂ but also shrinks the shunt, Dantzker 1980);
 //  hypercapnia's effect on pressure; inspiratory pressure (only PEEP and
 //  auto-PEEP move the cardiac output, matching how the studies were run);
-//  hemoglobin; altitude.
+//  hemoglobin; altitude; breaths the patient triggers above the set rate;
+//  heart rate.
 //  Speed: numbers drift with time constants of 20 s (O₂), 45 s (CO₂) and 10 s
 //  (blood pressure) of sim time. A real patient's CO₂ takes 10–20 minutes to
 //  settle and recruitment can take longer, so this is faster than life on
 //  purpose: a change has to be watchable.
 var VITAL_LUNG={
-  //  s5: shunt at PEEP 5 · rec: recruitable share of the PEEP-0 shunt · vq: low-V/Q gap (mmHg)
-  //  vdA: alveolar dead space ÷ Vt · bp: preset systolic/diastolic at PEEP 5 · age: years, for PALS
-  normal:   {s5:0.03, rec:0,    vq:0,  vdA:0.05, bp:[120,75]},
-  ards:     {s5:0.32, rec:0.75, vq:10, vdA:0.14, bp:[114,68]},
-  copd:     {s5:0.04, rec:0,    vq:25, vdA:0.15, bp:[132,80]},
-  asthma:   {s5:0.03, rec:0,    vq:20, vdA:0.12, bp:[128,78]},
-  pneumonia:{s5:0.22, rec:0.25, vq:15, vdA:0.08, bp:[116,70], over:10},
-  edema:    {s5:0.25, rec:0.8,  vq:10, vdA:0.08, bp:[160,95], lvf:true},
-  pedNormal:{s5:0.03, rec:0,    vq:0,  vdA:0.05, bp:[100,60], age:6},
-  pedArds:  {s5:0.32, rec:0.75, vq:10, vdA:0.14, bp:[104,62], age:6},
-  pedAsthma:{s5:0.03, rec:0,    vq:20, vdA:0.10, bp:[108,66], age:8},
-  pedBronch:{s5:0.08, rec:0.3,  vq:15, vdA:0.10, bp:[90,55],  age:0.25}
+  //  s5: shunt at PEEP 5 · rec: recruitable share of the PEEP-0 shunt · q: blood flow to low-V/Q units
+  //  vdA: alveolar dead space ÷ Vt · etF: share of it that dilutes end-tidal gas (1 = all)
+  //  bp: preset systolic/diastolic at PEEP 5 · age: years, for PALS · floor: SpO₂ target
+  normal:   {s5:0.03, rec:0,    q:0,     vdA:0.05, bp:[120,75], floor:92},
+  ards:     {s5:0.32, rec:0.75, q:0.05,  vdA:0.14, bp:[114,68], floor:88},
+  copd:     {s5:0.03, rec:0,    q:0.20,  vdA:0.32, etF:0.46, bp:[132,80], floor:88},
+  asthma:   {s5:0.02, rec:0,    q:0.105, vdA:0.32, etF:0.46, bp:[128,78], floor:88},
+  pneumonia:{s5:0.22, rec:0.25, q:0.11,  vdA:0.08, bp:[116,70], over:10, floor:92},
+  edema:    {s5:0.25, rec:0.8,  q:0.05,  vdA:0.08, bp:[160,95], lvf:true, floor:92},
+  pedNormal:{s5:0.03, rec:0,    q:0,     vdA:0.05, bp:[100,60], age:6, floor:92},
+  pedArds:  {s5:0.32, rec:0.75, q:0.05,  vdA:0.14, bp:[104,62], age:6, floor:88},
+  pedAsthma:{s5:0.02, rec:0,    q:0.105, vdA:0.10, bp:[108,66], age:8, floor:88},
+  pedBronch:{s5:0.08, rec:0.3,  q:0.10,  vdA:0.10, bp:[90,55],  age:0.25, floor:88}
 };
+var VIT_VQ_LOW=0.08;   // the low-V/Q compartment's ratio: inside the inert-gas "< 0.1" band (estimate)
 var VIT_TAU_O2=20000, VIT_TAU_CO2=45000, VIT_TAU_BP=10000;   // ms of sim time
 var VIT_REC_K=8;                                            // cmH₂O; with rec 0.75, fits Florio 2024
 function sevSat(po2){ var p=Math.max(0.1,po2); return 1/(23400/(p*p*p+150*p)+1); }   // Severinghaus 1979
@@ -4841,26 +4890,58 @@ function vitBPLimits(P){
   if(P.age!=null){ var f=P.age<1?70:Math.min(90,70+2*P.age); return {sbpRed:f, sbpAmber:f+10, mapRed:0, mapAmber:0, why:'PALS: SBP < '+f+' is hypotension at this age'}; }
   return {sbpRed:90, sbpAmber:100, mapRed:65, mapAmber:70, why:'MAP ≥ 65 (Surviving Sepsis 2021) and SBP ≥ 90'};
 }
-// Steady state for the settings and lung on the panel now.
+// O₂ content (mL/dL) at a PO₂, Hb 14
+function vitO2Content(p){ return 1.34*14*sevSat(p)+0.003*p; }
+function vitPO2ForContent(c){
+  var lo=1, hi=700;
+  for(var i=0;i<40;i++){ var mid=(lo+hi)/2; if(vitO2Content(mid)<c) lo=mid; else hi=mid; }
+  return (lo+hi)/2;
+}
+// Arterial O₂ content from the three compartments
+function vitArterialO2(fio2,pAO2,sh,q){
+  var avd=5, cI=vitO2Content(pAO2), ca=cI-sh*avd/(1-sh), cLow=cI;
+  if(q>0) for(var it=0; it<12; it++){
+    var cv=ca-avd, lo=1, hi=Math.max(1.5,pAO2);
+    for(var j=0;j<32;j++){ var m=(lo+hi)/2; if(VIT_VQ_LOW*(fio2-m/713)*100 > vitO2Content(m)-cv) lo=m; else hi=m; }
+    cLow=vitO2Content((lo+hi)/2);
+    ca=((1-sh-q)*cI + q*cLow - avd*sh)/(1-sh);
+  }
+  return ca;
+}
+// The patient behind the lung view: Free Play's chosen lung, the tutorial's
+// patient, or the scenario's own. Null where there is no lung view.
+function lvPatient(){
+  if(freeMode){
+    var fl=FREE_LUNGS[freeLungKey]||FREE_LUNGS.normal;
+    return {key:'free:'+freeLungKey, sprite:fl.sprite||'normal', label:fl.label+' test lung', kg:fl.kg||TL_ADULT_KG,
+            peds:!!fl.peds, spontRate:fl.spontRate||15, P:VITAL_LUNG[freeLungKey]||VITAL_LUNG.normal, start:null};
+  }
+  var t=(gameLevel>=1 && gameLevel<=3)?curTask():null, pt=(gameLevel===1)?TUTORIAL_PATIENT:(t&&t.patient);
+  if(!t || !pt) return null;
+  return {key:gameLevel===1?'L1':('L'+gameLevel+'S'+scenarioIdx), sprite:pt.sprite, label:pt.label, kg:pt.kg||TL_ADULT_KG,
+          peds:!!pt.peds, spontRate:pt.spontRate||15, P:pt.vit, start:pt.start||null};
+}
+// Steady state for the settings and the patient on the panel now.
 function vitalsTarget(){
-  var key=freeLungKey, fl=FREE_LUNGS[key]||FREE_LUNGS.normal, P=VITAL_LUNG[key]||VITAL_LUNG.normal;
-  var kg=fl.kg||TL_ADULT_KG, C=lung.compliance, spont=(ventMode==='cpap'||ventMode==='nppv');
+  var pt=lvPatient()||{kg:TL_ADULT_KG, spontRate:15, P:VITAL_LUNG.normal, peds:false}, P=pt.P;
+  var kg=pt.kg, C=lung.compliance, spont=(ventMode==='cpap'||ventMode==='nppv');
   var vt, rate, aP=spont?0:effectiveAutoPEEP();
-  if(spont){ vt=(fl.kg?6*fl.kg:400)+vals.ps.v*C; rate=fl.spontRate||15; }   // the readout's own estimate
+  if(spont){ vt=(pt.peds?6*kg:400)+vals.ps.v*C; rate=pt.spontRate; }      // the readout's own estimate
   else { vt=lvBreath().vt; rate=vals.rate.v; }                               // delivered, after any High Pressure cut
   // CO₂
   var vdAnat=2.2*kg, vdApp=Math.min(35,0.5*kg), vdAlv=P.vdA*vt, vd=vdAnat+vdApp+vdAlv;
   var va=Math.max(0.05, rate*(vt-vd)/1000);                                  // L/min
-  var vco2=200*Math.pow(kg/70,0.75);                                         // mL/min
+  var vco2=P.vco2||200*Math.pow(kg/70,0.75);                                 // mL/min
   var paco2=Math.min(150, 0.863*vco2/va);
-  var etco2=paco2*Math.max(0.3, 1-vdAlv/Math.max(1,vt-vdAnat-vdApp));
+  // Breathing on their own (CPAP/PSV), a patient with an intact drive sets
+  // their own rate and depth to hold PaCO₂ at their set point. Fatigue isn't modelled.
+  if(spont){ paco2=P.paco2Spont||40; va=0.863*vco2/paco2; }
+  var etF=P.etF==null?1:P.etF;
+  var etco2=paco2*Math.max(0.3, 1-etF*vdAlv/Math.max(1,vt-vdAnat-vdApp));
   // O₂
   var peep=vals.peep.v, fio2=vals.fio2.v/100, sh=vitShunt(P,peep);
-  var pAO2=Math.max(0, fio2*713-paco2/0.8), pc=Math.max(1, pAO2-P.vq);
-  var cap=1.34*14, cc=cap*sevSat(pc)+0.003*pc, ca=cc-sh*5/(1-sh);            // mL O₂/dL
-  var lo=1, hi=700;                                                          // PaO₂ that carries that content
-  for(var i=0;i<40;i++){ var mid=(lo+hi)/2; if(cap*sevSat(mid)+0.003*mid<ca) lo=mid; else hi=mid; }
-  var pao2=(lo+hi)/2;
+  var pAO2=Math.max(1, fio2*713-paco2/0.8);
+  var pao2=vitPO2ForContent(vitArterialO2(fio2,pAO2,sh,P.q||0));
   var bp=vitBP(P,peep+aP);
   return {spo2:Math.max(0,Math.min(100,sevSat(pao2)*100)), pao2:pao2, paco2:paco2, etco2:etco2,
           shunt:sh, va:va, vdvt:vd/vt, peepTotal:peep+aP, co:bp.co, map:bp.map, sbp:bp.sbp, dbp:bp.dbp};
@@ -4872,9 +4953,16 @@ function lvUpdateVitals(lv,run){
     lv.bp.textContent='—'; lv.map.textContent='MAP —';
     lv.spo2Box.className='lv-vit spo2'; lv.bpBox.className='lv-vit bp'; lvVitals=null; return;
   }
-  var tg=vitalsTarget(), key=freeLungKey, P=VITAL_LUNG[key]||VITAL_LUNG.normal;
+  var pt=lvPatient(); if(!pt) return;
+  var tg=vitalsTarget(), key=pt.key, P=pt.P;
   if(!lv.vit || lv.vitKey!==key || lv.vitT===null || simTime<lv.vitT || simTime-lv.vitT>600000){
-    lv.vit={spo2:tg.spo2, pao2:tg.pao2, paco2:tg.paco2, etco2:tg.etco2, sbp:tg.sbp, dbp:tg.dbp, map:tg.map};   // a new patient: start where they are
+    // A new patient. Free Play starts at steady state; a scenario starts where
+    // its story says the patient is, and drifts from there.
+    var st=pt.start||{}, v={spo2:tg.spo2, pao2:tg.pao2, paco2:tg.paco2, etco2:tg.etco2, sbp:tg.sbp, dbp:tg.dbp, map:tg.map};
+    if(st.spo2!=null){ v.spo2=st.spo2; v.pao2=vitPO2ForContent(vitO2Content(0)+1.34*14*st.spo2/100); }
+    if(st.paco2!=null){ v.paco2=st.paco2; v.etco2=st.paco2*tg.etco2/tg.paco2; }
+    if(st.etco2!=null){ v.etco2=st.etco2; if(st.paco2==null) v.paco2=st.etco2*tg.paco2/tg.etco2; }
+    lv.vit=v;
   } else {
     var dS=simTime-lv.vitT, kO=1-Math.exp(-dS/VIT_TAU_O2), kC=1-Math.exp(-dS/VIT_TAU_CO2), kB=1-Math.exp(-dS/VIT_TAU_BP), v0=lv.vit;
     v0.spo2+=(tg.spo2-v0.spo2)*kO; v0.pao2+=(tg.pao2-v0.pao2)*kO;
@@ -4888,10 +4976,10 @@ function lvUpdateVitals(lv,run){
   var sbp=Math.round(v.sbp), dbp=Math.round(v.dbp), map=Math.round(v.map);
   set(lv.bp,sbp+'/'+dbp); set(lv.map,'MAP '+map);
   // SpO₂ floor: 88% where ARDSnet and obstructive-disease practice accept 88–92/95, 92% otherwise
-  var floor=/ards|copd|asthma|Asthma|Bronch|Ards/.test(key)?88:92;
+  var floor=P.floor||92;
   lv.spo2Box.className='lv-vit spo2'+(sp<floor-4?' bad':(sp<floor?' warn':''));
   lv.spo2Box.title='SpO₂ target ≥ '+floor+'% for this lung';
-  var L=vitBPLimits(P), bpSt=(sbp<L.sbpRed||map<L.mapRed)?'bad':((sbp<L.sbpAmber||map<L.mapAmber)?'warn':'');
+  var L=P.bpLim||vitBPLimits(P), bpSt=(sbp<L.sbpRed||map<L.mapRed)?'bad':((sbp<L.sbpAmber||map<L.mapAmber)?'warn':'');
   lv.bpBox.className='lv-vit bp'+(bpSt?' '+bpSt:'');
   lv.bpBox.title='Modelled arterial pressure (a real cuff cycles every 3–5 min). '+L.why+'. Total PEEP '+Math.round(tg.peepTotal)+' cmH₂O';
   lvVitals={shown:{spo2:v.spo2, pao2:v.pao2, paco2:v.paco2, etco2:v.etco2, sbp:v.sbp, dbp:v.dbp, map:v.map},

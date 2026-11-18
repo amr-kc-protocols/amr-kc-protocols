@@ -253,13 +253,23 @@ where it runs out. Each number below is marked:
 ventilation equation, where V̇A = rate × (delivered Vt − anatomic −
 equipment − alveolar dead space). A breath cut short by the High Pressure
 limit therefore raises the CO₂. Alveolar dead space dilutes exhaled gas
-(Bohr), so EtCO₂ reads below PaCO₂. Then PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8,
-the alveolar gas equation at sea level, so hypoventilation lowers the O₂
-and extra oxygen hides it. The shunt equation mixes in venous blood, and
-the Severinghaus equation turns PaO₂ into SpO₂. Fixed values: V̇CO₂
-200 mL/min at 70 kg (scaled by weight^0.75 for children), anatomic dead
-space 2.2 mL/kg, Hb 14 g/dL, a–vO₂ difference 5 mL/dL. Equipment dead
-space of 0.5 mL/kg, up to 35 mL, is an estimate.
+(Bohr), so EtCO₂ reads below PaCO₂. In obstruction only part of it does,
+because slow units empty last and lift the end-tidal value.
+
+Then PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8, the alveolar gas equation at sea
+level, so hypoventilation lowers the O₂ and extra oxygen hides it. Blood
+flow is split three ways (the Riley model, and the shape inert-gas studies
+report): to shunt, to low-V/Q units (V/Q 0.08, an estimate inside the
+inert-gas "< 0.1" band) and to ideal units. A low-V/Q unit's PO₂ comes from
+its own oxygen balance, so oxygen fixes V/Q mismatch but barely touches a
+shunt. The Severinghaus equation turns PaO₂ into SpO₂.
+
+Fixed values: V̇CO₂ 200 mL/min at 70 kg (scaled by weight^0.75 for
+children), anatomic dead space 2.2 mL/kg, Hb 14 g/dL, a–vO₂ difference
+5 mL/dL. Equipment dead space of 0.5 mL/kg, up to 35 mL, is an estimate. On
+CPAP or pressure support the patient breathes for themselves, and a patient
+with an intact drive holds PaCO₂ at their own set point (40 unless stated).
+Fatigue isn't modelled.
 
 | Lung | Number in the model | Source | Strength |
 |---|---|---|---|
@@ -269,7 +279,10 @@ space of 0.5 mL/kg, up to 35 mL, is an estimate.
 | ARDS | Vd/Vt ≈ 0.58 at 6 mL/kg | Nuckton 2002: 0.58 ± 0.09 | Measured |
 | Pneumonia | Shunt 22%, plus low-V/Q units | Ventilated pneumonia, inert gas (Gea 1991, n=10): shunt 22 ± 5%, low V/Q 11 ± 5% | Measured |
 | Pneumonia | Recruits poorly; PEEP above 10 overdistends the good lung | Physiology | Estimate |
-| COPD, asthma | Low-V/Q mismatch, little shunt, so oxygen corrects it | Inert-gas studies | Established direction; size is an estimate |
+| Asthma | No shunt; 10.5% of blood flow to low-V/Q units | Acute severe asthma, inert gas (Ballester 1989, n=19) | Measured |
+| COPD | Low-V/Q units, essentially no shunt; 20% of flow | Pattern from inert gas (Wagner 1977); the amount is an estimate | Direction established; size is an estimate |
+| COPD, asthma | Physiologic Vd/Vt ≈ 0.70 | Ventilated COPD 0.69–0.71 (a crossover study); Tuxen 1987's patients needed 15.7 L/min for normocapnia, which implies about the same | Measured (asthma borrows the COPD number) |
+| COPD, asthma | EtCO₂ ≈ 0.76 × PaCO₂ | Ventilated COPD (Tyagi 2021, n=73): EtCO₂ 61 vs PaCO₂ 80 | Measured (asthma borrows it) |
 | Edema | Large shunt that PEEP/CPAP recruits | CPAP improves oxygenation in cardiogenic edema (trials) | Direction established; size is an estimate |
 
 **Blood pressure.** PEEP raises intrathoracic pressure and cuts venous
@@ -326,6 +339,42 @@ and auto-PEEP do, which matches how the studies were run.
 takes 10–20 minutes to settle, and recruitment can take longer, so this is
 faster than life on purpose, so that a change can be watched.
 
+**In the tutorial and the scenarios.** Level 1 and the Level 2–3
+scenarios show the same panel. The picture and the vitals come from that
+scenario's own patient. Each patient starts from the matching Free Play
+lung and is tuned, inside the published ranges above, so the starting
+settings reproduce the numbers on the scenario's monitor. A scenario whose
+story says the CO₂ is rising starts at the story's value and drifts toward
+what the settings produce, so it keeps rising until it's fixed. The monitor
+stays a snapshot of the story; the panel is live. The graded chips stay in
+Free Play, so they can't give the answer away.
+
+| Scenario | Picture | Tuned to the story | What the right answer does |
+|---|---|---|---|
+| L2 · Rising CO₂ | Normal | Post-op shunt 12% (estimate). PaCO₂ starts at 62 and climbs toward 72 | Rate 18 brings PaCO₂ to about 40 |
+| L2 · ARDS hypoxemia | ARDS | Shunt 41% at PEEP 3, inside 32 ± 14% | PEEP 8–14 lifts SpO₂ 85 → 93–96; 100% oxygen alone reaches about 90; BP falls a little |
+| L2 · COPD trapping | COPD | Shunt 11% plus 28% low V/Q; V̇CO₂ 220 for a patient fighting the vent (estimate). EtCO₂ climbs from 52 | Shorter Ti cuts auto-PEEP and lifts BP; a lower rate does too, but PaCO₂ rises (permissive hypercapnia) |
+| L2 · Fighting the vent | Normal | Shunt 12%; V̇CO₂ 210 | Gas exchange doesn't change; the fix is mechanical |
+| L2 · Septic | ARDS (lung injury: SpO₂ 95 on 60%) | Shunt 25% at PEEP 8; V̇CO₂ 230 (sepsis, estimate); BP 90/52, red (septic shock) | Left at 7.2 L/min, PaCO₂ heads to 55; MV 14+ holds it at 28 or below (Winter's) |
+| L3 · Ready to come down | Normal | Shunt 13%; V̇CO₂ 192; own PaCO₂ 42 | On CPAP/PS 5–8 the vitals hold |
+| L3 · Status asthmaticus | Asthma | 25% low V/Q, set above Ballester's 10.5% for an intubated patient (estimate); V̇CO₂ 265 (β-agonists, work of breathing; estimate) | Slowing the rate cuts auto-PEEP and lifts BP; PaCO₂ rises (permissive hypercapnia) |
+| L3 · Severe ARDS | ARDS | Shunt 45% at PEEP 8, about half recruitable | PEEP 14 + FiO₂ 90% reaches SpO₂ 88+; oxygen alone falls short |
+| L3 · Blown pupil | Normal | V̇CO₂ 225 (estimate) so PaCO₂ is 42 at 8 L/min | MV 10 gives EtCO₂ 30–35. BP is judged by the Brain Trauma Foundation (SBP ≥ 110 at 15–49), not MAP 65 |
+
+Three story numbers changed so the monitor and the physiology agree:
+
+- **Rising CO₂:** SpO₂ went from 93% to 98%. The story says oxygenation is
+  fine, and 93% on 50% would need a 27% shunt.
+- **ARDS hypoxemia:** the starting rate went from 16 to 22. EtCO₂ 38 on
+  6.4 L/min is impossible with ARDS dead space; at 22 it's 37.
+- **Severe ARDS:** PaO₂ went from 41 to 47 and P/F from 59 to 67. SpO₂ 82%
+  sits at PaO₂ 47 on the Severinghaus curve, and the case is still severe
+  ARDS.
+
+Limits: triggered breaths above the set rate aren't counted, and neither is
+heart rate. The tutorial runs on the simulator's generic lung (compliance
+20), which is stiffer than healthy adult lungs (about 50).
+
 This is a teaching model, and it should be reviewed by the Medical Director
 before it is used to teach.
 
@@ -360,8 +409,9 @@ checks them, including that fixing an ARDS lung the ARDSnet way turns it green.
 
 ### The LTV 1200 test lung picture
 
-Free Play (`vent-ltv1200.html?free`) shows a picture of the test lung that
-fills and empties with every breath, so the learner can see what the airway
+Free Play (`vent-ltv1200.html?free`), the Level 1 tutorial and the Level 2
+and 3 scenarios show a picture of the lung that fills and empties with every
+breath, so the learner can see what the airway
 pressure bar can't: whether the lung actually got the breath, and whether it
 emptied before the next one.
 

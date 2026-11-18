@@ -147,7 +147,12 @@ These suites live here:
   PEEP and auto-PEEP lower it (Auler 2000, Luo 2024), while CPAP in
   high-filling-pressure heart failure raises output without dropping pressure
   (De Hoyos 1995). It also checks that the pressure turns amber and red by
-  the Surviving Sepsis MAP target, and by PALS thresholds for children.
+  the Surviving Sepsis MAP target, and by PALS thresholds for children. It checks the lung view in the tutorial and in every Level 2–3
+  scenario. Each one's vitals start at its monitor's numbers, and its starting
+  settings hold them there, or let the CO₂ keep climbing where the story says
+  it is. Each correct answer moves the vitals the way the evidence says (PEEP
+  for a shunt, permissive hypercapnia for trapping, Winter's formula for
+  sepsis, ETCO₂ 30–35 for herniation), and Level 7 has no lung view.
 
 - **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
   grade as correct. Each scenario's `goal.check()` is the therapy the
