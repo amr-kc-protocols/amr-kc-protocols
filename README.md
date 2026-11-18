@@ -236,6 +236,128 @@ medical device. Nothing here has been through clinical review by the Medical
 Director; it is checked against published sources, which is not the same
 thing.
 
+### SpO₂, EtCO₂ and blood pressure in the test lung panel
+
+The lung panel shows SpO₂ (with PaO₂), EtCO₂ (with PaCO₂) and blood pressure
+(with MAP), and all of them respond to the vent. They are modelled, not
+measured. This is a template patient for teaching, so the goal is to be as
+close to the published evidence as the evidence allows, and to say plainly
+where it runs out. Each number below is marked:
+
+- **Established:** textbook physiology or a guideline target.
+- **Measured:** taken from a named study; the size of the study is given
+  because several are small.
+- **Estimate:** a teaching choice where no good number exists.
+
+**Equations (established).** PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A, the alveolar
+ventilation equation, where V̇A = rate × (delivered Vt − anatomic −
+equipment − alveolar dead space). A breath cut short by the High Pressure
+limit therefore raises the CO₂. Alveolar dead space dilutes exhaled gas
+(Bohr), so EtCO₂ reads below PaCO₂. Then PAO₂ = FiO₂ × 713 − PaCO₂ ÷ 0.8,
+the alveolar gas equation at sea level, so hypoventilation lowers the O₂
+and extra oxygen hides it. The shunt equation mixes in venous blood, and
+the Severinghaus equation turns PaO₂ into SpO₂. Fixed values: V̇CO₂
+200 mL/min at 70 kg (scaled by weight^0.75 for children), anatomic dead
+space 2.2 mL/kg, Hb 14 g/dL, a–vO₂ difference 5 mL/dL. Equipment dead
+space of 0.5 mL/kg, up to 35 mL, is an estimate.
+
+| Lung | Number in the model | Source | Strength |
+|---|---|---|---|
+| Normal | Shunt 3%; PaCO₂–EtCO₂ gap 2–5 mmHg | Normal venous admixture; normal gradient | Established |
+| ARDS | Shunt 32% at PEEP 5 (49% at PEEP 0) | Inert-gas PEEP study, shunt 32 ± 14% (Am Rev Respir Dis 1985;131:54, n=16). About half of cardiac output to shunt or very-low-V/Q units (Dantzker 1979, n=16) | Measured |
+| ARDS | PEEP 5 → 10 → 15 shrinks shunt ×1 → ×0.71 → ×0.56 | COVID-19 ARDS (Florio 2024, n=14): venous admixture 33 → 23 → 18%, shunt 36 → 27 → 24% | Measured, small; some patients don't respond (7 of 12 did in Karbing 2020) |
+| ARDS | Vd/Vt ≈ 0.58 at 6 mL/kg | Nuckton 2002: 0.58 ± 0.09 | Measured |
+| Pneumonia | Shunt 22%, plus low-V/Q units | Ventilated pneumonia, inert gas (Gea 1991, n=10): shunt 22 ± 5%, low V/Q 11 ± 5% | Measured |
+| Pneumonia | Recruits poorly; PEEP above 10 overdistends the good lung | Physiology | Estimate |
+| COPD, asthma | Low-V/Q mismatch, little shunt, so oxygen corrects it | Inert-gas studies | Established direction; size is an estimate |
+| Edema | Large shunt that PEEP/CPAP recruits | CPAP improves oxygenation in cardiogenic edema (trials) | Direction established; size is an estimate |
+
+**Blood pressure.** PEEP raises intrathoracic pressure and cuts venous
+return, so cardiac output falls. Values relative to PEEP 5:
+
+| PEEP | Cardiac output | Source | Strength |
+|---|---|---|---|
+| 0 | ×1.14 | Postop cardiac surgery (Auler 2000, n=10): CI 3.90 vs 3.43 | Measured, not ARDS |
+| 10 | ×0.98 | Moderate–severe ARDS (Luo 2024, n=52): CI 3.07 / 3.00 / 2.63 | Measured |
+| 15 | ×0.86 | Same study; Florio 2024 agrees (CO 5.4 / 4.8 / 4.7) | Measured |
+| > 15 | Keeps falling at the 10→15 slope | Jardin 1981: output and mean BP fell progressively up to PEEP 30 | Extrapolation |
+
+- **Auto-PEEP counts the same as set PEEP.** The heart feels total PEEP, so
+  trapping gas lowers the pressure. Dynamic hyperinflation causes
+  hypotension: Pepe & Marini 1982 and Tuxen 1987. In Williams 1992, 18 of 88
+  ICU stays for severe asthma had hypotension, and all 18 were ventilated. Strength: mechanism established; equal
+  weighting is an estimate. The simulator caps auto-PEEP at 1.2 × the lung's
+  base value, so it understates extreme hyperinflation.
+- **Heart failure with high filling pressures (the edema lung) is the
+  exception.** In De Hoyos 1995 (n=8, wedge ≥ 12), CPAP raised cardiac index
+  from 2.47 to 2.91 to 3.12 at 0, 5 and 10 cmH₂O, by unloading the left
+  ventricle. With a normal wedge, output fell instead. Not every patient
+  responds (7 of 13 in Baratz 1992), so the model shows a responder.
+  Arterial pressure did not change on CPAP or BiPAP in heart failure
+  (Philip-Joet 1999, n=20). Strength: measured, but small studies. There
+  are no data past 10, so the model holds output flat to 15 (estimate).
+- **Blood pressure falls less than cardiac output,** because vascular
+  resistance rises. The model passes on half the change, and pulse pressure
+  follows stroke volume (estimate). For comparison, mean pressure stayed
+  flat from PEEP 10 to 20 in ARDS patients who were given fluids to hold
+  preload (Bruhn 2004, n=8). This patient gets no fluids.
+- **The starting pressures are presets, not evidence.** For example,
+  normal 120/75 and edema 160/95.
+
+**Colours (guideline thresholds).**
+
+- SpO₂: amber below the lung's floor and red 4 points under it. The floor is
+  88% for ARDS and obstructive disease, where 88–92/95% is the accepted
+  target, and 92% otherwise.
+- Adult blood pressure: red when MAP < 65 (Surviving Sepsis 2021) or
+  SBP < 90, and amber within 5 MAP or 10 SBP of those.
+- Children: red when SBP < 70 + 2 × age (PALS hypotension; 70 under one
+  year, 90 from ten years), and amber within 10 of it.
+
+**Not modelled:** fluids, vasopressors, or a baroreflex beyond the
+half-change. Also the effect of cardiac output on oxygenation, which cuts
+both ways: lower output lowers mixed venous O₂ but also shrinks the shunt
+(Dantzker 1980). And hypercapnia's effect on pressure, hemoglobin, and
+altitude. Inspiratory pressure doesn't move the cardiac output; only PEEP
+and auto-PEEP do, which matches how the studies were run.
+
+**Speed:** the numbers drift to a change, with time constants of 20 s (O₂),
+45 s (CO₂) and 10 s (blood pressure) of sim time. A real patient's CO₂
+takes 10–20 minutes to settle, and recruitment can take longer, so this is
+faster than life on purpose, so that a change can be watched.
+
+This is a teaching model, and it should be reviewed by the Medical Director
+before it is used to teach.
+
+### The LTV 1200 test lung readout
+
+Under the picture, every reading is graded against the evidence for the lung
+on the panel, not one "normal" range for all. Green on an ARDS lung dialled to
+healthy-lung settings was false reassurance. Now each reading is green inside
+that lung's target, amber where guidelines allow it but don't aim for it
+(ARDS at 7 mL/kg, say), and red outside the evidence-based range. A line under
+the chips says why each one is flagged, worst first, with its source and how
+strong that source is. Where it can, it says how far to go: "on this lung that
+means a breath of 375 mL (5.4 mL/kg) or less." To keep the card short on a
+phone, that is folded to one line: the worst flag and a count, tap for the rest
+and the colour key.
+
+| Lung | Graded on |
+|---|---|
+| ARDS | Vt 4–6.5 mL/kg PBW (amber to 8) and plateau ≤ 30 (ATS 2017/2024, strong); driving pressure ≤ 15 (Amato 2015, observational); PEEP no lower than the ARDSnet table for the FiO₂ |
+| COPD, asthma | I:E ≥ 1:4 (amber from 1:3), inspiratory flow 60–100 L/min, minute volume < 10 L/min, auto-PEEP < 5, applied PEEP 0–5; asthma plateau < 25 (amber to 30). Expert consensus and physiology, not trials |
+| Normal, pneumonia, pulmonary edema | Vt 6–8 mL/kg PBW, plateau ≤ 30; PEEP 5–10 for pneumonia and edema |
+| Children | PALICC-2: Vt 5–8 mL/kg (3–6 in pediatric ARDS), plateau ≤ 28, driving pressure ≤ 15; pediatric ARDS PEEP from the ARDSnet table (Khemani 2018) |
+
+The adult test lungs are a 70 kg PBW patient, a man about 175 cm tall, so
+tidal volume is graded per kg for adults too. PIP is red only when it reaches
+the High Pressure limit, because the vent is then cutting the breath short;
+otherwise a high peak with a normal plateau is airway resistance, not lung
+injury. Spontaneous modes aren't graded, since the patient sets the rate and
+the size of each breath and the readings are estimates. The targets live in
+`tlTargetsFor()`, each with its source, and `test/ventscenarios.test.mjs`
+checks them, including that fixing an ARDS lung the ARDSnet way turns it green.
+
 ### The LTV 1200 test lung picture
 
 Free Play (`vent-ltv1200.html?free`) shows a picture of the test lung that
@@ -270,20 +392,40 @@ The 25% and 60% thresholds are display choices, not clinical ones.
 
 The art is one atlas, `vent-sprites/lungs-atlas.png`: six conditions down
 (normal, COPD, asthma, ARDS, pneumonia, pulmonary edema), three poses across.
-Each pose was drawn separately and they don't line up pixel for pixel, so the
-view switches between them with a short cross-fade and never morphs one into
-another. One file means one download: every lung works offline once the page
-has been opened.
+One file means one download: every lung works offline once the page has been
+opened.
+
+**Drawing it smoothly.** The pack's part-filled pose turned out to be its full
+pose at 50% over its rest pose, so the view stacks just those two and blends
+them by volume, passing through exactly that frame and every point between.
+Each outline is also stretched toward a box part-way between the rest and full
+outlines (measured from the atlas when it loads), so the lung swells rather
+than one outline ghosting in over the other. The blend follows the volume
+exactly but never faster than empty-to-full in an eighth of a second, so
+breathing is drawn with no lag while a jump in the clock (the rate changed
+mid-breath, a hold ending) glides. Airflow is drawn in the trachea from the
+slope of the same volume curve: chevrons stream in on inspiration and out on
+expiration, faster with higher flow. Under reduced motion it is a plain blend,
+with nothing stretching or streaming.
+
+The spontaneous breathing in CPAP and NPPV used to take its phase from
+`simTime % (current cycle length)` while the cycle length drifted. That jumps
+by more with every breath already taken, so after a minute the pressure trace
+ran backwards on one frame in six, and on most frames by five minutes.
+`spontBreath()` counts breaths as the integral of the rate instead, which only
+moves forward and is still a pure function of the clock.
 
 `vent-sprites/build-atlas.py` builds the atlas from the art pack, either from
 its overview sheet or, better, from the 1254 px originals. It also corrects
 the pack. As delivered, asthma's full-inspiration pose was drawn in the COPD
 style (dusky, no bronchospasm) and COPD's in the asthma style (bright, with
 bronchospasm bands), so bronchospasm vanished at end-inspiration in asthma.
-The script swaps the two back and rebuilds each part-filled pose the way the
-pack made them, as the full pose at 50% over the rest pose.
-`test/ventlungview.test.mjs` checks that only asthma shows the bands, and in
-every pose. The infant with bronchiolitis borrows the asthma art, because
+The script swaps the two back. It also replaces the inside of each full pose's
+trachea with the rest pose's plain rings, because four of them had airflow
+arrows drawn in, frozen in one direction for the whole breath (asthma's
+pointed out of the lung at end-inspiration). The page draws airflow itself.
+`test/ventlungview.test.mjs` checks that only asthma shows the bands, in
+every pose, and that no trachea is whiter than its rest pose's. The infant with bronchiolitis borrows the asthma art, because
 there is no bronchiolitis set and both are small-airway obstruction with
 trapping.
 

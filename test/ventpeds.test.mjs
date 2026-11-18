@@ -10,7 +10,8 @@
  *   V3  the readout judges a child per kilogram (it turns amber when you dial
  *       the tidal volume past the patient's range)
  *   V4  the infant teaches the LTV's 50 mL floor: pressure control
- *   V5  going back to an adult lung restores adult settings; switching between
+ *   V5  going back to an adult lung restores adult settings (and grades Vt per
+ *       kg of the adult's 70 kg PBW, not the child's weight); switching between
  *       adult lungs leaves your settings alone
  *   V6  no page errors
  *
@@ -79,9 +80,9 @@ console.log('\nV3 judged per kilogram');
 { await p.evaluate(() => setFreeLung('pedNormal'));
   await p.evaluate(() => { vals.vt.v = 250; enforceITLimit(); updateKnob('vt'); updateUI(); });   // 12.5 mL/kg — an adult habit on a 20 kg child
   await p.waitForTimeout(300);
-  const chip = await p.evaluate(() => { const c = [...document.querySelectorAll('.tl-chip')].find(x => /Vt \/ kg/i.test(x.textContent)); return c && { text: c.textContent, warn: /orange|253|#fdf0e7/.test(c.getAttribute('style')) }; });
+  const chip = await p.evaluate(() => { const c = [...document.querySelectorAll('.tl-chip')].find(x => /Vt ?\/ ?kg/i.test(x.textContent)); return c && { text: c.textContent, status: c.dataset.status }; });
   ok('V3 a 250 mL breath on a 20 kg child reads 12.5 mL/kg', !!chip && /12\.5 mL\/kg/.test(chip.text), chip && chip.text);
-  ok('V3 and turns amber', !!chip && chip.warn); }
+  ok('V3 and turns red — far outside PALICC-2\'s 5–8', !!chip && chip.status === 'bad', chip && chip.status); }
 
 console.log('\nV4 the infant');
 { await p.evaluate(() => setFreeLung('pedBronch'));
@@ -95,7 +96,10 @@ console.log('\nV5 back to adult');
   ok('V5 an adult lung after a child restores adult settings', a.vt === 500 && a.rate === 14 && a.bt === 'volume', JSON.stringify(a));
   await p.evaluate(() => { vals.vt.v = 420; updateKnob('vt'); setFreeLung('copd'); });
   ok('V5 switching between adult lungs keeps your settings', (await p.evaluate(() => vals.vt.v)) === 420);
-  ok('V5 the adult readout has no per-kg chip', !/Vt \/ kg/i.test(await bar())); }
+  // Adults are graded per kg of predicted body weight too (the adult test lung is 70 kg PBW),
+  // never per a child's weight.
+  const b = await bar();
+  ok('V5 the adult readout grades Vt per kg of PBW (70 kg), not a child\'s weight', /70 kg PBW/.test(b) && /6\.0 mL\/kg/.test(b) && !/\b(20|6|25) kg\b/.test(b)); }
 
 ok('V6 no page errors', errs.length === 0, errs.join(' | '));
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

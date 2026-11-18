@@ -29,6 +29,24 @@
  *   L11 switching lungs swaps the art without fetching it again
  *   L12 the two new adult lungs: pneumonia and pulmonary edema sit between
  *       normal and ARDS, and start without an alarm
+ *   L15 smooth: the CPAP breath clock only runs forward (it used to run
+ *       backwards after a minute), the picture takes at least 7 frames to go
+ *       from empty to full (the old frame-switching jumped half-way at once),
+ *       a mid-breath rate change glides
+ *       instead of snapping, airflow streams the right way, no airflow arrows
+ *       are baked into the art, and reduced motion keeps it still
+ *   L16 SpO₂ and EtCO₂ in the lung panel, recomputed here from textbook
+ *       physiology: PaCO₂ = 0.863 × V̇CO₂ ÷ V̇A; EtCO₂ below PaCO₂, further in
+ *       ARDS; oxygen masks hypoventilation that room air reveals; PEEP opens
+ *       an ARDS shunt that oxygen barely touches; COPD's V/Q mismatch answers
+ *       to oxygen; high PEEP backfires in one-sided pneumonia; a breath cut by
+ *       the High Pressure limit raises CO₂; the Severinghaus curve; and the
+ *       numbers drift to a change rather than jump. ARDS shunt and dead
+ *       space checked against Florio 2024 and Nuckton 2002
+ *   L17 blood pressure, recomputed from the published cardiac-output
+ *       numbers: PEEP and auto-PEEP lower it (Auler 2000, Luo 2024); CPAP in
+ *       high-filling-pressure heart failure raises output without dropping
+ *       pressure (De Hoyos 1995); red and amber by Surviving Sepsis and PALS
  *   L13 accessible, and fits a 320px phone without sideways scroll
  *   L14 no page errors
  *
@@ -98,7 +116,7 @@ console.log('\nL1 mounted, and one node for good');
 { const r = await p.evaluate(() => { const v = document.querySelectorAll('#tl-viz');
     return { n: v.length, inBar: !!document.querySelector('#mission-bar #tl-viz'), poses: document.querySelectorAll('#tl-viz .lv-pose').length }; });
   ok('L1 the lung view is in the test-lung card', r.n === 1 && r.inBar, JSON.stringify(r));
-  ok('L1 with three stacked poses', r.poses === 3);
+  ok('L1 with the rest and full poses stacked, and a flow overlay', r.poses === 2 && await p.evaluate(() => !!document.querySelector('#tl-viz .lv-pose.rest') && !!document.querySelector('#tl-viz .lv-pose.full') && !!document.querySelector('#tl-viz .lv-flow')));
   await p.evaluate(() => { document.getElementById('tl-viz').__mark = 'same'; });
   await p.evaluate(() => { setFreeLung('copd'); vals.rate.v = 18; updateKnob('rate'); updateUI(); renderMissionCard(); setFreeLung('pedNormal'); renderMissionCard(); });
   const same = await p.evaluate(() => { const v = document.querySelectorAll('#tl-viz'); return v.length === 1 && v[0].__mark === 'same' && v[0].isConnected; });
@@ -151,7 +169,7 @@ console.log('\nL2 the art');
   ok('L2 and no other condition does (COPD\'s full pose is COPD\'s own)', banded.length === 0, banded.map(k => k + ' ' + bands[k].join('/')).join(', '));
   await setup('copd');
   const pos = await p.evaluate(() => [...document.querySelectorAll('#tl-viz .lv-pose')].map(e => e.style.backgroundPosition));
-  ok('L2 COPD shows the COPD row in all three poses', JSON.stringify(pos) === JSON.stringify(['0% 20%', '50% 20%', '100% 20%']), JSON.stringify(pos)); }
+  ok('L2 COPD shows the COPD row: rest pose under full pose', JSON.stringify(pos) === JSON.stringify(['0% 20%', '100% 20%']), JSON.stringify(pos)); }
 
 console.log('\nL3 on the simulator\'s clock');
 { await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
@@ -235,8 +253,8 @@ console.log('\nL7 pressure control');
   const at = t => pts.reduce((b, x) => Math.abs(x.t - t) < Math.abs(b.t - t) ? x : b);
   const full = Math.max(...pts.map(x => x.v)), vee = s.aPEEP * s.C;
   ok('L7 fills to PC × compliance on top of any trapped gas (' + s.pc * s.C + ' mL)', near(full - vee, s.pc * s.C, 1.5), (full - vee).toFixed(1));
-  const chip = await p.evaluate(() => [...document.querySelectorAll('.tl-chip')].map(c => c.textContent).find(t => /Vt \/ kg/.test(t)));
-  ok('L7 the same number as the Vt / kg readout', chip && chip.includes(Math.round(s.pc * s.C) + ' mL'), chip);
+  const chip = await p.evaluate(() => { const c = [...document.querySelectorAll('.tl-chip')].find(x => /Vt\/kg/i.test(x.textContent)); return c && (c.textContent + ' | ' + c.title); });
+  ok('L7 the same number as the Vt/kg readout', chip && chip.includes((s.pc * s.C / 6).toFixed(1) + ' mL/kg') && chip.includes(Math.round(s.pc * s.C) + ' mL'), chip);
   ok('L7 fills fast first: more than half the breath by half the inspiratory time', at(ti / 2).v - vee > 0.5 * (full - vee), (at(ti / 2).v - vee).toFixed(1)); }
 
 console.log('\nL8 inspiratory hold');
@@ -260,9 +278,10 @@ console.log('\nL9 spontaneous breathing');
 console.log('\nL10 standby');
 { await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
   await p.evaluate(() => { deviceState = 'standby'; applyStandbyVisual(); });
-  await p.waitForTimeout(200);
-  const r = await p.evaluate(() => ({ phase: document.querySelector('#tl-viz .lv-phase').textContent, pose: [...document.querySelectorAll('#tl-viz .lv-pose')].findIndex(e => e.classList.contains('on')) }));
-  ok('L10 standby shows the resting lung and says STANDBY', r.pose === 0 && /STANDBY/.test(r.phase), JSON.stringify(r));
+  await p.waitForTimeout(600);                     // the picture eases down rather than snapping
+  const r = await p.evaluate(() => ({ phase: document.querySelector('#tl-viz .lv-phase').textContent, full: +getComputedStyle(document.querySelector('#tl-viz .lv-pose.full')).opacity, flow: +getComputedStyle(document.querySelector('#tl-viz .lv-flow')).opacity }));
+  ok('L10 standby shows the resting lung and says STANDBY', r.full < 0.02 && /STANDBY/.test(r.phase), JSON.stringify(r));
+  ok('L10 with no airflow drawn', r.flow < 0.02, r.flow);
   await p.evaluate(() => { deviceState = 'run'; applyStandbyVisual(); }); }
 
 console.log('\nL11 one download of the art');
@@ -287,6 +306,214 @@ console.log('\nL12 the new adult lungs');
   }
   const rows = await p.evaluate(() => document.querySelector('.tl-lungs.six') && getComputedStyle(document.querySelector('.tl-lungs.six')).gridTemplateColumns.split(' ').length);
   ok('L12 six adult lungs sit in two tidy rows of three', rows === 3, rows); }
+
+console.log('\nL15 smooth');
+{ // The spontaneous-breathing clock (CPAP / NPPV), over 15 minutes of 60 fps frames
+  const c = await p.evaluate(() => { let back = 0, maxStep = 0, prev = spontBreath(0).ph;
+    for (let t = 16; t < 15 * 60000; t += 16) { const ph = spontBreath(t).ph; let d = ph - prev; if (d < -0.5) d += 1;
+      if (d < 0) back++; maxStep = Math.max(maxStep, d); prev = ph; } return { back, maxStep }; });
+  ok('L15 the CPAP breath clock never runs backwards (15 min of frames)', c.back === 0, c.back + ' backwards frames');
+  ok('L15 and never skips ahead (≤ one 18.5/min breath\'s worth per frame)', c.maxStep <= 18.5 / 60000 * 16 + 1e-6, c.maxStep.toFixed(5));
+  await setup('normal', { mode: 'cpap', bt: 'volume', ps: 10, peep: 5 });
+  const tr = await p.evaluate(() => { let mx = 0, prev = calcPressure(10 * 60000);
+    for (let t = 10 * 60000 + 16; t < 12 * 60000; t += 16) { const q = calcPressure(t); mx = Math.max(mx, Math.abs(q - prev)); prev = q; } return mx; });
+  ok('L15 so the CPAP pressure trace is continuous ten minutes in (≤ 1 cmH₂O a frame)', tr <= 1, tr.toFixed(2));
+  // The picture itself, frame by frame (60 fps), across whole breaths
+  for (const [k, cfg, label] of [['normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 }, 'normal, volume control'],
+                                 ['asthma', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 60 }, 'asthma, volume control'],
+                                 ['normal', { mode: 'ac', bt: 'pressure', rate: 14, pc: 12, it: 1.0, peep: 5, hipres: 40 }, 'normal, pressure control'],
+                                 ['normal', { mode: 'cpap', bt: 'volume', ps: 10, peep: 5 }, 'CPAP + PS']]) {
+    await setup(k, cfg);
+    const mx = await p.evaluate(() => { const ref = lvRefMl(), w = t => Math.max(0, Math.min(1, lungVolumeAt(t).v / ref / LV_FULL));
+      let m = 0, prev = w(600000); for (let t = 600016; t < 612000; t += 16) { const x = w(t); m = Math.max(m, Math.abs(x - prev)); prev = x; } return m; });
+    ok(`L15 ${label}: the lung never jumps; it takes at least 7 frames to go from empty to full`, mx <= 0.15, mx.toFixed(3));
+  }
+  // A rate change mid-breath moves the breath clock; the picture should glide, not snap
+  await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
+  const g = await p.evaluate(() => { const ref = lvRefMl(), w = (t, rate) => { vals.rate.v = rate; const x = Math.max(0, Math.min(1, lungVolumeAt(t).v / ref / LV_FULL)); vals.rate.v = 14; return x; };
+    let T = 0; for (let t = 400000; t < 460000; t += 10) if (w(t, 14) < 0.05 && w(t, 30) > 0.95) { T = t; break; }
+    simTime = T; _lv.t = 0; updateLungView(); const before = lvLast.w;
+    vals.rate.v = 30; _lv.t = performance.now() - 16; updateLungView(); const after = lvLast.w;
+    for (let i = 0; i < 20; i++) { _lv.t = performance.now() - 16; simTime += 16; updateLungView(); }
+    const target = Math.max(0, Math.min(1, lungVolumeAt(simTime).v / ref / LV_FULL));
+    vals.rate.v = 14; return { T, before, after, settled: lvLast.w, target }; });
+  ok('L15 a mid-breath rate change that jumps the lung from empty to full glides in over several frames', g.T > 0 && g.before < 0.05 && g.after - g.before < 0.3, JSON.stringify(g));
+  ok('L15 and has caught up with the breath a third of a second later', Math.abs(g.settled - g.target) < 0.05, JSON.stringify(g));
+  // Airflow direction
+  await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
+  const f = await p.evaluate(() => { const c = lvBreath().cycleMs, at = t => { simTime = 50 * c + t; _lv.t = 0; updateLungView(); return { dir: lvLast.flowDir, flow: Math.round(lvLast.flow), cls: document.querySelector('#tl-viz .lv-flow').className }; };
+    return { insp: at(500), exp: at(1150) }; });
+  ok('L15 airflow streams in during inspiration (500 mL over 1 s = 500 mL/s)', f.insp.dir === 'in' && /\bin\b/.test(f.insp.cls) && Math.abs(f.insp.flow - 500) < 10, JSON.stringify(f.insp));
+  ok('L15 and out during expiration', f.exp.dir === 'out' && /\bout\b/.test(f.exp.cls) && f.exp.flow < 0, JSON.stringify(f.exp));
+  // No airflow arrows baked into any trachea (they point one way all breath; the page draws flow itself)
+  const glyphs = await p.evaluate(async () => {
+    const img = new Image(); img.src = 'vent-sprites/lungs-atlas.png'; await img.decode();
+    const cv = document.createElement('canvas'); cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+    const g = cv.getContext('2d'); g.drawImage(img, 0, 0); const d = g.getImageData(0, 0, cv.width, cv.height).data;
+    const CW = 254, CH = 252, out = [], counts = {};
+    for (const cond of Object.keys(LV_ROWS)) for (const col of [0, 2]) { let n = 0; const r = LV_ROWS[cond];
+      for (let y = Math.round(r * CH + 0.17 * CH); y < r * CH + 0.44 * CH; y++) for (let x = Math.round(col * CW + 0.47 * CW); x < col * CW + 0.525 * CW; x++) {
+        const i = (y * cv.width + x) * 4; if (d[i + 3] < 200) continue;
+        const R = d[i] / 255, G = d[i + 1] / 255, B = d[i + 2] / 255, mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+        if (mx > 0.95 && (mx - mn) / mx < 0.12) n++; }    // near-white: the arrows, not the pale-pink rings
+      counts[cond + col] = n; }
+    for (const cond of Object.keys(LV_ROWS)) if (counts[cond + 2] > counts[cond + 0] + 10) out.push(cond + ' full ' + counts[cond + 2] + ' vs rest ' + counts[cond + 0]);
+    return out; });
+  ok('L15 no airflow arrows are baked into any trachea (full pose no whiter than rest)', glyphs.length === 0, glyphs.join(', '));
+  ok('L15 every condition\'s outlines were measured, so the lung swells rather than ghosts', await p.evaluate(() => lvBoxes && Object.keys(LV_ROWS).every(k => lvBoxes[k] && lvBoxes[k].full[3] > lvBoxes[k].rest[3] - 0.02)));
+  // Reduced motion: still blends by volume, but nothing stretches or streams
+  const rm = await (await browser.newContext({ viewport: { width: 430, height: 932 }, serviceWorkers: 'block', reducedMotion: 'reduce' })).newPage();
+  rm.on('pageerror', e => errs.push(String(e)));
+  await rm.goto(ORIGIN + '/vent-ltv1200.html?free');
+  await rm.waitForFunction(() => document.querySelector('#tl-viz') && lvBoxes !== null);
+  const r1 = await rm.evaluate(() => ({ still: lvStill, tf: document.querySelector('#tl-viz .lv-pose.full').style.transform, y: document.querySelector('#tl-viz .lv-flow').style.backgroundPosition }));
+  await rm.waitForTimeout(1500);
+  const r2 = await rm.evaluate(() => ({ tf: document.querySelector('#tl-viz .lv-pose.full').style.transform, y: document.querySelector('#tl-viz .lv-flow').style.backgroundPosition, op: document.querySelector('#tl-viz .lv-pose.full').style.opacity }));
+  ok('L15 reduced motion: no stretching and no streaming, just the blend', r1.still && !r1.tf && !r2.tf && r1.y === r2.y && r2.op !== '', JSON.stringify({ r1, r2 }));
+  await rm.context().close(); }
+
+console.log('\nL16 SpO₂ and EtCO₂');
+{ const vp = await (await browser.newContext({ viewport: { width: 430, height: 932 }, serviceWorkers: 'block' })).newPage();
+  vp.on('pageerror', e => errs.push(String(e)));
+  await vp.goto(ORIGIN + '/vent-ltv1200.html?free');
+  await vp.waitForFunction(() => document.querySelector('#tl-viz .lv-spo2'));
+  await vp.waitForTimeout(300);
+  const shown = await vp.evaluate(() => ({ spo2: document.querySelector('#tl-viz .lv-spo2').textContent, et: document.querySelector('#tl-viz .lv-etco2').textContent }));
+  ok('L16 the panel shows SpO₂ and EtCO₂', /^\d{2,3}$/.test(shown.spo2) && /^\d{1,3}$/.test(shown.et), JSON.stringify(shown));
+  await vp.evaluate(() => { window.requestAnimationFrame = () => 0; });   // freeze the sim: this section steps the clock itself
+  await vp.waitForTimeout(100);
+  const V = (k, s) => vp.evaluate(([k, s]) => {
+    if (!FREE_LUNGS[k].peds) { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); }
+    setFreeLung(k); if (s) { for (const x of Object.keys(s)) vals[x].v = s[x]; enforceITLimit(); updateUI(); }
+    return vitalsTarget(); }, [k, s || null]);
+  // CO₂, recomputed: 70 kg, dead space 2.2 mL/kg + 35 mL equipment + 5% of Vt, V̇CO₂ 200 mL/min
+  const n = await V('normal');
+  const va = 14 * (500 - 154 - 35 - 0.05 * 500) / 1000, want = 0.863 * 200 / va;
+  ok(`L16 normal lung, 14 × 500 mL: PaCO₂ = 0.863 × 200 ÷ ${va.toFixed(2)} L/min = ${want.toFixed(0)}`, Math.abs(n.paco2 - want) < 0.5, n.paco2.toFixed(1));
+  ok('L16 and a normal ETCO₂ 2–5 mmHg below it', n.paco2 - n.etco2 >= 2 && n.paco2 - n.etco2 <= 5 && n.etco2 >= 35 && n.etco2 <= 45, (n.paco2 - n.etco2).toFixed(1));
+  const fast = await V('normal', { rate: 28 });
+  ok('L16 doubling the rate halves the PaCO₂ (alveolar ventilation doubles)', Math.abs(fast.paco2 - n.paco2 / 2) < 0.5, fast.paco2.toFixed(1));
+  const a = await V('ards');
+  ok('L16 ARDS dead space widens the PaCO₂–EtCO₂ gap', (a.paco2 - a.etco2) > 3 * (n.paco2 - n.etco2), (a.paco2 - a.etco2).toFixed(1));
+  const a6 = await V('ards', { vt: 420 });
+  ok('L16 ARDS physiologic Vd/Vt at 6 mL/kg is 0.58 ± 0.03 (Nuckton 2002: 0.58 ± 0.09)', Math.abs(a6.vdvt - 0.58) <= 0.03, a6.vdvt.toFixed(3));
+  const sh = [];
+  for (const pe of [5, 10, 15]) sh.push((await V('ards', { peep: pe, hipres: 60 })).shunt);
+  const r10 = sh[1] / sh[0], r15 = sh[2] / sh[0];
+  ok('L16 ARDS shunt at PEEP 5 is 0.32 (inert gas, Am Rev Respir Dis 1985: 32 ± 14%)', Math.abs(sh[0] - 0.32) < 0.005, sh[0].toFixed(3));
+  ok(`L16 and PEEP 5 → 10 → 15 shrinks it ×1 → ×${r10.toFixed(2)} → ×${r15.toFixed(2)}, inside Florio 2024 (×0.70–0.75, ×0.55–0.67)`,
+     r10 >= 0.69 && r10 <= 0.76 && r15 >= 0.54 && r15 <= 0.67, sh.map(x => x.toFixed(3)).join(' → '));
+  // Oxygen
+  ok('L16 normal lung on room air: SpO₂ ≥ 95 (PaO₂ ~90)', (await V('normal', { fio2: 21 })).spo2 >= 95);
+  const hypoRA = await V('normal', { rate: 7, fio2: 21 }), hypoO2 = await V('normal', { rate: 7, fio2: 40 });
+  ok('L16 hypoventilation on room air drops SpO₂ below 90 (alveolar gas equation)', hypoRA.spo2 < 90, hypoRA.spo2.toFixed(0));
+  ok('L16 …and 40% oxygen hides it: SpO₂ ≥ 97 with PaCO₂ over 70', hypoO2.spo2 >= 97 && hypoO2.paco2 > 70, JSON.stringify({ s: hypoO2.spo2.toFixed(0), c: hypoO2.paco2.toFixed(0) }));
+  const a5 = await V('ards', { peep: 5, fio2: 40 }), a5o = await V('ards', { peep: 5, fio2: 100 }), a10 = await V('ards', { peep: 10, fio2: 50 });
+  ok('L16 ARDS at PEEP 5 / 40% is hypoxemic (SpO₂ ≤ 90)', a5.spo2 < 90.5, a5.spo2.toFixed(1));
+  ok('L16 even 100% oxygen can\'t lift PaO₂ to 100 through a 32% shunt (iso-shunt)', a5o.pao2 < 100, a5o.pao2.toFixed(0));
+  ok('L16 PEEP 10 on 50% gets within 1.5 points of 100% oxygen on PEEP 5 — a shunt answers to PEEP, not oxygen', a10.spo2 >= a5o.spo2 - 1.5 && a10.shunt < a5.shunt, JSON.stringify({ p10: a10.spo2.toFixed(1), o100: a5o.spo2.toFixed(1) }));
+  const c21 = await V('copd', { fio2: 21 }), c30 = await V('copd', { fio2: 30 });
+  ok('L16 COPD on room air is below 90, and a little oxygen fixes it (V/Q mismatch)', c21.spo2 < 90 && c30.spo2 >= 94, JSON.stringify({ ra: c21.spo2.toFixed(0), o30: c30.spo2.toFixed(0) }));
+  const p10 = await V('pneumonia', { peep: 10 }), p14 = await V('pneumonia', { peep: 14 });
+  ok('L16 one-sided pneumonia: PEEP 14 is worse than PEEP 10 (overdistends the good lung)', p14.spo2 < p10.spo2, JSON.stringify({ p10: p10.spo2.toFixed(1), p14: p14.spo2.toFixed(1) }));
+  const e5 = await V('edema', { peep: 5 }), e10 = await V('edema', { peep: 10 });
+  ok('L16 pulmonary edema answers strongly to PEEP', e10.spo2 - e5.spo2 >= 3, JSON.stringify({ e5: e5.spo2.toFixed(1), e10: e10.spo2.toFixed(1) }));
+  const cut = await V('normal', { hipres: 15 }), full = await V('normal', { hipres: 40 });
+  ok('L16 a breath cut short by the High Pressure limit raises the CO₂', cut.paco2 > full.paco2 + 10, JSON.stringify({ cut: cut.paco2.toFixed(0), full: full.paco2.toFixed(0) }));
+  const sev = await vp.evaluate(() => [sevSat(27), sevSat(40), sevSat(60), sevSat(100)].map(x => +(x * 100).toFixed(1)));
+  ok('L16 the oxygen–hemoglobin curve (Severinghaus): P50 27 → 50%, 40 → 75%, 60 → 91%, 100 → 97%', Math.abs(sev[0] - 50) < 2 && Math.abs(sev[1] - 75) < 2 && Math.abs(sev[2] - 91) < 1.5 && Math.abs(sev[3] - 97.5) < 1, sev.join(','));
+  // Drift, not jump: drop FiO₂ on an ARDS lung and step the sim clock
+  const d = await vp.evaluate(() => {
+    setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); setFreeLung('ards'); vals.peep.v = 10; vals.fio2.v = 60; updateUI();
+    simTime = 100000; _lv.vit = null; updateLungView(); const before = lvVitals.shown.spo2;
+    vals.fio2.v = 30; updateUI(); const target = vitalsTarget().spo2;
+    simTime += 1000; updateLungView(); const oneSec = lvVitals.shown.spo2;
+    for (let i = 0; i < 120; i++) { simTime += 1000; updateLungView(); } const twoMin = lvVitals.shown.spo2;
+    return { before, target, oneSec, twoMin }; });
+  ok('L16 after a change the SpO₂ drifts — one second in it has moved under 10% of the way', d.before - d.oneSec > 0 && (d.before - d.oneSec) < 0.1 * (d.before - d.target), JSON.stringify(d));
+  ok('L16 …and has settled within two minutes of sim time', Math.abs(d.twoMin - d.target) < 0.2, JSON.stringify(d));
+  const st = await vp.evaluate(() => { deviceState = 'standby'; applyStandbyVisual(); updateLungView(); return document.querySelector('#tl-viz .lv-spo2').textContent + '|' + document.querySelector('#tl-viz .lv-etco2').textContent; });
+  ok('L16 standby: no numbers', st === '—|—', st);
+  await vp.context().close(); }
+
+console.log('\nL17 blood pressure');
+{ const vp = await (await browser.newContext({ viewport: { width: 430, height: 932 }, serviceWorkers: 'block' })).newPage();
+  vp.on('pageerror', e => errs.push(String(e)));
+  await vp.goto(ORIGIN + '/vent-ltv1200.html?free');
+  await vp.waitForFunction(() => document.querySelector('#tl-viz .lv-bp'));
+  await vp.waitForTimeout(300);
+  const shown = await vp.evaluate(() => document.querySelector('#tl-viz .lv-bp').textContent + '|' + document.querySelector('#tl-viz .lv-map').textContent);
+  ok('L17 the panel shows a blood pressure and MAP', /^\d{2,3}\/\d{2,3}\|MAP \d{2,3}$/.test(shown), shown);
+  await vp.evaluate(() => { window.requestAnimationFrame = () => 0; });
+  await vp.waitForTimeout(100);
+  const V = (k, s) => vp.evaluate(([k, s]) => {
+    if (!FREE_LUNGS[k].peds) { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); }
+    setFreeLung(k); if (s) { for (const x of Object.keys(s)) vals[x].v = s[x]; enforceITLimit(); updateUI(); }
+    return vitalsTarget(); }, [k, s || null]);
+  // Independent recomputation. Cardiac output relative to PEEP 5:
+  //   0 → 3.90/3.43 (Auler 2000); 10 → 3.00/3.07, 15 → 2.63/3.07 (Luo 2024); past 15, the 10→15 slope.
+  // Heart failure, wedge ≥ 12: 0 → 2.47/2.91, 10 → 3.12/2.91 (De Hoyos 1995); flat to 15.
+  // MAP = MAP₅ × (1 + ½(CO − 1)); pulse pressure × CO.
+  const coN = x => { const pts = [[0, 3.90 / 3.43], [5, 1], [10, 3.00 / 3.07], [15, 2.63 / 3.07]];
+    for (let i = 1; i < pts.length; i++) if (x <= pts[i][0]) return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * (x - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0]);
+    return Math.max(0.35, 2.63 / 3.07 - (3.00 - 2.63) / 3.07 / 5 * (x - 15)); };
+  const bpOf = (sbp, dbp, co) => { const m0 = (sbp + 2 * dbp) / 3, m = m0 * (1 + 0.5 * (co - 1)), pp = (sbp - dbp) * co; return { map: m, sbp: m + 2 * pp / 3, dbp: m - pp / 3 }; };
+  const n5 = await V('normal', { peep: 5 });
+  ok('L17 normal lung at PEEP 5: 120/75, MAP 90', Math.round(n5.sbp) === 120 && Math.round(n5.dbp) === 75 && Math.round(n5.map) === 90, `${n5.sbp.toFixed(1)}/${n5.dbp.toFixed(1)} (${n5.map.toFixed(1)})`);
+  for (const pe of [0, 10, 15, 20]) {
+    const got = await V('normal', { peep: pe, hipres: 60 }), co = coN(pe), w = bpOf(120, 75, co);
+    ok(`L17 normal lung, PEEP ${pe}: output ×${co.toFixed(3)} → ${Math.round(w.sbp)}/${Math.round(w.dbp)} (${Math.round(w.map)})`,
+       Math.abs(got.co - co) < 1e-6 && Math.abs(got.map - w.map) < 0.05 && Math.abs(got.sbp - w.sbp) < 0.05 && Math.abs(got.dbp - w.dbp) < 0.05,
+       `${got.sbp.toFixed(1)}/${got.dbp.toFixed(1)} (${got.map.toFixed(1)}) ×${got.co.toFixed(3)}`);
+  }
+  const ladder = [];
+  for (let pe = 0; pe <= 20; pe += 2) ladder.push((await V('ards', { peep: pe, hipres: 80 })).map);
+  ok('L17 in ARDS every step up in PEEP lowers the MAP', ladder.every((m, i) => i === 0 || m < ladder[i - 1]), ladder.map(m => m.toFixed(0)).join(' → '));
+  const a5 = await V('ards', { peep: 5, hipres: 80 }), a15 = await V('ards', { peep: 15, hipres: 80 });
+  ok('L17 ARDS PEEP 5 → 15 costs the MAP about 7% (half the 14% fall in cardiac index)', Math.abs(a15.map / a5.map - (1 + 0.5 * (coN(15) - 1))) < 0.001, (a15.map / a5.map).toFixed(3));
+  // Auto-PEEP: the same set PEEP, a faster rate traps gas, and the heart sees the total
+  const c14 = await V('copd', { rate: 14, peep: 5, hipres: 80 }), c30 = await V('copd', { rate: 30, peep: 5, hipres: 80 });
+  ok('L17 COPD: trapping gas (rate 30) lowers the blood pressure at the same set PEEP', c30.peepTotal > c14.peepTotal + 3 && c30.map < c14.map - 2, JSON.stringify({ r14: [c14.peepTotal, c14.map.toFixed(1)], r30: [c30.peepTotal, c30.map.toFixed(1)] }));
+  const cw = bpOf(132, 80, coN(c30.peepTotal));
+  ok('L17 …by exactly what that much set PEEP would (auto-PEEP counts as PEEP)', Math.abs(c30.map - cw.map) < 0.05, `${c30.map.toFixed(2)} vs ${cw.map.toFixed(2)}`);
+  const cs = await vp.evaluate(() => { ventMode = 'cpap'; vals.rate.v = 30; vals.peep.v = 5; updateUI(); const t = vitalsTarget(); ventMode = 'ac'; updateUI(); return t; });
+  ok('L17 and spontaneous CPAP breathing traps none', cs.peepTotal === 5, cs.peepTotal);
+  // Heart failure with high filling pressures: CPAP unloads the ventricle
+  const e = {};
+  for (const pe of [0, 5, 10, 15, 20]) e[pe] = await V('edema', { peep: pe, hipres: 60 });
+  ok('L17 edema (heart failure): cardiac output rises with PEEP 0 → 5 → 10 as De Hoyos 1995 measured (2.47 → 2.91 → 3.12)',
+     Math.abs(e[0].co - 2.47 / 2.91) < 1e-6 && e[5].co === 1 && Math.abs(e[10].co - 3.12 / 2.91) < 1e-6, [e[0].co, e[5].co, e[10].co].map(x => x.toFixed(3)).join(' → '));
+  ok('L17 …with no change in arterial pressure from 0 to 15', [0, 10, 15].every(k => Math.abs(e[k].map - e[5].map) < 0.01 && Math.abs(e[k].sbp - e[5].sbp) < 0.01), [0, 5, 10, 15].map(k => e[k].sbp.toFixed(0) + '/' + e[k].dbp.toFixed(0)).join(', '));
+  ok('L17 …and past 15, where there are no data, it falls like any other lung', e[20].map < e[15].map - 3, e[20].map.toFixed(1));
+  // Colour by the evidence
+  const cls = (k, s) => vp.evaluate(([k, s]) => {
+    if (!FREE_LUNGS[k].peds) { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); }
+    setFreeLung(k); for (const x of Object.keys(s)) vals[x].v = s[x]; enforceITLimit(); updateUI();
+    deviceState = 'run'; simTime += 1000; _lv.vit = null; updateLungView();
+    const b = document.querySelector('#tl-viz .lv-vit.bp'); return { cls: b.className, title: b.title, bp: document.querySelector('#tl-viz .lv-bp').textContent, map: lvVitals.shown.map, sbp: lvVitals.shown.sbp }; }, [k, s]);
+  const g = await cls('normal', { peep: 5 }), am = await cls('ards', { peep: 18, fio2: 80, hipres: 80 }), rd = await cls('ards', { peep: 24, fio2: 80, hipres: 80 });
+  ok('L17 a normal pressure is not coloured', g.cls === 'lv-vit bp', g.cls);
+  ok(`L17 ARDS on PEEP 18 is amber (${am.bp}, MAP ${Math.round(am.map)}: SBP 90–99)`, /\bwarn\b/.test(am.cls) && am.sbp >= 90 && am.sbp < 100 && am.map >= 65, am.cls);
+  ok(`L17 ARDS on PEEP 24 is red (${rd.bp}, MAP ${Math.round(rd.map)}: SBP < 90 or MAP < 65)`, /\bbad\b/.test(rd.cls) && (rd.sbp < 90 || rd.map < 65), rd.cls);
+  ok('L17 and says why: the Surviving Sepsis MAP target', /MAP ≥ 65/.test(rd.title) && /Surviving Sepsis/.test(rd.title), rd.title);
+  const kid = await cls('pedArds', { peep: 22, fio2: 80, hipres: 80 }), kidOk = await cls('pedArds', { peep: 10 });
+  ok(`L17 a 6-year-old is judged by PALS (SBP < 70 + 2 × 6 = 82), not adult numbers`, /SBP < 82/.test(kid.title) && kidOk.cls === 'lv-vit bp', kid.title);
+  ok(`L17 …so ${kid.bp} on PEEP 22 is coloured`, /\b(warn|bad)\b/.test(kid.cls) && kid.sbp < 92, kid.cls);
+  const inf = await cls('pedBronch', { peep: 6 });
+  ok('L17 an infant\'s limit is SBP 70', /SBP < 70/.test(inf.title) && inf.cls === 'lv-vit bp', inf.title + ' ' + inf.bp);
+  // Drift: about 10 s of sim time
+  const d = await vp.evaluate(() => {
+    setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); vals.peep.v = 5; vals.hipres.v = 60; updateUI();
+    simTime = 200000; _lv.vit = null; updateLungView(); const before = lvVitals.shown.map;
+    vals.peep.v = 20; updateUI(); const target = vitalsTarget().map;
+    simTime += 1000; updateLungView(); const oneSec = lvVitals.shown.map;
+    for (let i = 0; i < 60; i++) { simTime += 1000; updateLungView(); } const oneMin = lvVitals.shown.map;
+    return { before, target, oneSec, oneMin }; });
+  ok('L17 after a PEEP change the pressure drifts — one second in it has moved 5–15% of the way', (d.before - d.oneSec) > 0.05 * (d.before - d.target) && (d.before - d.oneSec) < 0.15 * (d.before - d.target), JSON.stringify(d));
+  ok('L17 …and has settled within a minute', Math.abs(d.oneMin - d.target) < 0.05, JSON.stringify(d));
+  const st = await vp.evaluate(() => { deviceState = 'standby'; applyStandbyVisual(); updateLungView(); return document.querySelector('#tl-viz .lv-bp').textContent; });
+  ok('L17 standby: no pressure shown', st === '—', st);
+  await vp.context().close(); }
 
 console.log('\nL13 accessible, and fits a phone');
 { const a = await p.evaluate(() => { const st = document.querySelector('#tl-viz .lv-stage');

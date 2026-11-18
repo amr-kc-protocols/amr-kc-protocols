@@ -76,6 +76,49 @@ def from_pack(folder, cell):
     return {c: {'rest': load(c, 'rest.png'), 'full': load(c, 'full_inspiration.png')} for c in CONDS}, (cell, cell)
 
 
+def trachea_rows(img):
+    """The trachea's inner rows, below the opening and above the carina:
+    [(y, left, right)], left/right being the first and last wall pixels."""
+    import colorsys
+    px = img.load(); w, h = img.size
+    a = img.getchannel('A').getbbox()
+    if not a: return []
+    cx = (a[0] + a[2]) // 2
+    inside = lambda p: p[3] > 200 and colorsys.rgb_to_hsv(p[0] / 255, p[1] / 255, p[2] / 255)[2] > 0.45
+    rows, first = [], None
+    for y in range(a[1] + int(0.11 * h), a[1] + int(0.6 * h)):   # starts below the cup-shaped opening
+        if not inside(px[cx, y]): break                          # the carina's dark gap
+        L = cx
+        while L > 0 and inside(px[L - 1, y]): L -= 1
+        R = cx
+        while R < w - 1 and inside(px[R + 1, y]): R += 1
+        first = first or (R - L)
+        if R - L > 1.6 * first: break                            # fanning out into the main bronchi
+        rows.append((y, L, R))
+    return rows
+
+
+def clear_trachea_arrows(full, rest):
+    """Replace the inside of the full pose's trachea with the rest pose's.
+
+    Four of the full poses had airflow arrows drawn in the trachea. They are
+    frozen in the art, so they point the same way all breath (asthma's pointed
+    out of the lung at end-inspiration), and the page draws airflow itself from
+    the computed flow. The rest poses have a plain ringed trachea, so each row
+    of the full pose's trachea takes the matching row of the rest pose's,
+    stretched to the full pose's width. The wall outline is left alone.
+    """
+    out = full.copy(); po = out.load(); pr = rest.load()
+    F, Rr = trachea_rows(full), trachea_rows(rest)
+    if len(F) < 2 or len(Rr) < 2: return out
+    for k, (y, L, R) in enumerate(F):
+        yr, Lr, RR = Rr[round(k * (len(Rr) - 1) / (len(F) - 1))]
+        for x in range(L, R + 1):
+            u = (x - L) / max(1, R - L)
+            po[x, y] = pr[round(Lr + u * (RR - Lr)), yr]
+    return out
+
+
 def part_filled(rest, full):
     half = full.copy(); half.putalpha(full.getchannel('A').point(lambda a: a // 2))
     out = rest.copy(); out.alpha_composite(half)
@@ -93,6 +136,8 @@ def main():
 
     x, y = SWAP_FULL
     poses[x]['full'], poses[y]['full'] = poses[y]['full'], poses[x]['full']
+    for cond in CONDS:
+        poses[cond]['full'] = clear_trachea_arrows(poses[cond]['full'], poses[cond]['rest'])
 
     cw, ch = w + 2 * GUTTER, h + 2 * GUTTER
     atlas = Image.new('RGBA', (cw * 3, ch * len(CONDS)), (0, 0, 0, 0))

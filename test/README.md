@@ -136,7 +136,35 @@ These suites live here:
   the volume is a pure function of the simulator's clock, so the picture
   cannot drift from the trace, that the view is one node that survives every
   re-render, that the atlas has a lung in every cell and nothing in its
-  gutters, and that it fits a 320px phone.
+  gutters, and that it fits a 320px phone. It recomputes the SpO₂ and EtCO₂
+  too: PaCO₂ from the alveolar ventilation equation, a wider PaCO₂–EtCO₂ gap
+  in ARDS, oxygen masking hypoventilation that room air reveals, PEEP opening
+  an ARDS shunt that oxygen barely touches, COPD answering to oxygen, high
+  PEEP backfiring in one-sided pneumonia, the Severinghaus curve, and the
+  numbers drifting to a change rather than jumping. It checks the ARDS shunt
+  and dead space against inert-gas data (1985), Florio 2024 and Nuckton 2002. It
+  recomputes the blood pressure from the published cardiac-output numbers:
+  PEEP and auto-PEEP lower it (Auler 2000, Luo 2024), while CPAP in
+  high-filling-pressure heart failure raises output without dropping pressure
+  (De Hoyos 1995). It also checks that the pressure turns amber and red by
+  the Surviving Sepsis MAP target, and by PALS thresholds for children.
+
+- **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
+  grade as correct. Each scenario's `goal.check()` is the therapy the
+  simulator teaches, so the suite holds them to the evidence: no scenario is
+  solved by its own starting settings; septic shock must match the
+  pre-intubation drive (Winter's formula, not a PaCO₂ allowed to rise above
+  the patient's own); severe ARDS pairs FiO₂ 0.9 with PEEP ≥ 14 (ARDSnet);
+  herniation hyperventilation lands at PaCO₂ 30–35 and an overshoot to ~25
+  fails; the weaning screen doesn't depend on RSBI (AARC 2024); and a
+  one-sided pneumonia doesn't reward high PEEP. Each corrected scenario keeps
+  a case for its old answer, which must now fail. It also checks the Free Play
+  readout's grading: a healthy lung on healthy settings is all green; ARDS on
+  those settings is not (driving pressure red, 7 mL/kg amber), and fixing it
+  the ARDSnet way turns it green; obstructive lungs want I:E ≥ 1:4, flow ≥ 60
+  and minute volume < 10; PEEP follows the ARDSnet table for the FiO₂; the
+  driving pressure and plateau are recomputed in the test; and every flag
+  carries a reason and a source.
 
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
