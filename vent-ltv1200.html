@@ -453,11 +453,22 @@ canvas#pip-canvas{display:none}
 .tl-viz{display:flex;gap:10px;align-items:stretch;margin-top:8px;padding:8px;border-radius:10px;
   background:#0f1726;border:1.5px solid #2a3a57;box-shadow:inset 0 2px 8px rgba(0,0,0,0.6)}
 .lv-stage{position:relative;flex:0 0 auto;width:min(48%,200px);aspect-ratio:254/252}
+/* Two layers, the rest pose under the full pose. The full pose's opacity
+   follows lung volume, and both outlines are stretched toward each other, so
+   the lung swells and settles continuously instead of stepping between
+   frames. Driven every animation frame from updateLungView(). */
 .lv-pose{position:absolute;inset:0;background:url(vent-sprites/lungs-atlas.png) no-repeat;background-size:300% 600%;
-  opacity:0;z-index:1;transition:opacity 0s linear .14s}
-/* Short cross-fade: the incoming pose fades in on top while the outgoing one
-   stays solid underneath, so the dark panel never shows through mid-change. */
-.lv-pose.on{opacity:1;z-index:2;transition:opacity .14s ease-out}
+  transform-origin:0 0;will-change:transform,opacity}
+.lv-pose.full{opacity:0}
+/* Airflow in the trachea, drawn from the computed flow: chevrons stream down
+   into the lung on inspiration and up out of it on expiration, faster and
+   brighter the higher the flow, and fade out when flow stops. The trachea
+   sits at the same place in every pose (centred, ~15–47% of the height). */
+.lv-flow{position:absolute;left:47.3%;width:4.6%;top:16%;height:29%;z-index:3;opacity:0;pointer-events:none;
+  background-repeat:repeat-y;background-size:100% auto;
+  -webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
+.lv-flow.in{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cpath d='M1.6 4 5 7.6 8.4 4' fill='none' stroke='%23eaf8ff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.lv-flow.out{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cpath d='M1.6 7.6 5 4 8.4 7.6' fill='none' stroke='%23ffe3b8' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 .lv-side{flex:1;min-width:0;display:flex;gap:8px}
 .lv-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .lv-phase{align-self:flex-start;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:0.05em;
@@ -482,7 +493,6 @@ canvas#pip-canvas{display:none}
   .lv-stage{width:min(78%,200px)}
   .lv-side{width:100%}
 }
-@media (prefers-reduced-motion:reduce){.lv-pose,.lv-pose.on{transition:none}}
 .tl-lungs.six{display:grid;grid-template-columns:repeat(3,1fr)}
 
 /* Scenario mission card elements */
@@ -2231,6 +2241,20 @@ function triggerInspHold(){
   openDrawer('insphold');
 }
 
+// The patient's own breathing in CPAP / NPPV: about 15 a minute, drifting
+// between roughly 11.5 and 18.5 so it looks alive. The phase comes from
+// counting breaths — the integral of the rate — not from simTime % (current
+// cycle length). That modulo jumps whenever the cycle length moves, and since
+// the jump grows with every breath already taken, after a minute the trace
+// was running backwards on about one frame in six, and on most frames by five
+// minutes. The integral only ever moves forward, and is still a pure function
+// of the clock, so the trace and the lung picture share it exactly.
+function spontBreath(tMs){
+  var bpm=15+2*Math.sin(tMs/9000)+1.5*Math.sin(tMs/3700);
+  var n=(15*tMs+18000*(1-Math.cos(tMs/9000))+5550*(1-Math.cos(tMs/3700)))/60000;   // ∫ bpm dt, in breaths
+  return {ph:n-Math.floor(n), cycMs:60000/bpm};
+}
+
 function calcPressure(tMs){
   var peep=vals.peep.v;
   var hi=vals.hipres.v;
@@ -2263,14 +2287,12 @@ function calcPressure(tMs){
     else { manualBreathActive=false; }
   }
 
-  // Spontaneous modes (CPAP / NPPV)
+  // Spontaneous modes (CPAP / NPPV): breath timing from spontBreath()
   if(ventMode==='cpap'||ventMode==='nppv'){
     var supPres=(ventMode==='nppv')?(peep+vals.ps.v):(peep+vals.ps.v);
     // CPAP: pressure dips slightly below baseline during effort then rises to peep+PS
     // NPPV: rises to IPAP during insp, falls to EPAP during exp
-    var spontBpm=15+2*Math.sin(tMs/9000)+1.5*Math.sin(tMs/3700); // natural variability
-    var cyclMs=60000/spontBpm;
-    var ph=(tMs%cyclMs)/cyclMs;
+    var ph=spontBreath(tMs).ph;
     var ri=0.38; // insp fraction (slightly longer than normal to show BiPAP shape)
     var p;
     if(ph<0.06){
@@ -3066,14 +3088,14 @@ var SCENARIO_LEVELS={
           'Nothing — add PEEP and leave ventilation alone'
         ],
         correct:1,
-        exp:'The low PaCO₂ is <strong>compensation</strong> for a severe metabolic (lactic) acidosis. If you let PaCO₂ drift up to 40, the pH crashes. The vent must <strong>match the high minute ventilation the patient was generating</strong>. Minute ventilation is only a <em>starting estimate</em> — it can\'t predict an exact PaCO₂ (dead space and CO₂ production vary) — so set a high MV, then <strong>titrate to the measured ETCO₂ and a follow-up ABG</strong>.'
+        exp:'The low PaCO₂ is <strong>compensation</strong> for a severe metabolic (lactic) acidosis. If you let PaCO₂ drift up to 40, the pH crashes. In fact 28 is already behind: <strong>Winter\'s formula</strong> (expected PaCO₂ = 1.5 × HCO₃⁻ + 8 ± 2) puts full compensation for this bicarbonate (about 10) at <strong>roughly 21–26</strong> — part of why they tired and needed the tube. The vent must <strong>match the high minute ventilation the patient was generating</strong>. Minute ventilation is only a <em>starting estimate</em> — it can\'t predict an exact PaCO₂ (dead space and CO₂ production vary) — so set a high MV, then <strong>titrate to the measured ETCO₂ and a follow-up ABG</strong>.'
       },
       goal:{
-        text:'Match the compensatory drive as a starting point — raise <strong>minute ventilation to about 10–13 L/min</strong>, then titrate to the measured gas (target ETCO₂/PaCO₂ ~28–34, guided by serial ABG). Don\'t let CO₂ climb.',
-        check:function(){ var mv=estMinuteVolume(); return mv>=10 && mv<=13.5; },
-        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min'; }
+        text:'Match the compensatory drive — they were breathing 30+ before the tube, so raise <strong>minute ventilation to at least 12 L/min</strong> (14–18 is common in severe acidosis), keeping the breath lung-safe and getting the extra from <em>rate</em>. Keep <strong>PaCO₂ at or below the pre-intubation 28, toward Winter\'s ~21–26</strong>, confirmed by ABG. Never let CO₂ climb.',
+        check:function(){ var mv=estMinuteVolume(); return mv>=12 && mv<=18.5; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   keep PaCO₂ ≤ 28'; }
       },
-      confirm:'✓ High minute ventilation set to sustain the compensation, then dialed to the measured gas. Remember MV is a proxy, not a PaCO₂ predictor — follow continuous ETCO₂ and serial ABGs. Never normalize the PaCO₂ in a compensating metabolic acidosis, and don\'t over-ventilate below target — both worsen outcomes. Level 2 complete!'
+      confirm:'✓ High minute ventilation set to sustain the compensation. Remember MV is a proxy, not a PaCO₂ predictor — and in shock, dead space widens the gap so <strong>ETCO₂ reads lower than the PaCO₂</strong>: a reassuring ETCO₂ can hide a rising PaCO₂, so trend it continuously and confirm with serial ABGs. Aim for the PaCO₂ Winter\'s formula predicts, never above the patient\'s own pre-intubation value: normalizing it toward 40 in a compensating metabolic acidosis drops the pH further and can tip a shocked patient into arrest. Level 2 complete!'
     }
   ],
 
@@ -3082,12 +3104,12 @@ var SCENARIO_LEVELS={
     { name:'Ready to Come Down',
       badgeCls:'scen-badge-3',
       intro:'A long-distance transfer to a rehab-capable facility. Your patient is awake, following commands, and clearly doing more of the breathing than the vent is. Medical control has cleared you to begin easing the support down for the ride.',
-      scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support and the RSBI is 62. They\'re fully controlled on AC right now.',
-      vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'RSBI',v:'62'}],
+      scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support (FiO₂ 40%, PEEP 5) and they are hemodynamically stable. They\'re fully controlled on AC right now.',
+      vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'FiO₂',v:'40%'}],
       lung:{compliance:45,resistance:10,label:'Recovering'},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
-        q:'Awake, strong effort, RSBI 62, good gas exchange — the readiness screen is passed. Under your medical-control order to ease support, what is the appropriate transport step?',
+        q:'Awake, strong effort, good gas exchange on modest support, stable — the readiness screen is passed. Under your medical-control order to ease support, what is the appropriate transport step?',
         choices:[
           'Keep full AC control — it\'s working, don\'t rock the boat',
           'Trial reduced support as ordered (CPAP/PSV, low pressure support) and monitor tolerance closely, ready to restore support',
@@ -3095,14 +3117,14 @@ var SCENARIO_LEVELS={
           'Extubate now — a passed screen means they\'re ready'
         ],
         correct:1,
-        exp:'A passed readiness screen (RSBI < 105, adequate oxygenation, awake, stable) supports a <strong>monitored trial of reduced support</strong> — here authorized by your medical-control order. Move to <strong>minimal support</strong> (CPAP/PSV, low pressure support) and watch tolerance, ready to restore full support if they tire. Mind the scope: a passed trial is only <em>one</em> input to extubation readiness — <strong>airway protection, cough strength and secretion burden still govern that decision</strong>, and <strong>extubating for weaning is not a field intervention</strong> without a specific protocol and physician direction. SIMV rate-ratcheting is linked to slower liberation (AARC 2024) and is not the modern bridge. Your job: reduce support as ordered, monitor, and communicate readiness to the receiving team.'
+        exp:'A passed readiness screen (awake, adequate oxygenation on modest FiO₂ and PEEP, hemodynamically stable, breathing on their own — the AARC 2024 guideline suggests an RSBI isn\'t needed to decide this) supports a <strong>monitored trial of reduced support</strong> — here authorized by your medical-control order. Move to <strong>minimal support</strong> (CPAP/PSV, low pressure support) and watch tolerance, ready to restore full support if they tire. Mind the scope: a passed trial is only <em>one</em> input to extubation readiness — <strong>airway protection, cough strength and secretion burden still govern that decision</strong>, and <strong>extubating for weaning is not a field intervention</strong> without a specific protocol and physician direction. In the trials that compared them (Brochard 1994, Esteban 1995), weaning by ratcheting down the SIMV rate was the slowest way off the vent — it is not the modern bridge. Your job: reduce support as ordered, monitor, and communicate readiness to the receiving team.'
       },
       goal:{
         text:'Under your medical-control order, trial reduced support — switch to <strong>CPAP / PSV</strong> (spontaneous), set a low <strong>pressure support 5–8 cmH₂O</strong> and <strong>PEEP ≤ 5</strong>, and watch tolerance (RR, Vt, SpO₂, comfort). Be ready to restore full support if they tire.',
         check:function(){ return ventMode==='cpap' && vals.ps.v>=5 && vals.ps.v<=8 && vals.peep.v<=5; },
         readout:function(){ return 'Mode '+ventMode.toUpperCase()+'  ·  PS '+vals.ps.v+'  ·  PEEP '+vals.peep.v; }
       },
-      confirm:'✓ Reduced to a monitored spontaneous trial with the patient carrying the work — the right transport action when it is ordered and tolerance is watched. A tolerated trial (stable RR/Vt/SpO₂, comfortable, RSBI < 105) is <em>one</em> input toward liberation, <strong>not a green light to extubate</strong>: airway protection, cough and secretions still decide that, and the extubation decision belongs to the receiving team and medical direction. If they tire, restore support. SIMV rate-weaning, by contrast, is linked to slower liberation (AARC 2024). Recognize readiness — and communicate it.'
+      confirm:'✓ Reduced to a monitored spontaneous trial with the patient carrying the work — the right transport action when it is ordered and tolerance is watched. A tolerated trial (stable RR, Vt and SpO₂ without raising the FiO₂, comfortable) is <em>one</em> input toward liberation, <strong>not a green light to extubate</strong>: airway protection, cough and secretions still decide that, and the extubation decision belongs to the receiving team and medical direction. If they tire, restore support — don\'t turn up the oxygen to carry them through it (AARC 2024). SIMV rate-weaning, by contrast, was the slowest route off the vent in the trials that tested it. Recognize readiness — and communicate it.'
     },
     // ─── L3 S2 ────────────────────────────────────────────────
     { name:'The Swinging Peak Pressure',
@@ -3150,8 +3172,8 @@ var SCENARIO_LEVELS={
         exp:'P/F < 100 is <strong>severe ARDS</strong> (Berlin). Bigger breaths injure; rate fixes CO₂, not oxygen. The evidence-based next step is to <strong>escalate PEEP and FiO₂ in tandem</strong> per the ARDSnet table to recruit lung and buy oxygenation — while you set up prone positioning and consider ECMO referral.'
       },
       goal:{
-        text:'Escalate up the oxygenation ladder: raise <strong>PEEP to ≥ 12–14</strong> and <strong>FiO₂ to ≥ 90%</strong> together. Recruit and oxygenate while the rest of the rescue plan spins up.',
-        check:function(){ return vals.peep.v>=12 && vals.fio2.v>=90; },
+        text:'Escalate up the oxygenation ladder: raise <strong>FiO₂ to ≥ 90%</strong> and <strong>PEEP to ≥ 14</strong> together — the ARDSnet lower-PEEP table pairs FiO₂ 0.9 with PEEP 14–18. Recruit and oxygenate while the rest of the rescue plan spins up.',
+        check:function(){ return vals.peep.v>=14 && vals.fio2.v>=90; },
         readout:function(){ return 'PEEP '+vals.peep.v+'  ·  FiO₂ '+vals.fio2.v+'%'; }
       },
       confirm:'✓ PEEP and FiO₂ escalated together per the ARDSnet ladder. This is severe ARDS (Berlin P/F < 100) — beyond high PEEP/FiO₂, the proven moves are prone positioning, neuromuscular blockade for dyssynchrony, and early ECMO referral. The ventilator is one piece of a bigger rescue.'
@@ -3176,11 +3198,11 @@ var SCENARIO_LEVELS={
         exp:'CO₂ is a potent cerebral vasodilator: lowering PaCO₂ constricts cerebral vessels, shrinks blood volume, and drops ICP within minutes. But over-doing it (PaCO₂ < 25–30) causes ischemia and rebound. Per Brain Trauma Foundation guidance, hyperventilation is a <strong>monitored, time-limited rescue</strong> for acute herniation only — <strong>guided by continuous ETCO₂</strong> (target ~30–35, correlated to ABG), not a standing setting.'
       },
       goal:{
-        text:'Mildly hyperventilate as a monitored bridge — raise <strong>minute ventilation to about 10–13 L/min</strong>, titrating to <strong>continuous ETCO₂ ~30–35</strong> (confirm with ABG). Increase the rate; don\'t overshoot into aggressive hypocapnia.',
-        check:function(){ var mv=estMinuteVolume(); return mv>=10 && mv<=13.5; },
+        text:'Mildly hyperventilate as a monitored bridge — at PaCO₂ 42 on 8 L/min, getting to <strong>30–35</strong> takes only about a quarter more ventilation: raise <strong>minute ventilation to about 10–11.5 L/min</strong> with the rate, titrating to <strong>continuous ETCO₂ ~30–35</strong> (confirm with ABG). Much more than that overshoots into the hypocapnia that causes ischemia.',
+        check:function(){ var mv=estMinuteVolume(); return mv>=9.5 && mv<=11.5 && vals.vt.v>=400 && vals.vt.v<=600; },
         readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   watch ETCO₂ 30–35'; }
       },
-      confirm:'🏆 Controlled, capnography-guided hyperventilation buys minutes by shrinking cerebral blood volume — a bridge to the OR, osmotic therapy, and sedation, not a destination. Follow continuous ETCO₂ (target ~30–35) with ABG correlation, and back off to normocapnia once the crisis is controlled — sustained PaCO₂ < 30 worsens outcomes (Brain Trauma Foundation). Level 3 complete — you\'re managing the toughest cases.'
+      confirm:'🏆 Controlled, capnography-guided hyperventilation buys minutes by shrinking cerebral blood volume — a bridge to the OR, osmotic therapy, and sedation, not a destination. Follow continuous ETCO₂ (target ~30–35) with ABG correlation, keep it brief (ENLS: under 2 hours at PaCO₂ 30–35), and back off to normocapnia (ETCO₂ 35–40) once the crisis is controlled — the Brain Trauma Foundation recommends against prolonged hyperventilation to PaCO₂ ≤ 25. Level 3 complete — you\'re managing the toughest cases.'
     }
   ],
 
@@ -3348,6 +3370,7 @@ var ACADEMY_SCENARIOS={
     intro:'Module 2 practice. You\'re called for a transfer of a pneumonia patient who\'s "not doing well." Before you can fix the vent you have to name the problem: which type of respiratory failure are you looking at — and does the fix live in oxygenation or ventilation?',
     scenario:'72-year-old, lobar pneumonia, intubated. SpO₂ 86% on FiO₂ 40% with PEEP 5. The CO₂ and pH are fine — this is purely an oxygen problem. Dense infiltrate in one lung base.',
     vitals:[{k:'HR',v:'104'},{k:'SpO₂',v:'86%'},{k:'EtCO₂',v:'40 mmHg'},{k:'FiO₂',v:'40%'}],
+    lung:{compliance:40,resistance:12,label:'Lobar pneumonia'},
     setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
       q:'Low oxygen, normal CO₂ and pH. Which failure type — and where does the fix live?',
@@ -3358,14 +3381,14 @@ var ACADEMY_SCENARIOS={
         'Type I — but the fix is a faster respiratory rate'
       ],
       correct:1,
-      exp:'Low O₂ with a normal CO₂/pH is <strong>Type I (hypoxemic) failure</strong> — a gas-exchange/shunt problem, not a ventilation problem. Rate and minute ventilation move CO₂, not oxygen. Fix it with <strong>FiO₂ and PEEP</strong>.'
+      exp:'Low O₂ with a normal CO₂/pH is <strong>Type I (hypoxemic) failure</strong> — a gas-exchange/shunt problem, not a ventilation problem. Rate and minute ventilation move CO₂, not oxygen. Fix it with <strong>FiO₂ and PEEP</strong> — but know PEEP\'s limits here. A dense <em>one-sided</em> consolidation recruits far less than the patchy collapse of ARDS, and pushing PEEP high mostly overdistends the <em>good</em> lung, squeezing blood toward the bad one and making the shunt worse. Moderate PEEP and more oxygen do the work; if you can, position <strong>good lung down</strong>.'
     },
     goal:{
-      text:'Treat the oxygenation failure: raise <strong>FiO₂ to ≥ 60%</strong> and add recruiting <strong>PEEP of 8–12</strong>. (Leave rate and volume alone — they\'re not the problem here.)',
+      text:'Treat the oxygenation failure: raise <strong>FiO₂ to ≥ 60%</strong> and add moderate <strong>PEEP of 8–12</strong> — not higher, with one lung doing the work. (Leave rate and volume alone — they\'re not the problem here.)',
       check:function(){ return vals.fio2.v>=60 && vals.peep.v>=8 && vals.peep.v<=12; },
       readout:function(){ return 'FiO₂ '+vals.fio2.v+'%  ·  PEEP '+vals.peep.v; }
     },
-    confirm:'✓ You named it Type I and treated the oxygen: more FiO₂ plus PEEP to recruit lung and cut the shunt. Contrast with Type II (hypercapnic) failure, where the lever is minute ventilation. Recognizing which failure you\'re in tells you which knob to reach for.'
+    confirm:'✓ You named it Type I and treated the oxygen: more FiO₂ plus moderate PEEP to hold open what will open. In a one-sided pneumonia, more PEEP isn\'t better — it overdistends the healthy lung — so good-lung-down positioning and FiO₂ carry more of the load than they would in ARDS. Contrast with Type II (hypercapnic) failure, where the lever is minute ventilation. Recognizing which failure you\'re in tells you which knob to reach for.'
   },
   'niv-vs-tube':{
     name:'Tube or Mask?',
@@ -3398,6 +3421,7 @@ var ACADEMY_SCENARIOS={
     intro:'Module 8 practice. Your intubated patient is agitated and "fighting the vent." The reflex is to start turning knobs. Read the mechanics first, then decide whether a setting is even the problem.',
     scenario:'Intubated, awake and agitated, pulling at the tube. But the mechanics are clean: I:E is fine, no breath-stacking, SpO₂ 98%, CO₂ normal. The one thing set poorly is a hard trigger sensitivity that makes them work for every breath.',
     vitals:[{k:'HR',v:'124'},{k:'SpO₂',v:'98%'},{k:'EtCO₂',v:'41 mmHg'},{k:'BP',v:'158/92'}],
+    lung:{compliance:50,resistance:8,label:'Healthy'},       // "the mechanics are clean"
     setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:0.9,peep:5,pc:15,ps:10,fio2:40,sens:8,hipres:40,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
       q:'Agitated and bucking, but gas exchange and mechanics are all normal. What is the primary problem?',
@@ -3423,6 +3447,7 @@ var ACADEMY_SCENARIOS={
     intro:'Final challenge. The sickest patient of your shift: severe ARDS going to an ECMO center, hours on the road. Everything you\'ve learned lands on this one vent — lung protection, oxygenation, minute ventilation, and safe alarms, all at once. No hand-holding. Get it right.',
     scenario:'28-year-old, severe ARDS, PBW 70 kg. Handed over at Vt 650 mL (9.3 mL/kg), PEEP 5, FiO₂ 70%, and SpO₂ still only 85%. The lungs are stiff and the plateau is high. Make it lung-protective AND oxygenating for a long transport.',
     vitals:[{k:'HR',v:'116'},{k:'SpO₂',v:'85%'},{k:'Pplat',v:'33 cmH₂O'},{k:'FiO₂',v:'70%'}],
+    lung:{compliance:23,resistance:12,label:'Severe ARDS'},   // Pplat 33 at 650 mL on PEEP 5, as the story says
     setup:{mode:'ac',bt:'volume',rate:14,vt:650,it:1.0,peep:5,pc:15,ps:10,fio2:70,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
     diagnose:{
       q:'Severe ARDS with an injurious volume AND refractory hypoxemia. What framework do you apply?',
@@ -3436,11 +3461,11 @@ var ACADEMY_SCENARIOS={
       exp:'Severe ARDS demands both at once: <strong>lung-protective</strong> (≈6 mL/kg, Pplat ≤ 30, rate up to hold minute ventilation) <strong>and</strong> <strong>oxygenation</strong> (climb the PEEP/FiO₂ ladder). Do one and neglect the other and the patient loses ground on a long transport.'
     },
     goal:{
-      text:'Put it all together: <strong>Vt ≈ 6 mL/kg (350–460 mL)</strong>, <strong>Pplat ≤ 30</strong>, <strong>minute ventilation ≥ 6.5 L/min</strong> (raise the rate), and recruit with <strong>PEEP 10–16</strong>.',
+      text:'Put it all together: <strong>Vt ≈ 6 mL/kg (350–460 mL)</strong>, <strong>Pplat ≤ 30</strong>, <strong>minute ventilation ≥ 6.5 L/min</strong> (raise the rate), and recruit with <strong>PEEP 10–14</strong> (the ARDSnet pairing for FiO₂ 0.7). On lungs this stiff, every 2 cmH₂O of PEEP costs about 45 mL of the breath if the plateau is to stay ≤ 30.',
       check:function(){
         var pplat=calcPplat();
         return vals.vt.v>=350 && vals.vt.v<=460 && pplat!==null && pplat.pplat<=30 &&
-               estMinuteVolume()>=6.5 && vals.peep.v>=10 && vals.peep.v<=16;
+               estMinuteVolume()>=6.5 && vals.peep.v>=10 && vals.peep.v<=14;
       },
       readout:function(){
         var pplat=calcPplat();
@@ -4309,13 +4334,58 @@ function startFree(){
 // Delivered volume uses the readout's own estimates (set Vt in volume
 // control, PC × compliance in pressure control), so picture and numbers agree.
 //
-// The pose is judged against a normal-size breath for this patient (7 mL/kg;
-// 70 kg for an adult test lung), not against the set Vt, so a cut-short or
-// trapped breath looks different from a normal one. LV_MID and LV_FULL are
-// display thresholds, not clinical ones. The three poses are separately drawn
-// art, so they are switched with a short cross-fade, never morphed.
+// How full the lung looks is judged against a normal-size breath for this
+// patient (7 mL/kg; 70 kg for an adult test lung), not against the set Vt, so
+// a cut-short or trapped breath looks different from a normal one. The full
+// pose is completely in at LV_FULL of that breath — a display choice, not a
+// clinical one.
+//
+// Drawing: the art pack made its part-filled frame as the full pose at 50%
+// over the rest pose, so blending the two by volume passes through exactly
+// that frame and every point between — no stepping. Each outline is also
+// stretched toward a box part-way between the rest and full outlines
+// (measured from the atlas when it loads), so the silhouette grows rather
+// than one outline ghosting in over the other. Under reduced motion the
+// stretch is dropped and it is a plain blend. The blend follows the volume
+// exactly but never moves faster than LV_MAX_SPEED (empty to full in no less
+// than 1/8 s): breathing is slower than that, so it is drawn with no lag,
+// while anything that would make the picture jump — the rate changed
+// mid-breath, a hold ending, a manual breath — glides. The airflow overlay
+// fades on a LV_EASE_MS time constant. LV_MID only names the stages for the
+// tests: rest below it, then part-filled, then full at LV_FULL.
 var LV_ROWS={normal:0, copd:1, asthma:2, ards:3, pneumonia:4, pulmonary_edema:5};
-var LV_REF_ML_PER_KG=7, LV_ADULT_KG=70, LV_MID=0.25, LV_FULL=0.6;
+var LV_REF_ML_PER_KG=7, LV_ADULT_KG=70, LV_MID=0.25, LV_FULL=0.6, LV_MAX_SPEED=0.008, LV_EASE_MS=60;
+var lvBoxes=null;      // {condition: {rest:[x0,y0,x1,y1], full:[…]}}, fractions of a cell
+var lvStill=!!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function lvMeasureBoxes(){
+  var img=new Image();
+  img.onload=function(){
+    try{
+      var c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
+      var g=c.getContext('2d'); g.drawImage(img,0,0);
+      var d=g.getImageData(0,0,c.width,c.height).data, W=c.width, cw=Math.floor(W/3), ch=Math.floor(c.height/6), out={};
+      Object.keys(LV_ROWS).forEach(function(cond){
+        var r=LV_ROWS[cond];
+        var box=function(col){
+          var x0=cw, y0=ch, x1=-1, y1=-1;
+          for(var y=0;y<ch;y++){ var row=((r*ch+y)*W+col*cw)*4;
+            for(var x=0;x<cw;x++) if(d[row+x*4+3]>128){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; y1=y; } }
+          return x1<0?null:[x0/cw, y0/ch, (x1+1)/cw, (y1+1)/ch];
+        };
+        var a=box(0), b=box(2); if(a&&b) out[cond]={rest:a, full:b};
+      });
+      lvBoxes=out;
+    }catch(_){ lvBoxes={}; }        // canvas unreadable (page opened from disk): blend without stretching
+    if(_lv) _lv.drawn=null;
+  };
+  img.src='vent-sprites/lungs-atlas.png';
+}
+// CSS transform that lays a layer whose lung fills box `own` onto box `to`
+// (transform-origin is the layer's top-left; translate % is of the layer).
+function lvFit(own,to){
+  var sx=(to[2]-to[0])/(own[2]-own[0]), sy=(to[3]-to[1])/(own[3]-own[1]);
+  return 'translate('+((to[0]-sx*own[0])*100).toFixed(3)+'%,'+((to[1]-sy*own[1])*100).toFixed(3)+'%) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
+}
 var LV_PHASE={insp:'INSPIRATION ↓', exp:'EXPIRATION ↑', hold:'INSP HOLD', cut:'INSP · HI PRES CUT', off:'STANDBY'};
 var _lv=null, lvLast=null;
 function lvRefMl(){ var fl=freeLung(); return LV_REF_ML_PER_KG*((fl&&fl.kg)||LV_ADULT_KG); }
@@ -4370,8 +4440,8 @@ function lungVolumeAt(tMs){
     }
     var fl=freeLung();
     var sVt=((fl&&fl.kg)?6*fl.kg:400)+vals.ps.v*C;            // same estimate as the minute-volume readout
-    var bpm=15+2*Math.sin(tMs/9000)+1.5*Math.sin(tMs/3700);   // same breath clock as the trace
-    var cyc=60000/bpm, ph=(tMs%cyc)/cyc, i0=0.06, i1=0.43;    // effort dip, then rise + support plateau
+    var sb=spontBreath(tMs);                                   // same breath clock as the trace
+    var cyc=sb.cycMs, ph=sb.ph, i0=0.06, i1=0.43;              // effort dip, then rise + support plateau
     if(ph<i0) return Object.assign(base,{v:0, phase:'insp'});
     if(ph<i1) return Object.assign(base,{v:sVt*lvRise((ph-i0)*cyc,(i1-i0)*cyc,tau,true), phase:'insp'});
     return Object.assign(base,{v:sVt*lvFall((ph-i1)*cyc,(1-i1)*cyc,tau), phase:'exp'});
@@ -4390,7 +4460,7 @@ function lvBuild(){
   var el=document.createElement('div');
   el.className='tl-viz'; el.id='tl-viz';
   el.innerHTML='<div class="lv-stage" role="img">'
-      +'<div class="lv-pose"></div><div class="lv-pose"></div><div class="lv-pose"></div></div>'
+      +'<div class="lv-pose rest"></div><div class="lv-pose full"></div><div class="lv-flow"></div></div>'
     +'<div class="lv-side"><div class="lv-info">'
       +'<div class="lv-phase" aria-hidden="true">—</div>'
       +'<div aria-hidden="true"><div class="lv-k">Lung volume above PEEP</div><div class="lv-v lv-vol">—</div></div>'
@@ -4398,10 +4468,27 @@ function lvBuild(){
       +'<div class="lv-note"></div>'
     +'</div><div class="lv-gauge" aria-hidden="true"><div class="lv-fill"></div><div class="lv-floor"></div></div></div>';
   var q=function(s){ return el.querySelector(s); };
-  _lv={el:el, stage:q('.lv-stage'), poses:[].slice.call(el.querySelectorAll('.lv-pose')),
+  _lv={el:el, stage:q('.lv-stage'), rest:q('.lv-pose.rest'), full:q('.lv-pose.full'), flow:q('.lv-flow'),
        phase:q('.lv-phase'), vol:q('.lv-vol'), trap:q('.lv-trap'), trapv:q('.lv-trapv'), note:q('.lv-note'),
-       fill:q('.lv-fill'), floor:q('.lv-floor'), sprite:null, pose:-1, phaseKey:null, txtAt:0, staticKey:null};
+       fill:q('.lv-fill'), floor:q('.lv-floor'), sprite:null, w:null, t:0, drawn:null, phaseKey:null, txtAt:0, staticKey:null,
+       fo:0, fy:0, fdir:'', fh:0, fhAt:0};
+  lvMeasureBoxes();
   return _lv;
+}
+// Lay the two poses for blend weight w (0 = rest pose, 1 = full pose).
+function lvDraw(lv,w){
+  var key=lv.sprite+'|'+w.toFixed(3);
+  if(key===lv.drawn) return;
+  lv.drawn=key;
+  lv.full.style.opacity=w.toFixed(3);
+  var bx=lvBoxes&&lvBoxes[lv.sprite];
+  if(bx && !lvStill){
+    var to=[0,1,2,3].map(function(i){ return bx.rest[i]+(bx.full[i]-bx.rest[i])*w; });
+    lv.rest.style.transform=lvFit(bx.rest,to);
+    lv.full.style.transform=lvFit(bx.full,to);
+  } else {
+    lv.rest.style.transform=''; lv.full.style.transform='';
+  }
 }
 // Called every animation frame in Free Play, and whenever the card re-renders.
 function updateLungView(){
@@ -4409,15 +4496,36 @@ function updateLungView(){
   var fl=freeLung(), sprite=(fl&&fl.sprite)||'normal';
   if(lv.sprite!==sprite){
     var row=LV_ROWS[sprite]||0;
-    lv.poses.forEach(function(p,i){ p.style.backgroundPosition=(i*50)+'% '+(row*20)+'%'; });
+    lv.rest.style.backgroundPosition='0% '+(row*20)+'%';
+    lv.full.style.backgroundPosition='100% '+(row*20)+'%';
     lv.stage.setAttribute('aria-label','Schematic of the '+fl.label+' test lung, filling and emptying with each breath the vent delivers');
-    lv.sprite=sprite;
+    lv.sprite=sprite; lv.drawn=null;
   }
   var run=deviceRunning();
   var s=run?lungVolumeAt(simTime):{v:0, phase:'off', vee:0, aPEEP:0, cut:false};
   var ref=lvRefMl(), frac=s.v/ref;
   var pose=frac>=LV_FULL?2:(frac>=LV_MID?1:0);
-  if(pose!==lv.pose){ lv.poses.forEach(function(p,i){ p.classList.toggle('on',i===pose); }); lv.pose=pose; }
+  // Blend weight follows volume, eased so a discontinuity glides instead of snapping
+  var target=Math.max(0,Math.min(1,frac/LV_FULL)), tNow=performance.now();
+  var dt=lv.t?tNow-lv.t:Infinity; lv.t=tNow;
+  var ease=isFinite(dt)?1-Math.exp(-dt/LV_EASE_MS):1;
+  // Follow the volume exactly, but never faster than LV_MAX_SPEED: breathing
+  // is always slower than that, so it is drawn with no lag, while a jump in
+  // the clock (rate changed mid-breath, a hold ending) glides instead.
+  var step=isFinite(dt)?LV_MAX_SPEED*dt:1;
+  lv.w=(lv.w===null)?target:lv.w+Math.max(-step,Math.min(step,target-lv.w));
+  lvDraw(lv,lv.w);
+  // Airflow: the slope of the same volume curve, mL/s, + into the lung
+  var flow=0;
+  if(run && s.phase!=='hold') flow=(lungVolumeAt(simTime+4).v-lungVolumeAt(simTime-4).v)/8*1000;
+  var rel=Math.min(3,Math.abs(flow)/ref);          // in normal-size breaths per second
+  lv.fo+=(Math.min(0.95,rel)-lv.fo)*ease;
+  var dir=rel<0.02?lv.fdir:(flow>0?'in':'out');
+  if(dir!==lv.fdir){ lv.flow.className='lv-flow '+dir; lv.fdir=dir; }
+  if(tNow-lv.fhAt>1000){ lv.fh=lv.flow.clientHeight; lv.fhAt=tNow; }   // column height, re-read now and then
+  if(!lvStill && isFinite(dt)) lv.fy=(lv.fy+(flow>0?1:-1)*rel*0.9*lv.fh*dt/1000)%1000;
+  lv.flow.style.opacity=lv.fo.toFixed(3);
+  lv.flow.style.backgroundPosition='0 '+lv.fy.toFixed(2)+'px';
   if(s.phase!==lv.phaseKey){ lv.phase.textContent=LV_PHASE[s.phase]; lv.phase.className='lv-phase '+s.phase; lv.phaseKey=s.phase; }
   var top=2*ref;                                   // the gauge spans two normal-size breaths
   lv.fill.style.height=Math.max(0,Math.min(100,s.v/top*100)).toFixed(1)+'%';
@@ -4443,7 +4551,7 @@ function updateLungView(){
         :'Schematic art, not to scale. It moves with the vent’s own breaths.';
     }
   }
-  lvLast={pose:pose, frac:frac, v:s.v, phase:s.phase, vee:s.vee||0, cut:!!s.cut, sprite:sprite, ref:ref};
+  lvLast={pose:pose, w:lv.w, flow:flow, flowDir:lv.fdir, frac:frac, v:s.v, phase:s.phase, vee:s.vee||0, cut:!!s.cut, sprite:sprite, ref:ref};
 }
 
 // ── LEVEL MANAGEMENT ──────────────────────────────────────────

@@ -29,6 +29,12 @@
  *   L11 switching lungs swaps the art without fetching it again
  *   L12 the two new adult lungs: pneumonia and pulmonary edema sit between
  *       normal and ARDS, and start without an alarm
+ *   L15 smooth: the CPAP breath clock only runs forward (it used to run
+ *       backwards after a minute), the picture takes at least 7 frames to go
+ *       from empty to full (the old frame-switching jumped half-way at once),
+ *       a mid-breath rate change glides
+ *       instead of snapping, airflow streams the right way, no airflow arrows
+ *       are baked into the art, and reduced motion keeps it still
  *   L13 accessible, and fits a 320px phone without sideways scroll
  *   L14 no page errors
  *
@@ -98,7 +104,7 @@ console.log('\nL1 mounted, and one node for good');
 { const r = await p.evaluate(() => { const v = document.querySelectorAll('#tl-viz');
     return { n: v.length, inBar: !!document.querySelector('#mission-bar #tl-viz'), poses: document.querySelectorAll('#tl-viz .lv-pose').length }; });
   ok('L1 the lung view is in the test-lung card', r.n === 1 && r.inBar, JSON.stringify(r));
-  ok('L1 with three stacked poses', r.poses === 3);
+  ok('L1 with the rest and full poses stacked, and a flow overlay', r.poses === 2 && await p.evaluate(() => !!document.querySelector('#tl-viz .lv-pose.rest') && !!document.querySelector('#tl-viz .lv-pose.full') && !!document.querySelector('#tl-viz .lv-flow')));
   await p.evaluate(() => { document.getElementById('tl-viz').__mark = 'same'; });
   await p.evaluate(() => { setFreeLung('copd'); vals.rate.v = 18; updateKnob('rate'); updateUI(); renderMissionCard(); setFreeLung('pedNormal'); renderMissionCard(); });
   const same = await p.evaluate(() => { const v = document.querySelectorAll('#tl-viz'); return v.length === 1 && v[0].__mark === 'same' && v[0].isConnected; });
@@ -151,7 +157,7 @@ console.log('\nL2 the art');
   ok('L2 and no other condition does (COPD\'s full pose is COPD\'s own)', banded.length === 0, banded.map(k => k + ' ' + bands[k].join('/')).join(', '));
   await setup('copd');
   const pos = await p.evaluate(() => [...document.querySelectorAll('#tl-viz .lv-pose')].map(e => e.style.backgroundPosition));
-  ok('L2 COPD shows the COPD row in all three poses', JSON.stringify(pos) === JSON.stringify(['0% 20%', '50% 20%', '100% 20%']), JSON.stringify(pos)); }
+  ok('L2 COPD shows the COPD row: rest pose under full pose', JSON.stringify(pos) === JSON.stringify(['0% 20%', '100% 20%']), JSON.stringify(pos)); }
 
 console.log('\nL3 on the simulator\'s clock');
 { await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
@@ -260,9 +266,10 @@ console.log('\nL9 spontaneous breathing');
 console.log('\nL10 standby');
 { await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
   await p.evaluate(() => { deviceState = 'standby'; applyStandbyVisual(); });
-  await p.waitForTimeout(200);
-  const r = await p.evaluate(() => ({ phase: document.querySelector('#tl-viz .lv-phase').textContent, pose: [...document.querySelectorAll('#tl-viz .lv-pose')].findIndex(e => e.classList.contains('on')) }));
-  ok('L10 standby shows the resting lung and says STANDBY', r.pose === 0 && /STANDBY/.test(r.phase), JSON.stringify(r));
+  await p.waitForTimeout(600);                     // the picture eases down rather than snapping
+  const r = await p.evaluate(() => ({ phase: document.querySelector('#tl-viz .lv-phase').textContent, full: +getComputedStyle(document.querySelector('#tl-viz .lv-pose.full')).opacity, flow: +getComputedStyle(document.querySelector('#tl-viz .lv-flow')).opacity }));
+  ok('L10 standby shows the resting lung and says STANDBY', r.full < 0.02 && /STANDBY/.test(r.phase), JSON.stringify(r));
+  ok('L10 with no airflow drawn', r.flow < 0.02, r.flow);
   await p.evaluate(() => { deviceState = 'run'; applyStandbyVisual(); }); }
 
 console.log('\nL11 one download of the art');
@@ -287,6 +294,71 @@ console.log('\nL12 the new adult lungs');
   }
   const rows = await p.evaluate(() => document.querySelector('.tl-lungs.six') && getComputedStyle(document.querySelector('.tl-lungs.six')).gridTemplateColumns.split(' ').length);
   ok('L12 six adult lungs sit in two tidy rows of three', rows === 3, rows); }
+
+console.log('\nL15 smooth');
+{ // The spontaneous-breathing clock (CPAP / NPPV), over 15 minutes of 60 fps frames
+  const c = await p.evaluate(() => { let back = 0, maxStep = 0, prev = spontBreath(0).ph;
+    for (let t = 16; t < 15 * 60000; t += 16) { const ph = spontBreath(t).ph; let d = ph - prev; if (d < -0.5) d += 1;
+      if (d < 0) back++; maxStep = Math.max(maxStep, d); prev = ph; } return { back, maxStep }; });
+  ok('L15 the CPAP breath clock never runs backwards (15 min of frames)', c.back === 0, c.back + ' backwards frames');
+  ok('L15 and never skips ahead (≤ one 18.5/min breath\'s worth per frame)', c.maxStep <= 18.5 / 60000 * 16 + 1e-6, c.maxStep.toFixed(5));
+  await setup('normal', { mode: 'cpap', bt: 'volume', ps: 10, peep: 5 });
+  const tr = await p.evaluate(() => { let mx = 0, prev = calcPressure(10 * 60000);
+    for (let t = 10 * 60000 + 16; t < 12 * 60000; t += 16) { const q = calcPressure(t); mx = Math.max(mx, Math.abs(q - prev)); prev = q; } return mx; });
+  ok('L15 so the CPAP pressure trace is continuous ten minutes in (≤ 1 cmH₂O a frame)', tr <= 1, tr.toFixed(2));
+  // The picture itself, frame by frame (60 fps), across whole breaths
+  for (const [k, cfg, label] of [['normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 }, 'normal, volume control'],
+                                 ['asthma', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 60 }, 'asthma, volume control'],
+                                 ['normal', { mode: 'ac', bt: 'pressure', rate: 14, pc: 12, it: 1.0, peep: 5, hipres: 40 }, 'normal, pressure control'],
+                                 ['normal', { mode: 'cpap', bt: 'volume', ps: 10, peep: 5 }, 'CPAP + PS']]) {
+    await setup(k, cfg);
+    const mx = await p.evaluate(() => { const ref = lvRefMl(), w = t => Math.max(0, Math.min(1, lungVolumeAt(t).v / ref / LV_FULL));
+      let m = 0, prev = w(600000); for (let t = 600016; t < 612000; t += 16) { const x = w(t); m = Math.max(m, Math.abs(x - prev)); prev = x; } return m; });
+    ok(`L15 ${label}: the lung never jumps; it takes at least 7 frames to go from empty to full`, mx <= 0.15, mx.toFixed(3));
+  }
+  // A rate change mid-breath moves the breath clock; the picture should glide, not snap
+  await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
+  const g = await p.evaluate(() => { const ref = lvRefMl(), w = (t, rate) => { vals.rate.v = rate; const x = Math.max(0, Math.min(1, lungVolumeAt(t).v / ref / LV_FULL)); vals.rate.v = 14; return x; };
+    let T = 0; for (let t = 400000; t < 460000; t += 10) if (w(t, 14) < 0.05 && w(t, 30) > 0.95) { T = t; break; }
+    simTime = T; _lv.t = 0; updateLungView(); const before = lvLast.w;
+    vals.rate.v = 30; _lv.t = performance.now() - 16; updateLungView(); const after = lvLast.w;
+    for (let i = 0; i < 20; i++) { _lv.t = performance.now() - 16; simTime += 16; updateLungView(); }
+    const target = Math.max(0, Math.min(1, lungVolumeAt(simTime).v / ref / LV_FULL));
+    vals.rate.v = 14; return { T, before, after, settled: lvLast.w, target }; });
+  ok('L15 a mid-breath rate change that jumps the lung from empty to full glides in over several frames', g.T > 0 && g.before < 0.05 && g.after - g.before < 0.3, JSON.stringify(g));
+  ok('L15 and has caught up with the breath a third of a second later', Math.abs(g.settled - g.target) < 0.05, JSON.stringify(g));
+  // Airflow direction
+  await setup('normal', { mode: 'ac', bt: 'volume', rate: 14, vt: 500, it: 1.0, peep: 5, hipres: 40 });
+  const f = await p.evaluate(() => { const c = lvBreath().cycleMs, at = t => { simTime = 50 * c + t; _lv.t = 0; updateLungView(); return { dir: lvLast.flowDir, flow: Math.round(lvLast.flow), cls: document.querySelector('#tl-viz .lv-flow').className }; };
+    return { insp: at(500), exp: at(1150) }; });
+  ok('L15 airflow streams in during inspiration (500 mL over 1 s = 500 mL/s)', f.insp.dir === 'in' && /\bin\b/.test(f.insp.cls) && Math.abs(f.insp.flow - 500) < 10, JSON.stringify(f.insp));
+  ok('L15 and out during expiration', f.exp.dir === 'out' && /\bout\b/.test(f.exp.cls) && f.exp.flow < 0, JSON.stringify(f.exp));
+  // No airflow arrows baked into any trachea (they point one way all breath; the page draws flow itself)
+  const glyphs = await p.evaluate(async () => {
+    const img = new Image(); img.src = 'vent-sprites/lungs-atlas.png'; await img.decode();
+    const cv = document.createElement('canvas'); cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+    const g = cv.getContext('2d'); g.drawImage(img, 0, 0); const d = g.getImageData(0, 0, cv.width, cv.height).data;
+    const CW = 254, CH = 252, out = [], counts = {};
+    for (const cond of Object.keys(LV_ROWS)) for (const col of [0, 2]) { let n = 0; const r = LV_ROWS[cond];
+      for (let y = Math.round(r * CH + 0.17 * CH); y < r * CH + 0.44 * CH; y++) for (let x = Math.round(col * CW + 0.47 * CW); x < col * CW + 0.525 * CW; x++) {
+        const i = (y * cv.width + x) * 4; if (d[i + 3] < 200) continue;
+        const R = d[i] / 255, G = d[i + 1] / 255, B = d[i + 2] / 255, mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+        if (mx > 0.95 && (mx - mn) / mx < 0.12) n++; }    // near-white: the arrows, not the pale-pink rings
+      counts[cond + col] = n; }
+    for (const cond of Object.keys(LV_ROWS)) if (counts[cond + 2] > counts[cond + 0] + 10) out.push(cond + ' full ' + counts[cond + 2] + ' vs rest ' + counts[cond + 0]);
+    return out; });
+  ok('L15 no airflow arrows are baked into any trachea (full pose no whiter than rest)', glyphs.length === 0, glyphs.join(', '));
+  ok('L15 every condition\'s outlines were measured, so the lung swells rather than ghosts', await p.evaluate(() => lvBoxes && Object.keys(LV_ROWS).every(k => lvBoxes[k] && lvBoxes[k].full[3] > lvBoxes[k].rest[3] - 0.02)));
+  // Reduced motion: still blends by volume, but nothing stretches or streams
+  const rm = await (await browser.newContext({ viewport: { width: 430, height: 932 }, serviceWorkers: 'block', reducedMotion: 'reduce' })).newPage();
+  rm.on('pageerror', e => errs.push(String(e)));
+  await rm.goto(ORIGIN + '/vent-ltv1200.html?free');
+  await rm.waitForFunction(() => document.querySelector('#tl-viz') && lvBoxes !== null);
+  const r1 = await rm.evaluate(() => ({ still: lvStill, tf: document.querySelector('#tl-viz .lv-pose.full').style.transform, y: document.querySelector('#tl-viz .lv-flow').style.backgroundPosition }));
+  await rm.waitForTimeout(1500);
+  const r2 = await rm.evaluate(() => ({ tf: document.querySelector('#tl-viz .lv-pose.full').style.transform, y: document.querySelector('#tl-viz .lv-flow').style.backgroundPosition, op: document.querySelector('#tl-viz .lv-pose.full').style.opacity }));
+  ok('L15 reduced motion: no stretching and no streaming, just the blend', r1.still && !r1.tf && !r2.tf && r1.y === r2.y && r2.op !== '', JSON.stringify({ r1, r2 }));
+  await rm.context().close(); }
 
 console.log('\nL13 accessible, and fits a phone');
 { const a = await p.evaluate(() => { const st = document.querySelector('#tl-viz .lv-stage');

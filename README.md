@@ -270,20 +270,40 @@ The 25% and 60% thresholds are display choices, not clinical ones.
 
 The art is one atlas, `vent-sprites/lungs-atlas.png`: six conditions down
 (normal, COPD, asthma, ARDS, pneumonia, pulmonary edema), three poses across.
-Each pose was drawn separately and they don't line up pixel for pixel, so the
-view switches between them with a short cross-fade and never morphs one into
-another. One file means one download: every lung works offline once the page
-has been opened.
+One file means one download: every lung works offline once the page has been
+opened.
+
+**Drawing it smoothly.** The pack's part-filled pose turned out to be its full
+pose at 50% over its rest pose, so the view stacks just those two and blends
+them by volume, passing through exactly that frame and every point between.
+Each outline is also stretched toward a box part-way between the rest and full
+outlines (measured from the atlas when it loads), so the lung swells rather
+than one outline ghosting in over the other. The blend follows the volume
+exactly but never faster than empty-to-full in an eighth of a second, so
+breathing is drawn with no lag while a jump in the clock (the rate changed
+mid-breath, a hold ending) glides. Airflow is drawn in the trachea from the
+slope of the same volume curve: chevrons stream in on inspiration and out on
+expiration, faster with higher flow. Under reduced motion it is a plain blend,
+with nothing stretching or streaming.
+
+The spontaneous breathing in CPAP and NPPV used to take its phase from
+`simTime % (current cycle length)` while the cycle length drifted. That jumps
+by more with every breath already taken, so after a minute the pressure trace
+ran backwards on one frame in six, and on most frames by five minutes.
+`spontBreath()` counts breaths as the integral of the rate instead, which only
+moves forward and is still a pure function of the clock.
 
 `vent-sprites/build-atlas.py` builds the atlas from the art pack, either from
 its overview sheet or, better, from the 1254 px originals. It also corrects
 the pack. As delivered, asthma's full-inspiration pose was drawn in the COPD
 style (dusky, no bronchospasm) and COPD's in the asthma style (bright, with
 bronchospasm bands), so bronchospasm vanished at end-inspiration in asthma.
-The script swaps the two back and rebuilds each part-filled pose the way the
-pack made them, as the full pose at 50% over the rest pose.
-`test/ventlungview.test.mjs` checks that only asthma shows the bands, and in
-every pose. The infant with bronchiolitis borrows the asthma art, because
+The script swaps the two back. It also replaces the inside of each full pose's
+trachea with the rest pose's plain rings, because four of them had airflow
+arrows drawn in, frozen in one direction for the whole breath (asthma's
+pointed out of the lung at end-inspiration). The page draws airflow itself.
+`test/ventlungview.test.mjs` checks that only asthma shows the bands, in
+every pose, and that no trachea is whiter than its rest pose's. The infant with bronchiolitis borrows the asthma art, because
 there is no bronchiolitis set and both are small-airway obstruction with
 trapping.
 

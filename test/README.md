@@ -138,6 +138,17 @@ These suites live here:
   re-render, that the atlas has a lung in every cell and nothing in its
   gutters, and that it fits a 320px phone.
 
+- **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
+  grade as correct. Each scenario's `goal.check()` is the therapy the
+  simulator teaches, so the suite holds them to the evidence: no scenario is
+  solved by its own starting settings; septic shock must match the
+  pre-intubation drive (Winter's formula, not a PaCO₂ allowed to rise above
+  the patient's own); severe ARDS pairs FiO₂ 0.9 with PEEP ≥ 14 (ARDSnet);
+  herniation hyperventilation lands at PaCO₂ 30–35 and an overshoot to ~25
+  fails; the weaning screen doesn't depend on RSBI (AARC 2024); and a
+  one-sided pneumonia doesn't reward high PEEP. Each corrected scenario keeps
+  a case for its old answer, which must now fail.
+
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
 ## Run
