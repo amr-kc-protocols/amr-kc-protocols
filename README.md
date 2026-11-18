@@ -236,6 +236,33 @@ medical device. Nothing here has been through clinical review by the Medical
 Director; it is checked against published sources, which is not the same
 thing.
 
+### The LTV 1200 test lung readout
+
+Under the picture, every reading is graded against the evidence for the lung
+on the panel, not one "normal" range for all. Green on an ARDS lung dialled to
+healthy-lung settings was false reassurance. Now each reading is green inside
+that lung's target, amber where guidelines allow it but don't aim for it
+(ARDS at 7 mL/kg, say), and red outside the evidence-based range. A line under
+the chips says why each one is flagged, worst first, with its source and how
+strong that source is. Where it can, it says how far to go: "on this lung that
+means a breath of 375 mL (5.4 mL/kg) or less."
+
+| Lung | Graded on |
+|---|---|
+| ARDS | Vt 4–6.5 mL/kg PBW (amber to 8) and plateau ≤ 30 (ATS 2017/2024, strong); driving pressure ≤ 15 (Amato 2015, observational); PEEP no lower than the ARDSnet table for the FiO₂ |
+| COPD, asthma | I:E ≥ 1:4 (amber from 1:3), inspiratory flow 60–100 L/min, minute volume < 10 L/min, auto-PEEP < 5, applied PEEP 0–5; asthma plateau < 25 (amber to 30). Expert consensus and physiology, not trials |
+| Normal, pneumonia, pulmonary edema | Vt 6–8 mL/kg PBW, plateau ≤ 30; PEEP 5–10 for pneumonia and edema |
+| Children | PALICC-2: Vt 5–8 mL/kg (3–6 in pediatric ARDS), plateau ≤ 28, driving pressure ≤ 15; pediatric ARDS PEEP from the ARDSnet table (Khemani 2018) |
+
+The adult test lungs are a 70 kg PBW patient, a man about 175 cm tall, so
+tidal volume is graded per kg for adults too. PIP is red only when it reaches
+the High Pressure limit, because the vent is then cutting the breath short;
+otherwise a high peak with a normal plateau is airway resistance, not lung
+injury. Spontaneous modes aren't graded, since the patient sets the rate and
+the size of each breath and the readings are estimates. The targets live in
+`tlTargetsFor()`, each with its source, and `test/ventscenarios.test.mjs`
+checks them, including that fixing an ARDS lung the ARDSnet way turns it green.
+
 ### The LTV 1200 test lung picture
 
 Free Play (`vent-ltv1200.html?free`) shows a picture of the test lung that

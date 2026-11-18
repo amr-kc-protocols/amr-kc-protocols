@@ -23,6 +23,12 @@
  *   S6  one-sided pneumonia: moderate PEEP 8–12 passes, higher fails, and the
  *       teaching says why (it overdistends the good lung)
  *   S7  the scenarios left as they were still grade their textbook answer
+ *   C1–C9 the Free Play readout grades every reading against the evidence for
+ *       the lung on the panel (green inside the target, amber allowed but not
+ *       the aim, red outside): an ARDS lung on healthy-lung settings is not
+ *       green; fixing it to ARDSnet turns it green; obstructive lungs want a
+ *       long exhale, high flow and a low minute volume; PEEP follows the
+ *       ARDSnet table for the FiO₂; every flag explains itself with a source
  *   S9  scenarios now carry the lung their story describes: the capstone's
  *       plateau is 33 at 650 mL on PEEP 5, as it says, and every PEEP in its
  *       goal range can pass; "clean mechanics" means a healthy lung
@@ -158,6 +164,106 @@ console.log('\nS9 the lung matches the story');
   ok('S9 capstone starts at the plateau its story states (33)', Math.abs(r.start - 33) <= 1, r.start);
   ok('S9 every PEEP in the capstone goal (10–14) has a passing breath', Object.values(r.reach).every(Boolean), JSON.stringify(r.reach));
   ok('S9 the agitation case\'s "clean mechanics" is a healthy lung', r.agC >= 45, r.agC); }
+
+// ── Free Play readout: graded for the lung on the panel ─────────────
+await p.goto(ORIGIN + '/vent-ltv1200.html?free');
+await p.waitForFunction(() => typeof freeMode !== 'undefined' && freeMode && document.querySelector('.tl-chip'));
+// Put a lung on the panel with the shared adult settings (or a child's own start), then apply overrides.
+const onLung = (k, s) => p.evaluate(([k, s]) => {
+  if (!FREE_LUNGS[k].peds) { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); }
+  setFreeLung(k);
+  if (s) { if (s.bt) breathType = s.bt; if (s.mode) ventMode = s.mode;
+    for (const x of Object.keys(s)) if (vals[x]) vals[x].v = s[x]; enforceITLimit(); Object.keys(vals).forEach(updateKnob); updateUI(); }
+  renderMissionCard();
+  const g = {}; tlAssess().forEach(i => { g[i.k] = i.status; });
+  const chips = [...document.querySelectorAll('.tl-chip')].map(c => c.dataset.status);
+  const why = [...document.querySelectorAll('.tl-why-i')].map(w => ({ cls: w.className, t: w.textContent }));
+  return { g, chips, why, ok: !!document.querySelector('.tl-why.ok') };
+}, [k, s || null]);
+const reds = r => Object.keys(r.g).filter(k => r.g[k] === 'bad');
+const ambers = r => Object.keys(r.g).filter(k => r.g[k] === 'warn');
+
+console.log('\nC1 a healthy lung on healthy settings is all green');
+{ const r = await onLung('normal');
+  ok('C1 normal lung, adult start: no amber, no red', !reds(r).length && !ambers(r).length && r.ok, JSON.stringify(r.g)); }
+
+console.log('\nC2 ARDS is not green on healthy-lung settings');
+{ const r = await onLung('ards');
+  ok('C2 driving pressure 20 is red (keep ≤ 15)', r.g.dp === 'bad', JSON.stringify(r.g));
+  ok('C2 7.1 mL/kg is amber (ATS allows 4–8; ARDSnet aims for 6)', r.g.vt === 'warn');
+  ok('C2 the card says why, worst first, with a source', r.why.length >= 2 && /bad/.test(r.why[0].cls) && /Amato 2015/.test(r.why[0].t) && /ARDSNet 2000/.test(r.why.map(w => w.t).join(' ')));
+  ok('C2 and says how big a breath keeps it ≤ 15 on this lung (15 × 25 = 375 mL)', /375 mL \(5\.4 mL\/kg\) or less/.test(r.why[0].t), r.why[0].t);
+  // ARDSnet at 6 mL/kg is not enough on a lung this stiff: driving pressure 420 ÷ 25 ≈ 17
+  const six = await onLung('ards', { vt: 420, rate: 22, it: 0.8, peep: 8 });
+  ok('C2 6 mL/kg on this stiff lung still leaves driving pressure 17 → red', six.g.dp === 'bad' && six.g.vt === 'good', JSON.stringify(six.g));
+  // Lower toward 5 mL/kg (ARDSnet allows 4–6), rate up to hold minute volume, PEEP from the table
+  const fixed = await onLung('ards', { vt: 370, rate: 26, it: 0.7, peep: 8 });
+  ok('C2 370 mL (5.3 mL/kg), rate 26, PEEP 8 at FiO₂ 40% → no red, no amber', !reds(fixed).length && !ambers(fixed).length, JSON.stringify(fixed.g)); }
+
+console.log('\nC3 PEEP follows the ARDSnet table for the FiO₂');
+{ for (const [fio2, peep, want] of [[60, 5, 'bad'], [60, 10, 'good'], [100, 10, 'bad'], [100, 18, 'good'], [40, 5, 'good'], [40, 20, 'warn']]) {
+    const r = await onLung('ards', { fio2, peep, vt: 420, rate: 20 });
+    ok(`C3 ARDS, FiO₂ ${fio2}%, PEEP ${peep} → ${want}`, r.g.peep === want, r.g.peep);
+  }
+  const k = await onLung('pedArds', { peep: 8 });
+  ok('C3 pediatric ARDS at FiO₂ 60% with PEEP 8 is red (below the table; Khemani 2018)', k.g.peep === 'bad', k.g.peep); }
+
+console.log('\nC4 obstructive lungs want a long exhale, high flow and a low minute volume');
+{ const c = await onLung('copd');
+  ok('C4 COPD on the adult start: I:E 1:3.3 and 40 L/min are amber', c.g.ie === 'warn' && c.g.pf === 'warn', JSON.stringify(c.g));
+  const hiFlow = await onLung('copd', { rate: 10, it: 0.6 });
+  ok('C4 high flow raises the peak to the 40 limit → PIP red (raise the limit too)', hiFlow.g.pip === 'bad', JSON.stringify(hiFlow.g));
+  const fixed = await onLung('copd', { rate: 10, it: 0.6, hipres: 55 });
+  ok('C4 rate 10, Ti 0.6 s (I:E ≥ 1:4, flow ≥ 60), limit 55 → green', fixed.g.ie === 'good' && fixed.g.pf === 'good' && !reds(fixed).length && !ambers(fixed).length, JSON.stringify(fixed.g));
+  const fast = await onLung('copd', { rate: 26, it: 0.6, hipres: 55 });
+  ok('C4 rate 26 (13 L/min) → minute volume red: trapping grows with it', fast.g.mv === 'bad', JSON.stringify(fast.g));
+  const inv = await onLung('copd', { rate: 20, it: 1.5 });
+  ok('C4 I:E worse than 1:3 is red', inv.g.ie === 'bad', JSON.stringify(inv.g));
+  const a = await onLung('asthma');
+  ok('C4 asthma on the adult start: peak is at the High Pressure limit → red', a.g.pip === 'bad', JSON.stringify(a.g));
+  const a2 = await onLung('asthma', { rate: 10, it: 0.6, hipres: 80, vt: 700, peep: 10 });
+  ok('C4 asthma plateau over 25 is amber (aim < 25–30)', a2.g.pplat === 'warn', JSON.stringify(a2.g)); }
+
+console.log('\nC5 the numbers are recomputed here, not trusted');
+{ const r = await p.evaluate(() => { setFreeLung('normal'); applyFreeStart(FREE_ADULT_START); setFreeLung('ards'); vals.vt.v = 450; vals.peep.v = 8; updateUI();
+    const m = {}; tlAssess().forEach(i => { m[i.k] = i.text; }); return { m, C: lung.compliance, a: effectiveAutoPEEP() }; });
+  const dp = 450 / r.C, pplat = 8 + r.a + dp;
+  ok('C5 driving pressure = Vt ÷ compliance (450 ÷ 25 = 18)', +r.m.dp === Math.round(dp), r.m.dp);
+  ok('C5 plateau = PEEP + auto-PEEP + Vt ÷ C', Math.abs(+r.m.pplat - pplat) <= 0.5, r.m.pplat + ' vs ' + pplat);
+  ok('C5 Vt per kg uses 70 kg PBW for the adult test lung (450 ÷ 70 = 6.4)', /^6\.4 mL\/kg/.test(r.m.vt) && /70 kg PBW/.test(r.m.vt), r.m.vt); }
+
+console.log('\nC6 children are graded per kilogram, against PALICC-2');
+{ for (const k of ['pedNormal', 'pedArds', 'pedAsthma', 'pedBronch']) {
+    const r = await onLung(k);
+    ok(`C6 ${k}: its own starting settings are all inside its targets`, !reds(r).length && !ambers(r).length, JSON.stringify(r.g));
+  }
+  const big = await onLung('pedNormal', { vt: 250 });
+  ok('C6 12.5 mL/kg on a 20 kg child is red', big.g.vt === 'bad');
+  const pa = await onLung('pedArds', { vt: 140 });
+  ok('C6 pediatric ARDS at 7 mL/kg is amber (3–6 with poor compliance)', pa.g.vt === 'warn', pa.g.vt);
+  const pp = await onLung('pedArds', { vt: 200 });
+  ok('C6 and its plateau over 28 is red', pp.g.pplat === 'bad', pp.g.pplat); }
+
+console.log('\nC7 every flag explains itself');
+{ let missing = [];
+  for (const k of Object.keys(await p.evaluate(() => FREE_LUNGS))) {
+    const r = await onLung(k, { rate: 30, vt: 700, it: 1.5, peep: 0 });   // deliberately bad everywhere
+    if (r.why.length !== Object.values(r.g).filter(s => s === 'bad' || s === 'warn').length) missing.push(k + ' count');
+    r.why.forEach(w => { if (!/ — .{10,}/.test(w.t)) missing.push(k + ': ' + w.t.slice(0, 30)); });
+  }
+  ok('C7 one line per flagged reading, each with a reason and a source', missing.length === 0, missing.join(' | '));
+  ok('C7 the colour key is on the card', await p.evaluate(() => /outside the evidence-based range/.test(document.querySelector('.tl-legend').textContent))); }
+
+console.log('\nC8 spontaneous modes are not graded, and say so');
+{ const r = await onLung('copd', { mode: 'cpap', ps: 10 });
+  ok('C8 CPAP: every chip neutral', r.chips.every(s => s === 'neutral'), r.chips.join(','));
+  ok('C8 and the card says why', r.ok && /Spontaneous mode/.test(await p.evaluate(() => document.querySelector('.tl-why').textContent))); }
+
+console.log('\nC9 pressure control is graded too');
+{ const r = await onLung('ards', { bt: 'pressure', pc: 22, peep: 8 });
+  ok('C9 ARDS, PC 22 above PEEP 8: driving pressure 22 is red, and Vt 7.9 mL/kg is amber', r.g.dp === 'bad' && r.g.vt === 'warn', JSON.stringify(r.g));
+  const g = await onLung('ards', { bt: 'pressure', pc: 14, peep: 8, rate: 22 });
+  ok('C9 PC 14 (Vt 5 mL/kg, driving pressure 14) → no red', !reds(g).length, JSON.stringify(g.g)); }
 
 ok('S8 no page errors', errs.length === 0, errs.join(' | '));
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

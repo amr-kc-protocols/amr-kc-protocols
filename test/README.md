@@ -147,7 +147,13 @@ These suites live here:
   herniation hyperventilation lands at PaCO₂ 30–35 and an overshoot to ~25
   fails; the weaning screen doesn't depend on RSBI (AARC 2024); and a
   one-sided pneumonia doesn't reward high PEEP. Each corrected scenario keeps
-  a case for its old answer, which must now fail.
+  a case for its old answer, which must now fail. It also checks the Free Play
+  readout's grading: a healthy lung on healthy settings is all green; ARDS on
+  those settings is not (driving pressure red, 7 mL/kg amber), and fixing it
+  the ARDSnet way turns it green; obstructive lungs want I:E ≥ 1:4, flow ≥ 60
+  and minute volume < 10; PEEP follows the ARDSnet table for the FiO₂; the
+  driving pressure and plateau are recomputed in the test; and every flag
+  carries a reason and a source.
 
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 

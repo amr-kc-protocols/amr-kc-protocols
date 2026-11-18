@@ -432,10 +432,22 @@ canvas#pip-canvas{display:none}
 #lvl-reset:hover,#lvl-reset:active{border-color:var(--alarm);color:var(--alarm)}
 /* Test Lung live plausibility chips */
 .tl-badge{color:var(--purple-dark);background:#efeaf9;border:1px solid var(--purple-dark)}
-.tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:7px;margin-top:8px}
+/* Why each flagged reading is flagged, and the colour key */
+.tl-why{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.tl-why.ok{font-size:11px;font-weight:600;color:var(--green);padding:6px 9px;border-radius:8px;background:#eafbf1;border:1px solid #bfe8cf}
+.tl-why-i{font-size:11px;line-height:1.4;color:var(--text);padding:6px 9px;border-radius:8px;border-left:4px solid}
+.tl-why-i.bad{background:#fdecec;border-color:var(--alarm)}
+.tl-why-i.warn{background:#fff6e0;border-color:#d97706}
+.tl-why-i b{font-family:var(--mono)}
+.tl-src{display:inline-block;font-size:9.5px;font-weight:700;color:var(--sub);letter-spacing:0.02em}
+.tl-legend{margin-top:7px;font-size:9.5px;color:var(--sub);line-height:1.5}
+.tl-legend span{font-size:11px;margin:0 2px 0 6px}.tl-legend span:first-child{margin-left:0}
+.tl-legend .g{color:var(--green)}.tl-legend .a{color:#d97706}.tl-legend .r{color:var(--alarm)}
 .tl-chip{border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;background:#fff}
 .tl-chip-k{font-size:8px;font-weight:700;letter-spacing:0.08em;color:var(--sub);text-transform:uppercase;margin-bottom:2px}
 .tl-chip-v{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1.1}
+.tl-chip-v small{font-size:10.5px;font-weight:600;opacity:0.8;margin-left:3px;white-space:nowrap}
 .tl-lungs{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
 .tl-lung{flex:1;min-width:64px;padding:7px 4px;border-radius:8px;border:1.5px solid var(--border);
   background:#fff;color:var(--sub);font-size:10px;font-weight:700;cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -3726,52 +3738,173 @@ function renderSolveBody(task){
 }
 
 // ── FREE PLAY · TEST LUNG readout ─────────────────────────────
+// ── FREE PLAY · TARGETS FOR THIS LUNG ─────────────────────────
+// Every reading is graded against the evidence for the lung on the panel,
+// not one "normal" range for all: an ARDS lung on healthy-lung settings must
+// not show green. Green is inside this lung's target; amber is something the
+// guidelines allow but don't aim for; red is outside the evidence-based range.
+// In each target, g is the green range and a the amber range (outside a is
+// red; with no a, anything outside g is red).
+//
+// The evidence behind these varies a lot, so each target names its source
+// and its strength, and the readout shows them:
+//  • ARDS: Vt 4–8 mL/kg PBW aiming at 6, plateau < 30 — strong
+//    recommendation, moderate certainty (ATS/ESICM/SCCM 2017, ATS 2024;
+//    ARDSNet 2000). PEEP no lower than the ARDSnet table for the FiO₂ —
+//    ARDSNet protocol; ATS 2024 suggests higher PEEP in moderate–severe ARDS
+//    (conditional). Driving pressure ≤ 15 — observational (Amato 2015).
+//  • Children: Vt 5–8 mL/kg, 3–6 with poor compliance; plateau ≤ 28; driving
+//    pressure ≤ 15 — PALICC-2 (2023), consensus. PEEP below the ARDSnet table
+//    carried higher PARDS mortality (Khemani 2018, observational).
+//  • Asthma and COPD: low rate, I:E 1:4–1:5 (1:3 at least), inspiratory flow
+//    60–100 L/min, minute volume < 10 L/min, plateau < 25–30, auto-PEEP as
+//    low as possible — expert consensus and physiology (Tuxen 1987), no
+//    outcome trials.
+//  • Healthy lungs: Vt 6–8 mL/kg PBW is the consensus default (PReVENT 2018:
+//    going lower didn't help non-ARDS patients).
+//  • Minute volume and peak-flow ranges for unobstructed lungs are physiology
+//    (~100–140 mL/kg/min for eucapnia; ≥ 40 L/min to meet demand) — the
+//    softest numbers here, so they never go red inside the device's range.
+// The adult test lungs are a 70 kg PBW patient — a man about 175 cm tall.
+var TL_ADULT_KG=70;
+var ARDSNET_LOW ={3:[5,5],4:[5,8],5:[8,10],6:[10,10],7:[10,14],8:[14,14],9:[14,18],10:[18,24]};
+var ARDSNET_HIGH_MAX={3:14,4:16,5:18,6:20,7:20,8:22,9:22,10:24};
+function ardsnetPeep(fio2){                       // FiO₂ in %, rounded down to the table's row
+  var r=Math.max(3,Math.min(10,Math.floor(fio2/10+1e-9)));
+  return {min:ARDSNET_LOW[r][0], lowMax:ARDSNET_LOW[r][1], max:ARDSNET_HIGH_MAX[r], row:r/10};
+}
+function tlTargetsFor(key){
+  var fl=FREE_LUNGS[key]||FREE_LUNGS.normal, peds=!!fl.peds;
+  var obstructive=(key==='copd'||key==='asthma'||key==='pedAsthma'||key==='pedBronch');
+  var ards=(key==='ards'||key==='pedArds');
+  var t={};
+  // Tidal volume per kg of predicted body weight
+  if(key==='ards')         t.vt={g:[4,6.5], a:[4,8], tgt:'4–6.5', why:'ARDS: aim for 6 mL/kg PBW; up to 8 only while the plateau stays under 30', src:'ARDSNet 2000, ATS 2024 · strong'};
+  else if(key==='pedArds') t.vt={g:[3,6], a:[3,8], tgt:'3–6', why:'Pediatric ARDS with poor compliance: 3–6 mL/kg', src:'PALICC-2 · consensus'};
+  else if(peds)            t.vt={g:[5,8], a:[4,8], tgt:'5–8', why:'A child with preserved compliance: 5–8 mL/kg', src:'PALICC-2 · consensus'};
+  else                     t.vt={g:[6,8], a:[5,8], tgt:'6–8', why:'6–8 mL/kg PBW; above 8 stretches even healthy lungs', src:'lung-protective consensus · PReVENT 2018'};
+  // Plateau
+  if(key==='asthma') t.pplat={g:[0,25], a:[0,30], tgt:'≤ 25', why:'Severe asthma: plateau under 25–30 — the best bedside measure of hyperinflation', src:'expert consensus'};
+  else if(peds)      t.pplat={g:[0,28], tgt:'≤ 28', why:'Children: plateau ≤ 28 cmH₂O', src:'PALICC-2 · consensus'};
+  else               t.pplat={g:[0,30], tgt:'≤ 30', why:'Plateau under 30 cmH₂O', src:'ATS 2017/2024 · strong'};
+  // Driving pressure (plateau − total PEEP)
+  t.dp = ards ? {g:[0,15], tgt:'≤ 15', why:'ARDS: keep driving pressure ≤ 15 — mortality climbs above it', src: peds?'PALICC-2 · consensus':'Amato 2015 · observational'}
+              : {g:[0,15], a:[0,20], tgt:'≤ 15', why:'Driving pressure over 15 usually means the breath is too big for this lung', src:'extrapolated from ARDS · observational'};
+  // I:E
+  if(key==='copd'||key==='asthma') t.ie={g:[4,999], a:[3,999], tgt:'≥ 1:4', why:'Obstruction: give the lung time to empty — I:E 1:4 or longer, 1:3 at the least', src:'expert consensus'};
+  else if(obstructive)             t.ie={g:[3,999], a:[2,999], tgt:'≥ 1:3', why:'Small-airway obstruction: I:E 1:3 or longer', src:'expert consensus'};
+  else                             t.ie={g:[1.5,999], a:[1,999], tgt:'not inverse', why:'Keep expiration longer than inspiration — 1:2 to 1:3 is usual', src:'convention'};
+  // Peak inspiratory flow (adults; small patients run low flows by design)
+  if(!peds) t.pf = obstructive
+      ? {g:[60,100], a:[40,100], tgt:'60–100', why:'High inspiratory flow (60–100 L/min) shortens inspiration and leaves time to exhale', src:'expert consensus'}
+      : {g:[40,100], a:[30,100], tgt:'≥ 40', why:'At least 40 L/min to meet an adult\'s demand; lower starves them of flow', src:'physiology'};
+  // Minute volume
+  if(peds)             t.mv={g:fl.mvKg, a:[0,1e9], perKg:true, tgt:fl.mvKg[0]+'–'+fl.mvKg[1]+' mL/kg', why:'Typical minute volume for this child\'s age', src:'physiology'};
+  else if(obstructive) t.mv={g:[4,10], a:[4,12], tgt:'< 10', why:'Controlled hypoventilation: trapping grows with minute volume — keep it under 10 L/min and accept a higher CO₂', src:'Tuxen 1987 · expert consensus'};
+  else if(ards)        t.mv={g:[6,15], a:[5,18], tgt:'6–15', why:'Small breaths need a higher rate (up to 35/min) to clear CO₂; permissive hypercapnia is allowed', src:'ARDSNet protocol'};
+  else                 t.mv={g:[5,10], a:[4,12], tgt:'5–10', why:'About 100–140 mL/kg/min keeps a 70 kg adult\'s CO₂ normal', src:'physiology'};
+  // PEEP
+  if(ards)                  t.peep={table:true, why:'No lower than the ARDSnet table\'s PEEP for this FiO₂', src: peds?'PALICC-2 · Khemani 2018 · observational':'ARDSNet protocol · ATS 2024 · conditional'};
+  else if(key==='pedBronch') t.peep={g:[4,8], a:[3,10], tgt:'4–8', why:'Bronchiolitis: moderate PEEP splints the small airways open', src:'expert consensus · weak'};
+  else if(obstructive)      t.peep={g:[0,5], a:[0,8], tgt:'0–5', why:'Obstruction: modest applied PEEP, kept below the auto-PEEP', src:'expert consensus'};
+  else if(key==='edema')    t.peep={g:[5,10], a:[5,14], tgt:'5–10', why:'PEEP opens flooded alveoli and unloads the left heart', src:'physiology · CPAP trials'};
+  else if(key==='pneumonia') t.peep={g:[5,10], a:[5,12], tgt:'5–10', why:'Moderate PEEP; high PEEP overdistends the good lung in one-sided disease', src:'physiology · weak'};
+  else                      t.peep={g:[5,8], a:[3,10], tgt:'5–8', why:'Physiologic PEEP of about 5 keeps alveoli from collapsing', src:'convention'};
+  // Auto-PEEP, where the lung traps gas
+  if(fl.autoPEEP) t.apeep={g:[0,4.9], a:[0,9.9], tgt:'< 5', why:'Auto-PEEP over 5 is clinically significant; over 10 risks hypotension and barotrauma', src:'expert consensus'};
+  return t;
+}
+function _tlGrade(v,r){
+  if(!r||v===null||v===undefined||!isFinite(v)) return 'neutral';
+  var e=1e-9;
+  if(v>=r.g[0]-e && v<=r.g[1]+e) return 'good';
+  if(r.a && v>=r.a[0]-e && v<=r.a[1]+e) return 'warn';
+  return 'bad';
+}
+// Every reading on the card, graded for the lung on the panel.
+// Returns [{k, label, text, status, why, src}].
+function tlAssess(){
+  var key=freeLungKey, fl=FREE_LUNGS[key]||FREE_LUNGS.normal, t=tlTargetsFor(key);
+  var peds=!!fl.peds, kg=fl.kg||TL_ADULT_KG, C=lung.compliance;
+  var spont=(ventMode==='cpap'||ventMode==='nppv'), pc=(!spont && breathType==='pressure');
+  var NAME={ie:'I:E',pf:'Peak flow',mv:'Min. vol.',vt:'Vt',p:'Pressure',pplat:'Pplat',dp:'Driving pressure',pip:'PIP',peep:'PEEP',apeep:'Auto-PEEP'};
+  var out=[], add=function(k,label,text,status,tg,short){ out.push({k:k,name:NAME[k],label:label,text:text,short:short||text,status:status,why:tg&&tg.why,src:tg&&tg.src}); };
+  // I:E
+  if(spont) add('ie','I:E','SPONT','neutral');
+  else { var e=ieExpRatio(); add('ie',t.ie.tgt==='not inverse'?'I:E':'I:E · '+t.ie.tgt, e===null?'—':'1 : '+e.toFixed(1), _tlGrade(e,t.ie), t.ie); }
+  // Peak flow
+  var pf=peakFlowLPM();
+  if(t.pf) add('pf','Peak flow · '+t.pf.tgt, pf===null?'—':Math.round(pf)+' L/min', spont?'neutral':_tlGrade(pf,t.pf), t.pf);
+  else add('pf','Peak flow', pf===null?'—':Math.round(pf)+' L/min', (pf!==null&&pf>MAX_PEAK_FLOW)?'bad':'neutral', {why:'Above what the blower can deliver', src:'device limit'});
+  // Minute volume
+  var mv=estMinuteVolume();
+  if(t.mv.perKg){ var mvKg=mv*1000/kg; add('mv','Min. vol. · '+t.mv.tgt, mv.toFixed(1)+' L/min <small>'+Math.round(mvKg)+' mL/kg</small>', spont?'neutral':_tlGrade(mvKg,t.mv), t.mv, Math.round(mvKg)+' mL/kg/min'); }
+  else add('mv','Min. vol. · '+t.mv.tgt, mv.toFixed(1)+' L/min', spont?'neutral':_tlGrade(mv,t.mv), t.mv);
+  // Tidal volume per kg (estimated from pressure × compliance in pressure modes)
+  var vt=spont ? ((fl.kg?6*fl.kg:400)+vals.ps.v*C) : (pc ? vals.pc.v*C : vals.vt.v), vtKg=vt/kg;
+  add('vt','Vt / kg · '+t.vt.tgt, vtKg.toFixed(1)+' mL/kg <small>'+Math.round(vt)+' mL · '+kg+' kg'+(peds?'':' PBW')+'</small>', spont?'neutral':_tlGrade(vtKg,t.vt), t.vt, vtKg.toFixed(1)+' mL/kg');
+  if(spont){
+    add('p', ventMode==='nppv'?'IPAP / EPAP':'CPAP', ventMode==='nppv'?((vals.peep.v+vals.ps.v)+' / '+vals.peep.v):(vals.peep.v+''), 'neutral');
+    return out;
+  }
+  // Pressures. Volume control: the vent's own plateau estimate. Pressure
+  // control: with flow reaching zero the plateau is PEEP + auto-PEEP + PC.
+  var aP=effectiveAutoPEEP(), d=(typeof calcPplat==='function')?calcPplat():null;
+  var pip=d?d.pip:(vals.peep.v+vals.pc.v), pplat=d?d.pplat:(vals.peep.v+aP+vals.pc.v), dp=pc?vals.pc.v:vt/C;
+  add('pplat','Pplat · '+t.pplat.tgt, (+pplat).toFixed(0), _tlGrade(+pplat,t.pplat), t.pplat);
+  var dpSt=_tlGrade(dp,t.dp), vt15=15*C;
+  add('dp','Driving P · '+t.dp.tgt, dp.toFixed(0), dpSt, dpSt==='good'?t.dp:{src:t.dp.src,
+      why:t.dp.why+'. On this lung that means a breath of '+Math.round(vt15)+' mL ('+(vt15/kg).toFixed(1)+' mL/kg) or less'+(pc?' — PC '+Math.floor(vt15/C)+' or less':'')+'.'});
+  var atLimit=(+pip)>=vals.hipres.v-0.5;
+  add('pip','PIP · limit '+vals.hipres.v, (+pip).toFixed(0), atLimit?'bad':(key==='asthma'&&pip>50?'warn':'good'),
+      atLimit?{why:'Peak pressure is at the High Pressure limit — the vent is ending the breath early', src:'LTV 1200 behaviour'}
+             :(key==='asthma'&&pip>50?{why:'Keep the peak under about 50 where you can — in asthma it is mostly airway resistance, so read the plateau', src:'expert consensus · weak'}:null));
+  // PEEP
+  if(t.peep.table){
+    var tb=ardsnetPeep(vals.fio2.v), pe=vals.peep.v;
+    var st=pe<tb.min?'bad':(pe>tb.max?'warn':'good');
+    add('peep','PEEP · ≥ '+tb.min+' at FiO₂ '+vals.fio2.v+'%', pe+'', st,
+        {why:'At FiO₂ '+tb.row.toFixed(1)+' the ARDSnet table asks for PEEP '+tb.min+'–'+tb.lowMax+' (up to '+tb.max+' on the higher-PEEP table)', src:t.peep.src});
+  } else add('peep','PEEP · '+t.peep.tgt, vals.peep.v+'', _tlGrade(vals.peep.v,t.peep), t.peep);
+  if(t.apeep) add('apeep','Auto-PEEP · '+t.apeep.tgt, aP.toFixed(1), _tlGrade(aP,t.apeep), t.apeep);
+  return out;
+}
+// Amber is a true amber, not the panel's red-orange, so it can't be mistaken for red.
+var _TL_COL={good:['var(--green)','#eafbf1'], warn:['#b45309','#fff6e0'], bad:['var(--alarm)','#fdecec'], neutral:['var(--sub)','#ffffff']};
 function _tlChip(label,val,status){
-  var col = status==='good'?'var(--green)':(status==='warn'?'var(--orange)':'var(--sub)');
-  var bg  = status==='good'?'#eafbf1':(status==='warn'?'#fdf0e7':'#ffffff');
-  return '<div class="tl-chip" style="border-color:'+col+';background:'+bg+'">'
+  var c=_TL_COL[status]||_TL_COL.neutral;
+  return '<div class="tl-chip" data-status="'+status+'" style="border-color:'+c[0]+';background:'+c[1]+'">'
     +'<div class="tl-chip-k">'+label+'</div>'
-    +'<div class="tl-chip-v" style="color:'+col+'">'+val+'</div></div>';
+    +'<div class="tl-chip-v" style="color:'+c[0]+'">'+val+'</div></div>';
+}
+// Why each flagged reading is flagged, worst first, with its source.
+function _tlWhy(items){
+  var flagged=items.filter(function(i){ return i.status==='bad'||i.status==='warn'; })
+    .sort(function(a,b){ return (a.status==='bad'?0:1)-(b.status==='bad'?0:1); });
+  var spont=(ventMode==='cpap'||ventMode==='nppv');
+  if(!flagged.length) return '<div class="tl-why ok">'+(spont
+      ? 'Spontaneous mode: the patient sets the rate and size of each breath, so the readings above are estimates and aren\'t graded.'
+      : 'Every reading is inside the evidence-based targets for this lung.')+'</div>';
+  return '<div class="tl-why">'+flagged.map(function(i){
+      return '<div class="tl-why-i '+i.status+'"><b>'+i.name+' '+i.short+'</b> — '+(i.why||'')+(i.src?' <span class="tl-src">'+i.src+'</span>':'')+'</div>';
+    }).join('')+'</div>';
 }
 function renderTestLung(bar){
-  var spont=(ventMode==='cpap'||ventMode==='nppv');
-  // I:E ratio
-  var ieTxt,ieStat;
-  if(spont){ ieTxt='SPONT'; ieStat='neutral'; }
-  else { var e=ieExpRatio(); if(e===null){ieTxt='—';ieStat='neutral';}
-    else { ieTxt='1 : '+e.toFixed(1); ieStat=(e>=1)?'good':'warn'; } }   // inverse (E<1) flags amber
-  // Peak inspiratory flow (Vt ÷ IT)
-  var pf=peakFlowLPM(),pfTxt,pfStat;
-  if(pf===null){ pfTxt='—'; pfStat='neutral'; }
-  else { pfTxt=Math.round(pf)+' L/min'; pfStat=(pf>=MIN_PEAK_FLOW&&pf<=MAX_PEAK_FLOW)?'good':'warn'; }
-  // Minute volume — adults 4–12 L/min; a child is judged per kg against that patient's range
   var fl=freeLung(), kg=fl&&fl.kg;
-  var mv=estMinuteVolume(), mvKg=kg?mv*1000/kg:0;
-  var mvStat=kg ? ((mvKg>=fl.mvKg[0]&&mvKg<=fl.mvKg[1])?'good':'warn') : ((mv>=4&&mv<=12)?'good':'warn');
-  if(kg && pf!==null) pfStat=(pf<=MAX_PEAK_FLOW)?'good':'warn';   // small patients run low flows by design
-  // Pressures
-  var d=(typeof calcPplat==='function')?calcPplat():null, pTxt,pStat,pLbl;
-  var pplatMax=(fl&&fl.pplatMax)||30;
-  if(d){ pLbl='PIP / Pplat'; pTxt=d.pip+' / '+d.pplat; pStat=(d.pplat<=pplatMax)?'good':'warn'; }
-  else if(spont){ pLbl=(ventMode==='nppv')?'IPAP / EPAP':'CPAP'; pTxt=(ventMode==='nppv')?((vals.peep.v+vals.ps.v)+' / '+vals.peep.v):(vals.peep.v+''); pStat='neutral'; }
-  else { pLbl='PIP (est)'; pTxt=(vals.peep.v+vals.pc.v)+''; pStat=((vals.peep.v+vals.pc.v)<=35)?'good':'warn'; }
+  var items=tlAssess();
   bar.innerHTML=
      '<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
     +'<div class="scen-header"><div class="mission-stage">Free Play · Test Lung</div>'
     +'<span class="scen-badge tl-badge">SANDBOX</span></div>'
-    +'<div class="scen-text">Dial any settings you like — the vent enforces only what it can physically deliver. Inspiratory time is capped by the rate, and tidal volume by the peak flow the blower can produce. Pick a test lung: each has its own compliance and airway resistance, so the same settings behave differently.</div>'
+    +'<div class="scen-text">Dial any settings you like — the vent enforces only what it can physically deliver. Inspiratory time is capped by the rate, and tidal volume by the peak flow the blower can produce. Pick a test lung: each has its own compliance and airway resistance, so the same settings behave differently — and the readings below are graded against the evidence for <em>that</em> lung.</div>'
     +_tlLungRow('Adult', false)
     +_tlLungRow('Pediatric', true)
     +(kg ? '<div class="tl-who"><b>'+fl.who+'</b> '+fl.tip+'</div>' : '')
     +'<div class="tl-mech">Compliance <b>'+lung.compliance+'</b> mL/cmH₂O · Resistance <b>'+lung.resistance+'</b> cmH₂O/(L/s)'+(lung.autoPEEP?' · auto-PEEP ≈ <b>'+effectiveAutoPEEP()+'</b> cmH₂O (dynamic)':'')+'</div>'
     +'<div class="tl-viz-slot"></div>'
-    +'<div class="tl-grid">'
-      +_tlChip('I:E', ieTxt, ieStat)
-      +_tlChip('Peak Flow', pfTxt, pfStat)
-      +_tlChip(kg?'Min. Vol. ('+fl.mvKg[0]+'–'+fl.mvKg[1]+' mL/kg)':'Min. Vol.', mv.toFixed(1)+' L/min'+(kg?' · '+Math.round(mvKg):''), mvStat)
-      +_tlChip(pLbl, pTxt+(d||spont?'':' cmH₂O'), pStat)
-      +(kg ? _tlVtPerKg(fl, spont) : '')
-    +'</div>';
+    +'<div class="tl-grid">'+items.map(function(i){ return _tlChip(i.label,i.text,i.status); }).join('')+'</div>'
+    +_tlWhy(items)
+    +'<div class="tl-legend"><span class="g">■</span> inside the target for this lung <span class="a">■</span> allowed, not the aim <span class="r">■</span> outside the evidence-based range</div>';
   // The card is rebuilt on every change; the lung view is one persistent node
   // re-seated into it, so the art never reloads and a cross-fade survives.
   var slot=bar.querySelector('.tl-viz-slot');
@@ -3783,15 +3916,6 @@ function _tlLungRow(title, peds){
     +keys.map(function(k){
       return '<button class="tl-lung'+(k===freeLungKey?' on':'')+'" aria-pressed="'+(k===freeLungKey)+'" onclick="setFreeLung(\''+k+'\')">'+FREE_LUNGS[k].label+'</button>';
     }).join('')+'</div>';
-}
-// Tidal volume per kilogram, the number that matters in a child. In pressure
-// control the delivered volume is estimated from the pressure and compliance.
-function _tlVtPerKg(fl, spont){
-  var vt = spont ? (6*fl.kg + vals.ps.v*lung.compliance)
-         : (breathType==='volume' ? vals.vt.v : vals.pc.v*lung.compliance);
-  var perKg=vt/fl.kg, ok=perKg>=fl.vtKg[0]&&perKg<=fl.vtKg[1];
-  return _tlChip('Vt / kg ('+fl.vtKg[0]+'–'+fl.vtKg[1]+')', Math.round(vt)+' mL · '+perKg.toFixed(1)+' mL/kg', ok?'good':'warn')
-    +_tlChip('Patient', fl.kg+' kg', 'neutral');
 }
 
 // ── MISSION CARD RENDER ───────────────────────────────────────
@@ -4268,7 +4392,7 @@ var FREE_LUNGS={
     who:'6-year-old, 20 kg, pneumonia progressing to ARDS. Stiff lungs.',
     tip:'Poor compliance: aim for 3–6 mL/kg and keep the plateau ≤ 28. Raise PEEP for oxygenation and accept some CO₂.',
     vtKg:[3,6], mvKg:[100,200], pplatMax:28, spontRate:30,
-    start:{mode:'ac',bt:'volume',rate:25,vt:120,it:0.7,pc:15,ps:10,peep:8,fio2:60,sens:2,hipres:35,lowpres:10,lowmv:1.5,apnea:20}},
+    start:{mode:'ac',bt:'volume',rate:25,vt:120,it:0.7,pc:15,ps:10,peep:10,fio2:60,sens:2,hipres:35,lowpres:10,lowmv:1.5,apnea:20}},
   pedAsthma:{compliance:20,resistance:60,autoPEEP:6,label:'Child — status asthmaticus', peds:true, kg:25, sprite:'asthma',
     who:'8-year-old, 25 kg, intubated for status asthmaticus. Very high airway resistance.',
     tip:'Give the lungs time to empty: a low rate and short inspiratory time lengthen expiration. Watch auto-PEEP, not the peak pressure, and accept a higher CO₂.',
