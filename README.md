@@ -345,9 +345,24 @@ scenario's own patient. Each patient starts from the matching Free Play
 lung and is tuned, inside the published ranges above, so the starting
 settings reproduce the numbers on the scenario's monitor. A scenario whose
 story says the CO₂ is rising starts at the story's value and drifts toward
-what the settings produce, so it keeps rising until it's fixed. The monitor
-stays a snapshot of the story and is labelled "On arrival"; the panel is
-live. The graded chips stay in Free Play, so they can't give the answer away.
+what the settings produce, so it keeps rising until it's fixed. The
+scenario's monitor is live too: its HR, SpO₂ and EtCO₂ start at the story's
+numbers and follow the same patient as the lung view. Lanes the story
+doesn't measure stay off, as on a real monitor, and the story's labs and
+settings are captioned "On arrival". The graded chips stay in Free Play, so
+they can't give the answer away.
+
+**Heart rate.** HR changes from the story's value through three reflexes,
+each measured against the patient's own starting numbers:
+
+| Reflex | Model | Source | Strength |
+|---|---|---|---|
+| Hypoxia | +0.83 bpm per 1% fall in SaO₂, below 98% | Isocapnic hypoxia in awake healthy adults (Slutsky 1979, n=10) | Measured; may overstate it under deep sedation |
+| Blood pressure | ΔHR = BRS × HR² ÷ 60000 per mmHg of MAP. BRS 3 ms/mmHg; 1 in septic shock | Under 6 ms/mmHg counts as baroreflex dysfunction; septic shock measured 0.3–1.7 | Ranges measured; the values chosen are estimates |
+| CO₂ | +0.3 bpm per mmHg above 45 | In healthy people the small HR rise with CO₂ matched that of breathing harder alone | Weak; estimate |
+
+Not modelled: Cushing's reflex, arrhythmias, drugs, pain, fever. The ECG
+sweep re-times itself when HR moves 8 bpm or more.
 
 **pH.** The panel shows pH under PaCO₂, from Henderson–Hasselbalch. Each
 patient has a bicarbonate at PaCO₂ 40: 24 unless the story's pH says

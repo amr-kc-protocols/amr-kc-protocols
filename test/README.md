@@ -161,7 +161,12 @@ These suites live here:
   stays off the header, that the vitals hold still while the intro is open,
   and that the tutorial keeps one healthy-lung patient across its stages:
   every stage's answer meets its goal, a misset High Pressure limit drives
-  the CO₂ up, and Pressure Control 10 delivers 500 mL.
+  the CO₂ up, and Pressure Control 10 delivers 500 mL. L20 checks the live
+  scenario monitor: every Level 2–3 monitor starts at its story's HR, SpO₂
+  and EtCO₂; after PEEP 10 in ARDS its SpO₂ matches the lung view and HR
+  falls by the published reflex gains (recomputed independently); a septic
+  patient left alone shows EtCO₂ climbing and HR edging up; and the ECG sweep
+  keeps pace with the rate.
 
 - **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
   grade as correct. Each scenario's `goal.check()` is the therapy the
