@@ -152,7 +152,12 @@ These suites live here:
   settings hold them there, or let the CO₂ keep climbing where the story says
   it is. Each correct answer moves the vitals the way the evidence says (PEEP
   for a shunt, permissive hypercapnia for trapping, Winter's formula for
-  sepsis, ETCO₂ 30–35 for herniation), and Level 7 has no lung view.
+  sepsis, ETCO₂ 30–35 for herniation), and Level 7 has no lung view. L19 checks
+  usability on a phone: every Level 1–3 card's first button is on the first
+  screen, the scenario monitor is labelled as the on-arrival snapshot, the
+  live vitals strip follows the learner to the controls and taps back to the
+  lung, the panel keeps one height as digits change, COPD trapping is worded
+  by size, and a pH under 7.20 shows red.
 
 - **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
   grade as correct. Each scenario's `goal.check()` is the therapy the

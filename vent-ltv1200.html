@@ -490,7 +490,9 @@ canvas#pip-canvas{display:none}
 .lv-flow.in{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cpath d='M1.6 4 5 7.6 8.4 4' fill='none' stroke='%23eaf8ff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 .lv-flow.out{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cpath d='M1.6 7.6 5 4 8.4 7.6' fill='none' stroke='%23ffe3b8' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 .lv-side{flex:1;min-width:0;display:flex;gap:8px}
-.lv-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.lv-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px;container-type:inline-size}
+.lv-ps{display:none}
+@container (max-width:160px){ .lv-pl{display:none} .lv-ps{display:inline} }
 .lv-phase{align-self:flex-start;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:0.05em;
   padding:3px 7px;border-radius:5px;color:#8a93a8;background:rgba(138,147,168,0.12);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .lv-phase.insp{color:#7ee2a8;background:rgba(126,226,168,0.13)}
@@ -510,14 +512,37 @@ canvas#pip-canvas{display:none}
 .lv-vit.spo2 .lv-vk,.lv-vit.spo2 .lv-vv{color:#5fe2ef}
 .lv-vit.etco2 .lv-vk,.lv-vit.etco2 .lv-vv{color:#ffd84d}
 .lv-vit.bp .lv-vk,.lv-vit.bp .lv-vv{color:#e8ecf8}
-.lv-vit.bp{flex-basis:100%;display:flex;align-items:baseline;flex-wrap:wrap;gap:0 5px}
-.lv-vit.bp .lv-vv{font-size:16px}.lv-vit.bp .lv-vs{margin-top:0}
+/* BP is a box like the others, so the panel keeps one height whatever the
+   digits; on a phone it sits on its own row under SpO₂ and EtCO₂. */
+.lv-vit.bp{display:grid;grid-template-columns:auto auto;column-gap:5px;align-items:baseline;justify-content:start}
+.lv-vit.bp .lv-vv{font-size:19px}.lv-vit.bp .lv-vs{grid-column:1 / -1}
+.lv-ph.warn{color:#ffb020;font-weight:700}.lv-ph.bad{color:#ff6b73;font-weight:700}
 .lv-vit.warn .lv-vv{color:#ffb020}.lv-vit.bad .lv-vv{color:#ff6b73}
+/* Live vitals strip: when the lung view scrolls away (down at the controls,
+   turning a knob), the same numbers ride along at the top of the screen.
+   Tap it to jump back to the lung. */
+.lv-strip{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translate(-50%,-160%);z-index:95;
+  display:flex;align-items:center;gap:12px;padding:6px 14px;border-radius:12px;background:#0d1424;border:1px solid #2a3550;
+  box-shadow:0 6px 20px rgba(0,0,0,0.35);font-family:var(--mono);color:#e8ecf8;transition:transform 0.2s;cursor:pointer;
+  max-width:calc(100vw - 16px);white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.lv-strip.show{transform:translate(-50%,0)}
+.lvs-dot{width:8px;height:8px;border-radius:50%;background:#8a93a8;flex-shrink:0}
+.lvs-dot.in{background:#5fe2ef}.lvs-dot.out{background:#ffb020}
+.lvs-i{display:flex;align-items:baseline;gap:4px}
+.lvs-k{font-size:8.5px;letter-spacing:0.08em;font-weight:700}
+.lvs-v{font-size:17px;font-weight:700}
+.lvs-i.spo2{color:#5fe2ef}.lvs-i.etco2{color:#ffd84d}.lvs-i.bp{color:#e8ecf8}
+.lvs-i.warn .lvs-v{color:#ffb020}.lvs-i.bad .lvs-v{color:#ff6b73}
+@media (prefers-reduced-motion:reduce){.lv-strip{transition:none}}
+/* On a scenario with a live lung view, the monitor is the story's snapshot */
+.monitor{position:relative}
+.mon-tag{position:absolute;top:4px;left:10px;z-index:1;pointer-events:none;font-family:var(--mono);font-size:7.5px;
+  letter-spacing:0.1em;color:#8a93a8;text-transform:uppercase;background:rgba(5,7,10,0.75);padding:1px 3px;border-radius:3px}
 .lv-note:empty{display:none}
 .lv-v{font-family:var(--mono);font-size:13px;font-weight:700;color:#eaf0ff;line-height:1.2}
 .lv-trap.on .lv-v{color:#ffb020}
 .lv-note{font-size:8.5px;line-height:1.35;color:#7d88a3}
-.lv-note.cut{color:#ff9aa0}
+.lv-note.cut{color:#ff9aa0}.lv-note.trap{color:#ffc46b}
 .lv-gauge{position:relative;flex:0 0 12px;border-radius:4px;background:#1b2740;border:1px solid #33456a;overflow:hidden}
 .lv-fill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(180deg,#ff8fa3,#e64a6b)}
 .lv-floor{position:absolute;left:0;right:0;height:0;border-top:2px dashed #ffb020;display:none}
@@ -3019,7 +3044,7 @@ var SCENARIO_LEVELS={
       scenario:'45-year-old post-op man, 178 cm tall (≈ 70 kg predicted body weight), sedated and not initiating breaths. ABG: PaCO₂ 62 mmHg, pH 7.28. SpO₂ is fine on the current FiO₂. The current minute ventilation is only 4.5 L/min.',
       vitals:[{k:'SpO₂',v:'98%'},{k:'PaCO₂',v:'62 mmHg'},{k:'pH',v:'7.28'},{k:'PBW',v:'70 kg'},{k:'HR',v:'102'}],
       lung:{compliance:40,resistance:10,label:'Post-op'},
-      patient:{sprite:'normal', label:'post-op patient\'s lungs', vit:{s5:0.12, rec:0.5, q:0.03, vdA:0.05, bp:[128,76], floor:92}, start:{paco2:62}},
+      patient:{sprite:'normal', label:'post-op patient\'s lungs', vit:{s5:0.12, rec:0.5, q:0.03, vdA:0.05, bp:[128,76], floor:92, hco3:26}, start:{paco2:62}},
       setup:{mode:'ac',bt:'volume',rate:10,vt:450,it:1.0,peep:5,pc:15,ps:10,fio2:50,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'PaCO₂ 62, pH 7.28, oxygenation adequate. What is the disturbance, and what has to change?',
@@ -3072,8 +3097,12 @@ var SCENARIO_LEVELS={
       intro:'Fifteen minutes into a transfer with an intubated COPD patient, the monitor picture turns on you and he stops going along with the vent. You\'re in the back of a moving truck — this one is yours to fix.',
       scenario:'54-year-old COPD exacerbation, intubated for respiratory failure. The flow–time curve shows expiratory flow never returns to zero before the next breath begins, EtCO₂ is climbing, and the patient is beginning to fight the vent.',
       vitals:[{k:'SpO₂',v:'91%'},{k:'EtCO₂',v:'52 mmHg'},{k:'pH',v:'7.30'},{k:'HR',v:'112'}],
-      lung:{compliance:50,resistance:22,autoPEEP:6,label:'COPD'},
-      patient:{sprite:'copd', label:'patient\'s lungs (COPD)', vit:{s5:0.11, rec:0, q:0.28, vdA:0.32, etF:0.46, vco2:220, bp:[138,84], floor:88}, start:{etco2:52}},
+      // autoPEEP is the model's anchor (at expiratory time 1.3 τ), not the reading:
+      // 18 gives ≈ 8 cmH₂O on the starting settings. Ventilated COPD measures
+      // 11.7 ± 4.0 at clinicians' settings (crossover study) and 10.5–13.1 on ZEEP
+      // (ERJ 1996), so 8 is a conservative, clearly significant start.
+      lung:{compliance:50,resistance:22,autoPEEP:18,label:'COPD'},
+      patient:{sprite:'copd', label:'patient\'s lungs (COPD)', vit:{s5:0.11, rec:0, q:0.28, vdA:0.32, etF:0.46, vco2:220, bp:[138,84], floor:88, hco3:29.5}, start:{etco2:52}},
       setup:{mode:'ac',bt:'volume',rate:18,vt:500,it:1.0,peep:0,pc:15,ps:10,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Expiratory flow never returns to baseline before the next breath, and CO₂ is rising. What is the problem?',
@@ -3128,7 +3157,7 @@ var SCENARIO_LEVELS={
       scenario:'56-year-old in septic shock, lactate 6.2. ABG: pH 7.18 with PaCO₂ already low at 28. They were breathing 30+ before intubation. On the current settings MV is only 7.2 L/min — and the low PaCO₂ says they were doing much more work than that themselves.',
       vitals:[{k:'HR',v:'142'},{k:'SpO₂',v:'95%'},{k:'PaCO₂',v:'28 mmHg'},{k:'EtCO₂',v:'26 mmHg'},{k:'Lactate',v:'6.2'},{k:'pH',v:'7.18'}],
       lung:{compliance:40,resistance:10,label:'Septic'},
-      patient:{sprite:'ards', label:'patient\'s lungs (sepsis, lung injury)', vit:{s5:0.27, rec:0.4, q:0.05, vdA:0.08, vco2:230, bp:[90,52], floor:92}, start:{paco2:28, etco2:26}},
+      patient:{sprite:'ards', label:'patient\'s lungs (sepsis, lung injury)', vit:{s5:0.27, rec:0.4, q:0.05, vdA:0.08, vco2:230, bp:[90,52], floor:92, hco3:12.5}, start:{paco2:28, etco2:26}},
       setup:{mode:'ac',bt:'volume',rate:16,vt:450,it:1.0,peep:8,pc:15,ps:10,fio2:60,sens:3,hipres:45,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'pH 7.18 but PaCO₂ is already LOW at 28. What is the vent\'s job here?',
@@ -3158,7 +3187,7 @@ var SCENARIO_LEVELS={
       scenario:'Day 4 post-op respiratory failure. The patient is awake, following commands, and initiating strong spontaneous breaths over the set rate. Gas exchange is excellent on modest support (FiO₂ 40%, PEEP 5) and they are hemodynamically stable. They\'re fully controlled on AC right now.',
       vitals:[{k:'HR',v:'84'},{k:'SpO₂',v:'97%'},{k:'EtCO₂',v:'38 mmHg'},{k:'pH',v:'7.42'},{k:'FiO₂',v:'40%'}],
       lung:{compliance:45,resistance:10,label:'Recovering'},
-      patient:{sprite:'normal', label:'patient\'s lungs (recovering)', vit:{s5:0.13, rec:0.5, q:0.03, vdA:0.06, vco2:192, bp:[124,76], floor:92, paco2Spont:42}},
+      patient:{sprite:'normal', label:'patient\'s lungs (recovering)', vit:{s5:0.13, rec:0.5, q:0.03, vdA:0.06, vco2:192, bp:[124,76], floor:92, paco2Spont:42, hco3:26.1}},
       setup:{mode:'ac',bt:'volume',rate:14,vt:500,it:1.0,peep:5,pc:15,ps:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'Awake, strong effort, good gas exchange on modest support, stable — the readiness screen is passed. Under your medical-control order to ease support, what is the appropriate transport step?',
@@ -3723,7 +3752,9 @@ function renderMonitor(vitals,sc){
   if(slot.co2)  lanes+=_monLane('co2','#f5d312',capnoDur,'EtCO₂',_splitVal(slot.co2).num,'mmHg',slot.rr?('RR '+_splitVal(slot.rr).num):null,
                     {obstructive:obstructive, flat:_firstNum(slot.co2)===0});
   else if(slot.rr) chips.unshift({k:'RR',v:_splitVal(slot.rr).num}); // RR without capno → chip
-  var mon=lanes?('<div class="monitor">'+lanes+'</div>'):'';
+  // With a live lung view below, say plainly that this monitor is the story's snapshot.
+  var live=sc && sc.patient && gameLevel>=2 && gameLevel<=3;
+  var mon=lanes?('<div class="monitor">'+(live?'<div class="mon-tag">On arrival · live vitals in the lung view ↓</div>':'')+lanes+'</div>'):'';
   var chipHtml='';
   if(chips.length){
     chipHtml='<div class="mon-chips">';
@@ -4573,6 +4604,8 @@ function lvFit(own,to){
   return 'translate('+((to[0]-sx*own[0])*100).toFixed(3)+'%,'+((to[1]-sy*own[1])*100).toFixed(3)+'%) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
 }
 var LV_PHASE={insp:'INSPIRATION ↓', exp:'EXPIRATION ↑', hold:'INSP HOLD', cut:'INSP · HI PRES CUT', off:'STANDBY'};
+// Short forms for a narrow panel (a phone), so the phase and volume share a line
+var LV_PHASE_SHORT={insp:'INSP ↓', exp:'EXP ↑', hold:'HOLD', cut:'HI PRES CUT', off:'STANDBY'};
 var _lv=null, lvLast=null;
 function lvRefMl(){ var pt=lvPatient(); return LV_REF_ML_PER_KG*((pt&&pt.peds&&pt.kg)||LV_ADULT_KG); }
 function lvTauMs(){ return Math.max(50, lung.resistance*lung.compliance); }   // cmH₂O/(L/s) × mL/cmH₂O = ms
@@ -4651,7 +4684,7 @@ function lvBuild(){
       +'<div class="lv-top" aria-hidden="true"><div class="lv-phase" aria-hidden="true">—</div><span class="lv-vol" title="Lung volume above PEEP">—</span></div>'
       +'<div class="lv-vitals">'
         +'<div class="lv-vit spo2"><div class="lv-vk">SpO₂</div><div class="lv-vv"><span class="lv-spo2">—</span><small>%</small></div><div class="lv-vs lv-pao2">PaO₂ —</div></div>'
-        +'<div class="lv-vit etco2"><div class="lv-vk">EtCO₂</div><div class="lv-vv"><span class="lv-etco2">—</span></div><div class="lv-vs lv-paco2">PaCO₂ —</div></div>'
+        +'<div class="lv-vit etco2"><div class="lv-vk">EtCO₂</div><div class="lv-vv"><span class="lv-etco2">—</span></div><div class="lv-vs lv-paco2">PaCO₂ —</div><div class="lv-vs lv-ph">pH —</div></div>'
         +'<div class="lv-vit bp"><div class="lv-vk">BP</div><div class="lv-vv lv-bp">—</div><div class="lv-vs lv-map">MAP —</div></div>'
       +'</div>'
       +'<div class="lv-trap"><div class="lv-k">End of expiration</div><div class="lv-v lv-trapv">—</div></div>'
@@ -4661,12 +4694,38 @@ function lvBuild(){
   _lv={el:el, stage:q('.lv-stage'), rest:q('.lv-pose.rest'), full:q('.lv-pose.full'), flow:q('.lv-flow'),
        phase:q('.lv-phase'), vol:q('.lv-vol'), trap:q('.lv-trap'), trapv:q('.lv-trapv'), note:q('.lv-note'),
        spo2:q('.lv-spo2'), pao2:q('.lv-pao2'), etco2:q('.lv-etco2'), paco2:q('.lv-paco2'), spo2Box:q('.lv-vit.spo2'),
-       bp:q('.lv-bp'), map:q('.lv-map'), bpBox:q('.lv-vit.bp'),
+       bp:q('.lv-bp'), map:q('.lv-map'), bpBox:q('.lv-vit.bp'), ph:q('.lv-ph'),
        vit:null, vitT:null, vitKey:null,
        fill:q('.lv-fill'), floor:q('.lv-floor'), sprite:null, w:null, t:0, drawn:null, phaseKey:null, txtAt:0, staticKey:null,
        fo:0, fy:0, fdir:'', fh:0, fhAt:0};
   lvMeasureBoxes();
+  lvBuildStrip(_lv);
   return _lv;
+}
+function lvBuildStrip(lv){
+  var st=document.createElement('button');
+  st.type='button'; st.className='lv-strip'; st.tabIndex=-1;
+  st.setAttribute('aria-label','Live vitals. Show the lung view'); st.setAttribute('aria-hidden','true');
+  st.innerHTML='<span class="lvs-dot"></span>'
+    +'<span class="lvs-i spo2"><span class="lvs-k">SpO₂</span><span class="lvs-v">—</span></span>'
+    +'<span class="lvs-i etco2"><span class="lvs-k">EtCO₂</span><span class="lvs-v">—</span></span>'
+    +'<span class="lvs-i bp"><span class="lvs-k">BP</span><span class="lvs-v">—</span></span>';
+  st.onclick=function(){ if(lv.el.isConnected) lv.el.scrollIntoView({block:'center', behavior:lvStill?'auto':'smooth'}); };
+  document.body.appendChild(st);
+  var q=function(s){ return st.querySelector(s); };
+  lv.strip={el:st, dot:q('.lvs-dot'), spo2:q('.spo2 .lvs-v'), etco2:q('.etco2 .lvs-v'), bp:q('.bp .lvs-v'),
+            spo2Box:q('.lvs-i.spo2'), bpBox:q('.lvs-i.bp'), shown:false};
+  lv.inView=true;
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){ es.forEach(function(e){ lv.inView=e.isIntersecting && e.intersectionRatio>=0.35; }); },
+                             {threshold:[0,0.35,0.7,1]}).observe(lv.el);
+  }
+}
+// Show or hide the strip; called every frame from updateLungView.
+function lvStripShow(lv,on){
+  var s=lv&&lv.strip; if(!s || s.shown===on) return;
+  s.shown=on; s.el.classList.toggle('show',on); s.el.tabIndex=on?0:-1;
+  if(on) s.el.removeAttribute('aria-hidden'); else s.el.setAttribute('aria-hidden','true');
 }
 // Lay the two poses for blend weight w (0 = rest pose, 1 = full pose).
 function lvDraw(lv,w){
@@ -4686,8 +4745,10 @@ function lvDraw(lv,w){
 // Called every animation frame wherever the card shows the lung view
 // (Free Play, the tutorial and the scenarios), and whenever the card re-renders.
 function updateLungView(){
-  var lv=_lv; if(!lv||!lv.el.isConnected) return;
-  var pt=lvPatient(); if(!pt) return;
+  var lv=_lv; if(!lv) return;
+  var pt=lv.el.isConnected?lvPatient():null;
+  lvStripShow(lv, !!pt && !lv.inView);
+  if(!pt) return;
   var sprite=pt.sprite||'normal';
   if(lv.sprite!==sprite || lv.label!==pt.label){
     var row=LV_ROWS[sprite]||0;
@@ -4721,7 +4782,10 @@ function updateLungView(){
   if(!lvStill && isFinite(dt)) lv.fy=(lv.fy+(flow>0?1:-1)*rel*0.9*lv.fh*dt/1000)%1000;
   lv.flow.style.opacity=lv.fo.toFixed(3);
   lv.flow.style.backgroundPosition='0 '+lv.fy.toFixed(2)+'px';
-  if(s.phase!==lv.phaseKey){ lv.phase.textContent=LV_PHASE[s.phase]; lv.phase.className='lv-phase '+s.phase; lv.phaseKey=s.phase; }
+  if(s.phase!==lv.phaseKey){
+    lv.phase.innerHTML='<span class="lv-pl">'+LV_PHASE[s.phase]+'</span><span class="lv-ps">'+LV_PHASE_SHORT[s.phase]+'</span>';
+    lv.phase.className='lv-phase '+s.phase; lv.phaseKey=s.phase;
+  }
   var top=2*ref;                                   // the gauge spans two normal-size breaths
   lv.fill.style.height=Math.max(0,Math.min(100,s.v/top*100)).toFixed(1)+'%';
   var now=performance.now();
@@ -4741,10 +4805,14 @@ function updateLungView(){
       lv.note.className='lv-note cut';
       lv.note.textContent='High Pressure limit ended the breath: about '+Math.round(s.vt)+' of '+Math.round(s.setVt)+' mL delivered.';
     } else {
-      lv.note.className='lv-note';
-      lv.note.textContent=trapOn
-        ?'Not enough time to empty: the next breath starts on top of trapped gas (auto-PEEP '+s.aPEEP+').'
-        :'';
+      // Same line as the Free Play readout: auto-PEEP under 5 is the usual
+      // target in obstruction (expert consensus); some always remains in COPD.
+      var bigTrap=trapOn && s.aPEEP>=5;
+      lv.note.className='lv-note'+(bigTrap?' trap':'');
+      lv.note.textContent=!trapOn?''
+        :(bigTrap
+          ?'Not enough time to empty: the next breath starts on top of trapped gas (auto-PEEP '+s.aPEEP+').'
+          :'A little gas still trapped (auto-PEEP '+s.aPEEP+'). Under 5 is the usual aim in obstruction; check the flow reaches zero.');
     }
   }
   lvLast={pose:pose, w:lv.w, flow:flow, flowDir:lv.fdir, frac:frac, v:s.v, phase:s.phase, vee:s.vee||0, cut:!!s.cut, sprite:sprite, ref:ref};
@@ -4845,9 +4913,10 @@ var VITAL_LUNG={
   //  s5: shunt at PEEP 5 · rec: recruitable share of the PEEP-0 shunt · q: blood flow to low-V/Q units
   //  vdA: alveolar dead space ÷ Vt · etF: share of it that dilutes end-tidal gas (1 = all)
   //  bp: preset systolic/diastolic at PEEP 5 · age: years, for PALS · floor: SpO₂ target
+//  hco3: bicarbonate at PaCO₂ 40 (24 unless set; COPD 30 for a chronic retainer, estimate)
   normal:   {s5:0.03, rec:0,    q:0,     vdA:0.05, bp:[120,75], floor:92},
   ards:     {s5:0.32, rec:0.75, q:0.05,  vdA:0.14, bp:[114,68], floor:88},
-  copd:     {s5:0.03, rec:0,    q:0.20,  vdA:0.32, etF:0.46, bp:[132,80], floor:88},
+  copd:     {s5:0.03, rec:0,    q:0.20,  vdA:0.32, etF:0.46, bp:[132,80], floor:88, hco3:30},
   asthma:   {s5:0.02, rec:0,    q:0.105, vdA:0.32, etF:0.46, bp:[128,78], floor:88},
   pneumonia:{s5:0.22, rec:0.25, q:0.11,  vdA:0.08, bp:[116,70], over:10, floor:92},
   edema:    {s5:0.25, rec:0.8,  q:0.05,  vdA:0.08, bp:[160,95], lvf:true, floor:92},
@@ -4889,6 +4958,13 @@ function vitBP(P,ptot){
 function vitBPLimits(P){
   if(P.age!=null){ var f=P.age<1?70:Math.min(90,70+2*P.age); return {sbpRed:f, sbpAmber:f+10, mapRed:0, mapAmber:0, why:'PALS: SBP < '+f+' is hypotension at this age'}; }
   return {sbpRed:90, sbpAmber:100, mapRed:65, mapAmber:70, why:'MAP ≥ 65 (Surviving Sepsis 2021) and SBP ≥ 90'};
+}
+// pH from PaCO₂ (Henderson–Hasselbalch). P.hco3 is the patient's bicarbonate
+// at PaCO₂ 40 (24 unless the story says otherwise); acute buffering moves it
+// +1 per 10 mmHg rise and −2 per 10 mmHg fall (established rules of thumb).
+function vitPH(P,paco2){
+  var h0=P.hco3||24, hco3=h0+(paco2>=40?0.1:0.2)*(paco2-40);
+  return 6.1+Math.log10(Math.max(1,hco3)/(0.03*Math.max(5,paco2)));
 }
 // O₂ content (mL/dL) at a PO₂, Hb 14
 function vitO2Content(p){ return 1.34*14*sevSat(p)+0.003*p; }
@@ -4943,15 +5019,18 @@ function vitalsTarget(){
   var pAO2=Math.max(1, fio2*713-paco2/0.8);
   var pao2=vitPO2ForContent(vitArterialO2(fio2,pAO2,sh,P.q||0));
   var bp=vitBP(P,peep+aP);
-  return {spo2:Math.max(0,Math.min(100,sevSat(pao2)*100)), pao2:pao2, paco2:paco2, etco2:etco2,
+  return {spo2:Math.max(0,Math.min(100,sevSat(pao2)*100)), pao2:pao2, paco2:paco2, etco2:etco2, ph:vitPH(P,paco2),
           shunt:sh, va:va, vdvt:vd/vt, peepTotal:peep+aP, co:bp.co, map:bp.map, sbp:bp.sbp, dbp:bp.dbp};
 }
 function lvUpdateVitals(lv,run){
   if(!run){
     lv.vit=null; lv.vitT=null;
     lv.spo2.textContent='—'; lv.etco2.textContent='—'; lv.pao2.textContent='PaO₂ —'; lv.paco2.textContent='PaCO₂ —';
-    lv.bp.textContent='—'; lv.map.textContent='MAP —';
-    lv.spo2Box.className='lv-vit spo2'; lv.bpBox.className='lv-vit bp'; lvVitals=null; return;
+    lv.bp.textContent='—'; lv.map.textContent='MAP —'; lv.ph.textContent='pH —'; lv.ph.className='lv-vs lv-ph';
+    lv.spo2Box.className='lv-vit spo2'; lv.bpBox.className='lv-vit bp'; lvVitals=null;
+    if(lv.strip){ lv.strip.spo2.textContent='—'; lv.strip.etco2.textContent='—'; lv.strip.bp.textContent='—';
+      lv.strip.spo2Box.className='lvs-i spo2'; lv.strip.bpBox.className='lvs-i bp'; lv.strip.dot.className='lvs-dot'; }
+    return;
   }
   var pt=lvPatient(); if(!pt) return;
   var tg=vitalsTarget(), key=pt.key, P=pt.P;
@@ -4973,6 +5052,10 @@ function lvUpdateVitals(lv,run){
   var v=lv.vit, sp=Math.round(v.spo2), set=function(el,t){ if(el.textContent!==t) el.textContent=t; };
   set(lv.spo2,String(sp)); set(lv.etco2,String(Math.round(v.etco2)));
   set(lv.pao2,'PaO₂ '+Math.round(v.pao2)); set(lv.paco2,'PaCO₂ '+Math.round(v.paco2));
+  // pH: ARDSnet aims for 7.30–7.45; permissive hypercapnia accepts down to 7.20
+  var ph=vitPH(P,v.paco2), phSt=(ph<7.20||ph>7.55)?' bad':((ph<7.30||ph>7.50)?' warn':'');
+  set(lv.ph,'pH '+ph.toFixed(2));
+  if(lv.ph.className!=='lv-vs lv-ph'+phSt){ lv.ph.className='lv-vs lv-ph'+phSt; lv.ph.title='pH 7.30–7.45 is the ARDSnet goal; permissive hypercapnia accepts down to 7.20'; }
   var sbp=Math.round(v.sbp), dbp=Math.round(v.dbp), map=Math.round(v.map);
   set(lv.bp,sbp+'/'+dbp); set(lv.map,'MAP '+map);
   // SpO₂ floor: 88% where ARDSnet and obstructive-disease practice accept 88–92/95, 92% otherwise
@@ -4982,7 +5065,16 @@ function lvUpdateVitals(lv,run){
   var L=P.bpLim||vitBPLimits(P), bpSt=(sbp<L.sbpRed||map<L.mapRed)?'bad':((sbp<L.sbpAmber||map<L.mapAmber)?'warn':'');
   lv.bpBox.className='lv-vit bp'+(bpSt?' '+bpSt:'');
   lv.bpBox.title='Modelled arterial pressure (a real cuff cycles every 3–5 min). '+L.why+'. Total PEEP '+Math.round(tg.peepTotal)+' cmH₂O';
-  lvVitals={shown:{spo2:v.spo2, pao2:v.pao2, paco2:v.paco2, etco2:v.etco2, sbp:v.sbp, dbp:v.dbp, map:v.map},
+  if(lv.strip){
+    var S=lv.strip;
+    set(S.spo2,sp+'%'); set(S.etco2,String(Math.round(v.etco2))); set(S.bp,sbp+'/'+dbp);
+    var c1='lvs-i spo2'+(sp<floor-4?' bad':(sp<floor?' warn':'')), c2='lvs-i bp'+(bpSt?' '+bpSt:'');
+    if(S.spo2Box.className!==c1) S.spo2Box.className=c1;
+    if(S.bpBox.className!==c2) S.bpBox.className=c2;
+    var phase=(lvLast&&lvLast.phase)||'', dc='lvs-dot'+(/insp/i.test(phase)?' in':(/exp/i.test(phase)?' out':''));
+    if(S.dot.className!==dc) S.dot.className=dc;
+  }
+  lvVitals={shown:{spo2:v.spo2, pao2:v.pao2, paco2:v.paco2, etco2:v.etco2, sbp:v.sbp, dbp:v.dbp, map:v.map, ph:ph},
             target:tg, floor:floor, bpStatus:bpSt||'ok', bpLimits:L};
 }
 var lvVitals=null;

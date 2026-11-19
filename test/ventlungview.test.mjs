@@ -556,6 +556,8 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
       ok(`L18 ${tag}: EtCO₂ starts at the monitor's ${r.story.etco2}`, Math.abs(r.shown.etco2 - r.story.etco2) <= 1.5, r.shown.etco2.toFixed(1));
     if (r.story.paco2 != null)
       ok(`L18 ${tag}: PaCO₂ starts at the story's ${r.story.paco2}`, Math.abs(r.shown.paco2 - r.story.paco2) <= 1.5, r.shown.paco2.toFixed(1));
+    if (r.story.ph != null)
+      ok(`L18 ${tag}: pH starts at the story's ${r.story.ph} (Henderson–Hasselbalch)`, Math.abs(r.shown.ph - r.story.ph) <= 0.015, r.shown.ph.toFixed(3));
     if (r.story.pao2 != null)
       ok(`L18 ${tag}: the story's PaO₂ ${r.story.pao2} agrees with its SpO₂ (Severinghaus)`, Math.abs(r.t.pao2 - r.story.pao2) <= 4, r.t.pao2.toFixed(0));
   }
@@ -574,6 +576,9 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   ok('L18 L2S3 COPD: left alone, EtCO₂ keeps climbing past 52', a.t.etco2 > 52.5, a.t.etco2.toFixed(1));
   ok('L18 …shortening Ti to 0.65 (I:E ≥ 1:4) cuts the auto-PEEP and lifts the BP, CO₂ unchanged', b.goal && b.t.peepTotal < a.t.peepTotal && b.t.map > a.t.map && Math.abs(b.t.paco2 - a.t.paco2) < 0.5, `${a.t.peepTotal}→${b.t.peepTotal}, MAP ${a.t.map.toFixed(1)}→${b.t.map.toFixed(1)}`);
   ok('L18 …dropping the rate to 12 also works but costs CO₂ — permissive hypercapnia', c.goal && c.t.paco2 > a.t.paco2 + 20, c.t.paco2.toFixed(0));
+  const e = await S(2, 2, { rate: 15, it: 0.65 }), f = await S(2, 2, { rate: 10, it: 0.8 });
+  ok('L18 …a balanced answer (rate 15, Ti 0.65) gets auto-PEEP under 5 and keeps pH ≥ 7.20', e.goal && e.t.peepTotal < 5 && e.t.ph >= 7.20, `${e.t.peepTotal} / pH ${e.t.ph.toFixed(2)}`);
+  ok('L18 …while rate 10 meets the I:E goal but drives pH below 7.20 — the I:E target is only a proxy', f.goal && f.t.ph < 7.20, f.t.ph.toFixed(2));
 
   a = await S(2, 3); b = await S(2, 3, { it: 0.8 });
   ok('L18 L2S4 Fighting the Vent: the fix is mechanical — gas exchange barely moves', b.goal && Math.abs(b.t.spo2 - a.t.spo2) < 1 && Math.abs(b.t.paco2 - a.t.paco2) < 1, `${a.t.paco2.toFixed(1)} → ${b.t.paco2.toFixed(1)}`);
@@ -582,6 +587,7 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   ok('L18 L2S5 Septic: left at 7.2 L/min, PaCO₂ heads far above the pre-intubation 28', a.t.paco2 > 45, a.t.paco2.toFixed(0));
   ok('L18 …matching the drive (MV 14.4) holds it at or below 28', b.goal && b.t.paco2 <= 28, b.t.paco2.toFixed(1));
   ok('L18 …and the BP reads septic shock: red (MAP < 65)', /\bbad\b/.test(a.bpCls) && a.t.map < 65, a.t.map.toFixed(1));
+  ok('L18 …left alone, the pH falls from 7.18 toward 7.0 as the CO₂ climbs', a.t.ph < 7.08, a.t.ph.toFixed(2));
 
   a = await S(3, 0); b = await S(3, 0, { mode: 'cpap', ps: 6, peep: 5 });
   ok('L18 L3S1 weaning: on CPAP/PS 6 the patient holds SpO₂ and their own PaCO₂ (≈ 42)', b.goal && Math.abs(b.t.spo2 - a.t.spo2) < 1 && Math.abs(b.t.paco2 - 42) < 0.5, `${b.t.spo2.toFixed(1)} / ${b.t.paco2.toFixed(1)}`);
@@ -602,6 +608,55 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   const none = await sp.evaluate(() => { startLevel(7); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); return !!document.querySelector('#mission-bar .lv-vitals'); });
   ok('L18 Level 7 (not asked for) has no lung view', !none);
   await sp.context().close(); }
+
+console.log('\nL19 usability on a phone: live strip, snapshot label, first button, stable panel');
+{ const up = await (await browser.newContext({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' })).newPage();
+  up.on('pageerror', e => errs.push(String(e)));
+  await up.goto(ORIGIN + '/vent-ltv1200.html');
+  await up.waitForFunction(() => typeof startLevel === 'function');
+  const load = (l, i) => up.evaluate(([l, i]) => { deviceState = 'run'; applyStandbyVisual(); startLevel(l); if (l > 1) { scenarioIdx = i; loadScenario(SCENARIO_LEVELS[l][i]); }
+    document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); window.scrollTo(0, 0); }, [l, i]);
+  // The first button is on the first screen for every card
+  const cards = [[1, 0], [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [3, 0], [3, 1], [3, 2], [3, 3]], below = [];
+  for (const [l, i] of cards) { await load(l, i); await up.waitForTimeout(80);
+    const b = await up.evaluate(() => { const c = document.querySelector('#mission-bar .mission-cta'); return c ? Math.round(c.getBoundingClientRect().bottom) : 0; });
+    if (b > 664) below.push(`L${l}S${i + 1}:${b}`); }
+  ok('L19 on a 390×664 phone every L1–L3 card shows its first button without scrolling', below.length === 0, below.join(' '));
+  // Snapshot label on the scenario monitor, not on Level 7
+  await load(2, 1);
+  ok('L19 a scenario monitor says it is the on-arrival snapshot', await up.evaluate(() => /on arrival/i.test(document.querySelector('#mission-bar .mon-tag')?.textContent || '')));
+  const l7 = await up.evaluate(() => { startLevel(7); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); return !!document.querySelector('#mission-bar .mon-tag'); });
+  ok('L19 …and a Level 7 monitor (no lung view) does not', !l7);
+  // The live strip
+  await load(2, 1); await up.waitForTimeout(400);
+  const top = await up.evaluate(() => { const s = document.querySelector('.lv-strip'); return { show: s.classList.contains('show'), hidden: s.getAttribute('aria-hidden') }; });
+  ok('L19 with the lung view on screen the strip stays hidden (and hidden from screen readers)', !top.show && top.hidden === 'true', JSON.stringify(top));
+  await up.evaluate(() => document.querySelector('#cw-peep').scrollIntoView({ block: 'center' })); await up.waitForTimeout(500);
+  const down = await up.evaluate(() => { const s = document.querySelector('.lv-strip'), r = s.getBoundingClientRect();
+    return { show: s.classList.contains('show'), top: r.top, right: r.right, w: innerWidth, txt: s.textContent,
+             spo2: Math.round(lvVitals.shown.spo2), et: Math.round(lvVitals.shown.etco2), bp: Math.round(lvVitals.shown.sbp) + '/' + Math.round(lvVitals.shown.dbp) }; });
+  ok('L19 down at the controls, the strip shows the live SpO₂, EtCO₂ and BP at the top of the screen', down.show && down.top >= 0 && down.top < 20 && down.right <= down.w
+     && down.txt.includes(down.spo2 + '%') && down.txt.includes(String(down.et)) && down.txt.includes(down.bp), JSON.stringify(down));
+  await up.locator('.lv-strip').click(); await up.waitForTimeout(900);
+  const back = await up.evaluate(() => { const r = document.getElementById('tl-viz').getBoundingClientRect(); return { top: r.top, bottom: r.bottom, show: document.querySelector('.lv-strip').classList.contains('show') }; });
+  ok('L19 tapping the strip brings the lung view back, and the strip goes away', back.top >= 0 && back.bottom <= 664 && !back.show, JSON.stringify(back));
+  // Stable panel height whatever the digits
+  const hts = await up.evaluate(() => { const h = []; for (const [sb, db, sp] of [[99, 60, 85], [138, 86, 100], [72, 41, 9]]) {
+      _lv.vit.sbp = sb; _lv.vit.dbp = db; _lv.vit.map = (sb + 2 * db) / 3; _lv.vit.spo2 = sp; _lv.vitT = simTime; updateLungView();
+      h.push(Math.round(document.getElementById('tl-viz').getBoundingClientRect().height)); } return h; });
+  ok('L19 the panel keeps one height as the numbers change digits', hts.every(x => x === hts[0]), hts.join(', '));
+  // COPD: significant vs residual trapping are worded differently
+  const note = (set) => up.evaluate((set) => { for (const k of Object.keys(set)) vals[k].v = set[k]; enforceITLimit(); updateUI(); updateLungView();
+    const n = document.querySelector('#tl-viz .lv-note'); return { cls: n.className, txt: n.textContent, ap: effectiveAutoPEEP() }; }, set);
+  await load(2, 2);
+  const n0 = await note({}), n1 = await note({ rate: 15, it: 0.65 });
+  ok(`L19 COPD start: auto-PEEP ${n0.ap} (≥ 5) is called out as trapping`, n0.ap >= 5 && /trap\b/.test(n0.cls) && /Not enough time/.test(n0.txt), JSON.stringify(n0));
+  ok(`L19 …after a good fix, auto-PEEP ${n1.ap} (< 5) reads as the usual small residual`, n1.ap < 5 && !/trap\b/.test(n1.cls) && /usual aim/.test(n1.txt), JSON.stringify(n1));
+  // pH colour
+  const ph = await up.evaluate(() => { vals.rate.v = 10; vals.it.v = 0.8; enforceITLimit(); updateUI(); for (let k = 0; k < 400; k++) { simTime += 1000; updateLungView(); }
+    const e = document.querySelector('#tl-viz .lv-ph'); return { cls: e.className, txt: e.textContent }; });
+  ok('L19 a pH under 7.20 shows red', /\bbad\b/.test(ph.cls) && parseFloat(ph.txt.replace('pH', '')) < 7.20, JSON.stringify(ph));
+  await up.context().close(); }
 
 console.log('\nL13 accessible, and fits a phone');
 { const a = await p.evaluate(() => { const st = document.querySelector('#tl-viz .lv-stage');

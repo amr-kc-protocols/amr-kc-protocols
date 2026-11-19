@@ -346,16 +346,32 @@ lung and is tuned, inside the published ranges above, so the starting
 settings reproduce the numbers on the scenario's monitor. A scenario whose
 story says the CO₂ is rising starts at the story's value and drifts toward
 what the settings produce, so it keeps rising until it's fixed. The monitor
-stays a snapshot of the story; the panel is live. The graded chips stay in
-Free Play, so they can't give the answer away.
+stays a snapshot of the story and is labelled "On arrival"; the panel is
+live. The graded chips stay in Free Play, so they can't give the answer away.
+
+**pH.** The panel shows pH under PaCO₂, from Henderson–Hasselbalch. Each
+patient has a bicarbonate at PaCO₂ 40: 24 unless the story's pH says
+otherwise, and 30 for the Free Play COPD lung, a chronic retainer
+(estimate). Acute buffering moves it +1 per 10 mmHg rise in PaCO₂ and −2 per
+10 mmHg fall (established rules of thumb). pH turns amber outside 7.30–7.50
+and red below 7.20 or above 7.55: ARDSnet aims for 7.30–7.45, and permissive
+hypercapnia accepts down to 7.20.
+
+**Using it on a phone.** The controls sit well below the lung view, so a
+learner turning a knob can't see the patient. When the lung view scrolls off
+screen, a small strip with the live SpO₂, EtCO₂ and BP pins to the top of
+the screen; tapping it scrolls back to the lung. On a narrow panel the phase
+label shortens (INSP / EXP) so it shares a line with the volume. BP is a box
+like the others, so the panel keeps one height as digits change. On a
+390 × 664 phone, every Level 1–3 card's first button is on the first screen.
 
 | Scenario | Picture | Tuned to the story | What the right answer does |
 |---|---|---|---|
 | L2 · Rising CO₂ | Normal | Post-op shunt 12% (estimate). PaCO₂ starts at 62 and climbs toward 72 | Rate 18 brings PaCO₂ to about 40 |
 | L2 · ARDS hypoxemia | ARDS | Shunt 41% at PEEP 3, inside 32 ± 14% | PEEP 8–14 lifts SpO₂ 85 → 93–96; 100% oxygen alone reaches about 90; BP falls a little |
-| L2 · COPD trapping | COPD | Shunt 11% plus 28% low V/Q; V̇CO₂ 220 for a patient fighting the vent (estimate). EtCO₂ climbs from 52 | Shorter Ti cuts auto-PEEP and lifts BP; a lower rate does too, but PaCO₂ rises (permissive hypercapnia) |
+| L2 · COPD trapping | COPD | Shunt 11% plus 28% low V/Q; V̇CO₂ 220 for a patient fighting the vent (estimate). EtCO₂ climbs from 52; pH 7.30 (bicarbonate 32). Auto-PEEP about 8 on the starting settings | Rate 15 with Ti 0.65 gets auto-PEEP under 5 with pH above 7.20. Rate 10 also meets the I:E goal, but the pH falls to about 7.1, which shows that the I:E target is only a proxy |
 | L2 · Fighting the vent | Normal | Shunt 12%; V̇CO₂ 210 | Gas exchange doesn't change; the fix is mechanical |
-| L2 · Septic | ARDS (lung injury: SpO₂ 95 on 60%) | Shunt 25% at PEEP 8; V̇CO₂ 230 (sepsis, estimate); BP 90/52, red (septic shock) | Left at 7.2 L/min, PaCO₂ heads to 55; MV 14+ holds it at 28 or below (Winter's) |
+| L2 · Septic | ARDS (lung injury: SpO₂ 95 on 60%) | Shunt 25% at PEEP 8; V̇CO₂ 230 (sepsis, estimate); bicarbonate 10 (pH 7.18); BP 90/52, red (septic shock) | Left at 7.2 L/min, PaCO₂ heads to 55 and pH toward 7.0; MV 14+ holds PaCO₂ at 28 or below (Winter's) |
 | L3 · Ready to come down | Normal | Shunt 13%; V̇CO₂ 192; own PaCO₂ 42 | On CPAP/PS 5–8 the vitals hold |
 | L3 · Status asthmaticus | Asthma | 25% low V/Q, set above Ballester's 10.5% for an intubated patient (estimate); V̇CO₂ 265 (β-agonists, work of breathing; estimate) | Slowing the rate cuts auto-PEEP and lifts BP; PaCO₂ rises (permissive hypercapnia) |
 | L3 · Severe ARDS | ARDS | Shunt 45% at PEEP 8, about half recruitable | PEEP 14 + FiO₂ 90% reaches SpO₂ 88+; oxygen alone falls short |
@@ -370,6 +386,12 @@ Three story numbers changed so the monitor and the physiology agree:
 - **Severe ARDS:** PaO₂ went from 41 to 47 and P/F from 59 to 67. SpO₂ 82%
   sits at PaO₂ 47 on the Severinghaus curve, and the case is still severe
   ARDS.
+
+One scenario's mechanics changed. The COPD lung's auto-PEEP anchor went from
+6 to 18, so the starting settings now trap about 8 cmH₂O instead of 2.6.
+At 2.6 the lung view called the trapping minor, which contradicted the
+story. Ventilated COPD measures 11.7 ± 4.0 cmH₂O at clinicians' settings (a
+crossover study) and 10.5–13.1 on ZEEP (ERJ 1996).
 
 Limits: triggered breaths above the set rate aren't counted, and neither is
 heart rate. The tutorial runs on the simulator's generic lung (compliance
