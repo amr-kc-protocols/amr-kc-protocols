@@ -147,7 +147,21 @@ These suites live here:
   PEEP and auto-PEEP lower it (Auler 2000, Luo 2024), while CPAP in
   high-filling-pressure heart failure raises output without dropping pressure
   (De Hoyos 1995). It also checks that the pressure turns amber and red by
-  the Surviving Sepsis MAP target, and by PALS thresholds for children.
+  the Surviving Sepsis MAP target, and by PALS thresholds for children. It checks the lung view in the tutorial and in every Level 2–3
+  scenario. Each one's vitals start at its monitor's numbers, and its starting
+  settings hold them there, or let the CO₂ keep climbing where the story says
+  it is. Each correct answer moves the vitals the way the evidence says (PEEP
+  for a shunt, permissive hypercapnia for trapping, Winter's formula for
+  sepsis, ETCO₂ 30–35 for herniation), and Level 7 has no lung view. L19 checks
+  usability on a phone: every Level 1–3 card's first button is on the first
+  screen, the scenario monitor is labelled as the on-arrival snapshot, the
+  live vitals strip follows the learner to the controls and taps back to the
+  lung, the panel keeps one height as digits change, COPD trapping is worded
+  by size, and a pH under 7.20 shows red. It also checks that the strip
+  stays off the header, that the vitals hold still while the intro is open,
+  and that the tutorial keeps one healthy-lung patient across its stages:
+  every stage's answer meets its goal, a misset High Pressure limit drives
+  the CO₂ up, and Pressure Control 10 delivers 500 mL.
 
 - **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
   grade as correct. Each scenario's `goal.check()` is the therapy the

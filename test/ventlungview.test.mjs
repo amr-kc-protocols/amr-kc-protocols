@@ -411,9 +411,12 @@ console.log('\nL16 SpO₂ and EtCO₂');
   const a5 = await V('ards', { peep: 5, fio2: 40 }), a5o = await V('ards', { peep: 5, fio2: 100 }), a10 = await V('ards', { peep: 10, fio2: 50 });
   ok('L16 ARDS at PEEP 5 / 40% is hypoxemic (SpO₂ ≤ 90)', a5.spo2 < 90.5, a5.spo2.toFixed(1));
   ok('L16 even 100% oxygen can\'t lift PaO₂ to 100 through a 32% shunt (iso-shunt)', a5o.pao2 < 100, a5o.pao2.toFixed(0));
-  ok('L16 PEEP 10 on 50% gets within 1.5 points of 100% oxygen on PEEP 5 — a shunt answers to PEEP, not oxygen', a10.spo2 >= a5o.spo2 - 1.5 && a10.shunt < a5.shunt, JSON.stringify({ p10: a10.spo2.toFixed(1), o100: a5o.spo2.toFixed(1) }));
+  ok('L16 PEEP 10 on 50% gets within 2 points of 100% oxygen on PEEP 5 — a shunt answers to PEEP, not oxygen', a10.spo2 >= a5o.spo2 - 2 && a10.shunt < a5.shunt, JSON.stringify({ p10: a10.spo2.toFixed(1), o100: a5o.spo2.toFixed(1) }));
   const c21 = await V('copd', { fio2: 21 }), c30 = await V('copd', { fio2: 30 });
-  ok('L16 COPD on room air is below 90, and a little oxygen fixes it (V/Q mismatch)', c21.spo2 < 90 && c30.spo2 >= 94, JSON.stringify({ ra: c21.spo2.toFixed(0), o30: c30.spo2.toFixed(0) }));
+  ok('L16 COPD on room air is below 90, and 30% oxygen reaches the 88–92 target (low V/Q answers to oxygen)', c21.spo2 < 90 && c30.spo2 >= 92 && c30.spo2 - c21.spo2 > 10, JSON.stringify({ ra: c21.spo2.toFixed(0), o30: c30.spo2.toFixed(0) }));
+  const cd = await V('copd', { vt: 500, rate: 14 });
+  ok('L16 ventilated COPD: physiologic Vd/Vt ≈ 0.70 (measured 0.69–0.71)', Math.abs(cd.vdvt - 0.70) <= 0.02, cd.vdvt.toFixed(3));
+  ok('L16 …and EtCO₂ ≈ 0.76 × PaCO₂ (Tyagi 2021: 61 vs 80 mmHg)', Math.abs(cd.etco2 / cd.paco2 - 0.763) < 0.02, (cd.etco2 / cd.paco2).toFixed(3));
   const p10 = await V('pneumonia', { peep: 10 }), p14 = await V('pneumonia', { peep: 14 });
   ok('L16 one-sided pneumonia: PEEP 14 is worse than PEEP 10 (overdistends the good lung)', p14.spo2 < p10.spo2, JSON.stringify({ p10: p10.spo2.toFixed(1), p14: p14.spo2.toFixed(1) }));
   const e5 = await V('edema', { peep: 5 }), e10 = await V('edema', { peep: 10 });
@@ -514,6 +517,172 @@ console.log('\nL17 blood pressure');
   const st = await vp.evaluate(() => { deviceState = 'standby'; applyStandbyVisual(); updateLungView(); return document.querySelector('#tl-viz .lv-bp').textContent; });
   ok('L17 standby: no pressure shown', st === '—', st);
   await vp.context().close(); }
+
+console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios');
+{ const sp = await (await browser.newContext({ viewport: { width: 400, height: 900 }, serviceWorkers: 'block' })).newPage();
+  sp.on('pageerror', e => errs.push(String(e)));
+  await sp.goto(ORIGIN + '/vent-ltv1200.html');
+  await sp.waitForFunction(() => typeof startLevel === 'function');
+  // Load a level/scenario, close the intro, render; optionally change settings. Returns the steady state
+  // for those settings plus what the card shows.
+  const S = (lvl, idx, set) => sp.evaluate(([lvl, idx, set]) => {
+    startLevel(lvl); if (lvl > 1) { scenarioIdx = idx; loadScenario(SCENARIO_LEVELS[lvl][idx]); }
+    document.getElementById('intro-overlay').classList.remove('open');
+    if (set) { for (const k of Object.keys(set)) { if (k === 'mode') ventMode = set[k]; else vals[k].v = set[k]; } enforceITLimit(); updateUI(); }
+    renderMissionCard(); updateLungView();
+    const bar = document.getElementById('mission-bar'), sc = lvl > 1 ? SCENARIO_LEVELS[lvl][idx] : null;
+    const story = {}; if (sc) sc.vitals.forEach(v => { const k = v.k.replace(/₂/g, '2').toLowerCase(), n = parseFloat(v.v); if (!isNaN(n)) story[k] = n; });
+    const pt = lvPatient();
+    return { t: vitalsTarget(), shown: lvVitals && lvVitals.shown, story, card: !!bar.querySelector('.lv-vitals'), sprite: pt && pt.sprite,
+             label: bar.querySelector('.lv-stage') && bar.querySelector('.lv-stage').getAttribute('aria-label'),
+             bpCls: bar.querySelector('.lv-vit.bp') && bar.querySelector('.lv-vit.bp').className, bpTitle: bar.querySelector('.lv-vit.bp') && bar.querySelector('.lv-vit.bp').title,
+             goal: sc && sc.goal ? !!sc.goal.check() : null };
+  }, [lvl, idx, set || null]);
+
+  const tut = await S(1, 0);
+  ok('L18 Level 1: the tutorial card shows the lung view and its vitals', tut.card && tut.sprite === 'normal', tut.label);
+  const tut2 = await S(1, 0, { rate: 16, vt: 500 });
+  ok('L18 …and the tutorial\'s first fix (MV 7–9 L/min) brings PaCO₂ from ' + tut.t.paco2.toFixed(0) + ' to 35–45', tut.t.paco2 > 50 && tut2.t.paco2 >= 35 && tut2.t.paco2 <= 45, tut2.t.paco2.toFixed(1));
+
+  const scen = [[2, 0, 'normal'], [2, 1, 'ards'], [2, 2, 'copd'], [2, 3, 'normal'], [2, 4, 'ards'], [3, 0, 'normal'], [3, 1, 'asthma'], [3, 2, 'ards'], [3, 3, 'normal']];
+  for (const [l, i, spr] of scen) {
+    const r = await S(l, i);
+    const tag = `L${l}S${i + 1}`;
+    ok(`L18 ${tag}: the card shows the lung view, drawn as ${spr}`, r.card && r.sprite === spr, r.sprite);
+    if (r.story.spo2 != null)
+      ok(`L18 ${tag}: SpO₂ starts at the monitor's ${r.story.spo2}% and the settings hold it there (steady ${r.t.spo2.toFixed(1)})`,
+         Math.abs(r.shown.spo2 - r.story.spo2) <= 1.5 && Math.abs(r.t.spo2 - r.story.spo2) <= 1.5, r.shown.spo2.toFixed(1));
+    if (r.story.etco2 != null)
+      ok(`L18 ${tag}: EtCO₂ starts at the monitor's ${r.story.etco2}`, Math.abs(r.shown.etco2 - r.story.etco2) <= 1.5, r.shown.etco2.toFixed(1));
+    if (r.story.paco2 != null)
+      ok(`L18 ${tag}: PaCO₂ starts at the story's ${r.story.paco2}`, Math.abs(r.shown.paco2 - r.story.paco2) <= 1.5, r.shown.paco2.toFixed(1));
+    if (r.story.ph != null)
+      ok(`L18 ${tag}: pH starts at the story's ${r.story.ph} (Henderson–Hasselbalch)`, Math.abs(r.shown.ph - r.story.ph) <= 0.015, r.shown.ph.toFixed(3));
+    if (r.story.pao2 != null)
+      ok(`L18 ${tag}: the story's PaO₂ ${r.story.pao2} agrees with its SpO₂ (Severinghaus)`, Math.abs(r.t.pao2 - r.story.pao2) <= 4, r.t.pao2.toFixed(0));
+  }
+
+  // Each scenario's correct answer moves the vitals the way the evidence says
+  let a = await S(2, 0), b = await S(2, 0, { rate: 18 });
+  ok('L18 L2S1 Rising CO₂: left alone, the CO₂ keeps climbing past 62', a.t.paco2 > 66, a.t.paco2.toFixed(1));
+  ok('L18 …raising the rate to 18 (MV 8.1) brings PaCO₂ to 35–45', b.goal && b.t.paco2 >= 35 && b.t.paco2 <= 45, b.t.paco2.toFixed(1));
+
+  a = await S(2, 1); b = await S(2, 1, { peep: 10 }); let c = await S(2, 1, { fio2: 100 });
+  ok('L18 L2S2 ARDS: PEEP 10 (the answer) lifts SpO₂ above 92 on the same FiO₂', b.goal && b.t.spo2 >= 92, b.t.spo2.toFixed(1));
+  ok('L18 …while 100% oxygen on PEEP 3 does less — a shunt answers to PEEP', c.t.spo2 < b.t.spo2 - 2, c.t.spo2.toFixed(1));
+  ok('L18 …and the PEEP costs some blood pressure', b.t.map < a.t.map - 2, `${a.t.map.toFixed(0)} → ${b.t.map.toFixed(0)}`);
+
+  a = await S(2, 2); b = await S(2, 2, { it: 0.65 }); c = await S(2, 2, { rate: 12 });
+  ok('L18 L2S3 COPD: left alone, EtCO₂ keeps climbing past 52', a.t.etco2 > 52.5, a.t.etco2.toFixed(1));
+  ok('L18 …shortening Ti to 0.65 (I:E ≥ 1:4) cuts the auto-PEEP and lifts the BP, CO₂ unchanged', b.goal && b.t.peepTotal < a.t.peepTotal && b.t.map > a.t.map && Math.abs(b.t.paco2 - a.t.paco2) < 0.5, `${a.t.peepTotal}→${b.t.peepTotal}, MAP ${a.t.map.toFixed(1)}→${b.t.map.toFixed(1)}`);
+  ok('L18 …dropping the rate to 12 also works but costs CO₂ — permissive hypercapnia', c.goal && c.t.paco2 > a.t.paco2 + 20, c.t.paco2.toFixed(0));
+  const e = await S(2, 2, { rate: 15, it: 0.65 }), f = await S(2, 2, { rate: 10, it: 0.8 });
+  ok('L18 …a balanced answer (rate 15, Ti 0.65) gets auto-PEEP under 5 and keeps pH ≥ 7.20', e.goal && e.t.peepTotal < 5 && e.t.ph >= 7.20, `${e.t.peepTotal} / pH ${e.t.ph.toFixed(2)}`);
+  ok('L18 …while rate 10 meets the I:E goal but drives pH below 7.20 — the I:E target is only a proxy', f.goal && f.t.ph < 7.20, f.t.ph.toFixed(2));
+
+  a = await S(2, 3); b = await S(2, 3, { it: 0.8 });
+  ok('L18 L2S4 Fighting the Vent: the fix is mechanical — gas exchange barely moves', b.goal && Math.abs(b.t.spo2 - a.t.spo2) < 1 && Math.abs(b.t.paco2 - a.t.paco2) < 1, `${a.t.paco2.toFixed(1)} → ${b.t.paco2.toFixed(1)}`);
+
+  a = await S(2, 4); b = await S(2, 4, { rate: 32 });
+  ok('L18 L2S5 Septic: left at 7.2 L/min, PaCO₂ heads far above the pre-intubation 28', a.t.paco2 > 45, a.t.paco2.toFixed(0));
+  ok('L18 …matching the drive (MV 14.4) holds it at or below 28', b.goal && b.t.paco2 <= 28, b.t.paco2.toFixed(1));
+  ok('L18 …and the BP reads septic shock: red (MAP < 65)', /\bbad\b/.test(a.bpCls) && a.t.map < 65, a.t.map.toFixed(1));
+  ok('L18 …left alone, the pH falls from 7.18 toward 7.0 as the CO₂ climbs', a.t.ph < 7.08, a.t.ph.toFixed(2));
+
+  a = await S(3, 0); b = await S(3, 0, { mode: 'cpap', ps: 6, peep: 5 });
+  ok('L18 L3S1 weaning: on CPAP/PS 6 the patient holds SpO₂ and their own PaCO₂ (≈ 42)', b.goal && Math.abs(b.t.spo2 - a.t.spo2) < 1 && Math.abs(b.t.paco2 - 42) < 0.5, `${b.t.spo2.toFixed(1)} / ${b.t.paco2.toFixed(1)}`);
+
+  a = await S(3, 1); b = await S(3, 1, { rate: 14 });
+  ok('L18 L3S2 asthma: slowing to 14 cuts the trapping and lifts the BP', b.goal && b.t.peepTotal < a.t.peepTotal - 3 && b.t.map > a.t.map + 2, `${a.t.peepTotal}→${b.t.peepTotal}`);
+  ok('L18 …at the price of permissive hypercapnia', b.t.paco2 > a.t.paco2 + 20, b.t.paco2.toFixed(0));
+
+  a = await S(3, 2); b = await S(3, 2, { peep: 14, fio2: 90 }); c = await S(3, 2, { fio2: 100 });
+  ok('L18 L3S3 severe ARDS: PEEP 14 + FiO₂ 90% reaches the ARDSnet SpO₂ band (≥ 88)', b.goal && b.t.spo2 >= 88, b.t.spo2.toFixed(1));
+  ok('L18 …100% oxygen on PEEP 8 alone falls short of that', c.t.spo2 < b.t.spo2 - 2, c.t.spo2.toFixed(1));
+
+  a = await S(3, 3); b = await S(3, 3, { rate: 20 }); c = await S(3, 3, { rate: 19 }); const d = await S(3, 3, { rate: 23 });
+  ok('L18 L3S4 TBI: the answer (MV 10 L/min) brings EtCO₂ into 30–35', b.goal && b.t.etco2 >= 30 && b.t.etco2 <= 35, b.t.etco2.toFixed(1));
+  ok('L18 …across the whole graded range (9.5–11.5 L/min) PaCO₂ stays 29–36', c.goal && d.goal && c.t.paco2 <= 36 && d.t.paco2 >= 29, `${c.t.paco2.toFixed(1)} … ${d.t.paco2.toFixed(1)}`);
+  ok('L18 …and BP is judged by the Brain Trauma Foundation (SBP ≥ 110), not MAP 65', /Brain Trauma Foundation/.test(a.bpTitle), a.bpTitle);
+
+  const none = await sp.evaluate(() => { startLevel(7); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); return !!document.querySelector('#mission-bar .lv-vitals'); });
+  ok('L18 Level 7 (not asked for) has no lung view', !none);
+  await sp.context().close(); }
+
+console.log('\nL19 usability on a phone: live strip, snapshot label, first button, stable panel');
+{ const up = await (await browser.newContext({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' })).newPage();
+  up.on('pageerror', e => errs.push(String(e)));
+  await up.goto(ORIGIN + '/vent-ltv1200.html');
+  await up.waitForFunction(() => typeof startLevel === 'function');
+  const load = (l, i) => up.evaluate(([l, i]) => { deviceState = 'run'; applyStandbyVisual(); startLevel(l); if (l > 1) { scenarioIdx = i; loadScenario(SCENARIO_LEVELS[l][i]); }
+    document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); window.scrollTo(0, 0); }, [l, i]);
+  // The first button is on the first screen for every card
+  const cards = [[1, 0], [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [3, 0], [3, 1], [3, 2], [3, 3]], below = [];
+  for (const [l, i] of cards) { await load(l, i); await up.waitForTimeout(80);
+    const b = await up.evaluate(() => { const c = document.querySelector('#mission-bar .mission-cta'); return c ? Math.round(c.getBoundingClientRect().bottom) : 0; });
+    if (b > 664) below.push(`L${l}S${i + 1}:${b}`); }
+  ok('L19 on a 390×664 phone every L1–L3 card shows its first button without scrolling', below.length === 0, below.join(' '));
+  // Snapshot label on the scenario monitor, not on Level 7
+  await load(2, 1);
+  ok('L19 a scenario monitor says it is the on-arrival snapshot', await up.evaluate(() => /on arrival/i.test(document.querySelector('#mission-bar .mon-tag')?.textContent || '')));
+  const l7 = await up.evaluate(() => { startLevel(7); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); return !!document.querySelector('#mission-bar .mon-tag'); });
+  ok('L19 …and a Level 7 monitor (no lung view) does not', !l7);
+  // The live strip
+  await load(2, 1); await up.waitForTimeout(400);
+  const top = await up.evaluate(() => { const s = document.querySelector('.lv-strip'); return { show: s.classList.contains('show'), hidden: s.getAttribute('aria-hidden') }; });
+  ok('L19 with the lung view on screen the strip stays hidden (and hidden from screen readers)', !top.show && top.hidden === 'true', JSON.stringify(top));
+  await up.evaluate(() => document.querySelector('#cw-peep').scrollIntoView({ block: 'center' })); await up.waitForTimeout(500);
+  const down = await up.evaluate(() => { const s = document.querySelector('.lv-strip'), r = s.getBoundingClientRect();
+    return { show: s.classList.contains('show'), top: r.top, right: r.right, w: innerWidth, txt: s.textContent,
+             spo2: Math.round(lvVitals.shown.spo2), et: Math.round(lvVitals.shown.etco2), bp: Math.round(lvVitals.shown.sbp) + '/' + Math.round(lvVitals.shown.dbp) }; });
+  ok('L19 down at the controls, the strip shows the live SpO₂, EtCO₂ and BP at the top of the screen', down.show && down.top >= 0 && down.top < 20 && down.right <= down.w
+     && down.txt.includes(down.spo2 + '%') && down.txt.includes(String(down.et)) && down.txt.includes(down.bp), JSON.stringify(down));
+  await up.locator('.lv-strip').click(); await up.waitForTimeout(900);
+  const back = await up.evaluate(() => { const r = document.getElementById('tl-viz').getBoundingClientRect(); return { top: r.top, bottom: r.bottom, show: document.querySelector('.lv-strip').classList.contains('show') }; });
+  ok('L19 tapping the strip brings the lung view back, and the strip goes away', back.top >= 0 && back.bottom <= 664 && !back.show, JSON.stringify(back));
+  // Stable panel height whatever the digits
+  const hts = await up.evaluate(() => { const h = []; for (const [sb, db, sp] of [[99, 60, 85], [138, 86, 100], [72, 41, 9]]) {
+      _lv.vit.sbp = sb; _lv.vit.dbp = db; _lv.vit.map = (sb + 2 * db) / 3; _lv.vit.spo2 = sp; _lv.vitT = simTime; updateLungView();
+      h.push(Math.round(document.getElementById('tl-viz').getBoundingClientRect().height)); } return h; });
+  ok('L19 the panel keeps one height as the numbers change digits', hts.every(x => x === hts[0]), hts.join(', '));
+  // COPD: significant vs residual trapping are worded differently
+  const note = (set) => up.evaluate((set) => { for (const k of Object.keys(set)) vals[k].v = set[k]; enforceITLimit(); updateUI(); updateLungView();
+    const n = document.querySelector('#tl-viz .lv-note'); return { cls: n.className, txt: n.textContent, ap: effectiveAutoPEEP() }; }, set);
+  await load(2, 2);
+  const n0 = await note({}), n1 = await note({ rate: 15, it: 0.65 });
+  ok(`L19 COPD start: auto-PEEP ${n0.ap} (≥ 5) is called out as trapping`, n0.ap >= 5 && /trap\b/.test(n0.cls) && /Not enough time/.test(n0.txt), JSON.stringify(n0));
+  ok(`L19 …after a good fix, auto-PEEP ${n1.ap} (< 5) reads as the usual small residual`, n1.ap < 5 && !/trap\b/.test(n1.cls) && /usual aim/.test(n1.txt), JSON.stringify(n1));
+  // pH colour
+  const ph = await up.evaluate(() => { vals.rate.v = 10; vals.it.v = 0.8; enforceITLimit(); updateUI(); for (let k = 0; k < 400; k++) { simTime += 1000; updateLungView(); }
+    const e = document.querySelector('#tl-viz .lv-ph'); return { cls: e.className, txt: e.textContent }; });
+  ok('L19 a pH under 7.20 shows red', /\bbad\b/.test(ph.cls) && parseFloat(ph.txt.replace('pH', '')) < 7.20, JSON.stringify(ph));
+  // The strip never covers the page header, and leaves no trace when hidden
+  const land = await (await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' })).newPage();
+  await land.goto(ORIGIN + '/vent-ltv1200.html'); await land.waitForFunction(() => typeof startLevel === 'function');
+  const lh = await land.evaluate(async () => { deviceState = 'run'; applyStandbyVisual(); startLevel(2); scenarioIdx = 1; loadScenario(SCENARIO_LEVELS[2][1]);
+    document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); window.scrollTo(0, 0);
+    await new Promise(r => setTimeout(r, 400)); const s = document.querySelector('.lv-strip');
+    return { lungOff: document.querySelector('#tl-viz .lv-vitals').getBoundingClientRect().bottom > innerHeight, show: s.classList.contains('show'), vis: getComputedStyle(s).visibility }; });
+  ok('L19 landscape phone at the top: the vitals are below the fold, but the strip stays off the header', lh.lungOff && !lh.show && lh.vis === 'hidden', JSON.stringify(lh));
+  await land.context().close();
+  // The patient waits while the intro covers the case
+  const ps = await up.evaluate(() => { startLevel(2); scenarioIdx = 4; loadScenario(SCENARIO_LEVELS[2][4]); document.getElementById('intro-overlay').classList.add('open'); renderMissionCard();
+    updateLungView(); const a = lvVitals.shown.paco2; for (let k = 0; k < 60; k++) { simTime += 1000; updateLungView(); } const b = lvVitals.shown.paco2;
+    document.getElementById('intro-overlay').classList.remove('open'); for (let k = 0; k < 60; k++) { simTime += 1000; updateLungView(); } return { a, b, c: lvVitals.shown.paco2 }; });
+  ok('L19 the vitals hold still while the intro is open, and start moving once it closes', Math.abs(ps.b - ps.a) < 0.01 && ps.c > ps.b + 5, JSON.stringify(ps));
+  // Tutorial: one patient across the stages; a misset High Pressure limit hurts them over time
+  const tu = await up.evaluate(() => { startLevel(1); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard();
+    const go = (fix) => { for (const k of Object.keys(fix)) { if (k === 'mode') ventMode = fix[k]; else if (k === 'breathType') breathType = fix[k]; else vals[k].v = fix[k]; } enforceITLimit(); updateUI();
+      for (let i = 0; i < 300; i++) { simTime += 1000; updateLungView(); } const ok = curStage().goal.check(); scenarioDiagnosed = true; advanceStage(); updateLungView(); return ok; };
+    const g1 = go({ rate: 16 }), g2 = go({ it: 1.2 }), g3 = go({ peep: 5, sens: 2 });
+    const enter4 = lvVitals.shown.paco2; for (let i = 0; i < 60; i++) { simTime += 1000; updateLungView(); } const min4 = lvVitals.shown.paco2;
+    const g4 = go({ hipres: Math.round(estPIP() + 8) }), g5 = go({ mode: 'simv', ps: 8 });
+    vals.pc.v = 10; breathType = 'pressure'; updateUI(); for (let i = 0; i < 300; i++) { simTime += 1000; updateLungView(); }
+    return { goals: [g1, g2, g3, g4, g5, curStage().goal.check()], enter4, min4, pc10: { paco2: vitalsTarget().paco2, ph: vitalsTarget().ph, vt: vals.pc.v * lung.compliance }, plat: estPplat() }; });
+  ok('L19 tutorial: each stage\'s answer meets its goal on the healthy-lung patient', tu.goals.every(Boolean), JSON.stringify(tu.goals));
+  ok(`L19 …Stage 4 carries the patient over (PaCO₂ ${tu.enter4.toFixed(0)}) and the misset limit drives it up as it cuts breaths`, tu.enter4 < 45 && tu.min4 > tu.enter4 + 10, `${tu.enter4.toFixed(1)} → ${tu.min4.toFixed(1)}`);
+  ok('L19 …Stage 6: Pressure Control 10 delivers 500 mL and keeps PaCO₂ 35–45', tu.pc10.vt === 500 && tu.pc10.paco2 >= 35 && tu.pc10.paco2 <= 45, JSON.stringify(tu.pc10));
+  await up.context().close(); }
 
 console.log('\nL13 accessible, and fits a phone');
 { const a = await p.evaluate(() => { const st = document.querySelector('#tl-viz .lv-stage');
