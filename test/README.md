@@ -157,7 +157,11 @@ These suites live here:
   screen, the scenario monitor is labelled as the on-arrival snapshot, the
   live vitals strip follows the learner to the controls and taps back to the
   lung, the panel keeps one height as digits change, COPD trapping is worded
-  by size, and a pH under 7.20 shows red.
+  by size, and a pH under 7.20 shows red. It also checks that the strip
+  stays off the header, that the vitals hold still while the intro is open,
+  and that the tutorial keeps one healthy-lung patient across its stages:
+  every stage's answer meets its goal, a misset High Pressure limit drives
+  the CO₂ up, and Pressure Control 10 delivers 500 mL.
 
 - **`ventscenarios.test.mjs`** — the answers the LTV 1200's clinical scenarios
   grade as correct. Each scenario's `goal.check()` is the therapy the

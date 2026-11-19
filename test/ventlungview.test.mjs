@@ -656,6 +656,32 @@ console.log('\nL19 usability on a phone: live strip, snapshot label, first butto
   const ph = await up.evaluate(() => { vals.rate.v = 10; vals.it.v = 0.8; enforceITLimit(); updateUI(); for (let k = 0; k < 400; k++) { simTime += 1000; updateLungView(); }
     const e = document.querySelector('#tl-viz .lv-ph'); return { cls: e.className, txt: e.textContent }; });
   ok('L19 a pH under 7.20 shows red', /\bbad\b/.test(ph.cls) && parseFloat(ph.txt.replace('pH', '')) < 7.20, JSON.stringify(ph));
+  // The strip never covers the page header, and leaves no trace when hidden
+  const land = await (await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' })).newPage();
+  await land.goto(ORIGIN + '/vent-ltv1200.html'); await land.waitForFunction(() => typeof startLevel === 'function');
+  const lh = await land.evaluate(async () => { deviceState = 'run'; applyStandbyVisual(); startLevel(2); scenarioIdx = 1; loadScenario(SCENARIO_LEVELS[2][1]);
+    document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); window.scrollTo(0, 0);
+    await new Promise(r => setTimeout(r, 400)); const s = document.querySelector('.lv-strip');
+    return { lungOff: document.querySelector('#tl-viz .lv-vitals').getBoundingClientRect().bottom > innerHeight, show: s.classList.contains('show'), vis: getComputedStyle(s).visibility }; });
+  ok('L19 landscape phone at the top: the vitals are below the fold, but the strip stays off the header', lh.lungOff && !lh.show && lh.vis === 'hidden', JSON.stringify(lh));
+  await land.context().close();
+  // The patient waits while the intro covers the case
+  const ps = await up.evaluate(() => { startLevel(2); scenarioIdx = 4; loadScenario(SCENARIO_LEVELS[2][4]); document.getElementById('intro-overlay').classList.add('open'); renderMissionCard();
+    updateLungView(); const a = lvVitals.shown.paco2; for (let k = 0; k < 60; k++) { simTime += 1000; updateLungView(); } const b = lvVitals.shown.paco2;
+    document.getElementById('intro-overlay').classList.remove('open'); for (let k = 0; k < 60; k++) { simTime += 1000; updateLungView(); } return { a, b, c: lvVitals.shown.paco2 }; });
+  ok('L19 the vitals hold still while the intro is open, and start moving once it closes', Math.abs(ps.b - ps.a) < 0.01 && ps.c > ps.b + 5, JSON.stringify(ps));
+  // Tutorial: one patient across the stages; a misset High Pressure limit hurts them over time
+  const tu = await up.evaluate(() => { startLevel(1); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard();
+    const go = (fix) => { for (const k of Object.keys(fix)) { if (k === 'mode') ventMode = fix[k]; else if (k === 'breathType') breathType = fix[k]; else vals[k].v = fix[k]; } enforceITLimit(); updateUI();
+      for (let i = 0; i < 300; i++) { simTime += 1000; updateLungView(); } const ok = curStage().goal.check(); scenarioDiagnosed = true; advanceStage(); updateLungView(); return ok; };
+    const g1 = go({ rate: 16 }), g2 = go({ it: 1.2 }), g3 = go({ peep: 5, sens: 2 });
+    const enter4 = lvVitals.shown.paco2; for (let i = 0; i < 60; i++) { simTime += 1000; updateLungView(); } const min4 = lvVitals.shown.paco2;
+    const g4 = go({ hipres: Math.round(estPIP() + 8) }), g5 = go({ mode: 'simv', ps: 8 });
+    vals.pc.v = 10; breathType = 'pressure'; updateUI(); for (let i = 0; i < 300; i++) { simTime += 1000; updateLungView(); }
+    return { goals: [g1, g2, g3, g4, g5, curStage().goal.check()], enter4, min4, pc10: { paco2: vitalsTarget().paco2, ph: vitalsTarget().ph, vt: vals.pc.v * lung.compliance }, plat: estPplat() }; });
+  ok('L19 tutorial: each stage\'s answer meets its goal on the healthy-lung patient', tu.goals.every(Boolean), JSON.stringify(tu.goals));
+  ok(`L19 …Stage 4 carries the patient over (PaCO₂ ${tu.enter4.toFixed(0)}) and the misset limit drives it up as it cuts breaths`, tu.enter4 < 45 && tu.min4 > tu.enter4 + 10, `${tu.enter4.toFixed(1)} → ${tu.min4.toFixed(1)}`);
+  ok('L19 …Stage 6: Pressure Control 10 delivers 500 mL and keeps PaCO₂ 35–45', tu.pc10.vt === 500 && tu.pc10.paco2 >= 35 && tu.pc10.paco2 <= 45, JSON.stringify(tu.pc10));
   await up.context().close(); }
 
 console.log('\nL13 accessible, and fits a phone');

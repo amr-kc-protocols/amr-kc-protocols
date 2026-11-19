@@ -358,9 +358,10 @@ and red below 7.20 or above 7.55: ARDSnet aims for 7.30–7.45, and permissive
 hypercapnia accepts down to 7.20.
 
 **Using it on a phone.** The controls sit well below the lung view, so a
-learner turning a knob can't see the patient. When the lung view scrolls off
+learner turning a knob can't see the patient. When the vitals scroll off
 screen, a small strip with the live SpO₂, EtCO₂ and BP pins to the top of
-the screen; tapping it scrolls back to the lung. On a narrow panel the phase
+the screen; tapping it (a 44 px target) scrolls back to the lung. It never
+covers the page header. On a narrow panel the phase
 label shortens (INSP / EXP) so it shares a line with the volume. BP is a box
 like the others, so the panel keeps one height as digits change. On a
 390 × 664 phone, every Level 1–3 card's first button is on the first screen.
@@ -393,9 +394,32 @@ At 2.6 the lung view called the trapping minor, which contradicted the
 story. Ventilated COPD measures 11.7 ± 4.0 cmH₂O at clinicians' settings (a
 crossover study) and 10.5–13.1 on ZEEP (ERJ 1996).
 
+**The tutorial's patient.** The tutorial used to run on the simulator's
+generic lung (compliance 20, as stiff as ARDS). With live vitals that showed:
+
+- Stage 4's "normal plateau" read 30.
+- Stage 6's Pressure Control 12–20 gave PaCO₂ 100 and a red pH on the right
+  answer.
+
+It now uses the same healthy lung as Free Play (C 50, R 8), and two stages
+were retuned to keep their lessons:
+
+- **Stage 4** starts the High Pressure limit at 15, below this patient's PIP
+  of about 19, so it still fires every breath.
+- **Stage 6** asks for a delivered volume of 6–8 mL/kg (400–600 mL, about PC
+  8–12 on healthy lungs) instead of a fixed PC 12–20. That is the stage's own
+  lesson: in pressure control, watch the delivered volume.
+
+The tutorial keeps one patient across its stages, so a misset High Pressure
+limit in Stage 4 visibly drives the CO₂ up as it cuts breaths.
+
+**Timing.** While the intro card, the level chooser, a victory card or the
+boot screen covers the case, the vitals hold still, so a story's CO₂ doesn't
+climb before the learner has seen it. They keep moving while the learner
+works the Diagnose question, as a real patient would.
+
 Limits: triggered breaths above the set rate aren't counted, and neither is
-heart rate. The tutorial runs on the simulator's generic lung (compliance
-20), which is stiffer than healthy adult lungs (about 50).
+heart rate.
 
 This is a teaching model, and it should be reviewed by the Medical Director
 before it is used to teach.
