@@ -2500,8 +2500,8 @@ const PRACTICE_MISSIONS = [
   { mod: "5", title: "Non-Invasive Setup", sub: "CPAP for the awake CHF patient.", href: "../vent-ltv1200.html?scenario=niv-setup" },
   { mod: "7", title: "Troubleshooting — DOPE", sub: "Disconnect, tension pneumothorax, mainstem: find it, then fix it.", href: "../vent-ltv1200.html?level=7" },
   { mod: "8", title: "Not Every Fight Is a Knob", sub: "Recognize when the fix is a drug, not a setting.", href: "../vent-ltv1200.html?scenario=agitation" },
-  { mod: "9", title: "Advanced Management", sub: "Four advanced multi-parameter cases.", href: "../vent-ltv1200.html?level=3" },
-  { mod: "◆", title: "Clinical Scenarios", sub: "Five graded cases across the course — ARDS, COPD, dyssynchrony & more.", href: "../vent-ltv1200.html?level=2" },
+  { mod: "9", title: "Advanced Management", sub: "Five advanced multi-parameter cases.", href: "../vent-ltv1200.html?level=3" },
+  { mod: "◆", title: "Clinical Scenarios", sub: "Seven graded cases across the course — ARDS, COPD, dyssynchrony, head injury, shock & more.", href: "../vent-ltv1200.html?level=2" },
   { mod: "★", title: "Capstone — The Whole Package", sub: "Severe ARDS to ECMO: everything at once.", href: "../vent-ltv1200.html?scenario=capstone" },
 ];
 
