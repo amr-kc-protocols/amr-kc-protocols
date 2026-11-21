@@ -184,6 +184,15 @@ These suites live here:
   and minute volume < 10; PEEP follows the ARDSnet table for the FiO₂; the
   driving pressure and plateau are recomputed in the test; and every flag
   carries a reason and a source.
+  Goals that teach a limit on the patient are held to it (S10): COPD needs
+  pH ≥ 7.20 as well as I:E ≥ 1:4, status asthmaticus pH ≥ 7.15, and the
+  septic patient a PaCO₂ of 20–28 — with the pH recomputed in the test from
+  the page's PaCO₂, and the old answers that broke those limits (COPD at rate
+  10, asthma at pH 7.0, sepsis at 13.5 L/min) kept as cases that must fail.
+  The diagnosis can't be won by a cue (S11), by the same standard as Chart
+  Rx: the right answer is the longest choice in at most a third of the
+  questions and as long as the wrong ones on average, and on screen the
+  choices come in a random order with the right one landing in every slot.
 
 - **`ventpanel.test.mjs`** — the LTV 1200's panel and level engine
   ([`vent-ltv1200.html`](../vent-ltv1200.html)), one check per bug found and
@@ -202,6 +211,10 @@ These suites live here:
   least 0.3 s to exhale); rounding to the nearest 0.1 s used to break them.
   Every teaching card's range matches its dial, and Control Lock confirms a
   flashing mode preview instead of letting it commit later on a locked panel.
+  On a phone, a met goal reaches the learner at the knob (P13): GOAL MET in
+  the scan window, announced, and a Confirm button on screen while the card's
+  own is out of view — never before the diagnosis or in graded Level 3, and
+  above the knob dock rather than on it.
 
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 

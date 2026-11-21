@@ -575,10 +575,10 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   a = await S(2, 2); b = await S(2, 2, { it: 0.65 }); c = await S(2, 2, { rate: 12 });
   ok('L18 L2S3 COPD: left alone, EtCO₂ keeps climbing past 52', a.t.etco2 > 52.5, a.t.etco2.toFixed(1));
   ok('L18 …shortening Ti to 0.65 (I:E ≥ 1:4) cuts the auto-PEEP and lifts the BP, CO₂ unchanged', b.goal && b.t.peepTotal < a.t.peepTotal && b.t.map > a.t.map && Math.abs(b.t.paco2 - a.t.paco2) < 0.5, `${a.t.peepTotal}→${b.t.peepTotal}, MAP ${a.t.map.toFixed(1)}→${b.t.map.toFixed(1)}`);
-  ok('L18 …dropping the rate to 12 also works but costs CO₂ — permissive hypercapnia', c.goal && c.t.paco2 > a.t.paco2 + 20, c.t.paco2.toFixed(0));
+  ok('L18 …dropping the rate to 12 opens the I:E too, but the CO₂ cost takes pH under 7.20, so the goal says no', !c.goal && c.t.paco2 > a.t.paco2 + 20 && c.t.ph < 7.20, c.t.paco2.toFixed(0) + ' / pH ' + c.t.ph.toFixed(2));
   const e = await S(2, 2, { rate: 15, it: 0.65 }), f = await S(2, 2, { rate: 10, it: 0.8 });
   ok('L18 …a balanced answer (rate 15, Ti 0.65) gets auto-PEEP under 5 and keeps pH ≥ 7.20', e.goal && e.t.peepTotal < 5 && e.t.ph >= 7.20, `${e.t.peepTotal} / pH ${e.t.ph.toFixed(2)}`);
-  ok('L18 …while rate 10 meets the I:E goal but drives pH below 7.20 — the I:E target is only a proxy', f.goal && f.t.ph < 7.20, f.t.ph.toFixed(2));
+  ok('L18 …and rate 10 (I:E 1:6.5) drives pH below 7.20 and fails — the goal grades the patient, not only the I:E', !f.goal && f.t.ph < 7.20, f.t.ph.toFixed(2));
 
   a = await S(2, 3); b = await S(2, 3, { it: 0.8 });
   ok('L18 L2S4 Fighting the Vent: the fix is mechanical — gas exchange barely moves', b.goal && Math.abs(b.t.spo2 - a.t.spo2) < 1 && Math.abs(b.t.paco2 - a.t.paco2) < 1, `${a.t.paco2.toFixed(1)} → ${b.t.paco2.toFixed(1)}`);
@@ -592,9 +592,11 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   a = await S(3, 0); b = await S(3, 0, { mode: 'cpap', ps: 6, peep: 5 });
   ok('L18 L3S1 weaning: on CPAP/PS 6 the patient holds SpO₂ and their own PaCO₂ (≈ 42)', b.goal && Math.abs(b.t.spo2 - a.t.spo2) < 1 && Math.abs(b.t.paco2 - 42) < 0.5, `${b.t.spo2.toFixed(1)} / ${b.t.paco2.toFixed(1)}`);
 
-  a = await S(3, 1); b = await S(3, 1, { rate: 14 });
-  ok('L18 L3S2 asthma: slowing to 14 cuts the trapping and lifts the BP', b.goal && b.t.peepTotal < a.t.peepTotal - 3 && b.t.map > a.t.map + 2, `${a.t.peepTotal}→${b.t.peepTotal}`);
-  ok('L18 …at the price of permissive hypercapnia', b.t.paco2 > a.t.paco2 + 20, b.t.paco2.toFixed(0));
+  a = await S(3, 1); b = await S(3, 1, { rate: 16, it: 0.8 });
+  ok('L18 L3S2 asthma: slowing to 16 with a shorter Ti cuts the trapping and lifts the BP', b.goal && b.t.peepTotal < a.t.peepTotal - 3 && b.t.map > a.t.map + 2, `${a.t.peepTotal}→${b.t.peepTotal}`);
+  ok('L18 …at the price of permissive hypercapnia, within the pH 7.15 floor', b.t.paco2 > a.t.paco2 + 15 && b.t.ph >= 7.15, b.t.paco2.toFixed(0) + ' / pH ' + b.t.ph.toFixed(2));
+  c = await S(3, 1, { rate: 10 });
+  ok('L18 …while slowing to 10 drops the pH under 7.15 and fails', !c.goal && c.t.ph < 7.15, c.t.ph.toFixed(2));
 
   a = await S(3, 2); b = await S(3, 2, { peep: 14, fio2: 90 }); c = await S(3, 2, { fio2: 100 });
   ok('L18 L3S3 severe ARDS: PEEP 14 + FiO₂ 90% reaches the ARDSnet SpO₂ band (≥ 88)', b.goal && b.t.spo2 >= 88, b.t.spo2.toFixed(1));
