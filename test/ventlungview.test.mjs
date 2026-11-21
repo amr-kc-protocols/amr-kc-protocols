@@ -544,7 +544,7 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   const tut2 = await S(1, 0, { rate: 16, vt: 500 });
   ok('L18 …and the tutorial\'s first fix (MV 7–9 L/min) brings PaCO₂ from ' + tut.t.paco2.toFixed(0) + ' to 35–45', tut.t.paco2 > 50 && tut2.t.paco2 >= 35 && tut2.t.paco2 <= 45, tut2.t.paco2.toFixed(1));
 
-  const scen = [[2, 0, 'normal'], [2, 1, 'ards'], [2, 2, 'copd'], [2, 3, 'normal'], [2, 4, 'ards'], [3, 0, 'normal'], [3, 1, 'asthma'], [3, 2, 'ards'], [3, 3, 'normal']];
+  const scen = [[2, 0, 'normal'], [2, 1, 'ards'], [2, 2, 'copd'], [2, 3, 'normal'], [2, 4, 'ards'], [2, 5, 'normal'], [2, 6, 'normal'], [3, 4, 'normal'], [3, 0, 'normal'], [3, 1, 'asthma'], [3, 2, 'ards'], [3, 3, 'normal']];
   for (const [l, i, spr] of scen) {
     const r = await S(l, i);
     const tag = `L${l}S${i + 1}`;
@@ -602,9 +602,11 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   ok('L18 L3S3 severe ARDS: PEEP 14 + FiO₂ 90% reaches the ARDSnet SpO₂ band (≥ 88)', b.goal && b.t.spo2 >= 88, b.t.spo2.toFixed(1));
   ok('L18 …100% oxygen on PEEP 8 alone falls short of that', c.t.spo2 < b.t.spo2 - 2, c.t.spo2.toFixed(1));
 
-  a = await S(3, 3); b = await S(3, 3, { rate: 20 }); c = await S(3, 3, { rate: 19 }); const d = await S(3, 3, { rate: 23 });
+  a = await S(3, 3); b = await S(3, 3, { rate: 20 }); c = await S(3, 3, { rate: 22 }); const d = await S(3, 3, { rate: 24 }), d19 = await S(3, 3, { rate: 19 });
   ok('L18 L3S4 TBI: the answer (MV 10 L/min) brings EtCO₂ into 30–35', b.goal && b.t.etco2 >= 30 && b.t.etco2 <= 35, b.t.etco2.toFixed(1));
-  ok('L18 …across the whole graded range (9.5–11.5 L/min) PaCO₂ stays 29–36', c.goal && d.goal && c.t.paco2 <= 36 && d.t.paco2 >= 29, `${c.t.paco2.toFixed(1)} … ${d.t.paco2.toFixed(1)}`);
+  ok('L18 …the goal is the PaCO₂ itself: rate 22 (≈ 31) passes; rate 19 (≈ 36) and rate 24 (≈ 28, the overshoot) fall outside 30–35 and fail', c.goal && c.t.paco2 >= 29.5 && c.t.paco2 <= 35.5 && !d19.goal && d19.t.paco2 > 35.5 && !d.goal && d.t.paco2 < 29.5, `${d19.t.paco2.toFixed(1)} / ${c.t.paco2.toFixed(1)} / ${d.t.paco2.toFixed(1)}`);
+  const e2 = await S(3, 3, { rate: 26, vt: 400 });
+  ok('L18 …and a small breath at a fast rate (26 × 400, PaCO₂ ≈ 39), which the old minute-volume goal passed, fails', !e2.goal && e2.t.paco2 > 36, e2.t.paco2.toFixed(1));
   ok('L18 …and BP is judged by the Brain Trauma Foundation (SBP ≥ 110), not MAP 65', /Brain Trauma Foundation/.test(a.bpTitle), a.bpTitle);
 
   const none = await sp.evaluate(() => { startLevel(7); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); return !!document.querySelector('#mission-bar .lv-vitals'); });
@@ -703,7 +705,7 @@ console.log('\nL20 the scenario monitor is live: HR, SpO₂ and EtCO₂ follow t
   }, [l, i, set || null, secs || 0]);
   // Every Level 2–3 monitor starts at its story
   const bad = [];
-  for (const [l, n] of [[2, 5], [3, 4]]) for (let i = 0; i < n; i++) {
+  for (const [l, n] of [[2, 7], [3, 5]]) for (let i = 0; i < n; i++) {
     const r = await mon(l, i);
     if (r.story.hr != null && r.a.hr !== r.story.hr) bad.push(`L${l}S${i + 1} HR ${r.a.hr}≠${r.story.hr}`);
     if (r.story.spo2 != null && Math.abs(r.a.spo2 - r.story.spo2) > 1.5) bad.push(`L${l}S${i + 1} SpO₂ ${r.a.spo2}≠${r.story.spo2}`);

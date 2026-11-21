@@ -465,6 +465,53 @@ order each time, and they were rewritten so the right one is the longest in
 only 2 of 24, about as long as the wrong ones on average (each wrong choice is
 a real misconception, not filler).
 
+**The first answer counts.** A wrong pick takes out only that choice and shows
+a hint written for the case, pointing at the reasoning without naming the
+answer; the right answer and the explanation stay hidden until the learner
+finds it. It used to light up the right answer and show the explanation, so the
+retry was a free click. Each case can earn two points, both on the first
+attempt: the diagnosis right first time, and the settings — right on the first
+submission in Level 3 and a shift, or reached without revealing the target in
+Levels 2 and 7. The tutorial and the academy missions score the diagnosis only.
+The score shows on the level's complete card and victory card, and the best is
+kept on the chooser (with the completion, in `localStorage`).
+
+**Level 2 gives the aim, not the numbers.** Its goals (and the one
+Troubleshooting goal with a number in it) say what to achieve — "recruit the
+lung with PEEP, enough to open alveoli, not so much you drop the pressure" —
+and leave the target to the learner. *Show the target numbers* reveals them,
+at the cost of that case's settings point; the met goal and the confirmation
+show them anyway, so the learner leaves knowing what they were. The tutorial
+and the academy missions keep their numbers: they teach rather than test.
+
+**Shift — mixed and timed.** Five cases drawn from Levels 2, 3 and
+Troubleshooting, in a random order, graded like Level 3 (submit, no live
+green, no numbers up front), with three minutes on the clock for each. The
+clock waits while the case intro is up, stops when the case is passed, and
+can be switched off on the chooser (*Shift clock*) for anyone who wants it
+untimed. Out of time, the case scores nothing and the debrief says what it
+needed. Every case gets a new patient, so a remembered setting is not an
+answer:
+
+| What changes | How |
+|---|---|
+| Size | Sex and height (men 165–190 cm, women 160–180 cm) give a new predicted body weight (Devine/ARDSNet: 50 or 45.5 + 0.91 × (cm − 152.4)), about 52–84 kg. A PBW chip shows it |
+| Starting breath | Scaled to keep the case's mL/kg |
+| Lungs | Compliance and resistance each ×0.85–1.15 |
+| CO₂ production | Scaled by weight^0.75 |
+| Goals | Vt limits are per kg of this patient's PBW; minute-volume targets scale by weight^0.75 |
+| Story | Every number the change moves (the starting minute volume, the Vt cap, the height) is rewritten to match; cases whose story says "he" stay male |
+
+Two Troubleshooting cases quote exact pressures in their story (the 33/38
+plateau and peak; the PIP before and after the tube was pulled back), so
+they keep their patient. `test/ventshift.test.mjs` checks that across 30
+seeds no variant of any case starts solved and every one can be solved, and
+that each goal still means the same thing for the new patient. Building those
+checks found that the herniation goal, graded on minute volume, passed
+26 × 400 mL (PaCO₂ settling at 39) and 19 × 600 mL (27): at the same minute
+volume a smaller breath is more dead space. It now grades the PaCO₂ itself,
+30–35.
+
 **Using it on a phone.** The controls sit well below the lung view, so a
 learner turning a knob can't see the patient. When the vitals scroll off
 screen, a small strip with the live SpO₂, EtCO₂ and BP pins to the top of
@@ -481,10 +528,13 @@ like the others, so the panel keeps one height as digits change. On a
 | L2 · COPD trapping | COPD | Shunt 11% plus 28% low V/Q; V̇CO₂ 220 for a patient fighting the vent (estimate). EtCO₂ climbs from 52; pH 7.30 (bicarbonate 32). Auto-PEEP about 8 on the starting settings | Rate 15 with Ti 0.65 gets auto-PEEP under 5 with pH above 7.20. Rate 10 opens the I:E just as well, but the pH falls to about 7.1, so the goal also asks for pH ≥ 7.20 and rate 10 fails |
 | L2 · Fighting the vent | Normal | Shunt 12%; V̇CO₂ 210 | Gas exchange doesn't change; the fix is mechanical |
 | L2 · Septic | ARDS (lung injury: SpO₂ 95 on 60%) | Shunt 25% at PEEP 8; V̇CO₂ 230 (sepsis, estimate); bicarbonate 10 (pH 7.18); BP 90/52, red (septic shock) | Left at 7.2 L/min, PaCO₂ heads to 55 and pH toward 7.0; MV 14+ holds PaCO₂ at 28 or below (Winter's). The goal is graded on that PaCO₂: 20–28 at a Vt ≤ 560 mL, so 12–13.5 L/min (PaCO₂ 29–32) no longer passes |
+| L2 · Over-ventilated head injury | Normal | Healthy lungs at V̇CO₂ 200: the sending rate 24 × 450 mL settles at PaCO₂ 30, EtCO₂ 28, pH 7.49. BP judged by the Brain Trauma Foundation (SBP ≥ 110 at 15–49) | Rate 17–18 (14–15 at 500 mL) settles the EtCO₂ at 35–40, KC protocol V-6's TBI target |
+| L2 · Shock on PEEP 12 | Normal (clear lungs) | Shunt 4%; alveolar dead space 12% (low output widens it: estimate), so EtCO₂ 35 against PaCO₂ 43. BP preset 86/49 at PEEP 5, which the usual PEEP–output curve puts at 82/48 on PEEP 12 | PEEP 3–5 (KC protocol V-6, shock) lifts the MAP only from 59 to 61–63 — the vent stops making it worse; the fix is blood |
 | L3 · Ready to come down | Normal | Shunt 13%; V̇CO₂ 192; own PaCO₂ 42 | On CPAP/PS 5–8 the vitals hold |
 | L3 · Status asthmaticus | Asthma | 25% low V/Q, set above Ballester's 10.5% for an intubated patient (estimate); V̇CO₂ 265 (β-agonists, work of breathing; estimate) | Slowing the rate cuts auto-PEEP and lifts BP; PaCO₂ rises (permissive hypercapnia). The goal holds the pH ≥ 7.15 (this patient's red line): rate 12 at 450 mL (pH ≈ 7.0) fails; rate 16, Ti 0.8, 550 mL (pH 7.18) passes |
 | L3 · Severe ARDS | ARDS | Shunt 45% at PEEP 8, about half recruitable | PEEP 14 + FiO₂ 90% reaches SpO₂ 88+; oxygen alone falls short |
-| L3 · Blown pupil | Normal | V̇CO₂ 225 (estimate) so PaCO₂ is 42 at 8 L/min | MV 10 gives EtCO₂ 30–35. BP is judged by the Brain Trauma Foundation (SBP ≥ 110 at 15–49), not MAP 65 |
+| L3 · Blown pupil | Normal | V̇CO₂ 225 (estimate) so PaCO₂ is 42 at 8 L/min | MV 10 gives EtCO₂ 30–35. BP is judged by the Brain Trauma Foundation (SBP ≥ 110 at 15–49), not MAP 65. The goal grades that PaCO₂ (30–35 once it settles) |
+| L3 · Massive PE | Normal (airspaces clear) | Hypoxemia from V/Q mismatch, low mixed-venous O₂ and a possible PFO lumped as a 37% shunt that PEEP does not recruit, plus 5% low V/Q (estimates); alveolar dead space 30% of the breath (EtCO₂ 24 against PaCO₂ 41); compliance 40 (plateau 31 at 700 mL on PEEP 14); BP preset 91/55 at PEEP 5, 84/52 on PEEP 14 | Low PEEP, 7–8 mL/kg, rate 18–24 and FiO₂ ≥ about 80% settle SpO₂ ≥ 90 and PaCO₂ ≤ 48 (RV-protective thresholds: Mekontso Dessap 2016, extrapolated from ARDS; ESC 2019: low Vt, PEEP with caution). PEEP changes nothing for the SpO₂; a 6 mL/kg breath needs a rate near 34 to hold the CO₂ |
 
 Three story numbers changed so the monitor and the physiology agree:
 
