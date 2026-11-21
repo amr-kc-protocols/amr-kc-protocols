@@ -79,6 +79,30 @@ The two shock answers are told apart the way the real unit tells them apart:
 **whether SYNC was armed when the shock landed.** That is the thing crews get
 wrong, so it is asked of the device rather than accepted as a word.
 
+And a synchronized shock lands on a QRS. SHOCK with SYNC armed is latched and
+delivered on the next complex the detector senses — the same detection that
+flashes the SYNC LED and draws the markers — so on a perfusing tachycardia it
+goes within a fraction of a second, and into asystole it never goes at all. It
+used to fire on the press whatever was on the screen, which let a
+"synchronized" shock be delivered into a flat line.
+
+Because a SHOCK that never fires looks like a broken button, the station says
+why after two seconds: SYNC is waiting for a QRS and the unit is not sensing
+one. That is the station speaking, in the page header, not a message the
+LIFEPAK shows, and it describes what the unit is doing without naming the
+rhythm. Arming SYNC part-way through a charge discards the charge, as it already
+did once the unit was charged. That rule is this page's own and has not been
+checked against the operating instructions, which could not be reached from
+where this was written.
+
+Pacing captures only above the patient's own rate, which is what the RATE card
+tells the crew to do. Paced below it, the normal-sinus item used to "capture"
+and drop from 78 to 60. Pacing a patient who doesn't need it is graded wrong
+whether or not anything captures. Where pacing is the right answer, it isn't
+accepted until it captures. A shock delivered before the rhythm has been named
+is not taken as an answer, and the station says so; one delivered in the pause
+just after naming counts.
+
 `none` is never "do nothing" — it is "nothing electrical", and the reason line
 says what the patient does need instead. A learner who reads "none" and stops
 has taken the wrong lesson from a right answer.
@@ -134,28 +158,47 @@ parts run on different clocks.
 
 So the station's rhythms are summed from parts measured **in seconds** — a P
 wave, a normal QRS-with-T, a ventricular complex — laid on the trace where the
-rhythm puts them, at durations that do not change with the heart rate. What
-changes with the rate is the gap between complexes.
+rhythm puts them. Each complex is two parts on two clocks, because the heart
+runs them that way:
 
-Measuring them turned up a second problem: the normal complex gave the QRS
-nearly half its length, which put a *normal* beat at about 140 ms — already
-wide by the under-120 rule the learner is being taught to apply — and left a
-fast VT barely broader than it. The QRS now takes the first quarter and the
-ST-T the rest, so a narrow complex measures about 75 ms against 165–245 ms for
-the ventricular ones, and the comparison the wide-complex items turn on is
-actually there to be made. That gets each rhythm its
-diagnosis rather than its outline:
+- **The QRS is a fixed width at every rate.** Measured the way a clinician
+  measures it, first deflection to J point, a narrow complex is about 90 ms
+  (86–95 depending on how fine the caliper is), close to the 95 ms mean of the
+  reference population behind the 2009 AHA/ACCF/HRS limit of 110 ms. VT, a
+  paced beat and a ventricular escape are about 175 ms, and a beat conducted
+  with bundle branch block about 130.
+- **The ST-T shortens as the rate rises.** It follows Fridericia,
+  QT = QTc × RR^⅓, around a QTc of 400 ms, so the QT is about 475 ms at 36/min,
+  365 at 78 and 265 at 212. A wide complex keeps a normal JT on top of its
+  wider QRS (about 480 ms at 60/min), which is the relation QT corrections for
+  bundle branch block rest on.
+
+An earlier version of this section put the narrow QRS at "about 75 ms". That
+was the steepest part of the complex only; onset to J it measured 100–109 ms,
+normal but at the top of the range and crowding the wide complexes. Two other
+things measured wrong before they were fixed: the QT was 330–370 ms at every
+rate (so at 212/min each T wave ran into the next QRS), and VT was squeezed
+whole to fit its R-R, so it got narrower as it got faster — 140 ms at 188/min
+against 181 at 146. Now only its repolarisation shortens. That gets each rhythm
+its diagnosis rather than its outline:
 
 - **Atrial flutter** — the flutter waves are their own generator at 300/min and
   run straight through the QRS, so there is no isoelectric baseline anywhere.
   The conduction ratio falls out of the ventricular rate: 150 is 2:1, 100 is
   3:1, without either being written down.
-- **Atrial fibrillation** — no two R-R intervals alike and no pattern to them,
-  from a closed-form sum of incommensurate terms, with the same QRS in every
-  one of them and fibrillatory waves in place of a flat line.
+- **Atrial fibrillation** — no two R-R intervals alike and no pattern to them
+  (coefficient of variation about 0.2), drawn from a fixed pseudo-random table
+  with a soft floor at the AV node's limit. The closed-form jitter it replaced
+  had no floor and conducted beats 219 ms apart in the 164/min item, inside the
+  250 ms range that in AF marks an accessory pathway; the shortest is now about
+  290 ms. Each beat carries the two before it, so an early one no longer cuts
+  the last T wave off. The fibrillatory waves wander between about 340 and
+  550/min at roughly 0.1 mV, in place of a flat line.
 - **Mobitz II** — the P waves march at a fixed P-P whether or not the ventricle
   answers, and the PR on the conducted beats never varies. That constant PR is
-  what separates it from Wenckebach.
+  what separates it from Wenckebach. The conducted beats carry a bundle branch
+  block, as 70–80% of Mobitz II does: the block is below the AV node, which is
+  also why atropine is unreliable for it.
 - **Third-degree block** — the P waves are on their own clock at 76/min and the
   wide escape is on the patient's, fully dissociated. A single repeating
   keyframe cannot show that, and the dissociation is the diagnosis.
@@ -175,6 +218,28 @@ The lead transform is applied to the parts rather than to fixed fractions of
 the cardiac cycle. Applied by phase it cut notches into whatever happened to be
 at that fraction of the R-R — at 32/min, a visible step in the baseline a third
 of the way between escape beats, nowhere near a complex.
+
+**How much of it is on the screen.** The LIFEPAK 15 shows at least five
+seconds of ECG at 25 mm/s, according to its data sheet, so the sweep is set from
+the width of the ECG channel to hold five seconds. It used to run at a fixed
+180 px/s, which showed 1.1 s on an iPhone SE and 1.9 s on an iPhone 14: less than one beat-to-beat interval of
+the 32/min complete heart block, and less than half the Mobitz II's repeating
+group. The sweep never drops below 60 px/s, because at 41 px/s (five seconds on
+an SE's 205 px channel) VT and SVT became the same dense comb. So an SE shows
+3.4 s; every phone from the iPhone 12 size up shows the full five. The grid
+keeps 0.2 s large boxes and drops the small ones when they would be under 4 px
+apart. The capnogram runs at half the ECG's speed, the unit's 12.5 mm/s, which
+is ten seconds of CO₂.
+
+Each pixel column is drawn peak-preserving, from its highest to its lowest
+point across 2 ms samples, the way monitors decimate. With one sample per column
+at a phone's sweep, R waves came out a different height every beat and a 12 ms
+pacing spike could fall between columns.
+
+The unit draws a small noise floor of its own, about 0.02 mV either side of the
+line and all inside its 0.5–40 Hz monitor bandwidth, so asystole is not a
+ruler-straight line. That is the look of a lead that has come off. The noise is
+added on the way to the screen, and the patient's signal stays exact.
 
 ### The boundary
 
