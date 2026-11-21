@@ -951,6 +951,92 @@ for (const [w, h, label, want] of [[667, 375, 'iPhone SE', 'floor'], [844, 390, 
   ok('S20 every R wave on a phone is drawn to the same height', tops.length >= 5 && spread <= 2, `${tops.length} peaks, spread ${spread.toFixed(1)} px`);
   await ctx.close(); }
 
+/* S21 — four smaller defects left after the audit. */
+{ const bank = await (async () => { const q = await fresh();
+    const r = await q.evaluate(() => ITEMS.map((x, i) => ({ i: i + 1, r: x.v.rhythm, hr: x.v.hr, t: x.therapy })));
+    await q.context().close(); return r; })();
+  const ix = f => bank.find(f).i;
+  const toastOf = p => p.evaluate(() => { const t = document.getElementById('fgToast');
+    return { on: t.classList.contains('show'), cls: t.className, txt: t.textContent }; });
+  const name = async p => { await p.evaluate(() => { const nm = RUN.items[RUN.ix].name;
+    [...document.querySelectorAll('#stnOpts .stnb')].find(x => x.textContent.trim() === nm).click(); }); };
+
+  /* SYNC armed mid-charge throws the charge away, as it already did once charged. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'svt' && x.t === 'sync'));
+    await powerUp(p); await nameIt(p);
+    await tap(p, 'kCHARGE', 2000); await tap(p, 'kSYNC', 4500);
+    const r = await p.evaluate(() => ({ charged: D.charged, charging: D.charging, sync: D.sync,
+      why: D.log.filter(e => e.type === 'disarm').map(e => e.detail) }));
+    ok('S21 arming SYNC halfway through a charge discards it, as it does once charged',
+       !r.charged && !r.charging && r.sync && r.why.includes('sync changed'), JSON.stringify(r));
+    await p.context().close(); }
+
+  /* A shock before the rhythm is named is not an answer, and is said not to be. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'vfib'));
+    await powerUp(p);
+    await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 300);
+    const t = await toastOf(p);
+    ok('S21 a shock before naming is not taken as the answer', await p.evaluate(() => RUN.step === 'name' && D.shocks === 1));
+    ok('S21 and the station says so rather than saying nothing', t.on && /not counted/.test(t.txt) && /bad/.test(t.cls), t.txt);
+    await nameIt(p); await deliver(p, 'defib');
+    ok('S21 and the item can still be answered properly after it', (await verdict(p)).good);
+    await p.context().close(); }
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'vfib'));
+    await powerUp(p); await tap(p, 'kCHARGE', 6200);
+    await name(p); await p.waitForTimeout(150); await tap(p, 'kSHOCK', 1500);
+    ok('S21 a shock in the pause after naming is this item\'s therapy, and is graded',
+       await p.evaluate(() => RUN.step === 'done' && RUN.asked === 2) && (await verdict(p)).good);
+    await p.context().close(); }
+
+  /* Pacing below the patient's own rate does not capture. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'nsr'));
+    await powerUp(p); await nameIt(p); await deliver(p, 'pace');
+    const r = await p.evaluate(() => ({ r: S.rhythm, hr: S.hr, cap: captured, rate: D.pacerRate }));
+    ok('S21 pacing a sinus rhythm at 60 does not pull its rate down from 78', r.r === 'nsr' && r.hr === 78 && !r.cap, JSON.stringify(r));
+    ok('S21 and is still graded, as the wrong answer', (await verdict(p)).bad);
+    await p.context().close(); }
+  { const own = bank.find(x => x.r === 'hb2');
+    const p = await fresh(PAGE + '?item=' + own.i);
+    await powerUp(p); await nameIt(p);
+    await tap(p, 'kPACER', 200); await tap(p, 'kRateDn', 150); await tap(p, 'kRateDn', 150);
+    for (let i = 0; i < 8; i++) await tap(p, 'kCurUp', 60);
+    await p.waitForTimeout(300);
+    const below = await p.evaluate(() => ({ rate: D.pacerRate, cap: captured, step: RUN.step }));
+    ok(`S21 Mobitz II at ${own.hr}/min paced at ${below.rate} does not capture, and is not yet an answer`,
+       below.rate <= own.hr && !below.cap && below.step === 'treat', JSON.stringify(below));
+    await tap(p, 'kRateUp', 300);
+    ok('S21 set above the patient\'s own rate it captures, and that is the answer',
+       (await p.evaluate(() => captured && S.hr === D.pacerRate && RUN.step === 'done')) && (await verdict(p)).good);
+    await tap(p, 'kRateDn', 300);
+    ok('S21 and turned back down to it, capture is lost', await p.evaluate(h => !captured && S.rhythm === 'hb2' && S.hr === h, own.hr));
+    await p.context().close(); }
+
+  /* SYNC with nothing to land on says why it is not firing. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'asystole'));
+    await powerUp(p); await nameIt(p);
+    await tap(p, 'kSYNC', 200); await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 800);
+    const early = await toastOf(p);
+    await p.waitForTimeout(1700);
+    const t = await toastOf(p);
+    const place = await p.evaluate(() => ({ toast: document.getElementById('fgToast').getBoundingClientRect().bottom,
+      screen: document.getElementById('screenWrap').getBoundingClientRect().top }));
+    ok('S21 SYNC waiting on asystole is not cued at once — a QRS would have come by now', !early.on, early.txt);
+    ok('S21 but after two seconds the station says the unit is waiting for a QRS', t.on && /waiting for a QRS/.test(t.txt), t.txt);
+    ok('S21 without naming the rhythm', !/asystole/i.test(t.txt));
+    ok('S21 and the cue sits above the screen, not across the rhythm', place.toast <= place.screen, JSON.stringify(place));
+    await p.waitForTimeout(4600);
+    await tap(p, 'kSHOCK', 300);
+    ok('S21 a second press says it again', (await toastOf(p)).on);
+    ok('S21 and nothing was delivered', await p.evaluate(() => D.shocks === 0 && D.charged));
+    await p.context().close(); }
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'svt' && x.t === 'sync'));
+    await powerUp(p); await nameIt(p);
+    await tap(p, 'kSYNC', 200); await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 2600);
+    ok('S21 on a rhythm with a QRS the shock goes and no cue is shown',
+       (await p.evaluate(() => D.shocks === 1)) && !/waiting for a QRS/.test((await toastOf(p)).txt));
+    await p.context().close(); }
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fails.length) { console.log('\nFailures:'); fails.forEach(f => console.log(' - ' + f)); }
 await browser.close(); srv.close();

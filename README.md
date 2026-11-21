@@ -86,6 +86,23 @@ goes within a fraction of a second, and into asystole it never goes at all. It
 used to fire on the press whatever was on the screen, which let a
 "synchronized" shock be delivered into a flat line.
 
+Because a SHOCK that never fires looks like a broken button, the station says
+why after two seconds: SYNC is waiting for a QRS and the unit is not sensing
+one. That is the station speaking, in the page header, not a message the
+LIFEPAK shows, and it describes what the unit is doing without naming the
+rhythm. Arming SYNC part-way through a charge discards the charge, as it already
+did once the unit was charged. That rule is this page's own and has not been
+checked against the operating instructions, which could not be reached from
+where this was written.
+
+Pacing captures only above the patient's own rate, which is what the RATE card
+tells the crew to do. Paced below it, the normal-sinus item used to "capture"
+and drop from 78 to 60. Pacing a patient who doesn't need it is graded wrong
+whether or not anything captures. Where pacing is the right answer, it isn't
+accepted until it captures. A shock delivered before the rhythm has been named
+is not taken as an answer, and the station says so; one delivered in the pause
+just after naming counts.
+
 `none` is never "do nothing" — it is "nothing electrical", and the reason line
 says what the patient does need instead. A learner who reads "none" and stops
 has taken the wrong lesson from a right answer.

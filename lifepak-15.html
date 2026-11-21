@@ -1026,17 +1026,20 @@ body.learn #learnNote{display:block;}
 .dbrow.miss .dbl{color:#dbe2e9;}
 
 /* A toast for things the trainer wants to say without taking the screen */
+/* Over the page header, the one place it covers neither the rhythm (which is
+   the question) nor a therapy key. It used to sit across the top of the ECG. */
 #fgToast{
-  position:fixed;top:calc(var(--hdrh,0px) + 52px);left:50%;transform:translateX(-50%);z-index:110;
-  max-width:min(92vw,520px);padding:9px 15px;border-radius:10px;
+  position:fixed;top:calc(4px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:110;
+  max-width:min(92vw,560px);padding:6px 14px;border-radius:10px;
   background:#12161b;border:1px solid #2f363e;color:#dbe2e9;
-  font:400 13px/1.45 'Arial Narrow',Arial,sans-serif;text-align:center;
+  font:400 12px/1.35 'Arial Narrow',Arial,sans-serif;text-align:center;
   box-shadow:0 8px 28px rgba(0,0,0,.6);
   opacity:0;pointer-events:none;transition:opacity .2s;
 }
 #fgToast.show{opacity:1;}
 #fgToast.good{border-color:#2f6b45;color:#a8ecc4;}
 #fgToast.bad{border-color:#a8341f;color:#ffc0b2;}
+#fgToast.warn{border-color:#8a5a1e;color:#ffc879;}
 
 /* Portrait already covers the unit with #rotate. The overlays are readable in
    portrait — a brief is text — so they sit above it rather than behind it. */
@@ -1724,146 +1727,11 @@ function sL(lut,ph){const f=((ph%1)+1)%1*(LS-1),i=Math.floor(f);return lut[i]*(1
 
 // Keyframes
 const NSR=[[0,.5],[.04,.5],[.058,.52],[.076,.537],[.09,.542],[.104,.537],[.118,.52],[.135,.5],[.162,.5],[.176,.488],[.184,.464],[.191,.498],[.2,.614],[.209,.828],[.214,.906],[.219,.952],[.224,.964],[.229,.924],[.236,.772],[.243,.596],[.249,.468],[.255,.484],[.264,.5],[.31,.5],[.355,.502],[.398,.51],[.436,.524],[.464,.54],[.482,.552],[.498,.556],[.514,.552],[.535,.54],[.56,.524],[.588,.51],[.622,.502],[.68,.5],[1,.5]];
-const TACHY=[[0,.5],[.038,.5],[.054,.516],[.068,.528],[.08,.532],[.092,.527],[.104,.514],[.118,.5],[.138,.5],[.148,.48],[.155,.459],[.161,.494],[.169,.596],[.176,.798],[.181,.9],[.186,.94],[.191,.902],[.198,.748],[.205,.576],[.211,.468],[.218,.486],[.228,.5],[.268,.5],[.298,.503],[.328,.512],[.354,.526],[.374,.538],[.388,.544],[.402,.543],[.418,.534],[.44,.518],[.462,.505],[.5,.5],[1,.5]];
-const BRADY=[[0,.5],[.022,.5],[.04,.514],[.06,.532],[.078,.542],[.096,.534],[.114,.516],[.132,.5],[.172,.5],[.192,.484],[.204,.458],[.212,.496],[.222,.634],[.234,.852],[.24,.924],[.246,.958],[.252,.966],[.258,.882],[.268,.718],[.278,.562],[.286,.464],[.294,.484],[.31,.5],[.375,.5],[.425,.503],[.48,.514],[.53,.534],[.572,.556],[.598,.566],[.622,.562],[.65,.546],[.685,.524],[.722,.506],[.782,.5],[.9,.5],[1,.5]];
-// ── Atrial Fibrillation Keyframes ────────────────────────────────────────────
-// Reference: LITFL AF ECG Library (Oct 2024), Ed Burns & Robert Buttner
-// Key features per LITFL:
-//   - Irregularly irregular ventricular rate (handled by jitter in sEcg)
-//   - NO P waves — replaced by fibrillatory (f) waves
-//   - ABSENCE of isoelectric baseline — continuous chaotic low-amplitude undulation
-//   - Fine fibrillatory waves throughout (amplitude ~0.5mm = ~0.006 normalised)
-//   - Narrow QRS (<120ms) — normal ventricular conduction
-//   - Normal T wave — upright, slightly broad
-//
-// The keyframe encodes ONE beat cycle. The fibrillatory baseline is baked into
-// the baseline segments — continuous irregular small oscillations replace the
-// flat isoelectric line seen in NSR. Amplitude of f-waves: ±0.012 (coarse AF).
-// Irregularity of R-R interval is applied by the jitter multiplier in sEcg().
-const AFIB=[
-  // ── Fibrillatory baseline — coarse f-waves, no isoelectric line ──
-  [0,.502],
-  [.008,.494],[.016,.508],[.024,.497],[.032,.511],[.040,.495],
-  [.048,.507],[.056,.492],[.064,.506],[.072,.496],[.080,.510],
-  [.088,.493],[.096,.508],[.104,.494],[.112,.507],[.120,.496],
-  [.130,.503],[.138,.491],
-  // ── QRS complex — narrow, normal morphology, no preceding P wave ──
-  // Small Q, rapid R upstroke, S notch — QRS < 120ms
-  [.145,.496],[.150,.479],[.155,.461],   // Q wave
-  [.160,.494],[.167,.636],[.174,.812],   // rapid upstroke
-  [.179,.916],[.184,.958],[.188,.976],   // R peak
-  [.192,.954],[.198,.874],[.205,.746],   // descent
-  [.212,.624],[.218,.530],[.223,.470],   // S wave notch
-  [.228,.492],[.234,.504],               // return to baseline
-  // ── Post-QRS fibrillatory baseline — T wave then f-waves resume ──
-  // T wave: upright, slightly broad, normal morphology
-  [.245,.505],[.260,.512],[.278,.524],
-  [.295,.534],[.312,.540],[.328,.538],   // T wave peak
-  [.345,.528],[.364,.514],[.382,.505],
-  // f-waves resume after T wave
-  [.398,.502],[.410,.494],[.422,.508],[.434,.496],[.446,.509],
-  [.458,.493],[.470,.506],[.482,.495],[.494,.508],[.506,.494],
-  [.520,.507],[.534,.493],[.548,.506],[.562,.495],[.578,.508],
-  [.594,.493],[.612,.506],[.632,.494],[.654,.507],[.678,.494],
-  [.704,.507],[.732,.493],[.762,.505],[.795,.495],[.832,.506],
-  [.872,.495],[.916,.504],[.960,.497],[1,.502]
-];
-
-// AF with Rapid Ventricular Response — same f-wave baseline, shorter R-R cycle
-// Rate ~110-160 bpm per LITFL: "AF most commonly associated with ventricular rate ~110-160"
-// QRS is identical — the rate difference is handled by HR slider + jitter
-// This keyframe is compressed to allow more beats per unit time
-const AFIBRVR=[
-  // ── Fibrillatory baseline — slightly coarser f-waves in RVR ──
-  [0,.503],
-  [.008,.493],[.016,.509],[.024,.495],[.032,.510],[.040,.494],
-  [.048,.508],[.056,.493],[.064,.507],[.072,.494],[.080,.509],
-  [.088,.493],[.096,.507],[.104,.494],[.110,.502],[.116,.492],
-  // ── QRS — same narrow morphology as AF ──
-  [.122,.494],[.127,.476],[.132,.456],   // Q
-  [.137,.490],[.143,.628],[.149,.808],   // upstroke
-  [.154,.912],[.158,.954],[.162,.974],   // R peak
-  [.166,.950],[.171,.868],[.177,.738],   // descent
-  [.183,.616],[.189,.524],[.194,.466],   // S notch
-  [.199,.489],[.204,.501],
-  // ── T wave ──
-  [.213,.506],[.226,.514],[.240,.526],
-  [.255,.536],[.268,.542],[.280,.540],   // T peak
-  [.294,.530],[.310,.516],[.326,.505],
-  // ── f-waves resume ──
-  [.340,.502],[.352,.492],[.364,.507],[.376,.493],[.390,.508],
-  [.404,.493],[.418,.506],[.434,.493],[.450,.507],[.468,.493],
-  [.488,.506],[.510,.493],[.534,.506],[.560,.493],[.590,.506],
-  [.624,.493],[.662,.505],[.706,.494],[.758,.505],[.820,.494],
-  [.892,.505],[.960,.495],[1,.503]
-];
-const AFLUTTER=[[0,.516],[.05,.532],[.09,.536],[.12,.522],[.148,.502],[.16,.5],[.178,.516],[.2,.53],[.222,.522],[.24,.504],[.248,.5],[.254,.48],[.26,.456],[.267,.494],[.275,.678],[.283,.866],[.289,.924],[.295,.956],[.301,.912],[.309,.758],[.317,.572],[.323,.464],[.331,.485],[.345,.5],[.37,.516],[.4,.528],[.428,.534],[.45,.526],[.47,.508],[.48,.5],[.51,.514],[.54,.526],[.562,.52],[.58,.506],[.59,.5],[1,.5]];
-const SVT=[[0,.5],[.018,.5],[.026,.484],[.033,.462],[.04,.498],[.048,.672],[.056,.858],[.062,.934],[.068,.952],[.074,.908],[.082,.756],[.09,.574],[.096,.464],[.103,.484],[.114,.5],[.148,.5],[.185,.504],[.215,.514],[.236,.52],[.25,.518],[.262,.508],[.278,.5],[1,.5]];
-const HB1=[[0,.5],[.028,.5],[.046,.513],[.064,.53],[.08,.54],[.096,.532],[.112,.515],[.128,.5],[.168,.5],[.21,.5],[.248,.5],[.26,.484],[.27,.458],[.278,.496],[.288,.634],[.298,.85],[.304,.922],[.31,.956],[.316,.966],[.323,.882],[.332,.718],[.341,.558],[.349,.462],[.357,.482],[.372,.5],[.42,.5],[.462,.504],[.506,.516],[.545,.533],[.572,.548],[.59,.554],[.608,.55],[.632,.536],[.66,.516],[.695,.502],[.74,.5],[1,.5]];
-const HB2N=[[0,.5],[.028,.5],[.046,.513],[.064,.529],[.08,.538],[.094,.53],[.108,.515],[.122,.5],[.158,.5],[.17,.484],[.178,.46],[.186,.496],[.195,.628],[.204,.842],[.21,.914],[.216,.946],[.222,.956],[.229,.87],[.238,.704],[.247,.548],[.255,.462],[.263,.482],[.278,.5],[.322,.5],[.362,.504],[.402,.516],[.436,.532],[.461,.545],[.478,.549],[.495,.545],[.518,.531],[.545,.512],[.578,.502],[.625,.5],[1,.5]];
-const HB2D=[[0,.5],[.055,.5],[.082,.514],[.11,.532],[.135,.542],[.158,.532],[.18,.514],[.202,.5],[1,.5]];
-const HB3=[[0,.5],[.022,.5],[.038,.51],[.054,.524],[.068,.532],[.08,.526],[.092,.512],[.104,.5],[.155,.5],[.18,.5],[.196,.508],[.212,.52],[.224,.524],[.236,.518],[.248,.502],[.26,.5],[.305,.5],[.32,.476],[.334,.442],[.346,.498],[.36,.594],[.375,.734],[.389,.836],[.4,.898],[.414,.88],[.43,.8],[.448,.682],[.464,.564],[.478,.444],[.49,.382],[.502,.358],[.516,.378],[.528,.416],[.542,.455],[.558,.488],[.576,.5],[.614,.5],[.63,.508],[.644,.518],[.656,.522],[.668,.516],[.68,.502],[.692,.5],[1,.5]];
-const VTACH=[[0,.5],[.038,.5],[.058,.558],[.086,.694],[.116,.836],[.14,.926],[.16,.958],[.176,.918],[.196,.798],[.22,.622],[.246,.444],[.266,.352],[.282,.314],[.298,.34],[.318,.396],[.346,.428],[.375,.418],[.404,.388],[.432,.358],[.462,.368],[.492,.396],[.53,.426],[.568,.446],[.624,.466],[.682,.488],[.758,.498],[.9,.5],[1,.5]];
-const VFIB=[[0,.5],[.055,.672],[.11,.81],[.165,.556],[.22,.304],[.275,.222],[.33,.394],[.385,.69],[.44,.814],[.495,.642],[.55,.346],[.605,.186],[.66,.258],[.715,.532],[.77,.774],[.825,.702],[.88,.524],[.94,.488],[1,.5]];
-// ── Inferior STEMI — Lead II ─────────────────────────────────────────────────
-// References: LITFL, SAEM, NIH StatPearls, Thoracic Key (2024)
-// Morphology: upright P → normal PR → PATHOLOGICAL Q wave (>0.04s, deep) →
-//   tall R → J-point elevation → CONCAVE ("smiley face") ST elevation →
-//   HYPERACUTE broad peaked T wave (broader than normal, taller than QRS in acute phase)
-// Note: ST elevation in II is present but III > II (RCA territory hallmark)
-// Concave (not convex/tombstone) morphology per SAEM/Healio references
-const STEMI=[
-  [0,.500],                   // isoelectric baseline
-  [.025,.500],                // flat pre-P segment
-  // ── Normal upright P wave ──
-  [.040,.506],[.052,.518],[.064,.528],[.076,.532],[.088,.526],
-  [.100,.516],[.112,.505],[.124,.500],
-  // ── PR segment — isoelectric ──
-  [.148,.500],
-  // ── Pathological Q wave — wide (>0.04s) and deep (>25% of R) ──
-  [.156,.496],[.162,.484],[.168,.464],[.174,.446],[.180,.462],
-  // ── R wave — tall, rapid upstroke ──
-  [.188,.530],[.196,.680],[.202,.820],[.208,.920],[.212,.964],
-  [.216,.976],[.220,.956],[.228,.880],[.236,.770],[.243,.660],
-  // ── J point — elevated ~2-3mm above baseline ──
-  [.248,.548],
-  // ── ST segment — CONCAVE upward elevation ("smiley face")
-  //    Gradual rise from J-point, plateau, then blends into T wave
-  //    Per SAEM: "concave upwards" is classic inferior STEMI ──
-  [.262,.554],[.278,.560],[.296,.566],[.318,.572],[.342,.576],
-  [.368,.580],[.392,.582],[.414,.580],
-  // ── Hyperacute T wave — broad, peaked, asymmetric
-  //    Upstroke less steep than downstroke, merges with elevated ST
-  //    Taller than normal T, peak stays above ST baseline level ──
-  [.430,.582],[.446,.592],[.462,.612],[.476,.636],[.490,.658],
-  [.502,.674],[.512,.682],[.520,.678],  // T peak
-  [.530,.664],[.542,.640],[.556,.612],[.572,.582],[.590,.560],
-  [.612,.540],[.638,.522],[.668,.510],[.710,.504],[.780,.501],
-  [1,.500]                    // return to baseline
-];
-// ── Junctional Escape Rhythm ──────────────────────────────────────────────────
-// Reference: LITFL (2025) — junctional-escape-rhythm-ecg-library
-// Features: NO visible P wave (retrograde P buried in QRS or absent),
-//   narrow QRS (<120ms), regular rhythm, rate 40-60bpm (at 18bpm = junctional bradycardia)
-//   Isoelectric baseline → absent P → narrow normal QRS → normal T → long pause
-const JUNCTIONAL=[
-  [0,.500],              // isoelectric baseline — no P wave
-  [.025,.500],
-  [.048,.500],           // PR segment absent — no atrial activity visible
-  [.070,.500],
-  // ── Narrow QRS — rapid upstroke, normal duration (<0.12s) ──
-  [.090,.492],[.097,.470],[.103,.454],[.109,.472],  // small q
-  [.116,.534],[.124,.682],[.130,.824],[.136,.916],
-  [.140,.960],[.144,.980],[.148,.958],[.154,.886],
-  [.162,.758],[.170,.618],[.177,.508],[.183,.484],  // S wave notch
-  [.190,.500],
-  // ── Normal T wave — upright, slightly broad ──
-  [.210,.500],[.240,.503],[.272,.512],[.304,.526],
-  [.330,.538],[.350,.544],[.366,.540],[.385,.528],
-  [.408,.512],[.435,.502],[.470,.500],
-  // ── Long isoelectric pause (slow rate) ──
-  [.550,.500],[.700,.500],[.850,.500],[1,.500]
-];
+/* The station's other rhythms used to have one keyframed beat each here, which
+   sEcg stretched to fill the R-R. Every one of them is now composed from the
+   parts below (P wave, QRST, ventricular complex) on its own clocks, so those
+   templates were unreachable and are gone. NSR stays as the fallback for a
+   rhythm name nothing else handles. */
 // ── Arterial Line Waveforms ─────────────────────────────────────────────────
 // References: ChatPPG (2026), NIH StatPearls/NBK556127, ResearchGate fig (2024),
 //   Michard F. J Clin Monit Comput 2024 (PMC11297833)
@@ -2010,9 +1878,7 @@ const VBEAT=[[0,.5],[.04,.472],[.10,.424],[.16,.560],[.24,.800],[.30,.940],
 const P_SEC=0.11;
 
 const L={
-  nsr:mkL(NSR),tachy:mkL(TACHY),brady:mkL(BRADY),afib:mkL(AFIB),afib_rvr:mkL(AFIBRVR),
-  aflutter:mkL(AFLUTTER),svt:mkL(SVT),hb1:mkL(HB1),hb2n:mkL(HB2N),hb2d:mkL(HB2D),
-  hb3:mkL(HB3),vtach:mkL(VTACH),vfib:mkL(VFIB),stemi:mkL(STEMI),junctional:mkL(JUNCTIONAL),
+  nsr:mkL(NSR),
   qrst:mkL(QRST),pw:mkL(PWAVE),vb:mkL(VBEAT),
   art:mkL(ART_NORMAL), artOver:mkL(ART_OVER), artUnder:mkL(ART_UNDER),
   co2:mkL(CO2_KF),co2s:mkL(CO2S_KF),spo2:mkL(SPO2_KF)
@@ -2691,9 +2557,8 @@ function sEcg(t){
     return leadDev(qrsTDev(u,bp)+qrsTDev(u+bp,bp), cfg);
   }
 
-  const lm={aflutter:L.aflutter,vtach:L.vtach,stemi:L.stemi,junctional:L.junctional};
   const ph=((t/bp)%1+1)%1;
-  return applyLeadCfg(sL(lm[r]||L.nsr,ph), ph, cfg);
+  return applyLeadCfg(sL(L.nsr,ph), ph, cfg);
 }
 function sArt(t){
   if(!S.patientConnected) return null;
@@ -3182,7 +3047,7 @@ const D={
   /* SHOCK pressed with SYNC armed: the press is taken and the shock waits for
      the next QRS the detector senses (syncDue is that detection, acted on in
      the next tick). */
-  syncPending:false, syncDue:false,
+  syncPending:false, syncDue:false, syncPressedAt:0, syncCued:false,
   pacer:false, pacerRate:60, pacerMa:0, pacePaused:false,   // 60 PPM is the unit's factory default
   alarms:true, silenceUntil:0,
   sunvue:false,
@@ -3235,7 +3100,7 @@ function resetDevice(){
   printerRun(false); closeMenu(); clearHomeSel();
   D.energyIx=ENERGIES.indexOf(200);
   D.shocks=0; D.lastShockAt=0;
-  D.sync=false; D.syncPending=false; D.syncDue=false; D.cpr=false;
+  D.sync=false; D.syncPending=false; D.syncDue=false; D.syncCued=false; D.cpr=false;
   D.analyzing=false; D.analyzeUntil=0; D.advisory=''; D.reanalyzeAt=0;
   aedReset();                               // AED/SYNC state machine to MANUAL_IDLE
   D.pacer=false; D.pacerRate=60; D.pacerMa=0; D.pacePaused=false;
@@ -3448,7 +3313,7 @@ function invalidateCanvases(){
 function disarm(reason){
   if(!D.charging&&!D.charged) return;
   D.charging=false; D.charged=false; D.disarmAt=0;
-  D.syncPending=false; D.syncDue=false;
+  D.syncPending=false; D.syncDue=false; D.syncCued=false;
   chargeTone(false); readyTone(false);
   if(reason) logEvent('disarm','Disarmed',reason);
   banner(null);
@@ -3478,8 +3343,14 @@ function chargeDone(){
    With no QRS to find it does not deliver, as the unit does not. */
 function deliverShock(onQrs){
   if(!D.charged) return;
-  if(D.sync&&!onQrs){ D.syncPending=true; return; }
-  D.syncPending=false; D.syncDue=false;
+  if(D.sync&&!onQrs){
+    // A second press on a shock that is already waiting is a crew who think
+    // the button has failed, so the cue answers it at once.
+    if(D.syncPending&&D.syncCued&&typeof syncWaitCue==='function') syncWaitCue();
+    if(!D.syncPending){ D.syncPending=true; D.syncPressedAt=Date.now(); D.syncCued=false; }
+    return;
+  }
+  D.syncPending=false; D.syncDue=false; D.syncCued=false;
   const wasSync=D.sync;
   D.shocks++; D.lastShockAt=Date.now();
   // Shock, then two minutes of CPR, then the unit asks for another rhythm check.
@@ -3878,8 +3749,11 @@ bind('kSYNC',()=>{ if(!D.on) return;
     return;
   }
   D.sync=!D.sync;
-  if(!D.sync){ D.syncPending=false; D.syncDue=false; }   // a waiting sync shock is not an unsynchronized one
-  if(D.sync&&D.charged) disarm('sync changed');
+  if(!D.sync){ D.syncPending=false; D.syncDue=false; D.syncCued=false; }   // a waiting sync shock is not an unsynchronized one
+  /* Arming SYNC throws away a charge taken without it — mid-charge as well
+     as once charged. Only the charged case was covered, so a charge started
+     unsynchronized and armed halfway through came out ready to cardiovert. */
+  if(D.sync&&(D.charged||D.charging)) disarm('sync changed');
   logEvent('sync',D.sync?'SYNC ON':'SYNC OFF',''); });
 
 function nudgeEnergy(d){
@@ -4060,6 +3934,13 @@ function devTick(){
   if(D.charged&&D.disarmAt&&now>=D.disarmAt) disarm('60s without a shock');
   // Sensed on last frame's samples; delivered here rather than mid-draw.
   if(D.syncDue){ D.syncDue=false; if(D.syncPending&&D.sync&&D.charged) deliverShock(true); }
+  /* Two seconds latched with nothing sensed. On any rhythm with a QRS the shock
+     has gone long before this; on one without, the unit will wait for good,
+     as it should, and the station says why rather than leave it looking like
+     a dead button. Said once; a second press says it again. */
+  if(D.syncPending&&!D.syncCued&&now-D.syncPressedAt>=2000){
+    D.syncCued=true; if(typeof syncWaitCue==='function') syncWaitCue();
+  }
   if(D.analyzing&&now>=D.analyzeUntil) finishAnalyze();
   if(D.banner&&D.bannerUntil&&now>=D.bannerUntil) banner(null);
   if(D.alarms&&D.silenceUntil&&now>=D.silenceUntil) D.silenceUntil=0;
@@ -4277,6 +4158,14 @@ function toggleSound(){
 }
 (function(){ const b=document.getElementById('btnSound');
   if(b) b.textContent=soundOn?'🔊':'🔇'; })();
+
+/* SYNC armed, SHOCK pressed, and no QRS to land on. The station's voice, not
+   the unit's: the LIFEPAK shows no such message, it simply does not fire.
+   Worded as what the unit is doing, not as a diagnosis, so it explains the
+   silence without naming the rhythm. */
+function syncWaitCue(){
+  toast('SYNC is waiting for a QRS to shock on. The unit is not sensing one, so it will not fire.','warn',4200);
+}
 
 let toastTimer=null;
 function toast(msg,kind,ms){
@@ -4659,6 +4548,7 @@ function answerName(btn){
   const picked=btn.textContent.trim();
   const right=picked===it.name;
   RUN.asked++;
+  RUN.named=RUN.ix;
   document.querySelectorAll('#stnOpts .stnb').forEach(b=>{
     b.disabled=true;
     if(b.textContent.trim()===it.name) b.classList.add('reveal');
@@ -4722,6 +4612,15 @@ function trainerEvent(ev){
   }
   // Powering down stops the pacer without a pacer key, so it is asked too.
   if(/^pacer/.test(ev.type)||ev.type==='power') paceCheck();
+  /* A shock while the naming question is still up. Once the rhythm has been
+     named it is this item's therapy arriving in the pause before the therapy
+     question, so it counts. Before that, the station asks its two questions
+     in order and does not take it as an answer — but it says so. It used to
+     vanish: the charge spent, the shock counted on the unit, and nothing. */
+  if(ev.type==='shock'&&RUN.step==='name'){
+    if(RUN.named===RUN.ix){ RUN.step='treat'; render(); }
+    else { toast('That shock was not counted — name the rhythm first, then treat it.','bad',3600); return; }
+  }
   if(RUN.step!=='treat') return;
   if(ev.type==='shock'){
     answerTherapy(/synchronized/.test(ev.detail||'')?'sync':'defib',ev.detail);
@@ -4755,29 +4654,39 @@ function paceCheck(){
      complexes running at the old rate under spikes at the new one, and on the
      screen with no pacer at all. */
   const grading=RUN.step==='treat';
+  const it=RUN.items[RUN.ix];
   const under=paceUnder||{rhythm:S.rhythm,hr:S.hr,sbp:S.sbp,dbp:S.dbp,spo2:S.spo2,etco2:S.etco2};
   const want=D.on&&D.pacer&&!D.pacePaused&&D.pacerMa>=PACE_THRESHOLD&&D.pacerRate>=40;
+  /* A heart that can answer, and a circulation to show it. PEA can take the
+     impulse electrically but gets no pressure from it, and showing one
+     contradicted the verdict sitting under it. */
+  const canAnswer=PACE_RESPONSIVE.includes(under.rhythm)&&under.sbp>0;
+  /* And a rate above the patient's own. Paced below it, the heart is already
+     beating faster than the pacer asks: the normal sinus item "captured" at
+     60 and the screen showed its rate fall from 78. It is also what the
+     RATE card tells the crew to do. */
+  const capture=want&&canAnswer&&D.pacerRate>under.hr;
 
-  if(want&&!captured){
-    /* Pacing something that cannot answer is still an answer, and it is the
-       wrong one, so it is graded rather than ignored. That includes PEA: an
-       organised rhythm with no pulse may take the impulse electrically, but
-       it gets no pressure from it, and showing one contradicted the verdict
-       sitting under it. */
-    if(!PACE_RESPONSIVE.includes(under.rhythm)||!(under.sbp>0)){
-      if(grading) answerTherapy('pace');
-      return;
-    }
+  if(capture&&!captured){
     paceUnder=under; captured=true;
     setPatient(pacedVitals(under));
     banner('CAPTURE  '+D.pacerRate+' ppm',2600);
     if(grading) answerTherapy('pace');
-  }else if(want&&captured){
+  }else if(capture&&captured){
     if(S.hr!==D.pacerRate) setPatient(pacedVitals(paceUnder));
-  }else if(!want&&captured){
+  }else if(!capture&&captured){
+    // Paused, switched off, current below threshold, or the rate turned down
+    // to the patient's own: the patient goes back to what is underneath.
     captured=false;
     setPatient({rhythm:paceUnder.rhythm,hr:paceUnder.hr,sbp:paceUnder.sbp,
       dbp:paceUnder.dbp,spo2:paceUnder.spo2,etco2:paceUnder.etco2});
+  }else if(want&&grading&&(!canAnswer||it.therapy!=='pace')){
+    /* Pacing a patient who does not need it, or one it cannot help, is still
+       an answer and the wrong one, so it is graded rather than ignored —
+       whether or not anything captured. Where pacing is the right answer, it
+       is not taken until it captures: the rate still has to go above the
+       patient's own. */
+    answerTherapy('pace');
   }
 }
 
