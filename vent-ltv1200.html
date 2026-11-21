@@ -939,19 +939,6 @@ canvas#pip-canvas{display:none}
 .boot-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#c2410c,#ffb020);border-radius:4px;transition:width 0.2s linear}
 .boot-title{font-size:11px;font-weight:700;letter-spacing:0.14em;color:var(--purple-dark);text-transform:uppercase;margin-bottom:6px}
 .boot-msg{font-size:13px;color:#2c3242;line-height:1.55;margin-bottom:16px}
-.boot-btns{display:flex;flex-direction:column;gap:9px}
-.boot-btn{width:100%;padding:13px;border:none;border-radius:11px;font-size:14px;font-weight:700;
-  letter-spacing:0.02em;cursor:pointer}
-.boot-btn.primary{background:linear-gradient(180deg,#2f6fed,#1d4ed8);color:#fff;box-shadow:0 4px 14px rgba(29,78,216,0.4)}
-.boot-btn.ghost{background:var(--panel);border:1.5px solid var(--border);color:var(--text)}
-.boot-btn:active{transform:scale(0.98)}
-.boot-preset-row{display:flex;gap:8px}
-.boot-preset{flex:1;padding:12px 6px;border-radius:11px;border:1.5px solid var(--border);background:#fff;
-  cursor:pointer;transition:all 0.15s}
-.boot-preset:active{transform:scale(0.96)}
-.boot-preset.sel{border-color:var(--blue);background:#eaf1fd}
-.boot-preset-name{font-size:12px;font-weight:700;color:var(--text)}
-.boot-preset-wt{font-size:9px;color:var(--sub);margin-top:2px}
 
 /* Standby scrim over the panel while device is off */
 .panel.standby{position:relative}
@@ -1072,7 +1059,7 @@ canvas#pip-canvas{display:none}
   <div class="power-card">
     <div class="power-card-kicker">LTV® 1200 · Transport Ventilator</div>
     <div class="power-card-title">Ventilator is in Standby</div>
-    <div class="power-card-sub">The panel below is dark because the vent is off — exactly like the real unit.<br>Power it up to run the self-test and set up your patient.</div>
+    <div class="power-card-sub">The panel below is dark because the vent is off — exactly like the real unit.<br>Power it up to run the self-test.</div>
     <button class="power-card-btn" onclick="powerOn()"><span class="power-card-ico">⏻</span> POWER ON</button>
   </div>
 
@@ -1951,22 +1938,14 @@ function pressMonitor(){
 }
 function updateMonitorLamp(){ var b=document.getElementById('btn-monitor'); if(b) b.classList.toggle('on',scanMode==='halt'); }
 
-// ── POWER-ON SEQUENCE: POST → PATIENT QUERY → RUN ─────────────
-var _bootThen=null, _pendingPreset=null;
-var PRESETS={   // factory presets from the LTV 1200/1150 Quick Reference Guide
-  adult:    {mode:'ac',bt:'volume',  rate:12,vt:500,it:1.0,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:40,lowpres:10,lowmv:3,apnea:20},
-  pediatric:{mode:'ac',bt:'pressure',rate:15,vt:250,it:0.7,pc:15,ps:10,peep:0,fio2:40,sens:3,hipres:30,lowpres:10,lowmv:1,apnea:20},
-  infant:   {mode:'ac',bt:'pressure',rate:20,vt:50, it:0.3,pc:15,ps:10,peep:0,fio2:40,sens:2,hipres:30,lowpres:10,lowmv:0.5,apnea:20}
-};
-function applyPreset(name){
-  var p=PRESETS[name]; if(!p) return;
-  ventMode=p.mode; breathType=p.bt;
-  var keys=['rate','vt','it','pc','ps','peep','fio2','sens','hipres','lowpres','lowmv','apnea'];
-  keys.forEach(function(k){ if(p[k]!==undefined) vals[k].v=p[k]; });
-  enforceITLimit(); keys.forEach(updateKnob);
-  simTime=0; pressureHistory=[]; resetMeasuredPIP(); updateUI();
-}
-var _booting=false;   // POST / patient query on screen: a second press must not start another
+// ── POWER-ON SEQUENCE: POST → RUN ─────────────────────────────
+// The real LTV follows its self-test with SAME PATIENT? (resume the last
+// settings, or load presets by size). In the game every tutorial stage, case
+// and test lung loads its own settings, so the answer never mattered: the
+// question is gone, and How to Use says what the real unit asks (KC protocol
+// V-6: NEW PATIENT for a new setup, SAME PATIENT to resume).
+var _bootThen=null;
+var _booting=false;   // self-test on screen: a second press must not start another
 function powerOnSequence(then){
   if(_booting) return;
   _booting=true; _bootThen=then||null; try{getAC();}catch(_){}; runPOST();
@@ -1974,7 +1953,7 @@ function powerOnSequence(then){
 function powerOn(){ if(deviceState==='standby') powerOnSequence(openLevelSelect); }
 function runPOST(){
   var ov=document.getElementById('boot-overlay'), card=document.getElementById('boot-card');
-  if(!ov||!card){ patientQuery(); return; }
+  if(!ov||!card){ finishBoot(); return; }
   ov.classList.add('open');
   card.innerHTML='<div class="boot-title">Power-On Self Test</div>'
     +'<div class="boot-lcd"><div class="boot-lcd-line" id="post-line">LTV® 1200</div>'
@@ -1985,7 +1964,7 @@ function runPOST(){
   var steps=[['SELF TEST…','CHECK SENSORS'],['XDCR AUTOZERO','FLOW / PRESSURE'],['POST','ALARMS OK'],['POST PASS','READY']];
   var i=0, fill=document.getElementById('post-fill');
   (function tick(){
-    if(i>=steps.length){ patientQuery(); return; }
+    if(i>=steps.length){ finishBoot(); return; }
     var line=document.getElementById('post-line'), sub=document.getElementById('post-sub');
     if(line) line.textContent=(i===steps.length-1)?'POST PASS':'LTV® 1200';
     if(sub) sub.textContent=steps[i][0]+' · '+steps[i][1];
@@ -1993,46 +1972,9 @@ function runPOST(){
     i++; setTimeout(tick,600);
   })();
 }
-function patientQuery(){
-  var card=document.getElementById('boot-card'); if(!card){ finishBoot(); return; }
-  card.innerHTML='<div class="boot-title">Patient Query</div>'
-    +'<div class="boot-lcd"><div class="boot-lcd-line">SAME PATIENT?</div>'
-    +'<div class="boot-lcd-sub">Resume last settings, or set up a new patient</div></div>'
-    +'<div class="boot-msg">The ventilator has powered up. Continue with the settings from the last power cycle, or load factory presets for a new patient.</div>'
-    +'<div class="boot-btns">'
-    +'<button class="boot-btn primary" onclick="samePatient()">SAME PATIENT — resume settings</button>'
-    +'<button class="boot-btn ghost" onclick="newPatient()">NEW PATIENT — load presets</button></div>';
-}
-function samePatient(){ finishBoot(); }
-function newPatient(){
-  var card=document.getElementById('boot-card'); if(!card){ finishBoot(); return; }
-  card.innerHTML='<div class="boot-title">New Patient — Select Type</div>'
-    +'<div class="boot-lcd"><div class="boot-lcd-line">SELECT PATIENT</div>'
-    +'<div class="boot-lcd-sub">Preset values load by patient size (LTV QRG)</div></div>'
-    +'<div class="boot-msg">Choose the patient category to load the factory presets, then reassess every setting before use.</div>'
-    +'<div class="boot-preset-row" role="radiogroup" aria-label="Patient type preset">'
-    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Infant preset, 5 to 10 kilograms" onclick="pickPreset(this,\'infant\')"><div class="boot-preset-name">INFANT</div><div class="boot-preset-wt">5–10 kg</div></div>'
-    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Pediatric preset, 10 to 40 kilograms" onclick="pickPreset(this,\'pediatric\')"><div class="boot-preset-name">PEDIATRIC</div><div class="boot-preset-wt">10–40 kg</div></div>'
-    +'<div class="boot-preset" role="radio" tabindex="0" aria-checked="false" aria-label="Adult preset, over 40 kilograms" onclick="pickPreset(this,\'adult\')"><div class="boot-preset-name">ADULT</div><div class="boot-preset-wt">&gt; 40 kg</div></div>'
-    +'</div>'
-    +'<div class="boot-btns" style="margin-top:14px"><button class="boot-btn primary" id="preset-go" style="opacity:0.5;pointer-events:none" onclick="confirmPreset()">SELECT</button></div>';
-}
-function pickPreset(el,name){
-  _pendingPreset=name;
-  document.querySelectorAll('.boot-preset').forEach(function(p){ p.classList.remove('sel'); p.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  var go=document.getElementById('preset-go'); if(go){ go.style.opacity='1'; go.style.pointerEvents='auto'; }
-}
-function confirmPreset(){ if(_pendingPreset) applyPreset(_pendingPreset); finishBoot(); }
 function finishBoot(){
   var ov=document.getElementById('boot-overlay'); if(ov) ov.classList.remove('open');
-  // Neutralize the preset SELECT button: pickPreset() gives it an inline
-  // pointer-events:auto that would otherwise survive the overlay closing
-  // (a descendant with :auto still receives clicks under a parent set to
-  // :none), leaving an invisible button clickable over the scenario intro.
-  var go=document.getElementById('preset-go');
-  if(go){ go.style.pointerEvents='none'; go.style.opacity='0.5'; }
-  _pendingPreset=null; _booting=false;
+  _booting=false;
   deviceState='run'; applyStandbyVisual(); updateUI();
   if(_bootThen){ var f=_bootThen; _bootThen=null; f(); }
 }
@@ -2816,7 +2758,7 @@ var CONTROLS={
     pearl:'Silence ≠ resolved. Never silence and walk away. Document alarm, cause, and intervention.'
   },
   grammar:{tag:'button',tagCls:'tag-button',title:'How to Use This Panel',range:'Same workflow as the real LTV 1200',
-    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — trace a circle on it with your finger (clockwise = increase, like the real dial), scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons, just like the real LTV: press once and the next option\'s lamp <strong>flashes</strong> (pending — not yet applied); press again to move the flash along (Assist/Control → SIMV → CPAP → NPPV, or Volume ↔ Pressure); when the one you want is flashing, <strong>press it once more to confirm</strong> (or just start setting another control and it locks in). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (POST → Patient Query); hold 3 seconds to power down. <br><br>Long-press any control to open its clinical teaching card.',
+    desc:'This simulator behaves like the real device so the skills transfer. <strong>To change any setting: 1) press the control to select it</strong> (its window brightens, the rest dim), <strong>2) turn the Set Value knob</strong> — trace a circle on it with your finger (clockwise = increase, like the real dial), scroll, or use arrow keys — to change the value, <strong>3) confirm</strong> by pressing the control again, selecting another, pressing Control Lock, or just waiting 5 seconds. <br><br><strong>Mode &amp; Breath Type</strong> use the two <strong>Select</strong> buttons, just like the real LTV: press once and the next option\'s lamp <strong>flashes</strong> (pending — not yet applied); press again to move the flash along (Assist/Control → SIMV → CPAP → NPPV, or Volume ↔ Pressure); when the one you want is flashing, <strong>press it once more to confirm</strong> (or just start setting another control and it locks in). <br><br><strong>Display window</strong>: one window scans the monitored data (PIP, MAP, PEEP, f, Vte, VE, I:E). Press <strong>Monitor Select</strong> once to halt on a value, again to step, or twice quickly to resume scanning. Alarm messages and the Vcalc peak-flow appear here too. <br><br><strong>Control Lock</strong>: press to lock the panel; press again to unlock (if a control flashes <strong>LOCKED</strong>, this is why). <br><br><strong>Power</strong>: On/Standby powers up (a self-test, then the level menu); hold 3 seconds to power down. The real LTV also asks <strong>SAME PATIENT?</strong> after its self-test: choose NEW PATIENT for a new setup, SAME PATIENT to resume the last settings (KC protocol V-6). <br><br>Long-press any control to open its clinical teaching card.',
     avail:[{mode:'Fidelity note',yes:true,note:'The real LTV 1200 has no +/- buttons — every setting is made by selecting the control and turning the single Set Value knob. Practicing that here builds the muscle memory you\'ll use on the actual device.'}],
     pearl:'Select → Turn → Confirm. If nothing happens when you turn the knob, you haven\'t selected a control yet — press the control first.'
   },
@@ -3829,15 +3771,15 @@ function levelCount(n){ var sc=SCENARIO_LEVELS[n]; return sc?sc.length:0; }
 // array to SCENARIO_LEVELS — the badge, the completion card, the victory
 // overlay and the chooser all read from this.
 var LEVEL_META={
-  1:{ label:'Level 1', unit:'Stage', icon:'\ud83c\udf93', color:'var(--blue)',   glow:'vc-glow-blue',
-      done:'All controls unlocked. Ready for clinical scenarios?', next:2 },
+  1:{ label:'Tutorial', unit:'Stage', icon:'\ud83c\udf93', color:'var(--blue)',   glow:'vc-glow-blue',
+      done:'All controls unlocked. Ready for the scenarios?', next:8 },
   2:{ label:'Level 2', unit:'Scenario', icon:'\u2b50', color:'var(--orange)', glow:'vc-glow-orange',
-      done:'clinical scenarios solved.', next:3 },
+      done:'clinical scenarios solved.', next:8 },
   3:{ label:'Level 3', unit:'Scenario', icon:'\ud83c\udfc6', color:'var(--alarm)',  glow:'vc-glow-red',
-      done:'advanced cases solved.', next:7 },
+      done:'advanced cases solved.', next:8 },
   7:{ label:'Troubleshooting', unit:'Case', icon:'\ud83e\uddf0', color:'var(--purple-dark)', glow:'vc-glow-purple',
-      done:'failures found and fixed.', next:0 },
-  8:{ label:'Shift', unit:'Case', icon:'\ud83d\ude91', color:'var(--purple-dark)', glow:'vc-glow-purple',
+      done:'failures found and fixed.', next:8 },
+  8:{ label:'Scenarios', unit:'Case', icon:'\ud83d\ude91', color:'var(--purple-dark)', glow:'vc-glow-purple',
       done:'cases worked.', next:0 }
 };
 function levelMeta(n){ return LEVEL_META[n]||LEVEL_META[2]; }
@@ -4267,7 +4209,7 @@ function renderTestLung(bar){
   var items=tlAssess();
   bar.innerHTML=
      '<button class="scen-back-btn" onclick="openLevelSelect()">‹ Level Select</button>'
-    +'<div class="scen-header"><div class="mission-stage">Free Play · Test Lung</div>'
+    +'<div class="scen-header"><div class="mission-stage">Sandbox · Test Lung</div>'
     +'<span class="scen-badge tl-badge">SANDBOX</span></div>'
     +'<div class="scen-text">Pick a lung and dial any settings. Each lung has its own mechanics, and every reading is graded against the evidence for <em>that</em> lung.</div>'
     +_tlLungRow('Adult', false)
@@ -4316,18 +4258,18 @@ function renderMissionCard(){
         +'<div class="lc-score">'+(levelScore().dx?'✓ Diagnosed right on the first try.':'Diagnosis took more than one try — worth another run.')+'</div>'
         +'<div class="lc-btns">'
         +'<button class="lc-btn lc-btn-next" onclick="location.href=\'vta/academy.html\'">← Back to Academy</button>'
-        +'<button class="lc-btn lc-btn-sel" onclick="startFree()">Free Play</button>'
+        +'<button class="lc-btn lc-btn-sel" onclick="startFree()">Sandbox</button>'
         +'</div></div>';
       return;
     }
     if(gameLevel===1){
       bar.innerHTML='<div class="lc-wrap">'
         +'<div class="lc-icon">🎓</div>'
-        +'<div class="lc-title" style="color:var(--blue)">Level 1 Complete</div>'
+        +'<div class="lc-title" style="color:var(--blue)">Tutorial Complete</div>'
         +'<div class="lc-sub">All controls unlocked. Ready for clinical scenarios?</div>'
         +'<div class="lc-score">'+scoreLine(levelScore())+'</div>'
         +'<div class="lc-btns">'
-        +'<button class="lc-btn lc-btn-next" onclick="startLevel(2)">Level 2 →</button>'
+        +'<button class="lc-btn lc-btn-next" onclick="startShift()">Scenarios →</button>'
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
         +'</div></div>';
     } else {
@@ -4338,7 +4280,7 @@ function renderMissionCard(){
         +'<div class="lc-sub">All '+levelCount(gameLevel)+' '+m.done+'</div>'
         +'<div class="lc-score">'+scoreLine(levelScore())+shiftTimeLine()+'</div>'
         +'<div class="lc-btns">'
-        +(gameLevel===8?'<button class="lc-btn lc-btn-next" onclick="startShift()">Another shift →</button>'
+        +(gameLevel===8?'<button class="lc-btn lc-btn-next" onclick="startShift()">Five more cases →</button>'
           :(nx?'<button class="lc-btn lc-btn-next" onclick="startLevel('+m.next+')">'+nx.label+' →</button>':''))
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
         +'</div></div>';
@@ -4509,7 +4451,7 @@ function showIntro(sc){
   var ov=document.getElementById('intro-overlay'), card=document.getElementById('intro-card');
   if(!ov||!card) return;
   var isTut=gameLevel===1;
-  var kicker=isTut?'Training · Setup':(academyMode?'Academy · Practice':(gameLevel===8?'Shift · On the clock':(gameLevel===3?'Incoming · Advanced':'Incoming · Clinical')));
+  var kicker=isTut?'Training · Setup':(academyMode?'Academy · Practice':(gameLevel===8?((shift&&shift.clock)?'Scenario · On the clock':'Scenario'):(gameLevel===3?'Incoming · Advanced':'Incoming · Clinical')));
   var narr=sc.intro||sc.scenario;
   // The Assess→Diagnose→Set→Confirm strip is orientation, not content: it only
   // earns its space the first time a learner meets the format. Show it when
@@ -4707,8 +4649,8 @@ function startAutoProgress(){
   function tick(){
     var msg=document.getElementById('auto-progress-msg');
     if(!msg){ _autoTimer=null; return; }
-    if(secs<=0){ startLevel(2); return; }
-    msg.textContent='All controls unlocked. Starting Level 2 in '+secs+'…';
+    if(secs<=0){ startShift(); return; }
+    msg.textContent='All controls unlocked. Starting the scenarios in '+secs+'…';
     secs--;
     _autoTimer=setTimeout(tick,1000);
   }
@@ -5493,7 +5435,10 @@ function lvUpdateVitals(lv,run){
 }
 var lvVitals=null;
 
-// ── SHIFT: MIXED, TIMED, A DIFFERENT PATIENT EVERY TIME ───────
+// ── SCENARIOS (internally "shift"): MIXED, A NEW PATIENT EVERY TIME ──
+// The chooser's one case mode. Levels 2, 3 and Troubleshooting are its pool;
+// they are off the chooser, but ?level=2/3/7 still opens each one on its own
+// (the Ventilator Training Academy's module practice links).
 // Five cases drawn from Levels 2, 3 and Troubleshooting, in a random order,
 // graded like Level 3 (submit, no live green, no numbers up front) against a
 // clock. Each case gets a new patient: sex and height (so a new predicted body
@@ -5577,7 +5522,7 @@ function toggleShiftClock(){
 function renderShiftClockToggle(){
   var b=document.getElementById('shift-clock-toggle'); if(!b) return; var on=shiftClockOn();
   b.setAttribute('aria-pressed', on?'true':'false');
-  b.textContent='⏱ Shift clock: '+(on?'on — '+(SHIFT_CASE_SECS/60)+' min a case':'off (untimed)');
+  b.textContent='⏱ Clock: '+(on?'on — '+(SHIFT_CASE_SECS/60)+' min a case':'off (untimed)');
 }
 function startShift(seed){
   lvSession++; freeMode=false; academyMode=false; cancelO2Flush();
@@ -5660,7 +5605,7 @@ function startLevel(n){
     simTime=0; pressureHistory=[]; resetMeasuredPIP();
     applyStageEnter(STAGE_DEFS[0]);
     updateUI();
-    showIntro({name:'LTV 1200 — Setup Walkthrough', badge:'Level 1 · Tutorial',
+    showIntro({name:'LTV 1200 — Setup Walkthrough', badge:'Tutorial',
       intro:'New to the transport vent? You\'ve just taken a patient onto your LTV 1200 with everything at defaults. You\'ll build the settings from scratch — one control at a time — deciding the "why" before you touch each knob. Controls unlock as you go.'});
   } else {
     scenarioIdx=0;
@@ -5735,7 +5680,7 @@ function initGameEntry(){
   var lvl=parseInt(params.get('level'),10);
   if(LEVEL_META[lvl]){ startLevel(lvl); return; }                           // deep-link: already booted to run
   // Plain load: leave the device in Standby. The learner powers it up with
-  // On/Standby → POST → Patient Query, and finishBoot() opens the level chooser.
+  // On/Standby → POST, and finishBoot() opens the level chooser.
   gameLevel=0;
   renderMissionCard();
   applyStandbyVisual();
@@ -5936,10 +5881,10 @@ function showVictoryOverlay(level){
   var icon, glowCls, colorStr, levelTxt, subTxt, btnsHtml;
   if(level===1){
     icon='🎓'; glowCls='vc-glow-blue'; colorStr='var(--blue)';
-    levelTxt='LEVEL 1 COMPLETE';
+    levelTxt='TUTORIAL COMPLETE';
     subTxt='All ventilator controls are unlocked.<br>Ready for the clinical scenarios?';
     btnsHtml='<div class="vc-btns">'
-      +'<button class="vc-btn vc-btn-primary" onclick="closeVictory();startLevel(2)">Level 2 →</button>'
+      +'<button class="vc-btn vc-btn-primary" onclick="closeVictory();startShift()">Scenarios →</button>'
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay &amp; explore</button>'
       +'</div>';
   } else {
@@ -5949,7 +5894,7 @@ function showVictoryOverlay(level){
     subTxt='All '+levelCount(level)+' '+m.done
       +(nx?'<br>Ready for '+nx.label+'?':'<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>');
     btnsHtml='<div class="vc-btns">'
-      +(level===8?'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startShift()">Another shift →</button>':'')
+      +(level===8?'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startShift()">Five more cases →</button>':'')
       +(nx?'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startLevel('+m.next+')">'+nx.label+' →</button>'
           :'<button class="vc-btn vc-btn-red" onclick="closeVictory();openLevelSelect()">Level Select</button>')
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay here</button>'
@@ -6026,52 +5971,28 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
 <div class="lvlsel-overlay hidden" id="lvlsel-overlay">
   <div class="lvlsel-inner">
     <div class="lvlsel-title">Ventilator Simulator</div>
-    <div class="lvlsel-sub">Choose a level, or free-play the Test Lung</div>
-    <div class="lvl-card" data-level="1" onclick="startLevel(1)" role="button" tabindex="0" aria-label="Level 1, Tutorial, Beginner. Learn the controls step by step.">
+    <div class="lvlsel-sub">Learn the panel, work the cases, or try anything on a test lung</div>
+    <div class="lvl-card" data-level="1" onclick="startLevel(1)" role="button" tabindex="0" aria-label="Tutorial, start here. Learn the controls step by step.">
       <div class="lvl-card-top">
-        <div class="lvl-name">Level 1 — Tutorial</div>
-        <span class="lvl-badge lvl-badge-1">Beginner</span>
+        <div class="lvl-name">Tutorial</div>
+        <span class="lvl-badge lvl-badge-1">Start here</span>
       </div>
       <div class="lvl-desc">Learn the controls step by step. Settings unlock progressively as you demonstrate each concept and answer a question.</div>
       <span class="lvl-arrow">›</span>
     </div>
-    <div class="lvl-card" data-level="2" onclick="startLevel(2)" role="button" tabindex="0" aria-label="Level 2, Clinical Scenarios, Intermediate. Seven real patient situations.">
+    <div class="lvl-card" data-level="8" onclick="startShift()" role="button" tabindex="0" aria-label="Scenarios. Five cases at a time, drawn at random from fifteen, each with a new patient. Diagnose, set the vent, and submit for grading.">
       <div class="lvl-card-top">
-        <div class="lvl-name">Level 2 — Clinical Scenarios</div>
-        <span class="lvl-badge lvl-badge-2">Intermediate</span>
+        <div class="lvl-name">Scenarios</div>
+        <span class="lvl-badge lvl-badge-8">Mixed</span>
       </div>
-      <div class="lvl-desc">7 real patient situations. All controls available. Read the clinical picture and correct the ventilator settings.</div>
+      <div class="lvl-desc">5 cases at a time, drawn at random from 15 — clinical problems, advanced management and equipment failures — each with a new patient. Diagnose it, set the vent, and submit for grading.</div>
       <span class="lvl-arrow">›</span>
     </div>
-    <div class="lvl-card" data-level="3" onclick="startLevel(3)" role="button" tabindex="0" aria-label="Level 3, Advanced Management, Advanced. Five complex cases.">
+    <button id="shift-clock-toggle" type="button" onclick="toggleShiftClock()" aria-pressed="true">⏱ Clock: on</button>
+    <div class="lvl-card lvl-card-free" onclick="startFree()" role="button" tabindex="0" aria-label="Sandbox, test lung. Adult and pediatric lungs; dial any settings you want.">
       <div class="lvl-card-top">
-        <div class="lvl-name">Level 3 — Advanced Management</div>
-        <span class="lvl-badge lvl-badge-3">Advanced</span>
-      </div>
-      <div class="lvl-desc">5 complex cases requiring multi-parameter decisions. Applied clinical judgment — no hand-holding.</div>
-      <span class="lvl-arrow">›</span>
-    </div>
-    <div class="lvl-card" data-level="7" onclick="startLevel(7)" role="button" tabindex="0" aria-label="Troubleshooting, DOPE. Three things that go wrong in transport and how to find them.">
-      <div class="lvl-card-top">
-        <div class="lvl-name">Troubleshooting — DOPE</div>
-        <span class="lvl-badge lvl-badge-7">Failures</span>
-      </div>
-      <div class="lvl-desc">3 cases where something was working and stopped. Read the alarm, find the cause, fix what can be fixed at the vent — and recognize what cannot.</div>
-      <span class="lvl-arrow">›</span>
-    </div>
-    <div class="lvl-card" data-level="8" onclick="startShift()" role="button" tabindex="0" aria-label="Shift, mixed and timed. Five random cases from Levels 2, 3 and Troubleshooting, a different patient each time, graded like Level 3.">
-      <div class="lvl-card-top">
-        <div class="lvl-name">Shift — Mixed &amp; Timed</div>
-        <span class="lvl-badge lvl-badge-8">Test</span>
-      </div>
-      <div class="lvl-desc">5 random cases from Levels 2, 3 and Troubleshooting, each with a new patient — size, lungs and starting volume change every shift. Graded like Level 3, on a clock.</div>
-      <span class="lvl-arrow">›</span>
-    </div>
-    <button id="shift-clock-toggle" type="button" onclick="toggleShiftClock()" aria-pressed="true">⏱ Shift clock: on</button>
-    <div class="lvl-card lvl-card-free" onclick="startFree()" role="button" tabindex="0" aria-label="Free Play, Test Lung sandbox, adult and pediatric lungs. Dial any settings you want.">
-      <div class="lvl-card-top">
-        <div class="lvl-name">Free Play — Test Lung</div>
-        <span class="lvl-badge lvl-badge-free">Sandbox</span>
+        <div class="lvl-name">Sandbox — Test Lung</div>
+        <span class="lvl-badge lvl-badge-free">Free play</span>
       </div>
       <div class="lvl-desc">No missions. Dial any settings you want on adult or pediatric test lungs (healthy child, pediatric ARDS, status asthmaticus, infant bronchiolitis); the vent enforces only what it can physically deliver. Live plausibility readout, judged per kilogram for children.</div>
       <span class="lvl-arrow">›</span>

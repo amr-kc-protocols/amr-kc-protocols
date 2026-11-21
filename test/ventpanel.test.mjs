@@ -32,6 +32,12 @@
  *       commit later on a locked panel
  *   P11 the insp-hold card colours a driving pressure within target green
  *   P12 no page errors
+ *   P14 three ways in: the menu is Tutorial, Scenarios (mixed) and Sandbox;
+ *       power-on goes from the self-test straight to it, with no SAME PATIENT
+ *       question (How to Use still teaches the real unit's, per protocol V-6);
+ *       each entry opens its mode; the tutorial leads on to Scenarios; and the
+ *       academy's ?level=2/3/7 links still open their tracks, leading on to
+ *       Scenarios too
  *   P13 on a phone, the goal turning green reaches the learner at the knob:
  *       GOAL MET in the scan window (announced), and a Confirm button on
  *       screen while the card's own Confirm is out of view — not before the
@@ -188,9 +194,9 @@ console.log('\nP4 academy mode ends when a level starts');
   await p.close(); }
 { const p = await open('?scenario=agitation'); await closeIntro(p);
   const r = await p.evaluate(() => { scenarioIdx = 1; renderMissionCard();
-    const b = [...document.querySelectorAll('#mission-bar .lc-btn')].find(x => /Free Play/.test(x.textContent));
+    const b = [...document.querySelectorAll('#mission-bar .lc-btn')].find(x => /Sandbox/.test(x.textContent));
     b.click(); return { freeMode, academyMode }; });
-  ok('P4 the academy complete card\'s Free Play button opens Free Play', r.freeMode === true && r.academyMode === false, JSON.stringify(r));
+  ok('P4 the academy complete card\'s Sandbox button opens the sandbox', r.freeMode === true && r.academyMode === false, JSON.stringify(r));
   await p.close(); }
 
 console.log('\nP5 unknown deep links');
@@ -332,6 +338,45 @@ console.log('\nP13 the goal turning green reaches the learner at the knob');
     vals.rate.v = 16; updateUI(); window.scrollTo(0, document.body.scrollHeight); updateGoalNudge(); });
   ok('P13 the tutorial shows it too (guided)', (await nudge()).show);
   await pctx.close(); }
+
+console.log('\nP14 three ways in: tutorial, scenarios, sandbox');
+{ const p = await open(); const k = await standbyKey(p);
+  await p.mouse.click(k.x, k.y); await p.waitForTimeout(300);
+  const mid = await p.evaluate(() => ({ boot: document.getElementById('boot-card').textContent }));
+  await p.waitForTimeout(2600);
+  const r = await p.evaluate(() => {
+    const cards = [...document.querySelectorAll('#lvlsel-overlay .lvl-card')].map(c => ({ level: c.getAttribute('data-level'), name: c.querySelector('.lvl-name').textContent, free: c.classList.contains('lvl-card-free') }));
+    return { cards, chooser: !document.getElementById('lvlsel-overlay').classList.contains('hidden'), boot: document.getElementById('boot-overlay').classList.contains('open'),
+             state: deviceState, gone: ['patientQuery', 'newPatient', 'samePatient', 'applyPreset'].filter(f => typeof window[f] === 'function'),
+             howTo: CONTROLS.grammar.desc };
+  });
+  ok('P14 power-on runs the self-test, then opens the menu — no SAME PATIENT question', !/SAME PATIENT|NEW PATIENT/.test(mid.boot) && r.chooser && !r.boot && r.state === 'run' && r.gone.length === 0, JSON.stringify({ boot: mid.boot.slice(0, 60), ...r, howTo: undefined, cards: undefined }));
+  ok('P14 the menu has exactly three entries: Tutorial, Scenarios, Sandbox', r.cards.length === 3 && r.cards[0].level === '1' && /Tutorial/.test(r.cards[0].name)
+     && r.cards[1].level === '8' && /Scenarios/.test(r.cards[1].name) && r.cards[2].free && /Sandbox/.test(r.cards[2].name), JSON.stringify(r.cards));
+  ok('P14 How to Use still teaches the real unit\'s SAME PATIENT prompt (protocol V-6)', /SAME PATIENT/.test(r.howTo) && /NEW PATIENT/.test(r.howTo) && /V-6/.test(r.howTo));
+  const go = await p.evaluate(() => {
+    const cards = [...document.querySelectorAll('#lvlsel-overlay .lvl-card')], out = [];
+    for (const c of cards) { openLevelSelect(); c.click(); out.push({ level: gameLevel, free: freeMode, cases: gameLevel === 8 ? SCENARIO_LEVELS[8].length : null }); }
+    return out;
+  });
+  ok('P14 each entry opens its mode (tutorial; five mixed cases; the test lung)', go[0].level === 1 && go[1].level === 8 && go[1].cases === 5 && go[2].free, JSON.stringify(go));
+  const tut = await p.evaluate(() => {
+    startLevel(1); gameStage = STAGE_DEFS.length; showVictoryOverlay(1);
+    const vc = [...document.querySelectorAll('#victory-card button')].map(b => b.textContent);
+    closeVictory(); const card = [...document.querySelectorAll('#mission-bar .lc-btn')].map(b => b.textContent);
+    [...document.querySelectorAll('#mission-bar .lc-btn')].find(b => /Scenarios/.test(b.textContent)).click();
+    return { vc, card, after: gameLevel };
+  });
+  ok('P14 finishing the tutorial leads to Scenarios', tut.vc.some(t => /Scenarios/.test(t)) && tut.card.some(t => /Scenarios/.test(t)) && !tut.vc.concat(tut.card).some(t => /Level 2/.test(t)) && tut.after === 8, JSON.stringify(tut));
+  await p.close(); }
+for (const lvl of [2, 3, 7]) {
+  const p = await open('?level=' + lvl);
+  const r = await p.evaluate(lvl => { const ok = gameLevel === lvl && SCENARIO_LEVELS[lvl].length > 0 && !!curScenario();
+    scenarioIdx = SCENARIO_LEVELS[lvl].length; renderMissionCard();
+    return { ok, next: [...document.querySelectorAll('#mission-bar .lc-btn')].map(b => b.textContent) }; }, lvl);
+  ok(`P14 the academy's ?level=${lvl} link still opens that track, and it leads on to Scenarios`, r.ok && r.next.some(t => /Scenarios/.test(t)), JSON.stringify(r));
+  await p.close();
+}
 
 ok('P12 no page errors', errs.length === 0, errs.join(' | '));
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

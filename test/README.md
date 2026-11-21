@@ -215,9 +215,12 @@ These suites live here:
   On a phone, a met goal reaches the learner at the knob (P13): GOAL MET in
   the scan window, announced, and a Confirm button on screen while the card's
   own is out of view — never before the diagnosis or in graded Level 3, and
-  above the knob dock rather than on it.
+  above the knob dock rather than on it. The menu has three ways in (P14):
+  Tutorial, Scenarios and Sandbox; power-on goes from the self-test straight
+  to it with no SAME PATIENT question, the tutorial leads on to Scenarios,
+  and the academy's `?level=2/3/7` links still open their tracks.
 
-- **`ventshift.test.mjs`** — the LTV 1200's Shift mode
+- **`ventshift.test.mjs`** — the LTV 1200's Scenarios mode ("shift" in the code)
   ([`vent-ltv1200.html?level=8`](../vent-ltv1200.html)): five cases from
   Levels 2, 3 and Troubleshooting, each with a new patient, graded like
   Level 3 against a per-case clock. A random patient is only worth having if

@@ -56,7 +56,9 @@ It also covers when to call, closed-loop orders, staying with the same physician
 Two interactive trainers, both single self-contained pages, both reachable
 from the home screen.
 
-- **`vent-ltv1200.html`** — the LTV 1200 transport ventilator.
+- **`vent-ltv1200.html`** — the LTV 1200 transport ventilator. Three ways in:
+  the **Tutorial**, **Scenarios** (five mixed, graded cases at a time, each
+  with a new patient) and the **Sandbox** test lung.
 - **`lifepak-15.html`** — the LIFEPAK 15 as the AHA's **Rhythm Recognition and
   Electrical Therapy** station: a rhythm on the monitor, name it from four,
   then deliver the right therapy on the unit's own keys. Sixteen rhythms
@@ -471,12 +473,14 @@ answer; the right answer and the explanation stay hidden until the learner
 finds it. It used to light up the right answer and show the explanation, so the
 retry was a free click. Each case can earn two points, both on the first
 attempt: the diagnosis right first time, and the settings — right on the first
-submission in Level 3 and a shift, or reached without revealing the target in
-Levels 2 and 7. The tutorial and the academy missions score the diagnosis only.
+submission in Scenarios and Level 3, or reached without revealing the target in
+Levels 2 and 7 (the academy's practice links). The tutorial and the academy missions score the diagnosis only.
 The score shows on the level's complete card and victory card, and the best is
 kept on the chooser (with the completion, in `localStorage`).
 
-**Level 2 gives the aim, not the numbers.** Its goals (and the one
+**Level 2 gives the aim, not the numbers** (Levels 2, 3 and Troubleshooting
+are off the menu now, but each still opens on its own from the academy's
+module practice links, `?level=2`, `3` and `7`). Its goals (and the one
 Troubleshooting goal with a number in it) say what to achieve — "recruit the
 lung with PEEP, enough to open alveoli, not so much you drop the pressure" —
 and leave the target to the learner. *Show the target numbers* reveals them,
@@ -484,12 +488,17 @@ at the cost of that case's settings point; the met goal and the confirmation
 show them anyway, so the learner leaves knowing what they were. The tutorial
 and the academy missions keep their numbers: they teach rather than test.
 
-**Shift — mixed and timed.** Five cases drawn from Levels 2, 3 and
-Troubleshooting, in a random order, graded like Level 3 (submit, no live
-green, no numbers up front), with three minutes on the clock for each. The
-clock waits while the case intro is up, stops when the case is passed, and
-can be switched off on the chooser (*Shift clock*) for anyone who wants it
-untimed. Out of time, the case scores nothing and the debrief says what it
+**The menu: Tutorial, Scenarios, Sandbox.** Power-on runs the self-test and
+opens the menu. (The real LTV then asks SAME PATIENT?; in the game every
+stage, case and test lung loads its own settings, so the answer never
+mattered and the question is gone. How to Use still says what the real unit
+asks and what protocol V-6 says to answer.) After the tutorial comes
+**Scenarios**: five cases drawn from all fifteen — the clinical, advanced and
+troubleshooting cases — in a random order, graded like Level 3 (submit, no
+live green, no numbers up front), with three minutes on the clock for each.
+(In the code this mode is still `startShift()`, level 8.) The clock waits
+while the case intro is up, stops when the case is passed, and can be
+switched off on the menu (*Clock*) for anyone who wants it untimed. Out of time, the case scores nothing and the debrief says what it
 needed. Every case gets a new patient, so a remembered setting is not an
 answer:
 
