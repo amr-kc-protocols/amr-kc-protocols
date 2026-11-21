@@ -193,6 +193,13 @@ These suites live here:
   Rx: the right answer is the longest choice in at most a third of the
   questions and as long as the wrong ones on average, and on screen the
   choices come in a random order with the right one landing in every slot.
+  The first answer counts (S12): a wrong pick takes out only that choice and
+  shows the case's hint, never the answer or the explanation, and a miss stays
+  a miss in the level score; all 24 have a hint and none repeats its answer.
+  Level 2 gives the aim, not the numbers (S13): no aim carries a target or a
+  unit, and revealing the target costs the case's settings point. Herniation
+  is graded on the PaCO₂ it settles at (S4): 26 × 400 mL and 19 × 600 mL,
+  which the old minute-volume goal passed, now fail.
 
 - **`ventpanel.test.mjs`** — the LTV 1200's panel and level engine
   ([`vent-ltv1200.html`](../vent-ltv1200.html)), one check per bug found and
@@ -215,6 +222,22 @@ These suites live here:
   the scan window, announced, and a Confirm button on screen while the card's
   own is out of view — never before the diagnosis or in graded Level 3, and
   above the knob dock rather than on it.
+
+- **`ventshift.test.mjs`** — the LTV 1200's Shift mode
+  ([`vent-ltv1200.html?level=8`](../vent-ltv1200.html)): five cases from
+  Levels 2, 3 and Troubleshooting, each with a new patient, graded like
+  Level 3 against a per-case clock. A random patient is only worth having if
+  every one it can produce is a fair case, so it checks, across 30 seeds and
+  all 12 cases, that no variant starts solved and every one can be solved;
+  that each goal still means the same thing for the new patient (the Vt cap is
+  8 mL/kg of a PBW recomputed here from sex and height; herniation lands the
+  PaCO₂ at 30–35; the septic PaCO₂ is 20–28); and that the story matches the
+  patient (a PBW chip, the starting minute volume and Vt cap rewritten, the
+  "he" cases male, the two pressure-quoting cases untouched). It plays a
+  shift: same seed, same shift; the clock waits for the intro, runs during the
+  case, stops on a pass; out of time scores nothing and shows a debrief; the
+  results and best score show; the clock can be switched off and remembers;
+  and on a 320 px phone the clock never takes a tap or covers the knob dock.
 
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
