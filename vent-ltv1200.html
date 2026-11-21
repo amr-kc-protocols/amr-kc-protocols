@@ -1043,7 +1043,7 @@ canvas#pip-canvas{display:none}
     <div class="power-card-kicker">LTV® 1200 · Transport Ventilator</div>
     <div class="power-card-title">Ventilator is in Standby</div>
     <div class="power-card-sub">The panel below is dark because the vent is off — exactly like the real unit.<br>Power it up to run the self-test and set up your patient.</div>
-    <button class="power-card-btn" onclick="onStandbyUp()"><span class="power-card-ico">⏻</span> POWER ON</button>
+    <button class="power-card-btn" onclick="powerOn()"><span class="power-card-ico">⏻</span> POWER ON</button>
   </div>
 
   <!-- MISSION BAR (hidden until a level/scenario renders into it) -->
@@ -1202,7 +1202,7 @@ canvas#pip-canvas{display:none}
   <!-- BOTTOM CONTROL DECK: On/Standby · Set Value knob · Control Lock/Monitor -->
   <div class="deck">
     <div class="deck-btns">
-      <button class="deck-btn on" id="btn-onstandby" onmousedown="onStandbyDown()" onmouseup="onStandbyUp()" onmouseleave="onStandbyUp()" ontouchstart="onStandbyDown();event.preventDefault()" ontouchend="onStandbyUp()">On / Standby<span class="lamp"></span></button>
+      <button class="deck-btn on" id="btn-onstandby" onmousedown="onStandbyDown()" onmouseup="onStandbyUp()" onmouseleave="onStandbyCancel()" ontouchstart="onStandbyDown();event.preventDefault()" ontouchend="onStandbyUp()" ontouchcancel="onStandbyCancel()" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.repeat){onStandbyDown();event.preventDefault();}" onkeyup="if(event.key==='Enter'||event.key===' '){onStandbyUp();event.preventDefault();}" onblur="onStandbyCancel()">On / Standby<span class="lamp"></span></button>
       <button class="deck-btn" id="btn-monitor" onclick="pressMonitor()">Monitor Select<span class="lamp"></span></button>
     </div>
     <div class="knob-block">
@@ -1380,7 +1380,9 @@ var MIN_EXH_TIME=0.3;    // s — minimum exhalation time the vent guarantees
 function maxITForRate(rate){
   var cycleS = 60 / rate;
   var raw    = Math.min(cycleS * 0.8, cycleS - MIN_EXH_TIME);   // 4:1 ratio OR min exhale, stricter wins
-  return Math.min(9.9, Math.max(vals.it.min, Math.round(raw * 10) / 10));
+  // Round DOWN to the 0.1 s dial step: rounding to nearest let the cap itself
+  // break both limits (rate 13 → IT 3.7, past 4:1; rate 80 → 0.25 s to exhale).
+  return Math.min(9.9, Math.max(vals.it.min, Math.floor(raw * 10 + 1e-9) / 10));
 }
 function enforceITLimit(){
   var maxIT = maxITForRate(vals.rate.v);
@@ -1453,6 +1455,12 @@ function adj(key,delta){
     if(applied!==0){ vals.ps.v=Math.max(0,Math.min(vals.ps.max, vals.ps.v-applied)); }
     updateKnob('peep'); updateKnob('ps');
   } else {
+    // Turning O₂% during a flush ends the flush: the value dialled is the new
+    // setting, rather than being thrown away when the flush reverts.
+    if(key==='fio2' && _o2SavedFio2!=null){
+      clearTimeout(_o2Timer); _o2Timer=null; _o2SavedFio2=null;
+      var fb=document.getElementById('o2-flush-badge'); if(fb) fb.style.display='none';
+    }
     c.v=Math.round((Math.min(c.max,Math.max(c.min,c.v+delta)))*10)/10;
     updateKnob(key);
   }
@@ -1607,6 +1615,9 @@ function markOperated(){
 var controlsLocked=false;
 function toggleLock(){
   if(!deviceRunning()) return;
+  // Locking confirms a flashing mode/breath-type preview first, like touching
+  // any other control does; otherwise it committed 4 s later on a locked panel.
+  if(!controlsLocked) commitPending();
   controlsLocked=!controlsLocked;
   if(controlsLocked) deselect();
   updateLockUI();
@@ -1764,7 +1775,7 @@ function renderDock(){
   if(!show) return;
   var key=selectedControl, c=vals[key];
   document.getElementById('dock-name').textContent=(key==='ps'&&ventMode==='nppv')?'IPAP':(CONTROL_SHORT[key]||key);
-  document.getElementById('dock-val').textContent = key==='it'? c.v.toFixed(1) : ctrlDisplayValue(key);
+  document.getElementById('dock-val').textContent = ctrlValueText(key);
   document.getElementById('dock-unit').textContent = (typeof KNOB_UNITS!=='undefined' && KNOB_UNITS[key])||'';
 }
 window.addEventListener('scroll',function(){ if(selectedControl) renderDock(); },{passive:true});
@@ -1921,7 +1932,12 @@ function applyPreset(name){
   enforceITLimit(); keys.forEach(updateKnob);
   simTime=0; pressureHistory=[]; resetMeasuredPIP(); updateUI();
 }
-function powerOnSequence(then){ _bootThen=then||null; try{getAC();}catch(_){}; runPOST(); }
+var _booting=false;   // POST / patient query on screen: a second press must not start another
+function powerOnSequence(then){
+  if(_booting) return;
+  _booting=true; _bootThen=then||null; try{getAC();}catch(_){}; runPOST();
+}
+function powerOn(){ if(deviceState==='standby') powerOnSequence(openLevelSelect); }
 function runPOST(){
   var ov=document.getElementById('boot-overlay'), card=document.getElementById('boot-card');
   if(!ov||!card){ patientQuery(); return; }
@@ -1982,24 +1998,33 @@ function finishBoot(){
   // :none), leaving an invisible button clickable over the scenario intro.
   var go=document.getElementById('preset-go');
   if(go){ go.style.pointerEvents='none'; go.style.opacity='0.5'; }
-  _pendingPreset=null;
+  _pendingPreset=null; _booting=false;
   deviceState='run'; applyStandbyVisual(); updateUI();
   if(_bootThen){ var f=_bootThen; _bootThen=null; f(); }
 }
 // ── SHUTDOWN (hold On/Standby 3 s) ────────────────────────────
-var _osHoldTimer=null, _osHeld=false;
+// A release only counts if this button saw the press. The pointer leaving the
+// button (or focus moving off it) cancels a press: it used to count as a
+// release, so moving the mouse across the key in Standby powered the vent up,
+// and a click followed by a mouse move ran the self-test twice.
+var _osHoldTimer=null, _osHeld=false, _osPressed=false;
 function onStandbyDown(){
-  _osHeld=false;
+  _osHeld=false; _osPressed=true;
+  clearTimeout(_osHoldTimer);
   if(deviceState==='run'){ _osHoldTimer=setTimeout(function(){ _osHeld=true; shutdownDevice(); },3000); }
 }
 function onStandbyUp(){
   clearTimeout(_osHoldTimer);
+  var pressed=_osPressed; _osPressed=false;
   if(_osHeld){ _osHeld=false; return; }
-  if(deviceState==='standby'){ powerOnSequence(openLevelSelect); }
+  if(!pressed) return;
+  if(deviceState==='standby'){ powerOn(); }
   else if(deviceState==='run'){ scanMessage('HOLD 3 s TO POWER OFF',1500); }
 }
+function onStandbyCancel(){ clearTimeout(_osHoldTimer); _osPressed=false; _osHeld=false; }
 function shutdownDevice(){
   try{ playAlarmBurst(4,700); }catch(_){}
+  cancelO2Flush();
   deviceState='standby'; _modeCandidate=null; _btCandidate=null;
   clearTimeout(_modeCommitTimer); clearTimeout(_btCommitTimer);
   controlsLocked=false; updateLockUI(); deselect();
@@ -2187,10 +2212,18 @@ function o2Flush(){
   _o2Timer=setTimeout(revertO2,20000);
 }
 function revertO2(){
+  clearTimeout(_o2Timer);
   if(_o2SavedFio2!=null){ vals.fio2.v=_o2SavedFio2; updateKnob('fio2'); _o2SavedFio2=null; }
   _o2Timer=null;
   var badge=document.getElementById('o2-flush-badge'); if(badge) badge.style.display='none';
 }
+// End a flush now, before anything loads new settings. Without this a flush
+// started on one case reverted 20 s later onto the next one, overwriting its
+// FiO₂ with the old case's.
+function cancelO2Flush(){ if(_o2Timer||_o2SavedFio2!=null) revertO2(); }
+// The FiO₂ the operator has set. During a flush the panel delivers 100%, but
+// the set value underneath it is unchanged: goals and grading read this one.
+function setFiO2(){ return _o2SavedFio2!=null ? _o2SavedFio2 : vals.fio2.v; }
 
 // ── MANUAL BREATH ─────────────────────────────────────────────
 // Delivers one mandatory breath now. Most useful in the spontaneous modes
@@ -2637,12 +2670,12 @@ requestAnimationFrame(animLoop);
 // ── CONTROL INFO ──────────────────────────────────────────────
 var CONTROLS={
   rate:{tag:'control',tagCls:'tag-control',title:'Breath Rate',range:'1–80 bpm  |  Typical: 12–16  |  Higher rate → shorter max IT',
-    desc:'Minimum mandatory breaths per minute. <strong>Inactive in CPAP and NPPV</strong> — patient determines own rate in those modes.',
+    desc:'Minimum mandatory breaths per minute. <strong>Inactive in CPAP</strong> — the patient sets their own rate. <strong>In NPPV it becomes the apnea backup rate</strong> (the window is relabelled Apnea Backup): the patient still triggers every breath.',
     avail:[
       {mode:'AC-VC / AC-PC',yes:true,note:'Delivers at least this many full breaths/min. Patient triggers additional breaths above this.'},
       {mode:'SIMV-VC / SIMV-PC',yes:true,note:'Exactly this many mandatory breaths/min. Patient breathes spontaneously between them.'},
       {mode:'CPAP / PSV',yes:false,note:'No mandatory rate. Patient must breathe spontaneously for every breath.'},
-      {mode:'NPPV / BiPAP',yes:false,note:'No mandatory rate. Patient-triggered only. Backup rate may be set in extended settings.'},
+      {mode:'NPPV / BiPAP',yes:true,note:'Apnea backup only. Every breath is patient-triggered; backup breaths at this rate start only if the patient stops breathing.'},
     ],
     pearl:'Lower rate in COPD/asthma (10–12) to allow full exhalation and prevent auto-PEEP. Titrate to ETCO₂.'
   },
@@ -2655,7 +2688,7 @@ var CONTROLS={
     ],
     pearl:'Size the breath to <strong>predicted body weight (PBW)</strong> — lung size tracks height, not actual weight. Male PBW = 50 + 2.3 × (height in inches − 60); Female = 45.5 + 2.3 × (height in inches − 60). Start at 6 mL/kg PBW.'
   },
-  pc:{tag:'control',tagCls:'tag-control',title:'Pressure Control',range:'5–55 cmH₂O above PEEP',
+  pc:{tag:'control',tagCls:'tag-control',title:'Pressure Control',range:'1–99 cmH₂O above PEEP',
     desc:'Inspiratory pressure target for mandatory breaths. <strong>Pressure mode only.</strong> Vent delivers this pressure above PEEP for the set Inspiratory Time.',
     avail:[
       {mode:'AC-PC / SIMV-PC',yes:true,note:'Vent pressurizes circuit to PEEP+PC for the Insp Time. Vt delivered varies with compliance.'},
@@ -2664,17 +2697,17 @@ var CONTROLS={
     ],
     pearl:'Monitor delivered Vt closely in pressure mode. If compliance worsens (pneumothorax, secretions), same PC delivers less volume.'
   },
-  it:{tag:'control',tagCls:'tag-control',title:'Inspiratory Time',range:'0.3 s – (60÷Rate − 0.5 s)  |  Typical: 0.8–1.2 s',
-    desc:'Duration of each inspiratory phase. <strong>Active in all mandatory breath modes</strong> — both Volume and Pressure A/C and SIMV. In Volume mode, IT directly controls insp duration and determines calculated peak flow (Vcalc). In Pressure mode, IT sets how long the pressure plateau is held. <strong>Maximum IT is mathematically limited</strong> to (60÷Rate − 0.5 s) to guarantee at least 0.5 s of expiratory time.',
+  it:{tag:'control',tagCls:'tag-control',title:'Inspiratory Time',range:'0.3–9.9 s, at most 0.8 × (60÷Rate)  |  Typical: 0.8–1.2 s',
+    desc:'Duration of each inspiratory phase. <strong>Active in all mandatory breath modes</strong> — both Volume and Pressure A/C and SIMV. In Volume mode, IT directly controls insp duration and determines calculated peak flow (Vcalc). In Pressure mode, IT sets how long the pressure plateau is held. <strong>Maximum IT is limited</strong> to 0.8 × the breath period (an I:E of 4:1), and always leaves at least 0.3 s to exhale.',
     avail:[
       {mode:'AC-VC / SIMV-VC',yes:true,note:'Sets insp duration directly. Vent displays calculated Vcalc (peak flow). I:E = IT ÷ (cycle time − IT).'},
       {mode:'AC-PC / SIMV-PC',yes:true,note:'Sets how long each mandatory breath holds at the pressure target. Watch I:E ratio — avoid inverse ratios.'},
       {mode:'NPPV / BiPAP',yes:true,note:'Sets maximum inspiratory time before the vent cycles back to EPAP. Acts as a backup Ti limit.'},
       {mode:'CPAP / PSV',yes:false,note:'Spontaneous only — breath duration determined by patient effort and flow cycling. No mandatory IT.'},
     ],
-    pearl:'Max IT = (60÷Rate) − 0.5 s. Example: Rate 12 → cycle = 5.0 s → max IT = 4.5 s. At Rate 20 → cycle = 3.0 s → max IT = 2.5 s. Insufficient exp time → auto-PEEP and hemodynamic compromise.'
+    pearl:'Max IT = 0.8 × (60÷Rate). Example: Rate 12 → cycle = 5.0 s → max IT = 4.0 s. At Rate 20 → cycle = 3.0 s → max IT = 2.4 s. A 4:1 inverse ratio is a ceiling, not a target: insufficient exp time → auto-PEEP and hemodynamic compromise.'
   },
-  ps:{tag:'control',tagCls:'tag-control',title:'Pressure Support / IPAP',range:'0–40 cmH₂O  |  Typical PS: 5–10',
+  ps:{tag:'control',tagCls:'tag-control',title:'Pressure Support / IPAP',range:'OFF, 1–60 cmH₂O  |  Typical PS: 5–10',
     desc:'In invasive modes (SIMV, CPAP/PSV) this control sets <strong>Pressure Support</strong> — a pressure boost above PEEP for spontaneous breaths. <strong>In NPPV the LTV display reads the absolute IPAP</strong>: you SET IPAP and SET EPAP as two independent values, and the device derives support = IPAP − EPAP.',
     avail:[
       {mode:'AC-VC / AC-PC',yes:false,note:'All breaths are mandatory in A/C. No spontaneous breaths to support.'},
@@ -2686,7 +2719,7 @@ var CONTROLS={
   },
   fio2:{tag:'control',tagCls:'tag-control',title:'FiO₂ / O₂ Flush',range:'21–100%  |  Hold 3 sec for 100% flush',
     desc:'Fraction of inspired oxygen. Active in all modes. In NPPV, oxygen is entrained into the circuit at this concentration.',
-    avail:[{mode:'All modes',yes:true,note:'Always active. Titrate to SpO₂ 94–98% (88–92% in chronic hypercapnic COPD). Hold knob 3 sec to flush to 100% for ~2 min.'}],
+    avail:[{mode:'All modes',yes:true,note:'Always active. Titrate to SpO₂ 94–98% (88–92% in chronic hypercapnic COPD). Hold knob 3 sec to flush to 100% for ~2 min. In this simulator, tap the 100% O₂ key instead: it reverts after 20 s, and turning O₂% during the flush ends it.'}],
     pearl:'Start 100% FiO₂ for all critically ill patients, then titrate down. Hyperoxia is harmful — target 94–98%, not 100%.'
   },
   sens:{tag:'control',tagCls:'tag-control',title:'Sensitivity (Flow Trigger)',range:'1–9 L/min  |  Typical: 1–3  |  Lower = easier to trigger',
@@ -2703,17 +2736,17 @@ var CONTROLS={
     ],
     pearl:'NPPV: EPAP primarily helps oxygenation (like PEEP). IPAP (EPAP + PS) primarily helps ventilation and CO₂ removal.'
   },
-  hipres:{tag:'alarm',tagCls:'tag-alarm',title:'High Pressure Limit',range:'20–80 cmH₂O  |  Red line on waveform',
+  hipres:{tag:'alarm',tagCls:'tag-alarm',title:'High Pressure Limit',range:'5–100 cmH₂O  |  Red line on waveform',
     desc:'If circuit pressure reaches this level, inspiration terminates immediately and the alarm sounds. The red line on the waveform shows this limit — the waveform is clamped here.',
     avail:[{mode:'All modes',yes:true,note:'Always active. In pressure modes this acts as a secondary safety limit above the PC setting.'}],
     pearl:'Frequent high-pressure alarms = investigate the patient. Causes: coughing, bronchospasm, secretions, right mainstem intubation, tension pneumothorax, biting tube, kinked circuit.'
   },
-  lowpres:{tag:'alarm',tagCls:'tag-alarm',title:'Low Pressure Alarm',range:'0–20 cmH₂O  |  Orange line on waveform',
+  lowpres:{tag:'alarm',tagCls:'tag-alarm',title:'Low Pressure Alarm',range:'OFF, 1–99 cmH₂O  |  Orange line on waveform',
     desc:'Alarms if circuit pressure does not reach this threshold during a breath. Indicates circuit disconnect, large leak, or cuff failure. The orange line on the waveform marks this threshold.',
     avail:[{mode:'All modes',yes:true,note:'If peak pressure stays below this level, alarm fires. In NPPV with a mask, small leaks are expected — set this conservatively.'}],
     pearl:'In NPPV, intentional mask leak is normal — do not set this too high or it will alarm constantly. Start low (2–3 cmH₂O) and titrate.'
   },
-  lowmv:{tag:'alarm',tagCls:'tag-alarm',title:'Low Minute Volume',range:'0–20 L/min',
+  lowmv:{tag:'alarm',tagCls:'tag-alarm',title:'Low Minute Volume',range:'OFF, 0.5–99 L/min (0.5 L/min steps)',
     desc:'Alarms if total minute ventilation falls below threshold. Critical in CPAP and NPPV where no mandatory backup rate is delivered.',
     avail:[{mode:'All modes',yes:true,note:'Set ~20% below expected MV. In spontaneous modes (CPAP, NPPV) this is the primary protection against apnea.'}],
     pearl:'In NPPV: if patient becomes apneic or the mask dislodges completely, this alarm should fire. Do not silence without investigating.'
@@ -2778,7 +2811,7 @@ function openDrawer(key){
       html+='<div style="font-family:monospace;font-size:22px;font-weight:700;color:#4a9eff">'+d.pplat+'<span style="font-size:11px;color:#1a5a7a"> cmH₂O</span></div></div>';
       html+='<div style="background:#0d0804;border:1px solid #3a2a08;border-radius:8px;padding:10px 12px">';
       html+='<div style="font-size:9px;color:#6a5010;letter-spacing:0.1em;margin-bottom:4px">DRIVING PRESSURE</div>';
-      var driveColor=d.drive>15?'#e63946':d.drive>12?'#f4a261':'#f4a261';
+      var driveColor=d.drive>15?'#e63946':d.drive>12?'#f4a261':'#39ff5a';   // red / borderline / within target
       html+='<div style="font-family:monospace;font-size:22px;font-weight:700;color:'+driveColor+'">'+d.drive+'<span style="font-size:11px;color:#6a5010"> cmH₂O</span></div>';
       html+='<div style="font-size:10px;color:#555;margin-top:3px">Pplat − PEEP | target &lt;15</div></div>';
       html+='<div style="background:#100a0a;border:1px solid #2a1a1a;border-radius:8px;padding:10px 12px">';
@@ -2835,7 +2868,7 @@ function openDrawer(key){
   html+='<div class="pearl"><div class="pearl-lbl">⚡ CLINICAL PEARL</div>'+c.pearl+'</div>';
     if(vals[key]){
     var isAlm=["hipres","lowpres","lowmv","apnea"].indexOf(key)>=0;
-    var dispV=(key==="it")?vals[key].v.toFixed(1):String(vals[key].v);
+    var dispV=ctrlValueText(key);
     var unt=KNOB_UNITS[key]||"";
     var bc=isAlm?"dv-btn alarm-clr":"dv-btn";
     var vc=isAlm?"dv-val alarm-clr":"dv-val";
@@ -3652,11 +3685,21 @@ function checkTarget(t){
   if(t.op==='<=') return c.v<=t.val+0.01;
   return Math.abs(c.v-t.val)<0.051;
 }
+// A goal is graded on the settings, so during a 100% O₂ flush it reads the
+// set FiO₂, not the temporary 100% (which used to pass "FiO₂ ≥ 90" goals for
+// the 20 s of the flush).
+function withSetFiO2(fn){
+  if(_o2SavedFio2==null) return fn();
+  var shown=vals.fio2.v; vals.fio2.v=_o2SavedFio2;
+  try{ return fn(); } finally{ vals.fio2.v=shown; }
+}
+function goalMet(task){ return !!(task && task.goal) && withSetFiO2(function(){ return !!task.goal.check(); }); }
+function goalReadout(task){ return withSetFiO2(function(){ return task.goal.readout(); }); }
 function allTargetsMet(){
   if(gameDone()) return false;
   var task=curTask(); if(!task) return false;
   // New problem-solving format: completion = diagnosed + physiologic goal reached
-  if(task.goal) return scenarioDiagnosed && task.goal.check();
+  if(task.goal) return scenarioDiagnosed && goalMet(task);
   if(!task.targets) return false;
   return task.targets.every(function(t){return checkTarget(t);});
 }
@@ -3801,7 +3844,7 @@ function renderSolveBody(task){
   }
 
   // ── GUIDED MODE (Levels 1 & 2) ─────────────────────────────
-  var met=task.goal.check();
+  var met=goalMet(task);
   var dxTxt=gameLevel===1?'Decided — now set the control':'Diagnosed — now fix it on the vent';
   // Operating coach: shown until the learner has worked the dial once, so anyone
   // who skipped the tutorial still knows HOW to change a setting.
@@ -3811,7 +3854,7 @@ function renderSolveBody(task){
   return '<div class="scen-dx"><span class="scen-dx-ico">✓</span> '+dxTxt+'</div>'
     +'<div class="scen-goal'+(met?' done':'')+'"><div class="scen-goal-lbl">🎯 Goal</div>'+task.goal.text+'</div>'
     +how
-    +'<div class="scen-readout'+(met?' hit':'')+'">'+(met?'✓ ':'')+task.goal.readout()+'</div>'
+    +'<div class="scen-readout'+(met?' hit':'')+'">'+(met?'✓ ':'')+goalReadout(task)+'</div>'
     +(met
        ?'<button class="mission-cta visible ready" onclick="openConfirm()">✓ GOAL REACHED — CONFIRM</button>'
        :'<button class="mission-cta visible wait">Dial the setting to reach the goal…</button>');
@@ -3941,7 +3984,7 @@ function tlAssess(){
              :(key==='asthma'&&pip>50?{why:'Keep the peak under about 50 where you can — in asthma it is mostly airway resistance, so read the plateau', src:'expert consensus · weak'}:null));
   // PEEP
   if(t.peep.table){
-    var tb=ardsnetPeep(vals.fio2.v), pe=vals.peep.v;
+    var tb=ardsnetPeep(setFiO2()), pe=vals.peep.v;   // the table pairs PEEP with the set FiO₂, not a flush
     var st=pe<tb.min?'bad':(pe>tb.max?'warn':'good');
     add('peep','PEEP ≥ '+tb.min, pe+'', st,
         {why:'At FiO₂ '+tb.row.toFixed(1)+' the ARDSnet table asks for PEEP '+tb.min+'–'+tb.lowMax+' (up to '+tb.max+' on the higher-PEEP table)', src:t.peep.src});
@@ -4031,7 +4074,7 @@ function renderMissionCard(){
         +'<div class="lc-sub">Nicely done — you set this one correctly.</div>'
         +'<div class="lc-btns">'
         +'<button class="lc-btn lc-btn-next" onclick="location.href=\'vta/academy.html\'">← Back to Academy</button>'
-        +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Free Play</button>'
+        +'<button class="lc-btn lc-btn-sel" onclick="startFree()">Free Play</button>'
         +'</div></div>';
       return;
     }
@@ -4283,7 +4326,7 @@ var _assessAttempts=0;
 function submitAssessment(){
   var sc=curTask(); if(!sc||!sc.goal) return;
   if(!scenarioDiagnosed) return;
-  var pass=sc.goal.check();
+  var pass=goalMet(sc);
   prepQuizSurface();
   var html;
   if(pass){
@@ -4298,7 +4341,7 @@ function submitAssessment(){
       : '<div class="assess-hint">One or more values are outside the acceptable range. Re-examine the physiology of your diagnosis and adjust, then resubmit.</div>';
     html='<div class="quiz-badge">'+sc.name+' — Assessment</div>'
       +'<div class="assess-verdict fail">✗ NOT YET</div>'
-      +'<div class="assess-current">Your current settings: '+sc.goal.readout()+'</div>'
+      +'<div class="assess-current">Your current settings: '+goalReadout(sc)+'</div>'
       +hint
       +(sc.diagnose&&sc.diagnose.exp?'<div class="quiz-exp" style="display:block">'+sc.diagnose.exp+'</div>':'');
   }
@@ -4313,7 +4356,7 @@ function submitAssessment(){
 // ── PROBLEM-SOLVING FLOW: CONFIRM (goal reached) ──────────────
 function openConfirm(){
   var sc=curTask(); if(!sc) return;
-  if(!(scenarioDiagnosed && sc.goal && sc.goal.check())) return;
+  if(!(scenarioDiagnosed && goalMet(sc))) return;
   prepQuizSurface();
   var html='<div class="quiz-badge">'+sc.name+(gameLevel===1?' — Set':' — Solved')+'</div>';
   html+='<div class="quiz-unlock" style="display:block">'+(sc.confirm||'✓ Goal achieved.')+'</div>';
@@ -4441,6 +4484,8 @@ adj=function(key,delta){
 // ── SCENARIO LOADING ──────────────────────────────────────────
 function loadScenario(s){
   lvSession++;              // a fresh start for the lung view's vitals, even on the same scenario
+  cancelO2Flush();          // a flush from the last case must not revert onto this one
+  inspHoldActive=false; manualBreathActive=false;   // nor finish its hold or manual breath here
   var su=s.setup;
   setLung(s.lung);          // per-scenario lung mechanics (defaults to generic if unset)
   ventMode=su.mode;
@@ -4509,6 +4554,7 @@ var freeLungKey='normal';
 function freeLung(){ return freeMode ? FREE_LUNGS[freeLungKey] : null; }
 // Load a set of starting settings onto the panel.
 function applyFreeStart(st){
+  cancelO2Flush();
   ventMode=st.mode; breathType=st.bt;
   ['rate','vt','it','pc','ps','peep','fio2','sens','hipres','lowpres','lowmv','apnea'].forEach(function(k){ vals[k].v=st[k]; });
   enforceITLimit();
@@ -5149,6 +5195,8 @@ var lvVitals=null;
 function startLevel(n){
   lvSession++;
   freeMode=false;
+  academyMode=false;   // a level is never an academy one-off, even right after one
+  cancelO2Flush();
   gameLevel=n;
   // Entering a level implies a running vent — covers the header LEVELS
   // shortcut taken while the device is still in Standby.
@@ -5244,6 +5292,10 @@ function initGameEntry(){
   renderMissionCard();
   applyStandbyVisual();
   renderScan();
+  // A deep link that named nothing we have (an old ?scenario= id, ?level=5)
+  // has already booted the vent to run. Without the chooser that left a live
+  // panel with no case and nothing to press, so offer the levels instead.
+  if(deviceRunning()) openLevelSelect();
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initGameEntry);
 else initGameEntry();
@@ -5473,7 +5525,26 @@ function closeVictory(){
 }
 
 var KNOB_UNITS={rate:"bpm",vt:"mL",pc:"cmH₂O",it:"sec",ps:"cmH₂O",fio2:"%",sens:"lpm",peep:"cmH₂O",hipres:"cmH₂O",lowpres:"cmH₂O",lowmv:"L/min",apnea:"sec"};
-function adjAndUpdate(key,delta){adj(key,delta);var el=document.getElementById("dv-num-"+key);if(el)el.textContent=(key==="it")?vals[key].v.toFixed(1):vals[key].v;markOperated();}
+// The value as a control window shows it: OFF for a zero alarm/support, IPAP
+// (not the support) in NPPV, dashes for the rate in CPAP, one decimal for IT
+// and Low MV. The teaching card's value and the floating dock use it.
+function ctrlValueText(key){
+  var c=vals[key]; if(!c) return '';
+  if(key==='rate' && ventMode==='cpap') return '- -';
+  if(key==='ps' && ventMode==='nppv') return String(ctrlDisplayValue('ps'));
+  if((key==='lowpres'||key==='lowmv'||key==='ps') && c.v===0) return 'OFF';
+  if(key==='it'||key==='lowmv') return c.v.toFixed(1);
+  return String(c.v);
+}
+// The teaching card's −/+ buttons are a second way to set a value, so they obey
+// the same rules as the panel: nothing moves in Standby or under Control Lock.
+function adjAndUpdate(key,delta){
+  if(!deviceRunning()){ scanMessage('STANDBY',1000); return; }
+  if(controlsLocked){ scanMessage('LOCKED',1400); sfxWrong(); return; }
+  adj(key,delta);
+  var el=document.getElementById("dv-num-"+key); if(el) el.textContent=ctrlValueText(key);
+  markOperated();
+}
 // Tap handler: opens drawer on tap, never blocks page scroll
 function setupSwipe(el,key){
   var sy=0,moved=false;

@@ -467,6 +467,8 @@ injury. Spontaneous modes aren't graded, since the patient sets the rate and
 the size of each breath and the readings are estimates. The targets live in
 `tlTargetsFor()`, each with its source, and `test/ventscenarios.test.mjs`
 checks them, including that fixing an ARDS lung the ARDSnet way turns it green.
+During a 100% O₂ flush the PEEP grade, like every scenario goal, reads the
+FiO₂ that is set, not the temporary 100%.
 
 ### The LTV 1200 test lung picture
 
