@@ -102,28 +102,14 @@ These suites live here:
   actually be answered** on the keys that are on the page; that **nothing
   scrolls** at any phone size in either step; and that every control clears
   44pt **by hit-testing the page**, since the rocker arrows are 39px boxes
-  whose real target is a pseudo-element larger on each side.
-
-- **`homepage.test.mjs`** — the homepage ([`index.html`](../index.html)) in
-  headless Chromium at four screen sizes, two of them Toughbook resolutions.
-  Defends the two things the revamp changed: that the sign-in is gone from the
-  markup *and* the source (no endpoint left to post a name to), and that the
-  layout becomes a real grid on a wide screen instead of stretching the phone
-  column edge to edge.
-
-- **`lifepak.test.mjs`** — the LIFEPAK 15 simulator
-  ([`lifepak-15.html`](../lifepak-15.html)) in headless Chromium: the level
-  picker, the walkthrough, every clinical case, pacing capture, the faults an
-  assessment exists to catch, the teaching card behind every control, and the
-  12-lead and code summary that used to be popup windows. Two things it
-  defends harder than the rest, because both would be silently wrong: that a
-  whole resuscitation driven through the unit moves **not one field of the
-  patient** — the crew own the device, somebody else owns the patient — and
-  that every control clears a thumb's 44pt minimum **by hit-testing the page**,
-  not by reading the box or the stylesheet. Three of the rockers are 43.5px
-  boxes at the scale a 1024x768 iPad reaches and are fine; their real target is
-  a pseudo-element four pixels larger on each side, which a box measurement
-  fails and a stylesheet check passes for the wrong reason.
+  whose real target is a pseudo-element larger on each side. S19 holds the
+  fixes from an audit that found defects with every other check green:
+  replaying a run, RESTART mid-step, learn mode and the keyboard on the
+  pointer-driven keys, SYNC landing on a sensed QRS, pacing after capture and
+  in PEA, and the sound switch. S20 holds the tracings to the published
+  figures — QRS, QT, AF response, sweep window — measured as a clinician
+  would measure them. S21 covers SYNC mid-charge, a shock before naming,
+  pacing below the patient's own rate, and the SYNC waiting cue.
 
 - **`ventlungview.test.mjs`** — the lung picture in the LTV 1200's Free Play
   test lung ([`vent-ltv1200.html?free`](../vent-ltv1200.html)) in headless
@@ -359,7 +345,7 @@ Grouped by the property being defended:
 | # | Scenario |
 |---|----------|
 | S1 | It opens as one thing: a run going, the unit off, and the first thing asked is to switch it on. Nothing left of the case engine's overlays |
-| S2 | **The boundary** — SYNC, energy, charge, shock, pacer and rate driven through the unit with the station's writer stubbed out, and no field of the patient moves |
+| S2 | **The boundary** — SYNC, energy, charge, shock, pacer and rate driven through the unit with the station's writer stubbed out, and no field of the patient moves. Pinned to sinus rhythm, because a synchronized shock waits for a QRS |
 | S3 | **Every item is answerable** — the whole bank named and treated correctly, all four therapies exercised, ending in a summary that scores both questions per rhythm |
 | S4 | The wrong answers: defibrillating asystole, pacing asystole, an unsynchronized shock on an unstable tachycardia, SYNC armed on VF, declining to shock VF, shocking a normal sinus rhythm — each caught, each told what it should have been |
 | S5 | A wrong name is marked, the right one revealed, the miss recorded, and the item moves on to its therapy anyway |
@@ -376,3 +362,6 @@ Grouped by the property being defended:
 | S16 | Reachable from the field guide, the copy describes the station rather than the old case engine, and the cache version is bumped |
 | S17 | **The tracings carry the finding the item asks about** — QRS width the same at 45/min as at 150, VT and a paced beat wide where SVT and a junctional escape are narrow, AF irregularly irregular where sinus is regular, flutter with no isoelectric baseline, complete heart block with more P waves than QRS and not a multiple of them, VF never at baseline |
 | S18 | **A laptop** — four desktop viewports including a 4:3 Toughbook and a half-screen window, and a whole item played with a mouse rather than a finger. Every other scenario runs at 844x390 with touch emulation on, so laptop use was being assumed rather than tested |
+| S19 | **Regressions from the station audit** — Run it again and RESTART take the summary down and leave the unit reachable, a one-rhythm link neither sets the best score nor reads "1 rhythms … 0 min", RESTART inside the pause after naming no longer wedges the new run, learn mode reads ON and SHOCK instead of firing them, ON and SHOCK work from the keyboard, a synchronized shock is withheld in asystole and lands within a frame of a sensed QRS on SVT, pacing PEA gives no pressure, capture follows RATE, PAUSE and the pacer switch after the verdict, a pacer set up while naming is answered, Sound off silences the unit, Ctrl+F is left to the browser, and the flutter rate matches its 2:1 trace |
+| S20 | **The tracings against the references**, measured the way a clinician measures them (onset to J, onset to T end, at 2% and 5% of the R). Narrow QRS 80–110 ms at every rate (2009 AHA/ACCF/HRS). QT within 25 ms of Fridericia at a QTc of 400 from 36/min to 212/min. T wave about a fifth of the R. Every ventricular complex 150 ms or wider, with VT no narrower at 188/min than at 146. Mobitz II conducted with a bundle branch block. AF's shortest R-R over 270 ms in ten minutes, CV 0.15–0.30, no step where an early beat lands, f-waves at 350–600/min and no isoelectric stretch. Every rhythm drawn at the rate the screen shows. The monitor's noise under 0.05 mV and kept out of the patient's signal. Five seconds of ECG on every screen with a channel of 300 px or more, and at least 60 px/s on an iPhone SE. R waves drawn to one height on a phone, read off the canvas |
+| S21 | Arming SYNC mid-charge discards the charge. A shock before naming is not an answer and the station says so, while one in the pause after naming counts. Pacing below the patient's own rate does not capture: normal sinus stays at 78 and is still graded wrong, and Mobitz II waits for a rate above 42, then loses capture when turned back down. SYNC waiting on asystole is cued after two seconds and again on a second press, above the screen and without naming the rhythm, with nothing delivered. On SVT there is no cue and the shock goes |

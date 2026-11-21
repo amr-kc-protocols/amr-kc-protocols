@@ -950,21 +950,6 @@ body.lp-skin.portrait #device{display:none;}
   flex:none;padding:3px 8px;border-radius:10px;background:#7a1f14;color:#ffd9c4;
   font:700 9px/1.5 'Arial Narrow',Arial,sans-serif;letter-spacing:1px;
 }
-/* The task line only exists while something is being asked. Its height is
-   measured rather than declared — a task that wraps to two lines on a phone
-   would otherwise hang the bottom of the unit off the screen. */
-#fgTask{display:none;align-items:center;gap:8px;padding:5px 2px 1px;}
-#fgHdr.running #fgTask{display:flex;}
-.fgphase{
-  flex:none;padding:3px 7px;border-radius:5px;background:#1d3b28;border:1px solid #2f6b45;
-  color:#7fe0a5;font:700 10px/1.3 'Arial Narrow',Arial,sans-serif;letter-spacing:.8px;white-space:nowrap;
-}
-.fgphase.warn{background:#3d2410;border-color:#8a5a1e;color:#ffc879;}
-.fgphase.crit{background:#3d1414;border-color:#a8341f;color:#ff9d8a;}
-.fgtask{flex:1;min-width:0;color:#dbe2e9;font-size:12px;line-height:1.3;}
-.fgtask em{font-style:normal;color:#8fe6ff;}
-.fgtick{flex:none;color:#7f8993;font:700 11px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:.5px;}
-
 /* Learn mode. Tapping a control opens what it does instead of doing it, so a
    learner can read the unit without charging it. Every control that has a card
    is ringed while the mode is on — a control with nothing to say should not
@@ -1010,33 +995,6 @@ body.learn #learnNote{display:block;}
 .ovrbtn.warn{background:#3d1414;border-color:#a8341f;color:#ff9d8a;}
 .ovrbtn:active{filter:brightness(1.25);}
 
-/* Vitals strip on a case brief — the handover numbers, before the unit is on */
-.vgrid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.vcell{flex:1;min-width:74px;background:#0a0d10;border:1px solid #232930;border-radius:8px;padding:5px 8px;}
-.vcell i{display:block;font-style:normal;font-size:8px;letter-spacing:1px;color:#6d7b8d;text-transform:uppercase;}
-.vcell b{display:block;font:700 16px/1.2 monospace;color:#e6edf5;margin-top:1px;}
-
-/* Level select */
-.lvgrid{display:flex;flex-direction:column;gap:8px;}
-.lvcard{
-  display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
-  min-height:56px;padding:9px 12px;border-radius:10px;
-  background:#171b20;border:1px solid #2f363e;color:#c6ced6;touch-action:manipulation;
-}
-.lvcard:active{background:#232931;}
-.lvcard .lvn{
-  flex:none;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  background:#0a3a4a;color:#8fe6ff;font:700 14px/1 'Arial Narrow',Arial,sans-serif;
-}
-.lvcard.done .lvn{background:#1d3b28;color:#7fe0a5;}
-.lvcard .lvt{flex:1;min-width:0;}
-.lvcard .lvt b{display:block;font-size:14px;color:#eef2f6;}
-.lvcard .lvt span{display:block;font-size:11px;color:#8b95a0;line-height:1.4;}
-.lvcard .lvp{flex:none;font:700 11px/1 'Arial Narrow',Arial,sans-serif;color:#7f8993;letter-spacing:.5px;}
-.lvsec{font:700 10px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1.4px;color:#6fb3c9;
-  text-transform:uppercase;margin:12px 0 4px;}
-.lvsec:first-child{margin-top:0;}
-
 /* Teaching card — a bottom sheet, so the control being explained stays visible */
 #ovrCard{align-items:flex-end;justify-content:center;padding:0;background:rgba(4,6,9,.55);}
 #ovrCard .ovrcard{
@@ -1059,10 +1017,6 @@ body.learn #learnNote{display:block;}
 .tcwatch p{color:#f0dcb4;}
 
 /* Debrief */
-.dbverdict{text-align:center;padding:10px;border-radius:10px;margin-bottom:10px;
-  font:700 16px/1.3 'Arial Narrow',Arial,sans-serif;letter-spacing:1.4px;}
-.dbverdict.pass{background:#122c1d;border:1px solid #2f6b45;color:#7fe0a5;}
-.dbverdict.fail{background:#2c1414;border:1px solid #a8341f;color:#ff9d8a;}
 .dbrow{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #1c2126;font-size:13px;}
 .dbrow:last-child{border-bottom:none;}
 .dbrow .dbm{flex:none;width:16px;font-weight:700;}
@@ -1070,51 +1024,22 @@ body.learn #learnNote{display:block;}
 .dbrow.miss .dbm{color:#ff6b58;}
 .dbrow .dbl{flex:1;color:#b9c3cd;line-height:1.45;}
 .dbrow.miss .dbl{color:#dbe2e9;}
-.dbrow .dbt{flex:none;font:700 11px/1.5 monospace;color:#7f8993;}
-.dblog{margin-top:10px;max-height:180px;overflow:auto;background:#0a0d10;border:1px solid #232930;
-  border-radius:8px;padding:8px;font:400 11px/1.6 monospace;color:#8b95a0;}
-.dblog b{color:#c6ced6;font-weight:700;}
-
-/* Free play — the facilitator's controls, for one person with nobody to run them */
-.fpsec{font:700 9px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1.3px;color:#6fb3c9;
-  text-transform:uppercase;margin:12px 0 5px;}
-.fpsec:first-child{margin-top:0;}
-.fpgrid{display:flex;flex-wrap:wrap;gap:5px;}
-.fpb{
-  min-height:38px;padding:0 10px;border-radius:7px;cursor:pointer;
-  background:#171b20;border:1px solid #2f363e;color:#b9c3cd;
-  font:700 11px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:.4px;touch-action:manipulation;
-}
-.fpb.on{background:#0a3a4a;border-color:#1d7f9c;color:#8fe6ff;}
-.fprow{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
-.fprow label{flex:none;width:64px;font:700 10px/1.3 'Arial Narrow',Arial,sans-serif;
-  letter-spacing:.8px;color:#8b95a0;text-transform:uppercase;}
-.fprow input[type=range]{flex:1;min-width:0;height:36px;accent-color:#1d7f9c;background:none;}
-.fprow output{flex:none;width:60px;text-align:right;font:700 14px/1 monospace;color:#e6edf5;}
-
-/* The 12-lead and the code summary. Framed, not popped: on a phone a popup is
-   a new tab at best and silently blocked at worst. */
-.frameovr{background:#000;padding:0;align-items:stretch;}
-.frameovr iframe{flex:1;width:100%;height:100%;border:0;background:#000;}
-.framex{
-  position:fixed;top:calc(8px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));
-  z-index:5;min-height:44px;padding:0 16px;border-radius:22px;cursor:pointer;
-  background:#7a1f14;border:1px solid #a8341f;color:#ffe7c2;
-  font:700 14px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1px;touch-action:manipulation;
-}
 
 /* A toast for things the trainer wants to say without taking the screen */
+/* Over the page header, the one place it covers neither the rhythm (which is
+   the question) nor a therapy key. It used to sit across the top of the ECG. */
 #fgToast{
-  position:fixed;top:calc(var(--hdrh,0px) + 52px);left:50%;transform:translateX(-50%);z-index:110;
-  max-width:min(92vw,520px);padding:9px 15px;border-radius:10px;
+  position:fixed;top:calc(4px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:110;
+  max-width:min(92vw,560px);padding:6px 14px;border-radius:10px;
   background:#12161b;border:1px solid #2f363e;color:#dbe2e9;
-  font:400 13px/1.45 'Arial Narrow',Arial,sans-serif;text-align:center;
+  font:400 12px/1.35 'Arial Narrow',Arial,sans-serif;text-align:center;
   box-shadow:0 8px 28px rgba(0,0,0,.6);
   opacity:0;pointer-events:none;transition:opacity .2s;
 }
 #fgToast.show{opacity:1;}
 #fgToast.good{border-color:#2f6b45;color:#a8ecc4;}
 #fgToast.bad{border-color:#a8341f;color:#ffc0b2;}
+#fgToast.warn{border-color:#8a5a1e;color:#ffc879;}
 
 /* Portrait already covers the unit with #rotate. The overlays are readable in
    portrait — a brief is text — so they sit above it rather than behind it. */
@@ -1418,7 +1343,7 @@ body.portrait .ovr{z-index:220;}
     <path d="M40 14a17 17 0 0 1 5 12M8 34a17 17 0 0 1-5-12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
     <path d="m43 22 2 5 3-4M5 26l-2-5-3 4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
-  <b>Turn the iPad sideways</b>
+  <b>Turn the screen sideways</b>
   <span>The LIFEPAK 15 is a landscape unit. Held upright, every control would
   sit below the size a gloved thumb can reliably hit.</span>
 </div>
@@ -1440,9 +1365,6 @@ body.portrait .ovr{z-index:220;}
 <div class="ovr" id="ovrCard" hidden onclick="if(event.target===this)closeCard()"></div>
 <div class="ovr" id="ovrDebrief" hidden></div>
 
-<!-- The acquisition and the code record. Each is a whole standalone document
-     built as a string — exactly as it is built for the popup in CES — handed
-     to an iframe through srcdoc rather than written into a second window. -->
 
 
 <div id="fgToast"></div>
@@ -1805,146 +1727,11 @@ function sL(lut,ph){const f=((ph%1)+1)%1*(LS-1),i=Math.floor(f);return lut[i]*(1
 
 // Keyframes
 const NSR=[[0,.5],[.04,.5],[.058,.52],[.076,.537],[.09,.542],[.104,.537],[.118,.52],[.135,.5],[.162,.5],[.176,.488],[.184,.464],[.191,.498],[.2,.614],[.209,.828],[.214,.906],[.219,.952],[.224,.964],[.229,.924],[.236,.772],[.243,.596],[.249,.468],[.255,.484],[.264,.5],[.31,.5],[.355,.502],[.398,.51],[.436,.524],[.464,.54],[.482,.552],[.498,.556],[.514,.552],[.535,.54],[.56,.524],[.588,.51],[.622,.502],[.68,.5],[1,.5]];
-const TACHY=[[0,.5],[.038,.5],[.054,.516],[.068,.528],[.08,.532],[.092,.527],[.104,.514],[.118,.5],[.138,.5],[.148,.48],[.155,.459],[.161,.494],[.169,.596],[.176,.798],[.181,.9],[.186,.94],[.191,.902],[.198,.748],[.205,.576],[.211,.468],[.218,.486],[.228,.5],[.268,.5],[.298,.503],[.328,.512],[.354,.526],[.374,.538],[.388,.544],[.402,.543],[.418,.534],[.44,.518],[.462,.505],[.5,.5],[1,.5]];
-const BRADY=[[0,.5],[.022,.5],[.04,.514],[.06,.532],[.078,.542],[.096,.534],[.114,.516],[.132,.5],[.172,.5],[.192,.484],[.204,.458],[.212,.496],[.222,.634],[.234,.852],[.24,.924],[.246,.958],[.252,.966],[.258,.882],[.268,.718],[.278,.562],[.286,.464],[.294,.484],[.31,.5],[.375,.5],[.425,.503],[.48,.514],[.53,.534],[.572,.556],[.598,.566],[.622,.562],[.65,.546],[.685,.524],[.722,.506],[.782,.5],[.9,.5],[1,.5]];
-// ── Atrial Fibrillation Keyframes ────────────────────────────────────────────
-// Reference: LITFL AF ECG Library (Oct 2024), Ed Burns & Robert Buttner
-// Key features per LITFL:
-//   - Irregularly irregular ventricular rate (handled by jitter in sEcg)
-//   - NO P waves — replaced by fibrillatory (f) waves
-//   - ABSENCE of isoelectric baseline — continuous chaotic low-amplitude undulation
-//   - Fine fibrillatory waves throughout (amplitude ~0.5mm = ~0.006 normalised)
-//   - Narrow QRS (<120ms) — normal ventricular conduction
-//   - Normal T wave — upright, slightly broad
-//
-// The keyframe encodes ONE beat cycle. The fibrillatory baseline is baked into
-// the baseline segments — continuous irregular small oscillations replace the
-// flat isoelectric line seen in NSR. Amplitude of f-waves: ±0.012 (coarse AF).
-// Irregularity of R-R interval is applied by the jitter multiplier in sEcg().
-const AFIB=[
-  // ── Fibrillatory baseline — coarse f-waves, no isoelectric line ──
-  [0,.502],
-  [.008,.494],[.016,.508],[.024,.497],[.032,.511],[.040,.495],
-  [.048,.507],[.056,.492],[.064,.506],[.072,.496],[.080,.510],
-  [.088,.493],[.096,.508],[.104,.494],[.112,.507],[.120,.496],
-  [.130,.503],[.138,.491],
-  // ── QRS complex — narrow, normal morphology, no preceding P wave ──
-  // Small Q, rapid R upstroke, S notch — QRS < 120ms
-  [.145,.496],[.150,.479],[.155,.461],   // Q wave
-  [.160,.494],[.167,.636],[.174,.812],   // rapid upstroke
-  [.179,.916],[.184,.958],[.188,.976],   // R peak
-  [.192,.954],[.198,.874],[.205,.746],   // descent
-  [.212,.624],[.218,.530],[.223,.470],   // S wave notch
-  [.228,.492],[.234,.504],               // return to baseline
-  // ── Post-QRS fibrillatory baseline — T wave then f-waves resume ──
-  // T wave: upright, slightly broad, normal morphology
-  [.245,.505],[.260,.512],[.278,.524],
-  [.295,.534],[.312,.540],[.328,.538],   // T wave peak
-  [.345,.528],[.364,.514],[.382,.505],
-  // f-waves resume after T wave
-  [.398,.502],[.410,.494],[.422,.508],[.434,.496],[.446,.509],
-  [.458,.493],[.470,.506],[.482,.495],[.494,.508],[.506,.494],
-  [.520,.507],[.534,.493],[.548,.506],[.562,.495],[.578,.508],
-  [.594,.493],[.612,.506],[.632,.494],[.654,.507],[.678,.494],
-  [.704,.507],[.732,.493],[.762,.505],[.795,.495],[.832,.506],
-  [.872,.495],[.916,.504],[.960,.497],[1,.502]
-];
-
-// AF with Rapid Ventricular Response — same f-wave baseline, shorter R-R cycle
-// Rate ~110-160 bpm per LITFL: "AF most commonly associated with ventricular rate ~110-160"
-// QRS is identical — the rate difference is handled by HR slider + jitter
-// This keyframe is compressed to allow more beats per unit time
-const AFIBRVR=[
-  // ── Fibrillatory baseline — slightly coarser f-waves in RVR ──
-  [0,.503],
-  [.008,.493],[.016,.509],[.024,.495],[.032,.510],[.040,.494],
-  [.048,.508],[.056,.493],[.064,.507],[.072,.494],[.080,.509],
-  [.088,.493],[.096,.507],[.104,.494],[.110,.502],[.116,.492],
-  // ── QRS — same narrow morphology as AF ──
-  [.122,.494],[.127,.476],[.132,.456],   // Q
-  [.137,.490],[.143,.628],[.149,.808],   // upstroke
-  [.154,.912],[.158,.954],[.162,.974],   // R peak
-  [.166,.950],[.171,.868],[.177,.738],   // descent
-  [.183,.616],[.189,.524],[.194,.466],   // S notch
-  [.199,.489],[.204,.501],
-  // ── T wave ──
-  [.213,.506],[.226,.514],[.240,.526],
-  [.255,.536],[.268,.542],[.280,.540],   // T peak
-  [.294,.530],[.310,.516],[.326,.505],
-  // ── f-waves resume ──
-  [.340,.502],[.352,.492],[.364,.507],[.376,.493],[.390,.508],
-  [.404,.493],[.418,.506],[.434,.493],[.450,.507],[.468,.493],
-  [.488,.506],[.510,.493],[.534,.506],[.560,.493],[.590,.506],
-  [.624,.493],[.662,.505],[.706,.494],[.758,.505],[.820,.494],
-  [.892,.505],[.960,.495],[1,.503]
-];
-const AFLUTTER=[[0,.516],[.05,.532],[.09,.536],[.12,.522],[.148,.502],[.16,.5],[.178,.516],[.2,.53],[.222,.522],[.24,.504],[.248,.5],[.254,.48],[.26,.456],[.267,.494],[.275,.678],[.283,.866],[.289,.924],[.295,.956],[.301,.912],[.309,.758],[.317,.572],[.323,.464],[.331,.485],[.345,.5],[.37,.516],[.4,.528],[.428,.534],[.45,.526],[.47,.508],[.48,.5],[.51,.514],[.54,.526],[.562,.52],[.58,.506],[.59,.5],[1,.5]];
-const SVT=[[0,.5],[.018,.5],[.026,.484],[.033,.462],[.04,.498],[.048,.672],[.056,.858],[.062,.934],[.068,.952],[.074,.908],[.082,.756],[.09,.574],[.096,.464],[.103,.484],[.114,.5],[.148,.5],[.185,.504],[.215,.514],[.236,.52],[.25,.518],[.262,.508],[.278,.5],[1,.5]];
-const HB1=[[0,.5],[.028,.5],[.046,.513],[.064,.53],[.08,.54],[.096,.532],[.112,.515],[.128,.5],[.168,.5],[.21,.5],[.248,.5],[.26,.484],[.27,.458],[.278,.496],[.288,.634],[.298,.85],[.304,.922],[.31,.956],[.316,.966],[.323,.882],[.332,.718],[.341,.558],[.349,.462],[.357,.482],[.372,.5],[.42,.5],[.462,.504],[.506,.516],[.545,.533],[.572,.548],[.59,.554],[.608,.55],[.632,.536],[.66,.516],[.695,.502],[.74,.5],[1,.5]];
-const HB2N=[[0,.5],[.028,.5],[.046,.513],[.064,.529],[.08,.538],[.094,.53],[.108,.515],[.122,.5],[.158,.5],[.17,.484],[.178,.46],[.186,.496],[.195,.628],[.204,.842],[.21,.914],[.216,.946],[.222,.956],[.229,.87],[.238,.704],[.247,.548],[.255,.462],[.263,.482],[.278,.5],[.322,.5],[.362,.504],[.402,.516],[.436,.532],[.461,.545],[.478,.549],[.495,.545],[.518,.531],[.545,.512],[.578,.502],[.625,.5],[1,.5]];
-const HB2D=[[0,.5],[.055,.5],[.082,.514],[.11,.532],[.135,.542],[.158,.532],[.18,.514],[.202,.5],[1,.5]];
-const HB3=[[0,.5],[.022,.5],[.038,.51],[.054,.524],[.068,.532],[.08,.526],[.092,.512],[.104,.5],[.155,.5],[.18,.5],[.196,.508],[.212,.52],[.224,.524],[.236,.518],[.248,.502],[.26,.5],[.305,.5],[.32,.476],[.334,.442],[.346,.498],[.36,.594],[.375,.734],[.389,.836],[.4,.898],[.414,.88],[.43,.8],[.448,.682],[.464,.564],[.478,.444],[.49,.382],[.502,.358],[.516,.378],[.528,.416],[.542,.455],[.558,.488],[.576,.5],[.614,.5],[.63,.508],[.644,.518],[.656,.522],[.668,.516],[.68,.502],[.692,.5],[1,.5]];
-const VTACH=[[0,.5],[.038,.5],[.058,.558],[.086,.694],[.116,.836],[.14,.926],[.16,.958],[.176,.918],[.196,.798],[.22,.622],[.246,.444],[.266,.352],[.282,.314],[.298,.34],[.318,.396],[.346,.428],[.375,.418],[.404,.388],[.432,.358],[.462,.368],[.492,.396],[.53,.426],[.568,.446],[.624,.466],[.682,.488],[.758,.498],[.9,.5],[1,.5]];
-const VFIB=[[0,.5],[.055,.672],[.11,.81],[.165,.556],[.22,.304],[.275,.222],[.33,.394],[.385,.69],[.44,.814],[.495,.642],[.55,.346],[.605,.186],[.66,.258],[.715,.532],[.77,.774],[.825,.702],[.88,.524],[.94,.488],[1,.5]];
-// ── Inferior STEMI — Lead II ─────────────────────────────────────────────────
-// References: LITFL, SAEM, NIH StatPearls, Thoracic Key (2024)
-// Morphology: upright P → normal PR → PATHOLOGICAL Q wave (>0.04s, deep) →
-//   tall R → J-point elevation → CONCAVE ("smiley face") ST elevation →
-//   HYPERACUTE broad peaked T wave (broader than normal, taller than QRS in acute phase)
-// Note: ST elevation in II is present but III > II (RCA territory hallmark)
-// Concave (not convex/tombstone) morphology per SAEM/Healio references
-const STEMI=[
-  [0,.500],                   // isoelectric baseline
-  [.025,.500],                // flat pre-P segment
-  // ── Normal upright P wave ──
-  [.040,.506],[.052,.518],[.064,.528],[.076,.532],[.088,.526],
-  [.100,.516],[.112,.505],[.124,.500],
-  // ── PR segment — isoelectric ──
-  [.148,.500],
-  // ── Pathological Q wave — wide (>0.04s) and deep (>25% of R) ──
-  [.156,.496],[.162,.484],[.168,.464],[.174,.446],[.180,.462],
-  // ── R wave — tall, rapid upstroke ──
-  [.188,.530],[.196,.680],[.202,.820],[.208,.920],[.212,.964],
-  [.216,.976],[.220,.956],[.228,.880],[.236,.770],[.243,.660],
-  // ── J point — elevated ~2-3mm above baseline ──
-  [.248,.548],
-  // ── ST segment — CONCAVE upward elevation ("smiley face")
-  //    Gradual rise from J-point, plateau, then blends into T wave
-  //    Per SAEM: "concave upwards" is classic inferior STEMI ──
-  [.262,.554],[.278,.560],[.296,.566],[.318,.572],[.342,.576],
-  [.368,.580],[.392,.582],[.414,.580],
-  // ── Hyperacute T wave — broad, peaked, asymmetric
-  //    Upstroke less steep than downstroke, merges with elevated ST
-  //    Taller than normal T, peak stays above ST baseline level ──
-  [.430,.582],[.446,.592],[.462,.612],[.476,.636],[.490,.658],
-  [.502,.674],[.512,.682],[.520,.678],  // T peak
-  [.530,.664],[.542,.640],[.556,.612],[.572,.582],[.590,.560],
-  [.612,.540],[.638,.522],[.668,.510],[.710,.504],[.780,.501],
-  [1,.500]                    // return to baseline
-];
-// ── Junctional Escape Rhythm ──────────────────────────────────────────────────
-// Reference: LITFL (2025) — junctional-escape-rhythm-ecg-library
-// Features: NO visible P wave (retrograde P buried in QRS or absent),
-//   narrow QRS (<120ms), regular rhythm, rate 40-60bpm (at 18bpm = junctional bradycardia)
-//   Isoelectric baseline → absent P → narrow normal QRS → normal T → long pause
-const JUNCTIONAL=[
-  [0,.500],              // isoelectric baseline — no P wave
-  [.025,.500],
-  [.048,.500],           // PR segment absent — no atrial activity visible
-  [.070,.500],
-  // ── Narrow QRS — rapid upstroke, normal duration (<0.12s) ──
-  [.090,.492],[.097,.470],[.103,.454],[.109,.472],  // small q
-  [.116,.534],[.124,.682],[.130,.824],[.136,.916],
-  [.140,.960],[.144,.980],[.148,.958],[.154,.886],
-  [.162,.758],[.170,.618],[.177,.508],[.183,.484],  // S wave notch
-  [.190,.500],
-  // ── Normal T wave — upright, slightly broad ──
-  [.210,.500],[.240,.503],[.272,.512],[.304,.526],
-  [.330,.538],[.350,.544],[.366,.540],[.385,.528],
-  [.408,.512],[.435,.502],[.470,.500],
-  // ── Long isoelectric pause (slow rate) ──
-  [.550,.500],[.700,.500],[.850,.500],[1,.500]
-];
+/* The station's other rhythms used to have one keyframed beat each here, which
+   sEcg stretched to fill the R-R. Every one of them is now composed from the
+   parts below (P wave, QRST, ventricular complex) on its own clocks, so those
+   templates were unreachable and are gone. NSR stays as the fallback for a
+   rhythm name nothing else handles. */
 // ── Arterial Line Waveforms ─────────────────────────────────────────────────
 // References: ChatPPG (2026), NIH StatPearls/NBK556127, ResearchGate fig (2024),
 //   Michard F. J Clin Monit Comput 2024 (PMC11297833)
@@ -2088,12 +1875,10 @@ const PWAVE=[[0,.5],[.16,.532],[.36,.562],[.5,.570],[.64,.556],[.86,.518],[1,.5]
 const VBEAT=[[0,.5],[.04,.472],[.10,.424],[.16,.560],[.24,.800],[.30,.940],
   [.36,.862],[.42,.664],[.48,.502],[.54,.442],[.62,.392],[.72,.356],[.82,.402],
   [.92,.466],[1,.5]];
-const QRS_SEC=0.44, P_SEC=0.11, V_SEC=0.42;
+const P_SEC=0.11;
 
 const L={
-  nsr:mkL(NSR),tachy:mkL(TACHY),brady:mkL(BRADY),afib:mkL(AFIB),afib_rvr:mkL(AFIBRVR),
-  aflutter:mkL(AFLUTTER),svt:mkL(SVT),hb1:mkL(HB1),hb2n:mkL(HB2N),hb2d:mkL(HB2D),
-  hb3:mkL(HB3),vtach:mkL(VTACH),vfib:mkL(VFIB),stemi:mkL(STEMI),junctional:mkL(JUNCTIONAL),
+  nsr:mkL(NSR),
   qrst:mkL(QRST),pw:mkL(PWAVE),vb:mkL(VBEAT),
   art:mkL(ART_NORMAL), artOver:mkL(ART_OVER), artUnder:mkL(ART_UNDER),
   co2:mkL(CO2_KF),co2s:mkL(CO2S_KF),spo2:mkL(SPO2_KF)
@@ -2344,7 +2129,23 @@ function lp(v,a){return v*.94+(Math.random()-.5)*a;}
 function wd(v){return v*.9995+(Math.random()-.5)*.008;}
 function advanceNoise(){ nS=lp(nS,.004); wS=wd(wS); }
 
-const SPX=180; // px/sec
+/* Sweep. The LIFEPAK 15 shows at least five seconds of ECG across its display
+   at 25 mm/s (data sheet), so the sweep is set from the width of the ECG
+   channel and the channel always holds five seconds. A fixed 180 px/s showed
+   1.1 s on an iPhone SE and 1.9 s on an iPhone 14: less than one beat-to-beat
+   interval of the 32/min complete heart block, and under half the repeating
+   group of the Mobitz II, so the rhythms whose diagnosis is a pattern could
+   not show it. The columns are drawn peak-preserving (drawChannel) so nothing
+   narrow is lost between them.
+
+   With one floor. Five seconds across a 205 px channel (an iPhone SE) is
+   41 px/s, a beat of fast VT 13 px wide, and VT and SVT become the same dense
+   comb: the width a learner is asked to judge is gone. Below 60 px/s the sweep
+   stops slowing and the window gives instead — 3.4 s on an SE, which still
+   holds a dropped P and a dissociated escape. Every phone from the iPhone 12
+   size up has a channel of 300 px or more and gets the full five seconds. */
+const ECG_WINDOW_S=5, ECG_MIN_SPX=60;
+function ecgSpx(){ const z=cSizes.cEcg; return z&&z.W>1?Math.max(ECG_MIN_SPX,z.W/ECG_WINDOW_S):180; }
 
 // ── Per-lead ECG morphology transform table ────────────────────────────────
 // References: LITFL, ECGwaves.com (2025), Merck Manual, Queen's University ECG,
@@ -2479,16 +2280,102 @@ function vfibValue(t){
 // Sample functions — pure math, no noise (noise added at render time)
 /* Deviation from baseline, in seconds from the start of the complex. Zero
    outside it, so a QRS can be laid over whatever the atria are doing. */
-function qrsTDev(u){
-  if(u<0||u>QRS_SEC) return 0;
-  return sL(L.qrst,u/QRS_SEC)-0.5;
+/* Every complex is drawn in two parts, because they run on different clocks.
+   The QRS is depolarisation: about as long at 150/min as at 45, so it is a
+   fixed number of seconds. The ST-T is repolarisation, and it shortens as the
+   rate rises — which is what QT correction exists to undo. One fixed complex
+   left the QT at 330-370 ms at every rate: at 212/min every T wave ran into
+   the next QRS, and at 36/min the QT was drawn shorter than a heart has it.
+   The ST-T now follows Fridericia, QT = QTc x RR^(1/3), around a QTc of
+   400 ms; Fridericia rather than Bazett because Bazett over-corrects at
+   exactly the rates this bank lives at.
+
+   The narrow QRS measures about 95 ms from onset to J point, the mean of the
+   reference population behind the 2009 AHA/ACCF/HRS limit (74-114 ms, abnormal
+   above 110). It used to measure 100-109 ms: normal, but at the top of the
+   range and crowding the wide complexes it is meant to be told from. The T is
+   about a fifth of the R, where it had been a tenth — at the edge of flat. */
+const QRS_FRAC=0.30;      // the J point's place in the QRST template
+const N_QRS_SEC=0.115;    // the QRS segment, onset baseline to J
+const N_ST_SEC=0.355;     // the ST-T at an R-R of one second
+const T_GAIN=2.0;         // T wave ~20% of the R, ~0.19 mV in II at 1 cm/mV
+/* How the ST-T scales with the R-R: by the JT that a Fridericia QT leaves once
+   the QRS is taken out (QT = 0.40 x RR^(1/3), JT = QT - 0.10). Scaling the
+   ST-T by the cube root itself ran the QT 20-45 ms long at 186-212/min. */
+function repol(rr){ const r=Math.min(2.5,Math.max(0.2,rr||1)); return (0.40*Math.cbrt(r)-0.10)/0.30; }
+function qrsTDev(u,rr){
+  if(u<0) return 0;
+  if(u<N_QRS_SEC) return sL(L.qrst,u/N_QRS_SEC*QRS_FRAC)-0.5;
+  const w=(u-N_QRS_SEC)/(N_ST_SEC*repol(rr));
+  if(w>=1) return 0;
+  return (sL(L.qrst,QRS_FRAC+w*(1-QRS_FRAC))-0.5)*T_GAIN;
 }
-/* A ventricular complex. dur is normally V_SEC; it is squeezed only when the
-   rate is so fast the next one is already due, which is what makes 180/min VT
-   read as back-to-back wide complexes with no baseline between them. */
-function vDev(u,dur){
-  if(u<0||u>dur) return 0;
-  return sL(L.vb,u/dur)-0.5;
+/* A ventricular complex, in the same two parts. It used to be squeezed whole to
+   fit the R-R, so VT got narrower the faster it ran — 181 ms at 146/min, 140
+   at 188 — when it is only the repolarisation that shortens. Now the QRS keeps
+   its width at every rate and the ST-T shortens instead; at 188/min it runs
+   straight into the next complex, which is the back-to-back look fast VT has.
+   qrs is the QRS segment in seconds: V_QRS_SEC for VT, an escape or a paced
+   beat (~175 ms), BBB_QRS_SEC for a beat conducted with bundle branch block. */
+const V_FRAC=0.48;        // where the QRS ends in VBEAT
+const V_QRS_SEC=0.18;
+const BBB_QRS_SEC=0.14;   // ~135 ms
+/* Sized so a wide complex keeps a normal JT: its QT is the narrow one plus
+   most of the extra QRS width (~480 ms at 60/min), the relation QT corrections
+   for bundle branch block are built on. At 188/min its T runs into the next
+   complex, which is the sine-wave look of fast VT. */
+const V_ST_SEC=0.34;
+function vDev(u,rr,qrs){
+  const q=qrs||V_QRS_SEC;
+  if(u<0) return 0;
+  if(u<q) return sL(L.vb,u/q*V_FRAC)-0.5;
+  const w=(u-q)/(V_ST_SEC*repol(rr));
+  if(w>=1) return 0;
+  return sL(L.vb,V_FRAC+w*(1-V_FRAC))-0.5;
+}
+
+/* Atrial fibrillation's ventricular response. Irregularly irregular, but not
+   unbounded: the AV node will not conduct two beats closer together than its
+   refractory period allows. The closed-form jitter this replaces had no floor
+   and put R-R intervals of 219 ms (274/min) into the 164/min item — inside the
+   250 ms range that, in AF, is the marker of an accessory pathway, a different
+   and more dangerous rhythm. So the intervals come from a fixed pseudo-random
+   table (the same strip every time, and still a pure function of t), with a
+   soft floor that leaves a right-skewed distribution sitting on the node's
+   limit, the way AF does, rather than a pile of identical shortest beats. */
+const AF_N=2048, AF_FLOOR_S=0.30, AF_SOFT_S=0.04;
+const afTables={};
+function afTable(mean,cv){
+  const key=mean.toFixed(4)+'/'+cv;
+  if(afTables[key]) return afTables[key];
+  let s=0x2545F491;
+  const rnd=()=>{ s=(s+0x6D2B79F5)|0; let x=Math.imul(s^(s>>>15),1|s);
+    x=(x+Math.imul(x^(x>>>7),61|x))^x; return ((x^(x>>>14))>>>0)/4294967296; };
+  const floor=Math.max(AF_FLOOR_S,mean*0.55), ceil=mean*1.8;
+  const rr=new Float64Array(AF_N); let sum=0;
+  for(let k=0;k<AF_N;k++){
+    const g=(rnd()+rnd()+rnd()+rnd()-2)*Math.sqrt(3);           // ~N(0,1)
+    let x=Math.min(ceil,mean*(1+cv*g));
+    // Above floor+soft, unchanged; below it, eased onto the floor and never past it.
+    if(x<floor+AF_SOFT_S) x=floor+AF_SOFT_S*Math.exp((x-floor-AF_SOFT_S)/AF_SOFT_S);
+    rr[k]=x; sum+=x;
+  }
+  const sc=mean*AF_N/sum;                                        // keep the rate on the screen
+  const cum=new Float64Array(AF_N+1);
+  for(let k=0;k<AF_N;k++) cum[k+1]=cum[k]+rr[k]*sc;
+  return afTables[key]={cum,period:cum[AF_N]};
+}
+
+/* The monitor's own noise floor: a faint undulation and a little fine noise,
+   together about 0.02 mV either side of the line, all of it inside the unit's
+   0.5-40 Hz monitor bandwidth (data sheet) — anything outside it the unit's
+   own filter would remove. Drawn by the unit, not part of the patient,
+   so it is added on the way to the screen and sEcg stays exact. Without it
+   every trace was mathematically clean and asystole was a ruler-straight line,
+   which on a real monitor is the look of a lead that is off. */
+function monitorNoise(t){
+  return 0.004*Math.sin(2*Math.PI*0.71*t+0.6)+0.003*Math.sin(2*Math.PI*1.13*t+2.2)
+       + 0.0012*(Math.sin(2*Math.PI*17.3*t)+Math.sin(2*Math.PI*23.9*t+1.1)+Math.sin(2*Math.PI*31.7*t+2.3));
 }
 function pDev(u){ return (u<0||u>P_SEC)?0:sL(L.pw,u/P_SEC)-0.5; }
 
@@ -2544,7 +2431,7 @@ function sEcg(t){
   if(r==='paced'){
     const k=Math.floor(t/bp), u=t-k*bp;
     if(u<0.012) return .98;            // the spike is not a lead-dependent deflection
-    return leadDev(vDev(u-0.02,V_SEC)+vDev(u+bp-0.02,V_SEC), cfg);
+    return leadDev(vDev(u-0.02,bp)+vDev(u+bp-0.02,bp), cfg);
   }
   /* ── The three that are assembled rather than repeated ──────────────── */
 
@@ -2561,8 +2448,8 @@ function sEcg(t){
     const saw=(fp<0.80 ? -(fp/0.80) : -(1-(fp-0.80)/0.20))*0.130;
     const ratio=Math.max(2,Math.round(300/Math.max(hr,40)));
     const beat=Math.floor(t*F/ratio);
-    const u=t-beat*ratio/F;
-    return leadDev(saw+qrsTDev(u), cfg);
+    const rr=ratio/F, u=t-beat*rr;
+    return leadDev(saw+qrsTDev(u,rr)+qrsTDev(u+rr,rr), cfg);
   }
 
   /* Atrial fibrillation. Irregularly irregular means no two R-R intervals the
@@ -2572,18 +2459,24 @@ function sEcg(t){
      closed-form cumulative sum of three incommensurate terms, so it stays a
      pure function of t while never repeating. */
   if(r==='afib'||r==='afib_rvr'){
-    const mean=bp, J=(r==='afib_rvr'?0.30:0.24)*mean;
-    const start=k=>k*mean+J*(Math.sin(k*2.399)+0.6*Math.sin(k*5.117+1.7)
-                            +0.35*Math.sin(k*11.31+2.9))*0.5;
-    let k=Math.floor(t/mean);
-    for(let i=0;i<4&&start(k)>t;i++) k--;
-    for(let i=0;i<4&&start(k+1)<=t;i++) k++;
-    const u=t-start(k);
-    /* Fibrillatory waves, and no isoelectric line anywhere between them —
-       the absence of a flat baseline is half of what identifies this. */
-    const f=0.014*(Math.sin(t*46.3)+0.7*Math.sin(t*71.9+1.2)
-                  +0.5*Math.sin(t*109.7+2.4))/2.2;
-    return leadDev(f+qrsTDev(u), cfg);
+    const T=afTable(bp,0.24), C=T.cum;
+    const tt=((t%T.period)+T.period)%T.period;
+    let lo=0,hi=AF_N; while(hi-lo>1){ const m=(lo+hi)>>1; if(C[m]<=tt) lo=m; else hi=m; }
+    const rrAt=k=>{ k=((k%AF_N)+AF_N)%AF_N; return C[k+1]-C[k]; };
+    /* This complex and the two before it. An early beat used to cut the last
+       one's T wave off where it stood, leaving a step in the line. */
+    const u=tt-C[lo], u1=u+rrAt(lo-1), u2=u1+rrAt(lo-2);
+    const v=qrsTDev(u,bp)+qrsTDev(u1,bp)+qrsTDev(u2,bp);
+    /* Fibrillatory waves: one wave whose cycle length wanders between about
+       340 and 550/min, inside AF's 350-600, at roughly 0.08-0.1 mV — fine to
+       medium. They were 0.03 mV with components out to 1,000/min, which is
+       no rhythm and, at two pixels, no wave either. Wandering the frequency
+       rather than summing fixed ones keeps the waves from cancelling into a
+       flat stretch: no isoelectric line anywhere is half of what identifies
+       AF. */
+    const fp=2*Math.PI*7.4*t+0.9*Math.sin(2*Math.PI*0.9*t)+0.5*Math.sin(2*Math.PI*1.7*t+1);
+    const f=0.024*(0.9+0.1*Math.sin(2*Math.PI*0.37*t))*(Math.sin(fp)+0.25*Math.sin(2*fp+0.5))/1.1;
+    return leadDev(f+v, cfg);
   }
 
   /* Second-degree AV block, Mobitz II. The P waves march out at a constant
@@ -2598,10 +2491,14 @@ function sEcg(t){
     const PR=0.18;
     const pIx=Math.floor(t/pp), up=t-pIx*pp;
     const mod=(n,m)=>((n%m)+m)%m;
+    /* Conducted with a bundle branch block. Mobitz II is a block below the AV
+       node, and 70-80% of it comes with a BBB; a narrow QRS is possible (a
+       block within the His bundle) but it is the minority, and the wide QRS
+       is part of why the item's answer is pacing rather than atropine. */
     let v=pDev(up)*pGain(cfg);
-    if(mod(pIx,TOTAL)!==TOTAL-1) v+=qrsTDev(up-PR);
+    if(mod(pIx,TOTAL)!==TOTAL-1) v+=vDev(up-PR,bp,BBB_QRS_SEC);
     /* The complex before this P can still be running under it. */
-    if(mod(pIx-1,TOTAL)!==TOTAL-1) v+=qrsTDev(up+pp-PR);
+    if(mod(pIx-1,TOTAL)!==TOTAL-1) v+=vDev(up+pp-PR,bp,BBB_QRS_SEC);
     return leadDev(v, cfg);
   }
   /* Sinus and the narrow-complex tachycardias are composed too, for the same
@@ -2620,8 +2517,8 @@ function sEcg(t){
     const k=Math.floor(t/bp), u=t-k*bp;
     const pg=cf.p*pGain(cfg);
     let v=cf.p?pDev(u)*pg:0;
-    v+=qrsTDev(u-cf.pr);
-    v+=qrsTDev(u+bp-cf.pr);           // the complex before this one, still running
+    v+=qrsTDev(u-cf.pr,bp);
+    v+=qrsTDev(u+bp-cf.pr,bp);        // the complex before this one, still running
     if(cf.p) v+=pDev(u+bp)*pg;
     return leadDev(v, cfg);
   }
@@ -2638,7 +2535,7 @@ function sEcg(t){
     const pg=pGain(cfg);
     let v=(pDev(up)+pDev(up+pp))*pg;
     const k=Math.floor(t/bp), u=t-k*bp;      // the escape, wide and slow
-    v+=vDev(u,V_SEC)+vDev(u+bp,V_SEC);
+    v+=vDev(u,bp)+vDev(u+bp,bp);
     return leadDev(v, cfg);
   }
 
@@ -2647,9 +2544,8 @@ function sEcg(t){
      complexes narrow at 190/min, which is the opposite of the finding the item
      is asking about. */
   if(r==='vtach'){
-    const dur=Math.min(V_SEC,bp*0.94);
     const k=Math.floor(t/bp), u=t-k*bp;
-    return leadDev(vDev(u,dur)+vDev(u+bp,dur), cfg);
+    return leadDev(vDev(u,bp)+vDev(u+bp,bp), cfg);
   }
   /* Junctional escape. The impulse starts below the atria, so the QRS is narrow
      and normal-looking and there is no P wave in front of it — narrow complexes
@@ -2658,12 +2554,11 @@ function sEcg(t){
      options. */
   if(r==='junctional'){
     const k=Math.floor(t/bp), u=t-k*bp;
-    return leadDev(qrsTDev(u)+qrsTDev(u+bp), cfg);
+    return leadDev(qrsTDev(u,bp)+qrsTDev(u+bp,bp), cfg);
   }
 
-  const lm={aflutter:L.aflutter,vtach:L.vtach,stemi:L.stemi,junctional:L.junctional};
   const ph=((t/bp)%1+1)%1;
-  return applyLeadCfg(sL(lm[r]||L.nsr,ph), ph, cfg);
+  return applyLeadCfg(sL(L.nsr,ph), ph, cfg);
 }
 function sArt(t){
   if(!S.patientConnected) return null;
@@ -2886,6 +2781,9 @@ document.addEventListener('fullscreenchange',()=>{
 /* F for fullscreen, but not while the learner is typing into the trainer. */
 window.addEventListener('keydown',e=>{
   if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  /* Not Ctrl+F or Cmd+F: that is the browser's find, and it was taking the
+     page in and out of fullscreen. */
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
   if(e.key==='f'||e.key==='F') toggleFullscreen();
 });
 if(window.visualViewport){
@@ -2912,12 +2810,18 @@ const PAPER={
 };
 function paper(){ return document.body.classList.contains('sunvue')?PAPER.sun:PAPER.dark; }
 
+/* One lattice on every channel, ruled like paper: a large box is 0.2 s of
+   ECG, a small one 0.04 s. Small boxes are left out when they would be under
+   4 px apart — at a five-second sweep on a phone they are a grey haze. */
+const gridFine=gx=>gx/5>=4;
 function drawGrid(ctx,W,H){
-  const gx=SPX/5, pp=paper();
+  const gx=ecgSpx()/5, pp=paper();
   ctx.fillStyle=pp.gnd; ctx.fillRect(0,0,W,H);
   ctx.lineWidth=.5; ctx.strokeStyle=pp.fine;
-  for(let x=0;x<W;x+=gx/5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=H/20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  if(gridFine(gx)){
+    for(let x=0;x<W;x+=gx/5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=H/20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  }
   ctx.lineWidth=.8; ctx.strokeStyle=pp.bold;
   for(let x=0;x<W;x+=gx){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=0;y<H;y+=H/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
@@ -2925,7 +2829,7 @@ function drawGrid(ctx,W,H){
 
 /* ── Ring-buffer pixel writer ──────────────────────────────────
    Each channel tracks its own pixel position (pxPos).
-   Each frame we advance by (dt * SPX) pixels and only write
+   Each frame we advance by (dt x the channel's sweep) pixels and only write
    those new columns — everything else stays untouched.
    This is exactly how a real monitor draws its trace.
 ──────────────────────────────────────────────────────────────── */
@@ -2935,14 +2839,16 @@ function drawGrid(ctx,W,H){
 // — and its 6px-wide erase never wrapped, so it left an unswept sliver at the
 // right edge of each canvas.
 function gridSeg(ctx,x0,w,H){
-  const gx=SPX/5, gmin=gx/5, x1=x0+w, pp=paper();
+  const gx=ecgSpx()/5, gmin=gx/5, x1=x0+w, pp=paper();
   // Same lattice and same weights as drawGrid, so a repainted band is
   // indistinguishable from the grid laid down when the canvas was sized.
-  ctx.lineWidth=.5; ctx.strokeStyle=pp.fine;
-  ctx.beginPath();
-  for(let g=Math.ceil(x0/gmin)*gmin; g<x1; g+=gmin){ ctx.moveTo(g,0); ctx.lineTo(g,H); }
-  for(let y=0;y<H;y+=H/20){ ctx.moveTo(x0,y); ctx.lineTo(x1,y); }
-  ctx.stroke();
+  if(gridFine(gx)){
+    ctx.lineWidth=.5; ctx.strokeStyle=pp.fine;
+    ctx.beginPath();
+    for(let g=Math.ceil(x0/gmin)*gmin; g<x1; g+=gmin){ ctx.moveTo(g,0); ctx.lineTo(g,H); }
+    for(let y=0;y<H;y+=H/20){ ctx.moveTo(x0,y); ctx.lineTo(x1,y); }
+    ctx.stroke();
+  }
   ctx.lineWidth=.8; ctx.strokeStyle=pp.bold;
   ctx.beginPath();
   for(let g=Math.ceil(x0/gx)*gx; g<x1; g+=gx){ ctx.moveTo(g,0); ctx.lineTo(g,H); }
@@ -2959,16 +2865,17 @@ function clearBand(ctx,x0,w,W,H){
 }
 
 /* Sweep speed per channel.
-   ECG and the pressure traces run at the standard 25 mm/s. A capnogram at
-   that speed puts barely one breath on the screen, which is why the real
-   unit runs CO2 slower — the shape of the plateau is the whole point of
-   waveform capnography, and you cannot see a shape you only get one of. */
-const CH_SPX={cCo2:0.25};
+   ECG, SpO2 and the pressure traces run at the ECG's speed, as they do on the
+   unit (25 mm/s for all three). CO2 runs at half of it, the unit's 12.5 mm/s,
+   which puts ten seconds and two or three breaths on the screen — the shape
+   of the plateau is the whole point of waveform capnography, and you cannot
+   see a shape you only get one of. */
+const CH_SPX={cCo2:0.5};
 /* The channel ceiling in mmHg. The unit scales CO2 0-50; the ZX skin's own
    channel is 0-60, and the sample function normalises against whichever is
    showing so a 37 sits at the same height as the printed scale says. */
 function co2Ceiling(){ return currentSkin==='lp'?50:60; }
-function chSpx(id){ return SPX*(CH_SPX[id]||1); }
+function chSpx(id){ return ecgSpx()*(CH_SPX[id]||1); }
 const pxAccum={};
 function stepFor(id,dt){
   pxAccum[id]=(pxAccum[id]||0)+dt*chSpx(id);
@@ -3000,10 +2907,33 @@ function drawChannel(id, fn, stroke, fill){
   // patient is not connected) and the trace is left blank rather than flat.
   const ys=new Array(count+1);
   const vs=(id==='cEcg')?new Array(count+1):null;
+  /* The ECG is drawn peak-preserving, as monitors draw it: each pixel column
+     covers 1/spx of a second, is sampled every 2 ms across that span, and is
+     drawn as a stroke from its first extreme to its second. One sample per
+     column was fine at 180 px/s; at a five-second sweep on a phone a column
+     is 14-24 ms, so R waves came out a different height every beat and a
+     12 ms pacing spike could fall between two columns and not be drawn. */
+  const sub=vs?Math.max(1,Math.ceil(1000/spx/2)):1;
+  const ea=vs&&sub>1?new Array(count+1):null, eb=ea?new Array(count+1):null;
   for(let i=0;i<=count;i++){
-    const v=fn(TT-(count-i)/spx);
-    if(vs) vs[i]=v;
-    ys[i]=(v===null||v===undefined)?null:yp(v);
+    const tc=TT-(count-i)/spx;
+    if(!ea){
+      const v=fn(tc);
+      if(vs) vs[i]=v;
+      ys[i]=(v===null||v===undefined)?null:yp(v);
+      continue;
+    }
+    let lo=Infinity,hi=-Infinity,loAt=0,hiAt=0,v=null;
+    for(let k=sub-1;k>=0;k--){
+      v=fn(tc-k/(spx*sub));
+      if(v===null||v===undefined){ v=null; break; }
+      if(v<lo){lo=v;loAt=k;} if(v>hi){hi=v;hiAt=k;}
+    }
+    if(v===null){ vs[i]=null; ys[i]=null; continue; }
+    vs[i]=hi;                                  // the detector sees the column's peak
+    ys[i]=yp(v);
+    // larger k is earlier in time
+    ea[i]=yp(hiAt>loAt?hi:lo); eb[i]=yp(hiAt>loAt?lo:hi);
   }
   if(vs&&D.on) scanQrs(vs,TT-count/spx,spx);
 
@@ -3018,12 +2948,15 @@ function drawChannel(id, fn, stroke, fill){
   // One path for the whole frame's worth of trace, broken at the canvas seam
   // and wherever the channel has no reading.
   ctx.strokeStyle=stroke;
-  ctx.lineWidth=2.0;
+  /* Finer and with less glow at a slow sweep, where beats sit close together:
+     a 2 px line under a 7 px blur smeared neighbouring complexes into one. */
+  const dense=ecgSpx()<110;
+  ctx.lineWidth=dense?1.5:2.0;
   ctx.lineCap='round';
   ctx.lineJoin='round';
   // The phosphor glow reads as smudge on the SunVue ground.
   const glow=!document.body.classList.contains('sunvue');
-  ctx.shadowBlur=glow?7:0;
+  ctx.shadowBlur=glow?(dense?2.5:7):0;
   if(glow) ctx.shadowColor=stroke;
   ctx.beginPath();
   let pen=false;
@@ -3032,6 +2965,7 @@ function drawChannel(id, fn, stroke, fill){
     if(y===null){ pen=false; lastY[id]=-1; continue; }
     const px=(prevPx+i)%W;
     if(!pen){ ctx.moveTo(px, lastY[id]<0?y:lastY[id]); pen=true; }
+    if(ea){ ctx.lineTo(px+1, ea[i]); ctx.lineTo(px+1, eb[i]); }
     ctx.lineTo(px+1, y);
     lastY[id]=y;
     if(px+1>=W) pen=false;                     // do not stroke across the wrap
@@ -3110,6 +3044,10 @@ const D={
   // modifier, never its own mode — an AED SYNC state cannot exist.
   mode:'manual',
   sync:false, cpr:false, analyzing:false, analyzeUntil:0, advisory:'', reanalyzeAt:0,
+  /* SHOCK pressed with SYNC armed: the press is taken and the shock waits for
+     the next QRS the detector senses (syncDue is that detection, acted on in
+     the next tick). */
+  syncPending:false, syncDue:false, syncPressedAt:0, syncCued:false,
   pacer:false, pacerRate:60, pacerMa:0, pacePaused:false,   // 60 PPM is the unit's factory default
   alarms:true, silenceUntil:0,
   sunvue:false,
@@ -3162,9 +3100,9 @@ function resetDevice(){
   printerRun(false); closeMenu(); clearHomeSel();
   D.energyIx=ENERGIES.indexOf(200);
   D.shocks=0; D.lastShockAt=0;
-  D.sync=false; D.cpr=false;
+  D.sync=false; D.syncPending=false; D.syncDue=false; D.syncCued=false; D.cpr=false;
   D.analyzing=false; D.analyzeUntil=0; D.advisory=''; D.reanalyzeAt=0;
-  aedReset();                                // AED/SYNC state machine to MANUAL_IDLE
+  aedReset();                               // AED/SYNC state machine to MANUAL_IDLE
   D.pacer=false; D.pacerRate=60; D.pacerMa=0; D.pacePaused=false;
   D.alarms=true; D.silenceUntil=0;
   D.nibpUntil=0;
@@ -3194,7 +3132,13 @@ function logEvent(type,label,detail){
    crew is actually trained on. */
 let AC=null;
 function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended') AC.resume(); return AC; }
+/* The header's sound key mutes the whole page, the unit included. It used to
+   gate only the station's own answer beeps, so "Sound off" still left the
+   charge whine and the ready tone going in a quiet classroom. */
+let soundOn=true;
+try{ soundOn=localStorage.getItem('amrkc.lp15.sound')!=='0'; }catch(e){}
 function beep(freq,ms,vol,type){
+  if(!soundOn) return;
   const c=ac(); if(!c) return;
   const o=c.createOscillator(), g=c.createGain();
   o.type=type||'sine'; o.frequency.value=freq;
@@ -3207,6 +3151,7 @@ function beep(freq,ms,vol,type){
 }
 let chargeOsc=null,chargeGain=null;
 function chargeTone(on){
+  if(on&&!soundOn) return;
   const c=ac(); if(!c) return;
   if(on&&!chargeOsc){
     chargeOsc=c.createOscillator(); chargeGain=c.createGain();
@@ -3368,6 +3313,7 @@ function invalidateCanvases(){
 function disarm(reason){
   if(!D.charging&&!D.charged) return;
   D.charging=false; D.charged=false; D.disarmAt=0;
+  D.syncPending=false; D.syncDue=false; D.syncCued=false;
   chargeTone(false); readyTone(false);
   if(reason) logEvent('disarm','Disarmed',reason);
   banner(null);
@@ -3388,8 +3334,23 @@ function chargeDone(){
   chargeTone(false); readyTone(true);
   banner(energy()+'J  READY  —  STAND CLEAR',0,false,true);
 }
-function deliverShock(){
+/* A synchronized shock lands on an R wave, which is the whole of what SYNC is.
+   It used to go off the instant SHOCK was pressed whatever was on the screen,
+   so a "synchronized" shock could be delivered into asystole — the one place
+   the station claims to ask the device rather than take a word for it. A press
+   is still a press: it is latched here and delivered on the next QRS the
+   detector senses, which on a perfusing tachycardia is a fraction of a second.
+   With no QRS to find it does not deliver, as the unit does not. */
+function deliverShock(onQrs){
   if(!D.charged) return;
+  if(D.sync&&!onQrs){
+    // A second press on a shock that is already waiting is a crew who think
+    // the button has failed, so the cue answers it at once.
+    if(D.syncPending&&D.syncCued&&typeof syncWaitCue==='function') syncWaitCue();
+    if(!D.syncPending){ D.syncPending=true; D.syncPressedAt=Date.now(); D.syncCued=false; }
+    return;
+  }
+  D.syncPending=false; D.syncDue=false; D.syncCued=false;
   const wasSync=D.sync;
   D.shocks++; D.lastShockAt=Date.now();
   // Shock, then two minutes of CPR, then the unit asks for another rhythm check.
@@ -3718,7 +3679,13 @@ function bind(id,fn){ const el=document.getElementById(id); if(el) el.addEventLi
 function bindHold(id,ms,onHold,onRelease,onTap){
   const el=document.getElementById(id); if(!el) return;
   let timer=null,fired=false,pressed=false;
-  const start=e=>{ e.preventDefault(); ac(); pressed=true; fired=false; el.classList.add('held');
+  /* In learn mode a tap reads the key out instead of working it. That was
+     enforced on click, and these keys work on pointer events, so ON, SHOCK and
+     PAUSE fired anyway — a charged unit delivered, and was graded, behind the
+     card that was explaining it. */
+  const reading=()=>learnOn&&!!nearestCardId(el);
+  const start=e=>{ if(reading()) return;
+    e.preventDefault(); ac(); pressed=true; fired=false; el.classList.add('held');
     timer=setTimeout(()=>{fired=true;onHold&&onHold();},ms); };
   /* Leaving the key is not pressing it, and finishing is not something that
      can happen twice. Both were true here: pointerleave ran the same handler
@@ -3740,6 +3707,18 @@ function bindHold(id,ms,onHold,onRelease,onTap){
   el.addEventListener('pointerup',()=>end(true));
   el.addEventListener('pointerleave',()=>end(false));
   el.addEventListener('pointercancel',()=>end(false));
+  /* Enter or Space works these keys from a keyboard, with the same hold, as
+     every other key on the unit already could be — on pointer events alone, a
+     Toughbook user tabbing to ON or SHOCK could not switch the unit on or
+     deliver. In learn mode the key is left to click, which opens its card. */
+  const isKey=e=>e.key==='Enter'||e.key===' ';
+  el.addEventListener('keydown',e=>{
+    if(!isKey(e)||reading()) return;
+    e.preventDefault();
+    if(!e.repeat&&!pressed) start(e);
+  });
+  el.addEventListener('keyup',e=>{ if(isKey(e)&&pressed){ e.preventDefault(); end(true); } });
+  el.addEventListener('blur',()=>end(false));
 }
 
 /* ON, as the key works on the device: a press brings the unit up, and holding
@@ -3770,7 +3749,11 @@ bind('kSYNC',()=>{ if(!D.on) return;
     return;
   }
   D.sync=!D.sync;
-  if(D.sync&&D.charged) disarm('sync changed');
+  if(!D.sync){ D.syncPending=false; D.syncDue=false; D.syncCued=false; }   // a waiting sync shock is not an unsynchronized one
+  /* Arming SYNC throws away a charge taken without it — mid-charge as well
+     as once charged. Only the charged case was covered, so a charge started
+     unsynchronized and armed halfway through came out ready to cardiovert. */
+  if(D.sync&&(D.charged||D.charging)) disarm('sync changed');
   logEvent('sync',D.sync?'SYNC ON':'SYNC OFF',''); });
 
 function nudgeEnergy(d){
@@ -3818,8 +3801,10 @@ bind('kRateUp',()=>nudgeRate(1));
 bind('kRateDn',()=>nudgeRate(-1));
 bind('kCurUp',()=>nudgeMa(1));
 bind('kCurDn',()=>nudgeMa(-1));
+/* Letting go is logged as well as pressing: it is the moment the set rate comes
+   back, and the patient under the pacing answers to it. */
 bindHold('kPAUSE',180,()=>{ if(D.pacer){ D.pacePaused=true; logEvent('pacerPause','PACING PAUSED',''); } },
-  ()=>{ D.pacePaused=false; },null);
+  ()=>{ if(D.pacePaused){ D.pacePaused=false; logEvent('pacerResume','PACING RESUMED',''); } },null);
 
 bind('kNIBP',()=>startNibp());
 bind('kALARMS',()=>{
@@ -3914,7 +3899,7 @@ function scanQrs(vals,t0,spx){
       qrsArmed=false; qrsLastT=t; qrsMarks.push(i);
     } else if(!qrsArmed&&v<QRS_ON*0.8) qrsArmed=true;
   }
-  if(qrsMarks.length&&D.sync) pulseLed('ledSYNC');
+  if(qrsMarks.length&&D.sync){ pulseLed('ledSYNC'); if(D.syncPending) D.syncDue=true; }
   return qrsMarks.length;
 }
 
@@ -3947,6 +3932,15 @@ function devTick(){
   applyPulses(now);
   if(D.charging&&now-D.chargeStart>=CHARGE_MS) chargeDone();
   if(D.charged&&D.disarmAt&&now>=D.disarmAt) disarm('60s without a shock');
+  // Sensed on last frame's samples; delivered here rather than mid-draw.
+  if(D.syncDue){ D.syncDue=false; if(D.syncPending&&D.sync&&D.charged) deliverShock(true); }
+  /* Two seconds latched with nothing sensed. On any rhythm with a QRS the shock
+     has gone long before this; on one without, the unit will wait for good,
+     as it should, and the station says why rather than leave it looking like
+     a dead button. Said once; a second press says it again. */
+  if(D.syncPending&&!D.syncCued&&now-D.syncPressedAt>=2000){
+    D.syncCued=true; if(typeof syncWaitCue==='function') syncWaitCue();
+  }
   if(D.analyzing&&now>=D.analyzeUntil) finishAnalyze();
   if(D.banner&&D.bannerUntil&&now>=D.bannerUntil) banner(null);
   if(D.alarms&&D.silenceUntil&&now>=D.silenceUntil) D.silenceUntil=0;
@@ -4014,7 +4008,7 @@ function sEcgDev(t){
   const v=sEcg(t);
   if(v===null||v===undefined) return v;
   const g=ecgSize();
-  return 0.5+(v-0.5)*g;
+  return 0.5+(v-0.5+monitorNoise(t))*g;
 }
 
 /* ── Main loop ── */
@@ -4154,17 +4148,24 @@ function newCase(patient){
 }
 
 /* ── Sound and toast ─────────────────────────────────────────────────── */
-let soundOn=true;
-try{ soundOn=localStorage.getItem('amrkc.lp15.sound')!=='0'; }catch(e){}
 function toggleSound(){
   soundOn=!soundOn;
   try{ localStorage.setItem('amrkc.lp15.sound',soundOn?'1':'0'); }catch(e){}
+  if(!soundOn){ chargeTone(false); alarmTone(false); }
   const b=document.getElementById('btnSound');
   if(b) b.textContent=soundOn?'🔊':'🔇';
   toast(soundOn?'Sound on':'Sound off');
 }
 (function(){ const b=document.getElementById('btnSound');
   if(b) b.textContent=soundOn?'🔊':'🔇'; })();
+
+/* SYNC armed, SHOCK pressed, and no QRS to land on. The station's voice, not
+   the unit's: the LIFEPAK shows no such message, it simply does not fire.
+   Worded as what the unit is doing, not as a diagnosis, so it explains the
+   silence without naming the rhythm. */
+function syncWaitCue(){
+  toast('SYNC is waiting for a QRS to shock on. The unit is not sensing one, so it will not fire.','warn',4200);
+}
 
 let toastTimer=null;
 function toast(msg,kind,ms){
@@ -4244,8 +4245,8 @@ const CARDS={
     watch:'Charge while compressions are still going. Every second the team stands clear waiting for the charge tone is a second of no perfusion, and the pre-shock pause is one of the few things about a code that is measurably yours to shorten.'},
 
   kSHOCK:{name:'SHOCK',area:'Area 1 · Defibrillation',
-    what:'Delivers the charge. It does nothing unless the unit is armed.',
-    how:'Press when charged and the team is clear.',
+    what:'Delivers the charge. It does nothing unless the unit is armed. With SYNC on, the press is held until the next QRS the unit senses and the shock lands on it — and where there is no QRS to sense, it does not deliver.',
+    how:'Press when charged and the team is clear. With SYNC on, keep everyone clear until the shock has gone.',
     watch:'Say it out loud and look before you press: "I\'m clear, you\'re clear, everybody clear." Then compressions restart immediately — you do not stop to check a rhythm or a pulse after the shock, you go straight back to the chest for two minutes.'},
 
   kPACER:{name:'PACER',area:'Area 2 · Pacing',
@@ -4379,7 +4380,7 @@ const ITEMS=[
    opts:['Second-degree AV block (Mobitz II)','First-degree AV block','Sinus bradycardia with PACs','Third-degree AV block'],
    context:'BP 80/48, lightheaded and short of breath on standing. Atropine given.',
    therapy:'pace',
-   why:'Mobitz II drops beats without warning and progresses to complete block. Symptomatic, and atropine is unreliable here, so get the pacer on and the pads ready early.'},
+   why:'Mobitz II drops beats without warning and progresses to complete block. The wide QRS is the usual company: the block is below the AV node, which is why atropine is unreliable here. Symptomatic, so get the pacer on and the pads ready early.'},
 
   {v:P('svt',212,78,44,94,34,22), name:'SVT',
    opts:['SVT','Sinus tachycardia','Atrial flutter with 2:1 conduction','Ventricular tachycardia'],
@@ -4399,7 +4400,7 @@ const ITEMS=[
    therapy:'sync',
    why:'Irregularly irregular with no P waves, fast, and the patient is unstable with it. Synchronized cardioversion at 200 J biphasic, escalating if it does not work — 2025 moved off the old low-and-climb approach for AF. And think about how long they have been in it before you shock.'},
 
-  {v:P('aflutter',148,126,80,97,36,16), name:'Atrial flutter',
+  {v:P('aflutter',150,126,80,97,36,16), name:'Atrial flutter',
    opts:['Atrial flutter','Atrial fibrillation','SVT','Sinus tachycardia'],
    context:'BP 126/80. Aware of a fast heartbeat, no pain, no shortness of breath.',
    therapy:'none',
@@ -4458,10 +4459,16 @@ function shuffled(a){
   return r;
 }
 
+/* What a run is drawn from: the whole bank, or the one rhythm a ?item= link
+   pinned. Run it again repeats the same set rather than widening it. */
+let BANK=ITEMS;
 function startStation(){
-  RUN={items:shuffled(ITEMS),ix:-1,step:'boot',right:0,asked:0,misses:[],t0:Date.now()};
+  RUN={items:shuffled(BANK),ix:-1,step:'boot',right:0,asked:0,misses:[],t0:Date.now()};
   captured=false; paceUnder=null;
-  closeCard();
+  /* Every overlay, not just the card. Run it again and RESTART both come
+     here, and the summary used to stay up over the unit, so a second run
+     could be started and never reached. */
+  closeAllOverlays();
   setPatient({...P('nsr',78,124,78,98,37,14),patientConnected:false,etco2On:false,
               scenario:'Rhythm & Electrical Therapy',deviceReset:(S.deviceReset||0)+1});
   if(D.on) setPower(false);
@@ -4541,6 +4548,7 @@ function answerName(btn){
   const picked=btn.textContent.trim();
   const right=picked===it.name;
   RUN.asked++;
+  RUN.named=RUN.ix;
   document.querySelectorAll('#stnOpts .stnb').forEach(b=>{
     b.disabled=true;
     if(b.textContent.trim()===it.name) b.classList.add('reveal');
@@ -4549,7 +4557,17 @@ function answerName(btn){
   if(right){ RUN.right++; if(soundOn) beep(1180,90,.06,'sine'); }
   else { RUN.misses.push({n:RUN.ix+1,what:'Named it '+picked,should:it.name});
          if(soundOn) beep(320,180,.06,'square'); }
-  setTimeout(()=>{ if(RUN){ RUN.step='treat'; render(); } }, right?520:1250);
+  /* Only this run, at this item, still at this step. RESTART inside that
+     second used to have the old timer land on the new run, push it to a
+     therapy step with no item behind it, throw, and leave ON dead. */
+  const run=RUN, ix=RUN.ix;
+  setTimeout(()=>{
+    if(RUN!==run||RUN.ix!==ix||RUN.step!=='name') return;
+    RUN.step='treat'; render();
+    /* A pacer the crew set up while they were still naming the rhythm is
+       answered now, not on whichever pacer key happens to be pressed next. */
+    paceCheck();
+  }, right?520:1250);
 }
 
 /* ── The therapy answer ──────────────────────────────────────────────────
@@ -4592,7 +4610,17 @@ function trainerEvent(ev){
     if(ev.type==='power'&&ev.label==='ON'){ nextItem(); }
     return;
   }
-  if(/^pacer/.test(ev.type)) paceCheck();
+  // Powering down stops the pacer without a pacer key, so it is asked too.
+  if(/^pacer/.test(ev.type)||ev.type==='power') paceCheck();
+  /* A shock while the naming question is still up. Once the rhythm has been
+     named it is this item's therapy arriving in the pause before the therapy
+     question, so it counts. Before that, the station asks its two questions
+     in order and does not take it as an answer — but it says so. It used to
+     vanish: the charge spent, the shock counted on the unit, and nothing. */
+  if(ev.type==='shock'&&RUN.step==='name'){
+    if(RUN.named===RUN.ix){ RUN.step='treat'; render(); }
+    else { toast('That shock was not counted — name the rhythm first, then treat it.','bad',3600); return; }
+  }
   if(RUN.step!=='treat') return;
   if(ev.type==='shock'){
     answerTherapy(/synchronized/.test(ev.detail||'')?'sync':'defib',ev.detail);
@@ -4612,29 +4640,53 @@ function trainerEvent(ev){
    pacer on and reaching capture is what counts as the answer; spikes without
    capture are not treatment and are not accepted as one. */
 const PACE_RESPONSIVE=['brady','hb1','hb2','hb3','junctional','nsr'];
+/* The patient once captured: the paced rate, and the pressure it buys. */
+function pacedVitals(under){
+  return {rhythm:'paced',hr:D.pacerRate,
+    sbp:Math.round(96+(D.pacerRate-60)*0.35),dbp:Math.round(58+(D.pacerRate-60)*0.2),
+    spo2:Math.min(98,(under.spo2||90)+6),etco2:Math.max(under.etco2||33,35)};
+}
 function paceCheck(){
-  if(!RUN||RUN.step!=='treat') return;
+  if(!RUN||RUN.ix<0||(RUN.step!=='treat'&&RUN.step!=='done')) return;
+  /* Graded once, on the therapy step. After that the patient still answers
+     the pacer — capture follows the rate, PAUSE shows what is underneath, and
+     turning the pacer off loses it. Stopping at the verdict left paced
+     complexes running at the old rate under spikes at the new one, and on the
+     screen with no pacer at all. */
+  const grading=RUN.step==='treat';
   const it=RUN.items[RUN.ix];
   const under=paceUnder||{rhythm:S.rhythm,hr:S.hr,sbp:S.sbp,dbp:S.dbp,spo2:S.spo2,etco2:S.etco2};
-  const want=D.pacer&&!D.pacePaused&&D.pacerMa>=PACE_THRESHOLD&&D.pacerRate>=40;
+  const want=D.on&&D.pacer&&!D.pacePaused&&D.pacerMa>=PACE_THRESHOLD&&D.pacerRate>=40;
+  /* A heart that can answer, and a circulation to show it. PEA can take the
+     impulse electrically but gets no pressure from it, and showing one
+     contradicted the verdict sitting under it. */
+  const canAnswer=PACE_RESPONSIVE.includes(under.rhythm)&&under.sbp>0;
+  /* And a rate above the patient's own. Paced below it, the heart is already
+     beating faster than the pacer asks: the normal sinus item "captured" at
+     60 and the screen showed its rate fall from 78. It is also what the
+     RATE card tells the crew to do. */
+  const capture=want&&canAnswer&&D.pacerRate>under.hr;
 
-  if(want&&!captured){
-    if(!PACE_RESPONSIVE.includes(under.rhythm)){
-      /* Pacing something that cannot answer is still an answer, and it is
-         the wrong one. It is graded here rather than ignored. */
-      answerTherapy('pace');
-      return;
-    }
+  if(capture&&!captured){
     paceUnder=under; captured=true;
-    setPatient({rhythm:'paced',hr:D.pacerRate,
-      sbp:Math.round(96+(D.pacerRate-60)*0.35),dbp:Math.round(58+(D.pacerRate-60)*0.2),
-      spo2:Math.min(98,(under.spo2||90)+6),etco2:Math.max(under.etco2||33,35)});
+    setPatient(pacedVitals(under));
     banner('CAPTURE  '+D.pacerRate+' ppm',2600);
-    answerTherapy('pace');
-  }else if(!want&&captured){
+    if(grading) answerTherapy('pace');
+  }else if(capture&&captured){
+    if(S.hr!==D.pacerRate) setPatient(pacedVitals(paceUnder));
+  }else if(!capture&&captured){
+    // Paused, switched off, current below threshold, or the rate turned down
+    // to the patient's own: the patient goes back to what is underneath.
     captured=false;
     setPatient({rhythm:paceUnder.rhythm,hr:paceUnder.hr,sbp:paceUnder.sbp,
       dbp:paceUnder.dbp,spo2:paceUnder.spo2,etco2:paceUnder.etco2});
+  }else if(want&&grading&&(!canAnswer||it.therapy!=='pace')){
+    /* Pacing a patient who does not need it, or one it cannot help, is still
+       an answer and the wrong one, so it is graded rather than ignored —
+       whether or not anything captured. Where pacing is the right answer, it
+       is not taken until it captures: the rate still has to go above the
+       patient's own. */
+    answerTherapy('pace');
   }
 }
 
@@ -4646,14 +4698,20 @@ function paceCheck(){
 function finish(){
   const run=RUN; RUN=null;
   const pct=Math.round(run.right/run.asked*100);
-  if(best===null||pct>best){ best=pct; saveProgress(); }
+  /* A best is a best over the whole bank. A one-rhythm ?item= link scored 100%
+     for one right answer and stood as the best run ever after. */
+  const whole=run.items.length===ITEMS.length;
+  if(whole&&(best===null||pct>best)){ best=pct; saveProgress(); }
+  const n=run.items.length;
+  const secs=Math.max(1,Math.round((Date.now()-run.t0)/1000));
+  const took=secs<60?secs+' s':Math.round(secs/60)+' min';
 
   let h='<div class="ovrcard wide">'
     +'<div class="ovrk">Rhythm &amp; Electrical Therapy</div>'
     +'<div class="ovrh">'+run.right+' of '+run.asked+' correct</div>'
-    +'<div class="ovrp">'+run.items.length+' rhythms, named and treated, in <b>'
-    +Math.round((Date.now()-run.t0)/60000)+' min</b>.'
-    +(best!==null?' Best so far <b>'+best+'%</b>.':'')+'</div>';
+    +'<div class="ovrp">'+n+(n===1?' rhythm':' rhythms')+', named and treated, in <b>'
+    +took+'</b>.'
+    +(whole&&best!==null?' Best so far <b>'+best+'%</b>.':'')+'</div>';
 
   if(run.misses.length){
     h+='<div class="ovrk" style="margin-top:4px">What to go back over</div>';
@@ -4688,10 +4746,8 @@ function closeAllOverlays(){
 (function boot(){
   let n=NaN;
   try{ n=parseInt(new URLSearchParams(location.search).get('item')||'',10); }catch(e){}
+  if(n>=1&&n<=ITEMS.length) BANK=[ITEMS[n-1]];
   startStation();
-  if(n>=1&&n<=ITEMS.length){
-    RUN.items=[ITEMS[n-1]];
-  }
 })();
 
 /* Escape closes the teaching card, and nothing else — losing a run to a stray
