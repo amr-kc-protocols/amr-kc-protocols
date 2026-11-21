@@ -958,6 +958,17 @@ canvas#pip-canvas{display:none}
   color:var(--sub);font-size:10px;font-weight:700;letter-spacing:0.06em;cursor:pointer;flex-shrink:0;
   -webkit-user-select:none;user-select:none}
 .dock-confirm:active{transform:scale(0.95)}
+/* GOAL MET: the learner is down at the knob when the goal turns green, and the
+   card's Confirm is a screen away. This brings it to them. Sits above the
+   knob dock when that is up. */
+.goal-nudge{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translate(-50%,170%);z-index:92;
+  min-height:44px;padding:10px 20px;border-radius:22px;border:none;background:var(--green);color:#ffffff;
+  font-size:14px;font-weight:800;letter-spacing:0.02em;box-shadow:0 8px 26px rgba(0,0,0,0.35);cursor:pointer;
+  visibility:hidden;transition:transform 0.2s,visibility 0s linear 0.2s;max-width:calc(100vw - 24px);white-space:nowrap}
+.goal-nudge.show{transform:translate(-50%,0);visibility:visible;transition:transform 0.2s}
+.knob-dock.show ~ .goal-nudge{bottom:calc(env(safe-area-inset-bottom,0px) + 112px)}
+.goal-nudge:active{transform:translate(-50%,0) scale(0.96)}
+@media (prefers-reduced-motion:reduce){.goal-nudge,.goal-nudge.show{transition:none}}
 
 /* Prominent power-on card — first thing seen on a cold open, sits above the scrim */
 .power-card{display:none;position:relative;z-index:6;background:#ffffff;border:1.5px solid var(--border);
@@ -1253,6 +1264,9 @@ canvas#pip-canvas{display:none}
   </div>
   <button class="dock-confirm" onclick="deselect()">DONE</button>
 </div>
+
+<!-- GOAL MET (shows when the goal is reached and the card's Confirm is off-screen) -->
+<button class="goal-nudge" id="goal-nudge" type="button" onclick="openConfirm()" tabindex="-1" aria-hidden="true">✓ Goal met — Confirm</button>
 
 <!-- DRAWER -->
 <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
@@ -2918,10 +2932,10 @@ var STAGE_DEFS=[
     diagnose:{
       q:'You\'re setting up an average-sized adult on your LTV. Which two controls set minute ventilation, and what\'s a safe starting point?',
       choices:[
-        'Inspiratory Time and PEEP',
-        'Rate and Tidal Volume — about 12–16/min and ~6–8 mL/kg (≈500 mL)',
-        'FiO₂ and Sensitivity',
-        'Pressure Control and Pressure Support'
+        'Inspiratory Time and PEEP — about 1.0 s and 5 cmH₂O',
+        'Rate and Tidal Volume — 12–16/min at about 6–8 mL/kg',
+        'FiO₂ and Sensitivity — 40% and an easy 2 L/min trigger',
+        'Pressure Control and Pressure Support — about 15 and 10'
       ],
       correct:1,
       exp:'Minute ventilation = <strong>Rate × Tidal Volume</strong>. Start around 6–8 mL/kg of <strong>predicted body weight</strong> (~500 mL for an average adult) at 12–16 breaths/min for a normal MV of roughly 7–9 L/min.'
@@ -2941,10 +2955,10 @@ var STAGE_DEFS=[
     diagnose:{
       q:'The inspiratory time is set long, squeezing exhalation. For most patients, what I:E ratio are you aiming for?',
       choices:[
-        'About 1:2 to 1:3 — a normal balance with enough time to exhale',
-        '1:1 — equal in and out is always best',
-        'As inverse as possible (2:1) for everyone',
-        'I:E doesn\'t matter as long as the rate is right'
+        'About 1:2 to 1:3 — enough time to exhale',
+        '1:1 — equal time in and out suits every lung',
+        'As inverse as possible (2:1) — a longer breath oxygenates better',
+        'It doesn\'t matter — only the rate decides how much they exhale'
       ],
       correct:0,
       exp:'Cycle time = 60 ÷ rate; expiratory time = cycle − inspiratory time. Most patients want <strong>I:E about 1:2 to 1:3</strong>. Too long an inspiration shortens exhalation and traps air.'
@@ -2964,10 +2978,10 @@ var STAGE_DEFS=[
     diagnose:{
       q:'Your patient is straining hard to trigger each breath. Sensitivity is set high, at 8 L/min. Which way do you move it?',
       choices:[
-        'Raise it — make them work harder',
-        'Lower it to 1–3 — make the vent easier to trigger',
-        'Turn PEEP up to 15 instead',
-        'Raise the rate so they never trigger'
+        'Raise it — a higher number makes it easier to trigger',
+        'Lower it to 1–3 L/min so a weak effort triggers',
+        'Leave it, and turn PEEP up to 15 to ease their effort',
+        'Raise the rate so they never need to trigger a breath'
       ],
       correct:1,
       exp:'On the LTV, a <strong>higher sensitivity number = harder to trigger</strong> (the patient must generate more flow). Lower it to 1–3 L/min so a weak effort opens the valve. If the vent starts firing on its own, you\'ve gone too far — raise it back.'
@@ -2987,10 +3001,10 @@ var STAGE_DEFS=[
     diagnose:{
       q:'The High Pressure alarm fires at the same pressure every breath. You\'ve assessed the patient — comfortable, equal breath sounds, patent tube, normal plateau. Now what?',
       choices:[
-        'A cuff leak — ignore it',
-        'Assessment is normal → the limit sits at/below the patient\'s own PIP; raise it a bit above',
-        'A tension pneumothorax — but pressure would be climbing and the plateau rising, not steady',
-        'The low minute-volume alarm is misset'
+        'A cuff leak — the alarm is spurious, so ignore it',
+        'Exam is normal, so the limit sits at or below their PIP — raise it',
+        'A tension pneumothorax — needle-decompress the chest before anything else',
+        'The low minute-volume alarm is misset — reset it instead'
       ],
       correct:1,
       exp:'<strong>Assess before you adjust.</strong> Reaching the same pressure every breath does not by itself mean the limit is too low — a fixed obstruction can do the same. But you\'ve done the work-up (comfortable patient, equal sounds, patent tube, normal plateau), which rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem — set the High Pressure limit 5–10 cmH₂O above the normal PIP. A true obstruction (kink, plug, bronchospasm) would drive the <em>PIP</em> up while the plateau stayed near-normal — a widening PIP–plateau gap; a <em>rising plateau</em> instead means stiffer lungs (falling compliance). A normal plateau argues against both.'
@@ -3010,10 +3024,10 @@ var STAGE_DEFS=[
     diagnose:{
       q:'Your patient is starting to take breaths of their own. You want to allow that but keep a mandatory backup. What do you choose?',
       choices:[
-        'Stay in A/C — fully control every breath',
-        'SIMV with Pressure Support — mandatory backup breaths plus a boost on their own breaths',
-        'CPAP only — no backup at all',
-        'Pressure Control'
+        'Stay in A/C — every breath fully controlled and supported',
+        'SIMV with PS — a backup rate, and their own breaths boosted',
+        'CPAP only — they\'re breathing, so no backup rate is needed',
+        'Pressure Control — set a pressure and let them breathe on top'
       ],
       correct:1,
       exp:'<strong>SIMV</strong> delivers a set number of mandatory breaths and lets the patient breathe spontaneously in between; <strong>Pressure Support</strong> augments each of those spontaneous efforts. A common transport setup for a patient who\'s waking up.'
@@ -3033,10 +3047,10 @@ var STAGE_DEFS=[
     diagnose:{
       q:'In Pressure Control you command a pressure and the vent gives whatever volume that pressure produces. What must you now watch?',
       choices:[
-        'Nothing changes from volume control',
-        'Delivered tidal volume — it rises and falls with the patient\'s compliance',
-        'The FiO₂',
-        'The PEEP'
+        'Nothing new — the vent still guarantees the same volume',
+        'Delivered tidal volume — it changes with compliance',
+        'The FiO₂ — pressure control lowers the oxygen delivered',
+        'The PEEP — pressure control turns it off between breaths'
       ],
       correct:1,
       exp:'Pressure control sets a <strong>pressure, not a volume</strong>. If the lungs stiffen, the same pressure moves less air and the tidal volume drops — so <strong>watch delivered Vt</strong> closely whenever you\'re pressure-targeting.'
@@ -3086,10 +3100,10 @@ var SCENARIO_LEVELS={
       diagnose:{
         q:'PaCO₂ 62, pH 7.28, oxygenation adequate. What is the disturbance, and what has to change?',
         choices:[
-          'Hypoxemia — raise FiO₂ and PEEP',
-          'Respiratory acidosis from inadequate minute ventilation — increase MV',
+          'Hypoxemia — raise FiO₂ and PEEP to correct the gas',
+          'Respiratory acidosis from low minute ventilation — raise MV',
           'Metabolic acidosis — this is compensatory, leave the vent alone',
-          'Air-trapping — lengthen exhalation'
+          'Air-trapping — lengthen exhalation so the CO₂ can get out'
         ],
         correct:1,
         exp:'A high PaCO₂ with a low pH and normal oxygenation is a <strong>respiratory acidosis</strong>. CO₂ clearance is proportional to minute ventilation (Rate × Vt) — so raising MV is the fix.'
@@ -3115,7 +3129,7 @@ var SCENARIO_LEVELS={
         choices:[
           'Increase the respiratory rate to blow off more CO₂',
           'Raise PEEP to recruit collapsed alveoli and increase FRC',
-          'Increase tidal volume to open the lung',
+          'Increase tidal volume to stretch open the collapsed alveoli',
           'Increase inspiratory time to hold the breath longer'
         ],
         correct:1,
@@ -3144,18 +3158,18 @@ var SCENARIO_LEVELS={
       diagnose:{
         q:'Expiratory flow never returns to baseline before the next breath, and CO₂ is rising. What is the problem?',
         choices:[
-          'Hypoxemic respiratory failure — needs more PEEP',
+          'Hypoxemic respiratory failure — it needs more PEEP',
           'Breath stacking / auto-PEEP — not enough time to exhale',
-          'A large leak in the circuit',
-          'Oversedation causing hypoventilation'
+          'A large circuit leak — the vent can\'t hold its pressure',
+          'Oversedation causing hypoventilation and a rising CO₂'
         ],
         correct:1,
         exp:'Gas trapped from incomplete exhalation builds <strong>intrinsic (auto) PEEP</strong>. The primary fix is to give the lungs more time to empty — lengthen expiration (lower rate and/or shorter inspiratory time). <em>Note:</em> "adding PEEP always worsens trapping" is too absolute — a modest applied PEEP set <em>below</em> the auto-PEEP can actually reduce trigger workload without adding to trapping. But the first move here is to open up expiration.'
       },
       goal:{
-        text:'Give the lungs time to empty — lengthen expiration until <strong>I:E is at least 1:4</strong>. Drop the rate, shorten the inspiratory time, or both — your call.',
-        check:function(){ var e=ieExpRatio(); return e!==null && e>=4-0.05; },
-        readout:function(){ var e=ieExpRatio(); return e===null?'I:E  —':'I:E   1 : '+e.toFixed(1); }
+        text:'Give the lungs time to empty — lengthen expiration until <strong>I:E is at least 1:4</strong> — without paying for it with too little ventilation: the CO₂ may rise, but only while <strong>pH stays ≥ 7.20</strong> once it settles (permissive hypercapnia). Shorten the inspiratory time first; drop the rate only as far as the pH allows.',
+        check:function(){ var e=ieExpRatio(); return e!==null && e>=4-0.05 && settledFor(this.task).ph>=7.20-0.005; },
+        readout:function(){ var e=ieExpRatio(), s=settledFor(this.task); return (e===null?'I:E  —':'I:E   1 : '+e.toFixed(1))+'   ·   pH settles at '+s.ph.toFixed(2); }
       },
       confirm:'✓ Expiration lengthened to I:E ≥ 1:4 — but an I:E target is only a proxy. It does <strong>not</strong> prove the trapping is gone: confirm on the flow–time curve that <strong>expiratory flow returns to zero</strong> before the next breath, or measure total-PEEP with an expiratory hold. In COPD, protect the exhale (low rate, short Ti), accept permissive hypercapnia (pH ≥ 7.20), and a small applied PEEP below auto-PEEP can ease triggering. Several combinations work — the endpoint is that the flow reaches baseline.'
     },
@@ -3172,9 +3186,9 @@ var SCENARIO_LEVELS={
       diagnose:{
         q:'A vigorous patient is out-pacing the vent\'s flow and stacking effort against a long inspiration. Besides sedation, what setting change helps most?',
         choices:[
-          'Lengthen inspiratory time further to slow them down',
-          'Shorten inspiratory time — deliver the breath faster and give more time to exhale',
-          'Increase PEEP to reduce their effort',
+          'Lengthen inspiratory time further to slow their breathing down',
+          'Shorten inspiratory time — faster flow, longer exhale',
+          'Increase PEEP so the vent takes over more of their effort',
           'Increase tidal volume to satisfy the air hunger'
         ],
         correct:1,
@@ -3199,18 +3213,18 @@ var SCENARIO_LEVELS={
       diagnose:{
         q:'pH 7.18 but PaCO₂ is already LOW at 28. What is the vent\'s job here?',
         choices:[
-          'Normalize the PaCO₂ toward 40 — it\'s too low',
-          'Maintain a HIGH minute ventilation to sustain the respiratory compensation for the metabolic acidosis',
-          'Hyperventilate hard to drive PaCO₂ below 20',
+          'Normalize the PaCO₂ toward 40 — 28 is dangerously low',
+          'Keep minute ventilation high to sustain their compensation',
+          'Hyperventilate hard to drive PaCO₂ below 20 and fix the pH',
           'Nothing — add PEEP and leave ventilation alone'
         ],
         correct:1,
         exp:'The low PaCO₂ is <strong>compensation</strong> for a severe metabolic (lactic) acidosis. If you let PaCO₂ drift up to 40, the pH crashes. In fact 28 is already behind: <strong>Winter\'s formula</strong> (expected PaCO₂ = 1.5 × HCO₃⁻ + 8 ± 2) puts full compensation for this bicarbonate (about 10) at <strong>roughly 21–26</strong> — part of why they tired and needed the tube. The vent must <strong>match the high minute ventilation the patient was generating</strong>. Minute ventilation is only a <em>starting estimate</em> — it can\'t predict an exact PaCO₂ (dead space and CO₂ production vary) — so set a high MV, then <strong>titrate to the measured ETCO₂ and a follow-up ABG</strong>.'
       },
       goal:{
-        text:'Match the compensatory drive — they were breathing 30+ before the tube, so raise <strong>minute ventilation to at least 12 L/min</strong> (14–18 is common in severe acidosis), keeping the breath lung-safe and getting the extra from <em>rate</em>. Keep <strong>PaCO₂ at or below the pre-intubation 28, toward Winter\'s ~21–26</strong>, confirmed by ABG. Never let CO₂ climb.',
-        check:function(){ var mv=estMinuteVolume(); return mv>=12 && mv<=18.5; },
-        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   keep PaCO₂ ≤ 28'; }
+        text:'Match the compensatory drive — they were breathing 30+ before the tube. Raise minute ventilation (on this patient it takes about <strong>14 L/min or more</strong>; 14–18 is common in severe acidosis), getting the extra from <em>rate</em> and keeping the breath lung-safe (<strong>Vt ≤ 8 mL/kg, 560 mL</strong>), until the <strong>PaCO₂ settles at or below the pre-intubation 28, toward Winter\'s ~21–26</strong> — not below 20. Confirm by ABG. Never let CO₂ climb.',
+        check:function(){ var pc=settledFor(this.task).paco2; return vals.vt.v<=560 && pc>=20 && pc<=28+0.05; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   PaCO₂ settles at '+Math.round(settledFor(this.task).paco2)+' (keep ≤ 28)'; }
       },
       confirm:'✓ High minute ventilation set to sustain the compensation. Remember MV is a proxy, not a PaCO₂ predictor — and in shock, dead space widens the gap so <strong>ETCO₂ reads lower than the PaCO₂</strong>: a reassuring ETCO₂ can hide a rising PaCO₂, so trend it continuously and confirm with serial ABGs. Aim for the PaCO₂ Winter\'s formula predicts, never above the patient\'s own pre-intubation value: normalizing it toward 40 in a compensating metabolic acidosis drops the pH further and can tip a shocked patient into arrest. Level 2 complete!'
     }
@@ -3229,9 +3243,9 @@ var SCENARIO_LEVELS={
       diagnose:{
         q:'Awake, strong effort, good gas exchange on modest support, stable — the readiness screen is passed. Under your medical-control order to ease support, what is the appropriate transport step?',
         choices:[
-          'Keep full AC control — it\'s working, don\'t rock the boat',
-          'Trial reduced support as ordered (CPAP/PSV, low pressure support) and monitor tolerance closely, ready to restore support',
-          'Wean gradually on SIMV, ratcheting the mandatory rate down over hours',
+          'Keep full A/C — it\'s working, so don\'t rock the boat in transit',
+          'Trial reduced support as ordered (CPAP/PSV) and watch tolerance',
+          'Wean on SIMV, stepping the mandatory rate down over several hours',
           'Extubate now — a passed screen means they\'re ready'
         ],
         correct:1,
@@ -3251,23 +3265,23 @@ var SCENARIO_LEVELS={
       scenario:'Intubated status asthmaticus on volume control. Peak pressure lurches breath to breath — 32 one breath, 54 the next — but an inspiratory-hold plateau is far lower, around 25. The rate is 22 and expiratory flow doesn\'t return to baseline before the next breath. SpO₂ and CO₂ are holding for now.',
       vitals:[{k:'SpO₂',v:'96%'},{k:'PIP',v:'32–54'},{k:'Pplat',v:'~25 cmH₂O'},{k:'EtCO₂',v:'44 mmHg'},{k:'HR',v:'104'}],
       lung:{compliance:45,resistance:30,autoPEEP:8,label:'Status asthmaticus'},
-      patient:{sprite:'asthma', label:'patient\'s lungs (status asthmaticus)', vit:{s5:0.02, rec:0, q:0.25, vdA:0.32, etF:0.46, vco2:265, bp:[128,78], floor:88}},
+      patient:{sprite:'asthma', label:'patient\'s lungs (status asthmaticus)', vit:{s5:0.02, rec:0, q:0.25, vdA:0.32, etF:0.46, vco2:265, bp:[128,78], floor:88, phRed:7.15}},
       setup:{mode:'ac',bt:'volume',rate:22,vt:550,it:1.0,peep:5,pc:15,ps:10,fio2:40,sens:3,hipres:55,lowpres:10,lowmv:3,apnea:20},
       diagnose:{
         q:'PIP swings to 54, but the inspiratory-hold plateau is only ~25. What does that tell you, and what is the priority?',
         choices:[
-          'The alveoli are dangerously over-pressured — cut tidal volume hard and cap the peak',
-          'The high PIP is resistive (airway), not alveolar — protect expiration: slow the rate, short Ti/high flow, long exhale, permissive hypercapnia; watch plateau & auto-PEEP',
-          'Switch to pressure control to cap the peak and the problem is solved',
-          'Prolong the inspiratory time to give the stiff lungs time to fill'
+          'The alveoli are over-pressured — cut tidal volume hard and cap the peak',
+          'The peak is resistive, not alveolar — protect the exhale',
+          'Switch to pressure control to cap the peak — that solves it',
+          'Prolong inspiratory time so the stiff lungs have time to fill'
         ],
         correct:1,
         exp:'In severe obstruction the peak pressure is mostly <strong>resistive</strong> — spent across narrowed airways, not delivered to the alveoli. The <strong>plateau</strong> (inspiratory hold) is the alveolar pressure, and here it\'s low and safe — so don\'t chase the scary PIP. The real danger is <strong>dynamic hyperinflation / auto-PEEP</strong>. The fix: slow the rate, use a <em>short</em> inspiratory time (high flow gets the breath in fast), and <strong>maximize expiratory time</strong>; accept permissive hypercapnia. Prolonging inspiration would steal exhale time and worsen trapping. (Pressure control can cap the peak, but it does not fix hyperinflation.)'
       },
       goal:{
-        text:'Protect the exhale — slow down and shorten inspiration so <strong>I:E ≥ 1:3</strong> while keeping the <strong>plateau ≤ 30</strong>. Drop the rate and/or shorten Ti; accept permissive hypercapnia (stay in volume so you can read the plateau).',
-        check:function(){ var e=ieExpRatio(); var d=calcPplat(); return e!==null && e>=3-0.05 && d!==null && d.pplat<=30; },
-        readout:function(){ var e=ieExpRatio(); var d=calcPplat(); return 'I:E 1:'+(e===null?'—':e.toFixed(1))+'  ·  Pplat '+(d?d.pplat.toFixed(0):'—'); }
+        text:'Protect the exhale — slow down and shorten inspiration so <strong>I:E ≥ 1:3</strong> while keeping the <strong>plateau ≤ 30</strong>. Drop the rate and/or shorten Ti and accept permissive hypercapnia — but not without limit: keep the <strong>pH ≥ 7.15</strong> once it settles. (Stay in volume so you can read the plateau.)',
+        check:function(){ var e=ieExpRatio(); var d=calcPplat(); return e!==null && e>=3-0.05 && d!==null && d.pplat<=30 && settledFor(this.task).ph>=7.15-0.005; },
+        readout:function(){ var e=ieExpRatio(); var d=calcPplat(); return 'I:E 1:'+(e===null?'—':e.toFixed(1))+'  ·  Pplat '+(d?d.pplat.toFixed(0):'—')+'  ·  pH settles at '+settledFor(this.task).ph.toFixed(2); }
       },
       confirm:'✓ You read the <strong>plateau, not the peak</strong> — the alveoli were never at 54; those peaks were resistive. In severe airflow obstruction, protect expiration (low rate, short Ti, long exhale), accept permissive hypercapnia, and watch the plateau and auto-PEEP rather than the PIP. Pressure control can cap the peak but doesn\'t resolve hyperinflation — the trapping is what hurts these patients.'
     },
@@ -3283,10 +3297,10 @@ var SCENARIO_LEVELS={
       diagnose:{
         q:'Severe, refractory hypoxemia (P/F ≈ 67) already on lung-protective volumes. What\'s the next ventilator move?',
         choices:[
-          'Increase the tidal volume to recruit more lung',
-          'Climb the ARDSnet FiO₂/PEEP ladder — raise PEEP and FiO₂ together',
+          'Increase the tidal volume to recruit more of the collapsed lung',
+          'Climb the ARDSnet ladder — raise PEEP and FiO₂ together',
           'Increase the respiratory rate — that will raise the oxygen level',
-          'Lower the PEEP to reduce dead space'
+          'Lower the PEEP to cut dead space and protect the blood pressure'
         ],
         correct:1,
         exp:'P/F < 100 is <strong>severe ARDS</strong> (Berlin). Bigger breaths injure; rate fixes CO₂, not oxygen. The evidence-based next step is to <strong>escalate PEEP and FiO₂ in tandem</strong> per the ARDSnet table to recruit lung and buy oxygenation — while you set up prone positioning and consider ECMO referral.'
@@ -3311,9 +3325,9 @@ var SCENARIO_LEVELS={
         q:'Acute herniation, surgeon minutes away. What emergency ventilator maneuver buys time — and what is the trap?',
         choices:[
           'Hyperventilate hard to PaCO₂ below 25 — the lower the better',
-          'Controlled, mild hyperventilation to PaCO₂ ~30–35 — vasoconstrict just enough to drop ICP, as a short bridge',
-          'Hypoventilate to raise PaCO₂ and cerebral blood flow',
-          'Add PEEP to 20 to push blood out of the head'
+          'Brief, mild hyperventilation to PaCO₂ 30–35 as a bridge',
+          'Hypoventilate to raise PaCO₂ and perfuse the injured brain',
+          'Raise PEEP to 20 to push venous blood out of the head'
         ],
         correct:1,
         exp:'CO₂ is a potent cerebral vasodilator: lowering PaCO₂ constricts cerebral vessels, shrinks blood volume, and drops ICP within minutes. But over-doing it (PaCO₂ < 25–30) causes ischemia and rebound. Per Brain Trauma Foundation guidance, hyperventilation is a <strong>monitored, time-limited rescue</strong> for acute herniation only — <strong>guided by continuous ETCO₂</strong> (target ~30–35, correlated to ABG), not a standing setting.'
@@ -3347,8 +3361,8 @@ var SCENARIO_LEVELS={
         q:'No chest rise, no EtCO₂, falling sat, and the pressure never builds. Which DOPE letter is this — and what do you do first?',
         choices:[
           'O — a mucus plug. Suction down the tube immediately.',
-          'E — equipment: gas is not reaching the patient (disconnect, big leak, or cuff failure). Disconnect from the vent and bag, then trace the circuit.',
-          'P — tension pneumothorax. Needle decompress.',
+          'E — gas isn\'t reaching the lungs. Bag them, then trace the circuit.',
+          'P — tension pneumothorax. Needle decompress the chest now.',
           'D — the patient is over-sedated. Increase the rate and keep going.'
         ],
         correct:1,
@@ -3381,7 +3395,7 @@ var SCENARIO_LEVELS={
         q:'The pressure is high and you need to know whether it is stuck in the airways or in the lung itself. Which single maneuver tells you that — before you touch a setting?',
         choices:[
           'Raise the high-pressure limit until the alarm stops, then reassess',
-          'An inspiratory hold — at zero flow the plateau is alveolar pressure, so peak-minus-plateau is the airway (resistive) part',
+          'An inspiratory hold — the plateau is alveolar, the gap is airway',
           'Switch to pressure control so the peak cannot exceed the limit',
           'Increase the tidal volume to push past the resistance'
         ],
@@ -3411,10 +3425,10 @@ var SCENARIO_LEVELS={
       diagnose:{
         q:'Absent breath sounds on the left, chest rising only on the right, PIP 22 → 36, tube at 26 cm. Which DOPE letter was that?',
         choices:[
-          'O — obstruction; the tube needed suctioning',
-          'D — dislodgement: the tube migrated into the right mainstem. Withdraw to ~21–23 cm at the teeth and re-auscultate.',
-          'P — pneumothorax; the left chest needed decompression',
-          'E — equipment; the circuit needed changing'
+          'O — obstruction: a plug, so the tube needed suctioning',
+          'D — right mainstem: withdraw to ~21–23 cm and re-auscultate',
+          'P — a left pneumothorax: the chest needed needle decompression',
+          'E — equipment: a kinked circuit needed changing'
         ],
         correct:1,
         exp:'<strong>D covers both directions.</strong> Too deep is a <strong>right mainstem</strong> — the right main bronchus leaves the carina at a shallower angle, so a migrating tube goes there. You are then putting the whole tidal volume into one lung: pressures climb, breath sounds go absent on the <em>left</em>, only one side rises, and the sat falls. Too far out is <strong>extubation</strong> — the opposite picture, with low pressure, low minute volume and a lost capnograph. Note what this was <em>not</em>: the tube was patent, so suctioning would have found nothing and cost time. Confirm the fix the way you found the problem — re-auscultate both axillae and watch the PIP fall as the second lung comes back. Re-check depth after every move: cot transfers, stair chairs, log rolls and lifts are when tubes migrate.'
@@ -3446,9 +3460,9 @@ var ACADEMY_SCENARIOS={
       q:'Healthy lungs, 75 kg PBW, just intubated. What defines a safe INITIAL tidal volume and baseline?',
       choices:[
         'Whatever was set at the sending hospital — don\'t change it',
-        'About 6–8 mL/kg PBW (≈450–600 mL) with a little PEEP (~5) — lung-protective from breath one',
-        'The biggest volume the high-pressure alarm allows',
-        '4 mL/kg — always use the smallest possible breath'
+        '6–8 mL/kg PBW (≈450–600 mL) and PEEP ~5 from breath one',
+        '10 mL/kg of actual body weight — about 800 mL',
+        '4 mL/kg — always the smallest possible breath, even in healthy lungs'
       ],
       correct:1,
       exp:'Start every intubated patient lung-protective: <strong>6–8 mL/kg of predicted body weight</strong> (here ~450–600 mL), physiologic <strong>PEEP ~5</strong>, and a rate that gives a normal minute ventilation. You don\'t wait for ARDS to protect the lung — you start protected. 9 mL/kg on healthy lungs is still too much.'
@@ -3471,8 +3485,8 @@ var ACADEMY_SCENARIOS={
       q:'Awake, protecting the airway, CHF flash edema failing on a mask. Best respiratory support to set up?',
       choices:[
         'Intubate now — non-invasive support is contraindicated',
-        'Non-invasive CPAP: high baseline pressure with high FiO₂ to recruit lung and unload the heart',
-        'Simple nasal cannula and reassess in 20 minutes',
+        'Non-invasive CPAP — high pressure and high FiO₂',
+        'A simple nasal cannula, then reassess in 20 minutes',
         'Full A/C volume ventilation without intubating'
       ],
       correct:1,
@@ -3497,8 +3511,8 @@ var ACADEMY_SCENARIOS={
       q:'Low oxygen, normal CO₂ and pH. Which failure type — and where does the fix live?',
       choices:[
         'Type II (hypercapnic) — increase minute ventilation',
-        'Type I (hypoxemic) — fix oxygenation with FiO₂ and PEEP',
-        'Neither — this is a metabolic problem',
+        'Type I (hypoxemic) — fix it with FiO₂ and PEEP',
+        'Neither — a metabolic problem the vent can\'t fix',
         'Type I — but the fix is a faster respiratory rate'
       ],
       correct:1,
@@ -3521,10 +3535,10 @@ var ACADEMY_SCENARIOS={
     diagnose:{
       q:'Awake, airway-protecting COPD patient in hypercapnic failure. What is indicated first?',
       choices:[
-        'Immediate intubation — NIV has no role in COPD',
-        'A trial of NIV / BiPAP — pressure support to offload CO₂ and avoid the tube',
-        'CPAP alone — a single pressure is all they need',
-        'Nasal cannula and recheck a gas in an hour'
+        'Immediate intubation — NIV has no role in a COPD flare',
+        'A trial of BiPAP — pressure support to blow off CO₂',
+        'CPAP alone — a single steady pressure is all they need',
+        'Nasal cannula, and recheck a blood gas in an hour'
       ],
       correct:1,
       exp:'Awake, cooperative, airway-protecting hypercapnic COPD is the <strong>strongest evidence-based indication for NIV/BiPAP</strong> — the pressure-support (IPAP above EPAP) unloads the respiratory muscles and blows off CO₂, avoiding intubation in most. CPAP (one pressure) helps oxygenation but doesn\'t augment ventilation the way BiPAP does.'
@@ -3547,10 +3561,10 @@ var ACADEMY_SCENARIOS={
     diagnose:{
       q:'Agitated and bucking, but gas exchange and mechanics are all normal. What is the primary problem?',
       choices:[
-        'Air-trapping — drop the rate',
-        'Hypoxemia — raise FiO₂',
-        'Pain / agitation — the fix is analgesia & sedation; mechanically, just make the vent easy to trigger',
-        'The tidal volume is too low'
+        'Air-trapping — drop the rate to let them exhale',
+        'Hypoxemia — raise the FiO₂ until they settle',
+        'Pain and agitation — analgesia, and an easy trigger',
+        'Air hunger — the tidal volume is too low; raise it'
       ],
       correct:2,
       exp:'When a patient fights the vent but the mechanics and gas exchange are <strong>normal</strong>, the answer usually isn\'t another knob — it\'s <strong>analgesia and sedation</strong>. Treat pain first, then sedation. Mechanically, all you owe them is a vent that isn\'t fighting back: an easy trigger and adequate support.'
@@ -3573,10 +3587,10 @@ var ACADEMY_SCENARIOS={
     diagnose:{
       q:'Severe ARDS with an injurious volume AND refractory hypoxemia. What framework do you apply?',
       choices:[
-        'Fix oxygenation only — raise PEEP and FiO₂, leave the volume',
-        'Protect the lung AND oxygenate: drop Vt to ~6 mL/kg (raise the rate to hold MV), keep Pplat ≤ 30, and climb PEEP/FiO₂',
-        'Give the biggest breath the alarm allows to recruit lung',
-        'Switch to pressure control and stop watching volume'
+        'Fix oxygenation only — raise PEEP and FiO₂ and leave the volume alone',
+        'Both — ~6 mL/kg with a higher rate, Pplat ≤ 30, climb PEEP/FiO₂',
+        'Give the biggest breath the alarm allows, to recruit the lung',
+        'Switch to pressure control and stop watching the tidal volume'
       ],
       correct:1,
       exp:'Severe ARDS demands both at once: <strong>lung-protective</strong> (≈6 mL/kg, Pplat ≤ 30, rate up to hold minute ventilation) <strong>and</strong> <strong>oxygenation</strong> (climb the PEEP/FiO₂ ladder). Do one and neglect the other and the patient loses ground on a long transport.'
@@ -3596,6 +3610,20 @@ var ACADEMY_SCENARIOS={
     confirm:'🏆 Everything at once: a lung-protective tidal volume, plateau under 30, the rate raised to hold minute ventilation, and PEEP climbed to recruit and oxygenate. The ARDSNet (ARMA) trial reported mortality <strong>31.0% vs 39.8%</strong> with 6 vs 12 mL/kg PBW — an 8.8-point absolute reduction (~22% relative); size the breath off <strong>predicted</strong> body weight, because lung size tracks height, not weight. Permissive hypercapnia is acceptable while pH ≥ 7.20. That is the whole discipline of transport ventilation in one patient — and you just ran it cold. You\'re ready.'
   }
 };
+
+// Goals that grade the patient, not just the knobs. A few cases teach a limit
+// on the patient (pH ≥ 7.20 in COPD, PaCO₂ ≤ 28 in sepsis) that the old
+// checks never looked at, so settings that broke the case's own rule passed:
+// COPD at rate 10 (pH ≈ 7.1), asthma at rate 8 (pH ≈ 7.0), sepsis at
+// 12.6 L/min (PaCO₂ 32). Each goal is linked back to its case so a check can
+// read that case's patient — the steady state the settings lead to, from the
+// same model the lung view draws — whichever case is on screen.
+[2,3,7].forEach(function(l){ SCENARIO_LEVELS[l].forEach(function(sc){ if(sc.goal) sc.goal.task=sc; }); });
+Object.keys(ACADEMY_SCENARIOS).forEach(function(k){ var sc=ACADEMY_SCENARIOS[k]; if(sc.goal) sc.goal.task=sc; });
+function settledFor(task){
+  var pt=task&&task.patient;
+  return vitalsTarget(pt?{kg:pt.kg||TL_ADULT_KG, peds:!!pt.peds, spontRate:pt.spontRate||15, P:pt.vit}:null);
+}
 
 // Launch a standalone academy scenario (from ?scenario=<id>)
 var academyMode=false;
@@ -4167,6 +4195,34 @@ function lvSeat(bar){
   if(slot){ slot.replaceWith((_lv||lvBuild()).el); updateLungView(); }
 }
 
+// ── GOAL MET, WHERE THE LEARNER IS LOOKING ───────────────────
+// On a phone the learner turns the knob a screen below the card, so the
+// goal turning green went unseen. When it does: GOAL MET in the scan window
+// (also announced to screen readers), a short chime, and a Confirm button at
+// the bottom of the screen while the card's own Confirm is out of view.
+// Guided play only — Level 3 is graded without live feedback, on purpose.
+var _goalNudgeKey=null, _goalWasMet=false;
+function updateGoalNudge(){
+  var el=document.getElementById('goal-nudge'); if(!el) return;
+  var task=(!freeMode && gameLevel>=1 && !gameDone())?curTask():null;
+  var key=task?(gameLevel+':'+(gameLevel===1?gameStage:scenarioIdx)+'#'+lvSession):null;
+  if(key!==_goalNudgeKey){ _goalNudgeKey=key; _goalWasMet=false; }
+  var met=!!(task && task.goal && scenarioDiagnosed && !assessMode() && deviceRunning() && goalMet(task));
+  if(met && !_goalWasMet){ scanMessage('GOAL MET — PRESS CONFIRM',2600); sfxGoal(); }
+  _goalWasMet=met;
+  var cta=met?document.querySelector('#mission-bar .mission-cta.ready'):null, ctaInView=false;
+  if(cta){ var r=cta.getBoundingClientRect(); ctaInView=r.bottom>0 && r.top<window.innerHeight; }
+  var show=met && !ctaInView;
+  if(el.classList.contains('show')!==show){
+    el.classList.toggle('show',show); el.tabIndex=show?0:-1;
+    if(show) el.removeAttribute('aria-hidden'); else el.setAttribute('aria-hidden','true');
+  }
+}
+var _origRenderMissionCard=renderMissionCard;
+renderMissionCard=function(){ _origRenderMissionCard.apply(this,arguments); updateGoalNudge(); };
+window.addEventListener('scroll',function(){ if(_goalWasMet) updateGoalNudge(); },{passive:true});
+window.addEventListener('resize',function(){ if(_goalWasMet) updateGoalNudge(); });
+
 // ── QUIZ ──────────────────────────────────────────────────────
 // The quiz must own the screen: close the teaching drawer (whose full-page
 // overlay would silently swallow taps) and drop any pending control
@@ -4278,6 +4334,12 @@ function beginScenario(){
 }
 
 // ── PROBLEM-SOLVING FLOW: DIAGNOSE (Step 1) ───────────────────
+// 0…n−1 in a random order (Fisher–Yates)
+function shuffledOrder(n){
+  var a=[]; for(var i=0;i<n;i++) a.push(i);
+  for(var j=n-1;j>0;j--){ var k=Math.floor(Math.random()*(j+1)), t=a[j]; a[j]=a[k]; a[k]=t; }
+  return a;
+}
 function openDiagnose(){
   var sc=curTask(); if(!sc||!sc.diagnose) return;
   prepQuizSurface();
@@ -4285,8 +4347,11 @@ function openDiagnose(){
   var stepLbl=gameLevel===1?' — Step 1: Decide':' — Step 1: Diagnose';
   var html='<div class="quiz-badge">'+sc.name+stepLbl+'</div>';
   html+='<div class="quiz-q">'+d.q+'</div><div class="quiz-choices">';
-  d.choices.forEach(function(c,i){
-    html+='<button class="quiz-btn" onclick="submitDiagnose('+i+')">'+c+'</button>';
+  // Shown in a fresh random order every time. In the data the right answer is
+  // the second choice in 22 of 24 cases, so a fixed order let "always pick B"
+  // pass almost every diagnosis. Each button keeps its choice's index.
+  shuffledOrder(d.choices.length).forEach(function(i){
+    html+='<button class="quiz-btn" data-choice="'+i+'" onclick="submitDiagnose('+i+')">'+d.choices[i]+'</button>';
   });
   html+='</div><div class="quiz-exp" id="qexp">'+d.exp+'</div>';
   document.getElementById('quiz-inner').innerHTML=html;
@@ -4301,7 +4366,8 @@ function submitDiagnose(idx){
   var btns=document.querySelectorAll('.quiz-btn');
   if(!btns.length||btns[0].classList.contains('disabled')) return;
   var ok=(idx===d.correct);
-  btns.forEach(function(b,i){
+  btns.forEach(function(b,pos){
+    var i=b.hasAttribute('data-choice')?+b.getAttribute('data-choice'):pos;   // the choice this button shows
     b.classList.add('disabled'); b.disabled=true;   // truly inert to assistive tech, not just visually
     if(i===d.correct)   b.classList.add('correct');
     else if(i===idx)    b.classList.add('wrong');
@@ -4993,10 +5059,12 @@ var VITAL_LUNG={
   //  vdA: alveolar dead space ÷ Vt · etF: share of it that dilutes end-tidal gas (1 = all)
   //  bp: preset systolic/diastolic at PEEP 5 · age: years, for PALS · floor: SpO₂ target
 //  hco3: bicarbonate at PaCO₂ 40 (24 unless set; COPD 30 for a chronic retainer, estimate)
+  //  phRed: pH below which the panel shows red (7.20 unless set). Severe asthma: 7.15 — reviews
+  //  of controlled hypoventilation accept about 7.15–7.20 (expert opinion; the data are case series)
   normal:   {s5:0.03, rec:0,    q:0,     vdA:0.05, bp:[120,75], floor:92},
   ards:     {s5:0.32, rec:0.75, q:0.05,  vdA:0.14, bp:[114,68], floor:88},
   copd:     {s5:0.03, rec:0,    q:0.20,  vdA:0.32, etF:0.46, bp:[132,80], floor:88, hco3:30},
-  asthma:   {s5:0.02, rec:0,    q:0.105, vdA:0.32, etF:0.46, bp:[128,78], floor:88},
+  asthma:   {s5:0.02, rec:0,    q:0.105, vdA:0.32, etF:0.46, bp:[128,78], floor:88, phRed:7.15},
   pneumonia:{s5:0.22, rec:0.25, q:0.11,  vdA:0.08, bp:[116,70], over:10, floor:92},
   edema:    {s5:0.25, rec:0.8,  q:0.05,  vdA:0.08, bp:[160,95], lvf:true, floor:92},
   pedNormal:{s5:0.03, rec:0,    q:0,     vdA:0.05, bp:[100,60], age:6, floor:92},
@@ -5106,8 +5174,10 @@ function lvPatient(){
           peds:!!pt.peds, spontRate:pt.spontRate||15, P:pt.vit, start:pt.start||null};
 }
 // Steady state for the settings and the patient on the panel now.
-function vitalsTarget(){
-  var pt=lvPatient()||{kg:TL_ADULT_KG, spontRate:15, P:VITAL_LUNG.normal, peds:false}, P=pt.P;
+// `ptArg` names the patient (a goal check passes its own case's); by default
+// it is whoever the lung view is showing.
+function vitalsTarget(ptArg){
+  var pt=ptArg||lvPatient()||{kg:TL_ADULT_KG, spontRate:15, P:VITAL_LUNG.normal, peds:false}, P=pt.P;
   var kg=pt.kg, C=lung.compliance, spont=(ventMode==='cpap'||ventMode==='nppv');
   var vt, rate, aP=spont?0:effectiveAutoPEEP();
   if(spont){ vt=(pt.peds?6*kg:400)+vals.ps.v*C; rate=pt.spontRate; }      // the readout's own estimate
@@ -5163,9 +5233,10 @@ function lvUpdateVitals(lv,run){
   set(lv.spo2,String(sp)); set(lv.etco2,String(Math.round(v.etco2)));
   set(lv.pao2,'PaO₂ '+Math.round(v.pao2)); set(lv.paco2,'PaCO₂ '+Math.round(v.paco2));
   // pH: ARDSnet aims for 7.30–7.45; permissive hypercapnia accepts down to 7.20
-  var ph=vitPH(P,v.paco2), phSt=(ph<7.20||ph>7.55)?' bad':((ph<7.30||ph>7.50)?' warn':'');
+  // (7.15 in severe asthma, whose goal is graded on the same line: P.phRed)
+  var phRed=P.phRed||7.20, ph=vitPH(P,v.paco2), phSt=(ph<phRed||ph>7.55)?' bad':((ph<7.30||ph>7.50)?' warn':'');
   set(lv.ph,'pH '+ph.toFixed(2));
-  if(lv.ph.className!=='lv-vs lv-ph'+phSt){ lv.ph.className='lv-vs lv-ph'+phSt; lv.ph.title='pH 7.30–7.45 is the ARDSnet goal; permissive hypercapnia accepts down to 7.20'; }
+  if(lv.ph.className!=='lv-vs lv-ph'+phSt){ lv.ph.className='lv-vs lv-ph'+phSt; lv.ph.title='pH 7.30–7.45 is the ARDSnet goal; permissive hypercapnia accepts down to '+phRed.toFixed(2)+(P.phRed?' in severe asthma':''); }
   var sbp=Math.round(v.sbp), dbp=Math.round(v.dbp), map=Math.round(v.map);
   set(lv.bp,sbp+'/'+dbp); set(lv.map,'MAP '+map);
   // SpO₂ floor: 88% where ARDSnet and obstructive-disease practice accept 88–92/95, 92% otherwise
@@ -5377,6 +5448,14 @@ function sfxDenied(){
   var ac=getAC(); var t=ac.currentTime+0.01;
   playNote(320,0.09,t,      0.16,'square');
   playNote(200,0.13,t+0.09, 0.16,'square');
+}
+
+// Goal reached — a short rising two-note chime, quieter than "correct"
+function sfxGoal(){
+  if(audioMuted) return;
+  var ac=getAC(); var t=ac.currentTime+0.01;
+  playNote(784,0.09,t,0.11,'square');
+  playNote(1175,0.14,t+0.09,0.11,'square');
 }
 
 // Stage unlock — 5-note ascending fanfare

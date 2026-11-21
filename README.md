@@ -370,7 +370,35 @@ otherwise, and 30 for the Free Play COPD lung, a chronic retainer
 (estimate). Acute buffering moves it +1 per 10 mmHg rise in PaCO₂ and −2 per
 10 mmHg fall (established rules of thumb). pH turns amber outside 7.30–7.50
 and red below 7.20 or above 7.55: ARDSnet aims for 7.30–7.45, and permissive
-hypercapnia accepts down to 7.20.
+hypercapnia accepts down to 7.20. Severe asthma draws its red line at 7.15:
+reviews of controlled hypoventilation in status asthmaticus accept about
+7.15–7.20 (expert opinion; the supporting data are case series), and on this
+model's asthma patient a slowed rate cannot keep 7.20 without raising the
+minute volume past the 10 L/min the readout itself grades as too much.
+
+**Goals that grade the patient.** Where a case teaches a limit on the
+patient, its goal checks that limit on the steady state the settings lead to,
+from the same model the panel draws, not only the knob that gets there. COPD
+needs I:E ≥ 1:4 *and* pH ≥ 7.20; status asthmaticus needs I:E ≥ 1:3,
+plateau ≤ 30 *and* pH ≥ 7.15; the septic patient needs PaCO₂ 20–28 (the
+pre-intubation 28, toward Winter's 21–26) at a Vt ≤ 560 mL. Before this, the
+COPD goal passed rate 10 at pH 7.1, the asthma goal passed pH 7.0, and the
+septic goal passed 12.6 L/min with PaCO₂ settling at 32. The guided readout
+shows the pH or PaCO₂ the settings settle at.
+
+**Goal met.** On a phone the learner is down at the knob when a goal is met,
+a screen below the card's Confirm. So in guided play (the tutorial, Levels 2
+and 7, and the academy missions) the scan window says GOAL MET (announced to
+screen readers), a short chime plays, and a Confirm button appears at the
+bottom of the screen while the card's own is out of view; it sits above the
+knob dock when that is up. Level 3 is graded without live feedback, so it
+gets none of this.
+
+**The diagnosis question.** The right answer used to be the second choice in
+22 of 24 questions and the longest in 23. The choices now come in a random
+order each time, and they were rewritten so the right one is the longest in
+only 2 of 24, about as long as the wrong ones on average (each wrong choice is
+a real misconception, not filler).
 
 **Using it on a phone.** The controls sit well below the lung view, so a
 learner turning a knob can't see the patient. When the vitals scroll off
@@ -385,11 +413,11 @@ like the others, so the panel keeps one height as digits change. On a
 |---|---|---|---|
 | L2 · Rising CO₂ | Normal | Post-op shunt 12% (estimate). PaCO₂ starts at 62 and climbs toward 72 | Rate 18 brings PaCO₂ to about 40 |
 | L2 · ARDS hypoxemia | ARDS | Shunt 41% at PEEP 3, inside 32 ± 14% | PEEP 8–14 lifts SpO₂ 85 → 93–96; 100% oxygen alone reaches about 90; BP falls a little |
-| L2 · COPD trapping | COPD | Shunt 11% plus 28% low V/Q; V̇CO₂ 220 for a patient fighting the vent (estimate). EtCO₂ climbs from 52; pH 7.30 (bicarbonate 32). Auto-PEEP about 8 on the starting settings | Rate 15 with Ti 0.65 gets auto-PEEP under 5 with pH above 7.20. Rate 10 also meets the I:E goal, but the pH falls to about 7.1, which shows that the I:E target is only a proxy |
+| L2 · COPD trapping | COPD | Shunt 11% plus 28% low V/Q; V̇CO₂ 220 for a patient fighting the vent (estimate). EtCO₂ climbs from 52; pH 7.30 (bicarbonate 32). Auto-PEEP about 8 on the starting settings | Rate 15 with Ti 0.65 gets auto-PEEP under 5 with pH above 7.20. Rate 10 opens the I:E just as well, but the pH falls to about 7.1, so the goal also asks for pH ≥ 7.20 and rate 10 fails |
 | L2 · Fighting the vent | Normal | Shunt 12%; V̇CO₂ 210 | Gas exchange doesn't change; the fix is mechanical |
-| L2 · Septic | ARDS (lung injury: SpO₂ 95 on 60%) | Shunt 25% at PEEP 8; V̇CO₂ 230 (sepsis, estimate); bicarbonate 10 (pH 7.18); BP 90/52, red (septic shock) | Left at 7.2 L/min, PaCO₂ heads to 55 and pH toward 7.0; MV 14+ holds PaCO₂ at 28 or below (Winter's) |
+| L2 · Septic | ARDS (lung injury: SpO₂ 95 on 60%) | Shunt 25% at PEEP 8; V̇CO₂ 230 (sepsis, estimate); bicarbonate 10 (pH 7.18); BP 90/52, red (septic shock) | Left at 7.2 L/min, PaCO₂ heads to 55 and pH toward 7.0; MV 14+ holds PaCO₂ at 28 or below (Winter's). The goal is graded on that PaCO₂: 20–28 at a Vt ≤ 560 mL, so 12–13.5 L/min (PaCO₂ 29–32) no longer passes |
 | L3 · Ready to come down | Normal | Shunt 13%; V̇CO₂ 192; own PaCO₂ 42 | On CPAP/PS 5–8 the vitals hold |
-| L3 · Status asthmaticus | Asthma | 25% low V/Q, set above Ballester's 10.5% for an intubated patient (estimate); V̇CO₂ 265 (β-agonists, work of breathing; estimate) | Slowing the rate cuts auto-PEEP and lifts BP; PaCO₂ rises (permissive hypercapnia) |
+| L3 · Status asthmaticus | Asthma | 25% low V/Q, set above Ballester's 10.5% for an intubated patient (estimate); V̇CO₂ 265 (β-agonists, work of breathing; estimate) | Slowing the rate cuts auto-PEEP and lifts BP; PaCO₂ rises (permissive hypercapnia). The goal holds the pH ≥ 7.15 (this patient's red line): rate 12 at 450 mL (pH ≈ 7.0) fails; rate 16, Ti 0.8, 550 mL (pH 7.18) passes |
 | L3 · Severe ARDS | ARDS | Shunt 45% at PEEP 8, about half recruitable | PEEP 14 + FiO₂ 90% reaches SpO₂ 88+; oxygen alone falls short |
 | L3 · Blown pupil | Normal | V̇CO₂ 225 (estimate) so PaCO₂ is 42 at 8 L/min | MV 10 gives EtCO₂ 30–35. BP is judged by the Brain Trauma Foundation (SBP ≥ 110 at 15–49), not MAP 65 |
 
