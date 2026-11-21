@@ -950,21 +950,6 @@ body.lp-skin.portrait #device{display:none;}
   flex:none;padding:3px 8px;border-radius:10px;background:#7a1f14;color:#ffd9c4;
   font:700 9px/1.5 'Arial Narrow',Arial,sans-serif;letter-spacing:1px;
 }
-/* The task line only exists while something is being asked. Its height is
-   measured rather than declared — a task that wraps to two lines on a phone
-   would otherwise hang the bottom of the unit off the screen. */
-#fgTask{display:none;align-items:center;gap:8px;padding:5px 2px 1px;}
-#fgHdr.running #fgTask{display:flex;}
-.fgphase{
-  flex:none;padding:3px 7px;border-radius:5px;background:#1d3b28;border:1px solid #2f6b45;
-  color:#7fe0a5;font:700 10px/1.3 'Arial Narrow',Arial,sans-serif;letter-spacing:.8px;white-space:nowrap;
-}
-.fgphase.warn{background:#3d2410;border-color:#8a5a1e;color:#ffc879;}
-.fgphase.crit{background:#3d1414;border-color:#a8341f;color:#ff9d8a;}
-.fgtask{flex:1;min-width:0;color:#dbe2e9;font-size:12px;line-height:1.3;}
-.fgtask em{font-style:normal;color:#8fe6ff;}
-.fgtick{flex:none;color:#7f8993;font:700 11px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:.5px;}
-
 /* Learn mode. Tapping a control opens what it does instead of doing it, so a
    learner can read the unit without charging it. Every control that has a card
    is ringed while the mode is on — a control with nothing to say should not
@@ -1010,33 +995,6 @@ body.learn #learnNote{display:block;}
 .ovrbtn.warn{background:#3d1414;border-color:#a8341f;color:#ff9d8a;}
 .ovrbtn:active{filter:brightness(1.25);}
 
-/* Vitals strip on a case brief — the handover numbers, before the unit is on */
-.vgrid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.vcell{flex:1;min-width:74px;background:#0a0d10;border:1px solid #232930;border-radius:8px;padding:5px 8px;}
-.vcell i{display:block;font-style:normal;font-size:8px;letter-spacing:1px;color:#6d7b8d;text-transform:uppercase;}
-.vcell b{display:block;font:700 16px/1.2 monospace;color:#e6edf5;margin-top:1px;}
-
-/* Level select */
-.lvgrid{display:flex;flex-direction:column;gap:8px;}
-.lvcard{
-  display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
-  min-height:56px;padding:9px 12px;border-radius:10px;
-  background:#171b20;border:1px solid #2f363e;color:#c6ced6;touch-action:manipulation;
-}
-.lvcard:active{background:#232931;}
-.lvcard .lvn{
-  flex:none;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  background:#0a3a4a;color:#8fe6ff;font:700 14px/1 'Arial Narrow',Arial,sans-serif;
-}
-.lvcard.done .lvn{background:#1d3b28;color:#7fe0a5;}
-.lvcard .lvt{flex:1;min-width:0;}
-.lvcard .lvt b{display:block;font-size:14px;color:#eef2f6;}
-.lvcard .lvt span{display:block;font-size:11px;color:#8b95a0;line-height:1.4;}
-.lvcard .lvp{flex:none;font:700 11px/1 'Arial Narrow',Arial,sans-serif;color:#7f8993;letter-spacing:.5px;}
-.lvsec{font:700 10px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1.4px;color:#6fb3c9;
-  text-transform:uppercase;margin:12px 0 4px;}
-.lvsec:first-child{margin-top:0;}
-
 /* Teaching card — a bottom sheet, so the control being explained stays visible */
 #ovrCard{align-items:flex-end;justify-content:center;padding:0;background:rgba(4,6,9,.55);}
 #ovrCard .ovrcard{
@@ -1059,10 +1017,6 @@ body.learn #learnNote{display:block;}
 .tcwatch p{color:#f0dcb4;}
 
 /* Debrief */
-.dbverdict{text-align:center;padding:10px;border-radius:10px;margin-bottom:10px;
-  font:700 16px/1.3 'Arial Narrow',Arial,sans-serif;letter-spacing:1.4px;}
-.dbverdict.pass{background:#122c1d;border:1px solid #2f6b45;color:#7fe0a5;}
-.dbverdict.fail{background:#2c1414;border:1px solid #a8341f;color:#ff9d8a;}
 .dbrow{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #1c2126;font-size:13px;}
 .dbrow:last-child{border-bottom:none;}
 .dbrow .dbm{flex:none;width:16px;font-weight:700;}
@@ -1070,38 +1024,6 @@ body.learn #learnNote{display:block;}
 .dbrow.miss .dbm{color:#ff6b58;}
 .dbrow .dbl{flex:1;color:#b9c3cd;line-height:1.45;}
 .dbrow.miss .dbl{color:#dbe2e9;}
-.dbrow .dbt{flex:none;font:700 11px/1.5 monospace;color:#7f8993;}
-.dblog{margin-top:10px;max-height:180px;overflow:auto;background:#0a0d10;border:1px solid #232930;
-  border-radius:8px;padding:8px;font:400 11px/1.6 monospace;color:#8b95a0;}
-.dblog b{color:#c6ced6;font-weight:700;}
-
-/* Free play — the facilitator's controls, for one person with nobody to run them */
-.fpsec{font:700 9px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1.3px;color:#6fb3c9;
-  text-transform:uppercase;margin:12px 0 5px;}
-.fpsec:first-child{margin-top:0;}
-.fpgrid{display:flex;flex-wrap:wrap;gap:5px;}
-.fpb{
-  min-height:38px;padding:0 10px;border-radius:7px;cursor:pointer;
-  background:#171b20;border:1px solid #2f363e;color:#b9c3cd;
-  font:700 11px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:.4px;touch-action:manipulation;
-}
-.fpb.on{background:#0a3a4a;border-color:#1d7f9c;color:#8fe6ff;}
-.fprow{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
-.fprow label{flex:none;width:64px;font:700 10px/1.3 'Arial Narrow',Arial,sans-serif;
-  letter-spacing:.8px;color:#8b95a0;text-transform:uppercase;}
-.fprow input[type=range]{flex:1;min-width:0;height:36px;accent-color:#1d7f9c;background:none;}
-.fprow output{flex:none;width:60px;text-align:right;font:700 14px/1 monospace;color:#e6edf5;}
-
-/* The 12-lead and the code summary. Framed, not popped: on a phone a popup is
-   a new tab at best and silently blocked at worst. */
-.frameovr{background:#000;padding:0;align-items:stretch;}
-.frameovr iframe{flex:1;width:100%;height:100%;border:0;background:#000;}
-.framex{
-  position:fixed;top:calc(8px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));
-  z-index:5;min-height:44px;padding:0 16px;border-radius:22px;cursor:pointer;
-  background:#7a1f14;border:1px solid #a8341f;color:#ffe7c2;
-  font:700 14px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1px;touch-action:manipulation;
-}
 
 /* A toast for things the trainer wants to say without taking the screen */
 #fgToast{
@@ -1418,7 +1340,7 @@ body.portrait .ovr{z-index:220;}
     <path d="M40 14a17 17 0 0 1 5 12M8 34a17 17 0 0 1-5-12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
     <path d="m43 22 2 5 3-4M5 26l-2-5-3 4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
-  <b>Turn the iPad sideways</b>
+  <b>Turn the screen sideways</b>
   <span>The LIFEPAK 15 is a landscape unit. Held upright, every control would
   sit below the size a gloved thumb can reliably hit.</span>
 </div>
@@ -1440,9 +1362,6 @@ body.portrait .ovr{z-index:220;}
 <div class="ovr" id="ovrCard" hidden onclick="if(event.target===this)closeCard()"></div>
 <div class="ovr" id="ovrDebrief" hidden></div>
 
-<!-- The acquisition and the code record. Each is a whole standalone document
-     built as a string — exactly as it is built for the popup in CES — handed
-     to an iframe through srcdoc rather than written into a second window. -->
 
 
 <div id="fgToast"></div>
@@ -2886,6 +2805,9 @@ document.addEventListener('fullscreenchange',()=>{
 /* F for fullscreen, but not while the learner is typing into the trainer. */
 window.addEventListener('keydown',e=>{
   if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  /* Not Ctrl+F or Cmd+F: that is the browser's find, and it was taking the
+     page in and out of fullscreen. */
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
   if(e.key==='f'||e.key==='F') toggleFullscreen();
 });
 if(window.visualViewport){
@@ -3110,6 +3032,10 @@ const D={
   // modifier, never its own mode — an AED SYNC state cannot exist.
   mode:'manual',
   sync:false, cpr:false, analyzing:false, analyzeUntil:0, advisory:'', reanalyzeAt:0,
+  /* SHOCK pressed with SYNC armed: the press is taken and the shock waits for
+     the next QRS the detector senses (syncDue is that detection, acted on in
+     the next tick). */
+  syncPending:false, syncDue:false,
   pacer:false, pacerRate:60, pacerMa:0, pacePaused:false,   // 60 PPM is the unit's factory default
   alarms:true, silenceUntil:0,
   sunvue:false,
@@ -3162,9 +3088,9 @@ function resetDevice(){
   printerRun(false); closeMenu(); clearHomeSel();
   D.energyIx=ENERGIES.indexOf(200);
   D.shocks=0; D.lastShockAt=0;
-  D.sync=false; D.cpr=false;
+  D.sync=false; D.syncPending=false; D.syncDue=false; D.cpr=false;
   D.analyzing=false; D.analyzeUntil=0; D.advisory=''; D.reanalyzeAt=0;
-  aedReset();                                // AED/SYNC state machine to MANUAL_IDLE
+  aedReset();                               // AED/SYNC state machine to MANUAL_IDLE
   D.pacer=false; D.pacerRate=60; D.pacerMa=0; D.pacePaused=false;
   D.alarms=true; D.silenceUntil=0;
   D.nibpUntil=0;
@@ -3194,7 +3120,13 @@ function logEvent(type,label,detail){
    crew is actually trained on. */
 let AC=null;
 function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended') AC.resume(); return AC; }
+/* The header's sound key mutes the whole page, the unit included. It used to
+   gate only the station's own answer beeps, so "Sound off" still left the
+   charge whine and the ready tone going in a quiet classroom. */
+let soundOn=true;
+try{ soundOn=localStorage.getItem('amrkc.lp15.sound')!=='0'; }catch(e){}
 function beep(freq,ms,vol,type){
+  if(!soundOn) return;
   const c=ac(); if(!c) return;
   const o=c.createOscillator(), g=c.createGain();
   o.type=type||'sine'; o.frequency.value=freq;
@@ -3207,6 +3139,7 @@ function beep(freq,ms,vol,type){
 }
 let chargeOsc=null,chargeGain=null;
 function chargeTone(on){
+  if(on&&!soundOn) return;
   const c=ac(); if(!c) return;
   if(on&&!chargeOsc){
     chargeOsc=c.createOscillator(); chargeGain=c.createGain();
@@ -3368,6 +3301,7 @@ function invalidateCanvases(){
 function disarm(reason){
   if(!D.charging&&!D.charged) return;
   D.charging=false; D.charged=false; D.disarmAt=0;
+  D.syncPending=false; D.syncDue=false;
   chargeTone(false); readyTone(false);
   if(reason) logEvent('disarm','Disarmed',reason);
   banner(null);
@@ -3388,8 +3322,17 @@ function chargeDone(){
   chargeTone(false); readyTone(true);
   banner(energy()+'J  READY  —  STAND CLEAR',0,false,true);
 }
-function deliverShock(){
+/* A synchronized shock lands on an R wave, which is the whole of what SYNC is.
+   It used to go off the instant SHOCK was pressed whatever was on the screen,
+   so a "synchronized" shock could be delivered into asystole — the one place
+   the station claims to ask the device rather than take a word for it. A press
+   is still a press: it is latched here and delivered on the next QRS the
+   detector senses, which on a perfusing tachycardia is a fraction of a second.
+   With no QRS to find it does not deliver, as the unit does not. */
+function deliverShock(onQrs){
   if(!D.charged) return;
+  if(D.sync&&!onQrs){ D.syncPending=true; return; }
+  D.syncPending=false; D.syncDue=false;
   const wasSync=D.sync;
   D.shocks++; D.lastShockAt=Date.now();
   // Shock, then two minutes of CPR, then the unit asks for another rhythm check.
@@ -3718,7 +3661,13 @@ function bind(id,fn){ const el=document.getElementById(id); if(el) el.addEventLi
 function bindHold(id,ms,onHold,onRelease,onTap){
   const el=document.getElementById(id); if(!el) return;
   let timer=null,fired=false,pressed=false;
-  const start=e=>{ e.preventDefault(); ac(); pressed=true; fired=false; el.classList.add('held');
+  /* In learn mode a tap reads the key out instead of working it. That was
+     enforced on click, and these keys work on pointer events, so ON, SHOCK and
+     PAUSE fired anyway — a charged unit delivered, and was graded, behind the
+     card that was explaining it. */
+  const reading=()=>learnOn&&!!nearestCardId(el);
+  const start=e=>{ if(reading()) return;
+    e.preventDefault(); ac(); pressed=true; fired=false; el.classList.add('held');
     timer=setTimeout(()=>{fired=true;onHold&&onHold();},ms); };
   /* Leaving the key is not pressing it, and finishing is not something that
      can happen twice. Both were true here: pointerleave ran the same handler
@@ -3740,6 +3689,18 @@ function bindHold(id,ms,onHold,onRelease,onTap){
   el.addEventListener('pointerup',()=>end(true));
   el.addEventListener('pointerleave',()=>end(false));
   el.addEventListener('pointercancel',()=>end(false));
+  /* Enter or Space works these keys from a keyboard, with the same hold, as
+     every other key on the unit already could be — on pointer events alone, a
+     Toughbook user tabbing to ON or SHOCK could not switch the unit on or
+     deliver. In learn mode the key is left to click, which opens its card. */
+  const isKey=e=>e.key==='Enter'||e.key===' ';
+  el.addEventListener('keydown',e=>{
+    if(!isKey(e)||reading()) return;
+    e.preventDefault();
+    if(!e.repeat&&!pressed) start(e);
+  });
+  el.addEventListener('keyup',e=>{ if(isKey(e)&&pressed){ e.preventDefault(); end(true); } });
+  el.addEventListener('blur',()=>end(false));
 }
 
 /* ON, as the key works on the device: a press brings the unit up, and holding
@@ -3770,6 +3731,7 @@ bind('kSYNC',()=>{ if(!D.on) return;
     return;
   }
   D.sync=!D.sync;
+  if(!D.sync){ D.syncPending=false; D.syncDue=false; }   // a waiting sync shock is not an unsynchronized one
   if(D.sync&&D.charged) disarm('sync changed');
   logEvent('sync',D.sync?'SYNC ON':'SYNC OFF',''); });
 
@@ -3818,8 +3780,10 @@ bind('kRateUp',()=>nudgeRate(1));
 bind('kRateDn',()=>nudgeRate(-1));
 bind('kCurUp',()=>nudgeMa(1));
 bind('kCurDn',()=>nudgeMa(-1));
+/* Letting go is logged as well as pressing: it is the moment the set rate comes
+   back, and the patient under the pacing answers to it. */
 bindHold('kPAUSE',180,()=>{ if(D.pacer){ D.pacePaused=true; logEvent('pacerPause','PACING PAUSED',''); } },
-  ()=>{ D.pacePaused=false; },null);
+  ()=>{ if(D.pacePaused){ D.pacePaused=false; logEvent('pacerResume','PACING RESUMED',''); } },null);
 
 bind('kNIBP',()=>startNibp());
 bind('kALARMS',()=>{
@@ -3914,7 +3878,7 @@ function scanQrs(vals,t0,spx){
       qrsArmed=false; qrsLastT=t; qrsMarks.push(i);
     } else if(!qrsArmed&&v<QRS_ON*0.8) qrsArmed=true;
   }
-  if(qrsMarks.length&&D.sync) pulseLed('ledSYNC');
+  if(qrsMarks.length&&D.sync){ pulseLed('ledSYNC'); if(D.syncPending) D.syncDue=true; }
   return qrsMarks.length;
 }
 
@@ -3947,6 +3911,8 @@ function devTick(){
   applyPulses(now);
   if(D.charging&&now-D.chargeStart>=CHARGE_MS) chargeDone();
   if(D.charged&&D.disarmAt&&now>=D.disarmAt) disarm('60s without a shock');
+  // Sensed on last frame's samples; delivered here rather than mid-draw.
+  if(D.syncDue){ D.syncDue=false; if(D.syncPending&&D.sync&&D.charged) deliverShock(true); }
   if(D.analyzing&&now>=D.analyzeUntil) finishAnalyze();
   if(D.banner&&D.bannerUntil&&now>=D.bannerUntil) banner(null);
   if(D.alarms&&D.silenceUntil&&now>=D.silenceUntil) D.silenceUntil=0;
@@ -4154,11 +4120,10 @@ function newCase(patient){
 }
 
 /* ── Sound and toast ─────────────────────────────────────────────────── */
-let soundOn=true;
-try{ soundOn=localStorage.getItem('amrkc.lp15.sound')!=='0'; }catch(e){}
 function toggleSound(){
   soundOn=!soundOn;
   try{ localStorage.setItem('amrkc.lp15.sound',soundOn?'1':'0'); }catch(e){}
+  if(!soundOn){ chargeTone(false); alarmTone(false); }
   const b=document.getElementById('btnSound');
   if(b) b.textContent=soundOn?'🔊':'🔇';
   toast(soundOn?'Sound on':'Sound off');
@@ -4244,8 +4209,8 @@ const CARDS={
     watch:'Charge while compressions are still going. Every second the team stands clear waiting for the charge tone is a second of no perfusion, and the pre-shock pause is one of the few things about a code that is measurably yours to shorten.'},
 
   kSHOCK:{name:'SHOCK',area:'Area 1 · Defibrillation',
-    what:'Delivers the charge. It does nothing unless the unit is armed.',
-    how:'Press when charged and the team is clear.',
+    what:'Delivers the charge. It does nothing unless the unit is armed. With SYNC on, the press is held until the next QRS the unit senses and the shock lands on it — and where there is no QRS to sense, it does not deliver.',
+    how:'Press when charged and the team is clear. With SYNC on, keep everyone clear until the shock has gone.',
     watch:'Say it out loud and look before you press: "I\'m clear, you\'re clear, everybody clear." Then compressions restart immediately — you do not stop to check a rhythm or a pulse after the shock, you go straight back to the chest for two minutes.'},
 
   kPACER:{name:'PACER',area:'Area 2 · Pacing',
@@ -4399,7 +4364,7 @@ const ITEMS=[
    therapy:'sync',
    why:'Irregularly irregular with no P waves, fast, and the patient is unstable with it. Synchronized cardioversion at 200 J biphasic, escalating if it does not work — 2025 moved off the old low-and-climb approach for AF. And think about how long they have been in it before you shock.'},
 
-  {v:P('aflutter',148,126,80,97,36,16), name:'Atrial flutter',
+  {v:P('aflutter',150,126,80,97,36,16), name:'Atrial flutter',
    opts:['Atrial flutter','Atrial fibrillation','SVT','Sinus tachycardia'],
    context:'BP 126/80. Aware of a fast heartbeat, no pain, no shortness of breath.',
    therapy:'none',
@@ -4458,10 +4423,16 @@ function shuffled(a){
   return r;
 }
 
+/* What a run is drawn from: the whole bank, or the one rhythm a ?item= link
+   pinned. Run it again repeats the same set rather than widening it. */
+let BANK=ITEMS;
 function startStation(){
-  RUN={items:shuffled(ITEMS),ix:-1,step:'boot',right:0,asked:0,misses:[],t0:Date.now()};
+  RUN={items:shuffled(BANK),ix:-1,step:'boot',right:0,asked:0,misses:[],t0:Date.now()};
   captured=false; paceUnder=null;
-  closeCard();
+  /* Every overlay, not just the card. Run it again and RESTART both come
+     here, and the summary used to stay up over the unit, so a second run
+     could be started and never reached. */
+  closeAllOverlays();
   setPatient({...P('nsr',78,124,78,98,37,14),patientConnected:false,etco2On:false,
               scenario:'Rhythm & Electrical Therapy',deviceReset:(S.deviceReset||0)+1});
   if(D.on) setPower(false);
@@ -4549,7 +4520,17 @@ function answerName(btn){
   if(right){ RUN.right++; if(soundOn) beep(1180,90,.06,'sine'); }
   else { RUN.misses.push({n:RUN.ix+1,what:'Named it '+picked,should:it.name});
          if(soundOn) beep(320,180,.06,'square'); }
-  setTimeout(()=>{ if(RUN){ RUN.step='treat'; render(); } }, right?520:1250);
+  /* Only this run, at this item, still at this step. RESTART inside that
+     second used to have the old timer land on the new run, push it to a
+     therapy step with no item behind it, throw, and leave ON dead. */
+  const run=RUN, ix=RUN.ix;
+  setTimeout(()=>{
+    if(RUN!==run||RUN.ix!==ix||RUN.step!=='name') return;
+    RUN.step='treat'; render();
+    /* A pacer the crew set up while they were still naming the rhythm is
+       answered now, not on whichever pacer key happens to be pressed next. */
+    paceCheck();
+  }, right?520:1250);
 }
 
 /* ── The therapy answer ──────────────────────────────────────────────────
@@ -4592,7 +4573,8 @@ function trainerEvent(ev){
     if(ev.type==='power'&&ev.label==='ON'){ nextItem(); }
     return;
   }
-  if(/^pacer/.test(ev.type)) paceCheck();
+  // Powering down stops the pacer without a pacer key, so it is asked too.
+  if(/^pacer/.test(ev.type)||ev.type==='power') paceCheck();
   if(RUN.step!=='treat') return;
   if(ev.type==='shock'){
     answerTherapy(/synchronized/.test(ev.detail||'')?'sync':'defib',ev.detail);
@@ -4612,25 +4594,39 @@ function trainerEvent(ev){
    pacer on and reaching capture is what counts as the answer; spikes without
    capture are not treatment and are not accepted as one. */
 const PACE_RESPONSIVE=['brady','hb1','hb2','hb3','junctional','nsr'];
+/* The patient once captured: the paced rate, and the pressure it buys. */
+function pacedVitals(under){
+  return {rhythm:'paced',hr:D.pacerRate,
+    sbp:Math.round(96+(D.pacerRate-60)*0.35),dbp:Math.round(58+(D.pacerRate-60)*0.2),
+    spo2:Math.min(98,(under.spo2||90)+6),etco2:Math.max(under.etco2||33,35)};
+}
 function paceCheck(){
-  if(!RUN||RUN.step!=='treat') return;
-  const it=RUN.items[RUN.ix];
+  if(!RUN||RUN.ix<0||(RUN.step!=='treat'&&RUN.step!=='done')) return;
+  /* Graded once, on the therapy step. After that the patient still answers
+     the pacer — capture follows the rate, PAUSE shows what is underneath, and
+     turning the pacer off loses it. Stopping at the verdict left paced
+     complexes running at the old rate under spikes at the new one, and on the
+     screen with no pacer at all. */
+  const grading=RUN.step==='treat';
   const under=paceUnder||{rhythm:S.rhythm,hr:S.hr,sbp:S.sbp,dbp:S.dbp,spo2:S.spo2,etco2:S.etco2};
-  const want=D.pacer&&!D.pacePaused&&D.pacerMa>=PACE_THRESHOLD&&D.pacerRate>=40;
+  const want=D.on&&D.pacer&&!D.pacePaused&&D.pacerMa>=PACE_THRESHOLD&&D.pacerRate>=40;
 
   if(want&&!captured){
-    if(!PACE_RESPONSIVE.includes(under.rhythm)){
-      /* Pacing something that cannot answer is still an answer, and it is
-         the wrong one. It is graded here rather than ignored. */
-      answerTherapy('pace');
+    /* Pacing something that cannot answer is still an answer, and it is the
+       wrong one, so it is graded rather than ignored. That includes PEA: an
+       organised rhythm with no pulse may take the impulse electrically, but
+       it gets no pressure from it, and showing one contradicted the verdict
+       sitting under it. */
+    if(!PACE_RESPONSIVE.includes(under.rhythm)||!(under.sbp>0)){
+      if(grading) answerTherapy('pace');
       return;
     }
     paceUnder=under; captured=true;
-    setPatient({rhythm:'paced',hr:D.pacerRate,
-      sbp:Math.round(96+(D.pacerRate-60)*0.35),dbp:Math.round(58+(D.pacerRate-60)*0.2),
-      spo2:Math.min(98,(under.spo2||90)+6),etco2:Math.max(under.etco2||33,35)});
+    setPatient(pacedVitals(under));
     banner('CAPTURE  '+D.pacerRate+' ppm',2600);
-    answerTherapy('pace');
+    if(grading) answerTherapy('pace');
+  }else if(want&&captured){
+    if(S.hr!==D.pacerRate) setPatient(pacedVitals(paceUnder));
   }else if(!want&&captured){
     captured=false;
     setPatient({rhythm:paceUnder.rhythm,hr:paceUnder.hr,sbp:paceUnder.sbp,
@@ -4646,14 +4642,20 @@ function paceCheck(){
 function finish(){
   const run=RUN; RUN=null;
   const pct=Math.round(run.right/run.asked*100);
-  if(best===null||pct>best){ best=pct; saveProgress(); }
+  /* A best is a best over the whole bank. A one-rhythm ?item= link scored 100%
+     for one right answer and stood as the best run ever after. */
+  const whole=run.items.length===ITEMS.length;
+  if(whole&&(best===null||pct>best)){ best=pct; saveProgress(); }
+  const n=run.items.length;
+  const secs=Math.max(1,Math.round((Date.now()-run.t0)/1000));
+  const took=secs<60?secs+' s':Math.round(secs/60)+' min';
 
   let h='<div class="ovrcard wide">'
     +'<div class="ovrk">Rhythm &amp; Electrical Therapy</div>'
     +'<div class="ovrh">'+run.right+' of '+run.asked+' correct</div>'
-    +'<div class="ovrp">'+run.items.length+' rhythms, named and treated, in <b>'
-    +Math.round((Date.now()-run.t0)/60000)+' min</b>.'
-    +(best!==null?' Best so far <b>'+best+'%</b>.':'')+'</div>';
+    +'<div class="ovrp">'+n+(n===1?' rhythm':' rhythms')+', named and treated, in <b>'
+    +took+'</b>.'
+    +(whole&&best!==null?' Best so far <b>'+best+'%</b>.':'')+'</div>';
 
   if(run.misses.length){
     h+='<div class="ovrk" style="margin-top:4px">What to go back over</div>';
@@ -4688,10 +4690,8 @@ function closeAllOverlays(){
 (function boot(){
   let n=NaN;
   try{ n=parseInt(new URLSearchParams(location.search).get('item')||'',10); }catch(e){}
+  if(n>=1&&n<=ITEMS.length) BANK=[ITEMS[n-1]];
   startStation();
-  if(n>=1&&n<=ITEMS.length){
-    RUN.items=[ITEMS[n-1]];
-  }
 })();
 
 /* Escape closes the teaching card, and nothing else — losing a run to a stray

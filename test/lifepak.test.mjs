@@ -96,7 +96,12 @@ const nameIt = async p => {
 /* Deliver a therapy the way a learner does: on the keys. */
 const deliver = async (p, therapy) => {
   if (therapy === 'defib') { await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 500); }
-  else if (therapy === 'sync') { await tap(p, 'kSYNC', 250); await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 500); }
+  else if (therapy === 'sync') { await tap(p, 'kSYNC', 250); await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 100);
+    /* A synchronized shock lands on the next sensed QRS, not on the press, so
+       it is waited for rather than assumed. A rhythm with no QRS never gets
+       one, which is the point; the wait is bounded so that case still ends. */
+    await p.waitForFunction(() => !D.charged, null, { timeout: 4000 }).catch(() => {});
+    await p.waitForTimeout(300); }
   else if (therapy === 'pace') { await tap(p, 'kPACER', 250);
     for (let i = 0; i < 8; i++) await tap(p, 'kCurUp', 70); await p.waitForTimeout(400); }
   else { await p.click('#stnOpts .stnb'); await p.waitForTimeout(400); }
@@ -123,14 +128,20 @@ const verdict = p => p.evaluate(() => {
   ok('S1 nothing is left of the case engine\'s overlays', gone.length === 0, gone.join(','));
   await p.context().close(); }
 
-/* S2 — THE BOUNDARY. The keys do not touch the patient; the station does. */
-{ const p = await fresh();
+/* S2 — THE BOUNDARY. The keys do not touch the patient; the station does.
+   Pinned to sinus rhythm: SYNC is armed below, and a synchronized shock waits
+   for a QRS, so a random first item that came up asystole would never shock. */
+{ const nsr = await (async () => { const q = await fresh();
+    const i = await q.evaluate(() => ITEMS.findIndex(x => x.v.rhythm === 'nsr') + 1);
+    await q.context().close(); return i; })();
+  const p = await fresh(PAGE + '?item=' + nsr);
   await powerUp(p);
   await p.evaluate(() => { window.__before = JSON.stringify(S); window.setPatient = () => { window.__wrote = true; }; });
   await tap(p, 'kSYNC', 250);
   await tap(p, 'kEnergyUp', 200); await tap(p, 'kEnergyDn', 200);
   await tap(p, 'kCHARGE', 6300);
-  await tap(p, 'kSHOCK', 500);
+  await tap(p, 'kSHOCK', 100);
+  await p.waitForFunction(() => D.shocks === 1, null, { timeout: 2500 }).catch(() => {});
   await tap(p, 'kPACER', 250);
   for (let i = 0; i < 10; i++) await tap(p, 'kCurUp', 60);
   await tap(p, 'kRateUp', 200);
@@ -317,7 +328,9 @@ for (const [name, w, h] of [['iPhone 14 landscape', 844, 390], ['iPhone SE lands
     for (let i = 0; i < 8; i++) { if (!await touch('#kCurUp')) { trouble.push('kCurUp'); break; } await p.waitForTimeout(80); } }
   else { if (t === 'sync') { if (!await touch('#kSYNC')) trouble.push('kSYNC'); await p.waitForTimeout(250); }
     if (!await touch('#kCHARGE')) trouble.push('kCHARGE'); await p.waitForTimeout(6300);
-    if (!await touch('#kSHOCK')) trouble.push('kSHOCK'); }
+    if (!await touch('#kSHOCK')) trouble.push('kSHOCK');
+    /* A synchronized shock waits for the next sensed QRS. */
+    await p.waitForFunction(() => !D.charged, null, { timeout: 4000 }).catch(() => {}); }
   await p.waitForTimeout(700);
   ok(`S8 ${name} — every tap landed on the key it aimed at`, trouble.length === 0, trouble.join(', '));
   ok(`S8 ${name} — and the item was answered`, (await verdict(p)).good);
@@ -659,6 +672,169 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
   ok('S18 the shock was delivered by mouse and graded right', end.shocks === 1 && end.good, JSON.stringify(end));
   ok('S18 no errors through the mouse playthrough', errs.length === 0, errs.join('|'));
   await ctx.close(); }
+
+/* S19 — defects an audit of the station found with every check above still
+   green. Each is asserted the way a learner would meet it. */
+{ const bank = await (async () => { const q = await fresh();
+    const r = await q.evaluate(() => ITEMS.map((x, i) => ({ i: i + 1, r: x.v.rhythm, hr: x.v.hr, sbp: x.v.sbp, t: x.therapy })));
+    await q.context().close(); return r; })();
+  const ix = f => bank.find(f).i;
+
+  /* The summary, and getting past it. Run it again used to leave it up over
+     the unit, so the second run started and could not be reached. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'nsr'));
+    await powerUp(p); await nameIt(p); await deliver(p, 'none');
+    await p.click('#stnNext'); await p.waitForTimeout(400);
+    const sum = (await p.locator('#ovrDebrief .ovrp').textContent()).trim();
+    ok('S19 a one-rhythm run says "1 rhythm"', /^1 rhythm,/.test(sum), sum);
+    ok('S19 and times itself in seconds rather than "0 min"', /in \d+ s\./.test(sum), sum);
+    ok('S19 and does not stand as the best run over the whole bank',
+       (await p.evaluate(() => best === null)) && !/Best so far/.test(sum), sum);
+    await p.click('#ovrDebrief .ovrbtn.go'); await p.waitForTimeout(400);
+    const r = await p.evaluate(() => { const k = document.getElementById('kON').getBoundingClientRect();
+      const n = document.elementFromPoint(k.left + k.width / 2, k.top + k.height / 2);
+      return { up: !document.getElementById('ovrDebrief').hidden, on: !!(n && n.closest('#kON')),
+        step: RUN && RUN.step, n: RUN && RUN.items.length }; });
+    ok('S19 Run it again takes the summary down', !r.up, JSON.stringify(r));
+    ok('S19 so the unit can be reached to start the new run', r.on && r.step === 'boot', JSON.stringify(r));
+    ok('S19 and it runs the same set again', r.n === 1, JSON.stringify(r));
+    ok('S19 no errors through a replay', p._errs.length === 0, p._errs.join('|'));
+    await p.context().close(); }
+
+  /* RESTART inside the pause after naming. The old timer landed on the new
+     run, threw, and left ON unable to start it. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'svt'));
+    await powerUp(p);
+    await p.evaluate(() => { const nm = RUN.items[RUN.ix].name;
+      [...document.querySelectorAll('#stnOpts .stnb')].find(x => x.textContent.trim() !== nm).click(); });
+    await p.waitForTimeout(150);
+    await p.click('#fgHdr button:has-text("RESTART")'); await p.waitForTimeout(1500);
+    const r = await p.evaluate(() => ({ step: RUN.step, ix: RUN.ix }));
+    ok('S19 RESTART straight after naming leaves the new run at its start', r.step === 'boot' && r.ix === -1, JSON.stringify(r));
+    await powerUp(p);
+    ok('S19 and ON still starts it', await p.evaluate(() => RUN.step === 'name' && RUN.ix === 0));
+    ok('S19 with no errors', p._errs.length === 0, p._errs.join('|'));
+    await p.context().close(); }
+
+  /* Learn mode. ON, SHOCK and PAUSE work on pointer events, which the click
+     guard never saw, so they fired behind the card explaining them. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'vfib'));
+    await p.click('#btnLearn'); await p.waitForTimeout(150);
+    await tap(p, 'kON', 300);
+    ok('S19 in learn mode ON reads its card instead of switching the unit on',
+       (await p.evaluate(() => !D.on && RUN.step === 'boot')) && (await p.locator('#ovrCard .tckey').textContent()) === 'ON');
+    await p.evaluate(() => closeCard()); await p.click('#btnLearn'); await p.waitForTimeout(150);
+    await powerUp(p); await nameIt(p);
+    await tap(p, 'kCHARGE', 6200);
+    await p.click('#btnLearn'); await p.waitForTimeout(150);
+    await tap(p, 'kSHOCK', 400);
+    const r = await p.evaluate(() => ({ shocks: D.shocks, charged: D.charged, step: RUN.step }));
+    ok('S19 and SHOCK on a charged unit reads its card without delivering, or being graded',
+       r.shocks === 0 && r.charged && r.step === 'treat', JSON.stringify(r));
+    await p.context().close(); }
+
+  /* The keyboard. Every other key was a button that answered Enter; these
+     three answered nothing. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'vfib'), 1366, 640);
+    await p.focus('#kON'); await p.keyboard.press('Enter'); await p.waitForTimeout(2300);
+    ok('S19 ON works from the keyboard', await p.evaluate(() => D.on && RUN.step === 'name'));
+    await nameIt(p);
+    await p.focus('#kCHARGE'); await p.keyboard.press('Enter'); await p.waitForTimeout(6200);
+    await p.focus('#kSHOCK'); await p.keyboard.press('Space'); await p.waitForTimeout(400);
+    ok('S19 so does SHOCK', await p.evaluate(() => D.shocks === 1), await p.evaluate(() => String(D.shocks)));
+    ok('S19 and a keyboard shock is graded like any other', (await verdict(p)).good);
+    await p.context().close(); }
+
+  /* SYNC lands on a QRS. It used to fire on the press, so a "synchronized"
+     shock went into asystole. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'asystole'));
+    await powerUp(p); await nameIt(p);
+    await tap(p, 'kSYNC', 200); await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 2500);
+    const r = await p.evaluate(() => ({ shocks: D.shocks, charged: D.charged, step: RUN.step }));
+    ok('S19 a synchronized shock is not delivered into asystole — there is no QRS to land on',
+       r.shocks === 0 && r.charged && r.step === 'treat', JSON.stringify(r));
+    await tap(p, 'kSYNC', 600);
+    ok('S19 and coming out of SYNC does not turn the waiting press into an unsynchronized shock',
+       await p.evaluate(() => D.shocks === 0 && !D.syncPending));
+    await p.context().close(); }
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'svt' && x.t === 'sync'));
+    await powerUp(p); await nameIt(p);
+    await p.evaluate(() => { window.__qrs = []; const f = window.scanQrs;
+      window.scanQrs = function (...a) { const n = f.apply(this, a); if (n && D.sync) window.__qrs.push(Date.now()); return n; }; });
+    await tap(p, 'kSYNC', 200); await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 100);
+    await p.waitForFunction(() => D.shocks === 1, null, { timeout: 3000 }).catch(() => {});
+    const r = await p.evaluate(() => { const s = D.log.find(e => e.type === 'shock');
+      const q = s ? window.__qrs.filter(t => t <= s.ms).pop() : undefined;
+      return { shot: !!s, sync: !!s && /synchronized/.test(s.detail), lag: s && q !== undefined ? s.ms - q : null }; });
+    ok('S19 on an unstable SVT the synchronized shock lands', r.shot && r.sync, JSON.stringify(r));
+    ok('S19 on a QRS the unit sensed, within a frame or two of it', r.lag !== null && r.lag < 100, JSON.stringify(r));
+    ok('S19 and is graded as cardioversion', (await verdict(p)).good);
+    await p.context().close(); }
+
+  /* Pacing PEA. It showed CAPTURE and a blood pressure on a pulseless patient,
+     over a verdict saying pacing would not help. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'junctional' && !x.sbp));
+    await powerUp(p); await nameIt(p); await deliver(p, 'pace');
+    const r = await p.evaluate(() => ({ r: S.rhythm, sbp: S.sbp, cap: captured }));
+    ok('S19 pacing PEA gives the patient no pulse and no pressure', r.r === 'junctional' && r.sbp === 0 && !r.cap, JSON.stringify(r));
+    ok('S19 and is still graded, as the wrong answer', (await verdict(p)).bad);
+    await p.context().close(); }
+
+  /* After capture the patient still answers the pacer. It used to freeze at
+     the verdict: paced at the old rate under spikes at the new one, paced
+     through PAUSE, and paced with the pacer off. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'brady'), 1366, 640);
+    const own = bank.find(x => x.r === 'brady');
+    await powerUp(p); await nameIt(p); await deliver(p, 'pace');
+    ok('S19 the bradycardia captures', await p.evaluate(() => captured && S.rhythm === 'paced'));
+    await tap(p, 'kRateUp', 150); await tap(p, 'kRateUp', 250);
+    ok('S19 after capture the paced rate follows RATE',
+       await p.evaluate(() => S.hr === D.pacerRate && D.pacerRate === 80), await p.evaluate(() => S.hr + ' vs ' + D.pacerRate));
+    const k = await p.locator('#kPAUSE').boundingBox();
+    await p.mouse.move(k.x + k.width / 2, k.y + k.height / 2); await p.mouse.down(); await p.waitForTimeout(500);
+    ok('S19 holding PAUSE shows the rhythm underneath', await p.evaluate(() => S.rhythm === 'brady' && D.pacePaused));
+    await p.mouse.up(); await p.waitForTimeout(250);
+    ok('S19 letting go brings the capture back', await p.evaluate(() => S.rhythm === 'paced' && S.hr === 80));
+    await tap(p, 'kPACER', 250);
+    ok('S19 and switching the pacer off loses it', await p.evaluate(s => S.rhythm === 'brady' && S.sbp === s, own.sbp));
+    ok('S19 no errors through the pacing checks', p._errs.length === 0, p._errs.join('|'));
+    await p.context().close(); }
+
+  /* A pacer set up while the rhythm was still being named. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'hb3'));
+    await powerUp(p);
+    await tap(p, 'kPACER', 200); for (let i = 0; i < 7; i++) await tap(p, 'kCurUp', 60);
+    await nameIt(p); await p.waitForTimeout(300);
+    ok('S19 pacing set up while naming is answered on reaching the therapy step',
+       (await p.evaluate(() => captured && RUN.step === 'done')) && (await verdict(p)).good);
+    await p.context().close(); }
+
+  /* Sound off is the whole page. */
+  { const p = await fresh(PAGE + '?item=' + ix(x => x.r === 'vfib'));
+    await p.evaluate(() => { window.__osc = 0; const o = AudioContext.prototype.createOscillator;
+      AudioContext.prototype.createOscillator = function () { window.__osc++; return o.call(this); }; });
+    await tap(p, 'btnSound', 200);
+    await powerUp(p); await nameIt(p);
+    const before = await p.evaluate(() => window.__osc);
+    await tap(p, 'kCHARGE', 6200); await tap(p, 'kSHOCK', 400);
+    const after = await p.evaluate(() => window.__osc);
+    ok('S19 Sound off silences the unit too — no charge, ready or shock tone', after === before, `${after - before} tones`);
+    await p.context().close(); }
+
+  /* F is fullscreen; Ctrl+F and Cmd+F are the browser's find. */
+  { const p = await fresh();
+    await p.evaluate(() => { window.__fs = 0; window.toggleFullscreen = () => window.__fs++; });
+    await p.keyboard.press('Control+f'); await p.keyboard.press('Meta+f');
+    const a = await p.evaluate(() => window.__fs);
+    await p.keyboard.press('f');
+    const b = await p.evaluate(() => window.__fs);
+    ok('S19 Ctrl+F is the browser\'s find, not fullscreen', a === 0 && b === 1, `${a}, ${b}`);
+    await p.context().close(); }
+
+  /* The rate on the screen is the rate on the trace: flutter at 300/min with
+     2:1 conduction is 150, which is what the trace draws. */
+  ok('S19 the flutter item reads the rate its 2:1 trace draws', bank.find(x => x.r === 'aflutter').hr === 150);
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fails.length) { console.log('\nFailures:'); fails.forEach(f => console.log(' - ' + f)); }

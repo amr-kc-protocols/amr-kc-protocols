@@ -79,6 +79,13 @@ The two shock answers are told apart the way the real unit tells them apart:
 **whether SYNC was armed when the shock landed.** That is the thing crews get
 wrong, so it is asked of the device rather than accepted as a word.
 
+And a synchronized shock lands on a QRS. SHOCK with SYNC armed is latched and
+delivered on the next complex the detector senses — the same detection that
+flashes the SYNC LED and draws the markers — so on a perfusing tachycardia it
+goes within a fraction of a second, and into asystole it never goes at all. It
+used to fire on the press whatever was on the screen, which let a
+"synchronized" shock be delivered into a flat line.
+
 `none` is never "do nothing" — it is "nothing electrical", and the reason line
 says what the patient does need instead. A learner who reads "none" and stops
 has taken the wrong lesson from a right answer.
