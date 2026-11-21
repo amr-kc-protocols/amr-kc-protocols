@@ -624,9 +624,9 @@ console.log('\nL19 usability on a phone: live strip, snapshot label, first butto
   ok('L19 on a 390×664 phone every L1–L3 card shows its first button without scrolling', below.length === 0, below.join(' '));
   // Snapshot label on the scenario monitor, not on Level 7
   await load(2, 1);
-  ok('L19 a scenario monitor says it is the on-arrival snapshot', await up.evaluate(() => /on arrival/i.test(document.querySelector('#mission-bar .mon-tag')?.textContent || '')));
-  const l7 = await up.evaluate(() => { startLevel(7); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); return !!document.querySelector('#mission-bar .mon-tag'); });
-  ok('L19 …and a Level 7 monitor (no lung view) does not', !l7);
+  ok('L19 a scenario monitor is live, and its arrival labs/settings are captioned "On arrival"', await up.evaluate(() => !!document.querySelector('#mission-bar .monitor[data-live]') && /on arrival/i.test(document.querySelector('#mission-bar .mon-chips-tag')?.textContent || '')));
+  const l7 = await up.evaluate(() => { startLevel(7); document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); return !!document.querySelector('#mission-bar .monitor[data-live]') || !!document.querySelector('#mission-bar .mon-chips-tag'); });
+  ok('L19 …and a Level 7 monitor (no lung view) stays the story\'s', !l7);
   // The live strip
   await load(2, 1); await up.waitForTimeout(400);
   const top = await up.evaluate(() => { const s = document.querySelector('.lv-strip'); return { show: s.classList.contains('show'), hidden: s.getAttribute('aria-hidden') }; });
@@ -683,6 +683,46 @@ console.log('\nL19 usability on a phone: live strip, snapshot label, first butto
   ok(`L19 …Stage 4 carries the patient over (PaCO₂ ${tu.enter4.toFixed(0)}) and the misset limit drives it up as it cuts breaths`, tu.enter4 < 45 && tu.min4 > tu.enter4 + 10, `${tu.enter4.toFixed(1)} → ${tu.min4.toFixed(1)}`);
   ok('L19 …Stage 6: Pressure Control 10 delivers 500 mL and keeps PaCO₂ 35–45', tu.pc10.vt === 500 && tu.pc10.paco2 >= 35 && tu.pc10.paco2 <= 45, JSON.stringify(tu.pc10));
   await up.context().close(); }
+
+console.log('\nL20 the scenario monitor is live: HR, SpO₂ and EtCO₂ follow the vent');
+{ const mp = await (await browser.newContext({ viewport: { width: 390, height: 664 }, serviceWorkers: 'block' })).newPage();
+  mp.on('pageerror', e => errs.push(String(e)));
+  await mp.goto(ORIGIN + '/vent-ltv1200.html'); await mp.waitForFunction(() => typeof startLevel === 'function');
+  const mon = (l, i, set, secs) => mp.evaluate(([l, i, set, secs]) => {
+    deviceState = 'run'; applyStandbyVisual(); startLevel(l); scenarioIdx = i; loadScenario(SCENARIO_LEVELS[l][i]);
+    document.getElementById('intro-overlay').classList.remove('open'); renderMissionCard(); updateLungView();
+    const read = () => { const n = c => { const e = document.querySelector('#mission-bar .' + c + ' .mon-val-num'); return e ? +e.textContent : null; };
+      return { hr: n('mon-ecg'), spo2: n('mon-spo2'), et: n('mon-co2'), sh: lvVitals.shown }; };
+    const story = {}; SCENARIO_LEVELS[l][i].vitals.forEach(v => { story[v.k.replace(/₂/g, '2').toLowerCase()] = parseFloat(v.v); });
+    const a = read();
+    if (set) { for (const k of Object.keys(set)) vals[k].v = set[k]; enforceITLimit(); updateUI(); }
+    for (let k = 0; k < (secs || 0); k++) { simTime += 1000; updateLungView(); }
+    return { story, a, b: read() };
+  }, [l, i, set || null, secs || 0]);
+  // Every Level 2–3 monitor starts at its story
+  const bad = [];
+  for (const [l, n] of [[2, 5], [3, 4]]) for (let i = 0; i < n; i++) {
+    const r = await mon(l, i);
+    if (r.story.hr != null && r.a.hr !== r.story.hr) bad.push(`L${l}S${i + 1} HR ${r.a.hr}≠${r.story.hr}`);
+    if (r.story.spo2 != null && Math.abs(r.a.spo2 - r.story.spo2) > 1.5) bad.push(`L${l}S${i + 1} SpO₂ ${r.a.spo2}≠${r.story.spo2}`);
+    if (r.story.etco2 != null && Math.abs(r.a.et - r.story.etco2) > 1.5) bad.push(`L${l}S${i + 1} EtCO₂ ${r.a.et}≠${r.story.etco2}`);
+  }
+  ok('L20 every Level 2–3 monitor starts at its story\'s HR, SpO₂ and EtCO₂', bad.length === 0, bad.join('; '));
+  // ARDS: PEEP 10, two minutes later
+  const r = await mon(2, 1, { peep: 10 }, 120);
+  ok('L20 ARDS: after PEEP 10 the monitor\'s SpO₂ rises with the lung view\'s', r.b.spo2 === Math.round(r.b.sh.spo2) && r.b.spo2 >= r.a.spo2 + 7, `${r.a.spo2} → ${r.b.spo2}`);
+  const wantHR = 118 + 0.83 * (Math.max(0, 98 - r.b.sh.spo2) - Math.max(0, 98 - r.a.sh.spo2)) + 0.3 * (Math.max(0, r.b.sh.paco2 - 45) - Math.max(0, r.a.sh.paco2 - 45)) + 3 * 118 * 118 / 60000 * (r.a.sh.map - r.b.sh.map);
+  ok(`L20 …and HR follows the reflexes: 118 → ${Math.round(wantHR)} (0.83 bpm per % SaO₂, baroreflex 3 ms/mmHg)`, r.b.hr === Math.round(wantHR) && r.b.hr < 118, `${r.b.hr} vs ${wantHR.toFixed(1)}`);
+  ok('L20 …while EtCO₂ on the monitor matches the lung view', r.b.et === Math.round(r.b.sh.etco2), `${r.b.et}`);
+  // Septic, left alone: CO₂ climbs, HR edges up (weak CO₂ term only; BP unchanged)
+  const sp = await mon(2, 4, null, 120);
+  ok('L20 septic, left at 7.2 L/min: EtCO₂ on the monitor climbs from 26', sp.b.et > sp.a.et + 8, `${sp.a.et} → ${sp.b.et}`);
+  ok('L20 …and HR edges up only a little (the CO₂ effect is weak)', sp.b.hr > sp.a.hr && sp.b.hr - sp.a.hr < 8, `${sp.a.hr} → ${sp.b.hr}`);
+  // A sweep that matches the rate
+  const sw = await mp.evaluate(() => { const ecg = document.querySelector('#mission-bar .mon-ecg'); const svg = ecg && ecg.parentNode.querySelector('svg');
+    return { dur: parseFloat(svg.style.animationDuration), hr: +ecg.querySelector('.mon-val-num').textContent }; });
+  ok('L20 the ECG sweep keeps about three complexes per window at the new rate', Math.abs(sw.dur - 180 / sw.hr) < 180 / sw.hr * 0.12, JSON.stringify(sw));
+  await mp.context().close(); }
 
 console.log('\nL13 accessible, and fits a phone');
 { const a = await p.evaluate(() => { const st = document.querySelector('#tl-viz .lv-stage');
