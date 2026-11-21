@@ -185,6 +185,24 @@ These suites live here:
   driving pressure and plateau are recomputed in the test; and every flag
   carries a reason and a source.
 
+- **`ventpanel.test.mjs`** — the LTV 1200's panel and level engine
+  ([`vent-ltv1200.html`](../vent-ltv1200.html)), one check per bug found and
+  fixed there. On/Standby only counts a press that started on the key (moving
+  the mouse across it used to power the vent up, and a click then a mouse move
+  ran the self-test twice), and it works from the keyboard. The 100% O₂ flush
+  ends when a case, level or lung loads or the vent powers off (it used to
+  revert 20 s later onto the next case's FiO₂), turning O₂% during a flush
+  keeps the dialled value, and no goal or ARDSnet grade is passed by the
+  flush's temporary 100%. Leaving an academy mission for a level leaves
+  academy mode, so Level 3 is assessed and a finished level still saves
+  progress. A deep link to a case that doesn't exist opens the level chooser.
+  The teaching card's −/+ obey Control Lock and Standby and show values as the
+  windows do (IPAP in NPPV, OFF). The inspiratory-time cap is checked at every
+  rate from 1 to 80 against both of its limits (no more inverse than 4:1, at
+  least 0.3 s to exhale); rounding to the nearest 0.1 s used to break them.
+  Every teaching card's range matches its dial, and Control Lock confirms a
+  flashing mode preview instead of letting it commit later on a locked panel.
+
 All test data is synthetic — no real roster, learner, or evaluation data is committed.
 
 ## Run
