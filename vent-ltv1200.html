@@ -360,6 +360,14 @@ canvas#pip-canvas{display:none}
 .quiz-btn.wrong{border-color:var(--alarm);background:#fdecec;color:var(--alarm)}
 .quiz-btn.reveal{border-color:var(--green);background:#eafbf1;color:var(--green);opacity:0.6}
 .quiz-btn.disabled{pointer-events:none}
+.quiz-btn.dim{opacity:0.45}
+.quiz-hint{display:none;font-size:12px;line-height:1.5;color:var(--text);background:#fff7ed;border:1px solid var(--orange);
+  border-left-width:3px;border-radius:8px;padding:9px 12px;margin:10px 0 0}
+.quiz-hint b{color:var(--alarm)}
+.lc-score,.vc-score{font-size:12px;color:var(--text);margin:0 0 10px;line-height:1.5}
+.vc-score{font-size:13px;margin:-8px 0 16px}
+.show-target{display:block;margin:6px 0 0;padding:8px 12px;min-height:44px;border-radius:8px;border:1px dashed var(--border);
+  background:transparent;color:var(--sub);font-size:11px;font-weight:700;letter-spacing:0.02em;cursor:pointer;text-align:left}
 .quiz-exp{background:#eafbf1;border-left:3px solid var(--green);
   border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;color:var(--text);
   line-height:1.6;margin-bottom:10px;display:none}
@@ -416,6 +424,17 @@ canvas#pip-canvas{display:none}
 .lvl-badge-2{background:#fdf0e7;color:var(--orange);border:1px solid var(--orange)}
 .lvl-badge-3{background:#fdecec;color:var(--alarm);border:1px solid var(--alarm)}
 .lvl-badge-7{background:#efeaf9;color:var(--purple-dark);border:1px solid var(--purple-dark)}
+.lvl-badge-8{background:#0d1424;color:#e8ecf8;border:1px solid #0d1424}
+#shift-clock-toggle{display:block;margin:-4px 0 12px auto;padding:8px 12px;min-height:44px;border-radius:8px;border:1px solid var(--border);
+  background:#ffffff;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer}
+#shift-clock-toggle[aria-pressed="false"]{color:var(--text)}
+/* The shift clock: bottom right, never taking taps; above the knob dock when that is up */
+.shift-clock{position:fixed;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:93;pointer-events:none;display:none;
+  font-family:var(--mono);font-size:15px;font-weight:700;color:#e8ecf8;background:#0d1424;border:1px solid #2a3550;border-radius:10px;
+  padding:6px 10px;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
+.shift-clock.show{display:block}
+.shift-clock.warn{color:#ffb020}.shift-clock.bad{color:#ff6b73}
+.knob-dock.show ~ .shift-clock{bottom:calc(env(safe-area-inset-bottom,0px) + 112px)}
 .lvl-desc{font-size:11px;color:var(--sub);line-height:1.5}
 .lvl-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);
   color:var(--border);font-size:20px;transition:color 0.18s;line-height:1}
@@ -1267,6 +1286,7 @@ canvas#pip-canvas{display:none}
 
 <!-- GOAL MET (shows when the goal is reached and the card's Confirm is off-screen) -->
 <button class="goal-nudge" id="goal-nudge" type="button" onclick="openConfirm()" tabindex="-1" aria-hidden="true">✓ Goal met — Confirm</button>
+<div class="shift-clock" id="shift-clock" aria-hidden="true">⏱ 3:00</div>
 
 <!-- DRAWER -->
 <div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
@@ -2938,6 +2958,7 @@ var STAGE_DEFS=[
         'Pressure Control and Pressure Support — about 15 and 10'
       ],
       correct:1,
+            hint:'Minute ventilation is the volume moved each minute. Which two settings multiply together to give it?',
       exp:'Minute ventilation = <strong>Rate × Tidal Volume</strong>. Start around 6–8 mL/kg of <strong>predicted body weight</strong> (~500 mL for an average adult) at 12–16 breaths/min for a normal MV of roughly 7–9 L/min.'
     },
     goal:{
@@ -2961,6 +2982,7 @@ var STAGE_DEFS=[
         'It doesn\'t matter — only the rate decides how much they exhale'
       ],
       correct:0,
+            hint:'Breathing out is passive and needs the most time. In a normal breath, is inspiration the longer or the shorter part?',
       exp:'Cycle time = 60 ÷ rate; expiratory time = cycle − inspiratory time. Most patients want <strong>I:E about 1:2 to 1:3</strong>. Too long an inspiration shortens exhalation and traps air.'
     },
     goal:{
@@ -2984,6 +3006,7 @@ var STAGE_DEFS=[
         'Raise the rate so they never need to trigger a breath'
       ],
       correct:1,
+            hint:'The sensitivity number is the flow the patient must pull before the vent fires. A bigger number means a bigger pull.',
       exp:'On the LTV, a <strong>higher sensitivity number = harder to trigger</strong> (the patient must generate more flow). Lower it to 1–3 L/min so a weak effort opens the valve. If the vent starts firing on its own, you\'ve gone too far — raise it back.'
     },
     goal:{
@@ -3007,6 +3030,7 @@ var STAGE_DEFS=[
         'The low minute-volume alarm is misset — reset it instead'
       ],
       correct:1,
+            hint:'The work-up is normal and the peak is the same every breath. Is the problem in the patient, or in where the limit is set?',
       exp:'<strong>Assess before you adjust.</strong> Reaching the same pressure every breath does not by itself mean the limit is too low — a fixed obstruction can do the same. But you\'ve done the work-up (comfortable patient, equal sounds, patent tube, normal plateau), which rules out an airway/compliance cause. With a confirmed-normal exam and a reproducible PIP, this is a limit-setting problem — set the High Pressure limit 5–10 cmH₂O above the normal PIP. A true obstruction (kink, plug, bronchospasm) would drive the <em>PIP</em> up while the plateau stayed near-normal — a widening PIP–plateau gap; a <em>rising plateau</em> instead means stiffer lungs (falling compliance). A normal plateau argues against both.'
     },
     goal:{
@@ -3030,6 +3054,7 @@ var STAGE_DEFS=[
         'Pressure Control — set a pressure and let them breathe on top'
       ],
       correct:1,
+            hint:'You want a guaranteed floor of breaths, plus help with the breaths they start themselves.',
       exp:'<strong>SIMV</strong> delivers a set number of mandatory breaths and lets the patient breathe spontaneously in between; <strong>Pressure Support</strong> augments each of those spontaneous efforts. A common transport setup for a patient who\'s waking up.'
     },
     goal:{
@@ -3053,6 +3078,7 @@ var STAGE_DEFS=[
         'The PEEP — pressure control turns it off between breaths'
       ],
       correct:1,
+            hint:'In pressure control the vent holds the pressure fixed. Which number is now free to change when the lungs change?',
       exp:'Pressure control sets a <strong>pressure, not a volume</strong>. If the lungs stiffen, the same pressure moves less air and the tidal volume drops — so <strong>watch delivered Vt</strong> closely whenever you\'re pressure-targeting.'
     },
     goal:{
@@ -3106,12 +3132,16 @@ var SCENARIO_LEVELS={
           'Air-trapping — lengthen exhalation so the CO₂ can get out'
         ],
         correct:1,
+            hint:'Oxygenation is fine; the CO₂ is high and the pH low. What clears CO₂?',
         exp:'A high PaCO₂ with a low pH and normal oxygenation is a <strong>respiratory acidosis</strong>. CO₂ clearance is proportional to minute ventilation (Rate × Vt) — so raising MV is the fix.'
       },
       goal:{
+        aim:'Clear the CO₂: raise minute ventilation enough to correct the acidosis — mostly with <em>rate</em>, keeping the breath lung-safe for his predicted body weight.',
         text:'Raise minute ventilation to clear the CO₂ — get <strong>MV into roughly 7–10 L/min</strong> (it\'s 4.5 now) while keeping <strong>Vt lung-safe (≤ 8 mL/kg, so ≤ ~560 mL for 70 kg PBW)</strong>. Prefer more <em>rate</em>, not a bigger breath.',
-        check:function(){ var mv=estMinuteVolume(); return mv>=7 && mv<=10.5 && vals.vt.v<=560; },
-        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   Vt '+(vals.vt.v/70).toFixed(1)+' mL/kg'; }
+        // Sized to the patient (70 kg PBW unless a shift varies it): Vt ≤ 8 mL/kg, and the
+        // minute volume scaled by weight^0.75, as CO₂ production is.
+        check:function(){ var kg=caseKg(this.task), s=Math.pow(kg/70,0.75), mv=estMinuteVolume(); return mv>=7*s && mv<=10.5*s && vals.vt.v<=8*kg; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   Vt '+(vals.vt.v/caseKg(this.task)).toFixed(1)+' mL/kg'; }
       },
       confirm:'✓ Minute ventilation roughly doubled and the acidosis corrects — and you did it the safe way, by <strong>raising rate rather than oversizing the breath</strong>. MV = Rate × Vt, but only rate is free of lung-stretch cost: pushing Vt past ~8 mL/kg PBW trades CO₂ clearance for volutrauma. Watch the ceiling too — driving MV far above need causes alkalosis.'
     },
@@ -3133,9 +3163,11 @@ var SCENARIO_LEVELS={
           'Increase inspiratory time to hold the breath longer'
         ],
         correct:1,
+            hint:'More oxygen didn\'t fix it, so blood is passing alveoli that are closed. What holds alveoli open at the end of a breath?',
         exp:'The problem is <strong>shunt</strong> — blood passing collapsed, flooded alveoli. Rate changes CO₂, not oxygenation. Bigger tidal volumes injure ARDS lungs. <strong>PEEP</strong> holds alveoli open at end-expiration, recruiting lung and cutting the shunt.'
       },
       goal:{
+        aim:'Recruit the lung with PEEP — enough to open alveoli, not so much that you overdistend them and drop the blood pressure.',
         text:'Recruit the lung with PEEP — bring PEEP into a therapeutic range of about <strong>8–14 cmH₂O</strong>. Enough to open alveoli, not so much you overdistend and drop the blood pressure.',
         check:function(){ return vals.peep.v>=8 && vals.peep.v<=14; },
         readout:function(){ return 'PEEP   '+vals.peep.v+' cmH₂O'; }
@@ -3164,9 +3196,11 @@ var SCENARIO_LEVELS={
           'Oversedation causing hypoventilation and a rising CO₂'
         ],
         correct:1,
+            hint:'Expiratory flow never reaches zero before the next breath starts. What is the lung running out of?',
         exp:'Gas trapped from incomplete exhalation builds <strong>intrinsic (auto) PEEP</strong>. The primary fix is to give the lungs more time to empty — lengthen expiration (lower rate and/or shorter inspiratory time). <em>Note:</em> "adding PEEP always worsens trapping" is too absolute — a modest applied PEEP set <em>below</em> the auto-PEEP can actually reduce trigger workload without adding to trapping. But the first move here is to open up expiration.'
       },
       goal:{
+        aim:'Give the lungs time to empty by lengthening expiration — without paying for it with too little ventilation: let the CO₂ rise only as far as permissive hypercapnia allows.',
         text:'Give the lungs time to empty — lengthen expiration until <strong>I:E is at least 1:4</strong> — without paying for it with too little ventilation: the CO₂ may rise, but only while <strong>pH stays ≥ 7.20</strong> once it settles (permissive hypercapnia). Shorten the inspiratory time first; drop the rate only as far as the pH allows.',
         check:function(){ var e=ieExpRatio(); return e!==null && e>=4-0.05 && settledFor(this.task).ph>=7.20-0.005; },
         readout:function(){ var e=ieExpRatio(), s=settledFor(this.task); return (e===null?'I:E  —':'I:E   1 : '+e.toFixed(1))+'   ·   pH settles at '+s.ph.toFixed(2); }
@@ -3192,9 +3226,11 @@ var SCENARIO_LEVELS={
           'Increase tidal volume to satisfy the air hunger'
         ],
         correct:1,
+            hint:'They pull hard at the start of each breath against a long, slow inspiration. What would get the breath in faster?',
         exp:'A long, slow inspiration starves a high-demand patient of flow and eats into exhalation time. <strong>Shortening inspiratory time</strong> delivers the set volume faster (higher flow) and lengthens expiration — both improve synchrony. Sedation still matters, but the mechanics are fixable.'
       },
       goal:{
+        aim:'Speed up the breath and free up exhalation. (Watch the live I:E as you do.)',
         text:'Speed up the breath and free up exhalation — shorten <strong>inspiratory time to ≤ 0.8 s</strong>. (Watch the live I:E open up as you do.)',
         check:function(){ return vals.it.v<=0.8+0.001; },
         readout:function(){ var e=ieExpRatio(); return 'IT  '+vals.it.v.toFixed(1)+' s    ·    I:E 1:'+(e===null?'—':e.toFixed(1)); }
@@ -3219,12 +3255,14 @@ var SCENARIO_LEVELS={
           'Nothing — add PEEP and leave ventilation alone'
         ],
         correct:1,
+            hint:'The CO₂ is already low and the pH is still 7.18. Is that low CO₂ the problem, or the patient\'s defence against the acid?',
         exp:'The low PaCO₂ is <strong>compensation</strong> for a severe metabolic (lactic) acidosis. If you let PaCO₂ drift up to 40, the pH crashes. In fact 28 is already behind: <strong>Winter\'s formula</strong> (expected PaCO₂ = 1.5 × HCO₃⁻ + 8 ± 2) puts full compensation for this bicarbonate (about 10) at <strong>roughly 21–26</strong> — part of why they tired and needed the tube. The vent must <strong>match the high minute ventilation the patient was generating</strong>. Minute ventilation is only a <em>starting estimate</em> — it can\'t predict an exact PaCO₂ (dead space and CO₂ production vary) — so set a high MV, then <strong>titrate to the measured ETCO₂ and a follow-up ABG</strong>.'
       },
       goal:{
+        aim:'Match the compensatory drive — they were breathing 30+ before the tube. Raise minute ventilation with <em>rate</em>, keeping the breath lung-safe, until the PaCO₂ settles no higher than the patient was holding it themselves — toward what Winter\'s formula predicts, not below it.',
         text:'Match the compensatory drive — they were breathing 30+ before the tube. Raise minute ventilation (on this patient it takes about <strong>14 L/min or more</strong>; 14–18 is common in severe acidosis), getting the extra from <em>rate</em> and keeping the breath lung-safe (<strong>Vt ≤ 8 mL/kg, 560 mL</strong>), until the <strong>PaCO₂ settles at or below the pre-intubation 28, toward Winter\'s ~21–26</strong> — not below 20. Confirm by ABG. Never let CO₂ climb.',
-        check:function(){ var pc=settledFor(this.task).paco2; return vals.vt.v<=560 && pc>=20 && pc<=28+0.05; },
-        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   PaCO₂ settles at '+Math.round(settledFor(this.task).paco2)+' (keep ≤ 28)'; }
+        check:function(){ var pc=settledFor(this.task).paco2; return vals.vt.v<=8*caseKg(this.task) && pc>=20 && pc<=28+0.05; },
+        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   PaCO₂ settles at '+Math.round(settledFor(this.task).paco2); }
       },
       confirm:'✓ High minute ventilation set to sustain the compensation. Remember MV is a proxy, not a PaCO₂ predictor — and in shock, dead space widens the gap so <strong>ETCO₂ reads lower than the PaCO₂</strong>: a reassuring ETCO₂ can hide a rising PaCO₂, so trend it continuously and confirm with serial ABGs. Aim for the PaCO₂ Winter\'s formula predicts, never above the patient\'s own pre-intubation value: normalizing it toward 40 in a compensating metabolic acidosis drops the pH further and can tip a shocked patient into arrest. Level 2 complete!'
     }
@@ -3249,6 +3287,7 @@ var SCENARIO_LEVELS={
           'Extubate now — a passed screen means they\'re ready'
         ],
         correct:1,
+            hint:'The order is to ease support while you watch. Which option does that, monitored, and can be undone if they tire?',
         exp:'A passed readiness screen (awake, adequate oxygenation on modest FiO₂ and PEEP, hemodynamically stable, breathing on their own — the AARC 2024 guideline suggests an RSBI isn\'t needed to decide this) supports a <strong>monitored trial of reduced support</strong> — here authorized by your medical-control order. Move to <strong>minimal support</strong> (CPAP/PSV, low pressure support) and watch tolerance, ready to restore full support if they tire. Mind the scope: a passed trial is only <em>one</em> input to extubation readiness — <strong>airway protection, cough strength and secretion burden still govern that decision</strong>, and <strong>extubating for weaning is not a field intervention</strong> without a specific protocol and physician direction. In the trials that compared them (Brochard 1994, Esteban 1995), weaning by ratcheting down the SIMV rate was the slowest way off the vent — it is not the modern bridge. Your job: reduce support as ordered, monitor, and communicate readiness to the receiving team.'
       },
       goal:{
@@ -3276,6 +3315,7 @@ var SCENARIO_LEVELS={
           'Prolong inspiratory time so the stiff lungs have time to fill'
         ],
         correct:1,
+            hint:'The plateau is about 25 while the peak hits 54. Which of those two is the pressure the alveoli actually see?',
         exp:'In severe obstruction the peak pressure is mostly <strong>resistive</strong> — spent across narrowed airways, not delivered to the alveoli. The <strong>plateau</strong> (inspiratory hold) is the alveolar pressure, and here it\'s low and safe — so don\'t chase the scary PIP. The real danger is <strong>dynamic hyperinflation / auto-PEEP</strong>. The fix: slow the rate, use a <em>short</em> inspiratory time (high flow gets the breath in fast), and <strong>maximize expiratory time</strong>; accept permissive hypercapnia. Prolonging inspiration would steal exhale time and worsen trapping. (Pressure control can cap the peak, but it does not fix hyperinflation.)'
       },
       goal:{
@@ -3303,6 +3343,7 @@ var SCENARIO_LEVELS={
           'Lower the PEEP to cut dead space and protect the blood pressure'
         ],
         correct:1,
+            hint:'This is severe ARDS already on small breaths. Rate moves CO₂. Which settings move oxygen?',
         exp:'P/F < 100 is <strong>severe ARDS</strong> (Berlin). Bigger breaths injure; rate fixes CO₂, not oxygen. The evidence-based next step is to <strong>escalate PEEP and FiO₂ in tandem</strong> per the ARDSnet table to recruit lung and buy oxygenation — while you set up prone positioning and consider ECMO referral.'
       },
       goal:{
@@ -3330,12 +3371,17 @@ var SCENARIO_LEVELS={
           'Raise PEEP to 20 to push venous blood out of the head'
         ],
         correct:1,
+            hint:'CO₂ widens brain vessels. You want a little less blood in the head for a short time — not so little the brain goes without.',
         exp:'CO₂ is a potent cerebral vasodilator: lowering PaCO₂ constricts cerebral vessels, shrinks blood volume, and drops ICP within minutes. But over-doing it (PaCO₂ < 25–30) causes ischemia and rebound. Per Brain Trauma Foundation guidance, hyperventilation is a <strong>monitored, time-limited rescue</strong> for acute herniation only — <strong>guided by continuous ETCO₂</strong> (target ~30–35, correlated to ABG), not a standing setting.'
       },
       goal:{
         text:'Mildly hyperventilate as a monitored bridge — at PaCO₂ 42 on 8 L/min, getting to <strong>30–35</strong> takes only about a quarter more ventilation: raise <strong>minute ventilation to about 10–11.5 L/min</strong> with the rate, titrating to <strong>continuous ETCO₂ ~30–35</strong> (confirm with ABG). Much more than that overshoots into the hypocapnia that causes ischemia.',
-        check:function(){ var mv=estMinuteVolume(); return mv>=9.5 && mv<=11.5 && vals.vt.v>=400 && vals.vt.v<=600; },
-        readout:function(){ return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   watch ETCO₂ 30–35'; }
+        // Graded on the PaCO₂ the settings settle at (30–35, ±0.5), as the case teaches. It used to
+        // grade minute volume (9.5–11.5 L/min), which passed 26 × 400 mL at PaCO₂ 39 — barely
+        // hyperventilated — and 19 × 600 mL at 27, the overshoot the case warns about: at the same
+        // minute volume a smaller breath is more dead space.
+        check:function(){ var kg=caseKg(this.task), pc=settledFor(this.task).paco2; return pc>=29.5 && pc<=35.5 && vals.vt.v>=400*kg/70-0.01 && vals.vt.v<=600*kg/70+0.01; },
+        readout:function(){ var t=settledFor(this.task); return 'MV   '+estMinuteVolume().toFixed(1)+' L/min   ·   EtCO₂ settles at '+Math.round(t.etco2)+' (PaCO₂ '+Math.round(t.paco2)+')'; }
       },
       confirm:'🏆 Controlled, capnography-guided hyperventilation buys minutes by shrinking cerebral blood volume — a bridge to the OR, osmotic therapy, and sedation, not a destination. Follow continuous ETCO₂ (target ~30–35) with ABG correlation, keep it brief (ENLS: under 2 hours at PaCO₂ 30–35), and back off to normocapnia (ETCO₂ 35–40) once the crisis is controlled — the Brain Trauma Foundation recommends against prolonged hyperventilation to PaCO₂ ≤ 25. Level 3 complete — you\'re managing the toughest cases.'
     }
@@ -3366,6 +3412,7 @@ var SCENARIO_LEVELS={
           'D — the patient is over-sedated. Increase the rate and keep going.'
         ],
         correct:1,
+            hint:'Which way is the pressure going? A plug, a bite or a pneumothorax push it up. Here it never builds.',
         exp:'Read the <em>direction</em> of the pressure. A plug, a kink, a bite or a tension pneumothorax all drive pressure <strong>up</strong>. Pressure that never builds, with a flat capnograph and no chest rise, means the gas is going somewhere other than the lungs — a disconnect, a large circuit leak, or a failed cuff. That is the <strong>E</strong> of DOPE. Apply the <strong>10-second rule</strong>: you do not troubleshoot a patient who is not being ventilated. Disconnect and bag first, so someone is moving air while you work the circuit hand-over-hand from the patient back to the vent — wye, HME/filter, inline suction, tubing, exhalation-valve pilot line, water trap.'
       },
       goal:{
@@ -3400,6 +3447,7 @@ var SCENARIO_LEVELS={
           'Increase the tidal volume to push past the resistance'
         ],
         correct:1,
+            hint:'You need to split the peak into the part spent in the airways and the part in the alveoli. What stops the flow?',
         exp:'Peak pressure is two things added together: the pressure spent pushing gas <em>through the airways</em> (resistive) and the pressure actually <em>distending the alveoli</em> (elastic). An <strong>inspiratory hold</strong> stops flow, so the resistive part falls away and what is left — the <strong>plateau</strong> — is alveolar. That one reading splits DOPE in half: <strong>high peak with a normal plateau</strong> is a resistance problem (plug, kink, bite, bronchospasm — the O), while <strong>high peak with a high plateau</strong> is a compliance problem (pneumothorax, mainstem, oedema, stiff lung — the P and D). Raising the limit silences the messenger and tells you nothing.'
       },
       goal:{
@@ -3431,9 +3479,11 @@ var SCENARIO_LEVELS={
           'E — equipment: a kinked circuit needed changing'
         ],
         correct:1,
+            hint:'Breath sounds went on one side only, and the PIP jumped right after a move. Where did the tube go?',
         exp:'<strong>D covers both directions.</strong> Too deep is a <strong>right mainstem</strong> — the right main bronchus leaves the carina at a shallower angle, so a migrating tube goes there. You are then putting the whole tidal volume into one lung: pressures climb, breath sounds go absent on the <em>left</em>, only one side rises, and the sat falls. Too far out is <strong>extubation</strong> — the opposite picture, with low pressure, low minute volume and a lost capnograph. Note what this was <em>not</em>: the tube was patent, so suctioning would have found nothing and cost time. Confirm the fix the way you found the problem — re-auscultate both axillae and watch the PIP fall as the second lung comes back. Re-check depth after every move: cot transfers, stair chairs, log rolls and lifts are when tubes migrate.'
       },
       goal:{
+        aim:'The tube is repositioned and the saturation is 97% — on the 100% oxygen you flushed during the desaturation. Wean it back to the lowest FiO₂ that holds your target saturation.',
         text:'The tube is repositioned and the saturation is 97% — on the 100% oxygen you flushed during the desaturation. Wean it back: set <strong>FiO₂ to the lowest that holds your target saturation, around 40%</strong> (30–60% is fine).',
         check:function(){ return vals.fio2.v>=30 && vals.fio2.v<=60; },
         readout:function(){ return 'FiO₂ '+vals.fio2.v+'%   ·   SpO₂ 97%'; }
@@ -3465,6 +3515,7 @@ var ACADEMY_SCENARIOS={
         '4 mL/kg — always the smallest possible breath, even in healthy lungs'
       ],
       correct:1,
+            hint:'Size the breath to predicted body weight, not actual weight, and protect the lung from the first breath.',
       exp:'Start every intubated patient lung-protective: <strong>6–8 mL/kg of predicted body weight</strong> (here ~450–600 mL), physiologic <strong>PEEP ~5</strong>, and a rate that gives a normal minute ventilation. You don\'t wait for ARDS to protect the lung — you start protected. 9 mL/kg on healthy lungs is still too much.'
     },
     goal:{
@@ -3490,6 +3541,7 @@ var ACADEMY_SCENARIOS={
         'Full A/C volume ventilation without intubating'
       ],
       correct:1,
+            hint:'Awake, protecting the airway, in flash pulmonary edema. What recruits lung and unloads the heart without a tube?',
       exp:'An awake CHF patient with intact airway reflexes is the textbook <strong>CPAP</strong> candidate. High airway pressure recruits flooded alveoli and drops preload/afterload — buying time while nitrates and diuretics work, and avoiding the tube in most cases.'
     },
     goal:{
@@ -3516,6 +3568,7 @@ var ACADEMY_SCENARIOS={
         'Type I — but the fix is a faster respiratory rate'
       ],
       correct:1,
+            hint:'The CO₂ and pH are normal; only the oxygen is low. Which settings move oxygen?',
       exp:'Low O₂ with a normal CO₂/pH is <strong>Type I (hypoxemic) failure</strong> — a gas-exchange/shunt problem, not a ventilation problem. Rate and minute ventilation move CO₂, not oxygen. Fix it with <strong>FiO₂ and PEEP</strong> — but know PEEP\'s limits here. A dense <em>one-sided</em> consolidation recruits far less than the patchy collapse of ARDS, and pushing PEEP high mostly overdistends the <em>good</em> lung, squeezing blood toward the bad one and making the shunt worse. Moderate PEEP and more oxygen do the work; if you can, position <strong>good lung down</strong>.'
     },
     goal:{
@@ -3541,6 +3594,7 @@ var ACADEMY_SCENARIOS={
         'Nasal cannula, and recheck a blood gas in an hour'
       ],
       correct:1,
+            hint:'Awake, airway protected, CO₂ high. They need help moving air, not just one steady pressure.',
       exp:'Awake, cooperative, airway-protecting hypercapnic COPD is the <strong>strongest evidence-based indication for NIV/BiPAP</strong> — the pressure-support (IPAP above EPAP) unloads the respiratory muscles and blows off CO₂, avoiding intubation in most. CPAP (one pressure) helps oxygenation but doesn\'t augment ventilation the way BiPAP does.'
     },
     goal:{
@@ -3567,6 +3621,7 @@ var ACADEMY_SCENARIOS={
         'Air hunger — the tidal volume is too low; raise it'
       ],
       correct:2,
+            hint:'Gas exchange and mechanics are normal. Is the problem the vent, or the patient\'s comfort?',
       exp:'When a patient fights the vent but the mechanics and gas exchange are <strong>normal</strong>, the answer usually isn\'t another knob — it\'s <strong>analgesia and sedation</strong>. Treat pain first, then sedation. Mechanically, all you owe them is a vent that isn\'t fighting back: an easy trigger and adequate support.'
     },
     goal:{
@@ -3593,6 +3648,7 @@ var ACADEMY_SCENARIOS={
         'Switch to pressure control and stop watching the tidal volume'
       ],
       correct:1,
+            hint:'The breath is too big and the oxygen is too low. A good answer fixes both.',
       exp:'Severe ARDS demands both at once: <strong>lung-protective</strong> (≈6 mL/kg, Pplat ≤ 30, rate up to hold minute ventilation) <strong>and</strong> <strong>oxygenation</strong> (climb the PEEP/FiO₂ ladder). Do one and neglect the other and the patient loses ground on a long transport.'
     },
     goal:{
@@ -3620,6 +3676,9 @@ var ACADEMY_SCENARIOS={
 // same model the lung view draws — whichever case is on screen.
 [2,3,7].forEach(function(l){ SCENARIO_LEVELS[l].forEach(function(sc){ if(sc.goal) sc.goal.task=sc; }); });
 Object.keys(ACADEMY_SCENARIOS).forEach(function(k){ var sc=ACADEMY_SCENARIOS[k]; if(sc.goal) sc.goal.task=sc; });
+// The patient's predicted body weight: 70 kg for every case as written; a shift
+// can give a case a different patient (makeVariant).
+function caseKg(task){ return (task && task.kg) || 70; }
 function settledFor(task){
   var pt=task&&task.patient;
   return vitalsTarget(pt?{kg:pt.kg||TL_ADULT_KG, peds:!!pt.peds, spontRate:pt.spontRate||15, P:pt.vit}:null);
@@ -3632,7 +3691,7 @@ function startAcademyScenario(id){
   if(!sc){ openLevelSelect(); return; }
   academyMode=true;
   SCENARIO_LEVELS[9]=[sc];        // park it in a private level slot
-  gameLevel=9; scenarioIdx=0;
+  gameLevel=9; scenarioIdx=0; resetRunStats();
   if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
   var ov=document.getElementById('lvlsel-overlay'); if(ov) ov.classList.add('hidden');
   loadScenario(sc);
@@ -3667,7 +3726,9 @@ var LEVEL_META={
   3:{ label:'Level 3', unit:'Scenario', icon:'\ud83c\udfc6', color:'var(--alarm)',  glow:'vc-glow-red',
       done:'advanced cases solved.', next:7 },
   7:{ label:'Troubleshooting', unit:'Case', icon:'\ud83e\uddf0', color:'var(--purple-dark)', glow:'vc-glow-purple',
-      done:'failures found and fixed.', next:0 }
+      done:'failures found and fixed.', next:0 },
+  8:{ label:'Shift', unit:'Case', icon:'\ud83d\ude91', color:'var(--purple-dark)', glow:'vc-glow-purple',
+      done:'cases worked.', next:0 }
 };
 function levelMeta(n){ return LEVEL_META[n]||LEVEL_META[2]; }
 function taskBadge(sc){
@@ -3675,6 +3736,35 @@ function taskBadge(sc){
   if(sc.badge) return sc.badge;                       // academy mission: literal badge
   var m=levelMeta(gameLevel);
   return m.label+' \u00b7 '+m.unit+' '+(scenarioIdx+1)+' of '+levelCount(gameLevel);
+}
+
+// ── FIRST-TRY SCORE ───────────────────────────────────────────
+// Each case can earn two points, both on the first attempt only:
+//  · the diagnosis, right first time;
+//  · the settings — right on the first submission where the case is graded
+//    (Level 3, a shift), or reached without revealing the target where it is
+//    guided (Levels 2 and 7).
+// The tutorial and the academy missions score the diagnosis only.
+var runStats=null;
+function resetRunStats(){ runStats={level:gameLevel, cases:{}}; }
+function caseStat(){
+  if(!runStats || runStats.level!==gameLevel) resetRunStats();
+  var k=gameLevel===1?('S'+gameStage):('C'+scenarioIdx);
+  return runStats.cases[k]||(runStats.cases[k]={dx:null, set:null, hint:false, timeUp:false});
+}
+function scoresSettings(lvl){ lvl=lvl==null?gameLevel:lvl; return lvl===2||lvl===3||lvl===7||lvl===8; }
+function levelScore(lvl){
+  lvl=lvl==null?gameLevel:lvl;
+  var n=lvl===1?STAGE_DEFS.length:levelCount(lvl), cs=(runStats&&runStats.level===lvl)?runStats.cases:{}, dx=0, set=0;
+  Object.keys(cs).forEach(function(k){ if(cs[k].dx===true) dx++; if(cs[k].set===true) set++; });
+  var withSet=scoresSettings(lvl);
+  return {n:n, dx:dx, set:withSet?set:null, points:dx+(withSet?set:0), max:n*(withSet?2:1)};
+}
+function scoreLine(s,lvl){
+  lvl=lvl==null?gameLevel:lvl;
+  var setLbl=(lvl===3||lvl===8)?'Settings right on the first submit':'Settings without revealing the target';
+  return 'Diagnosis right first time: <b>'+s.dx+'/'+s.n+'</b>'+(s.set===null?'':'<br>'+setLbl+': <b>'+s.set+'/'+s.n+'</b>')
+    +'<br>Score: <b>'+s.points+'/'+s.max+'</b>';
 }
 
 function gameDone(){
@@ -3830,7 +3920,7 @@ function renderMonitor(vitals,sc){
   // With a scenario patient behind it, the monitor is live: HR, SpO₂ and
   // EtCO₂ follow the vent (lvUpdateMonitor). The chips stay the story's
   // arrival data (labs, settings), and say so.
-  var live=sc && sc.patient && gameLevel>=2 && gameLevel<=3;
+  var live=sc && sc.patient && ((gameLevel>=2 && gameLevel<=3) || gameLevel===8);
   var mon=lanes?('<div class="monitor"'+(live?' data-live="1"':'')+'>'+lanes+'</div>'):'';
   var chipHtml='';
   if(chips.length){
@@ -3846,7 +3936,13 @@ function renderMonitor(vitals,sc){
 // ── SHARED: diagnose → goal → confirm body (used by L1, L2, L3) ──
 // Level 3 runs as a genuine assessment: no live "you hit it" feedback, no
 // exact target ranges up front — the learner commits, then gets graded.
-function assessMode(){ return gameLevel===3 && !academyMode; }
+function assessMode(){ return (gameLevel===3 || gameLevel===8) && !academyMode; }   // Level 3 and a shift are graded
+// Is this case's target given as an aim only (Levels 2 and 7)? The tutorial and
+// the academy missions keep their numbers: they are teaching, not testing.
+function targetHidden(task){
+  return !!(task && task.goal && task.goal.aim) && (gameLevel===2 || gameLevel===7) && !academyMode;
+}
+function revealTarget(){ var cs=caseStat(); cs.hint=true; renderMissionCard(); }
 function renderSolveBody(task){
   if(!scenarioDiagnosed){
     var lbl=gameLevel===1?'▶ STEP 1 · MAKE THE CALL':'▶ STEP 1 · DIAGNOSE THE PROBLEM';
@@ -3879,8 +3975,15 @@ function renderSolveBody(task){
   var how=(!met && !hasOperatedVent)
     ? '<div class="solve-how">▸ <b>How to change a setting:</b> tap a control below to select it, then turn the <b>Set Value</b> dial (it pops up within reach).</div>'
     : '';
+  // Levels 2 and 7 state the aim, not the numbers: the learner works out the
+  // target from the case. The numbers are a tap away, at the cost of this
+  // case's settings point, and are shown once the goal is reached.
+  var hidden=targetHidden(task), cs=caseStat(), numbers=!hidden || cs.hint || met;
+  var reveal=(hidden && !numbers)
+    ? '<button class="show-target" onclick="revealTarget()">Show the target numbers <span style="font-weight:500">(costs this case\'s settings point)</span></button>'
+    : '';
   return '<div class="scen-dx"><span class="scen-dx-ico">✓</span> '+dxTxt+'</div>'
-    +'<div class="scen-goal'+(met?' done':'')+'"><div class="scen-goal-lbl">🎯 Goal</div>'+task.goal.text+'</div>'
+    +'<div class="scen-goal'+(met?' done':'')+'"><div class="scen-goal-lbl">🎯 Goal</div>'+(numbers?task.goal.text:task.goal.aim)+reveal+'</div>'
     +how
     +'<div class="scen-readout'+(met?' hit':'')+'">'+(met?'✓ ':'')+goalReadout(task)+'</div>'
     +(met
@@ -4100,6 +4203,7 @@ function renderMissionCard(){
         +'<div class="lc-icon">✅</div>'
         +'<div class="lc-title" style="color:var(--green)">Mission Complete</div>'
         +'<div class="lc-sub">Nicely done — you set this one correctly.</div>'
+        +'<div class="lc-score">'+(levelScore().dx?'✓ Diagnosed right on the first try.':'Diagnosis took more than one try — worth another run.')+'</div>'
         +'<div class="lc-btns">'
         +'<button class="lc-btn lc-btn-next" onclick="location.href=\'vta/academy.html\'">← Back to Academy</button>'
         +'<button class="lc-btn lc-btn-sel" onclick="startFree()">Free Play</button>'
@@ -4111,6 +4215,7 @@ function renderMissionCard(){
         +'<div class="lc-icon">🎓</div>'
         +'<div class="lc-title" style="color:var(--blue)">Level 1 Complete</div>'
         +'<div class="lc-sub">All controls unlocked. Ready for clinical scenarios?</div>'
+        +'<div class="lc-score">'+scoreLine(levelScore())+'</div>'
         +'<div class="lc-btns">'
         +'<button class="lc-btn lc-btn-next" onclick="startLevel(2)">Level 2 →</button>'
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
@@ -4121,8 +4226,10 @@ function renderMissionCard(){
         +'<div class="lc-icon">'+m.icon+'</div>'
         +'<div class="lc-title" style="color:'+m.color+'">'+m.label+' Complete</div>'
         +'<div class="lc-sub">All '+levelCount(gameLevel)+' '+m.done+'</div>'
+        +'<div class="lc-score">'+scoreLine(levelScore())+shiftTimeLine()+'</div>'
         +'<div class="lc-btns">'
-        +(nx?'<button class="lc-btn lc-btn-next" onclick="startLevel('+m.next+')">'+nx.label+' →</button>':'')
+        +(gameLevel===8?'<button class="lc-btn lc-btn-next" onclick="startShift()">Another shift →</button>'
+          :(nx?'<button class="lc-btn lc-btn-next" onclick="startLevel('+m.next+')">'+nx.label+' →</button>':''))
         +'<button class="lc-btn lc-btn-sel" onclick="openLevelSelect()">Level Select</button>'
         +'</div></div>';
     }
@@ -4292,7 +4399,7 @@ function showIntro(sc){
   var ov=document.getElementById('intro-overlay'), card=document.getElementById('intro-card');
   if(!ov||!card) return;
   var isTut=gameLevel===1;
-  var kicker=isTut?'Training · Setup':(academyMode?'Academy · Practice':(gameLevel===3?'Incoming · Advanced':'Incoming · Clinical'));
+  var kicker=isTut?'Training · Setup':(academyMode?'Academy · Practice':(gameLevel===8?'Shift · On the clock':(gameLevel===3?'Incoming · Advanced':'Incoming · Clinical')));
   var narr=sc.intro||sc.scenario;
   // The Assess→Diagnose→Set→Confirm strip is orientation, not content: it only
   // earns its space the first time a learner meets the format. Show it when
@@ -4353,38 +4460,45 @@ function openDiagnose(){
   shuffledOrder(d.choices.length).forEach(function(i){
     html+='<button class="quiz-btn" data-choice="'+i+'" onclick="submitDiagnose('+i+')">'+d.choices[i]+'</button>';
   });
-  html+='</div><div class="quiz-exp" id="qexp">'+d.exp+'</div>';
+  html+='</div><div class="quiz-hint" id="qhint" role="status"></div><div class="quiz-exp" id="qexp">'+d.exp+'</div>';
   document.getElementById('quiz-inner').innerHTML=html;
   var cb=document.getElementById('quiz-continue');
   cb.style.display='none';
   document.getElementById('quiz-overlay').classList.add('open');
 }
+// A wrong pick costs the first-try point and nothing else is given away: only
+// that choice is marked (and taken out), a hint points at the reasoning, and
+// the learner tries again from the rest. It used to light up the right answer
+// and show the full explanation, so the retry was a free click.
 function submitDiagnose(idx){
   var task=curTask();
   if(!task||!task.diagnose){ closeQuiz(); return; }   // state reset out from under the quiz
   var d=task.diagnose;
-  var btns=document.querySelectorAll('.quiz-btn');
-  if(!btns.length||btns[0].classList.contains('disabled')) return;
+  var btns=[].slice.call(document.querySelectorAll('.quiz-btn'));
+  var choiceOf=function(b,pos){ return b.hasAttribute('data-choice')?+b.getAttribute('data-choice'):pos; };
+  var btn=btns.filter(function(b,pos){ return choiceOf(b,pos)===idx; })[0];
+  if(!btn || btn.disabled || btns.some(function(b){ return b.classList.contains('correct'); })) return;   // answered, or already tried
   var ok=(idx===d.correct);
-  btns.forEach(function(b,pos){
-    var i=b.hasAttribute('data-choice')?+b.getAttribute('data-choice'):pos;   // the choice this button shows
-    b.classList.add('disabled'); b.disabled=true;   // truly inert to assistive tech, not just visually
-    if(i===d.correct)   b.classList.add('correct');
-    else if(i===idx)    b.classList.add('wrong');
-    else                b.classList.add('reveal');
+  var cs=caseStat(); if(cs.dx===null) cs.dx=ok;   // only the first answer counts
+  var hint=document.getElementById('qhint');
+  if(!ok){
+    btn.classList.add('wrong','disabled'); btn.disabled=true;   // truly inert to assistive tech, not just visually
+    if(hint){ hint.innerHTML='<b>Not that one.</b> '+(d.hint||'Re-read the case and think about which problem the numbers point to.'); hint.style.display='block'; }
+    sfxWrong();
+    return;
+  }
+  btns.forEach(function(b){
+    b.disabled=true; b.classList.add('disabled');
+    if(b===btn) b.classList.add('correct');
+    else if(!b.classList.contains('wrong')) b.classList.add('dim');
   });
+  if(hint) hint.style.display='none';
   document.getElementById('qexp').style.display='block';
   var cb=document.getElementById('quiz-continue');
   cb.style.display='block';
-  if(ok){
-    scenarioDiagnosed=true; sfxCorrect();
-    cb.textContent=gameLevel===1?'Now set the control →':'Now fix it on the vent →';
-    cb.onclick=function(){ closeQuiz(); renderMissionCard(); };
-  } else {
-    sfxWrong();
-    cb.textContent='Reconsider — try again';
-    cb.onclick=function(){ openDiagnose(); };
-  }
+  scenarioDiagnosed=true; sfxCorrect();
+  cb.textContent=gameLevel===1?'Now set the control →':'Now fix it on the vent →';
+  cb.onclick=function(){ closeQuiz(); renderMissionCard(); };
 }
 
 // ── ASSESSMENT FLOW (Level 3): submit → grade → debrief ───────
@@ -4393,6 +4507,8 @@ function submitAssessment(){
   var sc=curTask(); if(!sc||!sc.goal) return;
   if(!scenarioDiagnosed) return;
   var pass=goalMet(sc);
+  var cs=caseStat(); if(cs.set===null) cs.set=pass;   // only the first submission counts
+  if(pass && gameLevel===8 && shift) shift.caseDone=true;
   prepQuizSurface();
   var html;
   if(pass){
@@ -4424,7 +4540,11 @@ function openConfirm(){
   var sc=curTask(); if(!sc) return;
   if(!(scenarioDiagnosed && goalMet(sc))) return;
   prepQuizSurface();
+  var cs=caseStat(); if(scoresSettings() && cs.set===null) cs.set=!cs.hint;   // reached without the target?
   var html='<div class="quiz-badge">'+sc.name+(gameLevel===1?' — Set':' — Solved')+'</div>';
+  // Where the goal was given without its numbers, show them now: the learner
+  // found the target, and should leave knowing what it was.
+  if(targetHidden(sc)) html+='<div class="scen-goal" style="margin-bottom:10px"><div class="scen-goal-lbl">🎯 The target</div>'+sc.goal.text+'</div>';
   html+='<div class="quiz-unlock" style="display:block">'+(sc.confirm||'✓ Goal achieved.')+'</div>';
   document.getElementById('quiz-inner').innerHTML=html;
   var cb=document.getElementById('quiz-continue');
@@ -4551,6 +4671,7 @@ adj=function(key,delta){
 function loadScenario(s){
   lvSession++;              // a fresh start for the lung view's vitals, even on the same scenario
   cancelO2Flush();          // a flush from the last case must not revert onto this one
+  if(gameLevel===8) shiftNewCase();
   inspHoldActive=false; manualBreathActive=false;   // nor finish its hold or manual breath here
   var su=s.setup;
   setLung(s.lung);          // per-scenario lung mechanics (defaults to generic if unset)
@@ -5167,7 +5288,7 @@ function lvPatient(){
     return {key:'free:'+freeLungKey, sprite:fl.sprite||'normal', label:fl.label+' test lung', kg:fl.kg||TL_ADULT_KG,
             peds:!!fl.peds, spontRate:fl.spontRate||15, P:VITAL_LUNG[freeLungKey]||VITAL_LUNG.normal, start:null};
   }
-  var t=(gameLevel>=1 && gameLevel<=3)?curTask():null, pt=(gameLevel===1)?TUTORIAL_PATIENT:(t&&t.patient);
+  var t=((gameLevel>=1 && gameLevel<=3) || gameLevel===8)?curTask():null, pt=(gameLevel===1)?TUTORIAL_PATIENT:(t&&t.patient);
   if(!t || !pt) return null;
   var hr0=null; (t.vitals||[]).forEach(function(x){ if(/^\s*hr\s*$/i.test(x.k)) hr0=_firstNum(x.v); });
   return {key:(gameLevel===1?'L1':('L'+gameLevel+'S'+scenarioIdx))+'#'+lvSession, sprite:pt.sprite, label:pt.label, kg:pt.kg||TL_ADULT_KG, hr0:hr0,
@@ -5262,13 +5383,150 @@ function lvUpdateVitals(lv,run){
 }
 var lvVitals=null;
 
+// ── SHIFT: MIXED, TIMED, A DIFFERENT PATIENT EVERY TIME ───────
+// Five cases drawn from Levels 2, 3 and Troubleshooting, in a random order,
+// graded like Level 3 (submit, no live green, no numbers up front) against a
+// clock. Each case gets a new patient: sex and height (so a new predicted body
+// weight, and the starting tidal volume scaled to keep its mL/kg), lungs a
+// little stiffer or softer and the airways a little tighter or looser (±15%),
+// and CO₂ production scaled with size (weight^0.75). Every number the story
+// quotes that the change moves is rewritten to match, and a PBW chip is added
+// so the learner can size the breath. The levels themselves keep the
+// patients as written. Two Troubleshooting cases quote exact pressures in
+// their story, so they keep their patient but can still be drawn.
+var SHIFT_CASES=5, SHIFT_CASE_SECS=180;
+var VARY={
+  "The Rising CO₂": {sex:'M', subst:function(v){ var s=v.mvScale; return [
+    ['178 cm tall (≈ 70 kg predicted body weight)', v.cm+' cm tall (≈ '+v.kg+' kg predicted body weight)'],
+    ['only 4.5 L/min', 'only '+v.mv0+' L/min'], ['(it\'s 4.5 now)', '(it\'s '+v.mv0+' now)'],
+    ['MV into roughly 7–10 L/min', 'MV into roughly '+(7*s).toFixed(1)+'–'+(10*s).toFixed(1)+' L/min'],
+    ['≤ ~560 mL for 70 kg PBW', '≤ ~'+v.vtMax+' mL for '+v.kg+' kg PBW']]; }},
+  "Hypoxemia That Won't Budge": {},
+  "COPD — Stop the Air-Trapping": {sex:'M'},
+  "Fighting the Vent": {},
+  "The Compensating Septic Patient": {subst:function(v){ return [
+    ['MV is only 7.2 L/min', 'MV is only '+v.mv0+' L/min'],
+    ['about <strong>14 L/min or more</strong>', 'about <strong>'+Math.round(14*v.mvScale)+' L/min or more</strong>'],
+    ['Vt ≤ 8 mL/kg, 560 mL', 'Vt ≤ 8 mL/kg, '+v.vtMax+' mL']]; }},
+  "Ready to Come Down": {},
+  "The Swinging Peak Pressure": {},
+  "Losing the Oxygenation Battle": {},
+  "The Blown Pupil": {subst:function(v){ var s=v.mvScale; return [
+    ['at PaCO₂ 42 on 8 L/min', 'at PaCO₂ 42 on '+v.mv0+' L/min'],
+    ['about 10–11.5 L/min', 'about '+(10*s).toFixed(1)+'–'+(11.5*s).toFixed(1)+' L/min']]; }},
+  "Nothing Is Going In": {},
+  "The Pressure and the Pressure": {keep:true},
+  "Four Seconds to the Cot": {keep:true}
+};
+// A small seeded generator (mulberry32), so a shift can be replayed from its seed.
+function rngFrom(seed){
+  var a=seed>>>0;
+  return function(){ a=(a+0x6D2B79F5)|0; var t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; };
+}
+// Predicted body weight (Devine; the ARDSNet formula)
+function pbwKg(sex,cm){ return (sex==='M'?50:45.5)+0.91*(cm-152.4); }
+function shiftPool(){ return [].concat(SCENARIO_LEVELS[2], SCENARIO_LEVELS[3], SCENARIO_LEVELS[7]); }
+// One case with a new patient. The case's goal, as written, is re-bound to the
+// new patient, so it grades this patient's PBW and physiology.
+function makeVariant(base, rng){
+  var spec=VARY[base.name]||{keep:true};
+  var v=Object.assign({}, base);
+  v.variantOf=base.name;
+  if(spec.keep){ v.kg=70; v.goal=Object.assign({}, base.goal, {task:v}); return v; }
+  var sex=spec.sex||(rng()<0.5?'M':'F');
+  var cm=sex==='M'?165+Math.floor(rng()*26):160+Math.floor(rng()*21);    // 165–190 cm, 160–180 cm
+  var kg=Math.round(pbwKg(sex,cm)), f=kg/70;
+  v.kg=kg; v.sex=sex; v.cm=cm; v.mvScale=Math.pow(f,0.75); v.vtMax=Math.round(8*kg/10)*10;
+  v.setup=Object.assign({}, base.setup, {vt:Math.round(base.setup.vt*f/10)*10});
+  v.mv0=(v.setup.rate*v.setup.vt/1000).toFixed(1);
+  if(base.lung) v.lung=Object.assign({}, base.lung, {compliance:Math.max(5,Math.round(base.lung.compliance*(0.85+0.3*rng()))),
+                                                     resistance:Math.max(2,Math.round(base.lung.resistance*(0.85+0.3*rng())))});
+  if(base.patient){
+    v.patient=Object.assign({}, base.patient, {kg:kg, vit:Object.assign({}, base.patient.vit)});
+    if(base.patient.vit.vco2) v.patient.vit.vco2=Math.round(base.patient.vit.vco2*v.mvScale);
+  }
+  var pairs=spec.subst?spec.subst(v):[];
+  var sub=function(t){ if(typeof t!=='string') return t; pairs.forEach(function(p){ t=t.split(p[0]).join(p[1]); }); return t; };
+  ['intro','scenario','confirm'].forEach(function(k){ v[k]=sub(base[k]); });
+  v.goal=Object.assign({}, base.goal, {task:v, text:sub(base.goal.text)}); if(base.goal.aim) v.goal.aim=sub(base.goal.aim);
+  v.diagnose=Object.assign({}, base.diagnose, {q:sub(base.diagnose.q), exp:sub(base.diagnose.exp), hint:sub(base.diagnose.hint)});
+  var chip={k:'PBW', v:kg+' kg ('+(sex==='M'?'male':'female')+', '+cm+' cm)'};
+  v.vitals=base.vitals.filter(function(x){ return x.k!=='PBW'; }).map(function(x){ return {k:x.k, v:sub(x.v)}; }).concat([chip]);
+  return v;
+}
+var shift=null;   // {seed, clock, left, caseDone, used, warned}
+function shiftClockOn(){ try{ return localStorage.getItem('ltv1200_shift_clock')!=='off'; }catch(_){ return true; } }
+function toggleShiftClock(){
+  var on=!shiftClockOn(); try{ localStorage.setItem('ltv1200_shift_clock', on?'on':'off'); }catch(_){}
+  renderShiftClockToggle();
+}
+function renderShiftClockToggle(){
+  var b=document.getElementById('shift-clock-toggle'); if(!b) return; var on=shiftClockOn();
+  b.setAttribute('aria-pressed', on?'true':'false');
+  b.textContent='⏱ Shift clock: '+(on?'on — '+(SHIFT_CASE_SECS/60)+' min a case':'off (untimed)');
+}
+function startShift(seed){
+  lvSession++; freeMode=false; academyMode=false; cancelO2Flush();
+  if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
+  var ov=document.getElementById('lvlsel-overlay'); if(ov) ov.classList.add('hidden');
+  seed=(seed==null)?Math.floor(Math.random()*2147483647):seed;
+  var rng=rngFrom(seed), pool=shiftPool().slice();
+  for(var j=pool.length-1;j>0;j--){ var k=Math.floor(rng()*(j+1)), t=pool[j]; pool[j]=pool[k]; pool[k]=t; }
+  SCENARIO_LEVELS[8]=pool.slice(0,SHIFT_CASES).map(function(b){ return makeVariant(b, rng); });
+  shift={seed:seed, clock:shiftClockOn(), left:SHIFT_CASE_SECS*1000, caseDone:false, used:0, warned:{}};
+  gameLevel=8; scenarioIdx=0; resetRunStats();
+  loadScenario(SCENARIO_LEVELS[8][0]);
+}
+// A new case: a full clock
+function shiftNewCase(){ if(shift){ shift.left=SHIFT_CASE_SECS*1000; shift.caseDone=false; shift.warned={}; } }
+function shiftTimeLine(){ return (gameLevel===8 && shift && shift.clock)?'<br>Time on the clock: <b>'+fmtClock(shift.used)+'</b> of '+fmtClock(SHIFT_CASES*SHIFT_CASE_SECS*1000):''; }
+function fmtClock(ms){ var s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60); }
+var _shiftLast=null;
+function shiftTick(){
+  var el=document.getElementById('shift-clock'), now=performance.now(), dt=_shiftLast==null?0:now-_shiftLast; _shiftLast=now;
+  var active=!!(shift && shift.clock && gameLevel===8 && !gameDone());
+  if(el){ el.classList.toggle('show',active); }
+  if(!active) return;
+  // The clock stops while the case can't be worked: the intro, the level
+  // chooser, a victory card, Standby, and once this case is decided.
+  var paused=lvPaused() || !deviceRunning() || shift.caseDone;
+  if(!paused){ shift.left-=dt; shift.used+=dt; }
+  var left=shift.left;
+  if(el){
+    var t='⏱ '+fmtClock(left); if(el.textContent!==t) el.textContent=t;
+    el.classList.toggle('warn', left<=30000 && left>10000); el.classList.toggle('bad', left<=10000);
+  }
+  var sr=document.getElementById('sr-status');
+  if(!paused && left<=60000 && !shift.warned[60]){ shift.warned[60]=true; if(sr) sr.textContent='One minute left on this case'; }
+  if(!paused && left<=30000 && !shift.warned[30]){ shift.warned[30]=true; if(sr) sr.textContent='30 seconds left on this case'; }
+  if(!paused && left<=0) shiftTimeUp();
+}
+setInterval(shiftTick,250);
+// Out of time: the case is lost, and the debrief says what it needed.
+function shiftTimeUp(){
+  var sc=curTask(); if(!sc || !shift) return;
+  shift.caseDone=true;
+  var cs=caseStat(); cs.timeUp=true; if(cs.dx===null) cs.dx=false; if(cs.set===null) cs.set=false;
+  prepQuizSurface();
+  document.getElementById('quiz-inner').innerHTML='<div class="quiz-badge">'+sc.name+' — Time\'s up</div>'
+    +'<div class="assess-verdict fail">⏱ OUT OF TIME</div>'
+    +'<div class="assess-hint"><b>What it needed:</b> '+sc.goal.text+'</div>'
+    +(sc.diagnose&&sc.diagnose.exp?'<div class="quiz-exp" style="display:block">'+sc.diagnose.exp+'</div>':'');
+  var cb=document.getElementById('quiz-continue');
+  cb.style.display='block'; cb.textContent='Next case →'; cb.onclick=function(){ advanceStage(); };
+  sfxWrong();
+  document.getElementById('quiz-overlay').classList.add('open');
+}
+
 // ── LEVEL MANAGEMENT ──────────────────────────────────────────
 function startLevel(n){
+  if(n===8){ startShift(); return; }   // a shift deals its own cases
   lvSession++;
   freeMode=false;
   academyMode=false;   // a level is never an academy one-off, even right after one
   cancelO2Flush();
   gameLevel=n;
+  resetRunStats();     // a fresh score for this run of the level
   // Entering a level implies a running vent — covers the header LEVELS
   // shortcut taken while the device is still in Standby.
   if(!deviceRunning()){ deviceState='run'; applyStandbyVisual(); }
@@ -5321,6 +5579,8 @@ function loadProgress(){
 function saveLevelComplete(n){
   if(!LEVEL_META[n]) return;   // only defined tracks earn a badge
   try{ var p=loadProgress(); p.levels[n]=true; p.updated=Date.now();
+    var sc=levelScore(n); p.best=p.best||{};
+    if(!p.best[n] || sc.points>p.best[n].points) p.best[n]={points:sc.points, max:sc.max, dx:sc.dx, set:sc.set, n:sc.n};
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); }catch(_){}
 }
 function resetProgress(){
@@ -5336,14 +5596,17 @@ function renderLevelBadges(){
     card.classList.toggle('lvl-complete',done);
     var mark=card.querySelector('.lvl-done');
     if(done){
-      if(!mark){ mark=document.createElement('span'); mark.className='lvl-done'; mark.setAttribute('aria-label','completed');
-        mark.textContent='✓ Completed';
+      if(!mark){ mark=document.createElement('span'); mark.className='lvl-done';
         var top=card.querySelector('.lvl-card-top'); if(top) top.appendChild(mark); }
+      var best=p.best&&p.best[n];
+      mark.textContent='✓ Completed'+(best?' · best '+best.points+'/'+best.max:'');
+      mark.setAttribute('aria-label','completed'+(best?', best score '+best.points+' of '+best.max:''));
       any=true;
     } else if(mark){ mark.remove(); }
   });
   var reset=document.getElementById('lvl-reset');
   if(reset) reset.style.display=any?'inline-flex':'none';
+  renderShiftClockToggle();
 }
 
 // ── INIT GAME ─────────────────────────────────────────────────
@@ -5572,6 +5835,7 @@ function showVictoryOverlay(level){
     subTxt='All '+levelCount(level)+' '+m.done
       +(nx?'<br>Ready for '+nx.label+'?':'<br><br><em style="color:#555;font-size:12px">You\'re ready for the real thing.</em>');
     btnsHtml='<div class="vc-btns">'
+      +(level===8?'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startShift()">Another shift →</button>':'')
       +(nx?'<button class="vc-btn vc-btn-orange" onclick="closeVictory();startLevel('+m.next+')">'+nx.label+' →</button>'
           :'<button class="vc-btn vc-btn-red" onclick="closeVictory();openLevelSelect()">Level Select</button>')
       +'<button class="vc-btn vc-btn-secondary" onclick="closeVictory()">Stay here</button>'
@@ -5583,6 +5847,7 @@ function showVictoryOverlay(level){
     +'<div class="vc-level" style="color:'+colorStr+'">'+levelTxt+'</div>'
     +'<div class="vc-divider" style="background:'+colorStr+'"></div>'
     +'<div class="vc-sub">'+subTxt+'</div>'
+    +'<div class="vc-score">'+scoreLine(levelScore(level),level)+(level===8?shiftTimeLine():'')+'</div>'
     +btnsHtml;
 
   ov.classList.add('show');
@@ -5680,6 +5945,15 @@ document.querySelectorAll(".alarm-wrap").forEach(function(w){var m=(w.getAttribu
       <div class="lvl-desc">3 cases where something was working and stopped. Read the alarm, find the cause, fix what can be fixed at the vent — and recognize what cannot.</div>
       <span class="lvl-arrow">›</span>
     </div>
+    <div class="lvl-card" data-level="8" onclick="startShift()" role="button" tabindex="0" aria-label="Shift, mixed and timed. Five random cases from Levels 2, 3 and Troubleshooting, a different patient each time, graded like Level 3.">
+      <div class="lvl-card-top">
+        <div class="lvl-name">Shift — Mixed &amp; Timed</div>
+        <span class="lvl-badge lvl-badge-8">Test</span>
+      </div>
+      <div class="lvl-desc">5 random cases from Levels 2, 3 and Troubleshooting, each with a new patient — size, lungs and starting volume change every shift. Graded like Level 3, on a clock.</div>
+      <span class="lvl-arrow">›</span>
+    </div>
+    <button id="shift-clock-toggle" type="button" onclick="toggleShiftClock()" aria-pressed="true">⏱ Shift clock: on</button>
     <div class="lvl-card lvl-card-free" onclick="startFree()" role="button" tabindex="0" aria-label="Free Play, Test Lung sandbox, adult and pediatric lungs. Dial any settings you want.">
       <div class="lvl-card-top">
         <div class="lvl-name">Free Play — Test Lung</div>

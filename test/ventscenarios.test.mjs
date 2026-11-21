@@ -19,7 +19,9 @@
  *       14–18 at 0.9). PEEP 12 at FiO₂ 0.9 is off the table and fails
  *   S4  herniation: PaCO₂ 42 on 8 L/min needs only ~10–11 L/min to reach
  *       30–35 (ENLS: brief course at 30–35). 13.5 L/min, which used to pass,
- *       drives it to about 25 and fails
+ *       drives it to about 25 and fails. The goal grades the PaCO₂ itself, so
+ *       26 × 400 mL (≈ 36–39: a small breath is mostly dead space) and
+ *       19 × 600 mL (≈ 27), which the old minute-volume goal passed, now fail
  *   S5  weaning: no RSBI in the readiness screen (AARC 2024 suggests it isn't
  *       needed); the trial is CPAP/PS 5–8 with PEEP ≤ 5
  *   S6  one-sided pneumonia: moderate PEEP 8–12 passes, higher fails, and the
@@ -45,6 +47,14 @@
  *       most a third of the questions and its length matches the wrong
  *       ones', and on screen the choices come in a random order — the right
  *       one lands in every slot — with grading by the choice, not the slot
+ *   S12 the first answer counts: a wrong pick takes out only that choice and
+ *       shows the case's hint — never the answer or the explanation — and a
+ *       miss stays a miss in the level score; every one of the 24 has a hint,
+ *       and no hint repeats its right answer
+ *   S13 Level 2 states the aim, not the numbers: no aim carries a target or a
+ *       unit; Show target reveals them at the cost of the case's settings
+ *       point; the confirmation and a met goal show them; the tutorial and the
+ *       academy missions keep theirs
  *
  * Run:  cd test && node ventscenarios.test.mjs
  */
@@ -140,7 +150,7 @@ console.log('\nS4 herniation');
 { const N = 'The Blown Pupil';
   // Independent check of the target: alveolar ventilation with ~150 mL of anatomic dead space
   const paco2 = (rate, vt) => 42 * (16 * (500 - 150)) / (rate * (vt - 150));
-  const cases = [[20, 500], [22, 500], [27, 500], [26, 520]];
+  const cases = [[20, 500], [22, 500], [27, 500], [26, 520], [26, 400], [19, 600]];   // the last two passed the old minute-volume goal
   for (const [rate, vt] of cases) {
     const g = await grade(N, { rate, vt }), pc = paco2(rate, vt), want = pc >= 29.5 && pc <= 35.5;
     ok(`S4 rate ${rate} × ${vt} mL → MV ${g.mv}, PaCO₂ ≈ ${pc.toFixed(0)}: ${want ? 'passes' : 'fails'}`, g.pass === want, JSON.stringify(g));
@@ -339,16 +349,87 @@ console.log('\nS11 the diagnosis cannot be won by a cue');
     openDiagnose(); let b = [...document.querySelectorAll('.quiz-btn')];
     const shownText = b.map(x => x.textContent).sort().join('|') === [...d.choices].sort().join('|');
     const wrongBtn = b.find(x => +x.dataset.choice !== d.correct); wrongBtn.click();
-    const afterWrong = { diagnosed: scenarioDiagnosed, marked: b.find(x => x.classList.contains('correct')).textContent === d.choices[d.correct] };
-    openDiagnose(); b = [...document.querySelectorAll('.quiz-btn')];
+    const afterWrong = { diagnosed: scenarioDiagnosed, marked: document.querySelectorAll('.quiz-btn.correct').length, wrong: wrongBtn.classList.contains('wrong') };
     b.find(x => x.textContent === d.choices[d.correct]).click();
-    const diagnosed = scenarioDiagnosed; closeQuiz();
-    return { slots, shownText, afterWrong, diagnosed };
+    const diagnosed = scenarioDiagnosed, marked = b.find(x => x.classList.contains('correct')).textContent === d.choices[d.correct]; closeQuiz();
+    return { slots, shownText, afterWrong, diagnosed, marked };
   });
   ok('S11 on screen the right answer lands in every one of the four slots (60 opens)', r.slots.every(n => n > 0), r.slots.join('/'));
   ok('S11 the shuffled buttons show exactly the case\'s four choices', r.shownText);
-  ok('S11 a wrong pick is graded wrong, and the right choice is the one marked', !r.afterWrong.diagnosed && r.afterWrong.marked, JSON.stringify(r.afterWrong));
-  ok('S11 picking the right choice, wherever it lands, diagnoses the case', r.diagnosed); }
+  ok('S11 a wrong pick is graded wrong and gives nothing away (no answer marked)', !r.afterWrong.diagnosed && r.afterWrong.wrong && r.afterWrong.marked === 0, JSON.stringify(r.afterWrong));
+  ok('S11 picking the right choice, wherever it lands, diagnoses the case and marks it', r.diagnosed && r.marked); }
+
+console.log('\nS12 the first answer counts');
+{ const h = await p.evaluate(() => {
+    const all = [].concat(...[1, 2, 3, 7].map(l => l === 1 ? STAGE_DEFS : SCENARIO_LEVELS[l])).concat(Object.values(ACADEMY_SCENARIOS));
+    return all.map(sc => ({ name: sc.name, hint: sc.diagnose.hint || '', right: sc.diagnose.choices[sc.diagnose.correct] }));
+  });
+  const noHint = h.filter(x => x.hint.length < 30).map(x => x.name);
+  ok(`S12 every one of the ${h.length} diagnoses has a hint`, h.length === 24 && noHint.length === 0, noHint.join(', '));
+  // A hint must not simply hand over the answer: it shares no run of four words with it
+  const words = t => t.toLowerCase().replace(/<[^>]+>/g, '').split(/[^a-z0-9₂]+/).filter(Boolean);
+  const leaks = h.filter(x => { const a = words(x.right), w = words(x.hint);
+    for (let i = 0; i + 4 <= a.length; i++) if (w.join(' ').includes(a.slice(i, i + 4).join(' '))) return true; return false; }).map(x => x.name);
+  ok('S12 no hint repeats the right answer (no shared run of four words)', leaks.length === 0, leaks.join(', '));
+  const r = await p.evaluate(() => {
+    deviceState = 'run'; startLevel(2); document.getElementById('intro-overlay').classList.remove('open');
+    const d = curScenario().diagnose, out = {};
+    openDiagnose(); const b = [...document.querySelectorAll('.quiz-btn')];
+    const wrong = b.filter(x => +x.dataset.choice !== d.correct);
+    wrong[0].click();
+    out.first = { hint: document.getElementById('qhint').textContent, hintShown: getComputedStyle(document.getElementById('qhint')).display !== 'none',
+                  exp: getComputedStyle(document.getElementById('qexp')).display, cont: getComputedStyle(document.getElementById('quiz-continue')).display,
+                  disabled: wrong[0].disabled, othersLive: b.filter(x => x !== wrong[0]).every(x => !x.disabled) };
+    wrong[0].click(); wrong[1].click();
+    out.twoWrong = { marked: document.querySelectorAll('.quiz-btn.correct').length, live: b.filter(x => !x.disabled).length };
+    b.find(x => +x.dataset.choice === d.correct).click();
+    out.right = { exp: getComputedStyle(document.getElementById('qexp')).display, hint: getComputedStyle(document.getElementById('qhint')).display, dx: scenarioDiagnosed };
+    out.stat = Object.assign({}, caseStat());
+    closeQuiz();
+    // next case, right first time
+    scenarioIdx = 1; loadScenario(SCENARIO_LEVELS[2][1]); document.getElementById('intro-overlay').classList.remove('open');
+    openDiagnose(); [...document.querySelectorAll('.quiz-btn')].find(x => +x.dataset.choice === curScenario().diagnose.correct).click(); closeQuiz();
+    out.stat2 = Object.assign({}, caseStat());
+    out.score = levelScore();
+    return out;
+  });
+  ok('S12 a wrong pick shows the case\'s hint — not the explanation, not a Continue', r.first.hintShown && /Not that one/.test(r.first.hint) && r.first.exp === 'none' && r.first.cont === 'none', JSON.stringify(r.first));
+  ok('S12 only the wrong choice is taken out; the rest stay to choose from', r.first.disabled && r.first.othersLive);
+  ok('S12 two wrong picks still reveal nothing (no answer marked, two choices left)', r.twoWrong.marked === 0 && r.twoWrong.live === 2, JSON.stringify(r.twoWrong));
+  ok('S12 the right pick shows the explanation and diagnoses the case', r.right.exp === 'block' && r.right.hint === 'none' && r.right.dx, JSON.stringify(r.right));
+  ok('S12 only the first answer counts: missed first time stays missed', r.stat.dx === false, JSON.stringify(r.stat));
+  ok('S12 right first time is recorded as right', r.stat2.dx === true, JSON.stringify(r.stat2));
+  ok('S12 the level score counts them (1 of 5 so far, out of 10)', r.score.dx === 1 && r.score.n === 5 && r.score.max === 10, JSON.stringify(r.score)); }
+
+console.log('\nS13 Level 2 gives the aim, not the numbers');
+{ const r = await p.evaluate(() => {
+    const aims = SCENARIO_LEVELS[2].map(sc => ({ name: sc.name, aim: sc.goal.aim || '' }));
+    deviceState = 'run'; startLevel(2); scenarioIdx = 0; loadScenario(SCENARIO_LEVELS[2][0]); document.getElementById('intro-overlay').classList.remove('open');
+    scenarioDiagnosed = true; renderMissionCard();
+    const goal0 = document.querySelector('#mission-bar .scen-goal').textContent, btn = !!document.querySelector('#mission-bar .show-target');
+    revealTarget(); const goal1 = document.querySelector('#mission-bar .scen-goal').textContent;
+    vals.rate.v = 18; updateUI(); openConfirm();
+    const conf = !!document.querySelector('#quiz-inner .scen-goal'), stat = Object.assign({}, caseStat()); closeQuiz();
+    // unaided: the next case, solved without the reveal, keeps its point
+    scenarioIdx = 1; loadScenario(SCENARIO_LEVELS[2][1]); document.getElementById('intro-overlay').classList.remove('open');
+    scenarioDiagnosed = true; vals.peep.v = 10; updateUI();
+    const metGoal = document.querySelector('#mission-bar .scen-goal').textContent; openConfirm(); const stat2 = Object.assign({}, caseStat()); closeQuiz();
+    // the tutorial and the academy keep their numbers
+    startLevel(1); document.getElementById('intro-overlay').classList.remove('open'); scenarioDiagnosed = true; renderMissionCard();
+    const tut = document.querySelector('#mission-bar .scen-goal').textContent;
+    startAcademyScenario('initial-settings'); document.getElementById('intro-overlay').classList.remove('open'); scenarioDiagnosed = true; renderMissionCard();
+    const aca = document.querySelector('#mission-bar .scen-goal').textContent;
+    return { aims, goal0, btn, goal1, conf, stat, metGoal, stat2, tut, aca, text0: SCENARIO_LEVELS[2][0].goal.text.replace(/<[^>]+>/g, '') };
+  });
+  const units = /L\/min|cmH₂O|mL\b|mL\/kg|%|1 ?: ?\d|\d+\s*–\s*\d+/;
+  const leaky = r.aims.filter(a => !a.aim || units.test(a.aim)).map(a => a.name);
+  ok('S13 every Level 2 case has an aim with no target numbers or units', leaky.length === 0, leaky.join(', '));
+  ok('S13 the card shows the aim and a Show-target button, not the numbers', !units.test(r.goal0.replace('🎯 Goal', '').replace(/\(costs.*\)/, '')) && r.btn, r.goal0);
+  ok('S13 Show target reveals the full goal', /7–10 L\/min/.test(r.goal1), r.goal1);
+  ok('S13 …and costs the case\'s settings point', r.stat.hint === true && r.stat.set === false, JSON.stringify(r.stat));
+  ok('S13 the confirmation shows the target numbers', r.conf);
+  ok('S13 reached without the reveal keeps the point, and the met goal shows its numbers', r.stat2.set === true && /8–14/.test(r.metGoal), JSON.stringify(r.stat2));
+  ok('S13 the tutorial and the academy missions keep their numbers', /400–550/.test(r.tut) && /450–600/.test(r.aca), r.tut.slice(0, 80) + ' | ' + r.aca.slice(0, 80)); }
 
 ok('S8 no page errors', errs.length === 0, errs.join(' | '));
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
