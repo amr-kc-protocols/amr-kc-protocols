@@ -836,6 +836,121 @@ for (const [w, h] of [[390, 844], [375, 667], [820, 1180]]) {
   ok('S19 the flutter item reads the rate its 2:1 trace draws', bank.find(x => x.r === 'aflutter').hr === 150);
 }
 
+/* S20 — THE TRACINGS AGAINST THE REFERENCES. S17 checks that each rhythm
+   carries its finding; this checks the numbers a clinician would measure off
+   it — onset to J point and onset to T end, by caliper threshold rather than
+   by slope — against the published figures, and that the screen shows enough
+   of it. References: 2009 AHA/ACCF/HRS ECG standardisation (QRS abnormal over
+   110 ms in adults; reference mean 95); Fridericia QT = QTc x RR^(1/3); the
+   LIFEPAK 15 data sheet (5 s of ECG at 25 mm/s, 0.5-40 Hz monitor band); AF
+   f-waves 350-600/min; a shortest R-R of 250 ms or less in AF being the
+   marker of an accessory pathway. */
+{ const p = await fresh(PAGE, 1366, 640);
+  const m = await p.evaluate(() => {
+    const R = sL(L.qrst, 0.16) - 0.5;
+    const series = (f, len) => { const a = []; for (let ms = 0; ms <= len; ms++) a.push(f(ms / 1000)); return a; };
+    /* Onset: first deflection past the threshold. J: after the S nadir, back
+       within it. T end: last sample past it. Both thresholds are reported,
+       2% and 5% of the R, because that is the spread between two careful
+       readers; the mean is what is held to the reference. */
+    const narrow = (rr, thr) => { const a = series(u => qrsTDev(u, rr), 900), th = thr * R;
+      const on = a.findIndex(x => Math.abs(x) > th); let rp = 0; a.forEach((x, i) => { if (x > a[rp]) rp = i; });
+      let sn = rp; for (let i = rp; i < rp + 80; i++) if (a[i] < a[sn]) sn = i; let j = sn; while (a[j] < -th) j++;
+      let te = a.length - 1; while (te > 0 && Math.abs(a[te]) <= th) te--;
+      let tp = j; for (let i = j; i < a.length; i++) if (a[i] > a[tp]) tp = i;
+      return { qrs: j - on, qt: te - on, t: a[tp] / R }; };
+    const wide = (rr, q, thr) => { const a = series(u => vDev(u, rr, q), 900), th = thr * R;
+      const on = a.findIndex(x => Math.abs(x) > th); let rp = 0; a.forEach((x, i) => { if (x > a[rp]) rp = i; });
+      let st = rp, md = 0; for (let i = rp; i < a.length - 1; i++) { const d = a[i] - a[i + 1]; if (d > md) { md = d; st = i; } }
+      let e = st; while (e < a.length - 1 && (a[e] - a[e + 1]) > 0.25 * md) e++;
+      return e - on; };
+    const both = (f, ...a) => (f(...a, 0.02) + f(...a, 0.05)) / 2;
+    const narrowAt = [36, 44, 78, 124, 150, 164, 186, 212].map(hr => { const rr = 60 / hr;
+      return { hr, qrs: both((r, t) => narrow(r, t).qrs, rr), qt: both((r, t) => narrow(r, t).qt, rr),
+               fri: 400 * Math.cbrt(rr), t: narrow(rr, 0.02).t }; });
+    const wideAt = [188, 168, 146, 72, 32].map(hr => ({ hr, qrs: both((r, q, t) => wide(r, q, t), 60 / hr, undefined) }));
+    const bbb = both((r, q, t) => wide(r, q, t), 60 / 42, BBB_QRS_SEC);
+    const trace = (rh, hr, secs) => { Object.assign(S, { rhythm: rh, hr, patientConnected: true, lead: 'II', pvcOn: false, pacOn: false });
+      D.leadFromPanel = null; const a = []; for (let i = 0; i < secs * 1000; i++) a.push(sEcg(i / 1000) - 0.5); return a; };
+    const rrOf = a => { const pk = []; for (let i = 1; i < a.length - 1; i++)
+      if (a[i] > 0.5 * R && a[i] >= a[i - 1] && a[i] > a[i + 1] && (!pk.length || i - pk[pk.length - 1] > 200)) pk.push(i);
+      return pk.slice(1).map((x, i) => x - pk[i]); };
+    const af = rrOf(trace('afib_rvr', 164, 600)), afMean = af.reduce((s, x) => s + x, 0) / af.length;
+    const afCv = Math.sqrt(af.reduce((s, x) => s + (x - afMean) ** 2, 0) / af.length) / afMean;
+    /* A step: a jump between two flat neighbourhoods, which no QRS slope is. */
+    const afT = trace('afib_rvr', 164, 60); let step = 0;
+    for (let i = 3; i < afT.length - 3; i++) { const d = Math.abs(afT[i] - afT[i - 1]);
+      if (Math.abs(afT[i - 1] - afT[i - 3]) < 0.004 && Math.abs(afT[i + 3] - afT[i]) < 0.004 && d > step) step = d; }
+    /* f-wave frequency: count the baseline's zero crossings where no complex is running. */
+    let fx = 0, span = 0; { const a = trace('afib', 60, 30), d = rrOf(a); void d;
+      for (let i = 1; i < a.length; i++) { const tt = i / 1000; const T0 = afTable(1, 0.24), C = T0.cum;
+        let lo = 0, hi = AF_N; while (hi - lo > 1) { const mm = (lo + hi) >> 1; if (C[mm] <= tt) lo = mm; else hi = mm; }
+        const u = tt - C[lo]; if (u > 0.6 && C[lo + 1] - tt > 0.02) { span++; if ((a[i] > 0) !== (a[i - 1] > 0)) fx++; } } }
+    let afFlat = 0, n = 0; for (const x of trace('afib', 88, 20)) { if (Math.abs(x) < 0.012) { n++; afFlat = Math.max(afFlat, n); } else n = 0; }
+    const rates = ITEMS.filter(it => !['vfib', 'asystole'].includes(it.v.rhythm)).map(it => {
+      const d = rrOf(trace(it.v.rhythm, it.v.hr, 40)); return { r: it.v.rhythm, hr: it.v.hr, drawn: 60000 / (d.reduce((s, x) => s + x, 0) / d.length) }; });
+    let nz = 0; for (let i = 0; i < 20000; i++) nz = Math.max(nz, Math.abs(monitorNoise(i / 1000)));
+    return { narrowAt, wideAt, bbb, afMin: Math.min(...af), afCv, step: step / R, fHz: fx / 2 / (span / 1000), afFlat, rates,
+             noiseMv: nz * 2, asysExact: trace('asystole', 0, 2).every(x => x === 0) };
+  });
+  const bad = (rows, f) => rows.filter(r => !f(r)).map(r => JSON.stringify(r)).join(' ');
+  ok('S20 a narrow QRS measures 80-110 ms onset to J, at every rate in the bank',
+     m.narrowAt.every(r => r.qrs >= 80 && r.qrs <= 110), bad(m.narrowAt, r => r.qrs >= 80 && r.qrs <= 110));
+  ok('S20 the QT follows the rate: within 25 ms of Fridericia at a QTc of 400, from 36/min to 212/min',
+     m.narrowAt.every(r => Math.abs(r.qt - r.fri) <= 25), bad(m.narrowAt, r => Math.abs(r.qt - r.fri) <= 25));
+  ok('S20 the T wave is a fifth of the R or so, not flat', m.narrowAt.every(r => r.t >= 0.15 && r.t <= 0.35),
+     m.narrowAt[0].t.toFixed(2));
+  ok('S20 every ventricular complex — VT, paced, escape — is 150 ms or wider at every rate',
+     m.wideAt.every(r => r.qrs >= 150), bad(m.wideAt, r => r.qrs >= 150));
+  { const w = Object.fromEntries(m.wideAt.map(r => [r.hr, r.qrs]));
+    ok('S20 and VT does not narrow as it speeds up — 188/min within 15 ms of 146/min', Math.abs(w[188] - w[146]) <= 15, `${w[188]} vs ${w[146]}`); }
+  ok('S20 Mobitz II is conducted with a bundle branch block, 120 ms or more', m.bbb >= 120, String(m.bbb));
+  ok('S20 the AF response never conducts faster than an AV node can — shortest R-R over 270 ms in ten minutes',
+     m.afMin > 270, `${m.afMin} ms`);
+  ok('S20 and is still irregularly irregular (R-R CV 0.15-0.30)', m.afCv >= 0.15 && m.afCv <= 0.30, m.afCv.toFixed(3));
+  ok('S20 an early AF beat does not cut the last T wave off — no step in the line', m.step < 0.02, m.step.toFixed(3));
+  ok('S20 the AF f-waves run at 350-600/min', m.fHz * 60 >= 350 && m.fHz * 60 <= 600, Math.round(m.fHz * 60) + '/min');
+  ok('S20 and leave no isoelectric stretch', m.afFlat < 100, `${m.afFlat} ms`);
+  ok('S20 every rhythm is drawn at the rate the screen shows',
+     m.rates.every(r => Math.abs(r.drawn - r.hr) <= 1), bad(m.rates, r => Math.abs(r.drawn - r.hr) <= 1));
+  ok('S20 the monitor\'s noise floor stays under 0.05 mV', m.noiseMv < 0.05, m.noiseMv.toFixed(3));
+  ok('S20 and is the unit\'s, not the patient\'s — asystole is still exactly zero in sEcg', m.asysExact);
+  await p.context().close(); }
+
+/* The screen: five seconds, as the unit shows, and what is drawn survives the
+   slower sweep. Sweep and grid are read off the page; the heights are read off
+   the canvas itself. */
+for (const [w, h, label, want] of [[667, 375, 'iPhone SE', 'floor'], [844, 390, 'iPhone 14', 5], [800, 360, 'small Android', 5],
+                                   [915, 412, 'Pixel 7', 5], [1366, 640, 'laptop', 5], [1920, 950, 'FZ-55', 5]]) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: w < 1000, hasTouch: w < 1000 });
+  const p = await ctx.newPage(); await p.goto(PAGE + '?item=15'); await p.waitForTimeout(500);
+  await p.click('#kON'); await p.waitForTimeout(2300);
+  const g = await p.evaluate(() => ({ W: cSizes.cEcg.W, spx: ecgSpx() }));
+  const secs = g.W / g.spx;
+  if (want === 5) ok(`S20 ${label} shows five seconds of ECG, as the unit does`, Math.abs(secs - 5) < 0.05, secs.toFixed(2) + ' s');
+  else ok(`S20 ${label} keeps complexes readable (60 px/s or more) and still shows over three seconds`,
+          g.spx >= 60 && secs > 3, `${g.spx.toFixed(0)} px/s, ${secs.toFixed(2)} s`);
+  await ctx.close();
+}
+/* Peak-preserving: at a phone's sweep one sample per column put the R wave a
+   different height every beat and could drop a 12 ms pacing spike entirely. */
+{ const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+  const p = await ctx.newPage(); await p.goto(PAGE + '?item=15'); await p.waitForTimeout(500);
+  await p.click('#kON'); await p.waitForTimeout(2300);
+  await p.evaluate(() => { const nm = RUN.items[RUN.ix].name;
+    [...document.querySelectorAll('#stnOpts .stnb')].find(x => x.textContent.trim() === nm).click(); });
+  await p.waitForTimeout(6500);
+  const tops = await p.evaluate(() => {
+    const c = document.getElementById('cEcg'), k = cSizes.cEcg.k, d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const top = []; for (let x = 0; x < c.width; x++) { let y = 0;
+      for (; y < c.height; y++) { const i = (y * c.width + x) * 4; if (d[i + 1] > 200 && d[i] < 120) break; } top.push(y / k); }
+    const pk = []; for (let x = 3; x < top.length - 3; x++)
+      if (Math.abs(x - pxPos.cEcg * k) > 30 && top[x] < c.height / k * 0.4 && top[x] <= Math.min(...top.slice(x - 3, x + 4)) && (!pk.length || x - pk[pk.length - 1] > 20)) pk.push(x);
+    return pk.map(x => top[x]); });
+  const spread = tops.length ? Math.max(...tops) - Math.min(...tops) : 99;
+  ok('S20 every R wave on a phone is drawn to the same height', tops.length >= 5 && spread <= 2, `${tops.length} peaks, spread ${spread.toFixed(1)} px`);
+  await ctx.close(); }
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fails.length) { console.log('\nFailures:'); fails.forEach(f => console.log(' - ' + f)); }
 await browser.close(); srv.close();

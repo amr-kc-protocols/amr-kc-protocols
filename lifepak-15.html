@@ -2007,7 +2007,7 @@ const PWAVE=[[0,.5],[.16,.532],[.36,.562],[.5,.570],[.64,.556],[.86,.518],[1,.5]
 const VBEAT=[[0,.5],[.04,.472],[.10,.424],[.16,.560],[.24,.800],[.30,.940],
   [.36,.862],[.42,.664],[.48,.502],[.54,.442],[.62,.392],[.72,.356],[.82,.402],
   [.92,.466],[1,.5]];
-const QRS_SEC=0.44, P_SEC=0.11, V_SEC=0.42;
+const P_SEC=0.11;
 
 const L={
   nsr:mkL(NSR),tachy:mkL(TACHY),brady:mkL(BRADY),afib:mkL(AFIB),afib_rvr:mkL(AFIBRVR),
@@ -2263,7 +2263,23 @@ function lp(v,a){return v*.94+(Math.random()-.5)*a;}
 function wd(v){return v*.9995+(Math.random()-.5)*.008;}
 function advanceNoise(){ nS=lp(nS,.004); wS=wd(wS); }
 
-const SPX=180; // px/sec
+/* Sweep. The LIFEPAK 15 shows at least five seconds of ECG across its display
+   at 25 mm/s (data sheet), so the sweep is set from the width of the ECG
+   channel and the channel always holds five seconds. A fixed 180 px/s showed
+   1.1 s on an iPhone SE and 1.9 s on an iPhone 14: less than one beat-to-beat
+   interval of the 32/min complete heart block, and under half the repeating
+   group of the Mobitz II, so the rhythms whose diagnosis is a pattern could
+   not show it. The columns are drawn peak-preserving (drawChannel) so nothing
+   narrow is lost between them.
+
+   With one floor. Five seconds across a 205 px channel (an iPhone SE) is
+   41 px/s, a beat of fast VT 13 px wide, and VT and SVT become the same dense
+   comb: the width a learner is asked to judge is gone. Below 60 px/s the sweep
+   stops slowing and the window gives instead — 3.4 s on an SE, which still
+   holds a dropped P and a dissociated escape. Every phone from the iPhone 12
+   size up has a channel of 300 px or more and gets the full five seconds. */
+const ECG_WINDOW_S=5, ECG_MIN_SPX=60;
+function ecgSpx(){ const z=cSizes.cEcg; return z&&z.W>1?Math.max(ECG_MIN_SPX,z.W/ECG_WINDOW_S):180; }
 
 // ── Per-lead ECG morphology transform table ────────────────────────────────
 // References: LITFL, ECGwaves.com (2025), Merck Manual, Queen's University ECG,
@@ -2398,16 +2414,102 @@ function vfibValue(t){
 // Sample functions — pure math, no noise (noise added at render time)
 /* Deviation from baseline, in seconds from the start of the complex. Zero
    outside it, so a QRS can be laid over whatever the atria are doing. */
-function qrsTDev(u){
-  if(u<0||u>QRS_SEC) return 0;
-  return sL(L.qrst,u/QRS_SEC)-0.5;
+/* Every complex is drawn in two parts, because they run on different clocks.
+   The QRS is depolarisation: about as long at 150/min as at 45, so it is a
+   fixed number of seconds. The ST-T is repolarisation, and it shortens as the
+   rate rises — which is what QT correction exists to undo. One fixed complex
+   left the QT at 330-370 ms at every rate: at 212/min every T wave ran into
+   the next QRS, and at 36/min the QT was drawn shorter than a heart has it.
+   The ST-T now follows Fridericia, QT = QTc x RR^(1/3), around a QTc of
+   400 ms; Fridericia rather than Bazett because Bazett over-corrects at
+   exactly the rates this bank lives at.
+
+   The narrow QRS measures about 95 ms from onset to J point, the mean of the
+   reference population behind the 2009 AHA/ACCF/HRS limit (74-114 ms, abnormal
+   above 110). It used to measure 100-109 ms: normal, but at the top of the
+   range and crowding the wide complexes it is meant to be told from. The T is
+   about a fifth of the R, where it had been a tenth — at the edge of flat. */
+const QRS_FRAC=0.30;      // the J point's place in the QRST template
+const N_QRS_SEC=0.115;    // the QRS segment, onset baseline to J
+const N_ST_SEC=0.355;     // the ST-T at an R-R of one second
+const T_GAIN=2.0;         // T wave ~20% of the R, ~0.19 mV in II at 1 cm/mV
+/* How the ST-T scales with the R-R: by the JT that a Fridericia QT leaves once
+   the QRS is taken out (QT = 0.40 x RR^(1/3), JT = QT - 0.10). Scaling the
+   ST-T by the cube root itself ran the QT 20-45 ms long at 186-212/min. */
+function repol(rr){ const r=Math.min(2.5,Math.max(0.2,rr||1)); return (0.40*Math.cbrt(r)-0.10)/0.30; }
+function qrsTDev(u,rr){
+  if(u<0) return 0;
+  if(u<N_QRS_SEC) return sL(L.qrst,u/N_QRS_SEC*QRS_FRAC)-0.5;
+  const w=(u-N_QRS_SEC)/(N_ST_SEC*repol(rr));
+  if(w>=1) return 0;
+  return (sL(L.qrst,QRS_FRAC+w*(1-QRS_FRAC))-0.5)*T_GAIN;
 }
-/* A ventricular complex. dur is normally V_SEC; it is squeezed only when the
-   rate is so fast the next one is already due, which is what makes 180/min VT
-   read as back-to-back wide complexes with no baseline between them. */
-function vDev(u,dur){
-  if(u<0||u>dur) return 0;
-  return sL(L.vb,u/dur)-0.5;
+/* A ventricular complex, in the same two parts. It used to be squeezed whole to
+   fit the R-R, so VT got narrower the faster it ran — 181 ms at 146/min, 140
+   at 188 — when it is only the repolarisation that shortens. Now the QRS keeps
+   its width at every rate and the ST-T shortens instead; at 188/min it runs
+   straight into the next complex, which is the back-to-back look fast VT has.
+   qrs is the QRS segment in seconds: V_QRS_SEC for VT, an escape or a paced
+   beat (~175 ms), BBB_QRS_SEC for a beat conducted with bundle branch block. */
+const V_FRAC=0.48;        // where the QRS ends in VBEAT
+const V_QRS_SEC=0.18;
+const BBB_QRS_SEC=0.14;   // ~135 ms
+/* Sized so a wide complex keeps a normal JT: its QT is the narrow one plus
+   most of the extra QRS width (~480 ms at 60/min), the relation QT corrections
+   for bundle branch block are built on. At 188/min its T runs into the next
+   complex, which is the sine-wave look of fast VT. */
+const V_ST_SEC=0.34;
+function vDev(u,rr,qrs){
+  const q=qrs||V_QRS_SEC;
+  if(u<0) return 0;
+  if(u<q) return sL(L.vb,u/q*V_FRAC)-0.5;
+  const w=(u-q)/(V_ST_SEC*repol(rr));
+  if(w>=1) return 0;
+  return sL(L.vb,V_FRAC+w*(1-V_FRAC))-0.5;
+}
+
+/* Atrial fibrillation's ventricular response. Irregularly irregular, but not
+   unbounded: the AV node will not conduct two beats closer together than its
+   refractory period allows. The closed-form jitter this replaces had no floor
+   and put R-R intervals of 219 ms (274/min) into the 164/min item — inside the
+   250 ms range that, in AF, is the marker of an accessory pathway, a different
+   and more dangerous rhythm. So the intervals come from a fixed pseudo-random
+   table (the same strip every time, and still a pure function of t), with a
+   soft floor that leaves a right-skewed distribution sitting on the node's
+   limit, the way AF does, rather than a pile of identical shortest beats. */
+const AF_N=2048, AF_FLOOR_S=0.30, AF_SOFT_S=0.04;
+const afTables={};
+function afTable(mean,cv){
+  const key=mean.toFixed(4)+'/'+cv;
+  if(afTables[key]) return afTables[key];
+  let s=0x2545F491;
+  const rnd=()=>{ s=(s+0x6D2B79F5)|0; let x=Math.imul(s^(s>>>15),1|s);
+    x=(x+Math.imul(x^(x>>>7),61|x))^x; return ((x^(x>>>14))>>>0)/4294967296; };
+  const floor=Math.max(AF_FLOOR_S,mean*0.55), ceil=mean*1.8;
+  const rr=new Float64Array(AF_N); let sum=0;
+  for(let k=0;k<AF_N;k++){
+    const g=(rnd()+rnd()+rnd()+rnd()-2)*Math.sqrt(3);           // ~N(0,1)
+    let x=Math.min(ceil,mean*(1+cv*g));
+    // Above floor+soft, unchanged; below it, eased onto the floor and never past it.
+    if(x<floor+AF_SOFT_S) x=floor+AF_SOFT_S*Math.exp((x-floor-AF_SOFT_S)/AF_SOFT_S);
+    rr[k]=x; sum+=x;
+  }
+  const sc=mean*AF_N/sum;                                        // keep the rate on the screen
+  const cum=new Float64Array(AF_N+1);
+  for(let k=0;k<AF_N;k++) cum[k+1]=cum[k]+rr[k]*sc;
+  return afTables[key]={cum,period:cum[AF_N]};
+}
+
+/* The monitor's own noise floor: a faint undulation and a little fine noise,
+   together about 0.02 mV either side of the line, all of it inside the unit's
+   0.5-40 Hz monitor bandwidth (data sheet) — anything outside it the unit's
+   own filter would remove. Drawn by the unit, not part of the patient,
+   so it is added on the way to the screen and sEcg stays exact. Without it
+   every trace was mathematically clean and asystole was a ruler-straight line,
+   which on a real monitor is the look of a lead that is off. */
+function monitorNoise(t){
+  return 0.004*Math.sin(2*Math.PI*0.71*t+0.6)+0.003*Math.sin(2*Math.PI*1.13*t+2.2)
+       + 0.0012*(Math.sin(2*Math.PI*17.3*t)+Math.sin(2*Math.PI*23.9*t+1.1)+Math.sin(2*Math.PI*31.7*t+2.3));
 }
 function pDev(u){ return (u<0||u>P_SEC)?0:sL(L.pw,u/P_SEC)-0.5; }
 
@@ -2463,7 +2565,7 @@ function sEcg(t){
   if(r==='paced'){
     const k=Math.floor(t/bp), u=t-k*bp;
     if(u<0.012) return .98;            // the spike is not a lead-dependent deflection
-    return leadDev(vDev(u-0.02,V_SEC)+vDev(u+bp-0.02,V_SEC), cfg);
+    return leadDev(vDev(u-0.02,bp)+vDev(u+bp-0.02,bp), cfg);
   }
   /* ── The three that are assembled rather than repeated ──────────────── */
 
@@ -2480,8 +2582,8 @@ function sEcg(t){
     const saw=(fp<0.80 ? -(fp/0.80) : -(1-(fp-0.80)/0.20))*0.130;
     const ratio=Math.max(2,Math.round(300/Math.max(hr,40)));
     const beat=Math.floor(t*F/ratio);
-    const u=t-beat*ratio/F;
-    return leadDev(saw+qrsTDev(u), cfg);
+    const rr=ratio/F, u=t-beat*rr;
+    return leadDev(saw+qrsTDev(u,rr)+qrsTDev(u+rr,rr), cfg);
   }
 
   /* Atrial fibrillation. Irregularly irregular means no two R-R intervals the
@@ -2491,18 +2593,24 @@ function sEcg(t){
      closed-form cumulative sum of three incommensurate terms, so it stays a
      pure function of t while never repeating. */
   if(r==='afib'||r==='afib_rvr'){
-    const mean=bp, J=(r==='afib_rvr'?0.30:0.24)*mean;
-    const start=k=>k*mean+J*(Math.sin(k*2.399)+0.6*Math.sin(k*5.117+1.7)
-                            +0.35*Math.sin(k*11.31+2.9))*0.5;
-    let k=Math.floor(t/mean);
-    for(let i=0;i<4&&start(k)>t;i++) k--;
-    for(let i=0;i<4&&start(k+1)<=t;i++) k++;
-    const u=t-start(k);
-    /* Fibrillatory waves, and no isoelectric line anywhere between them —
-       the absence of a flat baseline is half of what identifies this. */
-    const f=0.014*(Math.sin(t*46.3)+0.7*Math.sin(t*71.9+1.2)
-                  +0.5*Math.sin(t*109.7+2.4))/2.2;
-    return leadDev(f+qrsTDev(u), cfg);
+    const T=afTable(bp,0.24), C=T.cum;
+    const tt=((t%T.period)+T.period)%T.period;
+    let lo=0,hi=AF_N; while(hi-lo>1){ const m=(lo+hi)>>1; if(C[m]<=tt) lo=m; else hi=m; }
+    const rrAt=k=>{ k=((k%AF_N)+AF_N)%AF_N; return C[k+1]-C[k]; };
+    /* This complex and the two before it. An early beat used to cut the last
+       one's T wave off where it stood, leaving a step in the line. */
+    const u=tt-C[lo], u1=u+rrAt(lo-1), u2=u1+rrAt(lo-2);
+    const v=qrsTDev(u,bp)+qrsTDev(u1,bp)+qrsTDev(u2,bp);
+    /* Fibrillatory waves: one wave whose cycle length wanders between about
+       340 and 550/min, inside AF's 350-600, at roughly 0.08-0.1 mV — fine to
+       medium. They were 0.03 mV with components out to 1,000/min, which is
+       no rhythm and, at two pixels, no wave either. Wandering the frequency
+       rather than summing fixed ones keeps the waves from cancelling into a
+       flat stretch: no isoelectric line anywhere is half of what identifies
+       AF. */
+    const fp=2*Math.PI*7.4*t+0.9*Math.sin(2*Math.PI*0.9*t)+0.5*Math.sin(2*Math.PI*1.7*t+1);
+    const f=0.024*(0.9+0.1*Math.sin(2*Math.PI*0.37*t))*(Math.sin(fp)+0.25*Math.sin(2*fp+0.5))/1.1;
+    return leadDev(f+v, cfg);
   }
 
   /* Second-degree AV block, Mobitz II. The P waves march out at a constant
@@ -2517,10 +2625,14 @@ function sEcg(t){
     const PR=0.18;
     const pIx=Math.floor(t/pp), up=t-pIx*pp;
     const mod=(n,m)=>((n%m)+m)%m;
+    /* Conducted with a bundle branch block. Mobitz II is a block below the AV
+       node, and 70-80% of it comes with a BBB; a narrow QRS is possible (a
+       block within the His bundle) but it is the minority, and the wide QRS
+       is part of why the item's answer is pacing rather than atropine. */
     let v=pDev(up)*pGain(cfg);
-    if(mod(pIx,TOTAL)!==TOTAL-1) v+=qrsTDev(up-PR);
+    if(mod(pIx,TOTAL)!==TOTAL-1) v+=vDev(up-PR,bp,BBB_QRS_SEC);
     /* The complex before this P can still be running under it. */
-    if(mod(pIx-1,TOTAL)!==TOTAL-1) v+=qrsTDev(up+pp-PR);
+    if(mod(pIx-1,TOTAL)!==TOTAL-1) v+=vDev(up+pp-PR,bp,BBB_QRS_SEC);
     return leadDev(v, cfg);
   }
   /* Sinus and the narrow-complex tachycardias are composed too, for the same
@@ -2539,8 +2651,8 @@ function sEcg(t){
     const k=Math.floor(t/bp), u=t-k*bp;
     const pg=cf.p*pGain(cfg);
     let v=cf.p?pDev(u)*pg:0;
-    v+=qrsTDev(u-cf.pr);
-    v+=qrsTDev(u+bp-cf.pr);           // the complex before this one, still running
+    v+=qrsTDev(u-cf.pr,bp);
+    v+=qrsTDev(u+bp-cf.pr,bp);        // the complex before this one, still running
     if(cf.p) v+=pDev(u+bp)*pg;
     return leadDev(v, cfg);
   }
@@ -2557,7 +2669,7 @@ function sEcg(t){
     const pg=pGain(cfg);
     let v=(pDev(up)+pDev(up+pp))*pg;
     const k=Math.floor(t/bp), u=t-k*bp;      // the escape, wide and slow
-    v+=vDev(u,V_SEC)+vDev(u+bp,V_SEC);
+    v+=vDev(u,bp)+vDev(u+bp,bp);
     return leadDev(v, cfg);
   }
 
@@ -2566,9 +2678,8 @@ function sEcg(t){
      complexes narrow at 190/min, which is the opposite of the finding the item
      is asking about. */
   if(r==='vtach'){
-    const dur=Math.min(V_SEC,bp*0.94);
     const k=Math.floor(t/bp), u=t-k*bp;
-    return leadDev(vDev(u,dur)+vDev(u+bp,dur), cfg);
+    return leadDev(vDev(u,bp)+vDev(u+bp,bp), cfg);
   }
   /* Junctional escape. The impulse starts below the atria, so the QRS is narrow
      and normal-looking and there is no P wave in front of it — narrow complexes
@@ -2577,7 +2688,7 @@ function sEcg(t){
      options. */
   if(r==='junctional'){
     const k=Math.floor(t/bp), u=t-k*bp;
-    return leadDev(qrsTDev(u)+qrsTDev(u+bp), cfg);
+    return leadDev(qrsTDev(u,bp)+qrsTDev(u+bp,bp), cfg);
   }
 
   const lm={aflutter:L.aflutter,vtach:L.vtach,stemi:L.stemi,junctional:L.junctional};
@@ -2834,12 +2945,18 @@ const PAPER={
 };
 function paper(){ return document.body.classList.contains('sunvue')?PAPER.sun:PAPER.dark; }
 
+/* One lattice on every channel, ruled like paper: a large box is 0.2 s of
+   ECG, a small one 0.04 s. Small boxes are left out when they would be under
+   4 px apart — at a five-second sweep on a phone they are a grey haze. */
+const gridFine=gx=>gx/5>=4;
 function drawGrid(ctx,W,H){
-  const gx=SPX/5, pp=paper();
+  const gx=ecgSpx()/5, pp=paper();
   ctx.fillStyle=pp.gnd; ctx.fillRect(0,0,W,H);
   ctx.lineWidth=.5; ctx.strokeStyle=pp.fine;
-  for(let x=0;x<W;x+=gx/5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=H/20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  if(gridFine(gx)){
+    for(let x=0;x<W;x+=gx/5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=H/20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  }
   ctx.lineWidth=.8; ctx.strokeStyle=pp.bold;
   for(let x=0;x<W;x+=gx){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=0;y<H;y+=H/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
@@ -2847,7 +2964,7 @@ function drawGrid(ctx,W,H){
 
 /* ── Ring-buffer pixel writer ──────────────────────────────────
    Each channel tracks its own pixel position (pxPos).
-   Each frame we advance by (dt * SPX) pixels and only write
+   Each frame we advance by (dt x the channel's sweep) pixels and only write
    those new columns — everything else stays untouched.
    This is exactly how a real monitor draws its trace.
 ──────────────────────────────────────────────────────────────── */
@@ -2857,14 +2974,16 @@ function drawGrid(ctx,W,H){
 // — and its 6px-wide erase never wrapped, so it left an unswept sliver at the
 // right edge of each canvas.
 function gridSeg(ctx,x0,w,H){
-  const gx=SPX/5, gmin=gx/5, x1=x0+w, pp=paper();
+  const gx=ecgSpx()/5, gmin=gx/5, x1=x0+w, pp=paper();
   // Same lattice and same weights as drawGrid, so a repainted band is
   // indistinguishable from the grid laid down when the canvas was sized.
-  ctx.lineWidth=.5; ctx.strokeStyle=pp.fine;
-  ctx.beginPath();
-  for(let g=Math.ceil(x0/gmin)*gmin; g<x1; g+=gmin){ ctx.moveTo(g,0); ctx.lineTo(g,H); }
-  for(let y=0;y<H;y+=H/20){ ctx.moveTo(x0,y); ctx.lineTo(x1,y); }
-  ctx.stroke();
+  if(gridFine(gx)){
+    ctx.lineWidth=.5; ctx.strokeStyle=pp.fine;
+    ctx.beginPath();
+    for(let g=Math.ceil(x0/gmin)*gmin; g<x1; g+=gmin){ ctx.moveTo(g,0); ctx.lineTo(g,H); }
+    for(let y=0;y<H;y+=H/20){ ctx.moveTo(x0,y); ctx.lineTo(x1,y); }
+    ctx.stroke();
+  }
   ctx.lineWidth=.8; ctx.strokeStyle=pp.bold;
   ctx.beginPath();
   for(let g=Math.ceil(x0/gx)*gx; g<x1; g+=gx){ ctx.moveTo(g,0); ctx.lineTo(g,H); }
@@ -2881,16 +3000,17 @@ function clearBand(ctx,x0,w,W,H){
 }
 
 /* Sweep speed per channel.
-   ECG and the pressure traces run at the standard 25 mm/s. A capnogram at
-   that speed puts barely one breath on the screen, which is why the real
-   unit runs CO2 slower — the shape of the plateau is the whole point of
-   waveform capnography, and you cannot see a shape you only get one of. */
-const CH_SPX={cCo2:0.25};
+   ECG, SpO2 and the pressure traces run at the ECG's speed, as they do on the
+   unit (25 mm/s for all three). CO2 runs at half of it, the unit's 12.5 mm/s,
+   which puts ten seconds and two or three breaths on the screen — the shape
+   of the plateau is the whole point of waveform capnography, and you cannot
+   see a shape you only get one of. */
+const CH_SPX={cCo2:0.5};
 /* The channel ceiling in mmHg. The unit scales CO2 0-50; the ZX skin's own
    channel is 0-60, and the sample function normalises against whichever is
    showing so a 37 sits at the same height as the printed scale says. */
 function co2Ceiling(){ return currentSkin==='lp'?50:60; }
-function chSpx(id){ return SPX*(CH_SPX[id]||1); }
+function chSpx(id){ return ecgSpx()*(CH_SPX[id]||1); }
 const pxAccum={};
 function stepFor(id,dt){
   pxAccum[id]=(pxAccum[id]||0)+dt*chSpx(id);
@@ -2922,10 +3042,33 @@ function drawChannel(id, fn, stroke, fill){
   // patient is not connected) and the trace is left blank rather than flat.
   const ys=new Array(count+1);
   const vs=(id==='cEcg')?new Array(count+1):null;
+  /* The ECG is drawn peak-preserving, as monitors draw it: each pixel column
+     covers 1/spx of a second, is sampled every 2 ms across that span, and is
+     drawn as a stroke from its first extreme to its second. One sample per
+     column was fine at 180 px/s; at a five-second sweep on a phone a column
+     is 14-24 ms, so R waves came out a different height every beat and a
+     12 ms pacing spike could fall between two columns and not be drawn. */
+  const sub=vs?Math.max(1,Math.ceil(1000/spx/2)):1;
+  const ea=vs&&sub>1?new Array(count+1):null, eb=ea?new Array(count+1):null;
   for(let i=0;i<=count;i++){
-    const v=fn(TT-(count-i)/spx);
-    if(vs) vs[i]=v;
-    ys[i]=(v===null||v===undefined)?null:yp(v);
+    const tc=TT-(count-i)/spx;
+    if(!ea){
+      const v=fn(tc);
+      if(vs) vs[i]=v;
+      ys[i]=(v===null||v===undefined)?null:yp(v);
+      continue;
+    }
+    let lo=Infinity,hi=-Infinity,loAt=0,hiAt=0,v=null;
+    for(let k=sub-1;k>=0;k--){
+      v=fn(tc-k/(spx*sub));
+      if(v===null||v===undefined){ v=null; break; }
+      if(v<lo){lo=v;loAt=k;} if(v>hi){hi=v;hiAt=k;}
+    }
+    if(v===null){ vs[i]=null; ys[i]=null; continue; }
+    vs[i]=hi;                                  // the detector sees the column's peak
+    ys[i]=yp(v);
+    // larger k is earlier in time
+    ea[i]=yp(hiAt>loAt?hi:lo); eb[i]=yp(hiAt>loAt?lo:hi);
   }
   if(vs&&D.on) scanQrs(vs,TT-count/spx,spx);
 
@@ -2940,12 +3083,15 @@ function drawChannel(id, fn, stroke, fill){
   // One path for the whole frame's worth of trace, broken at the canvas seam
   // and wherever the channel has no reading.
   ctx.strokeStyle=stroke;
-  ctx.lineWidth=2.0;
+  /* Finer and with less glow at a slow sweep, where beats sit close together:
+     a 2 px line under a 7 px blur smeared neighbouring complexes into one. */
+  const dense=ecgSpx()<110;
+  ctx.lineWidth=dense?1.5:2.0;
   ctx.lineCap='round';
   ctx.lineJoin='round';
   // The phosphor glow reads as smudge on the SunVue ground.
   const glow=!document.body.classList.contains('sunvue');
-  ctx.shadowBlur=glow?7:0;
+  ctx.shadowBlur=glow?(dense?2.5:7):0;
   if(glow) ctx.shadowColor=stroke;
   ctx.beginPath();
   let pen=false;
@@ -2954,6 +3100,7 @@ function drawChannel(id, fn, stroke, fill){
     if(y===null){ pen=false; lastY[id]=-1; continue; }
     const px=(prevPx+i)%W;
     if(!pen){ ctx.moveTo(px, lastY[id]<0?y:lastY[id]); pen=true; }
+    if(ea){ ctx.lineTo(px+1, ea[i]); ctx.lineTo(px+1, eb[i]); }
     ctx.lineTo(px+1, y);
     lastY[id]=y;
     if(px+1>=W) pen=false;                     // do not stroke across the wrap
@@ -3980,7 +4127,7 @@ function sEcgDev(t){
   const v=sEcg(t);
   if(v===null||v===undefined) return v;
   const g=ecgSize();
-  return 0.5+(v-0.5)*g;
+  return 0.5+(v-0.5+monitorNoise(t))*g;
 }
 
 /* ── Main loop ── */
@@ -4344,7 +4491,7 @@ const ITEMS=[
    opts:['Second-degree AV block (Mobitz II)','First-degree AV block','Sinus bradycardia with PACs','Third-degree AV block'],
    context:'BP 80/48, lightheaded and short of breath on standing. Atropine given.',
    therapy:'pace',
-   why:'Mobitz II drops beats without warning and progresses to complete block. Symptomatic, and atropine is unreliable here, so get the pacer on and the pads ready early.'},
+   why:'Mobitz II drops beats without warning and progresses to complete block. The wide QRS is the usual company: the block is below the AV node, which is why atropine is unreliable here. Symptomatic, so get the pacer on and the pads ready early.'},
 
   {v:P('svt',212,78,44,94,34,22), name:'SVT',
    opts:['SVT','Sinus tachycardia','Atrial flutter with 2:1 conduction','Ventricular tachycardia'],

@@ -106,7 +106,9 @@ These suites live here:
   fixes from an audit that found defects with every other check green:
   replaying a run, RESTART mid-step, learn mode and the keyboard on the
   pointer-driven keys, SYNC landing on a sensed QRS, pacing after capture and
-  in PEA, and the sound switch.
+  in PEA, and the sound switch. S20 holds the tracings to the published
+  figures — QRS, QT, AF response, sweep window — measured as a clinician
+  would measure them.
 
 - **`ventlungview.test.mjs`** — the lung picture in the LTV 1200's Free Play
   test lung ([`vent-ltv1200.html?free`](../vent-ltv1200.html)) in headless
@@ -360,3 +362,4 @@ Grouped by the property being defended:
 | S17 | **The tracings carry the finding the item asks about** — QRS width the same at 45/min as at 150, VT and a paced beat wide where SVT and a junctional escape are narrow, AF irregularly irregular where sinus is regular, flutter with no isoelectric baseline, complete heart block with more P waves than QRS and not a multiple of them, VF never at baseline |
 | S18 | **A laptop** — four desktop viewports including a 4:3 Toughbook and a half-screen window, and a whole item played with a mouse rather than a finger. Every other scenario runs at 844x390 with touch emulation on, so laptop use was being assumed rather than tested |
 | S19 | **Regressions from the station audit** — Run it again and RESTART take the summary down and leave the unit reachable, a one-rhythm link neither sets the best score nor reads "1 rhythms … 0 min", RESTART inside the pause after naming no longer wedges the new run, learn mode reads ON and SHOCK instead of firing them, ON and SHOCK work from the keyboard, a synchronized shock is withheld in asystole and lands within a frame of a sensed QRS on SVT, pacing PEA gives no pressure, capture follows RATE, PAUSE and the pacer switch after the verdict, a pacer set up while naming is answered, Sound off silences the unit, Ctrl+F is left to the browser, and the flutter rate matches its 2:1 trace |
+| S20 | **The tracings against the references**, measured the way a clinician measures them (onset to J, onset to T end, at 2% and 5% of the R). Narrow QRS 80–110 ms at every rate (2009 AHA/ACCF/HRS). QT within 25 ms of Fridericia at a QTc of 400 from 36/min to 212/min. T wave about a fifth of the R. Every ventricular complex 150 ms or wider, with VT no narrower at 188/min than at 146. Mobitz II conducted with a bundle branch block. AF's shortest R-R over 270 ms in ten minutes, CV 0.15–0.30, no step where an early beat lands, f-waves at 350–600/min and no isoelectric stretch. Every rhythm drawn at the rate the screen shows. The monitor's noise under 0.05 mV and kept out of the patient's signal. Five seconds of ECG on every screen with a channel of 300 px or more, and at least 60 px/s on an iPhone SE. R waves drawn to one height on a phone, read off the canvas |
