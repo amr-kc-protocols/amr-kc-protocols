@@ -1,7 +1,7 @@
 /* Ventilator Training Academy — service worker
    Cache the app shell so it works offline once installed. */
 
-const CACHE = "vta-pwa-v10";
+const CACHE = "vta-pwa-v11";
 const ASSETS = [
   "./",
   "./academy.html",
