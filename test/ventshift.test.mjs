@@ -8,7 +8,7 @@
  * against a per-case clock. A random patient is only worth having if every
  * one it can produce is a fair case, so most of this suite checks variants:
  *
- *   H1  fair: across 30 seeds, no variant of any of the 12 cases is solved by
+ *   H1  fair: across 30 seeds, no variant of any of the 15 cases is solved by
  *       its own starting settings, and every one can be solved
  *   H2  the goal means the same thing for the new patient: the Vt cap is
  *       8 mL/kg of this patient's PBW (Devine/ARDSNet formula, recomputed
@@ -71,7 +71,9 @@ const SEARCH = {
   KN: { 'The Rising CO₂': ['rate', 'vt'], 'Hypoxemia That Won\'t Budge': ['peep'], 'COPD — Stop the Air-Trapping': ['rate', 'it'], 'Fighting the Vent': ['it'],
     'The Compensating Septic Patient': ['rate', 'vt'], 'Ready to Come Down': ['ps', 'peep', '@cpap'], 'The Swinging Peak Pressure': ['rate', 'it', 'vt'],
     'Losing the Oxygenation Battle': ['peep', 'fio2'], 'The Blown Pupil': ['rate', 'vt'], 'Nothing Is Going In': ['lowpres', 'lowmv'],
-    'The Pressure and the Pressure': ['!hold'], 'Four Seconds to the Cot': ['fio2'] }
+    'The Pressure and the Pressure': ['!hold'], 'Four Seconds to the Cot': ['fio2'],
+    'The Over-Ventilated Head Injury': ['rate', 'vt'], 'The Pressure Drop on the Vent': ['peep'],
+    'The Right Heart Under Pressure': ['rate', 'vt', 'peep=5', 'fio2=100'] }
 };
 
 console.log('\nH1 every variant is a fair case');
@@ -90,7 +92,8 @@ console.log('\nH1 every variant is a fair case');
         const kn = KN[v.name] || [], knobs = kn.filter(k => G[k]), flags = kn.filter(k => !G[k]), grids = knobs.map(range);
         let found = false; const N = grids.reduce((a, g) => a * g.length, 1);
         for (let n = 0; n < N && !found; n++) {
-          reset(); for (const f of flags) { if (f[0] === '@') { ventMode = f.slice(1); breathType = 'pressure'; } if (f === '!hold') inspHoldSinceLoad = true; }
+          reset(); for (const f of flags) { if (f[0] === '@') { ventMode = f.slice(1); breathType = 'pressure'; } if (f === '!hold') inspHoldSinceLoad = true;
+            if (f.includes('=')) { const [k, x] = f.split('='); vals[k].v = +x; } }
           let q = n; knobs.forEach((k, j) => { vals[k].v = grids[j][q % grids[j].length]; q = Math.floor(q / grids[j].length); }); enforceITLimit();
           found = !!v.goal.check();
         }
@@ -99,7 +102,7 @@ console.log('\nH1 every variant is a fair case');
     }
     return { bad, n: names.size, lo: Math.min(...kgs), hi: Math.max(...kgs) };
   }, SEARCH);
-  ok('H1 the pool is the 12 cases of Levels 2, 3 and Troubleshooting', r.n === 12, r.n);
+  ok('H1 the pool is the 15 cases of Levels 2, 3 and Troubleshooting', r.n === 15, r.n);
   ok('H1 across 30 seeds no variant starts solved, and every one can be solved', r.bad.length === 0, r.bad.slice(0, 5).join(' | '));
   ok(`H1 the patients really differ: PBW ${r.lo}–${r.hi} kg`, r.lo <= 56 && r.hi >= 80); }
 
@@ -159,6 +162,10 @@ console.log('\nH3 the story matches the patient');
         if (v.name === 'The Rising CO₂' && (all.indexOf('only ' + mv + ' L/min') < 0 || all.indexOf(v.cm + ' cm tall') < 0 || all.indexOf('≤ ~' + Math.round(8 * v.kg / 10) * 10 + ' mL for ' + v.kg + ' kg') < 0)) out.text.push(seed + ' Rising CO₂');
         if (v.name === 'The Compensating Septic Patient' && (all.indexOf('MV is only ' + mv + ' L/min') < 0 || all.indexOf(Math.round(8 * v.kg / 10) * 10 + ' mL') < 0)) out.text.push(seed + ' Septic');
         if (v.name === 'The Blown Pupil' && all.indexOf('on ' + mv + ' L/min') < 0) out.text.push(seed + ' Pupil');
+        if (v.name === 'The Right Heart Under Pressure') {
+          const pp = Math.round(v.setup.peep + v.setup.vt / v.lung.compliance), chipPp = (v.vitals.find(x => x.k === 'Pplat') || {}).v;
+          if (all.indexOf('Vt ' + v.setup.vt + ' (10 mL/kg)') < 0 || all.indexOf('the plateau ' + pp) < 0 || chipPp !== pp + ' cmH₂O') out.text.push(seed + ' PE');
+        }
         if ((v.kg !== 70 && /\b70 kg\b/.test(all)) || (v.cm !== 178 && /178 cm/.test(all))) out.text.push(seed + ' ' + v.name + ' still says 70 kg / 178 cm');
         if ((v.name === 'The Rising CO₂' || v.name === 'COPD — Stop the Air-Trapping') && v.sex !== 'M') out.male.push(v.name);
       }

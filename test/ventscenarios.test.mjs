@@ -51,6 +51,13 @@
  *       shows the case's hint — never the answer or the explanation — and a
  *       miss stays a miss in the level score; every one of the 24 has a hint,
  *       and no hint repeats its right answer
+ *   S14 the protocol cases (KC protocol V-6): a head injury left
+ *       hyperventilated passes exactly where the recomputed EtCO₂ settles at
+ *       35–40; shock after intubation passes at PEEP 3–5, which lifts the MAP
+ *       only a few mmHg; a massive PE passes on low PEEP, a protective breath,
+ *       oxygen and enough rate — PEEP does not fix its oxygenation, and a small
+ *       breath lets the dead-space CO₂ climb. The stories' numbers are what
+ *       their starting settings give, recomputed here
  *   S13 Level 2 states the aim, not the numbers: no aim carries a target or a
  *       unit; Show target reveals them at the cost of the case's settings
  *       point; the confirmation and a met goal show them; the tutorial and the
@@ -334,7 +341,7 @@ console.log('\nS11 the diagnosis cannot be won by a cue');
     return all.map(sc => ({ name: sc.name, c: sc.diagnose.correct, L: sc.diagnose.choices.map(x => x.replace(/<[^>]+>/g, '').length), n: new Set(sc.diagnose.choices).size }));
   });
   const strict = q.filter(x => { const s = [...x.L].sort((a, b) => b - a); return x.L[x.c] === s[0] && s[0] > s[1]; });
-  ok(`S11 the right answer is the longest choice in at most a third of the ${q.length} diagnoses`, q.length === 24 && strict.length <= q.length / 3, strict.length + ': ' + strict.map(x => x.name).join(', '));
+  ok(`S11 the right answer is the longest choice in at most a third of the ${q.length} diagnoses`, q.length === 27 && strict.length <= q.length / 3, strict.length + ': ' + strict.map(x => x.name).join(', '));
   const ratio = q.map(x => { const d = x.L.filter((_, i) => i !== x.c); return x.L[x.c] / (d.reduce((a, b) => a + b) / d.length); });
   const mean = ratio.reduce((a, b) => a + b) / ratio.length;
   ok('S11 on average the right answer is as long as the wrong ones (ratio 0.85–1.15)', mean >= 0.85 && mean <= 1.15, mean.toFixed(2));
@@ -365,7 +372,7 @@ console.log('\nS12 the first answer counts');
     return all.map(sc => ({ name: sc.name, hint: sc.diagnose.hint || '', right: sc.diagnose.choices[sc.diagnose.correct] }));
   });
   const noHint = h.filter(x => x.hint.length < 30).map(x => x.name);
-  ok(`S12 every one of the ${h.length} diagnoses has a hint`, h.length === 24 && noHint.length === 0, noHint.join(', '));
+  ok(`S12 every one of the ${h.length} diagnoses has a hint`, h.length === 27 && noHint.length === 0, noHint.join(', '));
   // A hint must not simply hand over the answer: it shares no run of four words with it
   const words = t => t.toLowerCase().replace(/<[^>]+>/g, '').split(/[^a-z0-9₂]+/).filter(Boolean);
   const leaks = h.filter(x => { const a = words(x.right), w = words(x.hint);
@@ -399,7 +406,7 @@ console.log('\nS12 the first answer counts');
   ok('S12 the right pick shows the explanation and diagnoses the case', r.right.exp === 'block' && r.right.hint === 'none' && r.right.dx, JSON.stringify(r.right));
   ok('S12 only the first answer counts: missed first time stays missed', r.stat.dx === false, JSON.stringify(r.stat));
   ok('S12 right first time is recorded as right', r.stat2.dx === true, JSON.stringify(r.stat2));
-  ok('S12 the level score counts them (1 of 5 so far, out of 10)', r.score.dx === 1 && r.score.n === 5 && r.score.max === 10, JSON.stringify(r.score)); }
+  ok('S12 the level score counts them (1 of 7 so far, out of 14)', r.score.dx === 1 && r.score.n === 7 && r.score.max === 14, JSON.stringify(r.score)); }
 
 console.log('\nS13 Level 2 gives the aim, not the numbers');
 { const r = await p.evaluate(() => {
@@ -430,6 +437,49 @@ console.log('\nS13 Level 2 gives the aim, not the numbers');
   ok('S13 the confirmation shows the target numbers', r.conf);
   ok('S13 reached without the reveal keeps the point, and the met goal shows its numbers', r.stat2.set === true && /8–14/.test(r.metGoal), JSON.stringify(r.stat2));
   ok('S13 the tutorial and the academy missions keep their numbers', /400–550/.test(r.tut) && /450–600/.test(r.aca), r.tut.slice(0, 80) + ' | ' + r.aca.slice(0, 80)); }
+
+console.log('\nS14 the protocol cases: TBI normocapnia, shock, massive PE');
+{ // Independent CO₂: the alveolar ventilation equation with the page's dead-space
+  // terms (anatomic 2.2 mL/kg, equipment 0.5 mL/kg ≤ 35 mL, alveolar vdA × Vt) and
+  // V̇CO₂ 200 mL/min for a 70 kg adult; EtCO₂ from the Bohr dilution of the alveolar gas.
+  const co2 = (rate, vt, vdA, vco2 = 200, kg = 70) => { const vd = 2.2 * kg + Math.min(35, 0.5 * kg) + vdA * vt, va = rate * (vt - vd) / 1000;
+    const pa = 0.863 * vco2 / va; return { paco2: pa, etco2: pa * (1 - vdA * vt / (vt - 2.2 * kg - Math.min(35, 0.5 * kg))) }; };
+  const look = (name, s) => p.evaluate(([name, s]) => {
+    const sc = [].concat(SCENARIO_LEVELS[2], SCENARIO_LEVELS[3]).find(x => x.name === name); loadScenario(sc);
+    for (const k of Object.keys(s || {})) vals[k].v = s[k]; enforceITLimit();
+    const t = settledFor(sc), d = calcPplat(); return { pass: !!sc.goal.check(), paco2: t.paco2, etco2: t.etco2, spo2: t.spo2, map: t.map, pplat: d && d.pplat };
+  }, [name, s || null]);
+  const T = 'The Over-Ventilated Head Injury';
+  let r = await look(T), c = co2(24, 450, 0.05);
+  ok('S14 TBI: the sending settings (rate 24) settle at the story\'s EtCO₂ 28 / PaCO₂ 30 — recomputed — and fail', !r.pass && Math.abs(c.etco2 - 28) < 1 && Math.abs(r.etco2 - c.etco2) < 0.3, `${c.etco2.toFixed(1)} / ${r.etco2.toFixed(1)}`);
+  const tbi = []; for (const rate of [15, 16, 17, 18, 19, 20]) { const g = await look(T, { rate }), k = co2(rate, 450, 0.05); tbi.push({ rate, pass: g.pass, et: k.etco2 }); }
+  const tw = tbi.filter(x => x.pass !== (x.et >= 34.95 && x.et <= 40.05));
+  ok('S14 TBI passes exactly where the recomputed EtCO₂ settles at 35–40 (KC protocol V-6)', tw.length === 0 && tbi.some(x => x.pass), JSON.stringify(tbi.map(x => x.rate + ':' + x.et.toFixed(1) + (x.pass ? '✓' : ''))));
+  ok('S14 TBI: a PEEP of 10 fails (protocol: keep it low)', !(await look(T, { rate: 18, peep: 10 })).pass);
+  const ov = await look(T, { rate: 11, vt: 600 });
+  ok('S14 TBI: an oversized breath (600 mL, 8.6 mL/kg) fails even with the EtCO₂ in 35–40', !ov.pass && ov.etco2 >= 35 && ov.etco2 <= 40, ov.etco2.toFixed(1));
+  const S = 'The Pressure Drop on the Vent';
+  const sh = {}; for (const peep of [0, 3, 5, 8, 12]) sh[peep] = await look(S, { peep });
+  ok('S14 shock: the sending PEEP 12 fails; 3–5 passes; 8 and 0 fail', !sh[12].pass && sh[3].pass && sh[5].pass && !sh[8].pass && !sh[0].pass, JSON.stringify(Object.fromEntries(Object.entries(sh).map(([k, v]) => [k, v.pass]))));
+  ok('S14 shock: lowering PEEP raises the MAP — by only a few mmHg, still under 65 at PEEP 5', sh[5].map > sh[12].map + 1 && sh[5].map < 65, `${sh[12].map.toFixed(1)} → ${sh[5].map.toFixed(1)}`);
+  ok('S14 shock: the story\'s 82/48 is what PEEP 12 gives (MAP ≈ 59)', Math.abs(sh[12].map - (82 + 2 * 48) / 3) < 1.5, sh[12].map.toFixed(1));
+  const E = 'The Right Heart Under Pressure';
+  const pe0 = await look(E), k0 = co2(14, 700, 0.30);
+  ok('S14 PE: the sending settings fail, and the story\'s PaCO₂ 41 / EtCO₂ 24 are what they give (recomputed)', !pe0.pass && Math.abs(k0.paco2 - 41) < 1 && Math.abs(k0.etco2 - 24) < 1 && Math.abs(pe0.paco2 - k0.paco2) < 0.3, `${k0.paco2.toFixed(1)}/${k0.etco2.toFixed(1)}`);
+  const good = await look(E, { rate: 20, vt: 560, peep: 5, fio2: 100 });
+  ok('S14 PE: low PEEP, 8 mL/kg, rate 20 and 100% oxygen pass', good.pass, JSON.stringify(good));
+  const peep10 = await look(E, { rate: 20, vt: 560, peep: 10, fio2: 100 }), room = await look(E, { rate: 20, vt: 560, peep: 5, fio2: 60 });
+  ok('S14 PE: the same with PEEP 10 fails; with FiO₂ 60% the SpO₂ stays under 90 and fails', !peep10.pass && !room.pass && room.spo2 < 90, `${room.spo2.toFixed(1)}`);
+  const p14 = await look(E, { rate: 20, vt: 560, peep: 14, fio2: 60 });
+  ok('S14 PE: PEEP does not fix this oxygenation (PEEP 14 vs 5 on 60%: the same SpO₂)', Math.abs(p14.spo2 - room.spo2) < 0.3, `${p14.spo2.toFixed(1)} vs ${room.spo2.toFixed(1)}`);
+  const small = await look(E, { rate: 24, vt: 450, peep: 5, fio2: 100 }), ks = co2(24, 450, 0.30);
+  ok('S14 PE: a 6.4 mL/kg breath at rate 24 lets the PaCO₂ climb past 48 (dead space) and fails', !small.pass && ks.paco2 > 48 && Math.abs(small.paco2 - ks.paco2) < 0.5, ks.paco2.toFixed(1));
+  const big = await look(E, { rate: 14, vt: 700, peep: 5, fio2: 100 });
+  ok('S14 PE: keeping the 10 mL/kg breath fails', !big.pass);
+  const t = await text(E);
+  ok('S14 PE: the teaching says what is consensus and what is extrapolated', /ESC 2019/.test(t) && /expert consensus/.test(t) && /Mekontso Dessap 2016, observational/.test(t) && /extrapolated/.test(t));
+  const tt = await text(T), ts = await text(S);
+  ok('S14 TBI and shock cite the KC protocol they follow (V-6)', /KC protocol \(V-6, TBI\)|KC protocol V-6/.test(tt) && /KC protocol \(V-6, shock\)|KC protocol V-6/.test(ts)); }
 
 ok('S8 no page errors', errs.length === 0, errs.join(' | '));
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

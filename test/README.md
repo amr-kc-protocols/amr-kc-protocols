@@ -186,6 +186,14 @@ These suites live here:
   unit, and revealing the target costs the case's settings point. Herniation
   is graded on the PaCO₂ it settles at (S4): 26 × 400 mL and 19 × 600 mL,
   which the old minute-volume goal passed, now fail.
+  The three cases written to the KC protocol (V-6) are held to it (S14): a
+  head injury left hyperventilated passes exactly where the EtCO₂, recomputed
+  with the alveolar ventilation equation, settles at 35–40; shock after
+  intubation passes at PEEP 3–5, which lifts the MAP only a few mmHg; and a
+  massive PE passes on low PEEP, a protective breath, oxygen and enough rate,
+  while PEEP 10, room-level oxygen, a 10 mL/kg breath or a small breath that
+  lets the dead-space CO₂ climb all fail. Each story's numbers are what its
+  starting settings give.
 
 - **`ventpanel.test.mjs`** — the LTV 1200's panel and level engine
   ([`vent-ltv1200.html`](../vent-ltv1200.html)), one check per bug found and

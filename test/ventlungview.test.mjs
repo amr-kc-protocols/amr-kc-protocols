@@ -544,7 +544,7 @@ console.log('\nL18 the lung view in the tutorial and the Level 2–3 scenarios')
   const tut2 = await S(1, 0, { rate: 16, vt: 500 });
   ok('L18 …and the tutorial\'s first fix (MV 7–9 L/min) brings PaCO₂ from ' + tut.t.paco2.toFixed(0) + ' to 35–45', tut.t.paco2 > 50 && tut2.t.paco2 >= 35 && tut2.t.paco2 <= 45, tut2.t.paco2.toFixed(1));
 
-  const scen = [[2, 0, 'normal'], [2, 1, 'ards'], [2, 2, 'copd'], [2, 3, 'normal'], [2, 4, 'ards'], [3, 0, 'normal'], [3, 1, 'asthma'], [3, 2, 'ards'], [3, 3, 'normal']];
+  const scen = [[2, 0, 'normal'], [2, 1, 'ards'], [2, 2, 'copd'], [2, 3, 'normal'], [2, 4, 'ards'], [2, 5, 'normal'], [2, 6, 'normal'], [3, 4, 'normal'], [3, 0, 'normal'], [3, 1, 'asthma'], [3, 2, 'ards'], [3, 3, 'normal']];
   for (const [l, i, spr] of scen) {
     const r = await S(l, i);
     const tag = `L${l}S${i + 1}`;
@@ -705,7 +705,7 @@ console.log('\nL20 the scenario monitor is live: HR, SpO₂ and EtCO₂ follow t
   }, [l, i, set || null, secs || 0]);
   // Every Level 2–3 monitor starts at its story
   const bad = [];
-  for (const [l, n] of [[2, 5], [3, 4]]) for (let i = 0; i < n; i++) {
+  for (const [l, n] of [[2, 7], [3, 5]]) for (let i = 0; i < n; i++) {
     const r = await mon(l, i);
     if (r.story.hr != null && r.a.hr !== r.story.hr) bad.push(`L${l}S${i + 1} HR ${r.a.hr}≠${r.story.hr}`);
     if (r.story.spo2 != null && Math.abs(r.a.spo2 - r.story.spo2) > 1.5) bad.push(`L${l}S${i + 1} SpO₂ ${r.a.spo2}≠${r.story.spo2}`);
