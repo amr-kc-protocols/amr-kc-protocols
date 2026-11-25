@@ -1,8 +1,7 @@
 # Protocols PDF: contradiction review (November 2026)
 
 Scope: `protocols-2026.pdf` (175 pages, "Effective May 15 2026"), read in full on 2026-11-25.
-Page numbers are PDF pages. Nothing in the PDF has been changed yet. Every item below
-is a proposed fix waiting for a decision.
+Page numbers are PDF pages. The PDF was updated on 2026-11-25 with the protocol owner's rulings (see **Resolution** below). The tables after it are the original findings.
 
 The items fall into three groups:
 
@@ -14,6 +13,57 @@ The items fall into three groups:
   are plausible, or the fix adds or removes something a crew is allowed to do.
 - **C. Not contradictions, but errors I found while reading.** Wrong numbers,
   broken references and duplicated pages.
+
+---
+
+## Resolution (2026-11-25)
+
+The protocol owner ruled on each item, and `protocols-2026.pdf` was updated to match. The original text was removed from the page, not hidden, and the new text was set in the same place, size and colour. All 387 original links are unchanged. The PDF now has 177 pages: pages 176–177 are a new formulary supplement, with a contents entry on p.5 and a viewer entry in `protocols-index.js`.
+
+| # | Ruling | What changed |
+|---|---|---|
+| A1 | The AEMT may give midazolam for seizures; confirm against the KBEMS list. | II-10, II-11 and II-12 (AEMT): midazolam per III-11, seizure only. The KBEMS Approved Medication List (June 6, 2025) allows benzodiazepines for the AEMT by IM, IV/IO, IN and rectal routes. |
+| A2 | Insulin is not in AEMT scope. | II-26 (AEMT): notify the Paramedic and contact DMO; the AEMT does not adjust insulin. |
+| A3 | Rocuronium may be given by the hospital. | II-28: intubate per V-4 (no RSI). If the hospital performs RSI before transfer, rocuronium is preferred to succinylcholine in hyperkalemia. |
+| A4 | AEMTs can manage ventilators. | p.11: LTV 1200 ventilator management added to the AEMT scope. |
+| A5 | Termination after CPR has started requires DMO. | VIII-B6 (EMT and AEMT): "until DMO authorizes termination." |
+| A6 | Fentanyl at the formulary dose. | VIII-A7, VIII-D1 and VIII-D5 now match III-10: 25–100 mcg IV/IO, or 1–2 mcg/kg IN with a maximum of 100 mcg per nostril. |
+| A7 | Pediatric atropine per PALS 2025. | III-5 and the quick reference: 0.02 mg/kg IV/IO, minimum 0.1 mg, maximum single dose 0.5 mg, may repeat once. |
+| A8 | Racemic epinephrine per PALS. | The quick reference, VIII-G3, VIII-G4 and the new III-25: racemic 2.25% 0.05 mL/kg (max 0.5 mL) in 3 mL NS, or L-epinephrine 1 mg/mL 0.5 mL/kg (max 5 mL). |
+| A9 | 20–30 breaths a minute. | VIII-G1: 1 breath every 2–3 s (20–30/min). |
+| A10 | LIFEPAK 15: follow the manufacturer. | V-30: check both battery fuel gauges before each transport and carry two charged batteries. The low-battery warning gives about 12 minutes at minimum. The 50% and 20% thresholds were removed. |
+| A11 | Remove the Appendix B reference. | p.14 now points to Section IV-A and TP02. |
+| A12–A16 | The MD agrees. | V-19 iGel indication; III-13 lidocaine VF/pVT indication; quick reference matches the formulary (fentanyl, midazolam IM, naloxone); VIII-A10 naloxone 2 mg IN or IM; V-6 "6 mL/kg for ARDS". |
+| B1 | CPAP at all levels, except through the ventilator. | EMT columns in II-6, II-13, VIII-C1 and VIII-C2 can now start Flow-Safe II CPAP. The AEMT columns now cover LTV 1200 NPPV above Flow-Safe II limits. |
+| B2 | NTG needs a 12-lead first; then the AEMT or PM may give it. | SL nitroglycerin moved to the AEMT column after a 12-lead in II-5, II-6, VIII-B2 and VIII-A11; III-16 says the same. The AEMT scope cell is now "SL": transdermal stays Paramedic only per the matrix. |
+| B3 | Lidocaine for pain follows the KBEMS list. | The KBEMS list (June 6, 2025) allows lidocaine for the AEMT IV/IO. V-8, VIII-A7 (now in the AEMT column) and III-13 make IO-pain lidocaine AEMT and PM. |
+| B5 | Head injury per the best evidence. | II-10 and VIII-D3: adult SBP ≥110 mmHg, from the Brain Trauma Foundation prehospital guidelines, 3rd edition (2023). That threshold rests on observational evidence. VIII-D3's MAP ≥85 was removed. |
+| B6 | The IN limit is per nostril. | p.13: a maximum of 1 mL per nostril; split larger doses between both nostrils. |
+| B7 | Add epinephrine push-dose to the formulary. | III-9 indications now include push-dose for refractory anaphylaxis and for bradycardia refractory to pacing. Epinephrine infusions and 0.1 mg IV pushes were replaced with push-dose 10–20 mcg (II-27, VIII-A3, VIII-B3). |
+| B8 | Drugs not in the formulary come out of the algorithms. Oral glucose, dexamethasone and nebulized epinephrine get formulary cards. | Calcium (II-19, II-28, VIII-A10), thiamine (VIII-A2), vasopressin (II-21), thrombolytics (II-15) and heliox (VIII-G3) were removed. New cards: III-23 Oral Glucose (all levels), III-24 Dexamethasone (AEMT+), III-25 Nebulized Epinephrine (PM only). |
+| B9 | The AEMT may titrate with orders, and only for drugs on the KBEMS list. | pp.11 and 13 rewritten to say so. |
+| B11 | Children are not terminated in the field. | VIII-G1: the termination note was removed; continue resuscitation and transport. |
+| C1 | Fix the ventilator body-weight numbers. | V-6: 70 in (5'10") ≈ 73 kg → 440–580 mL; 65 in (5'5") ≈ 57 kg → 340–460 mL. |
+| C2 | Fix the IO sizes. | V-8: 15 mm for 3–39 kg, 25 mm for ≥40 kg, 45 mm for the proximal humerus or excess tissue. |
+| C3 | Hold the suctioning sections. | Not changed. |
+| C4 | PALS amiodarone sequence. | VIII-G1 and the quick reference: after the third shock, 5 mg/kg (max 300 mg), up to 3 total doses. |
+| C5 | — | V-15: "press and hold the SHOCK button". |
+| C6 | TPOPP is the name. | TP03: "TPOPP (Transportable Physician Orders for Patient Preferences)". |
+| C7 | Pediatric airway and newborn care per current guidance. | V-29 and VIII-F1: newborn assessment within 60 s; epinephrine 0.01–0.03 mg/kg IV/IO after 60 s of compressions with effective ventilation. VIII-G2: cuffed ETT preferred for infants and children, cuff pressure <20–25 cmH2O. |
+
+### Still open
+
+- **B4, the behavioral sedation route** (IV only in II-23 and V-12 vs IV/IO/IM in VIII-A4): no ruling yet.
+- **B10, EMT infusion monitoring** (matrix ✓ vs Section IV-A "NS only"): no ruling yet.
+- **C3, the duplicated suctioning pages** (pp.82–87): on hold.
+- **DMO contact order**: p.14 still says dispatch first; the app's algorithm says base hospital first.
+
+### Check before publishing
+
+- **Doses written for this update:** the III-23, III-24 and III-25 doses and the oral glucose adult dose need Medical Director sign-off. The racemic and L-epinephrine doses are the standard published weight-based doses; I could not reach the PALS 2025 provider-manual drug table to compare them word for word.
+- **LIFEPAK 15 battery text:** it comes from secondary sources: the Stryker charger brochure (about 21 min typical, 12 min minimum after the low-battery warning) and published agency procedures (fuel-gauge colours). The LIFEPAK 15 Operating Instructions could not be reached from this environment.
+- **KBEMS list version:** this update relies on the June 6, 2025 list, which appeared in a Board packet. The October 2025 Board added IV acetaminophen for the AEMT. Confirm the current list on ksbems.org.
+- **App copies of the formulary:** `index.html` and `flashcards.html` still differ from the PDF in places. For example, the app makes nitroglycerin All Levels, SL only for the EMT. Neither file was changed here.
 
 ---
 

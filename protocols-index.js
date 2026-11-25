@@ -48,6 +48,7 @@ var PROTOCOLS = [
 {"c": "III-19", "t": "Ondansetron (Zofran)", "s": "iii", "p": 69, "y": 186},
 {"c": "III-20", "t": "Normal Saline (0.9% NaCl)", "s": "iii", "p": 70, "y": 410},
 {"c": "III-21–22", "t": "Ipratropium Bromide (Atrovent), Glucagon", "s": "iii", "p": 71, "y": 611},
+{"c": "III-23–25", "t": "Oral Glucose, Dexamethasone, Nebulized Epinephrine (Formulary Supplement)", "s": "iii", "p": 176, "y": 724},
 {"c": "IV-A–B", "t": "Dispatch Scope Framework, AEMT-Authorized Infusions", "s": "iv", "p": 72, "y": 430},
 {"c": "IV-C–H", "t": "Vasopressors, Sedation, Cardiac, Endocrine, Antibiotics, Blood Products", "s": "iv", "p": 76, "y": null},
 {"c": "V-1", "t": "Bag-Valve-Mask (BVM) Ventilation", "s": "v", "p": 80, "y": 615},

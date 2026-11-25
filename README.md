@@ -17,7 +17,7 @@ Quiz available at **https://amr-kc-protocols.github.io/amr-kc-protocols/quiz.htm
 
 - 28 IFT Clinical Protocols (Section II)
 - 34 Section VIII 911 Mutual Aid Protocols
-- 22-drug Formulary with full dosing by route and age
+- 25-drug Formulary with full dosing by route and age (III-23 to III-25 are on supplement pages 176–177)
 - 11 Procedure Cards
 - Reference: Vital targets, Pediatric dosing calculator, LTV 1200 alarms, GCS, Cincinnati Stroke Scale, Broselow, Rule of Nines, APGAR
 
@@ -31,7 +31,7 @@ Home is field tools first, in this order:
 
 Every protocol opens in **`protocols.html`**, a pdf.js viewer of the signed `protocols-2026.pdf`, scrolled to the exact spot the PDF's own table-of-contents link lands on. Linking to the PDF directly isn't enough, because iOS Safari ignores `#page=`. The viewer has zoom, a searchable contents list, tappable in-document links (e.g. "see Procedure V-17B"), and works offline once cached.
 
-- `protocols-index.js`: the 131 entries (code, title, section, page, y-position), extracted from the PDF's TOC links, plus `PROTOCOL_FAVORITES`. **Regenerate it if the PDF is re-assembled**, or entries will open at the wrong page.
+- `protocols-index.js`: the 132 entries (code, title, section, page, y-position), extracted from the PDF's TOC links, plus `PROTOCOL_FAVORITES`. **Regenerate it if the PDF is re-assembled**, or entries will open at the wrong page.
 - `pdfjs/`: vendored pdf.js 4.10.38 legacy build (Apache-2.0, `pdfjs/LICENSE`).
 ## Protocol Quiz and Daily 5
 Both run on one shared engine (`quiz-kit.js`, `quiz-kit.css`) and one question file, `quiz-bank.js`: EMT 50, AEMT 15, Paramedic 50, ventilator 20. **Fix a question there once and both quizzes get it.** Each level includes the levels below it (EMT 50, AEMT 65, Paramedic 135).
