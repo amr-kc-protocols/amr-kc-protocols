@@ -51,19 +51,26 @@ The protocol owner ruled on each item, and `protocols-2026.pdf` was updated to m
 | C6 | TPOPP is the name. | TP03: "TPOPP (Transportable Physician Orders for Patient Preferences)". |
 | C7 | Pediatric airway and newborn care per current guidance. | V-29 and VIII-F1: newborn assessment within 60 s; epinephrine 0.01–0.03 mg/kg IV/IO after 60 s of compressions with effective ventilation. VIII-G2: cuffed ETT preferred for infants and children, cuff pressure <20–25 cmH2O. |
 
+### Second round (2026-11-26)
+
+| Item | Ruling | What changed |
+|---|---|---|
+| B4 | Behavioral sedation may also be IM. | III-11, II-23, V-12 and VIII-A4: midazolam 2–5 mg IV/IO slow push or 5 mg IM; may repeat once at 5 minutes. |
+| B10 | EMTs may monitor lactated Ringer's as well. | Section IV-A EMT crews and the III-20 note: NS or LR continuity only. |
+| DMO | Medical control matches the app. | p.14: base hospital first, then dispatch, then the backup line, then continue within standing orders. New Appendix C (p.178) carries the app's full algorithm, the 12 base hospitals, receiving orders and non-base destinations. The hospice page (TP03) now points to it. Contents entry on p.5; viewer entry in `protocols-index.js`. |
+| III-8 | EMT epinephrine: auto-injector only. | PDF III-8 EMT scope cell and note; VIII-A3 EMT step 1 now reads auto-injector 0.3 mg (EMT) or 0.3–0.5 mg IM (AEMT+). This matches the app. |
+| App | Fix the app formulary and flashcards. | `index.html` (`D.formulary`) and `flashcards.html` (`AMB`) now carry III-1 to III-25, with scope, indications, contraindications and doses taken from PDF Section III. Notes that contradicted it were removed. The flashcard deck is now built from the same data. `test/formulary.test.mjs` pins the rulings. |
+
 ### Still open
 
-- **B4, the behavioral sedation route** (IV only in II-23 and V-12 vs IV/IO/IM in VIII-A4): no ruling yet.
-- **B10, EMT infusion monitoring** (matrix ✓ vs Section IV-A "NS only"): no ruling yet.
 - **C3, the duplicated suctioning pages** (pp.82–87): on hold.
-- **DMO contact order**: p.14 still says dispatch first; the app's algorithm says base hospital first.
 
 ### Check before publishing
 
 - **Doses written for this update:** the III-23, III-24 and III-25 doses and the oral glucose adult dose need Medical Director sign-off. The racemic and L-epinephrine doses are the standard published weight-based doses; I could not reach the PALS 2025 provider-manual drug table to compare them word for word.
 - **LIFEPAK 15 battery text:** it comes from secondary sources: the Stryker charger brochure (about 21 min typical, 12 min minimum after the low-battery warning) and published agency procedures (fuel-gauge colours). The LIFEPAK 15 Operating Instructions could not be reached from this environment.
 - **KBEMS list version:** this update relies on the June 6, 2025 list, which appeared in a Board packet. The October 2025 Board added IV acetaminophen for the AEMT. Confirm the current list on ksbems.org.
-- **App copies of the formulary:** `index.html` and `flashcards.html` still differ from the PDF in places. For example, the app makes nitroglycerin All Levels, SL only for the EMT. Neither file was changed here.
+- **Midazolam IM dose for behavioral sedation:** 5 mg IM, the same as the seizure IM dose. Confirm with the Medical Director.
 
 ---
 

@@ -50,7 +50,7 @@ function cardsFormulary() {
 console.log('\nFormulary — scope');
 const idx = indexFormulary(), cards = cardsFormulary();
 
-ok('both files carry all 22 drugs', idx.length === 22 && cards.length === 22,
+ok('both files carry all 25 drugs', idx.length === 25 && cards.length === 25,
    `index.html ${idx.length}, flashcards.html ${cards.length}`);
 
 const byNum = Object.fromEntries(cards.map(c => [c.num, c]));
@@ -94,13 +94,27 @@ ok('no page tells an EMT to give epinephrine IM', offenders.length === 0, offend
 
 // --- route-restricted drugs carry a route note ------------------------------
 // Drugs an EMT may give, but not by every route listed on the card.
-const ROUTE_LIMITED = { 'III-8':'epinephrine 1:1,000', 'III-15':'naloxone', 'III-16':'nitroglycerin', 'III-20':'normal saline' };
+const ROUTE_LIMITED = { 'III-6':'diphenhydramine', 'III-8':'epinephrine 1:1,000', 'III-15':'naloxone', 'III-19':'ondansetron', 'III-20':'normal saline' };
 for (const [num, label] of Object.entries(ROUTE_LIMITED)) {
   const d = idx.find(x => x.num === num);
   ok(`${num} (${label}) carries an EMT route note`,
      (d.notes || []).some(n => /EMT/.test(n) && /(only|not)/i.test(n)),
      (d.notes || []).join(' | ').slice(0, 160));
 }
+
+// --- rulings recorded in PROTOCOL-REVIEW-2026-11.md --------------------------
+const ntg = idx.find(d => d.num === 'III-16');
+ok('III-16 nitroglycerin is AEMT+ and needs a 12-lead first',
+   ntg.scope === 'aemt' && /12-lead/.test(JSON.stringify(ntg)));
+const atr = idx.find(d => d.num === 'III-5');
+ok('III-5 pediatric atropine max single dose is 0.5 mg (PALS 2025)',
+   atr.doses.some(d => /Pediatric/.test(d.route) && /maximum 0\.5 mg/.test(d.dose)) && !/max(imum)? 1 mg per dose/.test(JSON.stringify(atr)));
+const mid = idx.find(d => d.num === 'III-11');
+ok('III-11 behavioral sedation allows IM', mid.doses.some(d => /Behavioral/.test(d.route) && /IM/.test(d.dose)));
+const ns = idx.find(d => d.num === 'III-20');
+ok("III-20 lets EMTs monitor normal saline or lactated Ringer's", ns.notes.some(n => /EMT/.test(n) && /lactated Ringer/.test(n)));
+ok('III-23 to III-25 present in both files',
+   ['III-23','III-24','III-25'].every(n => idx.some(d => d.num === n) && byNum[n]));
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

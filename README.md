@@ -31,7 +31,7 @@ Home is field tools first, in this order:
 
 Every protocol opens in **`protocols.html`**, a pdf.js viewer of the signed `protocols-2026.pdf`, scrolled to the exact spot the PDF's own table-of-contents link lands on. Linking to the PDF directly isn't enough, because iOS Safari ignores `#page=`. The viewer has zoom, a searchable contents list, tappable in-document links (e.g. "see Procedure V-17B"), and works offline once cached.
 
-- `protocols-index.js`: the 132 entries (code, title, section, page, y-position), extracted from the PDF's TOC links, plus `PROTOCOL_FAVORITES`. **Regenerate it if the PDF is re-assembled**, or entries will open at the wrong page.
+- `protocols-index.js`: the 133 entries (code, title, section, page, y-position), extracted from the PDF's TOC links, plus `PROTOCOL_FAVORITES`. **Regenerate it if the PDF is re-assembled**, or entries will open at the wrong page.
 - `pdfjs/`: vendored pdf.js 4.10.38 legacy build (Apache-2.0, `pdfjs/LICENSE`).
 ## Protocol Quiz and Daily 5
 Both run on one shared engine (`quiz-kit.js`, `quiz-kit.css`) and one question file, `quiz-bank.js`: EMT 50, AEMT 15, Paramedic 50, ventilator 20. **Fix a question there once and both quizzes get it.** Each level includes the levels below it (EMT 50, AEMT 65, Paramedic 135).
@@ -49,7 +49,7 @@ The red **DMO** header button, the Home card ("Need orders?") and every "DMO" / 
 3. Only if both fail: the **backup line, 1-833-805-9381**. This is the only `tel:` link for it in the app.
 4. Still no contact: continue within standing orders, don't delay stabilization or diversion, document attempts.
 
-It also covers when to call, closed-loop orders, staying with the same physician, and non-base hospital destinations. The structure and base hospital list follow the Johnson County EMS System protocols (Direct Medical Oversight page; Appendix H, Base Hospital column), matching the Linn County app. The 2026 PDF (page 13) still says "contact dispatch first, then the DMO line," so the app and PDF differ until the PDF is updated. Code: `BASE_HOSPITALS`, `dmoAlgoHtml()` and `openDmo()` in `index.html`.
+It also covers when to call, closed-loop orders, staying with the same physician, and non-base hospital destinations. The structure and base hospital list follow the Johnson County EMS System protocols (Direct Medical Oversight page; Appendix H, Base Hospital column), matching the Linn County app. The PDF matches: page 14 gives the order in brief and Appendix C (page 178) carries the full algorithm and base hospital list. **Change both together.** Code: `BASE_HOSPITALS`, `dmoAlgoHtml()` and `openDmo()` in `index.html`.
 
 ## Simulators
 

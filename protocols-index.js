@@ -87,6 +87,7 @@ var PROTOCOLS = [
 {"c": "VII-4", "t": "ECMO Transport", "s": "vii", "p": 126, "y": 610},
 {"c": "App. A", "t": "Diversion Algorithm", "s": "app", "p": 128, "y": 672},
 {"c": "App. B", "t": "KC Metro Hospital Capability Chart", "s": "app", "p": 129, "y": 269},
+{"c": "App. C", "t": "Medical Control (DMO) — Algorithm and Base Hospitals", "s": "app", "p": 178, "y": 724},
 {"c": "VIII-A1", "t": "Abdominal Pain", "s": "viii", "p": 132, "y": 485},
 {"c": "VIII-A2", "t": "Altered Mental Status", "s": "viii", "p": 133, "y": 672},
 {"c": "VIII-A3", "t": "Anaphylaxis and Allergic Reaction", "s": "viii", "p": 133, "y": 207},
